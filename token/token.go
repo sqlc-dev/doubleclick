@@ -1,0 +1,389 @@
+// Package token defines constants representing the lexical tokens of ClickHouse SQL.
+package token
+
+// Token represents a lexical token.
+type Token int
+
+const (
+	// Special tokens
+	ILLEGAL Token = iota
+	EOF
+	WHITESPACE
+	COMMENT
+
+	// Literals
+	IDENT   // identifiers
+	NUMBER  // integer or float literals
+	STRING  // string literals
+	PARAM   // parameter placeholders like {name:Type}
+
+	// Operators
+	PLUS       // +
+	MINUS      // -
+	ASTERISK   // *
+	SLASH      // /
+	PERCENT    // %
+	EQ         // =
+	NEQ        // != or <>
+	LT         // <
+	GT         // >
+	LTE        // <=
+	GTE        // >=
+	CONCAT     // ||
+	ARROW      // ->
+	COLONCOLON // ::
+
+	// Delimiters
+	LPAREN    // (
+	RPAREN    // )
+	LBRACKET  // [
+	RBRACKET  // ]
+	LBRACE    // {
+	RBRACE    // }
+	COMMA     // ,
+	DOT       // .
+	SEMICOLON // ;
+	COLON     // :
+	QUESTION  // ?
+
+	// Keywords
+	keyword_beg
+	ADD
+	ALIAS
+	ALL
+	ALTER
+	AND
+	ANTI
+	ANY
+	ARRAY
+	AS
+	ASC
+	ASOF
+	ATTACH
+	BETWEEN
+	BOTH
+	BY
+	CASE
+	CAST
+	CHECK
+	CLUSTER
+	COLLATE
+	COLUMN
+	CONSTRAINT
+	CREATE
+	CROSS
+	DATABASE
+	DATABASES
+	DEFAULT
+	DELETE
+	DESC
+	DESCRIBE
+	DETACH
+	DISTINCT
+	DISTRIBUTED
+	DROP
+	ELSE
+	END
+	ENGINE
+	EXCEPT
+	EXISTS
+	EXPLAIN
+	EXTRACT
+	FALSE
+	FETCH
+	FINAL
+	FIRST
+	FOR
+	FORMAT
+	FROM
+	FULL
+	FUNCTION
+	GLOBAL
+	GRANT
+	GROUP
+	HAVING
+	IF
+	ILIKE
+	IN
+	INDEX
+	INF
+	INNER
+	INSERT
+	INTERVAL
+	INTO
+	IS
+	JOIN
+	KEY
+	KILL
+	LEADING
+	LEFT
+	LIKE
+	LIMIT
+	LIVE
+	LOCAL
+	MATERIALIZED
+	MODIFY
+	NAN
+	NATURAL
+	NOT
+	NULL
+	NULLS
+	OFFSET
+	ON
+	OPTIMIZE
+	OR
+	ORDER
+	OUTER
+	OUTFILE
+	OVER
+	PARTITION
+	POPULATE
+	PREWHERE
+	PRIMARY
+	RENAME
+	REPLACE
+	REVOKE
+	RIGHT
+	ROLLUP
+	SAMPLE
+	SELECT
+	SEMI
+	SET
+	SETTINGS
+	SHOW
+	SUBSTRING
+	SYSTEM
+	TABLE
+	TABLES
+	TEMPORARY
+	THEN
+	TIES
+	TO
+	TOP
+	TOTALS
+	TRAILING
+	TRIM
+	TRUE
+	TRUNCATE
+	TTL
+	UNION
+	UPDATE
+	USE
+	USING
+	VALUES
+	VIEW
+	WATCH
+	WHEN
+	WHERE
+	WINDOW
+	WITH
+	keyword_end
+)
+
+var tokens = [...]string{
+	ILLEGAL:    "ILLEGAL",
+	EOF:        "EOF",
+	WHITESPACE: "WHITESPACE",
+	COMMENT:    "COMMENT",
+
+	IDENT:  "IDENT",
+	NUMBER: "NUMBER",
+	STRING: "STRING",
+	PARAM:  "PARAM",
+
+	PLUS:       "+",
+	MINUS:      "-",
+	ASTERISK:   "*",
+	SLASH:      "/",
+	PERCENT:    "%",
+	EQ:         "=",
+	NEQ:        "!=",
+	LT:         "<",
+	GT:         ">",
+	LTE:        "<=",
+	GTE:        ">=",
+	CONCAT:     "||",
+	ARROW:      "->",
+	COLONCOLON: "::",
+
+	LPAREN:    "(",
+	RPAREN:    ")",
+	LBRACKET:  "[",
+	RBRACKET:  "]",
+	LBRACE:    "{",
+	RBRACE:    "}",
+	COMMA:     ",",
+	DOT:       ".",
+	SEMICOLON: ";",
+	COLON:     ":",
+	QUESTION:  "?",
+
+	ADD:          "ADD",
+	ALIAS:        "ALIAS",
+	ALL:          "ALL",
+	ALTER:        "ALTER",
+	AND:          "AND",
+	ANTI:         "ANTI",
+	ANY:          "ANY",
+	ARRAY:        "ARRAY",
+	AS:           "AS",
+	ASC:          "ASC",
+	ASOF:         "ASOF",
+	ATTACH:       "ATTACH",
+	BETWEEN:      "BETWEEN",
+	BOTH:         "BOTH",
+	BY:           "BY",
+	CASE:         "CASE",
+	CAST:         "CAST",
+	CHECK:        "CHECK",
+	CLUSTER:      "CLUSTER",
+	COLLATE:      "COLLATE",
+	COLUMN:       "COLUMN",
+	CONSTRAINT:   "CONSTRAINT",
+	CREATE:       "CREATE",
+	CROSS:        "CROSS",
+	DATABASE:     "DATABASE",
+	DATABASES:    "DATABASES",
+	DEFAULT:      "DEFAULT",
+	DELETE:       "DELETE",
+	DESC:         "DESC",
+	DESCRIBE:     "DESCRIBE",
+	DETACH:       "DETACH",
+	DISTINCT:     "DISTINCT",
+	DISTRIBUTED:  "DISTRIBUTED",
+	DROP:         "DROP",
+	ELSE:         "ELSE",
+	END:          "END",
+	ENGINE:       "ENGINE",
+	EXCEPT:       "EXCEPT",
+	EXISTS:       "EXISTS",
+	EXPLAIN:      "EXPLAIN",
+	EXTRACT:      "EXTRACT",
+	FALSE:        "FALSE",
+	FETCH:        "FETCH",
+	FINAL:        "FINAL",
+	FIRST:        "FIRST",
+	FOR:          "FOR",
+	FORMAT:       "FORMAT",
+	FROM:         "FROM",
+	FULL:         "FULL",
+	FUNCTION:     "FUNCTION",
+	GLOBAL:       "GLOBAL",
+	GRANT:        "GRANT",
+	GROUP:        "GROUP",
+	HAVING:       "HAVING",
+	IF:           "IF",
+	ILIKE:        "ILIKE",
+	IN:           "IN",
+	INDEX:        "INDEX",
+	INF:          "INF",
+	INNER:        "INNER",
+	INSERT:       "INSERT",
+	INTERVAL:     "INTERVAL",
+	INTO:         "INTO",
+	IS:           "IS",
+	JOIN:         "JOIN",
+	KEY:          "KEY",
+	KILL:         "KILL",
+	LEADING:      "LEADING",
+	LEFT:         "LEFT",
+	LIKE:         "LIKE",
+	LIMIT:        "LIMIT",
+	LIVE:         "LIVE",
+	LOCAL:        "LOCAL",
+	MATERIALIZED: "MATERIALIZED",
+	MODIFY:       "MODIFY",
+	NAN:          "NAN",
+	NATURAL:      "NATURAL",
+	NOT:          "NOT",
+	NULL:         "NULL",
+	NULLS:        "NULLS",
+	OFFSET:       "OFFSET",
+	ON:           "ON",
+	OPTIMIZE:     "OPTIMIZE",
+	OR:           "OR",
+	ORDER:        "ORDER",
+	OUTER:        "OUTER",
+	OUTFILE:      "OUTFILE",
+	OVER:         "OVER",
+	PARTITION:    "PARTITION",
+	POPULATE:     "POPULATE",
+	PREWHERE:     "PREWHERE",
+	PRIMARY:      "PRIMARY",
+	RENAME:       "RENAME",
+	REPLACE:      "REPLACE",
+	REVOKE:       "REVOKE",
+	RIGHT:        "RIGHT",
+	ROLLUP:       "ROLLUP",
+	SAMPLE:       "SAMPLE",
+	SELECT:       "SELECT",
+	SEMI:         "SEMI",
+	SET:          "SET",
+	SETTINGS:     "SETTINGS",
+	SHOW:         "SHOW",
+	SUBSTRING:    "SUBSTRING",
+	SYSTEM:       "SYSTEM",
+	TABLE:        "TABLE",
+	TABLES:       "TABLES",
+	TEMPORARY:    "TEMPORARY",
+	THEN:         "THEN",
+	TIES:         "TIES",
+	TO:           "TO",
+	TOP:          "TOP",
+	TOTALS:       "TOTALS",
+	TRAILING:     "TRAILING",
+	TRIM:         "TRIM",
+	TRUE:         "TRUE",
+	TRUNCATE:     "TRUNCATE",
+	TTL:          "TTL",
+	UNION:        "UNION",
+	UPDATE:       "UPDATE",
+	USE:          "USE",
+	USING:        "USING",
+	VALUES:       "VALUES",
+	VIEW:         "VIEW",
+	WATCH:        "WATCH",
+	WHEN:         "WHEN",
+	WHERE:        "WHERE",
+	WINDOW:       "WINDOW",
+	WITH:         "WITH",
+}
+
+func (tok Token) String() string {
+	if tok >= 0 && int(tok) < len(tokens) {
+		return tokens[tok]
+	}
+	return ""
+}
+
+// Keywords maps keyword strings to their token types.
+var Keywords map[string]Token
+
+func init() {
+	Keywords = make(map[string]Token)
+	for i := keyword_beg + 1; i < keyword_end; i++ {
+		Keywords[tokens[i]] = i
+	}
+}
+
+// Lookup returns the token type for an identifier string.
+// If the string is a keyword, it returns the keyword token.
+// Otherwise, it returns IDENT.
+func Lookup(ident string) Token {
+	if tok, ok := Keywords[ident]; ok {
+		return tok
+	}
+	return IDENT
+}
+
+// IsKeyword returns true if the token is a keyword.
+func (tok Token) IsKeyword() bool {
+	return tok > keyword_beg && tok < keyword_end
+}
+
+// Position represents a source position.
+type Position struct {
+	Offset int // byte offset
+	Line   int // line number (1-based)
+	Column int // column number (1-based)
+}
