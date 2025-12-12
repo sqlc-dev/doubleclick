@@ -558,10 +558,10 @@ func (w *WindowSpec) End() token.Position { return w.Position }
 
 // WindowFrame represents a window frame.
 type WindowFrame struct {
-	Position token.Position  `json:"-"`
-	Type     WindowFrameType `json:"type"`
-	Start    *FrameBound     `json:"start"`
-	End      *FrameBound     `json:"end,omitempty"`
+	Position   token.Position  `json:"-"`
+	Type       WindowFrameType `json:"type"`
+	StartBound *FrameBound     `json:"start"`
+	EndBound   *FrameBound     `json:"end,omitempty"`
 }
 
 func (w *WindowFrame) Pos() token.Position { return w.Position }
