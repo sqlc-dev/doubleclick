@@ -11,6 +11,7 @@ import (
 // Operator precedence levels
 const (
 	LOWEST      = iota
+	ALIAS_PREC  // AS
 	OR_PREC     // OR
 	AND_PREC    // AND
 	NOT_PREC    // NOT
@@ -25,6 +26,8 @@ const (
 
 func (p *Parser) precedence(tok token.Token) int {
 	switch tok {
+	case token.AS:
+		return ALIAS_PREC
 	case token.OR:
 		return OR_PREC
 	case token.AND:
