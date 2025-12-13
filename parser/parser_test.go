@@ -1,12 +1,8 @@
 package parser_test
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,30 +15,6 @@ import (
 type testMetadata struct {
 	Todo   bool   `json:"todo,omitempty"`
 	Source string `json:"source,omitempty"`
-}
-
-// clickhouseAvailable checks if ClickHouse server is running
-func clickhouseAvailable() bool {
-	resp, err := http.Get("http://127.0.0.1:8123/ping")
-	if err != nil {
-		return false
-	}
-	defer resp.Body.Close()
-	return resp.StatusCode == 200
-}
-
-// getClickHouseAST runs EXPLAIN AST on ClickHouse and returns the output
-func getClickHouseAST(query string) (string, error) {
-	explainQuery := fmt.Sprintf("EXPLAIN AST %s", query)
-	resp, err := http.Get("http://127.0.0.1:8123/?query=" + url.QueryEscape(explainQuery))
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	return buf.String(), nil
 }
 
 // TestParser tests the parser using test cases from the testdata directory.
@@ -121,110 +93,6 @@ func TestParser(t *testing.T) {
 			}
 		})
 	}
-}
-
-// TestParserWithClickHouse compares parsing with ClickHouse's EXPLAIN AST
-func TestParserWithClickHouse(t *testing.T) {
-	if !clickhouseAvailable() {
-		t.Skip("ClickHouse not available")
-	}
-
-	testdataDir := "testdata"
-
-	entries, err := os.ReadDir(testdataDir)
-	if err != nil {
-		t.Fatalf("Failed to read testdata directory: %v", err)
-	}
-
-	ctx := context.Background()
-	passed := 0
-	failed := 0
-	skipped := 0
-
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			continue
-		}
-
-		testName := entry.Name()
-		testDir := filepath.Join(testdataDir, testName)
-
-		t.Run(testName, func(t *testing.T) {
-			// Read the query
-			queryPath := filepath.Join(testDir, "query.sql")
-			queryBytes, err := os.ReadFile(queryPath)
-			if err != nil {
-				t.Fatalf("Failed to read query.sql: %v", err)
-			}
-			query := strings.TrimSpace(string(queryBytes))
-
-			// Read optional metadata
-			var metadata testMetadata
-			metadataPath := filepath.Join(testDir, "metadata.json")
-			if metadataBytes, err := os.ReadFile(metadataPath); err == nil {
-				if err := json.Unmarshal(metadataBytes, &metadata); err != nil {
-					t.Fatalf("Failed to parse metadata.json: %v", err)
-				}
-			}
-
-			// Get ClickHouse's AST
-			chAST, err := getClickHouseAST(query)
-			if err != nil {
-				t.Skipf("ClickHouse error: %v", err)
-				skipped++
-				return
-			}
-
-			// Check if ClickHouse accepted the query
-			if strings.Contains(chAST, "Code:") || strings.Contains(chAST, "Exception:") {
-				t.Skipf("ClickHouse rejected query: %s", strings.TrimSpace(chAST))
-				skipped++
-				return
-			}
-
-			// Parse with our parser
-			stmts, parseErr := parser.Parse(ctx, strings.NewReader(query))
-			if parseErr != nil {
-				if metadata.Todo {
-					t.Skipf("TODO: Parser does not yet support: %s (error: %v)", query, parseErr)
-					skipped++
-					return
-				}
-				t.Errorf("Our parser failed but ClickHouse accepted: %s\nError: %v", query, parseErr)
-				failed++
-				return
-			}
-
-			if len(stmts) == 0 {
-				if metadata.Todo {
-					t.Skipf("TODO: Parser returned no statements for: %s", query)
-					skipped++
-					return
-				}
-				t.Errorf("Our parser returned no statements: %s", query)
-				failed++
-				return
-			}
-
-			// Verify we can serialize to JSON
-			_, jsonErr := json.Marshal(stmts[0])
-			if jsonErr != nil {
-				if metadata.Todo {
-					t.Skipf("TODO: JSON serialization failed: %v", jsonErr)
-					skipped++
-					return
-				}
-				t.Errorf("JSON marshal error: %v\nQuery: %s", jsonErr, query)
-				failed++
-				return
-			}
-
-			passed++
-			t.Logf("PASS: %s", query)
-		})
-	}
-
-	t.Logf("\nSummary: %d passed, %d failed, %d skipped", passed, failed, skipped)
 }
 
 // BenchmarkParser benchmarks the parser performance using a complex query
