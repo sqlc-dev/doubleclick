@@ -17,6 +17,10 @@ func Explain(stmt ast.Statement) string {
 // explainNode writes the EXPLAIN AST output for an AST node.
 func explainNode(sb *strings.Builder, node interface{}, depth int) {
 	if node == nil {
+		// nil can represent an empty tuple in function arguments
+		indent := strings.Repeat(" ", depth)
+		fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s ExpressionList\n", indent)
 		return
 	}
 
@@ -144,9 +148,16 @@ func explainNode(sb *strings.Builder, node interface{}, depth int) {
 		}
 
 	case *ast.Literal:
-		// Check if this is a tuple with complex expressions that should be rendered as Function tuple
+		// Check if this is a tuple - either with expressions or empty
 		if n.Type == ast.LiteralTuple {
 			if exprs, ok := n.Value.([]ast.Expression); ok {
+				// Check if empty tuple or has complex expressions
+				if len(exprs) == 0 {
+					// Empty tuple renders as Function tuple with empty ExpressionList
+					fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
+					fmt.Fprintf(sb, "%s ExpressionList\n", indent)
+					return
+				}
 				hasComplexExpr := false
 				for _, e := range exprs {
 					if _, isLit := e.(*ast.Literal); !isLit {
@@ -163,6 +174,32 @@ func explainNode(sb *strings.Builder, node interface{}, depth int) {
 					}
 					return
 				}
+			} else if n.Value == nil {
+				// nil value means empty tuple
+				fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
+				fmt.Fprintf(sb, "%s ExpressionList\n", indent)
+				return
+			}
+		}
+		// Check if this is an array with complex expressions that should be rendered as Function array
+		if n.Type == ast.LiteralArray {
+			if exprs, ok := n.Value.([]ast.Expression); ok {
+				hasComplexExpr := false
+				for _, e := range exprs {
+					if _, isLit := e.(*ast.Literal); !isLit {
+						hasComplexExpr = true
+						break
+					}
+				}
+				if hasComplexExpr {
+					// Render as Function array instead of Literal
+					fmt.Fprintf(sb, "%sFunction array (children %d)\n", indent, 1)
+					fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
+					for _, e := range exprs {
+						explainNode(sb, e, depth+2)
+					}
+					return
+				}
 			}
 		}
 		fmt.Fprintf(sb, "%sLiteral %s\n", indent, formatLiteral(n))
@@ -172,10 +209,12 @@ func explainNode(sb *strings.Builder, node interface{}, depth int) {
 		if len(n.Parameters) > 0 {
 			children++ // parameters ExpressionList
 		}
+		// Normalize function name
+		fnName := normalizeFunctionName(n.Name)
 		if n.Alias != "" {
-			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, n.Name, n.Alias, children)
+			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Alias, children)
 		} else {
-			fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, n.Name, children)
+			fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, children)
 		}
 		// Arguments
 		fmt.Fprintf(sb, "%s ExpressionList", indent)
@@ -469,14 +508,16 @@ func explainNode(sb *strings.Builder, node interface{}, depth int) {
 		}
 
 	case *ast.SystemQuery:
-		fmt.Fprintf(sb, "%sSystem %s\n", indent, n.Command)
+		fmt.Fprintf(sb, "%sSYSTEM query\n", indent)
 
 	case *ast.ExplainQuery:
 		fmt.Fprintf(sb, "%sExplain %s (children %d)\n", indent, n.ExplainType, 1)
 		explainNode(sb, n.Statement, depth+1)
 
 	case *ast.ShowQuery:
-		fmt.Fprintf(sb, "%sShow%s\n", indent, n.ShowType)
+		// Capitalize ShowType correctly for display
+		showType := strings.Title(strings.ToLower(string(n.ShowType)))
+		fmt.Fprintf(sb, "%sShow%s\n", indent, showType)
 
 	case *ast.UseQuery:
 		fmt.Fprintf(sb, "%sUse %s\n", indent, n.Database)
@@ -690,6 +731,37 @@ func formatDataType(dt *ast.DataType) string {
 		}
 	}
 	return fmt.Sprintf("%s(%s)", dt.Name, strings.Join(params, ", "))
+}
+
+// normalizeFunctionName normalizes function names to match ClickHouse's EXPLAIN AST output
+func normalizeFunctionName(name string) string {
+	// ClickHouse normalizes certain function names in EXPLAIN AST
+	normalized := map[string]string{
+		"ltrim":       "trimLeft",
+		"rtrim":       "trimRight",
+		"lcase":       "lower",
+		"ucase":       "upper",
+		"mid":         "substring",
+		"substr":      "substring",
+		"pow":         "power",
+		"ceil":        "ceiling",
+		"ln":          "log",
+		"log10":       "log10",
+		"log2":        "log2",
+		"rand":        "rand",
+		"ifnull":      "ifNull",
+		"nullif":      "nullIf",
+		"coalesce":    "coalesce",
+		"greatest":    "greatest",
+		"least":       "least",
+		"concat_ws":   "concat",
+		"length":      "length",
+		"char_length": "length",
+	}
+	if n, ok := normalized[strings.ToLower(name)]; ok {
+		return n
+	}
+	return name
 }
 
 // operatorToFunction maps binary operators to ClickHouse function names
