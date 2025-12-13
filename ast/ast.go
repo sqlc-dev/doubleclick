@@ -315,6 +315,7 @@ type DropQuery struct {
 	Database     string         `json:"database,omitempty"`
 	Table        string         `json:"table,omitempty"`
 	View         string         `json:"view,omitempty"`
+	User         string         `json:"user,omitempty"`
 	Temporary    bool           `json:"temporary,omitempty"`
 	OnCluster    string         `json:"on_cluster,omitempty"`
 	DropDatabase bool           `json:"drop_database,omitempty"`
@@ -449,6 +450,7 @@ const (
 	ShowCreateDB      ShowType = "CREATE_DATABASE"
 	ShowColumns       ShowType = "COLUMNS"
 	ShowDictionaries  ShowType = "DICTIONARIES"
+	ShowFunctions     ShowType = "FUNCTIONS"
 )
 
 // ExplainQuery represents an EXPLAIN statement.
