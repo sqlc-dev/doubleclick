@@ -1,0 +1,1 @@
+SELECT * FROM users WHERE name IS NOT NULL

@@ -1,0 +1,1 @@
+ALTER TABLE test_table MODIFY COLUMN col UInt64

@@ -1,0 +1,1 @@
+SELECT toStartOfMonth(now())

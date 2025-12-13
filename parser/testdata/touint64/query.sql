@@ -1,0 +1,1 @@
+SELECT toUInt64(123)

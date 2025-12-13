@@ -1,0 +1,1 @@
+ALTER TABLE test_table MATERIALIZE INDEX idx

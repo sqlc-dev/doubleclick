@@ -1,0 +1,1 @@
+SELECT toIntervalDay(1)

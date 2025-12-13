@@ -1,0 +1,1 @@
+SELECT 1 INTO OUTFILE 'output.csv' FORMAT CSV

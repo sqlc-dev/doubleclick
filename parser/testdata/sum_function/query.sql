@@ -1,0 +1,1 @@
+SELECT sum(1)

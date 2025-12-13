@@ -1,0 +1,1 @@
+SELECT 1 WHERE 1 > 0 AND 2 < 3

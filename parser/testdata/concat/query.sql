@@ -1,0 +1,1 @@
+SELECT concat('hello', ' ', 'world')

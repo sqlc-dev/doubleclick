@@ -1,0 +1,1 @@
+SELECT number, avg(number) OVER (ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) FROM numbers(10)

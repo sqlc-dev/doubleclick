@@ -1,0 +1,1 @@
+SELECT toStartOfHour(now())

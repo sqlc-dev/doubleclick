@@ -1,0 +1,1 @@
+SELECT 1 AND 2

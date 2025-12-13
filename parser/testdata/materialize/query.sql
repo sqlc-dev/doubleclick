@@ -1,0 +1,1 @@
+SELECT materialize(1)

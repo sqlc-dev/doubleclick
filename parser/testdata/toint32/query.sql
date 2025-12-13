@@ -1,0 +1,1 @@
+SELECT toInt32(123)

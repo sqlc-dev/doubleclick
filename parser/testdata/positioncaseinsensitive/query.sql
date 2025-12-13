@@ -1,0 +1,1 @@
+SELECT positionCaseInsensitive('HELLO', 'l')
