@@ -1,0 +1,14 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 1)
+   ExpressionList (children 1)
+    Function toStartOfInterval (children 1)
+     ExpressionList (children 2)
+      Function toDateTime64 (children 1)
+       ExpressionList (children 2)
+        Literal \'\\0930-12-12 12:12:12.1234567\'
+        Literal UInt64_3
+      Function toIntervalNanosecond (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_1024
+The query succeeded but the server error '407' was expected (query: EXPLAIN AST select toStartOfInterval(toDateTime64('\0930-12-12 12:12:12.1234567', 3), toIntervalNanosecond(1024)); -- {serverError DECIMAL_OVERFLOW}).

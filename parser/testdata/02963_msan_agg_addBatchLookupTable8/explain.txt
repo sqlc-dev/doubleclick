@@ -1,0 +1,20 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 2)
+    Function modulo (alias even) (children 1)
+     ExpressionList (children 2)
+      Identifier number
+      Literal UInt64_2
+    Function aggThrow (children 1)
+     ExpressionList (children 1)
+      Identifier number
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Function numbers (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_10
+   ExpressionList (children 1)
+    Identifier even
+The query succeeded but the server error '503' was expected (query: EXPLAIN AST SELECT number % 2 AS even, aggThrow(number) FROM numbers(10) GROUP BY even; -- { serverError AGGREGATE_FUNCTION_THROW}).

@@ -1,0 +1,52 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 6)
+   ExpressionList (children 5)
+    Identifier CounterID
+    Function quantileTiming (alias qt) (children 2)
+     ExpressionList (children 1)
+      Identifier SendTiming
+     ExpressionList (children 1)
+      Literal Float64_0.5
+    Function least (alias qe) (children 1)
+     ExpressionList (children 2)
+      Literal UInt64_30000
+      Function quantileExact (children 2)
+       ExpressionList (children 1)
+        Identifier SendTiming
+       ExpressionList (children 1)
+        Literal Float64_0.5
+    Function count (alias c) (children 1)
+     ExpressionList
+    Function round (alias rounded_diff) (children 1)
+     ExpressionList (children 2)
+      Function divide (alias diff) (children 1)
+       ExpressionList (children 2)
+        Function abs (children 1)
+         ExpressionList (children 1)
+          Function minus (children 1)
+           ExpressionList (children 2)
+            Identifier qt
+            Identifier qe
+        Function greatest (children 1)
+         ExpressionList (children 2)
+          Identifier qt
+          Identifier qe
+      Literal UInt64_3
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier test.hits
+   Function notEquals (children 1)
+    ExpressionList (children 2)
+     Identifier SendTiming
+     Literal Int64_-1
+   ExpressionList (children 1)
+    Identifier CounterID
+   Function notEquals (children 1)
+    ExpressionList (children 2)
+     Identifier diff
+     Literal UInt64_0
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier diff

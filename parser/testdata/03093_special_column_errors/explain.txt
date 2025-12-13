@@ -1,0 +1,17 @@
+CreateQuery replacing_wrong (children 3)
+ Identifier replacing_wrong
+ Columns definition (children 1)
+  ExpressionList (children 3)
+   ColumnDeclaration key (children 1)
+    DataType Int64
+   ColumnDeclaration ver (children 1)
+    DataType Int64
+   ColumnDeclaration is_deleted (children 1)
+    DataType UInt16
+ Storage definition (children 2)
+  Function ReplacingMergeTree (children 1)
+   ExpressionList (children 2)
+    Identifier ver
+    Identifier is_deleted
+  Identifier key
+The query succeeded but the server error '169' was expected (query: EXPLAIN AST CREATE TABLE replacing_wrong (key Int64, ver Int64, is_deleted UInt16) ENGINE = ReplacingMergeTree(ver, is_deleted) ORDER BY key; -- { serverError BAD_TYPE_OF_FIELD }).

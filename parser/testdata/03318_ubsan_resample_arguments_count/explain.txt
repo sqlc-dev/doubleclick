@@ -1,0 +1,45 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 1)
+    Function quantileResampleMerge (children 2)
+     ExpressionList (children 1)
+      Function tupleElement (children 1)
+       ExpressionList (children 2)
+        Function tuple (children 1)
+         ExpressionList (children 1)
+          Asterisk
+        Literal UInt64_1
+     ExpressionList (children 4)
+      Literal Float64_0.5
+      Literal UInt64_257
+      Literal UInt64_65536
+      Literal UInt64_1
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 1)
+           Function quantileResampleState (children 2)
+            ExpressionList (children 3)
+             Function murmurHash3_128 (children 1)
+              ExpressionList (children 2)
+               Literal UInt64_88
+               Literal NULL
+             Identifier number
+             Identifier number
+            ExpressionList (children 4)
+             Literal Float64_0.1
+             Literal UInt64_1
+             Literal UInt64_2
+             Literal UInt64_42
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             Function numbers (children 1)
+              ExpressionList (children 1)
+               Literal UInt64_100
+The query succeeded but the server error '42' was expected (query: EXPLAIN AST SELECT quantileResampleMerge(0.5, 257, 65536, 1)(tuple(*).1) IGNORE NULLS FROM (SELECT quantileResampleState(0.1, 1, 2, 42)(murmurHash3_128(88, NULL), number, number) FROM numbers(100)); -- { serverError NUMBER_OF_ARGUMENTS_DOESNT_MATCH }).

@@ -1,0 +1,75 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 1)
+    Function count (children 1)
+     ExpressionList
+   TablesInSelectQuery (children 3)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Function numbers (alias n1) (children 1)
+       ExpressionList (children 2)
+        Function cityHash64 (children 1)
+         ExpressionList (children 7)
+          Function globalIn (children 1)
+           ExpressionList (children 2)
+            Function materialize (children 1)
+             ExpressionList (children 1)
+              Function toLowCardinality (children 1)
+               ExpressionList (children 1)
+                Function toNullable (children 1)
+                 ExpressionList (children 1)
+                  Literal UInt64_0
+            Literal Tuple_(NULL, Int64_-2147483648, Int64_-9223372036854775808)
+          Literal Float64_nan
+          Literal UInt64_1024
+          Literal NULL
+          Function materialize (children 1)
+           ExpressionList (children 1)
+            Literal Float64_1.000100016593933
+          Literal UInt64_0
+          Literal NULL
+        Literal UInt64_4
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Function numbers (alias n2) (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_3
+     TableJoin
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Function numbers (alias n3) (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_6
+     TableJoin
+   ExpressionList (children 2)
+    Function tuple (children 1)
+     ExpressionList (children 4)
+      Literal NULL
+      Function cityHash64 (children 1)
+       ExpressionList (children 5)
+        Literal Float64_inf
+        Literal Int64_-2147483648
+        Function toLowCardinality (children 1)
+         ExpressionList (children 1)
+          Literal UInt64_16
+        Literal NULL
+        Literal Float64_10.000100135803223
+      Function cityHash64 (children 1)
+       ExpressionList (children 4)
+        Literal Float64_1.1754943508222875e-38
+        Literal NULL
+        Literal NULL
+        Literal NULL
+      Literal UInt64_2147483647
+    Function cityHash64 (children 1)
+     ExpressionList (children 7)
+      Literal Float64_0
+      Literal UInt64_3
+      Literal NULL
+      Literal NULL
+      Literal Float64_10000000000
+      Literal NULL
+      Literal NULL
+   Set
+The query succeeded but the server error '36' was expected (query: EXPLAIN AST SELECT count() FROM numbers(cityHash64(materialize(toLowCardinality(toNullable(0))) GLOBAL IN (NULL, -2147483648, -9223372036854775808), nan, 1024, NULL, materialize(1.000100016593933), 0, NULL), 4) AS n1, numbers(3) AS n2, numbers(6) AS n3 GROUP BY (NULL, cityHash64(inf, -2147483648, toLowCardinality(16), NULL, 10.000100135803223), cityHash64(1.1754943508222875e-38, NULL, NULL, NULL), 2147483647), cityHash64(0., 3, NULL, NULL, 10000000000., NULL, NULL) SETTINGS enable_analyzer = 1; -- { serverError BAD_ARGUMENTS }).

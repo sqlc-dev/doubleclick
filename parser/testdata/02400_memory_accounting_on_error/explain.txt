@@ -1,0 +1,17 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 1)
+    Asterisk
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Function generateRandom (children 1)
+       ExpressionList (children 4)
+        Literal \'i Array(Int8)\'
+        Literal UInt64_1
+        Literal UInt64_1
+        Literal UInt64_1048577
+   Literal UInt64_65536
+   Set
+The query succeeded but the server error '241' was expected (query: EXPLAIN AST SELECT * FROM generateRandom('i Array(Int8)', 1, 1, 1048577) LIMIT 65536 SETTINGS max_memory_usage='1Gi', max_block_size=65505, log_queries=1; -- { serverError MEMORY_LIMIT_EXCEEDED }).

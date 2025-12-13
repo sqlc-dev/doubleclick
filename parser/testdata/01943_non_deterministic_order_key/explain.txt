@@ -1,0 +1,24 @@
+CreateQuery a (children 3)
+ Identifier a
+ Columns definition (children 1)
+  ExpressionList (children 1)
+   ColumnDeclaration number (children 1)
+    DataType UInt64
+ Storage definition (children 2)
+  Function MergeTree
+  Function if (children 1)
+   ExpressionList (children 3)
+    Function greater (children 1)
+     ExpressionList (children 2)
+      Function now (children 1)
+       ExpressionList
+      Function toDateTime (children 1)
+       ExpressionList (children 1)
+        Literal \'2020-06-01 13:31:40\'
+    Function toInt64 (children 1)
+     ExpressionList (children 1)
+      Identifier number
+    Function negate (children 1)
+     ExpressionList (children 1)
+      Identifier number
+The query succeeded but the server error '36' was expected (query: EXPLAIN AST CREATE TABLE a (number UInt64) ENGINE = MergeTree ORDER BY if(now() > toDateTime('2020-06-01 13:31:40'), toInt64(number), -number); -- { serverError BAD_ARGUMENTS }).

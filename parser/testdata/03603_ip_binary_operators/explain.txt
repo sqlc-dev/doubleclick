@@ -1,0 +1,20 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 1)
+   ExpressionList (children 1)
+    Function plus (children 1)
+     ExpressionList (children 2)
+      Function now (children 1)
+       ExpressionList
+      Function CAST (children 1)
+       ExpressionList (children 2)
+        Function toFixedString (children 1)
+         ExpressionList (children 2)
+          Function materialize (children 1)
+           ExpressionList (children 1)
+            Function toNullable (children 1)
+             ExpressionList (children 1)
+              Literal \'1\'
+          Literal UInt64_1
+        Literal \'IPv6\'
+The query succeeded but the server error '43' was expected (query: EXPLAIN AST SELECT now() + CAST(toFixedString(materialize(toNullable('1')), 1), 'IPv6'); -- {serverError ILLEGAL_TYPE_OF_ARGUMENT}).

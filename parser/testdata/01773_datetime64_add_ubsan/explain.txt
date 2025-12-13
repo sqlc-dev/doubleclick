@@ -1,0 +1,19 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 1)
+    Function ignore (children 1)
+     ExpressionList (children 1)
+      Function addHours (children 1)
+       ExpressionList (children 2)
+        Function now64 (children 1)
+         ExpressionList (children 1)
+          Literal UInt64_3
+        Literal Float64_inf
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Function numbers (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_2
+The query succeeded but the server error '407' was expected (query: EXPLAIN AST SELECT ignore(addHours(now64(3), inf)) FROM numbers(2); -- { serverError DECIMAL_OVERFLOW }).

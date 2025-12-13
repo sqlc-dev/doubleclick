@@ -1,0 +1,15 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 1)
+   ExpressionList (children 2)
+    Function arrayElement (children 1)
+     ExpressionList (children 2)
+      Identifier m
+      Literal UInt64_0
+    Function materialize (alias m) (children 1)
+     ExpressionList (children 1)
+      Function map (children 1)
+       ExpressionList (children 2)
+        Literal \'key\'
+        Literal UInt64_42
+The query succeeded but the server error '43' was expected (query: EXPLAIN AST select m[0], materialize(map('key', 42)) as m; -- {serverError ILLEGAL_TYPE_OF_ARGUMENT}).

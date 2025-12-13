@@ -1,0 +1,21 @@
+CreateQuery delta_codec_synthetic (children 3)
+ Identifier delta_codec_synthetic
+ Columns definition (children 1)
+  ExpressionList (children 1)
+   ColumnDeclaration id (children 2)
+    DataType Decimal (children 1)
+     ExpressionList (children 2)
+      Literal UInt64_38
+      Literal UInt64_10
+    Function CODEC (children 1)
+     ExpressionList (children 2)
+      Function Delta
+      Function ZSTD (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_22
+ Storage definition (children 2)
+  Function MergeTree (children 1)
+   ExpressionList
+  Function tuple (children 1)
+   ExpressionList
+The query succeeded but the server error '36' was expected (query: EXPLAIN AST CREATE TABLE delta_codec_synthetic (`id` Decimal(38, 10) CODEC(Delta, ZSTD(22))) ENGINE = MergeTree() ORDER BY tuple(); -- { serverError BAD_ARGUMENTS }).

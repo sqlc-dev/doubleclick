@@ -1,0 +1,18 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 1)
+    Asterisk
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Function format (children 1)
+       ExpressionList (children 3)
+        Identifier JSONCompactEachRow
+        Literal \'x UInt32, y UInt32\'
+        Function REPEAT (children 1)
+         ExpressionList (children 2)
+          Literal \'[1,1,\'
+          Literal UInt64_100000
+   Set
+The query succeeded but the server error '[306, 117]' was expected (query: EXPLAIN AST SELECT * FROM format("JSONCompactEachRow", 'x UInt32, y UInt32', REPEAT('[1,1,', 100000)) SETTINGS input_format_json_compact_allow_variable_number_of_columns = 1; -- { serverError TOO_DEEP_RECURSION, INCORRECT_DATA }).
