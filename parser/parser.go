@@ -880,10 +880,20 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 		p.expect(token.RPAREN)
 	}
 
+	// Parse SETTINGS before VALUES (skip for now as it's not in AST)
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		// Just parse and skip the settings
+		p.parseSettingsList()
+	}
+
 	// Parse VALUES or SELECT
 	if p.currentIs(token.VALUES) {
 		p.nextToken()
-		// VALUES are typically provided externally, skip for now
+		// Skip VALUES data - consume until end of statement
+		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) && !p.currentIs(token.SETTINGS) {
+			p.nextToken()
+		}
 	} else if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 		ins.Select = p.parseSelectWithUnion()
 	}
@@ -985,13 +995,31 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 		}
 	}
 
-	// Parse column definitions
+	// Parse column definitions and indexes
 	if p.currentIs(token.LPAREN) {
 		p.nextToken()
 		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-			col := p.parseColumnDeclaration()
-			if col != nil {
-				create.Columns = append(create.Columns, col)
+			// Handle INDEX definition
+			if p.currentIs(token.INDEX) {
+				p.nextToken()
+				// Skip index definition: INDEX name expr TYPE type GRANULARITY n
+				p.parseIdentifierName() // index name
+				// Skip expression and other index parts
+				for !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+					p.nextToken()
+				}
+			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CONSTRAINT" {
+				// Skip CONSTRAINT definitions
+				p.nextToken()
+				p.parseIdentifierName() // constraint name
+				for !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+					p.nextToken()
+				}
+			} else {
+				col := p.parseColumnDeclaration()
+				if col != nil {
+					create.Columns = append(create.Columns, col)
+				}
 			}
 			if p.currentIs(token.COMMA) {
 				p.nextToken()
