@@ -35,7 +35,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			Column(sb, col, depth+3)
 		}
 	}
-	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 {
+	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || len(n.Settings) > 0 {
 		storageChildren := 0
 		if n.Engine != nil {
 			storageChildren++
@@ -46,11 +46,21 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		if len(n.PrimaryKey) > 0 {
 			storageChildren++
 		}
+		if len(n.Settings) > 0 {
+			storageChildren++
+		}
 		fmt.Fprintf(sb, "%s Storage definition (children %d)\n", indent, storageChildren)
 		if n.Engine != nil {
 			if n.Engine.HasParentheses {
 				fmt.Fprintf(sb, "%s  Function %s (children %d)\n", indent, n.Engine.Name, 1)
-				fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+				if len(n.Engine.Parameters) > 0 {
+					fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.Engine.Parameters))
+					for _, param := range n.Engine.Parameters {
+						Node(sb, param, depth+4)
+					}
+				} else {
+					fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+				}
 			} else {
 				fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
 			}
@@ -70,14 +80,22 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				}
 			}
 		}
+		if len(n.Settings) > 0 {
+			fmt.Fprintf(sb, "%s  Set\n", indent)
+		}
 	}
 	if n.AsSelect != nil {
-		fmt.Fprintf(sb, "%s Subquery (children %d)\n", indent, 1)
-		Node(sb, n.AsSelect, depth+2)
+		// AS SELECT is output directly without Subquery wrapper
+		Node(sb, n.AsSelect, depth+1)
 	}
 }
 
 func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string) {
+	// DROP USER has a special output format
+	if n.User != "" {
+		fmt.Fprintf(sb, "%sDROP USER query\n", indent)
+		return
+	}
 	name := n.Table
 	if n.View != "" {
 		name = n.View

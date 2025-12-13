@@ -1318,6 +1318,7 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 	}
 
 	// What are we dropping?
+	dropUser := false
 	switch p.current.Token {
 	case token.TABLE:
 		p.nextToken()
@@ -1325,6 +1326,9 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		drop.DropDatabase = true
 		p.nextToken()
 	case token.VIEW:
+		p.nextToken()
+	case token.USER:
+		dropUser = true
 		p.nextToken()
 	default:
 		p.nextToken() // skip unknown token
@@ -1356,7 +1360,9 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 				p.nextToken()
 			}
 		} else {
-			if drop.DropDatabase {
+			if dropUser {
+				drop.User = name
+			} else if drop.DropDatabase {
 				drop.Database = name
 			} else {
 				drop.Table = name
@@ -1794,7 +1800,7 @@ func (p *Parser) parseShow() *ast.ShowQuery {
 			}
 		}
 	default:
-		// Handle SHOW PROCESSLIST, SHOW DICTIONARIES, etc.
+		// Handle SHOW PROCESSLIST, SHOW DICTIONARIES, SHOW FUNCTIONS, etc.
 		if p.currentIs(token.IDENT) {
 			upper := strings.ToUpper(p.current.Value)
 			switch upper {
@@ -1802,6 +1808,8 @@ func (p *Parser) parseShow() *ast.ShowQuery {
 				show.ShowType = ast.ShowProcesses
 			case "DICTIONARIES":
 				show.ShowType = ast.ShowDictionaries
+			case "FUNCTIONS":
+				show.ShowType = ast.ShowFunctions
 			}
 			p.nextToken()
 		}

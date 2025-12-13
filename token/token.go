@@ -177,6 +177,7 @@ const (
 	UNION
 	UPDATE
 	USE
+	USER
 	USING
 	VALUES
 	VIEW
@@ -355,6 +356,7 @@ var tokens = [...]string{
 	UNION:        "UNION",
 	UPDATE:       "UPDATE",
 	USE:          "USE",
+	USER:         "USER",
 	USING:        "USING",
 	VALUES:       "VALUES",
 	VIEW:         "VIEW",

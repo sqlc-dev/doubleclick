@@ -21,6 +21,8 @@ func FormatLiteral(lit *ast.Literal) string {
 		return fmt.Sprintf("Float64_%v", val)
 	case ast.LiteralString:
 		s := lit.Value.(string)
+		// Escape backslashes in strings
+		s = strings.ReplaceAll(s, "\\", "\\\\")
 		return fmt.Sprintf("\\'%s\\'", s)
 	case ast.LiteralBoolean:
 		if lit.Value.(bool) {
@@ -178,5 +180,33 @@ func UnaryOperatorToFunction(op string) string {
 		return "not"
 	default:
 		return strings.ToLower(op)
+	}
+}
+
+// formatExprAsString formats an expression as a string literal for :: cast syntax
+func formatExprAsString(expr ast.Expression) string {
+	switch e := expr.(type) {
+	case *ast.Literal:
+		switch e.Type {
+		case ast.LiteralInteger:
+			return fmt.Sprintf("%d", e.Value)
+		case ast.LiteralFloat:
+			return fmt.Sprintf("%v", e.Value)
+		case ast.LiteralString:
+			return e.Value.(string)
+		case ast.LiteralBoolean:
+			if e.Value.(bool) {
+				return "true"
+			}
+			return "false"
+		case ast.LiteralNull:
+			return "NULL"
+		default:
+			return fmt.Sprintf("%v", e.Value)
+		}
+	case *ast.Identifier:
+		return e.Name()
+	default:
+		return fmt.Sprintf("%v", expr)
 	}
 }
