@@ -116,6 +116,21 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				}
 			}
 		}
+		if len(n.PrimaryKey) > 0 {
+			if len(n.PrimaryKey) == 1 {
+				if ident, ok := n.PrimaryKey[0].(*ast.Identifier); ok {
+					fmt.Fprintf(sb, "%s  Identifier %s\n", indent, ident.Name())
+				} else {
+					Node(sb, n.PrimaryKey[0], depth+2)
+				}
+			} else {
+				fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.PrimaryKey))
+				for _, p := range n.PrimaryKey {
+					Node(sb, p, depth+4)
+				}
+			}
+		}
 		if len(n.Settings) > 0 {
 			fmt.Fprintf(sb, "%s  Set\n", indent)
 		}
