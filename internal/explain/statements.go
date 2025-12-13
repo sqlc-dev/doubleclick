@@ -18,6 +18,9 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 	if n.Select != nil {
 		children++
 	}
+	if n.HasSettings {
+		children++
+	}
 	// Note: InsertQuery uses 3 spaces after name in ClickHouse explain
 	fmt.Fprintf(sb, "%sInsertQuery   (children %d)\n", indent, children)
 
@@ -33,6 +36,10 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 
 	if n.Select != nil {
 		Node(sb, n.Select, depth+1)
+	}
+
+	if n.HasSettings {
+		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
 
@@ -168,37 +175,15 @@ func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent stri
 }
 
 func explainDataType(sb *strings.Builder, n *ast.DataType, indent string, depth int) {
-	// Check if type has nested DataType parameters that should be expanded
-	hasNestedTypes := false
-	for _, p := range n.Parameters {
-		if _, ok := p.(*ast.DataType); ok {
-			hasNestedTypes = true
-			break
-		}
-	}
-
-	// Check if type has complex parameters (expressions, not just literals/types)
-	hasComplexParams := false
-	for _, p := range n.Parameters {
-		if _, ok := p.(*ast.Literal); ok {
-			continue
-		}
-		if _, ok := p.(*ast.DataType); ok {
-			continue
-		}
-		hasComplexParams = true
-		break
-	}
-
-	if (hasNestedTypes || hasComplexParams) && len(n.Parameters) > 0 {
-		// Nested types and complex parameters need to be output as children
+	// If type has parameters, expand them as children
+	if len(n.Parameters) > 0 {
 		fmt.Fprintf(sb, "%sDataType %s (children %d)\n", indent, n.Name, 1)
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Parameters))
 		for _, p := range n.Parameters {
 			Node(sb, p, depth+2)
 		}
 	} else {
-		fmt.Fprintf(sb, "%sDataType %s\n", indent, FormatDataType(n))
+		fmt.Fprintf(sb, "%sDataType %s\n", indent, n.Name)
 	}
 }
 

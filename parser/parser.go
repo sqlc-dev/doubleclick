@@ -880,8 +880,9 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 		p.expect(token.RPAREN)
 	}
 
-	// Parse SETTINGS before VALUES (skip for now as it's not in AST)
+	// Parse SETTINGS before VALUES
 	if p.currentIs(token.SETTINGS) {
+		ins.HasSettings = true
 		p.nextToken()
 		// Just parse and skip the settings
 		p.parseSettingsList()

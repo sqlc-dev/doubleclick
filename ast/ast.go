@@ -202,13 +202,14 @@ func (s *SettingExpr) End() token.Position { return s.Position }
 
 // InsertQuery represents an INSERT statement.
 type InsertQuery struct {
-	Position token.Position `json:"-"`
-	Database string         `json:"database,omitempty"`
-	Table    string         `json:"table,omitempty"`
-	Function *FunctionCall  `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
-	Columns  []*Identifier  `json:"columns,omitempty"`
-	Select   Statement      `json:"select,omitempty"`
-	Format   *Identifier    `json:"format,omitempty"`
+	Position    token.Position `json:"-"`
+	Database    string         `json:"database,omitempty"`
+	Table       string         `json:"table,omitempty"`
+	Function    *FunctionCall  `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
+	Columns     []*Identifier  `json:"columns,omitempty"`
+	Select      Statement      `json:"select,omitempty"`
+	Format      *Identifier    `json:"format,omitempty"`
+	HasSettings bool           `json:"has_settings,omitempty"` // For SETTINGS clause
 }
 
 func (i *InsertQuery) Pos() token.Position { return i.Position }
