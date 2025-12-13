@@ -8,14 +8,18 @@ import (
 )
 
 func explainFunctionCall(sb *strings.Builder, n *ast.FunctionCall, indent string, depth int) {
+	explainFunctionCallWithAlias(sb, n, n.Alias, indent, depth)
+}
+
+func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int) {
 	children := 1 // arguments ExpressionList
 	if len(n.Parameters) > 0 {
 		children++ // parameters ExpressionList
 	}
 	// Normalize function name
 	fnName := NormalizeFunctionName(n.Name)
-	if n.Alias != "" {
-		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Alias, children)
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, children)
 	} else {
 		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, children)
 	}

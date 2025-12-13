@@ -149,3 +149,28 @@ func explainAsterisk(sb *strings.Builder, n *ast.Asterisk, indent string) {
 		fmt.Fprintf(sb, "%sAsterisk\n", indent)
 	}
 }
+
+func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, depth int) {
+	// For WITH elements, we need to show the underlying expression with the name as alias
+	switch e := n.Query.(type) {
+	case *ast.Literal:
+		fmt.Fprintf(sb, "%sLiteral %s (alias %s)\n", indent, FormatLiteral(e), n.Name)
+	case *ast.Identifier:
+		fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, e.Name(), n.Name)
+	case *ast.FunctionCall:
+		explainFunctionCallWithAlias(sb, e, n.Name, indent, depth)
+	case *ast.BinaryExpr:
+		// Binary expressions become functions
+		fnName := OperatorToFunction(e.Op)
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Name, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+		Node(sb, e.Left, depth+2)
+		Node(sb, e.Right, depth+2)
+	case *ast.Subquery:
+		fmt.Fprintf(sb, "%sSubquery (alias %s) (children %d)\n", indent, n.Name, 1)
+		Node(sb, e.Query, depth+1)
+	default:
+		// For other types, just output the expression (alias may be lost)
+		Node(sb, n.Query, depth)
+	}
+}

@@ -27,6 +27,13 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, depth int) {
 	children := countSelectQueryChildren(n)
 	fmt.Fprintf(sb, "%sSelectQuery (children %d)\n", indent, children)
+	// WITH clause (ExpressionList) - output before columns
+	if len(n.With) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.With))
+		for _, w := range n.With {
+			Node(sb, w, depth+2)
+		}
+	}
 	// Columns (ExpressionList)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Columns))
 	for _, col := range n.Columns {
@@ -95,6 +102,10 @@ func countSelectUnionChildren(n *ast.SelectWithUnionQuery) int {
 
 func countSelectQueryChildren(n *ast.SelectQuery) int {
 	count := 1 // columns ExpressionList
+	// WITH clause
+	if len(n.With) > 0 {
+		count++
+	}
 	// FROM and ARRAY JOIN together count as one child (TablesInSelectQuery)
 	if n.From != nil || n.ArrayJoin != nil {
 		count++

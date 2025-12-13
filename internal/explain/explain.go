@@ -63,6 +63,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainSubquery(sb, n, indent, depth)
 	case *ast.AliasedExpr:
 		explainAliasedExpr(sb, n, depth)
+	case *ast.WithElement:
+		explainWithElement(sb, n, indent, depth)
 	case *ast.Asterisk:
 		explainAsterisk(sb, n, indent)
 
