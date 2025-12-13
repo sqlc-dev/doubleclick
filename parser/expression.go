@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -36,8 +35,11 @@ func (p *Parser) precedence(tok token.Token) int {
 	case token.NOT:
 		return NOT_PREC
 	case token.EQ, token.NEQ, token.LT, token.GT, token.LTE, token.GTE,
-		token.LIKE, token.ILIKE, token.IN, token.BETWEEN, token.IS:
+		token.LIKE, token.ILIKE, token.IN, token.BETWEEN, token.IS,
+		token.NULL_SAFE_EQ, token.GLOBAL:
 		return COMPARE
+	case token.QUESTION:
+		return COMPARE // Ternary operator
 	case token.CONCAT:
 		return CONCAT_PREC
 	case token.PLUS, token.MINUS:
@@ -46,9 +48,29 @@ func (p *Parser) precedence(tok token.Token) int {
 		return MUL_PREC
 	case token.LPAREN, token.LBRACKET:
 		return CALL
+	case token.EXCEPT, token.REPLACE:
+		return CALL // For asterisk modifiers
+	case token.COLONCOLON:
+		return CALL // Cast operator
+	case token.DOT:
+		return HIGHEST // Dot access
+	case token.ARROW:
+		return ALIAS_PREC // Lambda arrow (low precedence)
+	case token.NUMBER:
+		// Handle .1 as tuple access (number starting with dot)
+		return LOWEST
 	default:
 		return LOWEST
 	}
+}
+
+// precedenceForCurrent returns the precedence for the current token,
+// with special handling for tuple access (number starting with dot)
+func (p *Parser) precedenceForCurrent() int {
+	if p.currentIs(token.NUMBER) && strings.HasPrefix(p.current.Value, ".") {
+		return HIGHEST // Tuple access like t.1
+	}
+	return p.precedence(p.current.Token)
 }
 
 func (p *Parser) parseExpressionList() []ast.Expression {
@@ -74,7 +96,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		return nil
 	}
 
-	for !p.currentIs(token.EOF) && precedence < p.precedence(p.current.Token) {
+	for !p.currentIs(token.EOF) && precedence < p.precedenceForCurrent() {
 		left = p.parseInfixExpression(left)
 		if left == nil {
 			return nil
@@ -124,7 +146,25 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 		return p.parseSubstring()
 	case token.TRIM:
 		return p.parseTrim()
+	case token.COLUMNS:
+		return p.parseColumnsMatcher()
+	case token.ARRAY:
+		// array(1,2,3) constructor
+		return p.parseArrayConstructor()
+	case token.IF:
+		// IF function
+		return p.parseIfFunction()
+	case token.FORMAT:
+		// format() function (not FORMAT clause)
+		if p.peekIs(token.LPAREN) {
+			return p.parseKeywordAsFunction()
+		}
+		return nil
 	default:
+		// Handle other keywords that can be used as function names
+		if p.current.Token.IsKeyword() && p.peekIs(token.LPAREN) {
+			return p.parseKeywordAsFunction()
+		}
 		return nil
 	}
 }
@@ -135,6 +175,10 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 		token.EQ, token.NEQ, token.LT, token.GT, token.LTE, token.GTE,
 		token.AND, token.OR, token.CONCAT:
 		return p.parseBinaryExpression(left)
+	case token.NULL_SAFE_EQ:
+		return p.parseBinaryExpression(left)
+	case token.QUESTION:
+		return p.parseTernary(left)
 	case token.LIKE, token.ILIKE:
 		return p.parseLikeExpression(left, false)
 	case token.NOT:
@@ -155,6 +199,22 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 		}
 	case token.IN:
 		return p.parseInExpression(left, false)
+	case token.GLOBAL:
+		// GLOBAL IN or GLOBAL NOT IN
+		p.nextToken()
+		not := false
+		if p.currentIs(token.NOT) {
+			not = true
+			p.nextToken()
+		}
+		if p.currentIs(token.IN) {
+			expr := p.parseInExpression(left, not)
+			if inExpr, ok := expr.(*ast.InExpr); ok {
+				inExpr.Global = true
+			}
+			return expr
+		}
+		return left
 	case token.BETWEEN:
 		return p.parseBetweenExpression(left, false)
 	case token.IS:
@@ -164,11 +224,11 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 		if ident, ok := left.(*ast.Identifier); ok {
 			return p.parseFunctionCall(ident.Name(), ident.Position)
 		}
-		// Parametric function call like quantile(0.9)(number) - not yet supported
-		// Return nil to signal error and prevent infinite loop
-		p.errors = append(p.errors, fmt.Errorf("parametric function calls like func(params)(args) are not yet supported at line %d, column %d",
-			p.current.Pos.Line, p.current.Pos.Column))
-		return nil
+		// Parametric function call like quantile(0.9)(number)
+		if fn, ok := left.(*ast.FunctionCall); ok {
+			return p.parseParametricFunctionCall(fn)
+		}
+		return left
 	case token.LBRACKET:
 		return p.parseArrayAccess(left)
 	case token.DOT:
@@ -179,6 +239,24 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 		return p.parseCastOperator(left)
 	case token.ARROW:
 		return p.parseLambda(left)
+	case token.EXCEPT:
+		// Handle * EXCEPT (col1, col2)
+		if asterisk, ok := left.(*ast.Asterisk); ok {
+			return p.parseAsteriskExcept(asterisk)
+		}
+		return left
+	case token.REPLACE:
+		// Handle * REPLACE (expr AS col)
+		if asterisk, ok := left.(*ast.Asterisk); ok {
+			return p.parseAsteriskReplace(asterisk)
+		}
+		return left
+	case token.NUMBER:
+		// Handle tuple access like t.1 where .1 is lexed as a number
+		if strings.HasPrefix(p.current.Value, ".") {
+			return p.parseTupleAccessFromNumber(left)
+		}
+		return left
 	default:
 		return left
 	}
@@ -580,7 +658,8 @@ func (p *Parser) parseCast() ast.Expression {
 		return nil
 	}
 
-	expr.Expr = p.parseExpression(LOWEST)
+	// Use ALIAS_PREC to avoid consuming AS as an alias operator
+	expr.Expr = p.parseExpression(ALIAS_PREC)
 
 	if !p.expect(token.AS) {
 		return nil
@@ -594,30 +673,72 @@ func (p *Parser) parseCast() ast.Expression {
 }
 
 func (p *Parser) parseExtract() ast.Expression {
-	expr := &ast.ExtractExpr{
-		Position: p.current.Pos,
-	}
+	pos := p.current.Pos
 	p.nextToken() // skip EXTRACT
 
 	if !p.expect(token.LPAREN) {
 		return nil
 	}
 
-	// Parse field (YEAR, MONTH, etc.)
+	// Check if it's EXTRACT(field FROM expr) or extract(str, pattern) form
 	if p.currentIs(token.IDENT) {
-		expr.Field = strings.ToUpper(p.current.Value)
+		field := strings.ToUpper(p.current.Value)
 		p.nextToken()
+
+		// Check for FROM keyword - if present, it's the EXTRACT(field FROM expr) form
+		if p.currentIs(token.FROM) {
+			p.nextToken()
+			from := p.parseExpression(LOWEST)
+			p.expect(token.RPAREN)
+			return &ast.ExtractExpr{
+				Position: pos,
+				Field:    field,
+				From:     from,
+			}
+		}
+
+		// Not FROM, so backtrack and parse as regular function call
+		// This is the extract(str, pattern) regex form
+		// We need to re-parse as a function call
+		args := []ast.Expression{
+			&ast.Identifier{Position: pos, Parts: []string{strings.ToLower(field)}},
+		}
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				args = append(args, p.parseExpression(LOWEST))
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+		}
+		p.expect(token.RPAREN)
+		return &ast.FunctionCall{
+			Position:  pos,
+			Name:      "extract",
+			Arguments: args,
+		}
 	}
 
-	if !p.expect(token.FROM) {
-		return nil
+	// If first token is a string, it's the regex form extract(str, pattern)
+	var args []ast.Expression
+	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+		args = append(args, p.parseExpression(LOWEST))
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+		} else {
+			break
+		}
 	}
-
-	expr.From = p.parseExpression(LOWEST)
-
 	p.expect(token.RPAREN)
 
-	return expr
+	return &ast.FunctionCall{
+		Position:  pos,
+		Name:      "extract",
+		Arguments: args,
+	}
 }
 
 func (p *Parser) parseInterval() ast.Expression {
@@ -916,6 +1037,29 @@ func (p *Parser) parseArrayAccess(left ast.Expression) ast.Expression {
 	return expr
 }
 
+// parseTupleAccessFromNumber handles tuple access like t.1 where .1 was lexed as a single NUMBER token
+func (p *Parser) parseTupleAccessFromNumber(left ast.Expression) ast.Expression {
+	// The current value is like ".1" - extract the index part
+	indexStr := strings.TrimPrefix(p.current.Value, ".")
+	pos := p.current.Pos
+	p.nextToken()
+
+	idx, err := strconv.ParseInt(indexStr, 10, 64)
+	if err != nil {
+		return left
+	}
+
+	return &ast.TupleAccess{
+		Position: pos,
+		Tuple:    left,
+		Index: &ast.Literal{
+			Position: pos,
+			Type:     ast.LiteralInteger,
+			Value:    idx,
+		},
+	}
+}
+
 func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
 	p.nextToken() // skip .
 
@@ -1023,4 +1167,212 @@ func (p *Parser) parseLambda(left ast.Expression) ast.Expression {
 
 	lambda.Body = p.parseExpression(LOWEST)
 	return lambda
+}
+
+func (p *Parser) parseTernary(condition ast.Expression) ast.Expression {
+	ternary := &ast.TernaryExpr{
+		Position:  p.current.Pos,
+		Condition: condition,
+	}
+
+	p.nextToken() // skip ?
+
+	ternary.Then = p.parseExpression(LOWEST)
+
+	if !p.expect(token.COLON) {
+		return nil
+	}
+
+	ternary.Else = p.parseExpression(LOWEST)
+
+	return ternary
+}
+
+func (p *Parser) parseParametricFunctionCall(fn *ast.FunctionCall) *ast.FunctionCall {
+	// The first FunctionCall's arguments become the parameters
+	// and we parse the second set of arguments
+	result := &ast.FunctionCall{
+		Position:   fn.Position,
+		Name:       fn.Name,
+		Parameters: fn.Arguments, // Parameters are the first ()'s content
+	}
+
+	p.nextToken() // skip (
+
+	// Parse the actual arguments
+	if !p.currentIs(token.RPAREN) {
+		result.Arguments = p.parseExpressionList()
+	}
+
+	p.expect(token.RPAREN)
+
+	// Handle OVER clause for window functions
+	if p.currentIs(token.OVER) {
+		p.nextToken()
+		result.Over = p.parseWindowSpec()
+	}
+
+	return result
+}
+
+func (p *Parser) parseColumnsMatcher() ast.Expression {
+	matcher := &ast.ColumnsMatcher{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip COLUMNS
+
+	if !p.expect(token.LPAREN) {
+		return nil
+	}
+
+	// Parse the pattern (string)
+	if p.currentIs(token.STRING) {
+		matcher.Pattern = p.current.Value
+		p.nextToken()
+	}
+
+	p.expect(token.RPAREN)
+
+	// Handle EXCEPT
+	if p.currentIs(token.EXCEPT) {
+		p.nextToken()
+		if p.expect(token.LPAREN) {
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				if p.currentIs(token.IDENT) {
+					matcher.Except = append(matcher.Except, p.current.Value)
+					p.nextToken()
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				}
+			}
+			p.expect(token.RPAREN)
+		}
+	}
+
+	return matcher
+}
+
+func (p *Parser) parseArrayConstructor() ast.Expression {
+	pos := p.current.Pos
+	p.nextToken() // skip ARRAY
+
+	if !p.expect(token.LPAREN) {
+		return nil
+	}
+
+	var args []ast.Expression
+	if !p.currentIs(token.RPAREN) {
+		args = p.parseExpressionList()
+	}
+
+	p.expect(token.RPAREN)
+
+	return &ast.FunctionCall{
+		Position:  pos,
+		Name:      "array",
+		Arguments: args,
+	}
+}
+
+func (p *Parser) parseIfFunction() ast.Expression {
+	pos := p.current.Pos
+	p.nextToken() // skip IF
+
+	if !p.expect(token.LPAREN) {
+		return nil
+	}
+
+	var args []ast.Expression
+	if !p.currentIs(token.RPAREN) {
+		args = p.parseExpressionList()
+	}
+
+	p.expect(token.RPAREN)
+
+	return &ast.FunctionCall{
+		Position:  pos,
+		Name:      "if",
+		Arguments: args,
+	}
+}
+
+func (p *Parser) parseKeywordAsFunction() ast.Expression {
+	pos := p.current.Pos
+	name := strings.ToLower(p.current.Value)
+	p.nextToken() // skip keyword
+
+	if !p.expect(token.LPAREN) {
+		return nil
+	}
+
+	var args []ast.Expression
+	if !p.currentIs(token.RPAREN) {
+		args = p.parseExpressionList()
+	}
+
+	p.expect(token.RPAREN)
+
+	return &ast.FunctionCall{
+		Position:  pos,
+		Name:      name,
+		Arguments: args,
+	}
+}
+
+func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
+	p.nextToken() // skip EXCEPT
+
+	if !p.expect(token.LPAREN) {
+		return asterisk
+	}
+
+	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+		if p.currentIs(token.IDENT) {
+			asterisk.Except = append(asterisk.Except, p.current.Value)
+			p.nextToken()
+		}
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+		}
+	}
+
+	p.expect(token.RPAREN)
+
+	return asterisk
+}
+
+func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
+	p.nextToken() // skip REPLACE
+
+	if !p.expect(token.LPAREN) {
+		return asterisk
+	}
+
+	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+		replace := &ast.ReplaceExpr{
+			Position: p.current.Pos,
+		}
+
+		replace.Expr = p.parseExpression(LOWEST)
+
+		if p.currentIs(token.AS) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) {
+				replace.Name = p.current.Value
+				p.nextToken()
+			}
+		}
+
+		asterisk.Replace = append(asterisk.Replace, replace)
+
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+		}
+	}
+
+	p.expect(token.RPAREN)
+
+	return asterisk
 }
