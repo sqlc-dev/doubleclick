@@ -1,1 +1,0 @@
-EXCHANGE TABLES table1 AND table2

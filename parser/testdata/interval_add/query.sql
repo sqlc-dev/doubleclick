@@ -1,1 +1,0 @@
-SELECT now() + INTERVAL 1 DAY

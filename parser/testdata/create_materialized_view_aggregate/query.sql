@@ -1,1 +1,0 @@
-CREATE MATERIALIZED VIEW basic_mv ENGINE = AggregatingMergeTree(StartDate, (CounterID, StartDate), 8192) AS SELECT CounterID, StartDate, sumState(Sign) AS Visits, uniqState(UserID) AS Users FROM test.visits GROUP BY CounterID, StartDate

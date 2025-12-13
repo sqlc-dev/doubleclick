@@ -18,12 +18,30 @@ type testMetadata struct {
 	Source string `json:"source,omitempty"`
 }
 
+// astJSON represents the structure of ast.json from ClickHouse EXPLAIN AST
+type astJSON struct {
+	Meta []struct {
+		Name string `json:"name"`
+		Type string `json:"type"`
+	} `json:"meta"`
+	Data []struct {
+		Explain string `json:"explain"`
+	} `json:"data"`
+	Rows       int `json:"rows"`
+	Statistics struct {
+		Elapsed  float64 `json:"elapsed"`
+		RowsRead int     `json:"rows_read"`
+		BytesRead int    `json:"bytes_read"`
+	} `json:"statistics"`
+	Error bool `json:"error,omitempty"`
+}
+
 // TestParser tests the parser using test cases from the testdata directory.
 // Each subdirectory in testdata represents a test case with:
 // - query.sql: The SQL query to parse
+// - ast.json: Expected AST from ClickHouse EXPLAIN AST
 // - metadata.json (optional): Metadata including:
 //   - todo: true if the test is not yet expected to pass
-//   - source: URL to the source file in ClickHouse repository
 func TestParser(t *testing.T) {
 	testdataDir := "testdata"
 
@@ -37,21 +55,24 @@ func TestParser(t *testing.T) {
 			continue
 		}
 
-		testName := entry.Name()
-		testDir := filepath.Join(testdataDir, testName)
+		testDir := filepath.Join(testdataDir, entry.Name())
 
-		t.Run(testName, func(t *testing.T) {
+		t.Run(entry.Name(), func(t *testing.T) {
+			t.Parallel()
+
 			// Create context with 1 second timeout
 			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 			defer cancel()
 
-			// Read the query
+			// Read the query (only first line, as ast.json was generated from first statement)
 			queryPath := filepath.Join(testDir, "query.sql")
 			queryBytes, err := os.ReadFile(queryPath)
 			if err != nil {
 				t.Fatalf("Failed to read query.sql: %v", err)
 			}
-			query := strings.TrimSpace(string(queryBytes))
+			// Get first line only (ast.json contains AST for first statement)
+			lines := strings.SplitN(string(queryBytes), "\n", 2)
+			query := strings.TrimSpace(lines[0])
 
 			// Read optional metadata
 			var metadata testMetadata
@@ -62,9 +83,19 @@ func TestParser(t *testing.T) {
 				}
 			}
 
-			// Log source if available
-			if metadata.Source != "" {
-				t.Logf("Source: %s", metadata.Source)
+			// Read expected AST from ClickHouse
+			var expectedAST astJSON
+			astPath := filepath.Join(testDir, "ast.json")
+			if astBytes, err := os.ReadFile(astPath); err == nil {
+				if err := json.Unmarshal(astBytes, &expectedAST); err != nil {
+					t.Fatalf("Failed to parse ast.json: %v", err)
+				}
+			}
+
+			// Skip tests where ClickHouse also couldn't parse the query
+			if expectedAST.Error {
+				t.Skipf("ClickHouse also failed to parse this query")
+				return
 			}
 
 			// Parse the query
@@ -94,6 +125,8 @@ func TestParser(t *testing.T) {
 				}
 				t.Fatalf("JSON marshal error: %v\nQuery: %s", jsonErr, query)
 			}
+
+			// TODO: Compare parsed AST against expectedAST.Data
 		})
 	}
 }

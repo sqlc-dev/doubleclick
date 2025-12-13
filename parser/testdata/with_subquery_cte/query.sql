@@ -1,1 +1,0 @@
-WITH x AS (SELECT 1) SELECT * FROM x

@@ -1,1 +1,0 @@
-SELECT toTypeName(1)

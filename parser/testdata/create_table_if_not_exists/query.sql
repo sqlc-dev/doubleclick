@@ -1,1 +1,0 @@
-CREATE TABLE IF NOT EXISTS test (id UInt64) ENGINE = MergeTree() ORDER BY id

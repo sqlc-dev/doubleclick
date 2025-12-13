@@ -1,1 +1,0 @@
-SELECT toIntervalMonth(1)

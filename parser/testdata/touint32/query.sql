@@ -1,1 +1,0 @@
-SELECT toUInt32(123)

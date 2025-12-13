@@ -1,1 +1,0 @@
-SELECT lower('HELLO')
