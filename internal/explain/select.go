@@ -15,6 +15,13 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 	for _, sel := range n.Selects {
 		Node(sb, sel, depth+2)
 	}
+	// FORMAT clause - check if any SelectQuery has Format set
+	for _, sel := range n.Selects {
+		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
+			Node(sb, sq.Format, depth+1)
+			break
+		}
+	}
 }
 
 func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, depth int) {
@@ -75,7 +82,15 @@ func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent st
 }
 
 func countSelectUnionChildren(n *ast.SelectWithUnionQuery) int {
-	return 1 // ExpressionList of selects
+	count := 1 // ExpressionList of selects
+	// Check if any SelectQuery has Format set
+	for _, sel := range n.Selects {
+		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
+			count++
+			break
+		}
+	}
+	return count
 }
 
 func countSelectQueryChildren(n *ast.SelectQuery) int {
