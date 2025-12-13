@@ -1,0 +1,60 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 5)
+   ExpressionList (children 1)
+    WithElement (children 1)
+     Subquery (children 1)
+      SelectWithUnionQuery (children 1)
+       ExpressionList (children 1)
+        SelectQuery (children 2)
+         ExpressionList (children 1)
+          Asterisk
+         TablesInSelectQuery (children 1)
+          TablesInSelectQueryElement (children 1)
+           TableExpression (children 1)
+            Function remote (children 1)
+             ExpressionList (children 2)
+              Literal \'127.{1,2}\'
+              Function view (children 1)
+               ExpressionList (children 1)
+                SelectWithUnionQuery (children 1)
+                 ExpressionList (children 1)
+                  SelectQuery (children 2)
+                   ExpressionList (children 2)
+                    Identifier dummy (alias d1)
+                    Identifier dummy (alias d2)
+                   TablesInSelectQuery (children 1)
+                    TablesInSelectQueryElement (children 1)
+                     TableExpression (children 1)
+                      TableIdentifier system.one
+   ExpressionList (children 1)
+    Identifier lhs.d2
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Function remote (alias lhs) (children 1)
+       ExpressionList (children 2)
+        Literal \'127.{1,2}\'
+        Function view (children 1)
+         ExpressionList (children 1)
+          SelectWithUnionQuery (children 1)
+           ExpressionList (children 1)
+            SelectQuery (children 2)
+             ExpressionList (children 2)
+              Identifier dummy (alias d1)
+              Identifier dummy (alias d2)
+             TablesInSelectQuery (children 1)
+              TablesInSelectQueryElement (children 1)
+               TableExpression (children 1)
+                TableIdentifier system.one
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier rhs
+     TableJoin (children 1)
+      ExpressionList (children 1)
+       Identifier d1
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier rhs.d2
+   Set
+The query succeeded but the server error '206' was expected (query: EXPLAIN AST with rhs as (select * from remote('127.{1,2}', view(select dummy d1, dummy d2 from system.one))) select lhs.d2 from remote('127.{1,2}', view(select dummy d1, dummy d2 from system.one)) lhs global join rhs using (d1) order by rhs.d2 settings enable_analyzer=0; -- { serverError ALIAS_REQUIRED }).

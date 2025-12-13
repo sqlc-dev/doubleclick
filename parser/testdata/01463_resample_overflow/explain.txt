@@ -1,0 +1,21 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 1)
+    Function groupArrayResample (children 2)
+     ExpressionList (children 2)
+      Identifier number
+      Function toInt64 (children 1)
+       ExpressionList (children 1)
+        Identifier number
+     ExpressionList (children 3)
+      Literal Int64_-9223372036854775808
+      Literal UInt64_9223372036854775807
+      Literal UInt64_9223372036854775807
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Function numbers (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_7
+The query succeeded but the server error '69' was expected (query: EXPLAIN AST select groupArrayResample(-9223372036854775808, 9223372036854775807, 9223372036854775807)(number, toInt64(number)) FROM numbers(7); -- { serverError ARGUMENT_OUT_OF_BOUND }).

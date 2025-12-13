@@ -1,0 +1,17 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 1)
+   ExpressionList (children 1)
+    Function sumMerge (children 1)
+     ExpressionList (children 1)
+      Function multiply (children 1)
+       ExpressionList (children 2)
+        Function initializeAggregation (children 1)
+         ExpressionList (children 2)
+          Literal \'sumState\'
+          Literal UInt64_1
+        Function CAST (children 1)
+         ExpressionList (children 2)
+          Literal \'1.1.1.1\'
+          Literal \'IPv4\'
+The query succeeded but the server error '43' was expected (query: EXPLAIN AST SELECT sumMerge(initializeAggregation('sumState', 1) * CAST('1.1.1.1', 'IPv4')); -- { serverError ILLEGAL_TYPE_OF_ARGUMENT }).

@@ -1,0 +1,34 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 1)
+    Subquery (alias n) (children 1)
+     SelectWithUnionQuery (children 1)
+      ExpressionList (children 1)
+       SelectQuery (children 2)
+        ExpressionList (children 1)
+         Function groupBitmapState (alias n) (children 1)
+          ExpressionList (children 1)
+           Function CAST (children 1)
+            ExpressionList (children 2)
+             Identifier number
+             Literal \'Nullable(UInt8)\'
+        TablesInSelectQuery (children 1)
+         TablesInSelectQueryElement (children 1)
+          TableExpression (children 1)
+           Function numbers (children 1)
+            ExpressionList (children 1)
+             Literal UInt64_1
+   ExpressionList (children 2)
+    Identifier number (alias x)
+    Function bitmapContains (children 1)
+     ExpressionList (children 2)
+      Identifier n
+      Identifier x
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Function numbers (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_10
+The query succeeded but the server error '43' was expected (query: EXPLAIN AST WITH (SELECT groupBitmapState(number::Nullable(UInt8)) as n from numbers(1)) as n SELECT number as x, bitmapContains(n, x) FROM numbers(10); -- { serverError ILLEGAL_TYPE_OF_ARGUMENT }).

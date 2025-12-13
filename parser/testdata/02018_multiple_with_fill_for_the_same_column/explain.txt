@@ -1,0 +1,28 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 2)
+    Identifier x
+    Identifier y
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 1)
+          ExpressionList (children 2)
+           Literal UInt64_5 (alias x)
+           Literal \'Hello\' (alias y)
+   ExpressionList (children 3)
+    OrderByElement (children 3)
+     Identifier x
+     Literal UInt64_3
+     Literal UInt64_7
+    OrderByElement (children 1)
+     Identifier y
+    OrderByElement (children 3)
+     Identifier x
+     Literal UInt64_1
+     Literal UInt64_10
+The query succeeded but the server error '475' was expected (query: EXPLAIN AST SELECT x, y FROM (SELECT 5 AS x, 'Hello' AS y) ORDER BY x WITH FILL FROM 3 TO 7, y, x WITH FILL FROM 1 TO 10; -- { serverError INVALID_WITH_FILL_EXPRESSION }).

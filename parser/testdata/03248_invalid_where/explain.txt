@@ -1,0 +1,24 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 1)
+    Function lambda (alias lambda_1) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 1)
+        Identifier x
+      Function toString (children 1)
+       ExpressionList (children 1)
+        Identifier x
+   ExpressionList (children 2)
+    Function arrayMap (children 1)
+     ExpressionList (children 2)
+      Identifier lambda_1 (alias lambda_2)
+      Literal Array_[UInt64_1, UInt64_2, UInt64_3]
+    Function arrayMap (children 1)
+     ExpressionList (children 2)
+      Identifier lambda_2
+      Literal Array_[\'1\', \'2\', \'3\']
+   Identifier lambda_2
+   Set
+The query succeeded but the server error '183' was expected (query: EXPLAIN AST WITH x -> toString(x) AS lambda_1 SELECT arrayMap(lambda_1 AS lambda_2, [1, 2, 3]), arrayMap(lambda_2, ['1', '2', '3']) WHERE lambda_2 SETTINGS enable_analyzer = 0; -- { serverError UNEXPECTED_EXPRESSION }).

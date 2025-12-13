@@ -1,0 +1,28 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 3)
+    Function anyLast (children 1)
+     ExpressionList (children 1)
+      Identifier id
+    Function anyLast (children 1)
+     ExpressionList (children 1)
+      Identifier time
+    Function exponentialTimeDecayedAvg (children 2)
+     ExpressionList (children 2)
+      Identifier id
+      Identifier time
+     ExpressionList (children 1)
+      Literal UInt64_10
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Function values (children 1)
+       ExpressionList (children 6)
+        Literal \'id Int8, time DateTime\'
+        Literal Tuple_(UInt64_1, UInt64_1)
+        Literal Tuple_(UInt64_1, UInt64_2)
+        Literal Tuple_(UInt64_2, UInt64_3)
+        Literal Tuple_(UInt64_3, UInt64_3)
+        Literal Tuple_(UInt64_3, UInt64_5)
+The query succeeded but the server error '36' was expected (query: EXPLAIN AST SELECT anyLast(id), anyLast(time), exponentialTimeDecayedAvg(10)(id, time) FROM values('id Int8, time DateTime', (1,1),(1,2),(2,3),(3,3),(3,5)); -- { serverError BAD_ARGUMENTS }).

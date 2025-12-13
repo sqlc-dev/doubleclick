@@ -1,0 +1,19 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 1)
+   ExpressionList (children 1)
+    Function arrayMap (children 1)
+     ExpressionList (children 2)
+      Function lambda (children 1)
+       ExpressionList (children 2)
+        Function tuple (children 1)
+         ExpressionList (children 1)
+          Identifier x
+        Function arrayJoin (children 1)
+         ExpressionList (children 1)
+          Function array (children 1)
+           ExpressionList (children 2)
+            Identifier x
+            Literal UInt64_1
+      Literal Array_[UInt64_1, UInt64_2]
+The query succeeded but the server error '36' was expected (query: EXPLAIN AST SELECT arrayMap(x -> arrayJoin([x, 1]), [1, 2]); -- { serverError BAD_ARGUMENTS }).

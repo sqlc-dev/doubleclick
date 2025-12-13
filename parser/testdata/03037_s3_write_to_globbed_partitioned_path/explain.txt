@@ -1,0 +1,20 @@
+InsertQuery   (children 3)
+ Function s3 (children 1)
+  ExpressionList (children 1)
+   Literal \'http://localhost:11111/test/data_*_{_partition_id}.csv\'
+ Function modulo (children 1)
+  ExpressionList (children 2)
+   Identifier number
+   Literal UInt64_3
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 2)
+    ExpressionList (children 1)
+     Asterisk
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       Function numbers (children 1)
+        ExpressionList (children 1)
+         Literal UInt64_10
+The query succeeded but the server error '291' was expected (query: EXPLAIN AST insert into function s3('http://localhost:11111/test/data_*_{_partition_id}.csv') partition by number % 3 select * from numbers(10); -- {serverError DATABASE_ACCESS_DENIED}).
