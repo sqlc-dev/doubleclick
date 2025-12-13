@@ -49,15 +49,22 @@ func TestParser(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 			defer cancel()
 
-			// Read the query (only first line)
+			// Read the query (first non-comment line)
 			queryPath := filepath.Join(testDir, "query.sql")
 			queryBytes, err := os.ReadFile(queryPath)
 			if err != nil {
 				t.Fatalf("Failed to read query.sql: %v", err)
 			}
-			// Get first line only
-			lines := strings.SplitN(string(queryBytes), "\n", 2)
-			query := strings.TrimSpace(lines[0])
+			// Get first non-comment, non-empty line
+			var query string
+			for _, line := range strings.Split(string(queryBytes), "\n") {
+				line = strings.TrimSpace(line)
+				if line == "" || strings.HasPrefix(line, "--") {
+					continue
+				}
+				query = line
+				break
+			}
 
 			// Read optional metadata
 			var metadata testMetadata
@@ -105,6 +112,20 @@ func TestParser(t *testing.T) {
 					return
 				}
 				t.Fatalf("JSON marshal error: %v\nQuery: %s", jsonErr, query)
+			}
+
+			// Check explain output if explain.txt exists
+			explainPath := filepath.Join(testDir, "explain.txt")
+			if expectedBytes, err := os.ReadFile(explainPath); err == nil {
+				expected := strings.TrimSpace(string(expectedBytes))
+				actual := strings.TrimSpace(parser.Explain(stmts[0]))
+				if actual != expected {
+					if metadata.Todo {
+						t.Skipf("TODO: Explain output mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", query, expected, actual)
+						return
+					}
+					t.Errorf("Explain output mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", query, expected, actual)
+				}
 			}
 		})
 	}
