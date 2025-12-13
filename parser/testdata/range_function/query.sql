@@ -1,1 +1,0 @@
-SELECT range(10)

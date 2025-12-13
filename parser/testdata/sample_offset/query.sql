@@ -1,1 +1,0 @@
-SELECT * FROM test_table SAMPLE 0.1 OFFSET 0.5

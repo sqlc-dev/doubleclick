@@ -1,1 +1,0 @@
-SELECT CAST(1 AS String)

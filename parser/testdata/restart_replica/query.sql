@@ -1,1 +1,0 @@
-SYSTEM RESTART REPLICA system.one

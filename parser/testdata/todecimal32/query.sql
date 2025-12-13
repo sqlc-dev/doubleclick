@@ -1,1 +1,0 @@
-SELECT toDecimal32(123.456, 2)

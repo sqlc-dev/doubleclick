@@ -1,1 +1,0 @@
-SELECT * FROM (SELECT id FROM users) AS t

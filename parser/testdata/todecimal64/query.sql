@@ -1,1 +1,0 @@
-SELECT toDecimal64(123.456, 2)

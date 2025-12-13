@@ -1,1 +1,0 @@
-SELECT 'HELLO' ILIKE '%ell%'

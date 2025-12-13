@@ -1,1 +1,0 @@
-CREATE TABLE test_table (id UInt64 MATERIALIZED 0) ENGINE = Memory

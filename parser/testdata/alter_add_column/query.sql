@@ -1,1 +1,0 @@
-ALTER TABLE test ADD COLUMN age UInt32

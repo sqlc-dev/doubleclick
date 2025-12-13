@@ -1,1 +1,0 @@
-ALTER TABLE test_table REPLACE PARTITION 202301 FROM other_table

@@ -1,1 +1,0 @@
-CREATE TABLE test_table AS SELECT 1 AS id

@@ -1,1 +1,0 @@
-SELECT toInt8(123)

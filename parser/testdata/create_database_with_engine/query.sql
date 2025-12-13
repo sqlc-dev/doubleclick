@@ -1,1 +1,0 @@
-CREATE DATABASE test_db ENGINE = Atomic

@@ -1,1 +1,0 @@
-ALTER TABLE test_table ADD CONSTRAINT c CHECK col > 0

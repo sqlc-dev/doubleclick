@@ -1,1 +1,0 @@
-SELECT toInt16(123)

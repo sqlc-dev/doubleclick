@@ -1,1 +1,0 @@
-SYSTEM SYNC REPLICA system.one

@@ -1,1 +1,0 @@
-ALTER TABLE test_table ADD COLUMN IF NOT EXISTS new_col UInt64

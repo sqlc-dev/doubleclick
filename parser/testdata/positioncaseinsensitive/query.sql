@@ -1,1 +1,0 @@
-SELECT positionCaseInsensitive('HELLO', 'l')

@@ -1,1 +1,0 @@
-DESCRIBE TABLE system.one

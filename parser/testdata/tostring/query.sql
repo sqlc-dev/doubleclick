@@ -1,1 +1,0 @@
-SELECT toString(123)

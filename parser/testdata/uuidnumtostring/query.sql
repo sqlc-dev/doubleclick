@@ -1,1 +1,0 @@
-SELECT UUIDNumToString(toFixedString('0000000000000000', 16))
