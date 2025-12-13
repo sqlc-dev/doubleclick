@@ -344,10 +344,49 @@ func (l *Lexer) readNumber() Item {
 		l.readChar()
 	}
 
-	// Read integer part
+	// Check for hex (0x), binary (0b), or octal (0o) prefix
+	if l.ch == '0' {
+		sb.WriteRune(l.ch)
+		l.readChar()
+		if l.ch == 'x' || l.ch == 'X' {
+			// Hex literal
+			sb.WriteRune(l.ch)
+			l.readChar()
+			for isHexDigit(l.ch) {
+				sb.WriteRune(l.ch)
+				l.readChar()
+			}
+			return Item{Token: token.NUMBER, Value: sb.String(), Pos: pos}
+		} else if l.ch == 'b' || l.ch == 'B' {
+			// Binary literal
+			sb.WriteRune(l.ch)
+			l.readChar()
+			for l.ch == '0' || l.ch == '1' {
+				sb.WriteRune(l.ch)
+				l.readChar()
+			}
+			return Item{Token: token.NUMBER, Value: sb.String(), Pos: pos}
+		} else if l.ch == 'o' || l.ch == 'O' {
+			// Octal literal
+			sb.WriteRune(l.ch)
+			l.readChar()
+			for l.ch >= '0' && l.ch <= '7' {
+				sb.WriteRune(l.ch)
+				l.readChar()
+			}
+			return Item{Token: token.NUMBER, Value: sb.String(), Pos: pos}
+		}
+		// Otherwise, continue with normal number parsing (leading 0)
+	}
+
+	// Read integer part (including underscores as separators, but only between digits)
 	for unicode.IsDigit(l.ch) {
 		sb.WriteRune(l.ch)
 		l.readChar()
+		// Handle underscore separators (only if followed by a digit)
+		for l.ch == '_' && unicode.IsDigit(l.peekChar()) {
+			l.readChar() // skip underscore
+		}
 	}
 
 	// Check for decimal point
@@ -357,6 +396,10 @@ func (l *Lexer) readNumber() Item {
 		for unicode.IsDigit(l.ch) {
 			sb.WriteRune(l.ch)
 			l.readChar()
+			// Handle underscore separators
+			for l.ch == '_' && unicode.IsDigit(l.peekChar()) {
+				l.readChar()
+			}
 		}
 	}
 
@@ -371,10 +414,18 @@ func (l *Lexer) readNumber() Item {
 		for unicode.IsDigit(l.ch) {
 			sb.WriteRune(l.ch)
 			l.readChar()
+			// Handle underscore separators
+			for l.ch == '_' && unicode.IsDigit(l.peekChar()) {
+				l.readChar()
+			}
 		}
 	}
 
 	return Item{Token: token.NUMBER, Value: sb.String(), Pos: pos}
+}
+
+func isHexDigit(ch rune) bool {
+	return unicode.IsDigit(ch) || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F')
 }
 
 func (l *Lexer) readIdentifier() Item {
