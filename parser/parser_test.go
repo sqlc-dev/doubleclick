@@ -17,6 +17,7 @@ type testMetadata struct {
 	Todo    bool   `json:"todo,omitempty"`
 	Source  string `json:"source,omitempty"`
 	Explain *bool  `json:"explain,omitempty"`
+	Skip    bool   `json:"skip,omitempty"`
 }
 
 // TestParser tests the parser using test cases from the testdata directory.
@@ -25,6 +26,7 @@ type testMetadata struct {
 // - metadata.json (optional): Metadata including:
 //   - todo: true if the test is not yet expected to pass
 //   - explain: false to skip the test (e.g., when ClickHouse couldn't parse it)
+//   - skip: true to skip the test entirely (e.g., causes infinite loop)
 func TestParser(t *testing.T) {
 	testdataDir := "testdata"
 
@@ -64,6 +66,11 @@ func TestParser(t *testing.T) {
 				if err := json.Unmarshal(metadataBytes, &metadata); err != nil {
 					t.Fatalf("Failed to parse metadata.json: %v", err)
 				}
+			}
+
+			// Skip tests marked with skip: true
+			if metadata.Skip {
+				t.Skip("Skipping: skip is true in metadata")
 			}
 
 			// Skip tests where explain is explicitly false (e.g., ClickHouse couldn't parse it)
