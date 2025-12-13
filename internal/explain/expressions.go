@@ -50,9 +50,15 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			return
 		}
 	}
-	// Check if this is an array with complex expressions that should be rendered as Function array
+	// Check if this is an array with complex expressions or empty that should be rendered as Function array
 	if n.Type == ast.LiteralArray {
 		if exprs, ok := n.Value.([]ast.Expression); ok {
+			// Empty array renders as Function array with empty ExpressionList
+			if len(exprs) == 0 {
+				fmt.Fprintf(sb, "%sFunction array (children %d)\n", indent, 1)
+				fmt.Fprintf(sb, "%s ExpressionList\n", indent)
+				return
+			}
 			hasComplexExpr := false
 			for _, e := range exprs {
 				if _, isLit := e.(*ast.Literal); !isLit {
@@ -69,6 +75,11 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 				}
 				return
 			}
+		} else if n.Value == nil {
+			// nil value means empty array
+			fmt.Fprintf(sb, "%sFunction array (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s ExpressionList\n", indent)
+			return
 		}
 	}
 	fmt.Fprintf(sb, "%sLiteral %s\n", indent, FormatLiteral(n))
