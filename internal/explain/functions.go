@@ -59,14 +59,8 @@ func explainCastExpr(sb *strings.Builder, n *ast.CastExpr, indent string, depth 
 	// CAST is represented as Function CAST with expr and type as arguments
 	fmt.Fprintf(sb, "%sFunction CAST (children %d)\n", indent, 1)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
-	// For :: operator syntax, expression is represented as string literal
-	if n.OperatorSyntax {
-		// Format expression as string literal
-		exprStr := formatExprAsString(n.Expr)
-		fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, exprStr)
-	} else {
-		Node(sb, n.Expr, depth+2)
-	}
+	// Expression is always rendered as proper AST node
+	Node(sb, n.Expr, depth+2)
 	// Type is formatted as a literal string
 	typeStr := FormatDataType(n.Type)
 	fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, typeStr)

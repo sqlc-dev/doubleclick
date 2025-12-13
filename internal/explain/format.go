@@ -153,7 +153,9 @@ func OperatorToFunction(op string) string {
 		return "multiply"
 	case "/":
 		return "divide"
-	case "%":
+	case "DIV":
+		return "intDiv"
+	case "%", "MOD":
 		return "modulo"
 	case "=", "==":
 		return "equals"
