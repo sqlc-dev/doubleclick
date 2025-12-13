@@ -83,6 +83,7 @@ const (
 	DETACH
 	DISTINCT
 	DISTRIBUTED
+	DIV
 	DROP
 	ELSE
 	END
@@ -128,6 +129,7 @@ const (
 	LIVE
 	LOCAL
 	MATERIALIZED
+	MOD
 	MODIFY
 	NAN
 	NATURAL
@@ -262,6 +264,7 @@ var tokens = [...]string{
 	DETACH:       "DETACH",
 	DISTINCT:     "DISTINCT",
 	DISTRIBUTED:  "DISTRIBUTED",
+	DIV:          "DIV",
 	DROP:         "DROP",
 	ELSE:         "ELSE",
 	END:          "END",
@@ -307,6 +310,7 @@ var tokens = [...]string{
 	LIVE:         "LIVE",
 	LOCAL:        "LOCAL",
 	MATERIALIZED: "MATERIALIZED",
+	MOD:          "MOD",
 	MODIFY:       "MODIFY",
 	NAN:          "NAN",
 	NATURAL:      "NATURAL",

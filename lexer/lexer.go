@@ -118,6 +118,10 @@ func (l *Lexer) NextToken() Item {
 		return Item{Token: token.PERCENT, Value: "%", Pos: pos}
 	case '=':
 		l.readChar()
+		if l.ch == '=' {
+			l.readChar()
+			return Item{Token: token.EQ, Value: "==", Pos: pos}
+		}
 		return Item{Token: token.EQ, Value: "=", Pos: pos}
 	case '!':
 		if l.peekChar() == '=' {
@@ -407,7 +411,7 @@ func isIdentStart(ch rune) bool {
 }
 
 func isIdentChar(ch rune) bool {
-	return ch == '_' || unicode.IsLetter(ch) || unicode.IsDigit(ch)
+	return ch == '_' || ch == '$' || unicode.IsLetter(ch) || unicode.IsDigit(ch)
 }
 
 // Tokenize returns all tokens from the reader.

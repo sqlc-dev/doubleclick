@@ -299,6 +299,34 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		sel.Offset = p.parseExpression(LOWEST)
 	}
 
+	// Parse FETCH FIRST ... ROW ONLY (SQL standard syntax)
+	if p.currentIs(token.FETCH) {
+		p.nextToken()
+		// Skip FIRST or NEXT
+		if p.currentIs(token.FIRST) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "NEXT") {
+			p.nextToken()
+		}
+		// Parse the limit count
+		if !p.currentIs(token.IDENT) || strings.ToUpper(p.current.Value) != "ROW" {
+			sel.Limit = p.parseExpression(LOWEST)
+		}
+		// Skip ROW/ROWS
+		if p.currentIs(token.IDENT) && (strings.ToUpper(p.current.Value) == "ROW" || strings.ToUpper(p.current.Value) == "ROWS") {
+			p.nextToken()
+		}
+		// Skip ONLY
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ONLY" {
+			p.nextToken()
+		}
+		// Skip WITH TIES
+		if p.currentIs(token.WITH) {
+			p.nextToken()
+			if p.currentIs(token.TIES) {
+				p.nextToken()
+			}
+		}
+	}
+
 	// Parse SETTINGS clause
 	if p.currentIs(token.SETTINGS) {
 		p.nextToken()
@@ -320,10 +348,10 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		}
 	}
 
-	// Parse FORMAT clause
+	// Parse FORMAT clause (format names can be keywords like Null, JSON, etc.)
 	if p.currentIs(token.FORMAT) {
 		p.nextToken()
-		if p.currentIs(token.IDENT) {
+		if p.currentIs(token.IDENT) || p.currentIs(token.NULL) || p.current.Token.IsKeyword() {
 			sel.Format = &ast.Identifier{
 				Position: p.current.Pos,
 				Parts:    []string{p.current.Value},
@@ -578,11 +606,11 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 			expr.Table = p.parseExpression(LOWEST)
 		}
 		p.expect(token.RPAREN)
-	} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+	} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() || p.currentIs(token.NUMBER) {
 		// Table identifier or function (keywords can be table names like "system")
-		ident := p.current.Value
+		// Table names can also start with numbers in ClickHouse
 		pos := p.current.Pos
-		p.nextToken()
+		ident := p.parseIdentifierName()
 
 		if p.currentIs(token.LPAREN) {
 			// Table function
@@ -590,11 +618,7 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 		} else if p.currentIs(token.DOT) {
 			// database.table
 			p.nextToken()
-			tableName := ""
-			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-				tableName = p.current.Value
-				p.nextToken()
-			}
+			tableName := p.parseIdentifierName()
 			expr.Table = &ast.TableIdentifier{
 				Position: pos,
 				Database: ident,
@@ -776,20 +800,25 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 		p.nextToken()
 	}
 
-	// Parse table name
-	if p.currentIs(token.IDENT) {
-		tableName := p.current.Value
+	// Handle INSERT INTO FUNCTION
+	if p.currentIs(token.FUNCTION) {
 		p.nextToken()
-
-		if p.currentIs(token.DOT) {
-			p.nextToken()
-			ins.Database = tableName
-			if p.currentIs(token.IDENT) {
-				ins.Table = p.current.Value
+		// Parse the function call
+		funcName := p.parseIdentifierName()
+		if funcName != "" && p.currentIs(token.LPAREN) {
+			ins.Function = p.parseFunctionCall(funcName, p.current.Pos)
+		}
+	} else {
+		// Parse table name (can start with a number in ClickHouse)
+		tableName := p.parseIdentifierName()
+		if tableName != "" {
+			if p.currentIs(token.DOT) {
 				p.nextToken()
+				ins.Database = tableName
+				ins.Table = p.parseIdentifierName()
+			} else {
+				ins.Table = tableName
 			}
-		} else {
-			ins.Table = tableName
 		}
 	}
 
@@ -821,10 +850,10 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 		ins.Select = p.parseSelectWithUnion()
 	}
 
-	// Parse FORMAT
+	// Parse FORMAT (format names can be keywords like Null, JSON, etc.)
 	if p.currentIs(token.FORMAT) {
 		p.nextToken()
-		if p.currentIs(token.IDENT) {
+		if p.currentIs(token.IDENT) || p.currentIs(token.NULL) || p.current.Token.IsKeyword() {
 			ins.Format = &ast.Identifier{
 				Position: p.current.Pos,
 				Parts:    []string{p.current.Value},
@@ -897,18 +926,13 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 		}
 	}
 
-	// Parse table name
-	if p.currentIs(token.IDENT) {
-		tableName := p.current.Value
-		p.nextToken()
-
+	// Parse table name (can start with a number in ClickHouse)
+	tableName := p.parseIdentifierName()
+	if tableName != "" {
 		if p.currentIs(token.DOT) {
 			p.nextToken()
 			create.Database = tableName
-			if p.currentIs(token.IDENT) {
-				create.Table = p.current.Value
-				p.nextToken()
-			}
+			create.Table = p.parseIdentifierName()
 		} else {
 			create.Table = tableName
 		}
@@ -919,10 +943,7 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 		p.nextToken()
 		if p.currentIs(token.CLUSTER) {
 			p.nextToken()
-			if p.currentIs(token.IDENT) || p.currentIs(token.STRING) {
-				create.OnCluster = p.current.Value
-				p.nextToken()
-			}
+			create.OnCluster = p.parseIdentifierName()
 		}
 	}
 
@@ -1024,21 +1045,15 @@ func (p *Parser) parseCreateDatabase(create *ast.CreateQuery) {
 		}
 	}
 
-	// Parse database name
-	if p.currentIs(token.IDENT) {
-		create.Database = p.current.Value
-		p.nextToken()
-	}
+	// Parse database name (can start with a number in ClickHouse)
+	create.Database = p.parseIdentifierName()
 
 	// Handle ON CLUSTER
 	if p.currentIs(token.ON) {
 		p.nextToken()
 		if p.currentIs(token.CLUSTER) {
 			p.nextToken()
-			if p.currentIs(token.IDENT) || p.currentIs(token.STRING) {
-				create.OnCluster = p.current.Value
-				p.nextToken()
-			}
+			create.OnCluster = p.parseIdentifierName()
 		}
 	}
 
@@ -1065,18 +1080,13 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		}
 	}
 
-	// Parse view name
-	if p.currentIs(token.IDENT) {
-		viewName := p.current.Value
-		p.nextToken()
-
+	// Parse view name (can start with a number in ClickHouse)
+	viewName := p.parseIdentifierName()
+	if viewName != "" {
 		if p.currentIs(token.DOT) {
 			p.nextToken()
 			create.Database = viewName
-			if p.currentIs(token.IDENT) {
-				create.View = p.current.Value
-				p.nextToken()
-			}
+			create.View = p.parseIdentifierName()
 		} else {
 			create.View = viewName
 		}
@@ -1087,20 +1097,14 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		p.nextToken()
 		if p.currentIs(token.CLUSTER) {
 			p.nextToken()
-			if p.currentIs(token.IDENT) || p.currentIs(token.STRING) {
-				create.OnCluster = p.current.Value
-				p.nextToken()
-			}
+			create.OnCluster = p.parseIdentifierName()
 		}
 	}
 
 	// Handle TO (target table for materialized views)
 	if p.currentIs(token.TO) {
 		p.nextToken()
-		if p.currentIs(token.IDENT) {
-			create.To = p.current.Value
-			p.nextToken()
-		}
+		create.To = p.parseIdentifierName()
 	}
 
 	// Parse ENGINE (for materialized views)
@@ -1343,21 +1347,19 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		}
 	}
 
-	// Parse name
-	if p.currentIs(token.IDENT) {
-		name := p.current.Value
-		p.nextToken()
-
+	// Parse name (can start with a number in ClickHouse)
+	name := p.parseIdentifierName()
+	if name != "" {
 		if p.currentIs(token.DOT) {
 			p.nextToken()
 			drop.Database = name
-			if p.currentIs(token.IDENT) {
+			tableName := p.parseIdentifierName()
+			if tableName != "" {
 				if drop.DropDatabase {
-					drop.Database = p.current.Value
+					drop.Database = tableName
 				} else {
-					drop.Table = p.current.Value
+					drop.Table = tableName
 				}
-				p.nextToken()
 			}
 		} else {
 			if dropUser {
@@ -1402,18 +1404,13 @@ func (p *Parser) parseAlter() *ast.AlterQuery {
 		return nil
 	}
 
-	// Parse table name
-	if p.currentIs(token.IDENT) {
-		tableName := p.current.Value
-		p.nextToken()
-
+	// Parse table name (can start with a number in ClickHouse)
+	tableName := p.parseIdentifierName()
+	if tableName != "" {
 		if p.currentIs(token.DOT) {
 			p.nextToken()
 			alter.Database = tableName
-			if p.currentIs(token.IDENT) {
-				alter.Table = p.current.Value
-				p.nextToken()
-			}
+			alter.Table = p.parseIdentifierName()
 		} else {
 			alter.Table = tableName
 		}
@@ -1424,10 +1421,7 @@ func (p *Parser) parseAlter() *ast.AlterQuery {
 		p.nextToken()
 		if p.currentIs(token.CLUSTER) {
 			p.nextToken()
-			if p.currentIs(token.IDENT) || p.currentIs(token.STRING) {
-				alter.OnCluster = p.current.Value
-				p.nextToken()
-			}
+			alter.OnCluster = p.parseIdentifierName()
 		}
 	}
 
@@ -1692,18 +1686,13 @@ func (p *Parser) parseTruncate() *ast.TruncateQuery {
 		}
 	}
 
-	// Parse table name
-	if p.currentIs(token.IDENT) {
-		tableName := p.current.Value
-		p.nextToken()
-
+	// Parse table name (can start with a number in ClickHouse)
+	tableName := p.parseIdentifierName()
+	if tableName != "" {
 		if p.currentIs(token.DOT) {
 			p.nextToken()
 			trunc.Database = tableName
-			if p.currentIs(token.IDENT) {
-				trunc.Table = p.current.Value
-				p.nextToken()
-			}
+			trunc.Table = p.parseIdentifierName()
 		} else {
 			trunc.Table = tableName
 		}
@@ -1714,10 +1703,7 @@ func (p *Parser) parseTruncate() *ast.TruncateQuery {
 		p.nextToken()
 		if p.currentIs(token.CLUSTER) {
 			p.nextToken()
-			if p.currentIs(token.IDENT) || p.currentIs(token.STRING) {
-				trunc.OnCluster = p.current.Value
-				p.nextToken()
-			}
+			trunc.OnCluster = p.parseIdentifierName()
 		}
 	}
 
@@ -1731,11 +1717,8 @@ func (p *Parser) parseUse() *ast.UseQuery {
 
 	p.nextToken() // skip USE
 
-	// Database name can be an identifier or a keyword like DEFAULT
-	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-		use.Database = p.current.Value
-		p.nextToken()
-	}
+	// Database name can be an identifier or a keyword like DEFAULT (can also start with number)
+	use.Database = p.parseIdentifierName()
 
 	return use
 }
@@ -1920,18 +1903,13 @@ func (p *Parser) parseOptimize() *ast.OptimizeQuery {
 		return nil
 	}
 
-	// Parse table name
-	if p.currentIs(token.IDENT) {
-		tableName := p.current.Value
-		p.nextToken()
-
+	// Parse table name (can start with a number in ClickHouse)
+	tableName := p.parseIdentifierName()
+	if tableName != "" {
 		if p.currentIs(token.DOT) {
 			p.nextToken()
 			opt.Database = tableName
-			if p.currentIs(token.IDENT) {
-				opt.Table = p.current.Value
-				p.nextToken()
-			}
+			opt.Table = p.parseIdentifierName()
 		} else {
 			opt.Table = tableName
 		}
@@ -1942,10 +1920,7 @@ func (p *Parser) parseOptimize() *ast.OptimizeQuery {
 		p.nextToken()
 		if p.currentIs(token.CLUSTER) {
 			p.nextToken()
-			if p.currentIs(token.IDENT) || p.currentIs(token.STRING) {
-				opt.OnCluster = p.current.Value
-				p.nextToken()
-			}
+			opt.OnCluster = p.parseIdentifierName()
 		}
 	}
 
@@ -2025,31 +2000,22 @@ func (p *Parser) parseRename() *ast.RenameQuery {
 		return nil
 	}
 
-	// Parse from table name
-	if p.currentIs(token.IDENT) {
-		rename.From = p.current.Value
-		p.nextToken()
-	}
+	// Parse from table name (can start with a number in ClickHouse)
+	rename.From = p.parseIdentifierName()
 
 	if !p.expect(token.TO) {
 		return nil
 	}
 
-	// Parse to table name
-	if p.currentIs(token.IDENT) {
-		rename.To = p.current.Value
-		p.nextToken()
-	}
+	// Parse to table name (can start with a number in ClickHouse)
+	rename.To = p.parseIdentifierName()
 
 	// Handle ON CLUSTER
 	if p.currentIs(token.ON) {
 		p.nextToken()
 		if p.currentIs(token.CLUSTER) {
 			p.nextToken()
-			if p.currentIs(token.IDENT) || p.currentIs(token.STRING) {
-				rename.OnCluster = p.current.Value
-				p.nextToken()
-			}
+			rename.OnCluster = p.parseIdentifierName()
 		}
 	}
 
@@ -2067,31 +2033,22 @@ func (p *Parser) parseExchange() *ast.ExchangeQuery {
 		return nil
 	}
 
-	// Parse first table name
-	if p.currentIs(token.IDENT) {
-		exchange.Table1 = p.current.Value
-		p.nextToken()
-	}
+	// Parse first table name (can start with a number in ClickHouse)
+	exchange.Table1 = p.parseIdentifierName()
 
 	if !p.expect(token.AND) {
 		return nil
 	}
 
-	// Parse second table name
-	if p.currentIs(token.IDENT) {
-		exchange.Table2 = p.current.Value
-		p.nextToken()
-	}
+	// Parse second table name (can start with a number in ClickHouse)
+	exchange.Table2 = p.parseIdentifierName()
 
 	// Handle ON CLUSTER
 	if p.currentIs(token.ON) {
 		p.nextToken()
 		if p.currentIs(token.CLUSTER) {
 			p.nextToken()
-			if p.currentIs(token.IDENT) || p.currentIs(token.STRING) {
-				exchange.OnCluster = p.current.Value
-				p.nextToken()
-			}
+			exchange.OnCluster = p.parseIdentifierName()
 		}
 	}
 
@@ -2177,4 +2134,39 @@ func (p *Parser) parseWindowDefinitions() []*ast.WindowDefinition {
 	}
 
 	return defs
+}
+
+// parseIdentifierName parses an identifier name that may start with a number.
+// In ClickHouse, table and database names can start with digits (e.g., 03657_test).
+// When such names are lexed, they produce NUMBER + IDENT tokens that need to be combined.
+func (p *Parser) parseIdentifierName() string {
+	var name string
+
+	// Handle identifier or keyword used as name
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		name = p.current.Value
+		p.nextToken()
+		return name
+	}
+
+	// Handle name starting with number (e.g., 03657_test)
+	if p.currentIs(token.NUMBER) {
+		name = p.current.Value
+		p.nextToken()
+		// Check if followed by identifier (underscore connects them)
+		if p.currentIs(token.IDENT) {
+			name += p.current.Value
+			p.nextToken()
+		}
+		return name
+	}
+
+	// Handle string (e.g., for cluster names)
+	if p.currentIs(token.STRING) {
+		name = p.current.Value
+		p.nextToken()
+		return name
+	}
+
+	return ""
 }
