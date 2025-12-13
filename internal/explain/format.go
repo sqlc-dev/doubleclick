@@ -11,11 +11,18 @@ import (
 func FormatLiteral(lit *ast.Literal) string {
 	switch lit.Type {
 	case ast.LiteralInteger:
-		val := lit.Value.(int64)
-		if val >= 0 {
+		// Handle both int64 and uint64 values
+		switch val := lit.Value.(type) {
+		case int64:
+			if val >= 0 {
+				return fmt.Sprintf("UInt64_%d", val)
+			}
+			return fmt.Sprintf("Int64_%d", val)
+		case uint64:
 			return fmt.Sprintf("UInt64_%d", val)
+		default:
+			return fmt.Sprintf("UInt64_%v", lit.Value)
 		}
-		return fmt.Sprintf("Int64_%d", val)
 	case ast.LiteralFloat:
 		val := lit.Value.(float64)
 		return fmt.Sprintf("Float64_%v", val)

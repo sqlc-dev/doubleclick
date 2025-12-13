@@ -7,6 +7,35 @@ import (
 	"github.com/kyleconroy/doubleclick/ast"
 )
 
+func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, depth int) {
+	// Count children
+	children := 0
+	if n.Function != nil {
+		children++
+	} else if n.Table != "" {
+		children++ // Table identifier
+	}
+	if n.Select != nil {
+		children++
+	}
+	// Note: InsertQuery uses 3 spaces after name in ClickHouse explain
+	fmt.Fprintf(sb, "%sInsertQuery   (children %d)\n", indent, children)
+
+	if n.Function != nil {
+		Node(sb, n.Function, depth+1)
+	} else if n.Table != "" {
+		name := n.Table
+		if n.Database != "" {
+			name = n.Database + "." + n.Table
+		}
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+	}
+
+	if n.Select != nil {
+		Node(sb, n.Select, depth+1)
+	}
+}
+
 func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, depth int) {
 	name := n.Table
 	if n.View != "" {
@@ -139,6 +168,15 @@ func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent stri
 }
 
 func explainDataType(sb *strings.Builder, n *ast.DataType, indent string, depth int) {
+	// Check if type has nested DataType parameters that should be expanded
+	hasNestedTypes := false
+	for _, p := range n.Parameters {
+		if _, ok := p.(*ast.DataType); ok {
+			hasNestedTypes = true
+			break
+		}
+	}
+
 	// Check if type has complex parameters (expressions, not just literals/types)
 	hasComplexParams := false
 	for _, p := range n.Parameters {
@@ -152,8 +190,8 @@ func explainDataType(sb *strings.Builder, n *ast.DataType, indent string, depth 
 		break
 	}
 
-	if hasComplexParams && len(n.Parameters) > 0 {
-		// Complex parameters need to be output as children
+	if (hasNestedTypes || hasComplexParams) && len(n.Parameters) > 0 {
+		// Nested types and complex parameters need to be output as children
 		fmt.Fprintf(sb, "%sDataType %s (children %d)\n", indent, n.Name, 1)
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Parameters))
 		for _, p := range n.Parameters {

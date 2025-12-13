@@ -206,7 +206,13 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 	case token.EXTRACT:
 		return p.parseExtract()
 	case token.INTERVAL:
-		return p.parseInterval()
+		// INTERVAL can be a literal (INTERVAL 1 DAY) or identifier reference
+		// Check if next token can start an interval value
+		if p.peekIs(token.NUMBER) || p.peekIs(token.LPAREN) || p.peekIs(token.MINUS) || p.peekIs(token.STRING) {
+			return p.parseInterval()
+		}
+		// Otherwise treat as identifier
+		return p.parseKeywordAsIdentifier()
 	case token.EXISTS:
 		return p.parseExists()
 	case token.PARAM:
@@ -230,7 +236,8 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 		if p.peekIs(token.LPAREN) {
 			return p.parseKeywordAsFunction()
 		}
-		return nil
+		// format as identifier (e.g., format='Parquet' in function args)
+		return p.parseKeywordAsIdentifier()
 	default:
 		// Handle other keywords that can be used as function names or identifiers
 		if p.current.Token.IsKeyword() {
@@ -572,10 +579,18 @@ func (p *Parser) parseNumber() ast.Expression {
 			lit.Value = f
 		}
 	} else {
+		// Try signed int64 first
 		i, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
-			lit.Type = ast.LiteralString
-			lit.Value = value
+			// Try unsigned uint64 for large positive numbers
+			u, uerr := strconv.ParseUint(value, 10, 64)
+			if uerr != nil {
+				lit.Type = ast.LiteralString
+				lit.Value = value
+			} else {
+				lit.Type = ast.LiteralInteger
+				lit.Value = u // Store as uint64
+			}
 		} else {
 			lit.Type = ast.LiteralInteger
 			lit.Value = i

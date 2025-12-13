@@ -97,6 +97,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainExtractExpr(sb, n, indent, depth)
 
 	// DDL statements
+	case *ast.InsertQuery:
+		explainInsertQuery(sb, n, indent, depth)
 	case *ast.CreateQuery:
 		explainCreateQuery(sb, n, indent, depth)
 	case *ast.DropQuery:

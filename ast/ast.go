@@ -2,6 +2,9 @@
 package ast
 
 import (
+	"encoding/json"
+	"math"
+
 	"github.com/kyleconroy/doubleclick/token"
 )
 
@@ -588,6 +591,42 @@ type Literal struct {
 func (l *Literal) Pos() token.Position { return l.Position }
 func (l *Literal) End() token.Position { return l.Position }
 func (l *Literal) expressionNode()     {}
+
+// MarshalJSON handles special float values (NaN, +Inf, -Inf) that JSON doesn't support.
+func (l *Literal) MarshalJSON() ([]byte, error) {
+	type literalAlias Literal
+	// Handle special float values
+	if f, ok := l.Value.(float64); ok {
+		if math.IsNaN(f) {
+			return json.Marshal(&struct {
+				*literalAlias
+				Value string `json:"value"`
+			}{
+				literalAlias: (*literalAlias)(l),
+				Value:        "NaN",
+			})
+		}
+		if math.IsInf(f, 1) {
+			return json.Marshal(&struct {
+				*literalAlias
+				Value string `json:"value"`
+			}{
+				literalAlias: (*literalAlias)(l),
+				Value:        "+Inf",
+			})
+		}
+		if math.IsInf(f, -1) {
+			return json.Marshal(&struct {
+				*literalAlias
+				Value string `json:"value"`
+			}{
+				literalAlias: (*literalAlias)(l),
+				Value:        "-Inf",
+			})
+		}
+	}
+	return json.Marshal((*literalAlias)(l))
+}
 
 // LiteralType represents the type of a literal.
 type LiteralType string
