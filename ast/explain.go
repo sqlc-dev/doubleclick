@@ -19,21 +19,33 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 
 	switch n := node.(type) {
 	case *SelectWithUnionQuery:
-		// Check if first select has Format clause
+		// Check if first select has Format or IntoOutfile clause
 		var format *Identifier
+		var intoOutfile *IntoOutfileClause
 		if len(n.Selects) > 0 {
-			if sq, ok := n.Selects[0].(*SelectQuery); ok && sq.Format != nil {
-				format = sq.Format
+			if sq, ok := n.Selects[0].(*SelectQuery); ok {
+				if sq.Format != nil {
+					format = sq.Format
+				}
+				if sq.IntoOutfile != nil {
+					intoOutfile = sq.IntoOutfile
+				}
 			}
 		}
 		unionChildren := 1 // ExpressionList
 		if format != nil {
 			unionChildren++
 		}
+		if intoOutfile != nil {
+			unionChildren++
+		}
 		fmt.Fprintf(b, "%sSelectWithUnionQuery (children %d)\n", indent, unionChildren)
 		fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(n.Selects))
 		for _, sel := range n.Selects {
 			explainNode(b, sel, depth+2)
+		}
+		if intoOutfile != nil {
+			fmt.Fprintf(b, "%s Literal \\'%s\\'\n", indent, intoOutfile.Filename)
 		}
 		if format != nil {
 			fmt.Fprintf(b, "%s Identifier %s\n", indent, format.Name())
@@ -59,6 +71,10 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		// From (with ArrayJoin integrated)
 		if n.From != nil || n.ArrayJoin != nil {
 			explainTablesWithArrayJoin(b, n.From, n.ArrayJoin, depth+1)
+		}
+		// PreWhere
+		if n.PreWhere != nil {
+			explainNode(b, n.PreWhere, depth+1)
 		}
 		// Where
 		if n.Where != nil {
@@ -94,14 +110,22 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		if len(n.Settings) > 0 {
 			fmt.Fprintf(b, "%s Set\n", indent)
 		}
+		// Window clause (WINDOW w AS ...)
+		if len(n.Window) > 0 {
+			fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(n.Window))
+			for range n.Window {
+				fmt.Fprintf(b, "%s  WindowListElement\n", indent)
+			}
+		}
 
 	case *TablesInSelectQuery:
 		fmt.Fprintf(b, "%sTablesInSelectQuery (children %d)\n", indent, len(n.Tables))
-		for _, table := range n.Tables {
-			explainNode(b, table, depth+1)
+		for i, table := range n.Tables {
+			explainTablesInSelectQueryElement(b, table, i > 0, depth+1)
 		}
 
 	case *TablesInSelectQueryElement:
+		// This case is kept for direct calls, but TablesInSelectQuery uses the specialized function
 		children := 0
 		if n.Table != nil {
 			children++
@@ -119,9 +143,18 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 
 	case *TableExpression:
 		children := 1
+		if n.Sample != nil {
+			children++ // SampleRatio for ratio
+			if n.Sample.Offset != nil {
+				children++ // SampleRatio for offset
+			}
+		}
 		fmt.Fprintf(b, "%sTableExpression (children %d)\n", indent, children)
 		// Pass alias to the inner Table
 		explainTableWithAlias(b, n.Table, n.Alias, depth+1)
+		if n.Sample != nil {
+			explainSampleClause(b, n.Sample, depth+1)
+		}
 
 	case *TableIdentifier:
 		name := n.Table
@@ -154,6 +187,27 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 				fmt.Fprintf(b, "%sFunction array (children 1)\n", indent)
 				fmt.Fprintf(b, "%s ExpressionList\n", indent)
 				return
+			}
+		}
+		// Tuple containing expressions should be output as Function tuple
+		if n.Type == LiteralTuple {
+			if exprs, ok := n.Value.([]Expression); ok && len(exprs) > 0 {
+				// Check if any element is not a simple literal
+				hasNonLiteral := false
+				for _, e := range exprs {
+					if _, isLit := e.(*Literal); !isLit {
+						hasNonLiteral = true
+						break
+					}
+				}
+				if hasNonLiteral {
+					fmt.Fprintf(b, "%sFunction tuple (children 1)\n", indent)
+					fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(exprs))
+					for _, e := range exprs {
+						explainNode(b, e, depth+2)
+					}
+					return
+				}
 			}
 		}
 		explainLiteral(b, n, "", depth)
@@ -207,7 +261,12 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 				fmt.Fprintf(b, "%s  ColumnsReplaceTransformer (children %d)\n", indent, len(n.Replace))
 				for _, r := range n.Replace {
 					fmt.Fprintf(b, "%s   ColumnsReplaceTransformer::Replacement (children 1)\n", indent)
-					explainNode(b, r.Expr, depth+4)
+					// Unwrap AliasedExpr if present - REPLACE doesn't output alias on expression
+					expr := r.Expr
+					if ae, ok := expr.(*AliasedExpr); ok {
+						expr = ae.Expr
+					}
+					explainNode(b, expr, depth+4)
 				}
 			}
 		} else if n.Table != "" {
@@ -303,11 +362,12 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 
 	case *LikeExpr:
 		funcName := "like"
-		if n.CaseInsensitive {
+		if n.Not && n.CaseInsensitive {
+			funcName = "notILike"
+		} else if n.CaseInsensitive {
 			funcName = "ilike"
-		}
-		if n.Not {
-			funcName = "not" + strings.Title(funcName)
+		} else if n.Not {
+			funcName = "notLike"
 		}
 		fmt.Fprintf(b, "%sFunction %s (children 1)\n", indent, funcName)
 		fmt.Fprintf(b, "%s ExpressionList (children 2)\n", indent)
@@ -449,14 +509,46 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		}
 
 	case *SystemQuery:
-		fmt.Fprintf(b, "%sSYSTEM query\n", indent)
+		children := 0
+		if n.Database != "" {
+			children++
+		}
+		if n.Table != "" {
+			children++
+		}
+		if children > 0 {
+			fmt.Fprintf(b, "%sSYSTEM query (children %d)\n", indent, children)
+			if n.Database != "" {
+				fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Database)
+			}
+			if n.Table != "" {
+				fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Table)
+			}
+		} else {
+			fmt.Fprintf(b, "%sSYSTEM query\n", indent)
+		}
 
 	case *OptimizeQuery:
 		tableName := n.Table
 		if n.Database != "" {
 			tableName = n.Database + "." + tableName
 		}
-		fmt.Fprintf(b, "%sOptimizeQuery %s (children 1)\n", indent, tableName)
+		// Add suffix based on flags
+		displayName := tableName
+		if n.Final {
+			displayName = tableName + "_final"
+		} else if n.Dedupe {
+			displayName = tableName + "_deduplicate"
+		}
+		children := 1 // identifier
+		if n.Partition != nil {
+			children++
+		}
+		fmt.Fprintf(b, "%sOptimizeQuery  %s (children %d)\n", indent, displayName, children)
+		if n.Partition != nil {
+			fmt.Fprintf(b, "%s Partition (children 1)\n", indent)
+			explainNode(b, n.Partition, depth+2)
+		}
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, tableName)
 
 	case *DescribeQuery:
@@ -469,16 +561,50 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		fmt.Fprintf(b, "%s  TableIdentifier %s\n", indent, tableName)
 
 	case *ShowQuery:
-		fmt.Fprintf(b, "%sShowQuery %s\n", indent, n.ShowType)
-
-	case *SetQuery:
-		fmt.Fprintf(b, "%sSetQuery (children %d)\n", indent, len(n.Settings))
-		for _, s := range n.Settings {
-			fmt.Fprintf(b, "%s SettingExpr %s\n", indent, s.Name)
+		// Handle SHOW CREATE specially
+		if n.ShowType == ShowCreate || n.ShowType == ShowCreateDB {
+			if n.ShowType == ShowCreate {
+				// SHOW CREATE TABLE
+				tableName := n.From
+				if n.Database != "" && tableName != "" {
+					fmt.Fprintf(b, "%sShowCreateTableQuery %s %s (children 2)\n", indent, n.Database, tableName)
+					fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Database)
+					fmt.Fprintf(b, "%s Identifier %s\n", indent, tableName)
+				} else if tableName != "" {
+					fmt.Fprintf(b, "%sShowCreateTableQuery %s (children 1)\n", indent, tableName)
+					fmt.Fprintf(b, "%s Identifier %s\n", indent, tableName)
+				} else {
+					fmt.Fprintf(b, "%sShowCreate\n", indent)
+				}
+			} else {
+				// SHOW CREATE DATABASE - database name is in From field
+				dbName := n.From
+				fmt.Fprintf(b, "%sShowCreateDatabaseQuery %s  (children 1)\n", indent, dbName)
+				fmt.Fprintf(b, "%s Identifier %s\n", indent, dbName)
+			}
+		} else if n.ShowType == ShowProcesses {
+			fmt.Fprintf(b, "%sShowProcesslistQuery\n", indent)
+		} else if n.ShowType == ShowColumns {
+			// SHOW COLUMNS doesn't output table name in children
+			fmt.Fprintf(b, "%sShowColumns\n", indent)
+		} else if n.ShowType == ShowTables && (n.From != "" || n.Database != "") {
+			// SHOW TABLES FROM database
+			dbName := n.From
+			if dbName == "" {
+				dbName = n.Database
+			}
+			fmt.Fprintf(b, "%sShowTables (children 1)\n", indent)
+			fmt.Fprintf(b, "%s Identifier %s\n", indent, dbName)
+		} else {
+			showName := showTypeToName(n.ShowType)
+			fmt.Fprintf(b, "%s%s\n", indent, showName)
 		}
 
+	case *SetQuery:
+		fmt.Fprintf(b, "%sSet\n", indent)
+
 	case *RenameQuery:
-		fmt.Fprintf(b, "%sRenameQuery (children 2)\n", indent)
+		fmt.Fprintf(b, "%sRename (children 2)\n", indent)
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.From)
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.To)
 
@@ -488,12 +614,7 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Table2)
 
 	case *ExplainQuery:
-		explainType := string(n.ExplainType)
-		if explainType == "" {
-			explainType = "EXPLAIN"
-		} else {
-			explainType = "EXPLAIN " + explainType
-		}
+		explainType := normalizeExplainType(string(n.ExplainType))
 		fmt.Fprintf(b, "%sExplain %s (children 1)\n", indent, explainType)
 		explainNode(b, n.Statement, depth+1)
 
@@ -564,6 +685,20 @@ func explainNodeWithAlias(b *strings.Builder, node interface{}, alias string, de
 
 	case *FunctionCall:
 		explainFunctionCallWithAlias(b, n, alias, depth)
+
+	case *BinaryExpr:
+		funcName := binaryOpToFunction(n.Op)
+		args := []Expression{n.Left, n.Right}
+		if alias != "" {
+			fmt.Fprintf(b, "%sFunction %s (alias %s) (children 1)\n", indent, funcName, alias)
+		} else {
+			fmt.Fprintf(b, "%sFunction %s (children 1)\n", indent, funcName)
+		}
+		fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(args))
+		for _, arg := range args {
+			explainNode(b, arg, depth+2)
+		}
+		return
 
 	default:
 		// Fall back to regular node printing
@@ -754,10 +889,17 @@ func explainFunctionCallWithAlias(b *strings.Builder, fn *FunctionCall, alias st
 		name = name + "Distinct"
 	}
 
-	// Count children: always 1 for ExpressionList, plus 1 for window spec if present
-	// ClickHouse always shows (children 1) with ExpressionList even for empty arg functions
-	children := 1 // Always have ExpressionList
-	if fn.Over != nil {
+	// Count children:
+	// - 1 for arguments ExpressionList
+	// - 1 for parameters ExpressionList if present (parametric aggregate functions)
+	// - 1 for window spec if present (but not for named windows, which are output separately)
+	children := 1 // Always have arguments ExpressionList
+	if len(fn.Parameters) > 0 {
+		children++
+	}
+	// Only count window spec for inline windows, not named windows (OVER w)
+	hasInlineWindow := fn.Over != nil && fn.Over.Name == ""
+	if hasInlineWindow {
 		children++
 	}
 
@@ -768,11 +910,10 @@ func explainFunctionCallWithAlias(b *strings.Builder, fn *FunctionCall, alias st
 
 	fmt.Fprintf(b, "%sFunction %s%s (children %d)\n", indent, name, aliasSuffix, children)
 
-	// Combine parameters and arguments
-	allArgs := append(fn.Parameters, fn.Arguments...)
-	if len(allArgs) > 0 {
-		fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(allArgs))
-		for _, arg := range allArgs {
+	// Arguments (first ExpressionList)
+	if len(fn.Arguments) > 0 {
+		fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(fn.Arguments))
+		for _, arg := range fn.Arguments {
 			explainNode(b, arg, depth+2)
 		}
 	} else {
@@ -780,8 +921,16 @@ func explainFunctionCallWithAlias(b *strings.Builder, fn *FunctionCall, alias st
 		fmt.Fprintf(b, "%s ExpressionList\n", indent)
 	}
 
-	// Window specification
-	if fn.Over != nil {
+	// Parameters (second ExpressionList, for parametric aggregate functions like quantile(0.9))
+	if len(fn.Parameters) > 0 {
+		fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(fn.Parameters))
+		for _, param := range fn.Parameters {
+			explainNode(b, param, depth+2)
+		}
+	}
+
+	// Window specification (only for inline windows, not named windows)
+	if hasInlineWindow {
 		explainWindowSpec(b, fn.Over, depth+1)
 	}
 }
@@ -1003,6 +1152,9 @@ func countSelectQueryChildren(s *SelectQuery) int {
 	if s.From != nil || s.ArrayJoin != nil {
 		count++
 	}
+	if s.PreWhere != nil {
+		count++
+	}
 	if s.Where != nil {
 		count++
 	}
@@ -1024,6 +1176,9 @@ func countSelectQueryChildren(s *SelectQuery) int {
 	if len(s.Settings) > 0 {
 		count++
 	}
+	if len(s.Window) > 0 {
+		count++
+	}
 	return count
 }
 
@@ -1042,8 +1197,8 @@ func explainTablesWithArrayJoin(b *strings.Builder, from *TablesInSelectQuery, a
 	fmt.Fprintf(b, "%sTablesInSelectQuery (children %d)\n", indent, tableCount)
 
 	if from != nil {
-		for _, table := range from.Tables {
-			explainNode(b, table, depth+1)
+		for i, table := range from.Tables {
+			explainTablesInSelectQueryElement(b, table, i > 0, depth+1)
 		}
 	}
 
@@ -1079,6 +1234,8 @@ func binaryOpToFunction(op string) string {
 		return "greater"
 	case ">=":
 		return "greaterOrEquals"
+	case "<=>":
+		return "isNotDistinctFrom"
 	case "AND":
 		return "and"
 	case "OR":
@@ -1143,6 +1300,10 @@ func normalizeAlterCommandType(t AlterCommandType) string {
 	switch t {
 	case AlterFreeze:
 		return "FREEZE_ALL"
+	case AlterDetachPartition:
+		return "DROP_PARTITION"
+	case AlterClearIndex:
+		return "DROP_INDEX"
 	default:
 		return string(t)
 	}
@@ -1157,6 +1318,9 @@ func explainAlterCommand(b *strings.Builder, cmd *AlterCommand, depth int) {
 		children++
 	}
 	if cmd.ColumnName != "" && cmd.Type != AlterAddColumn && cmd.Type != AlterModifyColumn {
+		children++
+	}
+	if cmd.NewName != "" {
 		children++
 	}
 	if cmd.AfterColumn != "" {
@@ -1178,6 +1342,9 @@ func explainAlterCommand(b *strings.Builder, cmd *AlterCommand, depth int) {
 	if cmd.ConstraintName != "" && cmd.Type != AlterAddConstraint {
 		children++
 	}
+	if cmd.TTL != nil {
+		children++
+	}
 
 	cmdType := normalizeAlterCommandType(cmd.Type)
 	if children > 0 {
@@ -1191,6 +1358,9 @@ func explainAlterCommand(b *strings.Builder, cmd *AlterCommand, depth int) {
 	}
 	if cmd.ColumnName != "" && cmd.Type != AlterAddColumn && cmd.Type != AlterModifyColumn {
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, cmd.ColumnName)
+	}
+	if cmd.NewName != "" {
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, cmd.NewName)
 	}
 	if cmd.AfterColumn != "" {
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, cmd.AfterColumn)
@@ -1217,6 +1387,11 @@ func explainAlterCommand(b *strings.Builder, cmd *AlterCommand, depth int) {
 	if cmd.ConstraintName != "" && cmd.Type != AlterAddConstraint {
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, cmd.ConstraintName)
 	}
+	if cmd.TTL != nil {
+		fmt.Fprintf(b, "%s ExpressionList (children 1)\n", indent)
+		fmt.Fprintf(b, "%s  TTLElement (children 1)\n", indent)
+		explainNode(b, cmd.TTL.Expression, depth+3)
+	}
 }
 
 // explainColumnDeclaration formats a column declaration.
@@ -1233,10 +1408,16 @@ func explainColumnDeclaration(b *strings.Builder, col *ColumnDeclaration, depth 
 	if col.Codec != nil {
 		children++
 	}
+	if col.Comment != "" {
+		children++
+	}
 
 	fmt.Fprintf(b, "%sColumnDeclaration %s (children %d)\n", indent, col.Name, children)
 	if col.Type != nil {
 		fmt.Fprintf(b, "%s DataType %s\n", indent, col.Type.Name)
+	}
+	if col.Comment != "" {
+		fmt.Fprintf(b, "%s Literal \\'%s\\'\n", indent, col.Comment)
 	}
 	if col.Default != nil {
 		explainNode(b, col.Default, depth+1)
@@ -1402,6 +1583,119 @@ func explainCreateQuery(b *strings.Builder, n *CreateQuery, depth int) {
 	if n.AsSelect != nil {
 		explainNode(b, n.AsSelect, depth+1)
 	}
+}
+
+// explainTablesInSelectQueryElement formats a table element with optional implicit join.
+func explainTablesInSelectQueryElement(b *strings.Builder, elem *TablesInSelectQueryElement, isImplicitJoin bool, depth int) {
+	indent := strings.Repeat(" ", depth)
+
+	children := 0
+	if elem.Table != nil {
+		children++
+	}
+	if elem.Join != nil {
+		children++
+	} else if isImplicitJoin {
+		// For implicit cross joins (comma-separated tables), add an empty TableJoin
+		children++
+	}
+
+	fmt.Fprintf(b, "%sTablesInSelectQueryElement (children %d)\n", indent, children)
+	if elem.Table != nil {
+		explainNode(b, elem.Table, depth+1)
+	}
+	if elem.Join != nil {
+		explainTableJoin(b, elem.Join, depth+1)
+	} else if isImplicitJoin {
+		// Output empty TableJoin for implicit cross join
+		fmt.Fprintf(b, "%s TableJoin\n", indent)
+	}
+}
+
+// explainSampleClause formats a SAMPLE clause.
+func explainSampleClause(b *strings.Builder, sample *SampleClause, depth int) {
+	indent := strings.Repeat(" ", depth)
+	fmt.Fprintf(b, "%sSampleRatio %s\n", indent, formatSampleRatio(sample.Ratio))
+	if sample.Offset != nil {
+		fmt.Fprintf(b, "%sSampleRatio %s\n", indent, formatSampleRatio(sample.Offset))
+	}
+}
+
+// formatSampleRatio formats a sample ratio expression.
+func formatSampleRatio(expr Expression) string {
+	switch e := expr.(type) {
+	case *Literal:
+		if e.Type == LiteralInteger {
+			return fmt.Sprintf("%v", e.Value)
+		}
+		if e.Type == LiteralFloat {
+			// Convert float to fraction
+			return floatToFraction(e.Value.(float64))
+		}
+		return fmt.Sprintf("%v", e.Value)
+	case *BinaryExpr:
+		// For division, format as "numerator / denominator"
+		if e.Op == "/" {
+			left := formatSampleRatio(e.Left)
+			right := formatSampleRatio(e.Right)
+			return fmt.Sprintf("%s / %s", left, right)
+		}
+	}
+	return fmt.Sprintf("%v", expr)
+}
+
+// normalizeExplainType normalizes EXPLAIN type for output.
+func normalizeExplainType(t string) string {
+	switch strings.ToUpper(t) {
+	case "", "PLAN":
+		return "EXPLAIN"
+	case "AST":
+		return "EXPLAIN AST"
+	case "SYNTAX":
+		return "EXPLAIN SYNTAX"
+	case "PIPELINE":
+		return "EXPLAIN PIPELINE"
+	default:
+		return "EXPLAIN " + t
+	}
+}
+
+// showTypeToName maps ShowType to EXPLAIN AST output name.
+func showTypeToName(t ShowType) string {
+	switch t {
+	case ShowTables:
+		return "ShowTables"
+	case ShowDatabases:
+		return "ShowTables"
+	case ShowProcesses:
+		return "ShowProcessList"
+	case ShowCreate:
+		return "ShowCreate"
+	case ShowCreateDB:
+		return "ShowCreate"
+	case ShowColumns:
+		return "ShowColumns"
+	case ShowDictionaries:
+		return "ShowTables"
+	default:
+		return "ShowTables"
+	}
+}
+
+// floatToFraction converts a float to a fraction string.
+func floatToFraction(f float64) string {
+	// Handle common fractions
+	if f == 0.1 {
+		return "1 / 10"
+	}
+	if f == 0.5 {
+		return "5 / 10"
+	}
+	if f == 0.25 {
+		return "25 / 100"
+	}
+	// For other floats, just return as is for now
+	return fmt.Sprintf("%v", f)
 }
 
 // explainCreateView formats a CREATE VIEW or MATERIALIZED VIEW query.
