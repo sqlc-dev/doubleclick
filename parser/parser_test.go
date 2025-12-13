@@ -63,13 +63,15 @@ func TestParser(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 			defer cancel()
 
-			// Read the query
+			// Read the query (only first line, as ast.json was generated from first statement)
 			queryPath := filepath.Join(testDir, "query.sql")
 			queryBytes, err := os.ReadFile(queryPath)
 			if err != nil {
 				t.Fatalf("Failed to read query.sql: %v", err)
 			}
-			query := strings.TrimSpace(string(queryBytes))
+			// Get first line only (ast.json contains AST for first statement)
+			lines := strings.SplitN(string(queryBytes), "\n", 2)
+			query := strings.TrimSpace(lines[0])
 
 			// Read optional metadata
 			var metadata testMetadata
