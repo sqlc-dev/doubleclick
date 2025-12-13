@@ -29,6 +29,13 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 	case *SelectQuery:
 		children := countSelectQueryChildren(n)
 		fmt.Fprintf(b, "%sSelectQuery (children %d)\n", indent, children)
+		// WITH clause (comes first)
+		if len(n.With) > 0 {
+			fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(n.With))
+			for _, w := range n.With {
+				explainNode(b, w, depth+2)
+			}
+		}
 		// Columns
 		if len(n.Columns) > 0 {
 			fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(n.Columns))
@@ -300,9 +307,15 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		explainNodeWithAlias(b, n.Expr, n.Alias, depth)
 
 	case *WithElement:
-		fmt.Fprintf(b, "%sWithElement (children 1)\n", indent)
-		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Name)
-		explainNode(b, n.Query, depth+1)
+		// For scalar WITH (WITH 1 AS x), output the expression with alias
+		// For subquery WITH (WITH x AS (SELECT 1)), output as WithElement
+		if _, isSubquery := n.Query.(*Subquery); isSubquery {
+			fmt.Fprintf(b, "%sWithElement (children 1)\n", indent)
+			explainNode(b, n.Query, depth+1)
+		} else {
+			// Scalar expression - output with alias
+			explainNodeWithAlias(b, n.Query, n.Name, depth)
+		}
 
 	case *ExistsExpr:
 		fmt.Fprintf(b, "%sFunction exists (children 1)\n", indent)
@@ -320,6 +333,102 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		} else {
 			fmt.Fprintf(b, "%sIdentifier %s\n", indent, n.Name)
 		}
+
+	// Non-SELECT statements
+	case *UseQuery:
+		fmt.Fprintf(b, "%sUseQuery %s (children 1)\n", indent, n.Database)
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Database)
+
+	case *TruncateQuery:
+		tableName := n.Table
+		if n.Database != "" {
+			tableName = n.Database + "." + tableName
+		}
+		fmt.Fprintf(b, "%sTruncateQuery %s (children 1)\n", indent, tableName)
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, tableName)
+
+	case *AlterQuery:
+		tableName := n.Table
+		if n.Database != "" {
+			tableName = n.Database + "." + tableName
+		}
+		fmt.Fprintf(b, "%sAlterQuery  %s (children 2)\n", indent, tableName)
+		fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(n.Commands))
+		for _, cmd := range n.Commands {
+			explainAlterCommand(b, cmd, depth+2)
+		}
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, tableName)
+
+	case *DropQuery:
+		var name string
+		if n.DropDatabase {
+			name = n.Database
+		} else if n.View != "" {
+			name = n.View
+		} else {
+			name = n.Table
+		}
+		if n.Database != "" && !n.DropDatabase {
+			name = n.Database + "." + name
+		}
+		fmt.Fprintf(b, "%sDropQuery %s (children 1)\n", indent, name)
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, name)
+
+	case *CreateQuery:
+		explainCreateQuery(b, n, depth)
+
+	case *InsertQuery:
+		tableName := n.Table
+		if n.Database != "" {
+			tableName = n.Database + "." + tableName
+		}
+		children := 1
+		if n.Select != nil {
+			children++
+		}
+		fmt.Fprintf(b, "%sInsertQuery %s (children %d)\n", indent, tableName, children)
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, tableName)
+		if n.Select != nil {
+			explainNode(b, n.Select, depth+1)
+		}
+
+	case *SystemQuery:
+		fmt.Fprintf(b, "%sSystemQuery %s\n", indent, n.Command)
+
+	case *OptimizeQuery:
+		tableName := n.Table
+		if n.Database != "" {
+			tableName = n.Database + "." + tableName
+		}
+		fmt.Fprintf(b, "%sOptimizeQuery %s (children 1)\n", indent, tableName)
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, tableName)
+
+	case *DescribeQuery:
+		tableName := n.Table
+		if n.Database != "" {
+			tableName = n.Database + "." + tableName
+		}
+		fmt.Fprintf(b, "%sDescribeQuery %s (children 1)\n", indent, tableName)
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, tableName)
+
+	case *ShowQuery:
+		fmt.Fprintf(b, "%sShowQuery %s\n", indent, n.ShowType)
+
+	case *SetQuery:
+		fmt.Fprintf(b, "%sSetQuery (children %d)\n", indent, len(n.Settings))
+		for _, s := range n.Settings {
+			fmt.Fprintf(b, "%s SettingExpr %s\n", indent, s.Name)
+		}
+
+	case *RenameQuery:
+		fmt.Fprintf(b, "%sRenameQuery (children 2)\n", indent)
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.From)
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.To)
+
+	case *ExchangeQuery:
+		fmt.Fprintf(b, "%sExchangeQuery (children 2)\n", indent)
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Table1)
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Table2)
 
 	default:
 		// For unknown types, just print the type name
@@ -409,9 +518,9 @@ func explainLiteral(b *strings.Builder, lit *Literal, alias string, depth int) {
 		valueStr = fmt.Sprintf("Float64_%v", lit.Value)
 	case LiteralBoolean:
 		if lit.Value.(bool) {
-			valueStr = "UInt8_1"
+			valueStr = "Bool_1"
 		} else {
-			valueStr = "UInt8_0"
+			valueStr = "Bool_0"
 		}
 	case LiteralNull:
 		valueStr = "NULL"
@@ -498,16 +607,16 @@ func explainInListAsTuple(b *strings.Builder, list []Expression, depth int) {
 func formatLiteralElement(elem interface{}) string {
 	switch e := elem.(type) {
 	case string:
-		return fmt.Sprintf("'%s'", e)
+		return fmt.Sprintf("\\'%s\\'", e)
 	case int, int64, uint64:
 		return fmt.Sprintf("UInt64_%v", e)
 	case float64:
 		return fmt.Sprintf("Float64_%v", e)
 	case bool:
 		if e {
-			return "UInt8_1"
+			return "Bool_1"
 		}
-		return "UInt8_0"
+		return "Bool_0"
 	default:
 		return fmt.Sprintf("%v", e)
 	}
@@ -559,13 +668,22 @@ func explainFunctionCallWithAlias(b *strings.Builder, fn *FunctionCall, alias st
 func explainWindowSpec(b *strings.Builder, spec *WindowSpec, depth int) {
 	indent := strings.Repeat(" ", depth)
 
-	// Count children: partition by + order by
+	// Count children: partition by + order by + frame bounds
 	children := 0
 	if len(spec.PartitionBy) > 0 {
 		children++
 	}
 	if len(spec.OrderBy) > 0 {
 		children++
+	}
+	// Count frame bound children
+	if spec.Frame != nil {
+		if spec.Frame.StartBound != nil && spec.Frame.StartBound.Offset != nil {
+			children++
+		}
+		if spec.Frame.EndBound != nil && spec.Frame.EndBound.Offset != nil {
+			children++
+		}
 	}
 
 	if children > 0 {
@@ -587,6 +705,16 @@ func explainWindowSpec(b *strings.Builder, spec *WindowSpec, depth int) {
 		fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(spec.OrderBy))
 		for _, elem := range spec.OrderBy {
 			explainOrderByElement(b, elem, depth+2)
+		}
+	}
+
+	// Frame bounds
+	if spec.Frame != nil {
+		if spec.Frame.StartBound != nil && spec.Frame.StartBound.Offset != nil {
+			explainNode(b, spec.Frame.StartBound.Offset, depth+1)
+		}
+		if spec.Frame.EndBound != nil && spec.Frame.EndBound.Offset != nil {
+			explainNode(b, spec.Frame.EndBound.Offset, depth+1)
 		}
 	}
 }
@@ -734,6 +862,9 @@ func explainLambda(b *strings.Builder, l *Lambda, depth int) {
 // countSelectQueryChildren counts the non-nil children of a SelectQuery.
 func countSelectQueryChildren(s *SelectQuery) int {
 	count := 0
+	if len(s.With) > 0 {
+		count++
+	}
 	if len(s.Columns) > 0 {
 		count++
 	}
@@ -870,5 +1001,159 @@ func extractFieldToFunction(field string) string {
 		return "toSecond"
 	default:
 		return "to" + strings.Title(strings.ToLower(field))
+	}
+}
+
+// explainAlterCommand formats an ALTER command.
+func explainAlterCommand(b *strings.Builder, cmd *AlterCommand, depth int) {
+	indent := strings.Repeat(" ", depth)
+
+	children := 0
+	if cmd.Column != nil {
+		children++
+	}
+	if cmd.ColumnName != "" && cmd.Type != AlterAddColumn && cmd.Type != AlterModifyColumn {
+		children++
+	}
+	if cmd.AfterColumn != "" {
+		children++
+	}
+	if cmd.Constraint != nil {
+		children++
+	}
+	if cmd.IndexExpr != nil {
+		children++
+	}
+
+	if children > 0 {
+		fmt.Fprintf(b, "%sAlterCommand %s (children %d)\n", indent, cmd.Type, children)
+	} else {
+		fmt.Fprintf(b, "%sAlterCommand %s\n", indent, cmd.Type)
+	}
+
+	if cmd.Column != nil {
+		explainColumnDeclaration(b, cmd.Column, depth+1)
+	}
+	if cmd.ColumnName != "" && cmd.Type != AlterAddColumn && cmd.Type != AlterModifyColumn {
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, cmd.ColumnName)
+	}
+	if cmd.AfterColumn != "" {
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, cmd.AfterColumn)
+	}
+	if cmd.Constraint != nil {
+		explainConstraint(b, cmd.Constraint, depth+1)
+	}
+	if cmd.IndexExpr != nil {
+		fmt.Fprintf(b, "%s Index (children 2)\n", indent)
+		explainNode(b, cmd.IndexExpr, depth+2)
+		if cmd.IndexType != "" {
+			fmt.Fprintf(b, "%s  Function %s (children 1)\n", indent, cmd.IndexType)
+			fmt.Fprintf(b, "%s   ExpressionList\n", indent)
+		}
+	}
+}
+
+// explainColumnDeclaration formats a column declaration.
+func explainColumnDeclaration(b *strings.Builder, col *ColumnDeclaration, depth int) {
+	indent := strings.Repeat(" ", depth)
+
+	children := 0
+	if col.Type != nil {
+		children++
+	}
+	if col.Default != nil {
+		children++
+	}
+
+	fmt.Fprintf(b, "%sColumnDeclaration %s (children %d)\n", indent, col.Name, children)
+	if col.Type != nil {
+		fmt.Fprintf(b, "%s DataType %s\n", indent, col.Type.Name)
+	}
+	if col.Default != nil {
+		explainNode(b, col.Default, depth+1)
+	}
+}
+
+// explainConstraint formats a constraint.
+func explainConstraint(b *strings.Builder, c *Constraint, depth int) {
+	indent := strings.Repeat(" ", depth)
+	fmt.Fprintf(b, "%sConstraint (children 1)\n", indent)
+	explainNode(b, c.Expression, depth+1)
+}
+
+// explainCreateQuery formats a CREATE query.
+func explainCreateQuery(b *strings.Builder, n *CreateQuery, depth int) {
+	indent := strings.Repeat(" ", depth)
+
+	if n.CreateDatabase {
+		fmt.Fprintf(b, "%sCreateQuery %s  (children 1)\n", indent, n.Database)
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Database)
+		return
+	}
+
+	var name string
+	if n.View != "" {
+		name = n.View
+	} else {
+		name = n.Table
+	}
+	if n.Database != "" {
+		name = n.Database + "." + name
+	}
+
+	children := 1 // identifier
+	if len(n.Columns) > 0 {
+		children++
+	}
+	if n.Engine != nil || len(n.OrderBy) > 0 {
+		children++
+	}
+	if n.AsSelect != nil {
+		children++
+	}
+
+	fmt.Fprintf(b, "%sCreateQuery %s (children %d)\n", indent, name, children)
+	fmt.Fprintf(b, "%s Identifier %s\n", indent, name)
+
+	if len(n.Columns) > 0 {
+		fmt.Fprintf(b, "%s Columns definition (children 1)\n", indent)
+		fmt.Fprintf(b, "%s  ExpressionList (children %d)\n", indent, len(n.Columns))
+		for _, col := range n.Columns {
+			explainColumnDeclaration(b, col, depth+3)
+		}
+	}
+
+	if n.Engine != nil || len(n.OrderBy) > 0 {
+		storageChildren := 0
+		if n.Engine != nil {
+			storageChildren++
+		}
+		if len(n.OrderBy) > 0 {
+			storageChildren++
+		}
+		fmt.Fprintf(b, "%s Storage definition (children %d)\n", indent, storageChildren)
+		if n.Engine != nil {
+			fmt.Fprintf(b, "%s  Function %s (children 1)\n", indent, n.Engine.Name)
+			fmt.Fprintf(b, "%s   ExpressionList\n", indent)
+		}
+		if len(n.OrderBy) > 0 {
+			// For simple ORDER BY, just output the identifier
+			if len(n.OrderBy) == 1 {
+				if id, ok := n.OrderBy[0].(*Identifier); ok {
+					fmt.Fprintf(b, "%s  Identifier %s\n", indent, id.Name())
+				} else {
+					explainNode(b, n.OrderBy[0], depth+2)
+				}
+			} else {
+				fmt.Fprintf(b, "%s  ExpressionList (children %d)\n", indent, len(n.OrderBy))
+				for _, expr := range n.OrderBy {
+					explainNode(b, expr, depth+3)
+				}
+			}
+		}
+	}
+
+	if n.AsSelect != nil {
+		explainNode(b, n.AsSelect, depth+1)
 	}
 }
