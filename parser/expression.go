@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"math"
 	"strconv"
 	"strings"
 
@@ -100,6 +101,34 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 	return exprs
 }
 
+// parseFunctionArgumentList parses arguments for function calls, stopping at SETTINGS
+func (p *Parser) parseFunctionArgumentList() []ast.Expression {
+	var exprs []ast.Expression
+
+	if p.currentIs(token.RPAREN) || p.currentIs(token.EOF) || p.currentIs(token.SETTINGS) {
+		return exprs
+	}
+
+	expr := p.parseExpression(LOWEST)
+	if expr != nil {
+		exprs = append(exprs, expr)
+	}
+
+	for p.currentIs(token.COMMA) {
+		p.nextToken()
+		// Stop if we hit SETTINGS
+		if p.currentIs(token.SETTINGS) {
+			break
+		}
+		expr := p.parseExpression(LOWEST)
+		if expr != nil {
+			exprs = append(exprs, expr)
+		}
+	}
+
+	return exprs
+}
+
 // parseImplicitAlias handles implicit column aliases like "SELECT 'a' c0" (meaning 'a' AS c0)
 func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
 	// If next token is a plain identifier (not a keyword), treat as implicit alias
@@ -158,6 +187,8 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 		return p.parseBoolean()
 	case token.NULL:
 		return p.parseNull()
+	case token.NAN, token.INF:
+		return p.parseSpecialNumber()
 	case token.MINUS:
 		return p.parseUnaryMinus()
 	case token.NOT:
@@ -201,9 +232,13 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 		}
 		return nil
 	default:
-		// Handle other keywords that can be used as function names
-		if p.current.Token.IsKeyword() && p.peekIs(token.LPAREN) {
-			return p.parseKeywordAsFunction()
+		// Handle other keywords that can be used as function names or identifiers
+		if p.current.Token.IsKeyword() {
+			if p.peekIs(token.LPAREN) {
+				return p.parseKeywordAsFunction()
+			}
+			// Keywords like ALL, DEFAULT, etc. can be used as identifiers
+			return p.parseKeywordAsIdentifier()
 		}
 		return nil
 	}
@@ -357,11 +392,32 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 	}
 
 	// Parse arguments
-	if !p.currentIs(token.RPAREN) {
-		fn.Arguments = p.parseExpressionList()
+	if !p.currentIs(token.RPAREN) && !p.currentIs(token.SETTINGS) {
+		fn.Arguments = p.parseFunctionArgumentList()
+	}
+
+	// Handle SETTINGS inside function call (table functions)
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		// Parse settings as key=value pairs until )
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			// Just skip the settings for now
+			p.nextToken()
+		}
 	}
 
 	p.expect(token.RPAREN)
+
+	// Handle IGNORE NULLS / RESPECT NULLS (window function modifiers)
+	if p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		if upper == "IGNORE" || upper == "RESPECT" {
+			p.nextToken()
+			if p.currentIs(token.NULLS) {
+				p.nextToken()
+			}
+		}
+	}
 
 	// Handle OVER clause for window functions
 	if p.currentIs(token.OVER) {
@@ -554,6 +610,21 @@ func (p *Parser) parseNull() ast.Expression {
 		Position: p.current.Pos,
 		Type:     ast.LiteralNull,
 		Value:    nil,
+	}
+	p.nextToken()
+	return lit
+}
+
+func (p *Parser) parseSpecialNumber() ast.Expression {
+	lit := &ast.Literal{
+		Position: p.current.Pos,
+		Type:     ast.LiteralFloat,
+	}
+	switch p.current.Token {
+	case token.NAN:
+		lit.Value = math.NaN()
+	case token.INF:
+		lit.Value = math.Inf(1)
 	}
 	p.nextToken()
 	return lit
@@ -1380,6 +1451,17 @@ func (p *Parser) parseKeywordAsFunction() ast.Expression {
 		Position:  pos,
 		Name:      name,
 		Arguments: args,
+	}
+}
+
+func (p *Parser) parseKeywordAsIdentifier() ast.Expression {
+	pos := p.current.Pos
+	name := p.current.Value
+	p.nextToken()
+
+	return &ast.Identifier{
+		Position: pos,
+		Parts:    []string{name},
 	}
 }
 
