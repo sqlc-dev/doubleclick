@@ -30,7 +30,7 @@ func FormatLiteral(lit *ast.Literal) string {
 		}
 		return "UInt8_0"
 	case ast.LiteralNull:
-		return "Null"
+		return "NULL"
 	case ast.LiteralArray:
 		return formatArrayLiteral(lit.Value)
 	case ast.LiteralTuple:

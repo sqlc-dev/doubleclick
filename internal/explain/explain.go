@@ -116,7 +116,7 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 
 	// Types
 	case *ast.DataType:
-		explainDataType(sb, n, indent)
+		explainDataType(sb, n, indent, depth)
 	case *ast.Parameter:
 		explainParameter(sb, n, indent)
 
@@ -165,7 +165,7 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	}
 	fmt.Fprintf(sb, "%sColumnDeclaration %s (children %d)\n", indent, col.Name, children)
 	if col.Type != nil {
-		fmt.Fprintf(sb, "%s DataType %s\n", indent, FormatDataType(col.Type))
+		Node(sb, col.Type, depth+1)
 	}
 	if col.Default != nil {
 		Node(sb, col.Default, depth+1)

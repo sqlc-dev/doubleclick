@@ -138,8 +138,30 @@ func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent stri
 	fmt.Fprintf(sb, "%sDescribe %s\n", indent, name)
 }
 
-func explainDataType(sb *strings.Builder, n *ast.DataType, indent string) {
-	fmt.Fprintf(sb, "%sDataType %s\n", indent, FormatDataType(n))
+func explainDataType(sb *strings.Builder, n *ast.DataType, indent string, depth int) {
+	// Check if type has complex parameters (expressions, not just literals/types)
+	hasComplexParams := false
+	for _, p := range n.Parameters {
+		if _, ok := p.(*ast.Literal); ok {
+			continue
+		}
+		if _, ok := p.(*ast.DataType); ok {
+			continue
+		}
+		hasComplexParams = true
+		break
+	}
+
+	if hasComplexParams && len(n.Parameters) > 0 {
+		// Complex parameters need to be output as children
+		fmt.Fprintf(sb, "%sDataType %s (children %d)\n", indent, n.Name, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Parameters))
+		for _, p := range n.Parameters {
+			Node(sb, p, depth+2)
+		}
+	} else {
+		fmt.Fprintf(sb, "%sDataType %s\n", indent, FormatDataType(n))
+	}
 }
 
 func explainParameter(sb *strings.Builder, n *ast.Parameter, indent string) {
