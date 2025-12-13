@@ -354,6 +354,13 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		}
 	}
 
+	// Parse WITH TOTALS (can appear after GROUP BY or at end of SELECT)
+	if p.currentIs(token.WITH) && p.peekIs(token.TOTALS) {
+		p.nextToken()
+		p.nextToken()
+		sel.WithTotals = true
+	}
+
 	// Parse SETTINGS clause
 	if p.currentIs(token.SETTINGS) {
 		p.nextToken()
