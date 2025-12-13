@@ -55,10 +55,11 @@ func TestParser(t *testing.T) {
 			continue
 		}
 
-		testName := entry.Name()
-		testDir := filepath.Join(testdataDir, testName)
+		testDir := filepath.Join(testdataDir, entry.Name())
 
-		t.Run(testName, func(t *testing.T) {
+		t.Run(entry.Name(), func(t *testing.T) {
+			t.Parallel()
+
 			// Create context with 1 second timeout
 			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 			defer cancel()
