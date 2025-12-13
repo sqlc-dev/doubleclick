@@ -199,7 +199,12 @@ func explainCaseExpr(sb *strings.Builder, n *ast.CaseExpr, indent string, depth 
 
 func explainIntervalExpr(sb *strings.Builder, n *ast.IntervalExpr, indent string, depth int) {
 	// INTERVAL is represented as Function toInterval<Unit>
-	fnName := "toInterval" + n.Unit
+	// Unit needs to be title-cased (e.g., YEAR -> Year)
+	unit := n.Unit
+	if len(unit) > 0 {
+		unit = strings.ToUpper(unit[:1]) + strings.ToLower(unit[1:])
+	}
+	fnName := "toInterval" + unit
 	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 	Node(sb, n.Value, depth+2)
