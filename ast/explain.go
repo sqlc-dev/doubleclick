@@ -77,6 +77,10 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		if n.Limit != nil {
 			explainNode(b, n.Limit, depth+1)
 		}
+		// Settings
+		if len(n.Settings) > 0 {
+			fmt.Fprintf(b, "%s Set\n", indent)
+		}
 
 	case *TablesInSelectQuery:
 		fmt.Fprintf(b, "%sTablesInSelectQuery (children %d)\n", indent, len(n.Tables))
@@ -126,6 +130,19 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		}
 
 	case *Literal:
+		// Empty array literal is represented as a function call
+		if n.Type == LiteralArray {
+			if arr, ok := n.Value.([]Expression); ok && len(arr) == 0 {
+				fmt.Fprintf(b, "%sFunction array (children 1)\n", indent)
+				fmt.Fprintf(b, "%s ExpressionList\n", indent)
+				return
+			}
+			if arr, ok := n.Value.([]interface{}); ok && len(arr) == 0 {
+				fmt.Fprintf(b, "%sFunction array (children 1)\n", indent)
+				fmt.Fprintf(b, "%s ExpressionList\n", indent)
+				return
+			}
+		}
 		explainLiteral(b, n, "", depth)
 
 	case *FunctionCall:
@@ -141,6 +158,13 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		}
 
 	case *UnaryExpr:
+		// Special case: unary minus on a literal integer becomes a negative literal
+		if n.Op == "-" {
+			if lit, ok := n.Operand.(*Literal); ok && lit.Type == LiteralInteger {
+				fmt.Fprintf(b, "%sLiteral Int64_-%v\n", indent, lit.Value)
+				return
+			}
+		}
 		funcName := unaryOpToFunction(n.Op)
 		fmt.Fprintf(b, "%sFunction %s (children 1)\n", indent, funcName)
 		fmt.Fprintf(b, "%s ExpressionList (children 1)\n", indent)
@@ -169,7 +193,8 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 				fmt.Fprintf(b, "%s ColumnsTransformerList (children 1)\n", indent)
 				fmt.Fprintf(b, "%s  ColumnsReplaceTransformer (children %d)\n", indent, len(n.Replace))
 				for _, r := range n.Replace {
-					explainNode(b, r.Expr, depth+3)
+					fmt.Fprintf(b, "%s   ColumnsReplaceTransformer::Replacement (children 1)\n", indent)
+					explainNode(b, r.Expr, depth+4)
 				}
 			}
 		} else if n.Table != "" {
@@ -344,7 +369,7 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		if n.Database != "" {
 			tableName = n.Database + "." + tableName
 		}
-		fmt.Fprintf(b, "%sTruncateQuery %s (children 1)\n", indent, tableName)
+		fmt.Fprintf(b, "%sTruncateQuery  %s (children 1)\n", indent, tableName)
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, tableName)
 
 	case *AlterQuery:
@@ -371,7 +396,12 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		if n.Database != "" && !n.DropDatabase {
 			name = n.Database + "." + name
 		}
-		fmt.Fprintf(b, "%sDropQuery %s (children 1)\n", indent, name)
+		// Different spacing for DROP DATABASE vs DROP TABLE
+		if n.DropDatabase {
+			fmt.Fprintf(b, "%sDropQuery %s  (children 1)\n", indent, name)
+		} else {
+			fmt.Fprintf(b, "%sDropQuery  %s (children 1)\n", indent, name)
+		}
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, name)
 
 	case *CreateQuery:
@@ -393,7 +423,7 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		}
 
 	case *SystemQuery:
-		fmt.Fprintf(b, "%sSystemQuery %s\n", indent, n.Command)
+		fmt.Fprintf(b, "%sSYSTEM query\n", indent)
 
 	case *OptimizeQuery:
 		tableName := n.Table
@@ -408,8 +438,9 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		if n.Database != "" {
 			tableName = n.Database + "." + tableName
 		}
-		fmt.Fprintf(b, "%sDescribeQuery %s (children 1)\n", indent, tableName)
-		fmt.Fprintf(b, "%s Identifier %s\n", indent, tableName)
+		fmt.Fprintf(b, "%sDescribeQuery (children 1)\n", indent)
+		fmt.Fprintf(b, "%s TableExpression (children 1)\n", indent)
+		fmt.Fprintf(b, "%s  TableIdentifier %s\n", indent, tableName)
 
 	case *ShowQuery:
 		fmt.Fprintf(b, "%sShowQuery %s\n", indent, n.ShowType)
@@ -426,7 +457,7 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.To)
 
 	case *ExchangeQuery:
-		fmt.Fprintf(b, "%sExchangeQuery (children 2)\n", indent)
+		fmt.Fprintf(b, "%sRename (children 2)\n", indent)
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Table1)
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Table2)
 
@@ -552,7 +583,20 @@ func formatArrayLiteral(value interface{}) string {
 		parts := make([]string, len(v))
 		for i, elem := range v {
 			if lit, ok := elem.(*Literal); ok {
-				parts[i] = formatLiteralElement(lit.Value)
+				switch lit.Type {
+				case LiteralString:
+					parts[i] = fmt.Sprintf("\\'%v\\'", lit.Value)
+				case LiteralInteger:
+					parts[i] = fmt.Sprintf("UInt64_%v", lit.Value)
+				case LiteralFloat:
+					parts[i] = fmt.Sprintf("Float64_%v", lit.Value)
+				case LiteralArray:
+					parts[i] = formatArrayLiteral(lit.Value)
+				case LiteralTuple:
+					parts[i] = formatTupleLiteral(lit.Value)
+				default:
+					parts[i] = fmt.Sprintf("%v", lit.Value)
+				}
 			} else {
 				parts[i] = fmt.Sprintf("%v", elem)
 			}
@@ -646,10 +690,28 @@ func explainFunctionCall(b *strings.Builder, fn *FunctionCall, depth int) {
 	explainFunctionCallWithAlias(b, fn, fn.Alias, depth)
 }
 
+// normalizeFunctionName normalizes function names to match ClickHouse EXPLAIN AST output.
+func normalizeFunctionName(name string) string {
+	switch strings.ToLower(name) {
+	case "trim":
+		return "trimBoth"
+	case "ltrim":
+		return "trimLeft"
+	case "rtrim":
+		return "trimRight"
+	default:
+		return name
+	}
+}
+
 // explainFunctionCallWithAlias formats a function call with an optional alias.
 func explainFunctionCallWithAlias(b *strings.Builder, fn *FunctionCall, alias string, depth int) {
 	indent := strings.Repeat(" ", depth)
-	name := fn.Name
+	name := normalizeFunctionName(fn.Name)
+	// DISTINCT in aggregate functions gets appended to function name
+	if fn.Distinct {
+		name = name + "Distinct"
+	}
 
 	// Count children: always 1 for ExpressionList, plus 1 for window spec if present
 	// ClickHouse always shows (children 1) with ExpressionList even for empty arg functions
@@ -858,7 +920,16 @@ func explainCastExpr(b *strings.Builder, c *CastExpr, depth int) {
 	}
 	fmt.Fprintf(b, "%sFunction CAST%s (children 1)\n", indent, aliasSuffix)
 	fmt.Fprintf(b, "%s ExpressionList (children 2)\n", indent)
-	explainNode(b, c.Expr, depth+2)
+	// For :: operator syntax, the expression is output as a string literal
+	if c.OperatorSyntax {
+		if lit, ok := c.Expr.(*Literal); ok {
+			fmt.Fprintf(b, "%s  Literal \\'%v\\'\n", indent, lit.Value)
+		} else {
+			explainNode(b, c.Expr, depth+2)
+		}
+	} else {
+		explainNode(b, c.Expr, depth+2)
+	}
 	// Type is represented as a Literal string
 	fmt.Fprintf(b, "%s  Literal \\'%s\\'\n", indent, c.Type.Name)
 }
@@ -907,6 +978,9 @@ func countSelectQueryChildren(s *SelectQuery) int {
 		count++
 	}
 	if s.Offset != nil {
+		count++
+	}
+	if len(s.Settings) > 0 {
 		count++
 	}
 	return count
@@ -1043,6 +1117,15 @@ func explainAlterCommand(b *strings.Builder, cmd *AlterCommand, depth int) {
 	if cmd.IndexExpr != nil {
 		children++
 	}
+	if cmd.Partition != nil {
+		children++
+	}
+	if cmd.Index != "" && cmd.IndexExpr == nil {
+		children++
+	}
+	if cmd.ConstraintName != "" {
+		children++
+	}
 
 	if children > 0 {
 		fmt.Fprintf(b, "%sAlterCommand %s (children %d)\n", indent, cmd.Type, children)
@@ -1070,6 +1153,16 @@ func explainAlterCommand(b *strings.Builder, cmd *AlterCommand, depth int) {
 			fmt.Fprintf(b, "%s   ExpressionList\n", indent)
 		}
 	}
+	if cmd.Partition != nil {
+		fmt.Fprintf(b, "%s Partition (children 1)\n", indent)
+		explainNode(b, cmd.Partition, depth+2)
+	}
+	if cmd.Index != "" && cmd.IndexExpr == nil {
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, cmd.Index)
+	}
+	if cmd.ConstraintName != "" {
+		fmt.Fprintf(b, "%s Identifier %s\n", indent, cmd.ConstraintName)
+	}
 }
 
 // explainColumnDeclaration formats a column declaration.
@@ -1083,6 +1176,9 @@ func explainColumnDeclaration(b *strings.Builder, col *ColumnDeclaration, depth 
 	if col.Default != nil {
 		children++
 	}
+	if col.Codec != nil {
+		children++
+	}
 
 	fmt.Fprintf(b, "%sColumnDeclaration %s (children %d)\n", indent, col.Name, children)
 	if col.Type != nil {
@@ -1090,6 +1186,27 @@ func explainColumnDeclaration(b *strings.Builder, col *ColumnDeclaration, depth 
 	}
 	if col.Default != nil {
 		explainNode(b, col.Default, depth+1)
+	}
+	if col.Codec != nil {
+		explainCodec(b, col.Codec, depth+1)
+	}
+}
+
+// explainCodec formats a CODEC expression.
+func explainCodec(b *strings.Builder, codec *CodecExpr, depth int) {
+	indent := strings.Repeat(" ", depth)
+	fmt.Fprintf(b, "%sFunction CODEC (children 1)\n", indent)
+	fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(codec.Codecs))
+	for _, c := range codec.Codecs {
+		if len(c.Arguments) == 0 {
+			fmt.Fprintf(b, "%s  Function %s\n", indent, c.Name)
+		} else {
+			fmt.Fprintf(b, "%s  Function %s (children 1)\n", indent, c.Name)
+			fmt.Fprintf(b, "%s   ExpressionList (children %d)\n", indent, len(c.Arguments))
+			for _, arg := range c.Arguments {
+				explainNode(b, arg, depth+4)
+			}
+		}
 	}
 }
 
@@ -1105,8 +1222,16 @@ func explainCreateQuery(b *strings.Builder, n *CreateQuery, depth int) {
 	indent := strings.Repeat(" ", depth)
 
 	if n.CreateDatabase {
-		fmt.Fprintf(b, "%sCreateQuery %s  (children 1)\n", indent, n.Database)
+		children := 1
+		if n.Engine != nil {
+			children++
+		}
+		fmt.Fprintf(b, "%sCreateQuery %s  (children %d)\n", indent, n.Database, children)
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Database)
+		if n.Engine != nil {
+			fmt.Fprintf(b, "%s Storage definition (children 1)\n", indent)
+			fmt.Fprintf(b, "%s  Function %s\n", indent, n.Engine.Name)
+		}
 		return
 	}
 
@@ -1120,11 +1245,17 @@ func explainCreateQuery(b *strings.Builder, n *CreateQuery, depth int) {
 		name = n.Database + "." + name
 	}
 
+	// For materialized views, handle specially
+	if n.View != "" {
+		explainCreateView(b, n, name, depth)
+		return
+	}
+
 	children := 1 // identifier
 	if len(n.Columns) > 0 {
 		children++
 	}
-	if n.Engine != nil || len(n.OrderBy) > 0 {
+	if n.Engine != nil || len(n.OrderBy) > 0 || n.PartitionBy != nil || len(n.PrimaryKey) > 0 || len(n.Settings) > 0 {
 		children++
 	}
 	if n.AsSelect != nil {
@@ -1142,18 +1273,56 @@ func explainCreateQuery(b *strings.Builder, n *CreateQuery, depth int) {
 		}
 	}
 
-	if n.Engine != nil || len(n.OrderBy) > 0 {
+	if n.Engine != nil || len(n.OrderBy) > 0 || n.PartitionBy != nil || len(n.PrimaryKey) > 0 || len(n.Settings) > 0 {
 		storageChildren := 0
 		if n.Engine != nil {
+			storageChildren++
+		}
+		if n.PartitionBy != nil {
+			storageChildren++
+		}
+		if len(n.PrimaryKey) > 0 {
 			storageChildren++
 		}
 		if len(n.OrderBy) > 0 {
 			storageChildren++
 		}
+		if len(n.Settings) > 0 {
+			storageChildren++
+		}
 		fmt.Fprintf(b, "%s Storage definition (children %d)\n", indent, storageChildren)
 		if n.Engine != nil {
-			fmt.Fprintf(b, "%s  Function %s (children 1)\n", indent, n.Engine.Name)
-			fmt.Fprintf(b, "%s   ExpressionList\n", indent)
+			if len(n.Engine.Parameters) == 0 && !n.Engine.HasParentheses {
+				fmt.Fprintf(b, "%s  Function %s\n", indent, n.Engine.Name)
+			} else if len(n.Engine.Parameters) == 0 && n.Engine.HasParentheses {
+				fmt.Fprintf(b, "%s  Function %s (children 1)\n", indent, n.Engine.Name)
+				fmt.Fprintf(b, "%s   ExpressionList\n", indent)
+			} else {
+				fmt.Fprintf(b, "%s  Function %s (children 1)\n", indent, n.Engine.Name)
+				fmt.Fprintf(b, "%s   ExpressionList (children %d)\n", indent, len(n.Engine.Parameters))
+				for _, p := range n.Engine.Parameters {
+					explainNode(b, p, depth+4)
+				}
+			}
+		}
+		if n.PartitionBy != nil {
+			explainNode(b, n.PartitionBy, depth+2)
+		}
+		if len(n.PrimaryKey) > 0 {
+			// For simple PRIMARY KEY, just output the identifier
+			if len(n.PrimaryKey) == 1 {
+				if id, ok := n.PrimaryKey[0].(*Identifier); ok {
+					fmt.Fprintf(b, "%s  Identifier %s\n", indent, id.Name())
+				} else {
+					explainNode(b, n.PrimaryKey[0], depth+2)
+				}
+			} else {
+				fmt.Fprintf(b, "%s  Function tuple (children 1)\n", indent)
+				fmt.Fprintf(b, "%s   ExpressionList (children %d)\n", indent, len(n.PrimaryKey))
+				for _, expr := range n.PrimaryKey {
+					explainNode(b, expr, depth+4)
+				}
+			}
 		}
 		if len(n.OrderBy) > 0 {
 			// For simple ORDER BY, just output the identifier
@@ -1164,15 +1333,55 @@ func explainCreateQuery(b *strings.Builder, n *CreateQuery, depth int) {
 					explainNode(b, n.OrderBy[0], depth+2)
 				}
 			} else {
-				fmt.Fprintf(b, "%s  ExpressionList (children %d)\n", indent, len(n.OrderBy))
+				fmt.Fprintf(b, "%s  Function tuple (children 1)\n", indent)
+				fmt.Fprintf(b, "%s   ExpressionList (children %d)\n", indent, len(n.OrderBy))
 				for _, expr := range n.OrderBy {
-					explainNode(b, expr, depth+3)
+					explainNode(b, expr, depth+4)
 				}
 			}
+		}
+		if len(n.Settings) > 0 {
+			fmt.Fprintf(b, "%s  Set\n", indent)
 		}
 	}
 
 	if n.AsSelect != nil {
 		explainNode(b, n.AsSelect, depth+1)
+	}
+}
+
+// explainCreateView formats a CREATE VIEW or MATERIALIZED VIEW query.
+func explainCreateView(b *strings.Builder, n *CreateQuery, name string, depth int) {
+	indent := strings.Repeat(" ", depth)
+
+	children := 1 // identifier
+	if n.AsSelect != nil {
+		children++
+	}
+	if n.Engine != nil {
+		children++ // ViewTargets
+	}
+
+	fmt.Fprintf(b, "%sCreateQuery %s (children %d)\n", indent, name, children)
+	fmt.Fprintf(b, "%s Identifier %s\n", indent, name)
+
+	// For views, the AS SELECT comes before storage/ViewTargets
+	if n.AsSelect != nil {
+		explainNode(b, n.AsSelect, depth+1)
+	}
+
+	// Storage is wrapped in ViewTargets for views
+	if n.Engine != nil {
+		fmt.Fprintf(b, "%s ViewTargets (children 1)\n", indent)
+		fmt.Fprintf(b, "%s  Storage definition (children 1)\n", indent)
+		if len(n.Engine.Parameters) == 0 {
+			fmt.Fprintf(b, "%s   Function %s\n", indent, n.Engine.Name)
+		} else {
+			fmt.Fprintf(b, "%s   Function %s (children 1)\n", indent, n.Engine.Name)
+			fmt.Fprintf(b, "%s    ExpressionList (children %d)\n", indent, len(n.Engine.Parameters))
+			for _, p := range n.Engine.Parameters {
+				explainNode(b, p, depth+5)
+			}
+		}
 	}
 }

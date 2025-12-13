@@ -1293,6 +1293,7 @@ func (p *Parser) parseEngineClause() *ast.EngineClause {
 	}
 
 	if p.currentIs(token.LPAREN) {
+		engine.HasParentheses = true
 		p.nextToken()
 		if !p.currentIs(token.RPAREN) {
 			engine.Parameters = p.parseExpressionList()
