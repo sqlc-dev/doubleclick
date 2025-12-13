@@ -290,9 +290,10 @@ func (c *Constraint) End() token.Position { return c.Position }
 
 // EngineClause represents an ENGINE clause.
 type EngineClause struct {
-	Position   token.Position `json:"-"`
-	Name       string         `json:"name"`
-	Parameters []Expression   `json:"parameters,omitempty"`
+	Position      token.Position `json:"-"`
+	Name          string         `json:"name"`
+	Parameters    []Expression   `json:"parameters,omitempty"`
+	HasParentheses bool          `json:"has_parentheses,omitempty"` // true if called with ()
 }
 
 func (e *EngineClause) Pos() token.Position { return e.Position }
@@ -781,10 +782,11 @@ func (w *WhenClause) End() token.Position { return w.Position }
 
 // CastExpr represents a CAST expression.
 type CastExpr struct {
-	Position token.Position `json:"-"`
-	Expr     Expression     `json:"expr"`
-	Type     *DataType      `json:"type"`
-	Alias    string         `json:"alias,omitempty"`
+	Position       token.Position `json:"-"`
+	Expr           Expression     `json:"expr"`
+	Type           *DataType      `json:"type"`
+	Alias          string         `json:"alias,omitempty"`
+	OperatorSyntax bool           `json:"operator_syntax,omitempty"` // true if using :: syntax
 }
 
 func (c *CastExpr) Pos() token.Position { return c.Position }

@@ -1132,8 +1132,9 @@ func (p *Parser) parseAlias(left ast.Expression) ast.Expression {
 
 func (p *Parser) parseCastOperator(left ast.Expression) ast.Expression {
 	expr := &ast.CastExpr{
-		Position: p.current.Pos,
-		Expr:     left,
+		Position:       p.current.Pos,
+		Expr:           left,
+		OperatorSyntax: true,
 	}
 
 	p.nextToken() // skip ::

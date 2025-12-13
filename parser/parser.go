@@ -1293,6 +1293,7 @@ func (p *Parser) parseEngineClause() *ast.EngineClause {
 	}
 
 	if p.currentIs(token.LPAREN) {
+		engine.HasParentheses = true
 		p.nextToken()
 		if !p.currentIs(token.RPAREN) {
 			engine.Parameters = p.parseExpressionList()
@@ -1806,8 +1807,8 @@ func (p *Parser) parseShow() *ast.ShowQuery {
 		}
 	}
 
-	// Parse FROM clause (or table name for SHOW CREATE TABLE)
-	if p.currentIs(token.FROM) || (show.ShowType == ast.ShowCreate && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword())) {
+	// Parse FROM clause (or table/database name for SHOW CREATE TABLE/DATABASE)
+	if p.currentIs(token.FROM) || ((show.ShowType == ast.ShowCreate || show.ShowType == ast.ShowCreateDB) && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword())) {
 		if p.currentIs(token.FROM) {
 			p.nextToken()
 		}
