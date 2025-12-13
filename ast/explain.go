@@ -19,11 +19,24 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 
 	switch n := node.(type) {
 	case *SelectWithUnionQuery:
-		children := len(n.Selects)
-		fmt.Fprintf(b, "%sSelectWithUnionQuery (children 1)\n", indent)
-		fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, children)
+		// Check if first select has Format clause
+		var format *Identifier
+		if len(n.Selects) > 0 {
+			if sq, ok := n.Selects[0].(*SelectQuery); ok && sq.Format != nil {
+				format = sq.Format
+			}
+		}
+		unionChildren := 1 // ExpressionList
+		if format != nil {
+			unionChildren++
+		}
+		fmt.Fprintf(b, "%sSelectWithUnionQuery (children %d)\n", indent, unionChildren)
+		fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(n.Selects))
 		for _, sel := range n.Selects {
 			explainNode(b, sel, depth+2)
+		}
+		if format != nil {
+			fmt.Fprintf(b, "%s Identifier %s\n", indent, format.Name())
 		}
 
 	case *SelectQuery:
@@ -244,7 +257,9 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		fmt.Fprintf(b, "%s ExpressionList (children 2)\n", indent)
 		explainNode(b, n.Expr, depth+2)
 		if n.Query != nil {
-			explainNode(b, n.Query, depth+2)
+			// Wrap query in Subquery node
+			fmt.Fprintf(b, "%s  Subquery (children 1)\n", indent)
+			explainNode(b, n.Query, depth+3)
 		} else {
 			// List is shown as a Tuple literal
 			explainInListAsTuple(b, n.List, depth+2)
@@ -345,7 +360,9 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 	case *ExistsExpr:
 		fmt.Fprintf(b, "%sFunction exists (children 1)\n", indent)
 		fmt.Fprintf(b, "%s ExpressionList (children 1)\n", indent)
-		explainNode(b, n.Query, depth+2)
+		// Wrap query in Subquery node
+		fmt.Fprintf(b, "%s  Subquery (children 1)\n", indent)
+		explainNode(b, n.Query, depth+3)
 
 	case *DataType:
 		// Data types in expressions (like in CAST)
@@ -412,12 +429,21 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		if n.Database != "" {
 			tableName = n.Database + "." + tableName
 		}
-		children := 1
+		children := 1 // Always have table identifier
+		if len(n.Columns) > 0 {
+			children++ // column list
+		}
 		if n.Select != nil {
 			children++
 		}
-		fmt.Fprintf(b, "%sInsertQuery %s (children %d)\n", indent, tableName, children)
+		fmt.Fprintf(b, "%sInsertQuery   (children %d)\n", indent, children)
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, tableName)
+		if len(n.Columns) > 0 {
+			fmt.Fprintf(b, "%s ExpressionList (children %d)\n", indent, len(n.Columns))
+			for _, col := range n.Columns {
+				fmt.Fprintf(b, "%s  Identifier %s\n", indent, col.Name())
+			}
+		}
 		if n.Select != nil {
 			explainNode(b, n.Select, depth+1)
 		}
@@ -460,6 +486,16 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		fmt.Fprintf(b, "%sRename (children 2)\n", indent)
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Table1)
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, n.Table2)
+
+	case *ExplainQuery:
+		explainType := string(n.ExplainType)
+		if explainType == "" {
+			explainType = "EXPLAIN"
+		} else {
+			explainType = "EXPLAIN " + explainType
+		}
+		fmt.Fprintf(b, "%sExplain %s (children 1)\n", indent, explainType)
+		explainNode(b, n.Statement, depth+1)
 
 	default:
 		// For unknown types, just print the type name
@@ -542,7 +578,9 @@ func explainLiteral(b *strings.Builder, lit *Literal, alias string, depth int) {
 
 	switch lit.Type {
 	case LiteralString:
-		valueStr = fmt.Sprintf("\\'%v\\'", lit.Value)
+		// Escape backslashes in string literals (ClickHouse doubles them)
+		strVal := strings.ReplaceAll(fmt.Sprintf("%v", lit.Value), "\\", "\\\\")
+		valueStr = fmt.Sprintf("\\'%s\\'", strVal)
 	case LiteralInteger:
 		valueStr = fmt.Sprintf("UInt64_%v", lit.Value)
 	case LiteralFloat:
@@ -585,7 +623,8 @@ func formatArrayLiteral(value interface{}) string {
 			if lit, ok := elem.(*Literal); ok {
 				switch lit.Type {
 				case LiteralString:
-					parts[i] = fmt.Sprintf("\\'%v\\'", lit.Value)
+					escaped := strings.ReplaceAll(fmt.Sprintf("%v", lit.Value), "\\", "\\\\")
+					parts[i] = fmt.Sprintf("\\'%s\\'", escaped)
 				case LiteralInteger:
 					parts[i] = fmt.Sprintf("UInt64_%v", lit.Value)
 				case LiteralFloat:
@@ -622,7 +661,8 @@ func formatTupleLiteral(value interface{}) string {
 			if lit, ok := elem.(*Literal); ok {
 				switch lit.Type {
 				case LiteralString:
-					parts[i] = fmt.Sprintf("\\'%v\\'", lit.Value)
+					escaped := strings.ReplaceAll(fmt.Sprintf("%v", lit.Value), "\\", "\\\\")
+					parts[i] = fmt.Sprintf("\\'%s\\'", escaped)
 				case LiteralInteger:
 					parts[i] = fmt.Sprintf("UInt64_%v", lit.Value)
 				case LiteralFloat:
@@ -670,7 +710,8 @@ func explainInListAsTuple(b *strings.Builder, list []Expression, depth int) {
 func formatLiteralElement(elem interface{}) string {
 	switch e := elem.(type) {
 	case string:
-		return fmt.Sprintf("\\'%s\\'", e)
+		escaped := strings.ReplaceAll(e, "\\", "\\\\")
+		return fmt.Sprintf("\\'%s\\'", escaped)
 	case int, int64, uint64:
 		return fmt.Sprintf("UInt64_%v", e)
 	case float64:
@@ -1097,6 +1138,16 @@ func extractFieldToFunction(field string) string {
 	}
 }
 
+// normalizeAlterCommandType normalizes ALTER command types to match ClickHouse output.
+func normalizeAlterCommandType(t AlterCommandType) string {
+	switch t {
+	case AlterFreeze:
+		return "FREEZE_ALL"
+	default:
+		return string(t)
+	}
+}
+
 // explainAlterCommand formats an ALTER command.
 func explainAlterCommand(b *strings.Builder, cmd *AlterCommand, depth int) {
 	indent := strings.Repeat(" ", depth)
@@ -1123,14 +1174,16 @@ func explainAlterCommand(b *strings.Builder, cmd *AlterCommand, depth int) {
 	if cmd.Index != "" && cmd.IndexExpr == nil {
 		children++
 	}
-	if cmd.ConstraintName != "" {
+	// Don't count ConstraintName for ADD_CONSTRAINT as it's part of the Constraint structure
+	if cmd.ConstraintName != "" && cmd.Type != AlterAddConstraint {
 		children++
 	}
 
+	cmdType := normalizeAlterCommandType(cmd.Type)
 	if children > 0 {
-		fmt.Fprintf(b, "%sAlterCommand %s (children %d)\n", indent, cmd.Type, children)
+		fmt.Fprintf(b, "%sAlterCommand %s (children %d)\n", indent, cmdType, children)
 	} else {
-		fmt.Fprintf(b, "%sAlterCommand %s\n", indent, cmd.Type)
+		fmt.Fprintf(b, "%sAlterCommand %s\n", indent, cmdType)
 	}
 
 	if cmd.Column != nil {
@@ -1160,7 +1213,8 @@ func explainAlterCommand(b *strings.Builder, cmd *AlterCommand, depth int) {
 	if cmd.Index != "" && cmd.IndexExpr == nil {
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, cmd.Index)
 	}
-	if cmd.ConstraintName != "" {
+	// Don't output ConstraintName for ADD_CONSTRAINT
+	if cmd.ConstraintName != "" && cmd.Type != AlterAddConstraint {
 		fmt.Fprintf(b, "%s Identifier %s\n", indent, cmd.ConstraintName)
 	}
 }
