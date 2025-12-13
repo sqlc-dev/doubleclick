@@ -1,0 +1,1 @@
+SELECT toTypeName(1)

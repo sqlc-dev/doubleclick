@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -163,7 +164,11 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 		if ident, ok := left.(*ast.Identifier); ok {
 			return p.parseFunctionCall(ident.Name(), ident.Position)
 		}
-		return left
+		// Parametric function call like quantile(0.9)(number) - not yet supported
+		// Return nil to signal error and prevent infinite loop
+		p.errors = append(p.errors, fmt.Errorf("parametric function calls like func(params)(args) are not yet supported at line %d, column %d",
+			p.current.Pos.Line, p.current.Pos.Column))
+		return nil
 	case token.LBRACKET:
 		return p.parseArrayAccess(left)
 	case token.DOT:

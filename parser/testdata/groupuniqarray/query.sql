@@ -1,0 +1,1 @@
+SELECT groupUniqArray(1)

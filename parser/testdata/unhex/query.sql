@@ -1,0 +1,1 @@
+SELECT unhex('68656C6C6F')

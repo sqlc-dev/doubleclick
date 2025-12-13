@@ -1,0 +1,1 @@
+SELECT 'hello' LIKE '%ell%'

@@ -1,0 +1,1 @@
+SELECT groupArray(1)

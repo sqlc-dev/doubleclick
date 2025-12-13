@@ -1,0 +1,1 @@
+SELECT toFloat32(123.456)

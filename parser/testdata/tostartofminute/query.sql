@@ -1,0 +1,1 @@
+SELECT toStartOfMinute(now())

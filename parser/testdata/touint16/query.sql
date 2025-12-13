@@ -1,0 +1,1 @@
+SELECT toUInt16(123)

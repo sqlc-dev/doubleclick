@@ -1,0 +1,1 @@
+SELECT toInt64(123)

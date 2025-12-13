@@ -1,0 +1,1 @@
+SELECT toMonth(now())

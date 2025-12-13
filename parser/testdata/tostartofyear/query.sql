@@ -1,0 +1,1 @@
+SELECT toStartOfYear(now())

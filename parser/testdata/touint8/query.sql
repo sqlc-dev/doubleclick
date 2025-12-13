@@ -1,0 +1,1 @@
+SELECT toUInt8(123)

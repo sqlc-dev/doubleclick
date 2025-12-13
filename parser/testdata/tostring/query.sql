@@ -1,0 +1,1 @@
+SELECT toString(123)

@@ -1,0 +1,1 @@
+SELECT position('hello', 'l')

@@ -1,0 +1,1 @@
+SELECT toYear(now())
