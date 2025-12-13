@@ -173,11 +173,23 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 			p.nextToken()
 		}
 		query.UnionModes = append(query.UnionModes, mode)
-		sel := p.parseSelect()
-		if sel == nil {
-			break
+
+		// Handle parenthesized subqueries: UNION ALL (SELECT ... UNION ALL SELECT ...)
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			nested := p.parseSelectWithUnion()
+			p.expect(token.RPAREN)
+			// Flatten nested union selects into current query
+			for _, s := range nested.Selects {
+				query.Selects = append(query.Selects, s)
+			}
+		} else {
+			sel := p.parseSelect()
+			if sel == nil {
+				break
+			}
+			query.Selects = append(query.Selects, sel)
 		}
-		query.Selects = append(query.Selects, sel)
 	}
 
 	return query
@@ -917,6 +929,17 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 		}
 	} else if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 		ins.Select = p.parseSelectWithUnion()
+		// If the SELECT has settings, mark the INSERT as having settings too
+		if ins.Select != nil {
+			if sel, ok := ins.Select.(*ast.SelectWithUnionQuery); ok && sel != nil && len(sel.Selects) > 0 {
+				lastSel := sel.Selects[len(sel.Selects)-1]
+				if lastSel != nil {
+					if selQuery, ok := lastSel.(*ast.SelectQuery); ok && selQuery != nil && len(selQuery.Settings) > 0 {
+						ins.HasSettings = true
+					}
+				}
+			}
+		}
 	}
 
 	// Parse FORMAT (format names can be keywords like Null, JSON, etc.)
@@ -1314,6 +1337,7 @@ func (p *Parser) parseDataType() *ast.DataType {
 
 	// Parse type parameters
 	if p.currentIs(token.LPAREN) {
+		dt.HasParentheses = true
 		p.nextToken()
 
 		// Special handling for Nested type - it contains column declarations, not just types
@@ -1321,14 +1345,19 @@ func (p *Parser) parseDataType() *ast.DataType {
 			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
 				// Parse as column name + type
 				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					pos := p.current.Pos
 					colName := p.current.Value
 					p.nextToken()
 					// Parse the type for this column
 					colType := p.parseDataType()
 					if colType != nil {
-						// Wrap in a special format or just store as data type
-						colType.Name = colName + " " + colType.Name
-						dt.Parameters = append(dt.Parameters, colType)
+						// Use NameTypePair for Nested column declarations
+						ntp := &ast.NameTypePair{
+							Position: pos,
+							Name:     colName,
+							Type:     colType,
+						}
+						dt.Parameters = append(dt.Parameters, ntp)
 					}
 				}
 				if p.currentIs(token.COMMA) {

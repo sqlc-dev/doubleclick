@@ -121,6 +121,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	// Types
 	case *ast.DataType:
 		explainDataType(sb, n, indent, depth)
+	case *ast.NameTypePair:
+		explainNameTypePair(sb, n, indent, depth)
 	case *ast.Parameter:
 		explainParameter(sb, n, indent)
 

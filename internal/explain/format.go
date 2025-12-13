@@ -33,9 +33,9 @@ func FormatLiteral(lit *ast.Literal) string {
 		return fmt.Sprintf("\\'%s\\'", s)
 	case ast.LiteralBoolean:
 		if lit.Value.(bool) {
-			return "UInt8_1"
+			return "Bool_1"
 		}
-		return "UInt8_0"
+		return "Bool_0"
 	case ast.LiteralNull:
 		return "NULL"
 	case ast.LiteralArray:

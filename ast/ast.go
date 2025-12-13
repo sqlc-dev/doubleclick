@@ -266,14 +266,26 @@ func (c *ColumnDeclaration) End() token.Position { return c.Position }
 
 // DataType represents a data type.
 type DataType struct {
-	Position   token.Position `json:"-"`
-	Name       string         `json:"name"`
-	Parameters []Expression   `json:"parameters,omitempty"`
+	Position       token.Position `json:"-"`
+	Name           string         `json:"name"`
+	Parameters     []Expression   `json:"parameters,omitempty"`
+	HasParentheses bool           `json:"has_parentheses,omitempty"`
 }
 
 func (d *DataType) Pos() token.Position { return d.Position }
 func (d *DataType) End() token.Position { return d.Position }
 func (d *DataType) expressionNode()     {}
+
+// NameTypePair represents a named type pair, used in Nested types.
+type NameTypePair struct {
+	Position token.Position `json:"-"`
+	Name     string         `json:"name"`
+	Type     *DataType      `json:"type"`
+}
+
+func (n *NameTypePair) Pos() token.Position { return n.Position }
+func (n *NameTypePair) End() token.Position { return n.Position }
+func (n *NameTypePair) expressionNode()     {}
 
 // CodecExpr represents a CODEC expression.
 type CodecExpr struct {
