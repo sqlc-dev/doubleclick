@@ -13,13 +13,12 @@ import (
 	"testing"
 
 	"github.com/kyleconroy/doubleclick/parser"
-	"gopkg.in/yaml.v3"
 )
 
 // testMetadata holds optional metadata for a test case
 type testMetadata struct {
-	Todo   bool   `yaml:"todo"`
-	Source string `yaml:"source"`
+	Todo   bool   `json:"todo,omitempty"`
+	Source string `json:"source,omitempty"`
 }
 
 // clickhouseAvailable checks if ClickHouse server is running
@@ -49,7 +48,7 @@ func getClickHouseAST(query string) (string, error) {
 // TestParser tests the parser using test cases from the testdata directory.
 // Each subdirectory in testdata represents a test case with:
 // - query.sql: The SQL query to parse
-// - metadata.yaml (optional): Metadata including:
+// - metadata.json (optional): Metadata including:
 //   - todo: true if the test is not yet expected to pass
 //   - source: URL to the source file in ClickHouse repository
 func TestParser(t *testing.T) {
@@ -81,10 +80,10 @@ func TestParser(t *testing.T) {
 
 			// Read optional metadata
 			var metadata testMetadata
-			metadataPath := filepath.Join(testDir, "metadata.yaml")
+			metadataPath := filepath.Join(testDir, "metadata.json")
 			if metadataBytes, err := os.ReadFile(metadataPath); err == nil {
-				if err := yaml.Unmarshal(metadataBytes, &metadata); err != nil {
-					t.Fatalf("Failed to parse metadata.yaml: %v", err)
+				if err := json.Unmarshal(metadataBytes, &metadata); err != nil {
+					t.Fatalf("Failed to parse metadata.json: %v", err)
 				}
 			}
 
@@ -161,10 +160,10 @@ func TestParserWithClickHouse(t *testing.T) {
 
 			// Read optional metadata
 			var metadata testMetadata
-			metadataPath := filepath.Join(testDir, "metadata.yaml")
+			metadataPath := filepath.Join(testDir, "metadata.json")
 			if metadataBytes, err := os.ReadFile(metadataPath); err == nil {
-				if err := yaml.Unmarshal(metadataBytes, &metadata); err != nil {
-					t.Fatalf("Failed to parse metadata.yaml: %v", err)
+				if err := json.Unmarshal(metadataBytes, &metadata); err != nil {
+					t.Fatalf("Failed to parse metadata.json: %v", err)
 				}
 			}
 
