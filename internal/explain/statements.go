@@ -48,7 +48,12 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		}
 		fmt.Fprintf(sb, "%s Storage definition (children %d)\n", indent, storageChildren)
 		if n.Engine != nil {
-			fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
+			if n.Engine.HasParentheses {
+				fmt.Fprintf(sb, "%s  Function %s (children %d)\n", indent, n.Engine.Name, 1)
+				fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+			} else {
+				fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
+			}
 		}
 		if len(n.OrderBy) > 0 {
 			if len(n.OrderBy) == 1 {
