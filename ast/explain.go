@@ -180,7 +180,7 @@ func explainNode(b *strings.Builder, node interface{}, depth int) {
 		}
 
 	case *ColumnsMatcher:
-		fmt.Fprintf(b, "%sColumnsMatcher %s\n", indent, n.Pattern)
+		fmt.Fprintf(b, "%sColumnsRegexpMatcher\n", indent)
 
 	case *Subquery:
 		if n.Alias != "" {
@@ -570,6 +570,25 @@ func formatTupleLiteral(value interface{}) string {
 		parts := make([]string, len(v))
 		for i, elem := range v {
 			parts[i] = formatLiteralElement(elem)
+		}
+		return fmt.Sprintf("Tuple_(%s)", strings.Join(parts, ", "))
+	case []Expression:
+		parts := make([]string, len(v))
+		for i, elem := range v {
+			if lit, ok := elem.(*Literal); ok {
+				switch lit.Type {
+				case LiteralString:
+					parts[i] = fmt.Sprintf("\\'%v\\'", lit.Value)
+				case LiteralInteger:
+					parts[i] = fmt.Sprintf("UInt64_%v", lit.Value)
+				case LiteralFloat:
+					parts[i] = fmt.Sprintf("Float64_%v", lit.Value)
+				default:
+					parts[i] = fmt.Sprintf("%v", lit.Value)
+				}
+			} else {
+				parts[i] = fmt.Sprintf("%v", elem)
+			}
 		}
 		return fmt.Sprintf("Tuple_(%s)", strings.Join(parts, ", "))
 	default:
