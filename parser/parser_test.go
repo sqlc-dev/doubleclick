@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/kyleconroy/doubleclick/parser"
 )
@@ -31,8 +32,6 @@ func TestParser(t *testing.T) {
 		t.Fatalf("Failed to read testdata directory: %v", err)
 	}
 
-	ctx := context.Background()
-
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			continue
@@ -42,6 +41,10 @@ func TestParser(t *testing.T) {
 		testDir := filepath.Join(testdataDir, testName)
 
 		t.Run(testName, func(t *testing.T) {
+			// Create context with 1 second timeout
+			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+			defer cancel()
+
 			// Read the query
 			queryPath := filepath.Join(testDir, "query.sql")
 			queryBytes, err := os.ReadFile(queryPath)
