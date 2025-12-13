@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 
 	"github.com/kyleconroy/doubleclick/ast"
@@ -122,7 +123,7 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseTruncate()
 	case token.USE:
 		return p.parseUse()
-	case token.DESCRIBE:
+	case token.DESCRIBE, token.DESC:
 		return p.parseDescribe()
 	case token.SHOW:
 		return p.parseShow()
@@ -134,6 +135,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseOptimize()
 	case token.SYSTEM:
 		return p.parseSystem()
+	case token.RENAME:
+		return p.parseRename()
+	case token.EXCHANGE:
+		return p.parseExchange()
 	default:
 		p.errors = append(p.errors, fmt.Errorf("unexpected token %s at line %d, column %d",
 			p.current.Token, p.current.Pos.Line, p.current.Pos.Column))
@@ -158,10 +163,16 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 	// Parse UNION clauses
 	for p.currentIs(token.UNION) {
 		p.nextToken() // skip UNION
+		var mode string
 		if p.currentIs(token.ALL) {
 			query.UnionAll = true
+			mode = "ALL"
+			p.nextToken()
+		} else if p.currentIs(token.DISTINCT) {
+			mode = "DISTINCT"
 			p.nextToken()
 		}
+		query.UnionModes = append(query.UnionModes, mode)
 		sel := p.parseSelect()
 		if sel == nil {
 			break
@@ -208,6 +219,11 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		sel.From = p.parseTablesInSelect()
 	}
 
+	// Parse ARRAY JOIN clause
+	if p.currentIs(token.ARRAY) || (p.currentIs(token.LEFT) && p.peekIs(token.ARRAY)) {
+		sel.ArrayJoin = p.parseArrayJoin()
+	}
+
 	// Parse PREWHERE clause
 	if p.currentIs(token.PREWHERE) {
 		p.nextToken()
@@ -249,6 +265,12 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		sel.Having = p.parseExpression(LOWEST)
 	}
 
+	// Parse WINDOW clause for named windows
+	if p.currentIs(token.WINDOW) {
+		p.nextToken()
+		sel.Window = p.parseWindowDefinitions()
+	}
+
 	// Parse ORDER BY clause
 	if p.currentIs(token.ORDER) {
 		p.nextToken()
@@ -283,6 +305,21 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		sel.Settings = p.parseSettingsList()
 	}
 
+	// Parse INTO OUTFILE clause
+	if p.currentIs(token.INTO) {
+		p.nextToken()
+		if p.currentIs(token.OUTFILE) {
+			p.nextToken()
+			if p.currentIs(token.STRING) {
+				sel.IntoOutfile = &ast.IntoOutfileClause{
+					Position: p.current.Pos,
+					Filename: p.current.Value,
+				}
+				p.nextToken()
+			}
+		}
+	}
+
 	// Parse FORMAT clause
 	if p.currentIs(token.FORMAT) {
 		p.nextToken()
@@ -306,27 +343,67 @@ func (p *Parser) parseWithClause() []ast.Expression {
 			Position: p.current.Pos,
 		}
 
-		// Check if it's a subquery or expression
-		if p.currentIs(token.LPAREN) {
-			// Subquery
+		// Check if it's the "name AS (subquery)" syntax (standard SQL CTE)
+		// or "expr AS name" syntax (ClickHouse scalar)
+		if p.currentIs(token.IDENT) && p.peekIs(token.AS) {
+			// This could be "name AS (subquery)" or "ident AS alias" for scalar
+			name := p.current.Value
+			p.nextToken() // skip identifier
+			p.nextToken() // skip AS
+
+			if p.currentIs(token.LPAREN) {
+				// Standard CTE: name AS (subquery)
+				p.nextToken()
+				if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
+					subquery := p.parseSelectWithUnion()
+					if !p.expect(token.RPAREN) {
+						return nil
+					}
+					elem.Name = name
+					elem.Query = &ast.Subquery{Query: subquery}
+				} else {
+					// It's an expression in parentheses, parse it and use name as alias
+					expr := p.parseExpression(LOWEST)
+					p.expect(token.RPAREN)
+					elem.Name = name
+					elem.Query = expr
+				}
+			} else {
+				// Scalar expression where the first identifier is used directly
+				// This is likely "name AS name" which means the CTE name is name with scalar value name
+				elem.Name = name
+				elem.Query = &ast.Identifier{Position: elem.Position, Parts: []string{name}}
+			}
+		} else if p.currentIs(token.LPAREN) {
+			// Subquery: (SELECT ...) AS name
 			p.nextToken()
 			subquery := p.parseSelectWithUnion()
 			if !p.expect(token.RPAREN) {
 				return nil
 			}
 			elem.Query = &ast.Subquery{Query: subquery}
+
+			if !p.expect(token.AS) {
+				return nil
+			}
+
+			if p.currentIs(token.IDENT) {
+				elem.Name = p.current.Value
+				p.nextToken()
+			}
 		} else {
-			// Expression
-			elem.Query = p.parseExpression(LOWEST)
-		}
+			// Scalar WITH: expr AS name (ClickHouse style)
+			// Examples: WITH 1 AS x, WITH 'hello' AS s, WITH func() AS f
+			elem.Query = p.parseExpression(ALIAS_PREC) // Use ALIAS_PREC to stop before AS
 
-		if !p.expect(token.AS) {
-			return nil
-		}
+			if !p.expect(token.AS) {
+				return nil
+			}
 
-		if p.currentIs(token.IDENT) {
-			elem.Name = p.current.Value
-			p.nextToken()
+			if p.currentIs(token.IDENT) {
+				elem.Name = p.current.Value
+				p.nextToken()
+			}
 		}
 
 		elements = append(elements, elem)
@@ -365,6 +442,10 @@ func (p *Parser) parseTablesInSelect() *ast.TablesInSelectQuery {
 }
 
 func (p *Parser) isJoinKeyword() bool {
+	// LEFT ARRAY JOIN is handled by parseArrayJoin, not as a regular join
+	if p.currentIs(token.LEFT) && p.peekIs(token.ARRAY) {
+		return false
+	}
 	switch p.current.Token {
 	case token.JOIN, token.INNER, token.LEFT, token.RIGHT, token.FULL, token.CROSS,
 		token.GLOBAL, token.ANY, token.ALL, token.ASOF, token.SEMI, token.ANTI:
@@ -497,8 +578,8 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 			expr.Table = p.parseExpression(LOWEST)
 		}
 		p.expect(token.RPAREN)
-	} else if p.currentIs(token.IDENT) {
-		// Table identifier or function
+	} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		// Table identifier or function (keywords can be table names like "system")
 		ident := p.current.Value
 		pos := p.current.Pos
 		p.nextToken()
@@ -510,7 +591,7 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 			// database.table
 			p.nextToken()
 			tableName := ""
-			if p.currentIs(token.IDENT) {
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 				tableName = p.current.Value
 				p.nextToken()
 			}
@@ -597,8 +678,7 @@ func (p *Parser) parseOrderByList() []*ast.OrderByElement {
 				t := true
 				elem.NullsFirst = &t
 				p.nextToken()
-			} else {
-				// NULLS LAST
+			} else if p.currentIs(token.LAST) {
 				f := false
 				elem.NullsFirst = &f
 				p.nextToken()
@@ -611,6 +691,31 @@ func (p *Parser) parseOrderByList() []*ast.OrderByElement {
 			if p.currentIs(token.STRING) || p.currentIs(token.IDENT) {
 				elem.Collate = p.current.Value
 				p.nextToken()
+			}
+		}
+
+		// Handle WITH FILL
+		if p.currentIs(token.WITH) && p.peekIs(token.FILL) {
+			p.nextToken() // skip WITH
+			p.nextToken() // skip FILL
+			elem.WithFill = true
+
+			// Handle FROM
+			if p.currentIs(token.FROM) {
+				p.nextToken()
+				elem.FillFrom = p.parseExpression(LOWEST)
+			}
+
+			// Handle TO
+			if p.currentIs(token.TO) {
+				p.nextToken()
+				elem.FillTo = p.parseExpression(LOWEST)
+			}
+
+			// Handle STEP
+			if p.currentIs(token.STEP) {
+				p.nextToken()
+				elem.FillStep = p.parseExpression(LOWEST)
 			}
 		}
 
@@ -847,64 +952,55 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 		create.Engine = p.parseEngineClause()
 	}
 
-	// Parse ORDER BY
-	if p.currentIs(token.ORDER) {
-		p.nextToken()
-		if p.expect(token.BY) {
-			if p.currentIs(token.LPAREN) {
-				p.nextToken()
-				create.OrderBy = p.parseExpressionList()
-				p.expect(token.RPAREN)
-			} else {
-				create.OrderBy = []ast.Expression{p.parseExpression(LOWEST)}
+	// Parse table options in flexible order (PARTITION BY, ORDER BY, PRIMARY KEY, etc.)
+	for {
+		switch {
+		case p.currentIs(token.PARTITION):
+			p.nextToken()
+			if p.expect(token.BY) {
+				create.PartitionBy = p.parseExpression(LOWEST)
 			}
-		}
-	}
-
-	// Parse PARTITION BY
-	if p.currentIs(token.PARTITION) {
-		p.nextToken()
-		if p.expect(token.BY) {
-			create.PartitionBy = p.parseExpression(LOWEST)
-		}
-	}
-
-	// Parse PRIMARY KEY
-	if p.currentIs(token.PRIMARY) {
-		p.nextToken()
-		if p.expect(token.KEY) {
-			if p.currentIs(token.LPAREN) {
-				p.nextToken()
-				create.PrimaryKey = p.parseExpressionList()
-				p.expect(token.RPAREN)
-			} else {
-				create.PrimaryKey = []ast.Expression{p.parseExpression(LOWEST)}
+		case p.currentIs(token.ORDER):
+			p.nextToken()
+			if p.expect(token.BY) {
+				if p.currentIs(token.LPAREN) {
+					p.nextToken()
+					create.OrderBy = p.parseExpressionList()
+					p.expect(token.RPAREN)
+				} else {
+					create.OrderBy = []ast.Expression{p.parseExpression(LOWEST)}
+				}
 			}
+		case p.currentIs(token.PRIMARY):
+			p.nextToken()
+			if p.expect(token.KEY) {
+				if p.currentIs(token.LPAREN) {
+					p.nextToken()
+					create.PrimaryKey = p.parseExpressionList()
+					p.expect(token.RPAREN)
+				} else {
+					create.PrimaryKey = []ast.Expression{p.parseExpression(LOWEST)}
+				}
+			}
+		case p.currentIs(token.SAMPLE):
+			p.nextToken()
+			if p.expect(token.BY) {
+				create.SampleBy = p.parseExpression(LOWEST)
+			}
+		case p.currentIs(token.TTL):
+			p.nextToken()
+			create.TTL = &ast.TTLClause{
+				Position:   p.current.Pos,
+				Expression: p.parseExpression(LOWEST),
+			}
+		case p.currentIs(token.SETTINGS):
+			p.nextToken()
+			create.Settings = p.parseSettingsList()
+		default:
+			goto done_table_options
 		}
 	}
-
-	// Parse SAMPLE BY
-	if p.currentIs(token.SAMPLE) {
-		p.nextToken()
-		if p.expect(token.BY) {
-			create.SampleBy = p.parseExpression(LOWEST)
-		}
-	}
-
-	// Parse TTL
-	if p.currentIs(token.TTL) {
-		p.nextToken()
-		create.TTL = &ast.TTLClause{
-			Position:   p.current.Pos,
-			Expression: p.parseExpression(LOWEST),
-		}
-	}
-
-	// Parse SETTINGS
-	if p.currentIs(token.SETTINGS) {
-		p.nextToken()
-		create.Settings = p.parseSettingsList()
-	}
+done_table_options:
 
 	// Parse AS SELECT
 	if p.currentIs(token.AS) {
@@ -998,6 +1094,30 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		}
 	}
 
+	// Handle TO (target table for materialized views)
+	if p.currentIs(token.TO) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) {
+			create.To = p.current.Value
+			p.nextToken()
+		}
+	}
+
+	// Parse ENGINE (for materialized views)
+	if p.currentIs(token.ENGINE) {
+		p.nextToken()
+		if p.currentIs(token.EQ) {
+			p.nextToken()
+		}
+		create.Engine = p.parseEngineClause()
+	}
+
+	// Parse POPULATE (for materialized views)
+	if p.currentIs(token.POPULATE) {
+		create.Populate = true
+		p.nextToken()
+	}
+
 	// Parse AS SELECT
 	if p.currentIs(token.AS) {
 		p.nextToken()
@@ -1049,6 +1169,15 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 	if p.currentIs(token.TTL) {
 		p.nextToken()
 		col.TTL = p.parseExpression(LOWEST)
+	}
+
+	// Parse COMMENT
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "COMMENT" {
+		p.nextToken()
+		if p.currentIs(token.STRING) {
+			col.Comment = p.current.Value
+			p.nextToken()
+		}
 	}
 
 	return col
@@ -1246,6 +1375,12 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		}
 	}
 
+	// Handle SYNC
+	if p.currentIs(token.SYNC) {
+		drop.Sync = true
+		p.nextToken()
+	}
+
 	return drop
 }
 
@@ -1317,6 +1452,17 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		if p.currentIs(token.COLUMN) {
 			cmd.Type = ast.AlterAddColumn
 			p.nextToken()
+			// Handle IF NOT EXISTS
+			if p.currentIs(token.IF) {
+				p.nextToken()
+				if p.currentIs(token.NOT) {
+					p.nextToken()
+					if p.currentIs(token.EXISTS) {
+						cmd.IfNotExists = true
+						p.nextToken()
+					}
+				}
+			}
 			cmd.Column = p.parseColumnDeclaration()
 			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "AFTER" {
 				p.nextToken()
@@ -1328,11 +1474,51 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		} else if p.currentIs(token.INDEX) {
 			cmd.Type = ast.AlterAddIndex
 			p.nextToken()
-			// Parse index definition
+			// Parse index name
+			if p.currentIs(token.IDENT) {
+				cmd.Index = p.current.Value
+				p.nextToken()
+			}
+			// Parse expression in parentheses
+			if p.currentIs(token.LPAREN) {
+				p.nextToken()
+				cmd.IndexExpr = p.parseExpression(LOWEST)
+				p.expect(token.RPAREN)
+			}
+			// Parse TYPE
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TYPE" {
+				p.nextToken()
+				if p.currentIs(token.IDENT) {
+					cmd.IndexType = p.current.Value
+					p.nextToken()
+				}
+			}
+			// Parse GRANULARITY
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "GRANULARITY" {
+				p.nextToken()
+				if p.currentIs(token.NUMBER) {
+					granularity, _ := strconv.Atoi(p.current.Value)
+					cmd.Granularity = granularity
+					p.nextToken()
+				}
+			}
 		} else if p.currentIs(token.CONSTRAINT) {
 			cmd.Type = ast.AlterAddConstraint
 			p.nextToken()
-			// Parse constraint
+			// Parse constraint name
+			if p.currentIs(token.IDENT) {
+				cmd.ConstraintName = p.current.Value
+				p.nextToken()
+			}
+			// Parse CHECK
+			if p.currentIs(token.CHECK) {
+				p.nextToken()
+				cmd.Constraint = &ast.Constraint{
+					Position:   p.current.Pos,
+					Name:       cmd.ConstraintName,
+					Expression: p.parseExpression(LOWEST),
+				}
+			}
 		}
 	case token.DROP:
 		p.nextToken()
@@ -1342,6 +1528,7 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			if p.currentIs(token.IF) {
 				p.nextToken()
 				p.expect(token.EXISTS)
+				cmd.IfExists = true
 			}
 			if p.currentIs(token.IDENT) {
 				cmd.ColumnName = p.current.Value
@@ -1357,10 +1544,47 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		} else if p.currentIs(token.CONSTRAINT) {
 			cmd.Type = ast.AlterDropConstraint
 			p.nextToken()
+			if p.currentIs(token.IDENT) {
+				cmd.ConstraintName = p.current.Value
+				p.nextToken()
+			}
 		} else if p.currentIs(token.PARTITION) {
 			cmd.Type = ast.AlterDropPartition
 			p.nextToken()
 			cmd.Partition = p.parseExpression(LOWEST)
+		}
+	case token.IDENT:
+		// Handle CLEAR, MATERIALIZE
+		upper := strings.ToUpper(p.current.Value)
+		if upper == "CLEAR" {
+			p.nextToken()
+			if p.currentIs(token.INDEX) {
+				cmd.Type = ast.AlterClearIndex
+				p.nextToken()
+				if p.currentIs(token.IDENT) {
+					cmd.Index = p.current.Value
+					p.nextToken()
+				}
+			} else if p.currentIs(token.COLUMN) {
+				cmd.Type = ast.AlterClearColumn
+				p.nextToken()
+				if p.currentIs(token.IDENT) {
+					cmd.ColumnName = p.current.Value
+					p.nextToken()
+				}
+			}
+		} else if upper == "MATERIALIZE" {
+			p.nextToken()
+			if p.currentIs(token.INDEX) {
+				cmd.Type = ast.AlterMaterializeIndex
+				p.nextToken()
+				if p.currentIs(token.IDENT) {
+					cmd.Index = p.current.Value
+					p.nextToken()
+				}
+			}
+		} else {
+			return nil
 		}
 	case token.MODIFY:
 		p.nextToken()
@@ -1410,6 +1634,29 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			cmd.Type = ast.AlterAttachPartition
 			p.nextToken()
 			cmd.Partition = p.parseExpression(LOWEST)
+		}
+	case token.FREEZE:
+		p.nextToken()
+		if p.currentIs(token.PARTITION) {
+			cmd.Type = ast.AlterFreezePartition
+			p.nextToken()
+			cmd.Partition = p.parseExpression(LOWEST)
+		} else {
+			cmd.Type = ast.AlterFreeze
+		}
+	case token.REPLACE:
+		p.nextToken()
+		if p.currentIs(token.PARTITION) {
+			cmd.Type = ast.AlterReplacePartition
+			p.nextToken()
+			cmd.Partition = p.parseExpression(LOWEST)
+			if p.currentIs(token.FROM) {
+				p.nextToken()
+				if p.currentIs(token.IDENT) {
+					cmd.FromTable = p.current.Value
+					p.nextToken()
+				}
+			}
 		}
 	default:
 		return nil
@@ -1477,7 +1724,8 @@ func (p *Parser) parseUse() *ast.UseQuery {
 
 	p.nextToken() // skip USE
 
-	if p.currentIs(token.IDENT) {
+	// Database name can be an identifier or a keyword like DEFAULT
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		use.Database = p.current.Value
 		p.nextToken()
 	}
@@ -1490,21 +1738,21 @@ func (p *Parser) parseDescribe() *ast.DescribeQuery {
 		Position: p.current.Pos,
 	}
 
-	p.nextToken() // skip DESCRIBE
+	p.nextToken() // skip DESCRIBE or DESC
 
 	if p.currentIs(token.TABLE) {
 		p.nextToken()
 	}
 
-	// Parse table name
-	if p.currentIs(token.IDENT) {
+	// Parse table name (can be identifier or keyword used as table name like "system")
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		tableName := p.current.Value
 		p.nextToken()
 
 		if p.currentIs(token.DOT) {
 			p.nextToken()
 			desc.Database = tableName
-			if p.currentIs(token.IDENT) {
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 				desc.Table = p.current.Value
 				p.nextToken()
 			}
@@ -1530,28 +1778,53 @@ func (p *Parser) parseShow() *ast.ShowQuery {
 	case token.DATABASES:
 		show.ShowType = ast.ShowDatabases
 		p.nextToken()
-	case token.CREATE:
-		show.ShowType = ast.ShowCreate
+	case token.COLUMNS:
+		show.ShowType = ast.ShowColumns
 		p.nextToken()
-		if p.currentIs(token.TABLE) {
+	case token.CREATE:
+		p.nextToken()
+		if p.currentIs(token.DATABASE) {
+			show.ShowType = ast.ShowCreateDB
 			p.nextToken()
+		} else {
+			show.ShowType = ast.ShowCreate
+			if p.currentIs(token.TABLE) {
+				p.nextToken()
+			}
 		}
 	default:
-		// Handle SHOW PROCESSLIST etc.
+		// Handle SHOW PROCESSLIST, SHOW DICTIONARIES, etc.
 		if p.currentIs(token.IDENT) {
-			if strings.ToUpper(p.current.Value) == "PROCESSLIST" {
+			upper := strings.ToUpper(p.current.Value)
+			switch upper {
+			case "PROCESSLIST":
 				show.ShowType = ast.ShowProcesses
+			case "DICTIONARIES":
+				show.ShowType = ast.ShowDictionaries
 			}
 			p.nextToken()
 		}
 	}
 
-	// Parse FROM clause
-	if p.currentIs(token.FROM) {
-		p.nextToken()
-		if p.currentIs(token.IDENT) {
-			show.From = p.current.Value
+	// Parse FROM clause (or table name for SHOW CREATE TABLE)
+	if p.currentIs(token.FROM) || (show.ShowType == ast.ShowCreate && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword())) {
+		if p.currentIs(token.FROM) {
 			p.nextToken()
+		}
+		// Parse table name which can be database.table or just table
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			name := p.current.Value
+			p.nextToken()
+			if p.currentIs(token.DOT) {
+				p.nextToken()
+				show.Database = name
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					show.From = p.current.Value
+					p.nextToken()
+				}
+			} else {
+				show.From = name
+			}
 		}
 	}
 
@@ -1695,13 +1968,204 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 
 	p.nextToken() // skip SYSTEM
 
-	// Read the command
+	// Read the command - can include identifiers and keywords (like TTL, SYNC, etc.)
 	var parts []string
-	for p.currentIs(token.IDENT) {
+	for p.currentIs(token.IDENT) || p.isSystemCommandKeyword() {
 		parts = append(parts, p.current.Value)
 		p.nextToken()
 	}
 	sys.Command = strings.Join(parts, " ")
 
+	// Parse optional table name for commands like SYNC REPLICA table
+	// Table names can be keywords like "system" or dotted like "system.one"
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		tableName := p.current.Value
+		p.nextToken()
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			sys.Database = tableName
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				sys.Table = p.current.Value
+				p.nextToken()
+			}
+		} else {
+			sys.Table = tableName
+		}
+	}
+
 	return sys
+}
+
+// isSystemCommandKeyword returns true if current token is a keyword that can be part of SYSTEM command
+func (p *Parser) isSystemCommandKeyword() bool {
+	switch p.current.Token {
+	case token.TTL, token.SYNC, token.DROP:
+		return true
+	}
+	return false
+}
+
+func (p *Parser) parseRename() *ast.RenameQuery {
+	rename := &ast.RenameQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip RENAME
+
+	if !p.expect(token.TABLE) {
+		return nil
+	}
+
+	// Parse from table name
+	if p.currentIs(token.IDENT) {
+		rename.From = p.current.Value
+		p.nextToken()
+	}
+
+	if !p.expect(token.TO) {
+		return nil
+	}
+
+	// Parse to table name
+	if p.currentIs(token.IDENT) {
+		rename.To = p.current.Value
+		p.nextToken()
+	}
+
+	// Handle ON CLUSTER
+	if p.currentIs(token.ON) {
+		p.nextToken()
+		if p.currentIs(token.CLUSTER) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) || p.currentIs(token.STRING) {
+				rename.OnCluster = p.current.Value
+				p.nextToken()
+			}
+		}
+	}
+
+	return rename
+}
+
+func (p *Parser) parseExchange() *ast.ExchangeQuery {
+	exchange := &ast.ExchangeQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip EXCHANGE
+
+	if !p.expect(token.TABLES) {
+		return nil
+	}
+
+	// Parse first table name
+	if p.currentIs(token.IDENT) {
+		exchange.Table1 = p.current.Value
+		p.nextToken()
+	}
+
+	if !p.expect(token.AND) {
+		return nil
+	}
+
+	// Parse second table name
+	if p.currentIs(token.IDENT) {
+		exchange.Table2 = p.current.Value
+		p.nextToken()
+	}
+
+	// Handle ON CLUSTER
+	if p.currentIs(token.ON) {
+		p.nextToken()
+		if p.currentIs(token.CLUSTER) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) || p.currentIs(token.STRING) {
+				exchange.OnCluster = p.current.Value
+				p.nextToken()
+			}
+		}
+	}
+
+	return exchange
+}
+
+func (p *Parser) parseArrayJoin() *ast.ArrayJoinClause {
+	aj := &ast.ArrayJoinClause{
+		Position: p.current.Pos,
+	}
+
+	// Check for LEFT ARRAY JOIN
+	if p.currentIs(token.LEFT) {
+		aj.Left = true
+		p.nextToken()
+	}
+
+	if !p.expect(token.ARRAY) {
+		return nil
+	}
+
+	if !p.expect(token.JOIN) {
+		return nil
+	}
+
+	// Parse array expressions
+	aj.Columns = p.parseExpressionList()
+
+	return aj
+}
+
+func (p *Parser) parseWindowDefinitions() []*ast.WindowDefinition {
+	var defs []*ast.WindowDefinition
+
+	for {
+		def := &ast.WindowDefinition{
+			Position: p.current.Pos,
+		}
+
+		// Parse window name
+		if p.currentIs(token.IDENT) {
+			def.Name = p.current.Value
+			p.nextToken()
+		}
+
+		if !p.expect(token.AS) {
+			break
+		}
+
+		if !p.expect(token.LPAREN) {
+			break
+		}
+
+		// Parse window specification
+		spec := &ast.WindowSpec{
+			Position: p.current.Pos,
+		}
+
+		// Parse PARTITION BY
+		if p.currentIs(token.PARTITION) {
+			p.nextToken()
+			if p.expect(token.BY) {
+				spec.PartitionBy = p.parseExpressionList()
+			}
+		}
+
+		// Parse ORDER BY
+		if p.currentIs(token.ORDER) {
+			p.nextToken()
+			if p.expect(token.BY) {
+				spec.OrderBy = p.parseOrderByList()
+			}
+		}
+
+		p.expect(token.RPAREN)
+		def.Spec = spec
+		defs = append(defs, def)
+
+		if !p.currentIs(token.COMMA) {
+			break
+		}
+		p.nextToken()
+	}
+
+	return defs
 }

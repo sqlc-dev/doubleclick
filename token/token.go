@@ -30,8 +30,9 @@ const (
 	LTE        // <=
 	GTE        // >=
 	CONCAT     // ||
-	ARROW      // ->
-	COLONCOLON // ::
+	ARROW        // ->
+	COLONCOLON   // ::
+	NULL_SAFE_EQ // <=>
 
 	// Delimiters
 	LPAREN    // (
@@ -69,6 +70,7 @@ const (
 	CLUSTER
 	COLLATE
 	COLUMN
+	COLUMNS
 	CONSTRAINT
 	CREATE
 	CROSS
@@ -86,13 +88,16 @@ const (
 	END
 	ENGINE
 	EXCEPT
+	EXCHANGE
 	EXISTS
 	EXPLAIN
 	EXTRACT
 	FALSE
 	FETCH
+	FILL
 	FINAL
 	FIRST
+	FREEZE
 	FOR
 	FORMAT
 	FROM
@@ -119,6 +124,7 @@ const (
 	LEFT
 	LIKE
 	LIMIT
+	LAST
 	LIVE
 	LOCAL
 	MATERIALIZED
@@ -151,7 +157,9 @@ const (
 	SET
 	SETTINGS
 	SHOW
+	STEP
 	SUBSTRING
+	SYNC
 	SYSTEM
 	TABLE
 	TABLES
@@ -203,8 +211,9 @@ var tokens = [...]string{
 	LTE:        "<=",
 	GTE:        ">=",
 	CONCAT:     "||",
-	ARROW:      "->",
-	COLONCOLON: "::",
+	ARROW:        "->",
+	COLONCOLON:   "::",
+	NULL_SAFE_EQ: "<=>",
 
 	LPAREN:    "(",
 	RPAREN:    ")",
@@ -239,6 +248,7 @@ var tokens = [...]string{
 	CLUSTER:      "CLUSTER",
 	COLLATE:      "COLLATE",
 	COLUMN:       "COLUMN",
+	COLUMNS:      "COLUMNS",
 	CONSTRAINT:   "CONSTRAINT",
 	CREATE:       "CREATE",
 	CROSS:        "CROSS",
@@ -256,13 +266,16 @@ var tokens = [...]string{
 	END:          "END",
 	ENGINE:       "ENGINE",
 	EXCEPT:       "EXCEPT",
+	EXCHANGE:     "EXCHANGE",
 	EXISTS:       "EXISTS",
 	EXPLAIN:      "EXPLAIN",
 	EXTRACT:      "EXTRACT",
 	FALSE:        "FALSE",
 	FETCH:        "FETCH",
+	FILL:         "FILL",
 	FINAL:        "FINAL",
 	FIRST:        "FIRST",
+	FREEZE:       "FREEZE",
 	FOR:          "FOR",
 	FORMAT:       "FORMAT",
 	FROM:         "FROM",
@@ -285,6 +298,7 @@ var tokens = [...]string{
 	JOIN:         "JOIN",
 	KEY:          "KEY",
 	KILL:         "KILL",
+	LAST:         "LAST",
 	LEADING:      "LEADING",
 	LEFT:         "LEFT",
 	LIKE:         "LIKE",
@@ -321,7 +335,9 @@ var tokens = [...]string{
 	SET:          "SET",
 	SETTINGS:     "SETTINGS",
 	SHOW:         "SHOW",
+	STEP:         "STEP",
 	SUBSTRING:    "SUBSTRING",
+	SYNC:         "SYNC",
 	SYSTEM:       "SYSTEM",
 	TABLE:        "TABLE",
 	TABLES:       "TABLES",

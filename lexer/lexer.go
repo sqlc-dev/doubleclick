@@ -131,6 +131,11 @@ func (l *Lexer) NextToken() Item {
 		if l.peekChar() == '=' {
 			l.readChar()
 			l.readChar()
+			// Check for <=>
+			if l.ch == '>' {
+				l.readChar()
+				return Item{Token: token.NULL_SAFE_EQ, Value: "<=>", Pos: pos}
+			}
 			return Item{Token: token.LTE, Value: "<=", Pos: pos}
 		}
 		if l.peekChar() == '>' {

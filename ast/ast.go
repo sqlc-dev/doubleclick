@@ -28,9 +28,10 @@ type Expression interface {
 
 // SelectWithUnionQuery represents a SELECT query possibly with UNION.
 type SelectWithUnionQuery struct {
-	Position token.Position `json:"-"`
-	Selects  []Statement    `json:"selects"`
-	UnionAll bool           `json:"union_all,omitempty"`
+	Position     token.Position `json:"-"`
+	Selects      []Statement    `json:"selects"`
+	UnionAll     bool           `json:"union_all,omitempty"`
+	UnionModes   []string       `json:"union_modes,omitempty"` // "ALL", "DISTINCT", or "" for each union
 }
 
 func (s *SelectWithUnionQuery) Pos() token.Position { return s.Position }
@@ -39,24 +40,56 @@ func (s *SelectWithUnionQuery) statementNode()      {}
 
 // SelectQuery represents a SELECT statement.
 type SelectQuery struct {
-	Position   token.Position `json:"-"`
-	With       []Expression   `json:"with,omitempty"`
-	Distinct   bool           `json:"distinct,omitempty"`
-	Top        Expression     `json:"top,omitempty"`
-	Columns    []Expression   `json:"columns"`
-	From       *TablesInSelectQuery `json:"from,omitempty"`
-	PreWhere   Expression     `json:"prewhere,omitempty"`
-	Where      Expression     `json:"where,omitempty"`
-	GroupBy    []Expression   `json:"group_by,omitempty"`
-	WithRollup bool           `json:"with_rollup,omitempty"`
-	WithTotals bool           `json:"with_totals,omitempty"`
-	Having     Expression     `json:"having,omitempty"`
-	OrderBy    []*OrderByElement `json:"order_by,omitempty"`
-	Limit      Expression     `json:"limit,omitempty"`
-	Offset     Expression     `json:"offset,omitempty"`
-	Settings   []*SettingExpr `json:"settings,omitempty"`
-	Format     *Identifier    `json:"format,omitempty"`
+	Position    token.Position        `json:"-"`
+	With        []Expression          `json:"with,omitempty"`
+	Distinct    bool                  `json:"distinct,omitempty"`
+	Top         Expression            `json:"top,omitempty"`
+	Columns     []Expression          `json:"columns"`
+	From        *TablesInSelectQuery  `json:"from,omitempty"`
+	ArrayJoin   *ArrayJoinClause      `json:"array_join,omitempty"`
+	PreWhere    Expression            `json:"prewhere,omitempty"`
+	Where       Expression            `json:"where,omitempty"`
+	GroupBy     []Expression          `json:"group_by,omitempty"`
+	WithRollup  bool                  `json:"with_rollup,omitempty"`
+	WithTotals  bool                  `json:"with_totals,omitempty"`
+	Having      Expression            `json:"having,omitempty"`
+	Window      []*WindowDefinition   `json:"window,omitempty"`
+	OrderBy     []*OrderByElement     `json:"order_by,omitempty"`
+	Limit       Expression            `json:"limit,omitempty"`
+	Offset      Expression            `json:"offset,omitempty"`
+	Settings    []*SettingExpr        `json:"settings,omitempty"`
+	IntoOutfile *IntoOutfileClause    `json:"into_outfile,omitempty"`
+	Format      *Identifier           `json:"format,omitempty"`
 }
+
+// ArrayJoinClause represents an ARRAY JOIN clause.
+type ArrayJoinClause struct {
+	Position token.Position `json:"-"`
+	Left     bool           `json:"left,omitempty"`
+	Columns  []Expression   `json:"columns"`
+}
+
+func (a *ArrayJoinClause) Pos() token.Position { return a.Position }
+func (a *ArrayJoinClause) End() token.Position { return a.Position }
+
+// WindowDefinition represents a named window definition in the WINDOW clause.
+type WindowDefinition struct {
+	Position token.Position `json:"-"`
+	Name     string         `json:"name"`
+	Spec     *WindowSpec    `json:"spec"`
+}
+
+func (w *WindowDefinition) Pos() token.Position { return w.Position }
+func (w *WindowDefinition) End() token.Position { return w.Position }
+
+// IntoOutfileClause represents INTO OUTFILE clause.
+type IntoOutfileClause struct {
+	Position token.Position `json:"-"`
+	Filename string         `json:"filename"`
+}
+
+func (i *IntoOutfileClause) Pos() token.Position { return i.Position }
+func (i *IntoOutfileClause) End() token.Position { return i.Position }
 
 func (s *SelectQuery) Pos() token.Position { return s.Position }
 func (s *SelectQuery) End() token.Position { return s.Position }
@@ -146,6 +179,9 @@ type OrderByElement struct {
 	NullsFirst *bool          `json:"nulls_first,omitempty"`
 	Collate    string         `json:"collate,omitempty"`
 	WithFill   bool           `json:"with_fill,omitempty"`
+	FillFrom   Expression     `json:"fill_from,omitempty"`
+	FillTo     Expression     `json:"fill_to,omitempty"`
+	FillStep   Expression     `json:"fill_step,omitempty"`
 }
 
 func (o *OrderByElement) Pos() token.Position { return o.Position }
@@ -185,6 +221,8 @@ type CreateQuery struct {
 	Table          string               `json:"table,omitempty"`
 	View           string               `json:"view,omitempty"`
 	Materialized   bool                 `json:"materialized,omitempty"`
+	To             string               `json:"to,omitempty"`       // Target table for materialized views
+	Populate       bool                 `json:"populate,omitempty"` // POPULATE for materialized views
 	Columns        []*ColumnDeclaration `json:"columns,omitempty"`
 	Constraints    []*Constraint        `json:"constraints,omitempty"`
 	Engine         *EngineClause        `json:"engine,omitempty"`
@@ -271,14 +309,15 @@ func (t *TTLClause) End() token.Position { return t.Position }
 
 // DropQuery represents a DROP statement.
 type DropQuery struct {
-	Position token.Position `json:"-"`
-	IfExists bool           `json:"if_exists,omitempty"`
-	Database string         `json:"database,omitempty"`
-	Table    string         `json:"table,omitempty"`
-	View     string         `json:"view,omitempty"`
-	Temporary bool          `json:"temporary,omitempty"`
-	OnCluster string        `json:"on_cluster,omitempty"`
-	DropDatabase bool       `json:"drop_database,omitempty"`
+	Position     token.Position `json:"-"`
+	IfExists     bool           `json:"if_exists,omitempty"`
+	Database     string         `json:"database,omitempty"`
+	Table        string         `json:"table,omitempty"`
+	View         string         `json:"view,omitempty"`
+	Temporary    bool           `json:"temporary,omitempty"`
+	OnCluster    string         `json:"on_cluster,omitempty"`
+	DropDatabase bool           `json:"drop_database,omitempty"`
+	Sync         bool           `json:"sync,omitempty"`
 }
 
 func (d *DropQuery) Pos() token.Position { return d.Position }
@@ -300,17 +339,24 @@ func (a *AlterQuery) statementNode()      {}
 
 // AlterCommand represents an ALTER command.
 type AlterCommand struct {
-	Position    token.Position       `json:"-"`
-	Type        AlterCommandType     `json:"type"`
-	Column      *ColumnDeclaration   `json:"column,omitempty"`
-	ColumnName  string               `json:"column_name,omitempty"`
-	AfterColumn string               `json:"after_column,omitempty"`
-	NewName     string               `json:"new_name,omitempty"`
-	Index       string               `json:"index,omitempty"`
-	Constraint  *Constraint          `json:"constraint,omitempty"`
-	Partition   Expression           `json:"partition,omitempty"`
-	TTL         *TTLClause           `json:"ttl,omitempty"`
-	Settings    []*SettingExpr       `json:"settings,omitempty"`
+	Position       token.Position       `json:"-"`
+	Type           AlterCommandType     `json:"type"`
+	Column         *ColumnDeclaration   `json:"column,omitempty"`
+	ColumnName     string               `json:"column_name,omitempty"`
+	AfterColumn    string               `json:"after_column,omitempty"`
+	NewName        string               `json:"new_name,omitempty"`
+	IfNotExists    bool                 `json:"if_not_exists,omitempty"`
+	IfExists       bool                 `json:"if_exists,omitempty"`
+	Index          string               `json:"index,omitempty"`
+	IndexExpr      Expression           `json:"index_expr,omitempty"`
+	IndexType      string               `json:"index_type,omitempty"`
+	Granularity    int                  `json:"granularity,omitempty"`
+	Constraint     *Constraint          `json:"constraint,omitempty"`
+	ConstraintName string               `json:"constraint_name,omitempty"`
+	Partition      Expression           `json:"partition,omitempty"`
+	FromTable      string               `json:"from_table,omitempty"`
+	TTL            *TTLClause           `json:"ttl,omitempty"`
+	Settings       []*SettingExpr       `json:"settings,omitempty"`
 }
 
 func (a *AlterCommand) Pos() token.Position { return a.Position }
@@ -320,21 +366,26 @@ func (a *AlterCommand) End() token.Position { return a.Position }
 type AlterCommandType string
 
 const (
-	AlterAddColumn       AlterCommandType = "ADD_COLUMN"
-	AlterDropColumn      AlterCommandType = "DROP_COLUMN"
-	AlterModifyColumn    AlterCommandType = "MODIFY_COLUMN"
-	AlterRenameColumn    AlterCommandType = "RENAME_COLUMN"
-	AlterClearColumn     AlterCommandType = "CLEAR_COLUMN"
-	AlterCommentColumn   AlterCommandType = "COMMENT_COLUMN"
-	AlterAddIndex        AlterCommandType = "ADD_INDEX"
-	AlterDropIndex       AlterCommandType = "DROP_INDEX"
-	AlterAddConstraint   AlterCommandType = "ADD_CONSTRAINT"
-	AlterDropConstraint  AlterCommandType = "DROP_CONSTRAINT"
-	AlterModifyTTL       AlterCommandType = "MODIFY_TTL"
-	AlterModifySetting   AlterCommandType = "MODIFY_SETTING"
-	AlterDropPartition   AlterCommandType = "DROP_PARTITION"
-	AlterDetachPartition AlterCommandType = "DETACH_PARTITION"
-	AlterAttachPartition AlterCommandType = "ATTACH_PARTITION"
+	AlterAddColumn         AlterCommandType = "ADD_COLUMN"
+	AlterDropColumn        AlterCommandType = "DROP_COLUMN"
+	AlterModifyColumn      AlterCommandType = "MODIFY_COLUMN"
+	AlterRenameColumn      AlterCommandType = "RENAME_COLUMN"
+	AlterClearColumn       AlterCommandType = "CLEAR_COLUMN"
+	AlterCommentColumn     AlterCommandType = "COMMENT_COLUMN"
+	AlterAddIndex          AlterCommandType = "ADD_INDEX"
+	AlterDropIndex         AlterCommandType = "DROP_INDEX"
+	AlterClearIndex        AlterCommandType = "CLEAR_INDEX"
+	AlterMaterializeIndex  AlterCommandType = "MATERIALIZE_INDEX"
+	AlterAddConstraint     AlterCommandType = "ADD_CONSTRAINT"
+	AlterDropConstraint    AlterCommandType = "DROP_CONSTRAINT"
+	AlterModifyTTL         AlterCommandType = "MODIFY_TTL"
+	AlterModifySetting     AlterCommandType = "MODIFY_SETTING"
+	AlterDropPartition     AlterCommandType = "DROP_PARTITION"
+	AlterDetachPartition   AlterCommandType = "DETACH_PARTITION"
+	AlterAttachPartition   AlterCommandType = "ATTACH_PARTITION"
+	AlterReplacePartition  AlterCommandType = "REPLACE_PARTITION"
+	AlterFreezePartition   AlterCommandType = "FREEZE_PARTITION"
+	AlterFreeze            AlterCommandType = "FREEZE"
 )
 
 // TruncateQuery represents a TRUNCATE statement.
@@ -390,10 +441,13 @@ func (s *ShowQuery) statementNode()      {}
 type ShowType string
 
 const (
-	ShowTables     ShowType = "TABLES"
-	ShowDatabases  ShowType = "DATABASES"
-	ShowProcesses  ShowType = "PROCESSLIST"
-	ShowCreate     ShowType = "CREATE"
+	ShowTables        ShowType = "TABLES"
+	ShowDatabases     ShowType = "DATABASES"
+	ShowProcesses     ShowType = "PROCESSLIST"
+	ShowCreate        ShowType = "CREATE"
+	ShowCreateDB      ShowType = "CREATE_DATABASE"
+	ShowColumns       ShowType = "COLUMNS"
+	ShowDictionaries  ShowType = "DICTIONARIES"
 )
 
 // ExplainQuery represents an EXPLAIN statement.
@@ -454,6 +508,30 @@ type SystemQuery struct {
 func (s *SystemQuery) Pos() token.Position { return s.Position }
 func (s *SystemQuery) End() token.Position { return s.Position }
 func (s *SystemQuery) statementNode()      {}
+
+// RenameQuery represents a RENAME TABLE statement.
+type RenameQuery struct {
+	Position  token.Position `json:"-"`
+	From      string         `json:"from"`
+	To        string         `json:"to"`
+	OnCluster string         `json:"on_cluster,omitempty"`
+}
+
+func (r *RenameQuery) Pos() token.Position { return r.Position }
+func (r *RenameQuery) End() token.Position { return r.Position }
+func (r *RenameQuery) statementNode()      {}
+
+// ExchangeQuery represents an EXCHANGE TABLES statement.
+type ExchangeQuery struct {
+	Position  token.Position `json:"-"`
+	Table1    string         `json:"table1"`
+	Table2    string         `json:"table2"`
+	OnCluster string         `json:"on_cluster,omitempty"`
+}
+
+func (e *ExchangeQuery) Pos() token.Position { return e.Position }
+func (e *ExchangeQuery) End() token.Position { return e.Position }
+func (e *ExchangeQuery) statementNode()      {}
 
 // -----------------------------------------------------------------------------
 // Expressions
@@ -522,18 +600,42 @@ const (
 
 // Asterisk represents a *.
 type Asterisk struct {
-	Position token.Position `json:"-"`
-	Table    string         `json:"table,omitempty"` // for table.*
+	Position token.Position  `json:"-"`
+	Table    string          `json:"table,omitempty"`   // for table.*
+	Except   []string        `json:"except,omitempty"`  // for * EXCEPT (col1, col2)
+	Replace  []*ReplaceExpr  `json:"replace,omitempty"` // for * REPLACE (expr AS col)
 }
 
 func (a *Asterisk) Pos() token.Position { return a.Position }
 func (a *Asterisk) End() token.Position { return a.Position }
 func (a *Asterisk) expressionNode()     {}
 
+// ReplaceExpr represents an expression in REPLACE clause.
+type ReplaceExpr struct {
+	Position token.Position `json:"-"`
+	Expr     Expression     `json:"expr"`
+	Name     string         `json:"name"`
+}
+
+func (r *ReplaceExpr) Pos() token.Position { return r.Position }
+func (r *ReplaceExpr) End() token.Position { return r.Position }
+
+// ColumnsMatcher represents COLUMNS('pattern') expression.
+type ColumnsMatcher struct {
+	Position token.Position `json:"-"`
+	Pattern  string         `json:"pattern"`
+	Except   []string       `json:"except,omitempty"`
+}
+
+func (c *ColumnsMatcher) Pos() token.Position { return c.Position }
+func (c *ColumnsMatcher) End() token.Position { return c.Position }
+func (c *ColumnsMatcher) expressionNode()     {}
+
 // FunctionCall represents a function call.
 type FunctionCall struct {
 	Position   token.Position `json:"-"`
 	Name       string         `json:"name"`
+	Parameters []Expression   `json:"parameters,omitempty"` // For parametric functions like quantile(0.9)(x)
 	Arguments  []Expression   `json:"arguments,omitempty"`
 	Distinct   bool           `json:"distinct,omitempty"`
 	Over       *WindowSpec    `json:"over,omitempty"`
@@ -619,6 +721,18 @@ type UnaryExpr struct {
 func (u *UnaryExpr) Pos() token.Position { return u.Position }
 func (u *UnaryExpr) End() token.Position { return u.Position }
 func (u *UnaryExpr) expressionNode()     {}
+
+// TernaryExpr represents a ternary conditional expression (cond ? then : else).
+type TernaryExpr struct {
+	Position  token.Position `json:"-"`
+	Condition Expression     `json:"condition"`
+	Then      Expression     `json:"then"`
+	Else      Expression     `json:"else"`
+}
+
+func (t *TernaryExpr) Pos() token.Position { return t.Position }
+func (t *TernaryExpr) End() token.Position { return t.Position }
+func (t *TernaryExpr) expressionNode()     {}
 
 // Subquery represents a subquery.
 type Subquery struct {
