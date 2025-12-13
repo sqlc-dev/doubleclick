@@ -80,14 +80,54 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 		return exprs
 	}
 
-	exprs = append(exprs, p.parseExpression(LOWEST))
+	expr := p.parseExpression(LOWEST)
+	if expr != nil {
+		// Handle implicit alias (identifier without AS)
+		expr = p.parseImplicitAlias(expr)
+		exprs = append(exprs, expr)
+	}
 
 	for p.currentIs(token.COMMA) {
 		p.nextToken()
-		exprs = append(exprs, p.parseExpression(LOWEST))
+		expr := p.parseExpression(LOWEST)
+		if expr != nil {
+			// Handle implicit alias (identifier without AS)
+			expr = p.parseImplicitAlias(expr)
+			exprs = append(exprs, expr)
+		}
 	}
 
 	return exprs
+}
+
+// parseImplicitAlias handles implicit column aliases like "SELECT 'a' c0" (meaning 'a' AS c0)
+func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
+	// If next token is a plain identifier (not a keyword), treat as implicit alias
+	// Keywords like FROM, WHERE etc. are tokenized as their own token types, not IDENT
+	if p.currentIs(token.IDENT) {
+		alias := p.current.Value
+		p.nextToken()
+
+		// Set alias on the expression if it supports it
+		switch e := expr.(type) {
+		case *ast.Identifier:
+			e.Alias = alias
+			return e
+		case *ast.FunctionCall:
+			e.Alias = alias
+			return e
+		case *ast.Subquery:
+			e.Alias = alias
+			return e
+		default:
+			return &ast.AliasedExpr{
+				Position: expr.Pos(),
+				Expr:     expr,
+				Alias:    alias,
+			}
+		}
+	}
+	return expr
 }
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
@@ -543,6 +583,16 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 	pos := p.current.Pos
 	p.nextToken() // skip (
 
+	// Handle empty tuple ()
+	if p.currentIs(token.RPAREN) {
+		p.nextToken()
+		return &ast.Literal{
+			Position: pos,
+			Type:     ast.LiteralTuple,
+			Value:    []ast.Expression{},
+		}
+	}
+
 	// Check for subquery
 	if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 		subquery := p.parseSelectWithUnion()
@@ -661,11 +711,21 @@ func (p *Parser) parseCast() ast.Expression {
 	// Use ALIAS_PREC to avoid consuming AS as an alias operator
 	expr.Expr = p.parseExpression(ALIAS_PREC)
 
-	if !p.expect(token.AS) {
-		return nil
+	// Handle both CAST(x AS Type) and CAST(x, 'Type') syntax
+	if p.currentIs(token.AS) {
+		p.nextToken()
+		expr.Type = p.parseDataType()
+	} else if p.currentIs(token.COMMA) {
+		p.nextToken()
+		// Type is given as a string literal
+		if p.currentIs(token.STRING) {
+			expr.Type = &ast.DataType{
+				Position: p.current.Pos,
+				Name:     p.current.Value,
+			}
+			p.nextToken()
+		}
 	}
-
-	expr.Type = p.parseDataType()
 
 	p.expect(token.RPAREN)
 

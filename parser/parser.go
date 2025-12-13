@@ -291,6 +291,12 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			sel.Offset = sel.Limit
 			sel.Limit = p.parseExpression(LOWEST)
 		}
+
+		// WITH TIES modifier
+		if p.currentIs(token.WITH) && p.peekIs(token.TIES) {
+			p.nextToken() // skip WITH
+			p.nextToken() // skip TIES
+		}
 	}
 
 	// Parse OFFSET clause
@@ -1136,8 +1142,8 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 		Position: p.current.Pos,
 	}
 
-	// Parse column name
-	if p.currentIs(token.IDENT) {
+	// Parse column name (can be identifier or keyword like KEY)
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		col.Name = p.current.Value
 		p.nextToken()
 	} else {
@@ -1188,7 +1194,8 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 }
 
 func (p *Parser) parseDataType() *ast.DataType {
-	if !p.currentIs(token.IDENT) {
+	// Type names can be identifiers or keywords (Array, Nested, Key, etc.)
+	if !p.currentIs(token.IDENT) && !p.current.Token.IsKeyword() {
 		return nil
 	}
 
@@ -1203,7 +1210,8 @@ func (p *Parser) parseDataType() *ast.DataType {
 		p.nextToken()
 		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
 			// Could be another data type or an expression
-			if p.currentIs(token.IDENT) && p.isDataTypeName(p.current.Value) {
+			// Type names can be identifiers or keywords (Array, Nested, etc.)
+			if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.isDataTypeName(p.current.Value) {
 				dt.Parameters = append(dt.Parameters, p.parseDataType())
 			} else {
 				dt.Parameters = append(dt.Parameters, p.parseExpression(LOWEST))
@@ -1223,9 +1231,9 @@ func (p *Parser) parseDataType() *ast.DataType {
 func (p *Parser) isDataTypeName(name string) bool {
 	upper := strings.ToUpper(name)
 	types := []string{
-		"INT8", "INT16", "INT32", "INT64", "INT128", "INT256",
+		"INT", "INT8", "INT16", "INT32", "INT64", "INT128", "INT256",
 		"UINT8", "UINT16", "UINT32", "UINT64", "UINT128", "UINT256",
-		"FLOAT32", "FLOAT64",
+		"FLOAT32", "FLOAT64", "FLOAT",
 		"DECIMAL", "DECIMAL32", "DECIMAL64", "DECIMAL128", "DECIMAL256",
 		"STRING", "FIXEDSTRING",
 		"UUID", "DATE", "DATE32", "DATETIME", "DATETIME64",
@@ -1235,6 +1243,11 @@ func (p *Parser) isDataTypeName(name string) bool {
 		"BOOL", "BOOLEAN",
 		"IPV4", "IPV6",
 		"NOTHING", "INTERVAL",
+		"JSON", "OBJECT", "VARIANT",
+		"AGGREGATEFUNCTION", "SIMPLEAGGREGATEFUNCTION",
+		"POINT", "RING", "POLYGON", "MULTIPOLYGON",
+		"TIME64", "TIME",
+		"DYNAMIC",
 	}
 	for _, t := range types {
 		if upper == t {
