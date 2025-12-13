@@ -251,6 +251,13 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			sel.WithRollup = true
 		}
 
+		// WITH CUBE
+		if p.currentIs(token.WITH) && p.peekIs(token.CUBE) {
+			p.nextToken()
+			p.nextToken()
+			sel.WithCube = true
+		}
+
 		// WITH TOTALS
 		if p.currentIs(token.WITH) && p.peekIs(token.TOTALS) {
 			p.nextToken()

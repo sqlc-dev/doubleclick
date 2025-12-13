@@ -54,6 +54,7 @@ type SelectQuery struct {
 	Where       Expression            `json:"where,omitempty"`
 	GroupBy     []Expression          `json:"group_by,omitempty"`
 	WithRollup  bool                  `json:"with_rollup,omitempty"`
+	WithCube    bool                  `json:"with_cube,omitempty"`
 	WithTotals  bool                  `json:"with_totals,omitempty"`
 	Having      Expression            `json:"having,omitempty"`
 	Window      []*WindowDefinition   `json:"window,omitempty"`
