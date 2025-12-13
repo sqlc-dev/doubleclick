@@ -201,7 +201,8 @@ func (s *SettingExpr) End() token.Position { return s.Position }
 type InsertQuery struct {
 	Position token.Position `json:"-"`
 	Database string         `json:"database,omitempty"`
-	Table    string         `json:"table"`
+	Table    string         `json:"table,omitempty"`
+	Function *FunctionCall  `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
 	Columns  []*Identifier  `json:"columns,omitempty"`
 	Select   Statement      `json:"select,omitempty"`
 	Format   *Identifier    `json:"format,omitempty"`

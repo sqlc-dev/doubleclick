@@ -44,7 +44,7 @@ func (p *Parser) precedence(tok token.Token) int {
 		return CONCAT_PREC
 	case token.PLUS, token.MINUS:
 		return ADD_PREC
-	case token.ASTERISK, token.SLASH, token.PERCENT:
+	case token.ASTERISK, token.SLASH, token.PERCENT, token.DIV, token.MOD:
 		return MUL_PREC
 	case token.LPAREN, token.LBRACKET:
 		return CALL
@@ -173,7 +173,7 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	switch p.current.Token {
 	case token.PLUS, token.MINUS, token.ASTERISK, token.SLASH, token.PERCENT,
 		token.EQ, token.NEQ, token.LT, token.GT, token.LTE, token.GTE,
-		token.AND, token.OR, token.CONCAT:
+		token.AND, token.OR, token.CONCAT, token.DIV, token.MOD:
 		return p.parseBinaryExpression(left)
 	case token.NULL_SAFE_EQ:
 		return p.parseBinaryExpression(left)
@@ -1104,8 +1104,9 @@ func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
 func (p *Parser) parseAlias(left ast.Expression) ast.Expression {
 	p.nextToken() // skip AS
 
+	// Alias can be an identifier or a keyword (ClickHouse allows keywords as aliases)
 	alias := ""
-	if p.currentIs(token.IDENT) {
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		alias = p.current.Value
 		p.nextToken()
 	}
