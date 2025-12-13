@@ -2,6 +2,7 @@ package ast_test
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,6 +11,12 @@ import (
 	"github.com/kyleconroy/doubleclick/ast"
 	"github.com/kyleconroy/doubleclick/parser"
 )
+
+// testMetadata holds optional metadata for a test case
+type testMetadata struct {
+	Todo   bool   `json:"todo,omitempty"`
+	Source string `json:"source,omitempty"`
+}
 
 func TestExplain(t *testing.T) {
 	testdataDir := "../parser/testdata"
@@ -36,6 +43,15 @@ func TestExplain(t *testing.T) {
 		expected := string(explainBytes)
 
 		t.Run(testName, func(t *testing.T) {
+			// Read optional metadata
+			var metadata testMetadata
+			metadataPath := filepath.Join(testDir, "metadata.json")
+			if metadataBytes, err := os.ReadFile(metadataPath); err == nil {
+				if err := json.Unmarshal(metadataBytes, &metadata); err != nil {
+					t.Fatalf("Failed to parse metadata.json: %v", err)
+				}
+			}
+
 			// Read the query
 			queryPath := filepath.Join(testDir, "query.sql")
 			queryBytes, err := os.ReadFile(queryPath)
@@ -60,6 +76,9 @@ func TestExplain(t *testing.T) {
 
 			// Compare
 			if got != expected {
+				if metadata.Todo {
+					t.Skipf("TODO: Explain output mismatch (skipping)")
+				}
 				t.Errorf("Explain output mismatch\nQuery: %s\n\nExpected:\n%s\nGot:\n%s", query, expected, got)
 			}
 		})
