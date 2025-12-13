@@ -432,6 +432,18 @@ func (l *Lexer) readIdentifier() Item {
 	pos := l.pos
 	var sb strings.Builder
 
+	// Check for hex string literal: x'...' or X'...'
+	if (l.ch == 'x' || l.ch == 'X') && l.peekChar() == '\'' {
+		l.readChar() // skip x
+		return l.readString('\'') // read as regular string
+	}
+
+	// Check for binary string literal: b'...' or B'...'
+	if (l.ch == 'b' || l.ch == 'B') && l.peekChar() == '\'' {
+		l.readChar() // skip b
+		return l.readString('\'') // read as regular string
+	}
+
 	for isIdentChar(l.ch) {
 		sb.WriteRune(l.ch)
 		l.readChar()
