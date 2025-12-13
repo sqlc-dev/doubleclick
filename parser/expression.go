@@ -432,14 +432,8 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 		fn.Over = p.parseWindowSpec()
 	}
 
-	// Handle alias
-	if p.currentIs(token.AS) {
-		p.nextToken()
-		if p.currentIs(token.IDENT) {
-			fn.Alias = p.current.Value
-			p.nextToken()
-		}
-	}
+	// Note: AS alias is handled by the expression parser's infix handling (parseAlias)
+	// to respect precedence levels when called from contexts like WITH clauses
 
 	return fn
 }
@@ -1095,18 +1089,34 @@ func (p *Parser) parseInExpression(left ast.Expression, not bool) ast.Expression
 
 	p.nextToken() // skip IN
 
-	if !p.expect(token.LPAREN) {
-		return nil
-	}
+	// Handle different IN list formats:
+	// 1. (subquery or list) - standard format
+	// 2. [array literal] - array format
+	// 3. identifier - table or alias reference
+	// 4. tuple(...) - explicit tuple function
 
-	// Check for subquery
-	if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
-		expr.Query = p.parseSelectWithUnion()
+	if p.currentIs(token.LPAREN) {
+		p.nextToken() // skip (
+		// Check for subquery
+		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
+			expr.Query = p.parseSelectWithUnion()
+		} else {
+			expr.List = p.parseExpressionList()
+		}
+		p.expect(token.RPAREN)
+	} else if p.currentIs(token.LBRACKET) {
+		// Array literal: IN [1, 2, 3]
+		arr := p.parseArrayLiteral()
+		expr.List = []ast.Expression{arr}
 	} else {
-		expr.List = p.parseExpressionList()
+		// Could be identifier, tuple function, or other expression
+		// Parse as expression
+		innerExpr := p.parseExpression(CALL)
+		if innerExpr != nil {
+			expr.List = []ast.Expression{innerExpr}
+		}
 	}
 
-	p.expect(token.RPAREN)
 	return expr
 }
 

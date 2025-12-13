@@ -380,6 +380,12 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		}
 	}
 
+	// Parse SETTINGS clause (can come after FORMAT)
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		sel.Settings = p.parseSettingsList()
+	}
+
 	return sel
 }
 
