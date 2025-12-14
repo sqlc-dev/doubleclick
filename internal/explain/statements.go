@@ -56,7 +56,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if len(n.Columns) > 0 {
 		children++
 	}
-	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 {
+	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil {
 		children++
 	}
 	if n.AsSelect != nil {
@@ -76,9 +76,12 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			Column(sb, col, depth+3)
 		}
 	}
-	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || len(n.Settings) > 0 {
+	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || len(n.Settings) > 0 {
 		storageChildren := 0
 		if n.Engine != nil {
+			storageChildren++
+		}
+		if n.PartitionBy != nil {
 			storageChildren++
 		}
 		if len(n.OrderBy) > 0 {
@@ -104,6 +107,13 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				}
 			} else {
 				fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
+			}
+		}
+		if n.PartitionBy != nil {
+			if ident, ok := n.PartitionBy.(*ast.Identifier); ok {
+				fmt.Fprintf(sb, "%s  Identifier %s\n", indent, ident.Name())
+			} else {
+				Node(sb, n.PartitionBy, depth+2)
 			}
 		}
 		if len(n.OrderBy) > 0 {

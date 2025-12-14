@@ -29,7 +29,9 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			}
 			hasComplexExpr := false
 			for _, e := range exprs {
-				if _, isLit := e.(*ast.Literal); !isLit {
+				lit, isLit := e.(*ast.Literal)
+				// Non-literals or tuple/array literals count as complex
+				if !isLit || (isLit && (lit.Type == ast.LiteralTuple || lit.Type == ast.LiteralArray)) {
 					hasComplexExpr = true
 					break
 				}
