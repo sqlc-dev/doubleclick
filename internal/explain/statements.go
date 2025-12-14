@@ -62,7 +62,12 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if n.AsSelect != nil {
 		children++
 	}
-	fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, name, children)
+	// ClickHouse adds an extra space before (children N) for CREATE DATABASE
+	if n.CreateDatabase {
+		fmt.Fprintf(sb, "%sCreateQuery %s  (children %d)\n", indent, name, children)
+	} else {
+		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, name, children)
+	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 	if len(n.Columns) > 0 {
 		fmt.Fprintf(sb, "%s Columns definition (children %d)\n", indent, 1)
@@ -154,7 +159,12 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string) {
 	if n.DropDatabase {
 		name = n.Database
 	}
-	fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, name, 1)
+	// DROP DATABASE uses different spacing than DROP TABLE
+	if n.DropDatabase {
+		fmt.Fprintf(sb, "%sDropQuery %s  (children %d)\n", indent, name, 1)
+	} else {
+		fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, name, 1)
+	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 }
 
