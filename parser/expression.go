@@ -411,11 +411,7 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 	// Handle SETTINGS inside function call (table functions)
 	if p.currentIs(token.SETTINGS) {
 		p.nextToken()
-		// Parse settings as key=value pairs until )
-		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-			// Just skip the settings for now
-			p.nextToken()
-		}
+		fn.Settings = p.parseSettingsList()
 	}
 
 	p.expect(token.RPAREN)

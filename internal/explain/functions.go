@@ -26,14 +26,22 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 	} else {
 		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, children)
 	}
-	// Arguments
+	// Arguments (Settings are included as part of argument count)
+	argCount := len(n.Arguments)
+	if len(n.Settings) > 0 {
+		argCount++ // Set is counted as one argument
+	}
 	fmt.Fprintf(sb, "%s ExpressionList", indent)
-	if len(n.Arguments) > 0 {
-		fmt.Fprintf(sb, " (children %d)", len(n.Arguments))
+	if argCount > 0 {
+		fmt.Fprintf(sb, " (children %d)", argCount)
 	}
 	fmt.Fprintln(sb)
 	for _, arg := range n.Arguments {
 		Node(sb, arg, depth+2)
+	}
+	// Settings appear as Set node inside ExpressionList
+	if len(n.Settings) > 0 {
+		fmt.Fprintf(sb, "%s  Set\n", indent)
 	}
 	// Parameters (for parametric functions)
 	if len(n.Parameters) > 0 {

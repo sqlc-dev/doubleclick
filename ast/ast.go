@@ -716,6 +716,7 @@ type FunctionCall struct {
 	Name       string         `json:"name"`
 	Parameters []Expression   `json:"parameters,omitempty"` // For parametric functions like quantile(0.9)(x)
 	Arguments  []Expression   `json:"arguments,omitempty"`
+	Settings   []*SettingExpr `json:"settings,omitempty"` // For table functions with SETTINGS
 	Distinct   bool           `json:"distinct,omitempty"`
 	Over       *WindowSpec    `json:"over,omitempty"`
 	Alias      string         `json:"alias,omitempty"`
