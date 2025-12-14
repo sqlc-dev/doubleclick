@@ -14,6 +14,35 @@ func FormatFloat(val float64) string {
 	return strconv.FormatFloat(val, 'f', -1, 64)
 }
 
+// escapeStringLiteral escapes special characters in a string for EXPLAIN AST output
+// Uses double-escaping as ClickHouse EXPLAIN AST displays strings
+func escapeStringLiteral(s string) string {
+	var sb strings.Builder
+	for _, r := range s {
+		switch r {
+		case '\\':
+			sb.WriteString("\\\\\\\\") // backslash becomes four backslashes (\\\\)
+		case '\'':
+			sb.WriteString("\\'")
+		case '\n':
+			sb.WriteString("\\\\n") // newline becomes \\n
+		case '\t':
+			sb.WriteString("\\\\t") // tab becomes \\t
+		case '\r':
+			sb.WriteString("\\\\r") // carriage return becomes \\r
+		case '\x00':
+			sb.WriteString("\\\\0") // null becomes \\0
+		case '\b':
+			sb.WriteString("\\\\b") // backspace becomes \\b
+		case '\f':
+			sb.WriteString("\\\\f") // form feed becomes \\f
+		default:
+			sb.WriteRune(r)
+		}
+	}
+	return sb.String()
+}
+
 // FormatLiteral formats a literal value for EXPLAIN AST output
 func FormatLiteral(lit *ast.Literal) string {
 	switch lit.Type {
@@ -35,8 +64,8 @@ func FormatLiteral(lit *ast.Literal) string {
 		return fmt.Sprintf("Float64_%s", FormatFloat(val))
 	case ast.LiteralString:
 		s := lit.Value.(string)
-		// Escape backslashes in strings
-		s = strings.ReplaceAll(s, "\\", "\\\\")
+		// Escape special characters for display
+		s = escapeStringLiteral(s)
 		return fmt.Sprintf("\\'%s\\'", s)
 	case ast.LiteralBoolean:
 		if lit.Value.(bool) {

@@ -2,8 +2,8 @@
 
 ## Current State
 
-- **Tests passing:** 6,000 (87.9%)
-- **Tests skipped:** 824 (12.1%)
+- **Tests passing:** 6,006 (88.0%)
+- **Tests skipped:** 819 (12.0%)
 
 ## Recently Fixed (explain layer)
 
@@ -21,6 +21,7 @@
 - ✅ DROP TABLE with multiple tables (e.g., `DROP TABLE t1, t2, t3`)
 - ✅ Negative integer/float literals (e.g., `-1` → `Literal Int64_-1`)
 - ✅ Empty tuple in ORDER BY (e.g., `ORDER BY ()` → `Function tuple` with empty `ExpressionList`)
+- ✅ String escape handling (lexer now unescapes `\'`, `\\`, `\n`, `\t`, `\0`, etc.)
 
 ## Parser Issues (High Priority)
 
@@ -44,14 +45,6 @@ TTL expressions on columns are not captured:
 ```sql
 CREATE TABLE t (c Int TTL expr()) ENGINE=MergeTree;
 -- Expected: ColumnDeclaration with 2 children (type + TTL function)
-```
-
-### String Escape Handling
-Parser stores escaped characters literally instead of unescaping:
-```sql
-SELECT 'x\'e2\'';
--- Parser stores: x\'e2\'  (with backslashes)
--- Should store: x'e2'  (unescaped)
 ```
 
 ## Parser Issues (Medium Priority)
