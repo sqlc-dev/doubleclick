@@ -173,11 +173,23 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 			p.nextToken()
 		}
 		query.UnionModes = append(query.UnionModes, mode)
-		sel := p.parseSelect()
-		if sel == nil {
-			break
+
+		// Handle parenthesized subqueries: UNION ALL (SELECT ... UNION ALL SELECT ...)
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			nested := p.parseSelectWithUnion()
+			p.expect(token.RPAREN)
+			// Flatten nested union selects into current query
+			for _, s := range nested.Selects {
+				query.Selects = append(query.Selects, s)
+			}
+		} else {
+			sel := p.parseSelect()
+			if sel == nil {
+				break
+			}
+			query.Selects = append(query.Selects, sel)
 		}
-		query.Selects = append(query.Selects, sel)
 	}
 
 	return query
@@ -251,6 +263,13 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			sel.WithRollup = true
 		}
 
+		// WITH CUBE
+		if p.currentIs(token.WITH) && p.peekIs(token.CUBE) {
+			p.nextToken()
+			p.nextToken()
+			sel.WithCube = true
+		}
+
 		// WITH TOTALS
 		if p.currentIs(token.WITH) && p.peekIs(token.TOTALS) {
 			p.nextToken()
@@ -291,6 +310,26 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			sel.Offset = sel.Limit
 			sel.Limit = p.parseExpression(LOWEST)
 		}
+
+		// LIMIT BY clause (ClickHouse specific: LIMIT n BY expr1, expr2, ...)
+		if p.currentIs(token.BY) {
+			p.nextToken()
+			// Parse LIMIT BY expressions - skip them for now
+			for !p.isEndOfExpression() {
+				p.parseExpression(LOWEST)
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+		}
+
+		// WITH TIES modifier
+		if p.currentIs(token.WITH) && p.peekIs(token.TIES) {
+			p.nextToken() // skip WITH
+			p.nextToken() // skip TIES
+		}
 	}
 
 	// Parse OFFSET clause
@@ -327,6 +366,13 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		}
 	}
 
+	// Parse WITH TOTALS (can appear after GROUP BY or at end of SELECT)
+	if p.currentIs(token.WITH) && p.peekIs(token.TOTALS) {
+		p.nextToken()
+		p.nextToken()
+		sel.WithTotals = true
+	}
+
 	// Parse SETTINGS clause
 	if p.currentIs(token.SETTINGS) {
 		p.nextToken()
@@ -358,6 +404,12 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			}
 			p.nextToken()
 		}
+	}
+
+	// Parse SETTINGS clause (can come after FORMAT)
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		sel.Settings = p.parseSettingsList()
 	}
 
 	return sel
@@ -651,10 +703,10 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 		}
 	}
 
-	// Handle alias
+	// Handle alias (keywords like LEFT, RIGHT can be used as aliases after AS)
 	if p.currentIs(token.AS) {
 		p.nextToken()
-		if p.currentIs(token.IDENT) {
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 			expr.Alias = p.current.Value
 			p.nextToken()
 		}
@@ -673,6 +725,17 @@ func (p *Parser) isKeywordForClause() bool {
 		token.PREWHERE, token.JOIN, token.LEFT, token.RIGHT, token.INNER,
 		token.FULL, token.CROSS, token.ON, token.USING, token.GLOBAL,
 		token.ANY, token.ALL, token.SEMI, token.ANTI, token.ASOF:
+		return true
+	}
+	return false
+}
+
+func (p *Parser) isEndOfExpression() bool {
+	switch p.current.Token {
+	case token.EOF, token.RPAREN, token.RBRACKET, token.SEMICOLON,
+		token.UNION, token.EXCEPT, token.ORDER, token.LIMIT,
+		token.OFFSET, token.SETTINGS, token.FORMAT, token.INTO,
+		token.WITH:
 		return true
 	}
 	return false
@@ -768,11 +831,18 @@ func (p *Parser) parseSettingsList() []*ast.SettingExpr {
 		}
 		p.nextToken()
 
-		if !p.expect(token.EQ) {
-			break
+		// Settings can have optional value (bool settings can be just name)
+		if p.currentIs(token.EQ) {
+			p.nextToken()
+			setting.Value = p.parseExpression(LOWEST)
+		} else {
+			// Boolean setting without value - defaults to true
+			setting.Value = &ast.Literal{
+				Position: setting.Position,
+				Type:     ast.LiteralBoolean,
+				Value:    true,
+			}
 		}
-
-		setting.Value = p.parseExpression(LOWEST)
 		settings = append(settings, setting)
 
 		if !p.currentIs(token.COMMA) {
@@ -842,12 +912,34 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 		p.expect(token.RPAREN)
 	}
 
+	// Parse SETTINGS before VALUES
+	if p.currentIs(token.SETTINGS) {
+		ins.HasSettings = true
+		p.nextToken()
+		// Just parse and skip the settings
+		p.parseSettingsList()
+	}
+
 	// Parse VALUES or SELECT
 	if p.currentIs(token.VALUES) {
 		p.nextToken()
-		// VALUES are typically provided externally, skip for now
+		// Skip VALUES data - consume until end of statement
+		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) && !p.currentIs(token.SETTINGS) {
+			p.nextToken()
+		}
 	} else if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 		ins.Select = p.parseSelectWithUnion()
+		// If the SELECT has settings, mark the INSERT as having settings too
+		if ins.Select != nil {
+			if sel, ok := ins.Select.(*ast.SelectWithUnionQuery); ok && sel != nil && len(sel.Selects) > 0 {
+				lastSel := sel.Selects[len(sel.Selects)-1]
+				if lastSel != nil {
+					if selQuery, ok := lastSel.(*ast.SelectQuery); ok && selQuery != nil && len(selQuery.Settings) > 0 {
+						ins.HasSettings = true
+					}
+				}
+			}
+		}
 	}
 
 	// Parse FORMAT (format names can be keywords like Null, JSON, etc.)
@@ -947,13 +1039,31 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 		}
 	}
 
-	// Parse column definitions
+	// Parse column definitions and indexes
 	if p.currentIs(token.LPAREN) {
 		p.nextToken()
 		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-			col := p.parseColumnDeclaration()
-			if col != nil {
-				create.Columns = append(create.Columns, col)
+			// Handle INDEX definition
+			if p.currentIs(token.INDEX) {
+				p.nextToken()
+				// Skip index definition: INDEX name expr TYPE type GRANULARITY n
+				p.parseIdentifierName() // index name
+				// Skip expression and other index parts
+				for !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+					p.nextToken()
+				}
+			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CONSTRAINT" {
+				// Skip CONSTRAINT definitions
+				p.nextToken()
+				p.parseIdentifierName() // constraint name
+				for !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+					p.nextToken()
+				}
+			} else {
+				col := p.parseColumnDeclaration()
+				if col != nil {
+					create.Columns = append(create.Columns, col)
+				}
 			}
 			if p.currentIs(token.COMMA) {
 				p.nextToken()
@@ -1023,11 +1133,27 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 	}
 done_table_options:
 
-	// Parse AS SELECT
+	// Parse AS SELECT or AS table_function()
 	if p.currentIs(token.AS) {
 		p.nextToken()
 		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 			create.AsSelect = p.parseSelectWithUnion()
+		} else if p.currentIs(token.IDENT) {
+			// AS table_function(...) like "AS s3Cluster(...)"
+			// Skip the function call for now
+			p.parseIdentifierName()
+			if p.currentIs(token.LPAREN) {
+				depth := 1
+				p.nextToken()
+				for depth > 0 && !p.currentIs(token.EOF) {
+					if p.currentIs(token.LPAREN) {
+						depth++
+					} else if p.currentIs(token.RPAREN) {
+						depth--
+					}
+					p.nextToken()
+				}
+			}
 		}
 	}
 }
@@ -1136,8 +1262,8 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 		Position: p.current.Pos,
 	}
 
-	// Parse column name
-	if p.currentIs(token.IDENT) {
+	// Parse column name (can be identifier or keyword like KEY)
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		col.Name = p.current.Value
 		p.nextToken()
 	} else {
@@ -1147,7 +1273,7 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 	// Parse data type
 	col.Type = p.parseDataType()
 
-	// Parse DEFAULT/MATERIALIZED/ALIAS
+	// Parse DEFAULT/MATERIALIZED/ALIAS/EPHEMERAL
 	switch p.current.Token {
 	case token.DEFAULT:
 		col.DefaultKind = "DEFAULT"
@@ -1161,6 +1287,16 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 		col.DefaultKind = "ALIAS"
 		p.nextToken()
 		col.Default = p.parseExpression(LOWEST)
+	}
+
+	// Handle EPHEMERAL (can be EPHEMERAL or EPHEMERAL default_value)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "EPHEMERAL" {
+		col.DefaultKind = "EPHEMERAL"
+		p.nextToken()
+		// Optional default value
+		if !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) && !p.currentIs(token.IDENT) {
+			col.Default = p.parseExpression(LOWEST)
+		}
 	}
 
 	// Parse CODEC
@@ -1188,7 +1324,8 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 }
 
 func (p *Parser) parseDataType() *ast.DataType {
-	if !p.currentIs(token.IDENT) {
+	// Type names can be identifiers or keywords (Array, Nested, Key, etc.)
+	if !p.currentIs(token.IDENT) && !p.current.Token.IsKeyword() {
 		return nil
 	}
 
@@ -1200,18 +1337,49 @@ func (p *Parser) parseDataType() *ast.DataType {
 
 	// Parse type parameters
 	if p.currentIs(token.LPAREN) {
+		dt.HasParentheses = true
 		p.nextToken()
-		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-			// Could be another data type or an expression
-			if p.currentIs(token.IDENT) && p.isDataTypeName(p.current.Value) {
-				dt.Parameters = append(dt.Parameters, p.parseDataType())
-			} else {
-				dt.Parameters = append(dt.Parameters, p.parseExpression(LOWEST))
+
+		// Special handling for Nested type - it contains column declarations, not just types
+		if strings.ToUpper(dt.Name) == "NESTED" {
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				// Parse as column name + type
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					pos := p.current.Pos
+					colName := p.current.Value
+					p.nextToken()
+					// Parse the type for this column
+					colType := p.parseDataType()
+					if colType != nil {
+						// Use NameTypePair for Nested column declarations
+						ntp := &ast.NameTypePair{
+							Position: pos,
+							Name:     colName,
+							Type:     colType,
+						}
+						dt.Parameters = append(dt.Parameters, ntp)
+					}
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
 			}
-			if p.currentIs(token.COMMA) {
-				p.nextToken()
-			} else {
-				break
+		} else {
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				// Could be another data type or an expression
+				// Type names can be identifiers or keywords (Array, Nested, etc.)
+				if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.isDataTypeName(p.current.Value) {
+					dt.Parameters = append(dt.Parameters, p.parseDataType())
+				} else {
+					dt.Parameters = append(dt.Parameters, p.parseExpression(LOWEST))
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
 			}
 		}
 		p.expect(token.RPAREN)
@@ -1223,9 +1391,9 @@ func (p *Parser) parseDataType() *ast.DataType {
 func (p *Parser) isDataTypeName(name string) bool {
 	upper := strings.ToUpper(name)
 	types := []string{
-		"INT8", "INT16", "INT32", "INT64", "INT128", "INT256",
+		"INT", "INT8", "INT16", "INT32", "INT64", "INT128", "INT256",
 		"UINT8", "UINT16", "UINT32", "UINT64", "UINT128", "UINT256",
-		"FLOAT32", "FLOAT64",
+		"FLOAT32", "FLOAT64", "FLOAT",
 		"DECIMAL", "DECIMAL32", "DECIMAL64", "DECIMAL128", "DECIMAL256",
 		"STRING", "FIXEDSTRING",
 		"UUID", "DATE", "DATE32", "DATETIME", "DATETIME64",
@@ -1235,6 +1403,11 @@ func (p *Parser) isDataTypeName(name string) bool {
 		"BOOL", "BOOLEAN",
 		"IPV4", "IPV6",
 		"NOTHING", "INTERVAL",
+		"JSON", "OBJECT", "VARIANT",
+		"AGGREGATEFUNCTION", "SIMPLEAGGREGATEFUNCTION",
+		"POINT", "RING", "POLYGON", "MULTIPOLYGON",
+		"TIME64", "TIME",
+		"DYNAMIC",
 	}
 	for _, t := range types {
 		if upper == t {
@@ -1291,7 +1464,8 @@ func (p *Parser) parseEngineClause() *ast.EngineClause {
 		Position: p.current.Pos,
 	}
 
-	if p.currentIs(token.IDENT) {
+	// Engine name can be identifier or keyword (Null, Join, Memory, etc.)
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		engine.Name = p.current.Value
 		p.nextToken()
 	}
@@ -1334,8 +1508,29 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 	case token.USER:
 		dropUser = true
 		p.nextToken()
+	case token.FUNCTION:
+		p.nextToken()
+	case token.INDEX:
+		p.nextToken()
 	default:
-		p.nextToken() // skip unknown token
+		// Handle multi-word DROP types: ROW POLICY, NAMED COLLECTION, SETTINGS PROFILE
+		if p.currentIs(token.IDENT) {
+			upper := strings.ToUpper(p.current.Value)
+			switch upper {
+			case "ROW", "NAMED", "POLICY", "SETTINGS", "QUOTA", "ROLE":
+				// Skip the DROP type tokens
+				for p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					if p.currentIs(token.IF) {
+						break // Hit IF EXISTS
+					}
+					p.nextToken()
+				}
+			default:
+				p.nextToken() // skip unknown token
+			}
+		} else {
+			p.nextToken() // skip unknown token
+		}
 	}
 
 	// Handle IF EXISTS
@@ -1372,7 +1567,39 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		}
 	}
 
-	// Handle ON CLUSTER
+	// Handle multiple tables (DROP TABLE IF EXISTS t1, t2, t3)
+	// For now, just skip additional table names
+	for p.currentIs(token.COMMA) {
+		p.nextToken()
+		// Skip the table name (may be qualified like db.table)
+		p.parseIdentifierName()
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			p.parseIdentifierName()
+		}
+	}
+
+	// Handle ON table or ON CLUSTER
+	if p.currentIs(token.ON) {
+		p.nextToken()
+		if p.currentIs(token.CLUSTER) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) || p.currentIs(token.STRING) {
+				drop.OnCluster = p.current.Value
+				p.nextToken()
+			}
+		} else {
+			// ON table_name (for DROP ROW POLICY, etc.)
+			// Skip the table reference
+			p.parseIdentifierName()
+			if p.currentIs(token.DOT) {
+				p.nextToken()
+				p.parseIdentifierName()
+			}
+		}
+	}
+
+	// Handle second ON CLUSTER (can appear after ON table)
 	if p.currentIs(token.ON) {
 		p.nextToken()
 		if p.currentIs(token.CLUSTER) {
@@ -1388,6 +1615,14 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 	if p.currentIs(token.SYNC) {
 		drop.Sync = true
 		p.nextToken()
+	}
+
+	// Handle NO DELAY
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "NO" {
+		p.nextToken()
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DELAY" {
+			p.nextToken()
+		}
 	}
 
 	return drop

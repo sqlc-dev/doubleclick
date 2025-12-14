@@ -29,7 +29,9 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			}
 			hasComplexExpr := false
 			for _, e := range exprs {
-				if _, isLit := e.(*ast.Literal); !isLit {
+				lit, isLit := e.(*ast.Literal)
+				// Non-literals or tuple/array literals count as complex
+				if !isLit || (isLit && (lit.Type == ast.LiteralTuple || lit.Type == ast.LiteralArray)) {
 					hasComplexExpr = true
 					break
 				}
@@ -61,7 +63,9 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			}
 			hasComplexExpr := false
 			for _, e := range exprs {
-				if _, isLit := e.(*ast.Literal); !isLit {
+				lit, isLit := e.(*ast.Literal)
+				// Non-literals or tuple/array literals count as complex
+				if !isLit || (isLit && (lit.Type == ast.LiteralTuple || lit.Type == ast.LiteralArray)) {
 					hasComplexExpr = true
 					break
 				}
@@ -88,10 +92,43 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 func explainBinaryExpr(sb *strings.Builder, n *ast.BinaryExpr, indent string, depth int) {
 	// Convert operator to function name
 	fnName := OperatorToFunction(n.Op)
+
+	// For || (concat) operator, flatten chained concatenations
+	if n.Op == "||" {
+		operands := collectConcatOperands(n)
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(operands))
+		for _, op := range operands {
+			Node(sb, op, depth+2)
+		}
+		return
+	}
+
 	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
 	Node(sb, n.Left, depth+2)
 	Node(sb, n.Right, depth+2)
+}
+
+// collectConcatOperands flattens chained || (concat) operations into a list of operands
+func collectConcatOperands(n *ast.BinaryExpr) []ast.Expression {
+	var operands []ast.Expression
+
+	// Recursively collect from left side if it's also a concat
+	if left, ok := n.Left.(*ast.BinaryExpr); ok && left.Op == "||" {
+		operands = append(operands, collectConcatOperands(left)...)
+	} else {
+		operands = append(operands, n.Left)
+	}
+
+	// Recursively collect from right side if it's also a concat
+	if right, ok := n.Right.(*ast.BinaryExpr); ok && right.Op == "||" {
+		operands = append(operands, collectConcatOperands(right)...)
+	} else {
+		operands = append(operands, n.Right)
+	}
+
+	return operands
 }
 
 func explainUnaryExpr(sb *strings.Builder, n *ast.UnaryExpr, indent string, depth int) {
@@ -135,6 +172,35 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 			}
 		}
 		fmt.Fprintf(sb, "%sLiteral %s (alias %s)\n", indent, FormatLiteral(e), n.Alias)
+	case *ast.BinaryExpr:
+		// Binary expressions become functions with alias
+		fnName := OperatorToFunction(e.Op)
+		// For || (concat) operator, flatten chained concatenations
+		if e.Op == "||" {
+			operands := collectConcatOperands(e)
+			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Alias, 1)
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(operands))
+			for _, op := range operands {
+				Node(sb, op, depth+2)
+			}
+		} else {
+			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Alias, 1)
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+			Node(sb, e.Left, depth+2)
+			Node(sb, e.Right, depth+2)
+		}
+	case *ast.UnaryExpr:
+		// Unary expressions become functions with alias
+		fnName := UnaryOperatorToFunction(e.Op)
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Alias, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
+		Node(sb, e.Operand, depth+2)
+	case *ast.FunctionCall:
+		// Function calls already handle aliases
+		explainFunctionCallWithAlias(sb, e, n.Alias, indent, depth)
+	case *ast.Identifier:
+		// Identifiers with alias
+		fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, e.Name(), n.Alias)
 	default:
 		// For other types, recursively explain and add alias info
 		Node(sb, n.Expr, depth)
@@ -147,5 +213,40 @@ func explainAsterisk(sb *strings.Builder, n *ast.Asterisk, indent string) {
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 	} else {
 		fmt.Fprintf(sb, "%sAsterisk\n", indent)
+	}
+}
+
+func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, depth int) {
+	// For WITH elements, we need to show the underlying expression with the name as alias
+	switch e := n.Query.(type) {
+	case *ast.Literal:
+		fmt.Fprintf(sb, "%sLiteral %s (alias %s)\n", indent, FormatLiteral(e), n.Name)
+	case *ast.Identifier:
+		fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, e.Name(), n.Name)
+	case *ast.FunctionCall:
+		explainFunctionCallWithAlias(sb, e, n.Name, indent, depth)
+	case *ast.BinaryExpr:
+		// Binary expressions become functions
+		fnName := OperatorToFunction(e.Op)
+		// For || (concat) operator, flatten chained concatenations
+		if e.Op == "||" {
+			operands := collectConcatOperands(e)
+			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Name, 1)
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(operands))
+			for _, op := range operands {
+				Node(sb, op, depth+2)
+			}
+		} else {
+			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Name, 1)
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+			Node(sb, e.Left, depth+2)
+			Node(sb, e.Right, depth+2)
+		}
+	case *ast.Subquery:
+		fmt.Fprintf(sb, "%sSubquery (alias %s) (children %d)\n", indent, n.Name, 1)
+		Node(sb, e.Query, depth+1)
+	default:
+		// For other types, just output the expression (alias may be lost)
+		Node(sb, n.Query, depth)
 	}
 }

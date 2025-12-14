@@ -8,14 +8,21 @@ import (
 )
 
 func explainFunctionCall(sb *strings.Builder, n *ast.FunctionCall, indent string, depth int) {
+	explainFunctionCallWithAlias(sb, n, n.Alias, indent, depth)
+}
+
+func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int) {
 	children := 1 // arguments ExpressionList
 	if len(n.Parameters) > 0 {
 		children++ // parameters ExpressionList
 	}
+	if n.Over != nil {
+		children++ // WindowDefinition for OVER clause
+	}
 	// Normalize function name
 	fnName := NormalizeFunctionName(n.Name)
-	if n.Alias != "" {
-		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Alias, children)
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, children)
 	} else {
 		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, children)
 	}
@@ -34,6 +41,11 @@ func explainFunctionCall(sb *strings.Builder, n *ast.FunctionCall, indent string
 		for _, p := range n.Parameters {
 			Node(sb, p, depth+2)
 		}
+	}
+	// Window definition (for window functions with OVER clause)
+	// WindowDefinition is a sibling to ExpressionList, so use the same indent
+	if n.Over != nil {
+		explainWindowSpec(sb, n.Over, indent+" ", depth+1)
 	}
 }
 
@@ -55,17 +67,72 @@ func explainCastExpr(sb *strings.Builder, n *ast.CastExpr, indent string, depth 
 	// CAST is represented as Function CAST with expr and type as arguments
 	fmt.Fprintf(sb, "%sFunction CAST (children %d)\n", indent, 1)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
-	// For :: operator syntax, expression is represented as string literal
+	// For :: operator syntax with simple literals, format as string literal
+	// For function syntax or complex expressions, use normal AST node
 	if n.OperatorSyntax {
-		// Format expression as string literal
-		exprStr := formatExprAsString(n.Expr)
-		fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, exprStr)
+		if lit, ok := n.Expr.(*ast.Literal); ok {
+			// For arrays/tuples of simple primitives, use FormatLiteral (Array_[...] format)
+			// For strings and other types, use string format
+			if lit.Type == ast.LiteralArray || lit.Type == ast.LiteralTuple {
+				if containsOnlyPrimitives(lit) {
+					fmt.Fprintf(sb, "%s  Literal %s\n", indent, FormatLiteral(lit))
+				} else {
+					// Complex content - format as string
+					exprStr := formatExprAsString(lit)
+					fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, exprStr)
+				}
+			} else {
+				// Simple literal - format as string
+				exprStr := formatExprAsString(lit)
+				fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, exprStr)
+			}
+		} else {
+			// Complex expression - use normal AST node
+			Node(sb, n.Expr, depth+2)
+		}
 	} else {
 		Node(sb, n.Expr, depth+2)
 	}
 	// Type is formatted as a literal string
 	typeStr := FormatDataType(n.Type)
 	fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, typeStr)
+}
+
+// containsOnlyPrimitives checks if a literal array/tuple contains only primitive literals
+func containsOnlyPrimitives(lit *ast.Literal) bool {
+	var exprs []ast.Expression
+	switch lit.Type {
+	case ast.LiteralArray, ast.LiteralTuple:
+		var ok bool
+		exprs, ok = lit.Value.([]ast.Expression)
+		if !ok {
+			return false
+		}
+	default:
+		return true
+	}
+
+	for _, e := range exprs {
+		innerLit, ok := e.(*ast.Literal)
+		if !ok {
+			return false
+		}
+		// Strings with special chars are not considered primitive for this purpose
+		if innerLit.Type == ast.LiteralString {
+			s := innerLit.Value.(string)
+			// Strings that look like JSON or contain special chars should be converted to string format
+			if strings.ContainsAny(s, "{}[]\"\\") {
+				return false
+			}
+		}
+		// Nested arrays/tuples need recursive check
+		if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
+			if !containsOnlyPrimitives(innerLit) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int) {
@@ -201,7 +268,12 @@ func explainCaseExpr(sb *strings.Builder, n *ast.CaseExpr, indent string, depth 
 
 func explainIntervalExpr(sb *strings.Builder, n *ast.IntervalExpr, indent string, depth int) {
 	// INTERVAL is represented as Function toInterval<Unit>
-	fnName := "toInterval" + n.Unit
+	// Unit needs to be title-cased (e.g., YEAR -> Year)
+	unit := n.Unit
+	if len(unit) > 0 {
+		unit = strings.ToUpper(unit[:1]) + strings.ToLower(unit[1:])
+	}
+	fnName := "toInterval" + unit
 	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 	Node(sb, n.Value, depth+2)
@@ -221,4 +293,43 @@ func explainExtractExpr(sb *strings.Builder, n *ast.ExtractExpr, indent string, 
 	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 	Node(sb, n.From, depth+2)
+}
+
+func explainWindowSpec(sb *strings.Builder, n *ast.WindowSpec, indent string, depth int) {
+	// Window spec is represented as WindowDefinition
+	// For simple cases like OVER (), just output WindowDefinition without children
+	children := 0
+	if n.Name != "" {
+		children++
+	}
+	if len(n.PartitionBy) > 0 {
+		children++
+	}
+	if len(n.OrderBy) > 0 {
+		children++
+	}
+	if n.Frame != nil {
+		children++
+	}
+	if children > 0 {
+		fmt.Fprintf(sb, "%sWindowDefinition (children %d)\n", indent, children)
+		if n.Name != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Name)
+		}
+		if len(n.PartitionBy) > 0 {
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.PartitionBy))
+			for _, e := range n.PartitionBy {
+				Node(sb, e, depth+2)
+			}
+		}
+		if len(n.OrderBy) > 0 {
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.OrderBy))
+			for _, o := range n.OrderBy {
+				Node(sb, o.Expression, depth+2)
+			}
+		}
+		// Frame handling would go here if needed
+	} else {
+		fmt.Fprintf(sb, "%sWindowDefinition\n", indent)
+	}
 }

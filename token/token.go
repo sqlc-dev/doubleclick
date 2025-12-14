@@ -74,6 +74,7 @@ const (
 	CONSTRAINT
 	CREATE
 	CROSS
+	CUBE
 	DATABASE
 	DATABASES
 	DEFAULT
@@ -255,6 +256,7 @@ var tokens = [...]string{
 	CONSTRAINT:   "CONSTRAINT",
 	CREATE:       "CREATE",
 	CROSS:        "CROSS",
+	CUBE:         "CUBE",
 	DATABASE:     "DATABASE",
 	DATABASES:    "DATABASES",
 	DEFAULT:      "DEFAULT",

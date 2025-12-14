@@ -2,120 +2,179 @@
 
 ## Current State
 
-- **Tests passing:** 5,197 (76.2%)
-- **Tests skipped:** 1,627 (23.8%)
-  - Parser issues: ~675
-  - Explain mismatches: ~637
+- **Tests passing:** 5,933 (86.9%)
+- **Tests skipped:** 891 (13.1%)
 
-## Parser Issues
+## Recently Fixed (explain layer)
+
+- ✅ TableJoin output - removed join type keywords
+- ✅ Table function aliases (e.g., `remote('127.1') AS t1`)
+- ✅ Table identifier aliases (e.g., `system.one AS xxx`)
+- ✅ Array/tuple cast formatting for `::` syntax
+- ✅ SETTINGS placement with FORMAT clause
+- ✅ Concat operator `||` flattening into single `concat` function
+- ✅ Window function (OVER clause) support
+- ✅ Float literal formatting
+- ✅ Aliased expression handling for binary/unary/function/identifier
+- ✅ PARTITION BY support in CREATE TABLE
+- ✅ Server error message stripping from expected output
+
+## Parser Issues (High Priority)
 
 These require changes to `parser/parser.go`:
 
-### Table/Database Names Starting with Numbers
-Tables and databases with names starting with digits fail to parse:
+### DROP TABLE with Multiple Tables
+Parser only captures first table when multiple are specified:
 ```sql
-DROP TABLE IF EXISTS 03657_gby_overflow;
-DROP DATABASE IF EXISTS 03710_database;
+DROP TABLE IF EXISTS t1, t2, t3;
+-- Expected: ExpressionList with 3 TableIdentifiers
+-- Got: Single Identifier for t1
 ```
 
-### FORMAT Null
-The `FORMAT Null` clause is not recognized:
+### Negative Integer Literals
+Negative numbers are parsed as `Function negate` instead of negative literals:
 ```sql
-SELECT ... FORMAT Null;
+SELECT -1, -10000;
+-- Expected: Literal Int64_-1
+-- Got: Function negate (children 1) with Literal UInt64_1
 ```
 
-### FETCH FIRST ... ROW ONLY
-SQL standard fetch syntax is not supported:
+### CREATE TABLE with INDEX Clause
+INDEX definitions in CREATE TABLE are not captured:
 ```sql
-SELECT ... FETCH FIRST 1 ROW ONLY;
+CREATE TABLE t (x Array(String), INDEX idx1 x TYPE bloom_filter(0.025)) ENGINE=MergeTree;
 ```
 
-### INSERT INTO FUNCTION
-Function-based inserts are not supported:
+### SETTINGS Inside Function Arguments
+SETTINGS clause within function calls is not parsed:
 ```sql
-INSERT INTO FUNCTION file('file.parquet') SELECT ...;
+SELECT * FROM icebergS3(s3_conn, filename='test', SETTINGS key='value');
+-- The SETTINGS should become a Set child of the function
 ```
 
-### WITH ... AS Subquery Aliases
-Subquery aliases in FROM clauses with keyword `AS`:
+### CREATE TABLE with Column TTL
+TTL expressions on columns are not captured:
 ```sql
-SELECT * FROM (SELECT 1 x) AS alias;
+CREATE TABLE t (c Int TTL expr()) ENGINE=MergeTree;
+-- Expected: ColumnDeclaration with 2 children (type + TTL function)
 ```
 
-### String Concatenation Operator ||
-The `||` operator in some contexts:
+### Empty Tuple in ORDER BY
+`ORDER BY ()` should capture empty tuple expression:
 ```sql
-SELECT currentDatabase() || '_test' AS key;
+CREATE TABLE t (...) ENGINE=MergeTree ORDER BY ();
+-- Expected: Function tuple (children 1) with empty ExpressionList
+-- Got: Storage definition with no ORDER BY
 ```
 
-### MOD/DIV Operators
-The MOD and DIV keywords as operators:
+### String Escape Handling
+Parser stores escaped characters literally instead of unescaping:
 ```sql
-SELECT number MOD 3, number DIV 3 FROM ...;
+SELECT 'x\'e2\'';
+-- Parser stores: x\'e2\'  (with backslashes)
+-- Should store: x'e2'  (unescaped)
 ```
 
-### Reserved Keyword Handling
-Keywords like `LEFT`, `RIGHT` used as table aliases:
+## Parser Issues (Medium Priority)
+
+### CREATE DICTIONARY
+Dictionary definitions are not supported:
 ```sql
-SELECT * FROM numbers(10) AS left RIGHT JOIN ...;
+CREATE DICTIONARY d0 (c1 UInt64) PRIMARY KEY c1 LAYOUT(FLAT()) SOURCE(...);
 ```
 
-### Parameterized Settings
-Settings with `$` parameters:
+### CREATE USER / CREATE FUNCTION
+User and function definitions are not supported:
 ```sql
-SET param_$1 = 'Hello';
+CREATE USER test_user GRANTEES ...;
+CREATE OR REPLACE FUNCTION myFunc AS ...;
 ```
 
-### Incomplete CASE Expression
-CASE without END:
+### QUALIFY Clause
+Window function filtering clause:
 ```sql
-SELECT CASE number  -- missing END
+SELECT x QUALIFY row_number() OVER () = 1;
 ```
 
-## Explain Output Issues
-
-These require changes to `internal/explain/`:
-
-### Double Equals (==) Operator
-The `==` operator creates extra nested equals/tuple nodes:
+### INTO OUTFILE with TRUNCATE
+Extended INTO OUTFILE syntax:
 ```sql
-SELECT value == '127.0.0.1:9181'
-```
-Expected: `Function equals` with `Identifier` and `Literal`
-Got: Nested `Function equals` with extra `Function tuple`
-
-### CreateQuery Spacing
-Some ClickHouse versions output extra space before `(children`:
-```
-CreateQuery d1  (children 1)  -- two spaces
-CreateQuery d1 (children 1)   -- one space (our output)
+SELECT 1, 2 INTO OUTFILE '/dev/null' TRUNCATE FORMAT Npy;
 ```
 
-### Server Error Messages in Expected Output
-Some test expected outputs include trailing messages:
-```
-The query succeeded but the server error '42' was expected
-```
-These are not part of the actual EXPLAIN output.
-
-## Lower Priority
-
-### DateTime64 with Timezone
-Type parameters with string timezone:
+### GROUPING SETS
+Advanced grouping syntax:
 ```sql
-DateTime64(3,'UTC')
+SELECT ... GROUP BY GROUPING SETS ((a), (b));
 ```
 
-### Complex Type Expressions
-Nested type expressions in column definitions:
+### view() Table Function
+The view() table function in FROM:
 ```sql
-CREATE TABLE t (c LowCardinality(UUID));
+SELECT * FROM view(SELECT 1 as id);
 ```
 
-### Parameterized Views
-View definitions with parameters:
+### CREATE TABLE ... AS SELECT
+CREATE TABLE with inline SELECT:
 ```sql
-CREATE VIEW v AS SELECT ... WHERE x={parity:Int8};
+CREATE TABLE src ENGINE=Memory AS SELECT 1;
+```
+
+### Variant() Type with PRIMARY KEY
+Complex column definitions:
+```sql
+CREATE TABLE t (c Variant() PRIMARY KEY) ENGINE=Redis(...);
+```
+
+## Parser Issues (Lower Priority)
+
+### INTERVAL with Dynamic Type
+INTERVAL with type cast:
+```sql
+SELECT INTERVAL 1 MINUTE AS c0, INTERVAL c0::Dynamic DAY;
+```
+
+### ALTER TABLE with Multiple Operations
+Multiple ALTER operations in parentheses:
+```sql
+ALTER TABLE t (DELETE WHERE ...), (MODIFY SETTING ...), (UPDATE ... WHERE ...);
+```
+
+### Tuple Type in Column with Subfield Access
+Tuple type with engine using subfield:
+```sql
+CREATE TABLE t (t Tuple(a Int32)) ENGINE=EmbeddedRocksDB() PRIMARY KEY (t.a);
+```
+
+### insert() Function with input()
+INSERT using input() function:
+```sql
+INSERT INTO FUNCTION null() SELECT * FROM input('x Int') ...;
+```
+
+## Explain Issues (Remaining)
+
+### Scientific Notation for Floats
+Very small/large floats should use scientific notation:
+```sql
+SELECT 2.2250738585072014e-308;
+-- Expected: Float64_2.2250738585072014e-308
+-- Got: Float64_0.0000...22250738585072014
+```
+
+### Array Literals with Negative Numbers
+Arrays with negative integers expand to Function instead of Literal:
+```sql
+SELECT [-10000, 5750];
+-- Expected: Literal Array_[Int64_-10000, UInt64_5750]
+-- Got: Function array with Function negate for -10000
+```
+
+### WithElement for CTE Subqueries
+Some CTE subqueries should use WithElement wrapper:
+```sql
+WITH sub AS (SELECT ...) SELECT ...;
+-- Expected: WithElement (children 1) > Subquery > SelectWithUnionQuery
 ```
 
 ## Testing Notes
@@ -127,10 +186,15 @@ go test ./parser -timeout 5s -v
 
 Count test results:
 ```bash
-go test ./parser -timeout 5s -v 2>&1 | grep -E 'PASS:|SKIP:' | cut -d':' -f1 | sort | uniq -c
+go test ./parser -v 2>&1 | grep -E 'PASS:|SKIP:' | wc -l
 ```
 
 View explain mismatches:
 ```bash
-go test ./parser -timeout 5s -v 2>&1 | grep -A 30 "TODO: Explain output mismatch" | head -100
+go test ./parser -v 2>&1 | grep -A 30 "TODO: Explain output mismatch" | head -100
+```
+
+View parser failures:
+```bash
+go test ./parser -v 2>&1 | grep "TODO: Parser does not yet support" | head -20
 ```

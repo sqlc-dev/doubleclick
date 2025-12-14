@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"math"
 	"strconv"
 	"strings"
 
@@ -80,14 +81,82 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 		return exprs
 	}
 
-	exprs = append(exprs, p.parseExpression(LOWEST))
+	expr := p.parseExpression(LOWEST)
+	if expr != nil {
+		// Handle implicit alias (identifier without AS)
+		expr = p.parseImplicitAlias(expr)
+		exprs = append(exprs, expr)
+	}
 
 	for p.currentIs(token.COMMA) {
 		p.nextToken()
-		exprs = append(exprs, p.parseExpression(LOWEST))
+		expr := p.parseExpression(LOWEST)
+		if expr != nil {
+			// Handle implicit alias (identifier without AS)
+			expr = p.parseImplicitAlias(expr)
+			exprs = append(exprs, expr)
+		}
 	}
 
 	return exprs
+}
+
+// parseFunctionArgumentList parses arguments for function calls, stopping at SETTINGS
+func (p *Parser) parseFunctionArgumentList() []ast.Expression {
+	var exprs []ast.Expression
+
+	if p.currentIs(token.RPAREN) || p.currentIs(token.EOF) || p.currentIs(token.SETTINGS) {
+		return exprs
+	}
+
+	expr := p.parseExpression(LOWEST)
+	if expr != nil {
+		exprs = append(exprs, expr)
+	}
+
+	for p.currentIs(token.COMMA) {
+		p.nextToken()
+		// Stop if we hit SETTINGS
+		if p.currentIs(token.SETTINGS) {
+			break
+		}
+		expr := p.parseExpression(LOWEST)
+		if expr != nil {
+			exprs = append(exprs, expr)
+		}
+	}
+
+	return exprs
+}
+
+// parseImplicitAlias handles implicit column aliases like "SELECT 'a' c0" (meaning 'a' AS c0)
+func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
+	// If next token is a plain identifier (not a keyword), treat as implicit alias
+	// Keywords like FROM, WHERE etc. are tokenized as their own token types, not IDENT
+	if p.currentIs(token.IDENT) {
+		alias := p.current.Value
+		p.nextToken()
+
+		// Set alias on the expression if it supports it
+		switch e := expr.(type) {
+		case *ast.Identifier:
+			e.Alias = alias
+			return e
+		case *ast.FunctionCall:
+			e.Alias = alias
+			return e
+		case *ast.Subquery:
+			e.Alias = alias
+			return e
+		default:
+			return &ast.AliasedExpr{
+				Position: expr.Pos(),
+				Expr:     expr,
+				Alias:    alias,
+			}
+		}
+	}
+	return expr
 }
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
@@ -118,6 +187,8 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 		return p.parseBoolean()
 	case token.NULL:
 		return p.parseNull()
+	case token.NAN, token.INF:
+		return p.parseSpecialNumber()
 	case token.MINUS:
 		return p.parseUnaryMinus()
 	case token.NOT:
@@ -135,7 +206,13 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 	case token.EXTRACT:
 		return p.parseExtract()
 	case token.INTERVAL:
-		return p.parseInterval()
+		// INTERVAL can be a literal (INTERVAL 1 DAY) or identifier reference
+		// Check if next token can start an interval value
+		if p.peekIs(token.NUMBER) || p.peekIs(token.LPAREN) || p.peekIs(token.MINUS) || p.peekIs(token.STRING) {
+			return p.parseInterval()
+		}
+		// Otherwise treat as identifier
+		return p.parseKeywordAsIdentifier()
 	case token.EXISTS:
 		return p.parseExists()
 	case token.PARAM:
@@ -159,11 +236,16 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 		if p.peekIs(token.LPAREN) {
 			return p.parseKeywordAsFunction()
 		}
-		return nil
+		// format as identifier (e.g., format='Parquet' in function args)
+		return p.parseKeywordAsIdentifier()
 	default:
-		// Handle other keywords that can be used as function names
-		if p.current.Token.IsKeyword() && p.peekIs(token.LPAREN) {
-			return p.parseKeywordAsFunction()
+		// Handle other keywords that can be used as function names or identifiers
+		if p.current.Token.IsKeyword() {
+			if p.peekIs(token.LPAREN) {
+				return p.parseKeywordAsFunction()
+			}
+			// Keywords like ALL, DEFAULT, etc. can be used as identifiers
+			return p.parseKeywordAsIdentifier()
 		}
 		return nil
 	}
@@ -317,11 +399,32 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 	}
 
 	// Parse arguments
-	if !p.currentIs(token.RPAREN) {
-		fn.Arguments = p.parseExpressionList()
+	if !p.currentIs(token.RPAREN) && !p.currentIs(token.SETTINGS) {
+		fn.Arguments = p.parseFunctionArgumentList()
+	}
+
+	// Handle SETTINGS inside function call (table functions)
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		// Parse settings as key=value pairs until )
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			// Just skip the settings for now
+			p.nextToken()
+		}
 	}
 
 	p.expect(token.RPAREN)
+
+	// Handle IGNORE NULLS / RESPECT NULLS (window function modifiers)
+	if p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		if upper == "IGNORE" || upper == "RESPECT" {
+			p.nextToken()
+			if p.currentIs(token.NULLS) {
+				p.nextToken()
+			}
+		}
+	}
 
 	// Handle OVER clause for window functions
 	if p.currentIs(token.OVER) {
@@ -329,14 +432,8 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 		fn.Over = p.parseWindowSpec()
 	}
 
-	// Handle alias
-	if p.currentIs(token.AS) {
-		p.nextToken()
-		if p.currentIs(token.IDENT) {
-			fn.Alias = p.current.Value
-			p.nextToken()
-		}
-	}
+	// Note: AS alias is handled by the expression parser's infix handling (parseAlias)
+	// to respect precedence levels when called from contexts like WITH clauses
 
 	return fn
 }
@@ -476,10 +573,18 @@ func (p *Parser) parseNumber() ast.Expression {
 			lit.Value = f
 		}
 	} else {
+		// Try signed int64 first
 		i, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
-			lit.Type = ast.LiteralString
-			lit.Value = value
+			// Try unsigned uint64 for large positive numbers
+			u, uerr := strconv.ParseUint(value, 10, 64)
+			if uerr != nil {
+				lit.Type = ast.LiteralString
+				lit.Value = value
+			} else {
+				lit.Type = ast.LiteralInteger
+				lit.Value = u // Store as uint64
+			}
 		} else {
 			lit.Type = ast.LiteralInteger
 			lit.Value = i
@@ -519,6 +624,21 @@ func (p *Parser) parseNull() ast.Expression {
 	return lit
 }
 
+func (p *Parser) parseSpecialNumber() ast.Expression {
+	lit := &ast.Literal{
+		Position: p.current.Pos,
+		Type:     ast.LiteralFloat,
+	}
+	switch p.current.Token {
+	case token.NAN:
+		lit.Value = math.NaN()
+	case token.INF:
+		lit.Value = math.Inf(1)
+	}
+	p.nextToken()
+	return lit
+}
+
 func (p *Parser) parseUnaryMinus() ast.Expression {
 	expr := &ast.UnaryExpr{
 		Position: p.current.Pos,
@@ -542,6 +662,16 @@ func (p *Parser) parseNot() ast.Expression {
 func (p *Parser) parseGroupedOrTuple() ast.Expression {
 	pos := p.current.Pos
 	p.nextToken() // skip (
+
+	// Handle empty tuple ()
+	if p.currentIs(token.RPAREN) {
+		p.nextToken()
+		return &ast.Literal{
+			Position: pos,
+			Type:     ast.LiteralTuple,
+			Value:    []ast.Expression{},
+		}
+	}
 
 	// Check for subquery
 	if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
@@ -661,11 +791,21 @@ func (p *Parser) parseCast() ast.Expression {
 	// Use ALIAS_PREC to avoid consuming AS as an alias operator
 	expr.Expr = p.parseExpression(ALIAS_PREC)
 
-	if !p.expect(token.AS) {
-		return nil
+	// Handle both CAST(x AS Type) and CAST(x, 'Type') syntax
+	if p.currentIs(token.AS) {
+		p.nextToken()
+		expr.Type = p.parseDataType()
+	} else if p.currentIs(token.COMMA) {
+		p.nextToken()
+		// Type is given as a string literal
+		if p.currentIs(token.STRING) {
+			expr.Type = &ast.DataType{
+				Position: p.current.Pos,
+				Name:     p.current.Value,
+			}
+			p.nextToken()
+		}
 	}
-
-	expr.Type = p.parseDataType()
 
 	p.expect(token.RPAREN)
 
@@ -949,18 +1089,34 @@ func (p *Parser) parseInExpression(left ast.Expression, not bool) ast.Expression
 
 	p.nextToken() // skip IN
 
-	if !p.expect(token.LPAREN) {
-		return nil
-	}
+	// Handle different IN list formats:
+	// 1. (subquery or list) - standard format
+	// 2. [array literal] - array format
+	// 3. identifier - table or alias reference
+	// 4. tuple(...) - explicit tuple function
 
-	// Check for subquery
-	if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
-		expr.Query = p.parseSelectWithUnion()
+	if p.currentIs(token.LPAREN) {
+		p.nextToken() // skip (
+		// Check for subquery
+		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
+			expr.Query = p.parseSelectWithUnion()
+		} else {
+			expr.List = p.parseExpressionList()
+		}
+		p.expect(token.RPAREN)
+	} else if p.currentIs(token.LBRACKET) {
+		// Array literal: IN [1, 2, 3]
+		arr := p.parseArrayLiteral()
+		expr.List = []ast.Expression{arr}
 	} else {
-		expr.List = p.parseExpressionList()
+		// Could be identifier, tuple function, or other expression
+		// Parse as expression
+		innerExpr := p.parseExpression(CALL)
+		if innerExpr != nil {
+			expr.List = []ast.Expression{innerExpr}
+		}
 	}
 
-	p.expect(token.RPAREN)
 	return expr
 }
 
@@ -1320,6 +1476,17 @@ func (p *Parser) parseKeywordAsFunction() ast.Expression {
 		Position:  pos,
 		Name:      name,
 		Arguments: args,
+	}
+}
+
+func (p *Parser) parseKeywordAsIdentifier() ast.Expression {
+	pos := p.current.Pos
+	name := p.current.Value
+	p.nextToken()
+
+	return &ast.Identifier{
+		Position: pos,
+		Parts:    []string{name},
 	}
 }
 

@@ -2,6 +2,9 @@
 package ast
 
 import (
+	"encoding/json"
+	"math"
+
 	"github.com/kyleconroy/doubleclick/token"
 )
 
@@ -51,6 +54,7 @@ type SelectQuery struct {
 	Where       Expression            `json:"where,omitempty"`
 	GroupBy     []Expression          `json:"group_by,omitempty"`
 	WithRollup  bool                  `json:"with_rollup,omitempty"`
+	WithCube    bool                  `json:"with_cube,omitempty"`
 	WithTotals  bool                  `json:"with_totals,omitempty"`
 	Having      Expression            `json:"having,omitempty"`
 	Window      []*WindowDefinition   `json:"window,omitempty"`
@@ -199,13 +203,14 @@ func (s *SettingExpr) End() token.Position { return s.Position }
 
 // InsertQuery represents an INSERT statement.
 type InsertQuery struct {
-	Position token.Position `json:"-"`
-	Database string         `json:"database,omitempty"`
-	Table    string         `json:"table,omitempty"`
-	Function *FunctionCall  `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
-	Columns  []*Identifier  `json:"columns,omitempty"`
-	Select   Statement      `json:"select,omitempty"`
-	Format   *Identifier    `json:"format,omitempty"`
+	Position    token.Position `json:"-"`
+	Database    string         `json:"database,omitempty"`
+	Table       string         `json:"table,omitempty"`
+	Function    *FunctionCall  `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
+	Columns     []*Identifier  `json:"columns,omitempty"`
+	Select      Statement      `json:"select,omitempty"`
+	Format      *Identifier    `json:"format,omitempty"`
+	HasSettings bool           `json:"has_settings,omitempty"` // For SETTINGS clause
 }
 
 func (i *InsertQuery) Pos() token.Position { return i.Position }
@@ -261,14 +266,26 @@ func (c *ColumnDeclaration) End() token.Position { return c.Position }
 
 // DataType represents a data type.
 type DataType struct {
-	Position   token.Position `json:"-"`
-	Name       string         `json:"name"`
-	Parameters []Expression   `json:"parameters,omitempty"`
+	Position       token.Position `json:"-"`
+	Name           string         `json:"name"`
+	Parameters     []Expression   `json:"parameters,omitempty"`
+	HasParentheses bool           `json:"has_parentheses,omitempty"`
 }
 
 func (d *DataType) Pos() token.Position { return d.Position }
 func (d *DataType) End() token.Position { return d.Position }
 func (d *DataType) expressionNode()     {}
+
+// NameTypePair represents a named type pair, used in Nested types.
+type NameTypePair struct {
+	Position token.Position `json:"-"`
+	Name     string         `json:"name"`
+	Type     *DataType      `json:"type"`
+}
+
+func (n *NameTypePair) Pos() token.Position { return n.Position }
+func (n *NameTypePair) End() token.Position { return n.Position }
+func (n *NameTypePair) expressionNode()     {}
 
 // CodecExpr represents a CODEC expression.
 type CodecExpr struct {
@@ -588,6 +605,42 @@ type Literal struct {
 func (l *Literal) Pos() token.Position { return l.Position }
 func (l *Literal) End() token.Position { return l.Position }
 func (l *Literal) expressionNode()     {}
+
+// MarshalJSON handles special float values (NaN, +Inf, -Inf) that JSON doesn't support.
+func (l *Literal) MarshalJSON() ([]byte, error) {
+	type literalAlias Literal
+	// Handle special float values
+	if f, ok := l.Value.(float64); ok {
+		if math.IsNaN(f) {
+			return json.Marshal(&struct {
+				*literalAlias
+				Value string `json:"value"`
+			}{
+				literalAlias: (*literalAlias)(l),
+				Value:        "NaN",
+			})
+		}
+		if math.IsInf(f, 1) {
+			return json.Marshal(&struct {
+				*literalAlias
+				Value string `json:"value"`
+			}{
+				literalAlias: (*literalAlias)(l),
+				Value:        "+Inf",
+			})
+		}
+		if math.IsInf(f, -1) {
+			return json.Marshal(&struct {
+				*literalAlias
+				Value string `json:"value"`
+			}{
+				literalAlias: (*literalAlias)(l),
+				Value:        "-Inf",
+			})
+		}
+	}
+	return json.Marshal((*literalAlias)(l))
+}
 
 // LiteralType represents the type of a literal.
 type LiteralType string

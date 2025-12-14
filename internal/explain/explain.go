@@ -63,6 +63,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainSubquery(sb, n, indent, depth)
 	case *ast.AliasedExpr:
 		explainAliasedExpr(sb, n, depth)
+	case *ast.WithElement:
+		explainWithElement(sb, n, indent, depth)
 	case *ast.Asterisk:
 		explainAsterisk(sb, n, indent)
 
@@ -97,6 +99,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainExtractExpr(sb, n, indent, depth)
 
 	// DDL statements
+	case *ast.InsertQuery:
+		explainInsertQuery(sb, n, indent, depth)
 	case *ast.CreateQuery:
 		explainCreateQuery(sb, n, indent, depth)
 	case *ast.DropQuery:
@@ -117,6 +121,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	// Types
 	case *ast.DataType:
 		explainDataType(sb, n, indent, depth)
+	case *ast.NameTypePair:
+		explainNameTypePair(sb, n, indent, depth)
 	case *ast.Parameter:
 		explainParameter(sb, n, indent)
 

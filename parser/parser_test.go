@@ -118,6 +118,11 @@ func TestParser(t *testing.T) {
 			explainPath := filepath.Join(testDir, "explain.txt")
 			if expectedBytes, err := os.ReadFile(explainPath); err == nil {
 				expected := strings.TrimSpace(string(expectedBytes))
+				// Strip server error messages from expected output
+				// These are messages like "The query succeeded but the server error '43' was expected..."
+				if idx := strings.Index(expected, "\nThe query succeeded but the server error"); idx != -1 {
+					expected = strings.TrimSpace(expected[:idx])
+				}
 				actual := strings.TrimSpace(parser.Explain(stmts[0]))
 				if actual != expected {
 					if metadata.Todo {

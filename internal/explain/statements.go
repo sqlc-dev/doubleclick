@@ -7,6 +7,42 @@ import (
 	"github.com/kyleconroy/doubleclick/ast"
 )
 
+func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, depth int) {
+	// Count children
+	children := 0
+	if n.Function != nil {
+		children++
+	} else if n.Table != "" {
+		children++ // Table identifier
+	}
+	if n.Select != nil {
+		children++
+	}
+	if n.HasSettings {
+		children++
+	}
+	// Note: InsertQuery uses 3 spaces after name in ClickHouse explain
+	fmt.Fprintf(sb, "%sInsertQuery   (children %d)\n", indent, children)
+
+	if n.Function != nil {
+		Node(sb, n.Function, depth+1)
+	} else if n.Table != "" {
+		name := n.Table
+		if n.Database != "" {
+			name = n.Database + "." + n.Table
+		}
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+	}
+
+	if n.Select != nil {
+		Node(sb, n.Select, depth+1)
+	}
+
+	if n.HasSettings {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
+}
+
 func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, depth int) {
 	name := n.Table
 	if n.View != "" {
@@ -20,13 +56,18 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if len(n.Columns) > 0 {
 		children++
 	}
-	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 {
+	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil {
 		children++
 	}
 	if n.AsSelect != nil {
 		children++
 	}
-	fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, name, children)
+	// ClickHouse adds an extra space before (children N) for CREATE DATABASE
+	if n.CreateDatabase {
+		fmt.Fprintf(sb, "%sCreateQuery %s  (children %d)\n", indent, name, children)
+	} else {
+		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, name, children)
+	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 	if len(n.Columns) > 0 {
 		fmt.Fprintf(sb, "%s Columns definition (children %d)\n", indent, 1)
@@ -35,9 +76,12 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			Column(sb, col, depth+3)
 		}
 	}
-	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || len(n.Settings) > 0 {
+	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || len(n.Settings) > 0 {
 		storageChildren := 0
 		if n.Engine != nil {
+			storageChildren++
+		}
+		if n.PartitionBy != nil {
 			storageChildren++
 		}
 		if len(n.OrderBy) > 0 {
@@ -65,6 +109,13 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
 			}
 		}
+		if n.PartitionBy != nil {
+			if ident, ok := n.PartitionBy.(*ast.Identifier); ok {
+				fmt.Fprintf(sb, "%s  Identifier %s\n", indent, ident.Name())
+			} else {
+				Node(sb, n.PartitionBy, depth+2)
+			}
+		}
 		if len(n.OrderBy) > 0 {
 			if len(n.OrderBy) == 1 {
 				if ident, ok := n.OrderBy[0].(*ast.Identifier); ok {
@@ -77,6 +128,21 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.OrderBy))
 				for _, o := range n.OrderBy {
 					Node(sb, o, depth+4)
+				}
+			}
+		}
+		if len(n.PrimaryKey) > 0 {
+			if len(n.PrimaryKey) == 1 {
+				if ident, ok := n.PrimaryKey[0].(*ast.Identifier); ok {
+					fmt.Fprintf(sb, "%s  Identifier %s\n", indent, ident.Name())
+				} else {
+					Node(sb, n.PrimaryKey[0], depth+2)
+				}
+			} else {
+				fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.PrimaryKey))
+				for _, p := range n.PrimaryKey {
+					Node(sb, p, depth+4)
 				}
 			}
 		}
@@ -103,7 +169,12 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string) {
 	if n.DropDatabase {
 		name = n.Database
 	}
-	fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, name, 1)
+	// DROP DATABASE uses different spacing than DROP TABLE
+	if n.DropDatabase {
+		fmt.Fprintf(sb, "%sDropQuery %s  (children %d)\n", indent, name, 1)
+	} else {
+		fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, name, 1)
+	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 }
 
@@ -139,29 +210,25 @@ func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent stri
 }
 
 func explainDataType(sb *strings.Builder, n *ast.DataType, indent string, depth int) {
-	// Check if type has complex parameters (expressions, not just literals/types)
-	hasComplexParams := false
-	for _, p := range n.Parameters {
-		if _, ok := p.(*ast.Literal); ok {
-			continue
-		}
-		if _, ok := p.(*ast.DataType); ok {
-			continue
-		}
-		hasComplexParams = true
-		break
-	}
-
-	if hasComplexParams && len(n.Parameters) > 0 {
-		// Complex parameters need to be output as children
+	// If type has parameters, expand them as children
+	if len(n.Parameters) > 0 {
 		fmt.Fprintf(sb, "%sDataType %s (children %d)\n", indent, n.Name, 1)
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Parameters))
 		for _, p := range n.Parameters {
 			Node(sb, p, depth+2)
 		}
+	} else if n.HasParentheses {
+		// Empty parentheses, e.g., Tuple()
+		fmt.Fprintf(sb, "%sDataType %s (children %d)\n", indent, n.Name, 1)
+		fmt.Fprintf(sb, "%s ExpressionList\n", indent)
 	} else {
-		fmt.Fprintf(sb, "%sDataType %s\n", indent, FormatDataType(n))
+		fmt.Fprintf(sb, "%sDataType %s\n", indent, n.Name)
 	}
+}
+
+func explainNameTypePair(sb *strings.Builder, n *ast.NameTypePair, indent string, depth int) {
+	fmt.Fprintf(sb, "%sNameTypePair %s (children %d)\n", indent, n.Name, 1)
+	Node(sb, n.Type, depth+1)
 }
 
 func explainParameter(sb *strings.Builder, n *ast.Parameter, indent string) {

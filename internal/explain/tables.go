@@ -35,9 +35,23 @@ func explainTableExpression(sb *strings.Builder, n *ast.TableExpression, indent 
 	if subq, ok := n.Table.(*ast.Subquery); ok && n.Alias != "" {
 		fmt.Fprintf(sb, "%s Subquery (alias %s) (children %d)\n", indent, n.Alias, 1)
 		Node(sb, subq.Query, depth+2)
+	} else if fn, ok := n.Table.(*ast.FunctionCall); ok && n.Alias != "" {
+		// Table function with alias
+		explainFunctionCallWithAlias(sb, fn, n.Alias, indent+" ", depth+1)
+	} else if ti, ok := n.Table.(*ast.TableIdentifier); ok && n.Alias != "" {
+		// Table identifier with alias
+		explainTableIdentifierWithAlias(sb, ti, n.Alias, indent+" ")
 	} else {
 		Node(sb, n.Table, depth+1)
 	}
+}
+
+func explainTableIdentifierWithAlias(sb *strings.Builder, n *ast.TableIdentifier, alias string, indent string) {
+	name := n.Table
+	if n.Database != "" {
+		name = n.Database + "." + n.Table
+	}
+	fmt.Fprintf(sb, "%sTableIdentifier %s (alias %s)\n", indent, name, alias)
 }
 
 func explainTableIdentifier(sb *strings.Builder, n *ast.TableIdentifier, indent string) {
@@ -62,13 +76,7 @@ func explainArrayJoinClause(sb *strings.Builder, n *ast.ArrayJoinClause, indent 
 
 func explainTableJoin(sb *strings.Builder, n *ast.TableJoin, indent string, depth int) {
 	// TableJoin is part of TablesInSelectQueryElement
-	joinType := strings.ToLower(string(n.Type))
-	if n.Strictness != "" {
-		joinType = strings.ToLower(string(n.Strictness)) + " " + joinType
-	}
-	if n.Global {
-		joinType = "global " + joinType
-	}
+	// ClickHouse EXPLAIN AST doesn't show join type in the output
 	children := 0
 	if n.On != nil {
 		children++
@@ -76,7 +84,7 @@ func explainTableJoin(sb *strings.Builder, n *ast.TableJoin, indent string, dept
 	if len(n.Using) > 0 {
 		children++
 	}
-	fmt.Fprintf(sb, "%sTableJoin %s (children %d)\n", indent, joinType, children)
+	fmt.Fprintf(sb, "%sTableJoin (children %d)\n", indent, children)
 	if n.On != nil {
 		Node(sb, n.On, depth+1)
 	}
