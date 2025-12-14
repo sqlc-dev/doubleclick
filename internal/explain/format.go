@@ -2,6 +2,7 @@ package explain
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/kyleconroy/doubleclick/ast"
@@ -25,7 +26,9 @@ func FormatLiteral(lit *ast.Literal) string {
 		}
 	case ast.LiteralFloat:
 		val := lit.Value.(float64)
-		return fmt.Sprintf("Float64_%v", val)
+		// Use 'f' format to avoid scientific notation, -1 precision for smallest representation
+		s := strconv.FormatFloat(val, 'f', -1, 64)
+		return fmt.Sprintf("Float64_%s", s)
 	case ast.LiteralString:
 		s := lit.Value.(string)
 		// Escape backslashes in strings
