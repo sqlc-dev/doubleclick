@@ -120,6 +120,18 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			if len(n.OrderBy) == 1 {
 				if ident, ok := n.OrderBy[0].(*ast.Identifier); ok {
 					fmt.Fprintf(sb, "%s  Identifier %s\n", indent, ident.Name())
+				} else if lit, ok := n.OrderBy[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+					// Handle tuple literal (including empty tuple from ORDER BY ())
+					exprs, _ := lit.Value.([]ast.Expression)
+					fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+					if len(exprs) > 0 {
+						fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(exprs))
+						for _, e := range exprs {
+							Node(sb, e, depth+4)
+						}
+					} else {
+						fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+					}
 				} else {
 					Node(sb, n.OrderBy[0], depth+2)
 				}
@@ -135,6 +147,18 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			if len(n.PrimaryKey) == 1 {
 				if ident, ok := n.PrimaryKey[0].(*ast.Identifier); ok {
 					fmt.Fprintf(sb, "%s  Identifier %s\n", indent, ident.Name())
+				} else if lit, ok := n.PrimaryKey[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+					// Handle tuple literal (including empty tuple from PRIMARY KEY ())
+					exprs, _ := lit.Value.([]ast.Expression)
+					fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+					if len(exprs) > 0 {
+						fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(exprs))
+						for _, e := range exprs {
+							Node(sb, e, depth+4)
+						}
+					} else {
+						fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+					}
 				} else {
 					Node(sb, n.PrimaryKey[0], depth+2)
 				}
@@ -156,12 +180,23 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	}
 }
 
-func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string) {
+func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, depth int) {
 	// DROP USER has a special output format
 	if n.User != "" {
 		fmt.Fprintf(sb, "%sDROP USER query\n", indent)
 		return
 	}
+
+	// Handle multiple tables: DROP TABLE t1, t2, t3
+	if len(n.Tables) > 1 {
+		fmt.Fprintf(sb, "%sDropQuery   (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Tables))
+		for _, t := range n.Tables {
+			Node(sb, t, depth+2)
+		}
+		return
+	}
+
 	name := n.Table
 	if n.View != "" {
 		name = n.View

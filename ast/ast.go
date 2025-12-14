@@ -328,16 +328,17 @@ func (t *TTLClause) End() token.Position { return t.Position }
 
 // DropQuery represents a DROP statement.
 type DropQuery struct {
-	Position     token.Position `json:"-"`
-	IfExists     bool           `json:"if_exists,omitempty"`
-	Database     string         `json:"database,omitempty"`
-	Table        string         `json:"table,omitempty"`
-	View         string         `json:"view,omitempty"`
-	User         string         `json:"user,omitempty"`
-	Temporary    bool           `json:"temporary,omitempty"`
-	OnCluster    string         `json:"on_cluster,omitempty"`
-	DropDatabase bool           `json:"drop_database,omitempty"`
-	Sync         bool           `json:"sync,omitempty"`
+	Position     token.Position     `json:"-"`
+	IfExists     bool               `json:"if_exists,omitempty"`
+	Database     string             `json:"database,omitempty"`
+	Table        string             `json:"table,omitempty"`
+	Tables       []*TableIdentifier `json:"tables,omitempty"` // For DROP TABLE t1, t2, t3
+	View         string             `json:"view,omitempty"`
+	User         string             `json:"user,omitempty"`
+	Temporary    bool               `json:"temporary,omitempty"`
+	OnCluster    string             `json:"on_cluster,omitempty"`
+	DropDatabase bool               `json:"drop_database,omitempty"`
+	Sync         bool               `json:"sync,omitempty"`
 }
 
 func (d *DropQuery) Pos() token.Position { return d.Position }

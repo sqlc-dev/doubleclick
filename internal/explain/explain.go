@@ -104,7 +104,7 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	case *ast.CreateQuery:
 		explainCreateQuery(sb, n, indent, depth)
 	case *ast.DropQuery:
-		explainDropQuery(sb, n, indent)
+		explainDropQuery(sb, n, indent, depth)
 	case *ast.SetQuery:
 		explainSetQuery(sb, indent)
 	case *ast.SystemQuery:

@@ -132,6 +132,29 @@ func collectConcatOperands(n *ast.BinaryExpr) []ast.Expression {
 }
 
 func explainUnaryExpr(sb *strings.Builder, n *ast.UnaryExpr, indent string, depth int) {
+	// Handle negate of literal numbers - output as negative literal instead of function
+	if n.Op == "-" {
+		if lit, ok := n.Operand.(*ast.Literal); ok {
+			switch lit.Type {
+			case ast.LiteralInteger:
+				// Convert positive integer to negative
+				switch val := lit.Value.(type) {
+				case int64:
+					fmt.Fprintf(sb, "%sLiteral Int64_%d\n", indent, -val)
+					return
+				case uint64:
+					fmt.Fprintf(sb, "%sLiteral Int64_-%d\n", indent, val)
+					return
+				}
+			case ast.LiteralFloat:
+				val := lit.Value.(float64)
+				s := FormatFloat(-val)
+				fmt.Fprintf(sb, "%sLiteral Float64_%s\n", indent, s)
+				return
+			}
+		}
+	}
+
 	fnName := UnaryOperatorToFunction(n.Op)
 	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)

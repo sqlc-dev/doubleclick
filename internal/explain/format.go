@@ -8,6 +8,12 @@ import (
 	"github.com/kyleconroy/doubleclick/ast"
 )
 
+// FormatFloat formats a float value for EXPLAIN AST output
+func FormatFloat(val float64) string {
+	// Use 'f' format to avoid scientific notation, -1 precision for smallest representation
+	return strconv.FormatFloat(val, 'f', -1, 64)
+}
+
 // FormatLiteral formats a literal value for EXPLAIN AST output
 func FormatLiteral(lit *ast.Literal) string {
 	switch lit.Type {
@@ -26,9 +32,7 @@ func FormatLiteral(lit *ast.Literal) string {
 		}
 	case ast.LiteralFloat:
 		val := lit.Value.(float64)
-		// Use 'f' format to avoid scientific notation, -1 precision for smallest representation
-		s := strconv.FormatFloat(val, 'f', -1, 64)
-		return fmt.Sprintf("Float64_%s", s)
+		return fmt.Sprintf("Float64_%s", FormatFloat(val))
 	case ast.LiteralString:
 		s := lit.Value.(string)
 		// Escape backslashes in strings

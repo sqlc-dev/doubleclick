@@ -1095,9 +1095,21 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 			p.nextToken()
 			if p.expect(token.BY) {
 				if p.currentIs(token.LPAREN) {
+					pos := p.current.Pos
 					p.nextToken()
-					create.OrderBy = p.parseExpressionList()
+					exprs := p.parseExpressionList()
 					p.expect(token.RPAREN)
+					// Store tuple literal for ORDER BY (expr1, expr2, ...) or ORDER BY ()
+					if len(exprs) == 0 || len(exprs) > 1 {
+						create.OrderBy = []ast.Expression{&ast.Literal{
+							Position: pos,
+							Type:     ast.LiteralTuple,
+							Value:    exprs,
+						}}
+					} else {
+						// Single expression in parentheses - just extract it
+						create.OrderBy = exprs
+					}
 				} else {
 					create.OrderBy = []ast.Expression{p.parseExpression(LOWEST)}
 				}
@@ -1106,9 +1118,21 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 			p.nextToken()
 			if p.expect(token.KEY) {
 				if p.currentIs(token.LPAREN) {
+					pos := p.current.Pos
 					p.nextToken()
-					create.PrimaryKey = p.parseExpressionList()
+					exprs := p.parseExpressionList()
 					p.expect(token.RPAREN)
+					// Store tuple literal for PRIMARY KEY (expr1, expr2, ...) or PRIMARY KEY ()
+					if len(exprs) == 0 || len(exprs) > 1 {
+						create.PrimaryKey = []ast.Expression{&ast.Literal{
+							Position: pos,
+							Type:     ast.LiteralTuple,
+							Value:    exprs,
+						}}
+					} else {
+						// Single expression in parentheses - just extract it
+						create.PrimaryKey = exprs
+					}
 				} else {
 					create.PrimaryKey = []ast.Expression{p.parseExpression(LOWEST)}
 				}
@@ -1545,37 +1569,52 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 	// Parse name (can start with a number in ClickHouse)
 	name := p.parseIdentifierName()
 	if name != "" {
+		var database, tableName string
 		if p.currentIs(token.DOT) {
 			p.nextToken()
-			drop.Database = name
-			tableName := p.parseIdentifierName()
-			if tableName != "" {
-				if drop.DropDatabase {
-					drop.Database = tableName
-				} else {
-					drop.Table = tableName
-				}
-			}
+			database = name
+			tableName = p.parseIdentifierName()
 		} else {
-			if dropUser {
-				drop.User = name
-			} else if drop.DropDatabase {
-				drop.Database = name
-			} else {
-				drop.Table = name
+			tableName = name
+		}
+
+		if dropUser {
+			drop.User = tableName
+		} else if drop.DropDatabase {
+			drop.Database = tableName
+		} else {
+			// First table - add to Tables list
+			drop.Tables = append(drop.Tables, &ast.TableIdentifier{
+				Position: drop.Position,
+				Database: database,
+				Table:    tableName,
+			})
+			drop.Table = tableName // Keep for backward compatibility
+			if database != "" {
+				drop.Database = database
 			}
 		}
 	}
 
 	// Handle multiple tables (DROP TABLE IF EXISTS t1, t2, t3)
-	// For now, just skip additional table names
 	for p.currentIs(token.COMMA) {
 		p.nextToken()
-		// Skip the table name (may be qualified like db.table)
-		p.parseIdentifierName()
+		pos := p.current.Pos
+		name := p.parseIdentifierName()
+		var database, tableName string
 		if p.currentIs(token.DOT) {
 			p.nextToken()
-			p.parseIdentifierName()
+			database = name
+			tableName = p.parseIdentifierName()
+		} else {
+			tableName = name
+		}
+		if tableName != "" {
+			drop.Tables = append(drop.Tables, &ast.TableIdentifier{
+				Position: pos,
+				Database: database,
+				Table:    tableName,
+			})
 		}
 	}
 
