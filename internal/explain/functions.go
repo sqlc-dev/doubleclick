@@ -71,9 +71,21 @@ func explainCastExpr(sb *strings.Builder, n *ast.CastExpr, indent string, depth 
 	// For function syntax or complex expressions, use normal AST node
 	if n.OperatorSyntax {
 		if lit, ok := n.Expr.(*ast.Literal); ok {
-			// Format literal as string
-			exprStr := formatExprAsString(lit)
-			fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, exprStr)
+			// For arrays/tuples of simple primitives, use FormatLiteral (Array_[...] format)
+			// For strings and other types, use string format
+			if lit.Type == ast.LiteralArray || lit.Type == ast.LiteralTuple {
+				if containsOnlyPrimitives(lit) {
+					fmt.Fprintf(sb, "%s  Literal %s\n", indent, FormatLiteral(lit))
+				} else {
+					// Complex content - format as string
+					exprStr := formatExprAsString(lit)
+					fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, exprStr)
+				}
+			} else {
+				// Simple literal - format as string
+				exprStr := formatExprAsString(lit)
+				fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, exprStr)
+			}
 		} else {
 			// Complex expression - use normal AST node
 			Node(sb, n.Expr, depth+2)
@@ -84,6 +96,43 @@ func explainCastExpr(sb *strings.Builder, n *ast.CastExpr, indent string, depth 
 	// Type is formatted as a literal string
 	typeStr := FormatDataType(n.Type)
 	fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, typeStr)
+}
+
+// containsOnlyPrimitives checks if a literal array/tuple contains only primitive literals
+func containsOnlyPrimitives(lit *ast.Literal) bool {
+	var exprs []ast.Expression
+	switch lit.Type {
+	case ast.LiteralArray, ast.LiteralTuple:
+		var ok bool
+		exprs, ok = lit.Value.([]ast.Expression)
+		if !ok {
+			return false
+		}
+	default:
+		return true
+	}
+
+	for _, e := range exprs {
+		innerLit, ok := e.(*ast.Literal)
+		if !ok {
+			return false
+		}
+		// Strings with special chars are not considered primitive for this purpose
+		if innerLit.Type == ast.LiteralString {
+			s := innerLit.Value.(string)
+			// Strings that look like JSON or contain special chars should be converted to string format
+			if strings.ContainsAny(s, "{}[]\"\\") {
+				return false
+			}
+		}
+		// Nested arrays/tuples need recursive check
+		if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
+			if !containsOnlyPrimitives(innerLit) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int) {

@@ -213,6 +213,10 @@ func formatExprAsString(expr ast.Expression) string {
 			return "false"
 		case ast.LiteralNull:
 			return "NULL"
+		case ast.LiteralArray:
+			return formatArrayAsString(e.Value)
+		case ast.LiteralTuple:
+			return formatTupleAsString(e.Value)
 		default:
 			return fmt.Sprintf("%v", e.Value)
 		}
@@ -220,5 +224,67 @@ func formatExprAsString(expr ast.Expression) string {
 		return e.Name()
 	default:
 		return fmt.Sprintf("%v", expr)
+	}
+}
+
+// formatArrayAsString formats an array literal as a string for :: cast syntax
+func formatArrayAsString(val interface{}) string {
+	exprs, ok := val.([]ast.Expression)
+	if !ok {
+		return "[]"
+	}
+	var parts []string
+	for _, e := range exprs {
+		parts = append(parts, formatElementAsString(e))
+	}
+	return "[" + strings.Join(parts, ", ") + "]"
+}
+
+// formatTupleAsString formats a tuple literal as a string for :: cast syntax
+func formatTupleAsString(val interface{}) string {
+	exprs, ok := val.([]ast.Expression)
+	if !ok {
+		return "()"
+	}
+	var parts []string
+	for _, e := range exprs {
+		parts = append(parts, formatElementAsString(e))
+	}
+	return "(" + strings.Join(parts, ", ") + ")"
+}
+
+// formatElementAsString formats a single element for array/tuple string representation
+func formatElementAsString(expr ast.Expression) string {
+	switch e := expr.(type) {
+	case *ast.Literal:
+		switch e.Type {
+		case ast.LiteralInteger:
+			return fmt.Sprintf("%d", e.Value)
+		case ast.LiteralFloat:
+			return fmt.Sprintf("%v", e.Value)
+		case ast.LiteralString:
+			// Quote strings with single quotes
+			s := e.Value.(string)
+			// Escape single quotes in the string
+			s = strings.ReplaceAll(s, "'", "\\'")
+			return "\\'" + s + "\\'"
+		case ast.LiteralBoolean:
+			if e.Value.(bool) {
+				return "true"
+			}
+			return "false"
+		case ast.LiteralNull:
+			return "NULL"
+		case ast.LiteralArray:
+			return formatArrayAsString(e.Value)
+		case ast.LiteralTuple:
+			return formatTupleAsString(e.Value)
+		default:
+			return fmt.Sprintf("%v", e.Value)
+		}
+	case *ast.Identifier:
+		return e.Name()
+	default:
+		return formatExprAsString(expr)
 	}
 }
