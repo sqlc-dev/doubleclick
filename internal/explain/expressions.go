@@ -139,6 +139,25 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 			}
 		}
 		fmt.Fprintf(sb, "%sLiteral %s (alias %s)\n", indent, FormatLiteral(e), n.Alias)
+	case *ast.BinaryExpr:
+		// Binary expressions become functions with alias
+		fnName := OperatorToFunction(e.Op)
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Alias, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+		Node(sb, e.Left, depth+2)
+		Node(sb, e.Right, depth+2)
+	case *ast.UnaryExpr:
+		// Unary expressions become functions with alias
+		fnName := UnaryOperatorToFunction(e.Op)
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Alias, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
+		Node(sb, e.Operand, depth+2)
+	case *ast.FunctionCall:
+		// Function calls already handle aliases
+		explainFunctionCallWithAlias(sb, e, n.Alias, indent, depth)
+	case *ast.Identifier:
+		// Identifiers with alias
+		fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, e.Name(), n.Alias)
 	default:
 		// For other types, recursively explain and add alias info
 		Node(sb, n.Expr, depth)
