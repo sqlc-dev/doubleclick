@@ -219,29 +219,35 @@ func (i *InsertQuery) statementNode()      {}
 
 // CreateQuery represents a CREATE statement.
 type CreateQuery struct {
-	Position       token.Position       `json:"-"`
-	OrReplace      bool                 `json:"or_replace,omitempty"`
-	IfNotExists    bool                 `json:"if_not_exists,omitempty"`
-	Temporary      bool                 `json:"temporary,omitempty"`
-	Database       string               `json:"database,omitempty"`
-	Table          string               `json:"table,omitempty"`
-	View           string               `json:"view,omitempty"`
-	Materialized   bool                 `json:"materialized,omitempty"`
-	To             string               `json:"to,omitempty"`       // Target table for materialized views
-	Populate       bool                 `json:"populate,omitempty"` // POPULATE for materialized views
-	Columns        []*ColumnDeclaration `json:"columns,omitempty"`
-	Constraints    []*Constraint        `json:"constraints,omitempty"`
-	Engine         *EngineClause        `json:"engine,omitempty"`
-	OrderBy        []Expression         `json:"order_by,omitempty"`
-	PartitionBy    Expression           `json:"partition_by,omitempty"`
-	PrimaryKey     []Expression         `json:"primary_key,omitempty"`
-	SampleBy       Expression           `json:"sample_by,omitempty"`
-	TTL            *TTLClause           `json:"ttl,omitempty"`
-	Settings       []*SettingExpr       `json:"settings,omitempty"`
-	AsSelect       Statement            `json:"as_select,omitempty"`
-	Comment        string               `json:"comment,omitempty"`
-	OnCluster      string               `json:"on_cluster,omitempty"`
-	CreateDatabase bool                 `json:"create_database,omitempty"`
+	Position         token.Position       `json:"-"`
+	OrReplace        bool                 `json:"or_replace,omitempty"`
+	IfNotExists      bool                 `json:"if_not_exists,omitempty"`
+	Temporary        bool                 `json:"temporary,omitempty"`
+	Database         string               `json:"database,omitempty"`
+	Table            string               `json:"table,omitempty"`
+	View             string               `json:"view,omitempty"`
+	Materialized     bool                 `json:"materialized,omitempty"`
+	To               string               `json:"to,omitempty"`       // Target table for materialized views
+	Populate         bool                 `json:"populate,omitempty"` // POPULATE for materialized views
+	Columns          []*ColumnDeclaration `json:"columns,omitempty"`
+	Constraints      []*Constraint        `json:"constraints,omitempty"`
+	Engine           *EngineClause        `json:"engine,omitempty"`
+	OrderBy          []Expression         `json:"order_by,omitempty"`
+	PartitionBy      Expression           `json:"partition_by,omitempty"`
+	PrimaryKey       []Expression         `json:"primary_key,omitempty"`
+	SampleBy         Expression           `json:"sample_by,omitempty"`
+	TTL              *TTLClause           `json:"ttl,omitempty"`
+	Settings         []*SettingExpr       `json:"settings,omitempty"`
+	AsSelect         Statement            `json:"as_select,omitempty"`
+	Comment          string               `json:"comment,omitempty"`
+	OnCluster        string               `json:"on_cluster,omitempty"`
+	CreateDatabase   bool                 `json:"create_database,omitempty"`
+	CreateFunction   bool                 `json:"create_function,omitempty"`
+	CreateUser       bool                 `json:"create_user,omitempty"`
+	CreateDictionary bool                 `json:"create_dictionary,omitempty"`
+	FunctionName     string               `json:"function_name,omitempty"`
+	FunctionBody     Expression           `json:"function_body,omitempty"`
+	UserName         string               `json:"user_name,omitempty"`
 }
 
 func (c *CreateQuery) Pos() token.Position { return c.Position }

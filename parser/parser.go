@@ -997,8 +997,33 @@ func (p *Parser) parseCreate() *ast.CreateQuery {
 	case token.VIEW:
 		p.nextToken()
 		p.parseCreateView(create)
+	case token.FUNCTION:
+		// CREATE FUNCTION name AS lambda_expr
+		create.CreateFunction = true
+		p.nextToken()
+		p.parseCreateFunction(create)
+	case token.USER:
+		// CREATE USER name ...
+		create.CreateUser = true
+		p.nextToken()
+		p.parseCreateUser(create)
+	case token.IDENT:
+		// Handle CREATE DICTIONARY, CREATE RESOURCE, CREATE WORKLOAD, etc.
+		identUpper := strings.ToUpper(p.current.Value)
+		switch identUpper {
+		case "DICTIONARY":
+			create.CreateDictionary = true
+			p.nextToken()
+			p.parseCreateGeneric(create)
+		case "RESOURCE", "WORKLOAD", "POLICY", "ROLE", "QUOTA", "PROFILE":
+			// Skip these statements - just consume tokens until semicolon
+			p.parseCreateGeneric(create)
+		default:
+			p.errors = append(p.errors, fmt.Errorf("expected TABLE, DATABASE, VIEW, FUNCTION, USER after CREATE"))
+			return nil
+		}
 	default:
-		p.errors = append(p.errors, fmt.Errorf("expected TABLE, DATABASE, or VIEW after CREATE"))
+		p.errors = append(p.errors, fmt.Errorf("expected TABLE, DATABASE, VIEW, FUNCTION, USER after CREATE"))
 		return nil
 	}
 
@@ -1278,6 +1303,73 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 			create.AsSelect = p.parseSelectWithUnion()
 		}
+	}
+}
+
+func (p *Parser) parseCreateFunction(create *ast.CreateQuery) {
+	// Handle IF NOT EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.NOT) {
+			p.nextToken()
+			if p.currentIs(token.EXISTS) {
+				create.IfNotExists = true
+				p.nextToken()
+			}
+		}
+	}
+
+	// Parse function name
+	create.FunctionName = p.parseIdentifierName()
+
+	// Handle ON CLUSTER
+	if p.currentIs(token.ON) {
+		p.nextToken()
+		if p.currentIs(token.CLUSTER) {
+			p.nextToken()
+			create.OnCluster = p.parseIdentifierName()
+		}
+	}
+
+	// Parse AS lambda_expression
+	if p.currentIs(token.AS) {
+		p.nextToken()
+		create.FunctionBody = p.parseExpression(LOWEST)
+	}
+}
+
+func (p *Parser) parseCreateUser(create *ast.CreateQuery) {
+	// Handle IF NOT EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.NOT) {
+			p.nextToken()
+			if p.currentIs(token.EXISTS) {
+				create.IfNotExists = true
+				p.nextToken()
+			}
+		}
+	}
+
+	// Parse user name
+	create.UserName = p.parseIdentifierName()
+
+	// Skip the rest of the user definition (complex syntax)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+}
+
+func (p *Parser) parseCreateGeneric(create *ast.CreateQuery) {
+	// Parse name
+	name := p.parseIdentifierName()
+	if name != "" {
+		create.Table = name // Reuse Table field for generic name
+	}
+
+	// Skip the rest of the statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
 	}
 }
 

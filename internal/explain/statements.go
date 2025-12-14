@@ -44,6 +44,25 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 }
 
 func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, depth int) {
+	// Handle special CREATE types
+	if n.CreateFunction {
+		children := 1 // lambda
+		fmt.Fprintf(sb, "%sCreateFunctionQuery %s (children %d)\n", indent, n.FunctionName, children)
+		if n.FunctionBody != nil {
+			Node(sb, n.FunctionBody, depth+1)
+		}
+		return
+	}
+	if n.CreateUser {
+		fmt.Fprintf(sb, "%sCreateUserQuery %s\n", indent, n.UserName)
+		return
+	}
+	if n.CreateDictionary {
+		fmt.Fprintf(sb, "%sCreateDictionaryQuery %s (children 1)\n", indent, n.Table)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		return
+	}
+
 	name := n.Table
 	if n.View != "" {
 		name = n.View
