@@ -38,9 +38,20 @@ func explainTableExpression(sb *strings.Builder, n *ast.TableExpression, indent 
 	} else if fn, ok := n.Table.(*ast.FunctionCall); ok && n.Alias != "" {
 		// Table function with alias
 		explainFunctionCallWithAlias(sb, fn, n.Alias, indent+" ", depth+1)
+	} else if ti, ok := n.Table.(*ast.TableIdentifier); ok && n.Alias != "" {
+		// Table identifier with alias
+		explainTableIdentifierWithAlias(sb, ti, n.Alias, indent+" ")
 	} else {
 		Node(sb, n.Table, depth+1)
 	}
+}
+
+func explainTableIdentifierWithAlias(sb *strings.Builder, n *ast.TableIdentifier, alias string, indent string) {
+	name := n.Table
+	if n.Database != "" {
+		name = n.Database + "." + n.Table
+	}
+	fmt.Fprintf(sb, "%sTableIdentifier %s (alias %s)\n", indent, name, alias)
 }
 
 func explainTableIdentifier(sb *strings.Builder, n *ast.TableIdentifier, indent string) {
