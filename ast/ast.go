@@ -57,6 +57,7 @@ type SelectQuery struct {
 	WithCube    bool                  `json:"with_cube,omitempty"`
 	WithTotals  bool                  `json:"with_totals,omitempty"`
 	Having      Expression            `json:"having,omitempty"`
+	Qualify     Expression            `json:"qualify,omitempty"`
 	Window      []*WindowDefinition   `json:"window,omitempty"`
 	OrderBy     []*OrderByElement     `json:"order_by,omitempty"`
 	Limit       Expression            `json:"limit,omitempty"`
@@ -90,6 +91,7 @@ func (w *WindowDefinition) End() token.Position { return w.Position }
 type IntoOutfileClause struct {
 	Position token.Position `json:"-"`
 	Filename string         `json:"filename"`
+	Truncate bool           `json:"truncate,omitempty"`
 }
 
 func (i *IntoOutfileClause) Pos() token.Position { return i.Position }
@@ -162,6 +164,7 @@ const (
 	JoinRight JoinType = "RIGHT"
 	JoinFull  JoinType = "FULL"
 	JoinCross JoinType = "CROSS"
+	JoinPaste JoinType = "PASTE"
 )
 
 // JoinStrictness represents the join strictness.
@@ -458,6 +461,7 @@ type DescribeQuery struct {
 	Database      string         `json:"database,omitempty"`
 	Table         string         `json:"table,omitempty"`
 	TableFunction *FunctionCall  `json:"table_function,omitempty"`
+	Settings      []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (d *DescribeQuery) Pos() token.Position { return d.Position }

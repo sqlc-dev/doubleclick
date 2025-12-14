@@ -254,7 +254,30 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		if !p.expect(token.BY) {
 			return nil
 		}
-		sel.GroupBy = p.parseExpressionList()
+
+		// Handle GROUPING SETS, ROLLUP(...), CUBE(...) as special expressions
+		if p.currentIs(token.GROUPING) && p.peekIs(token.SETS) {
+			// GROUPING SETS ((a), (b), (a, b))
+			p.nextToken() // skip GROUPING
+			p.nextToken() // skip SETS
+			sel.GroupBy = p.parseGroupingSets()
+		} else if p.currentIs(token.ROLLUP) && p.peekIs(token.LPAREN) {
+			// ROLLUP(a, b, c)
+			p.nextToken() // skip ROLLUP
+			p.nextToken() // skip (
+			sel.GroupBy = p.parseExpressionList()
+			p.expect(token.RPAREN)
+			sel.WithRollup = true
+		} else if p.currentIs(token.CUBE) && p.peekIs(token.LPAREN) {
+			// CUBE(a, b, c)
+			p.nextToken() // skip CUBE
+			p.nextToken() // skip (
+			sel.GroupBy = p.parseExpressionList()
+			p.expect(token.RPAREN)
+			sel.WithCube = true
+		} else {
+			sel.GroupBy = p.parseExpressionList()
+		}
 
 		// WITH ROLLUP
 		if p.currentIs(token.WITH) && p.peekIs(token.ROLLUP) {
@@ -282,6 +305,12 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 	if p.currentIs(token.HAVING) {
 		p.nextToken()
 		sel.Having = p.parseExpression(LOWEST)
+	}
+
+	// Parse QUALIFY clause (window function filter)
+	if p.currentIs(token.QUALIFY) {
+		p.nextToken()
+		sel.Qualify = p.parseExpression(LOWEST)
 	}
 
 	// Parse WINDOW clause for named windows
@@ -390,6 +419,11 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 					Filename: p.current.Value,
 				}
 				p.nextToken()
+				// Parse optional TRUNCATE
+				if p.currentIs(token.TRUNCATE) {
+					sel.IntoOutfile.Truncate = true
+					p.nextToken()
+				}
 			}
 		}
 	}
@@ -528,7 +562,7 @@ func (p *Parser) isJoinKeyword() bool {
 	}
 	switch p.current.Token {
 	case token.JOIN, token.INNER, token.LEFT, token.RIGHT, token.FULL, token.CROSS,
-		token.GLOBAL, token.ANY, token.ALL, token.ASOF, token.SEMI, token.ANTI:
+		token.GLOBAL, token.ANY, token.ALL, token.ASOF, token.SEMI, token.ANTI, token.PASTE:
 		return true
 	case token.COMMA:
 		return true
@@ -612,6 +646,9 @@ func (p *Parser) parseTableElementWithJoin() *ast.TablesInSelectQueryElement {
 		}
 	case token.CROSS:
 		join.Type = ast.JoinCross
+		p.nextToken()
+	case token.PASTE:
+		join.Type = ast.JoinPaste
 		p.nextToken()
 	default:
 		join.Type = ast.JoinInner
@@ -720,10 +757,10 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 
 func (p *Parser) isKeywordForClause() bool {
 	switch p.current.Token {
-	case token.WHERE, token.GROUP, token.HAVING, token.ORDER, token.LIMIT,
+	case token.WHERE, token.GROUP, token.HAVING, token.QUALIFY, token.ORDER, token.LIMIT,
 		token.OFFSET, token.UNION, token.EXCEPT, token.SETTINGS, token.FORMAT,
 		token.PREWHERE, token.JOIN, token.LEFT, token.RIGHT, token.INNER,
-		token.FULL, token.CROSS, token.ON, token.USING, token.GLOBAL,
+		token.FULL, token.CROSS, token.PASTE, token.ON, token.USING, token.GLOBAL,
 		token.ANY, token.ALL, token.SEMI, token.ANTI, token.ASOF:
 		return true
 	}
@@ -2199,6 +2236,12 @@ func (p *Parser) parseDescribe() *ast.DescribeQuery {
 		} else {
 			desc.Table = tableName
 		}
+	}
+
+	// Parse SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		desc.Settings = p.parseSettingsList()
 	}
 
 	return desc

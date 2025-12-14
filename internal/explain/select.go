@@ -15,6 +15,13 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 	for _, sel := range n.Selects {
 		Node(sb, sel, depth+2)
 	}
+	// INTO OUTFILE clause - check if any SelectQuery has IntoOutfile set
+	for _, sel := range n.Selects {
+		if sq, ok := sel.(*ast.SelectQuery); ok && sq.IntoOutfile != nil {
+			fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, sq.IntoOutfile.Filename)
+			break
+		}
+	}
 	// FORMAT clause - check if any SelectQuery has Format set
 	var hasFormat bool
 	for _, sel := range n.Selects {
@@ -131,6 +138,13 @@ func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent st
 
 func countSelectUnionChildren(n *ast.SelectWithUnionQuery) int {
 	count := 1 // ExpressionList of selects
+	// Check if any SelectQuery has IntoOutfile set
+	for _, sel := range n.Selects {
+		if sq, ok := sel.(*ast.SelectQuery); ok && sq.IntoOutfile != nil {
+			count++
+			break
+		}
+	}
 	// Check if any SelectQuery has Format set
 	var hasFormat bool
 	for _, sel := range n.Selects {

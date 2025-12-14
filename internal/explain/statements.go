@@ -273,8 +273,15 @@ func explainUseQuery(sb *strings.Builder, n *ast.UseQuery, indent string) {
 func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent string) {
 	if n.TableFunction != nil {
 		// DESCRIBE on a table function
-		fmt.Fprintf(sb, "%sDescribeQuery (children 1)\n", indent)
+		children := 1
+		if len(n.Settings) > 0 {
+			children++
+		}
+		fmt.Fprintf(sb, "%sDescribeQuery (children %d)\n", indent, children)
 		explainFunctionCall(sb, n.TableFunction, indent+" ", 1)
+		if len(n.Settings) > 0 {
+			fmt.Fprintf(sb, "%s Set\n", indent)
+		}
 	} else {
 		name := n.Table
 		if n.Database != "" {

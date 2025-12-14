@@ -36,7 +36,7 @@ func (p *Parser) precedence(tok token.Token) int {
 	case token.NOT:
 		return NOT_PREC
 	case token.EQ, token.NEQ, token.LT, token.GT, token.LTE, token.GTE,
-		token.LIKE, token.ILIKE, token.IN, token.BETWEEN, token.IS,
+		token.LIKE, token.ILIKE, token.REGEXP, token.IN, token.BETWEEN, token.IS,
 		token.NULL_SAFE_EQ, token.GLOBAL:
 		return COMPARE
 	case token.QUESTION:
@@ -98,6 +98,38 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 		}
 	}
 
+	return exprs
+}
+
+// parseGroupingSets parses GROUPING SETS ((a), (b), (a, b))
+func (p *Parser) parseGroupingSets() []ast.Expression {
+	var exprs []ast.Expression
+
+	if !p.expect(token.LPAREN) {
+		return exprs
+	}
+
+	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+		// Each element in GROUPING SETS is a tuple or a single expression
+		if p.currentIs(token.LPAREN) {
+			// Parse as tuple
+			tuple := p.parseGroupedOrTuple()
+			exprs = append(exprs, tuple)
+		} else {
+			// Single expression
+			expr := p.parseExpression(LOWEST)
+			if expr != nil {
+				exprs = append(exprs, expr)
+			}
+		}
+
+		// Skip comma if present
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+		}
+	}
+
+	p.expect(token.RPAREN)
 	return exprs
 }
 
@@ -263,8 +295,10 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 		return p.parseTernary(left)
 	case token.LIKE, token.ILIKE:
 		return p.parseLikeExpression(left, false)
+	case token.REGEXP:
+		return p.parseRegexpExpression(left, false)
 	case token.NOT:
-		// NOT IN, NOT LIKE, NOT BETWEEN, IS NOT
+		// NOT IN, NOT LIKE, NOT BETWEEN, NOT REGEXP, IS NOT
 		p.nextToken()
 		switch p.current.Token {
 		case token.IN:
@@ -273,6 +307,8 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 			return p.parseLikeExpression(left, true)
 		case token.ILIKE:
 			return p.parseLikeExpression(left, true)
+		case token.REGEXP:
+			return p.parseRegexpExpression(left, true)
 		case token.BETWEEN:
 			return p.parseBetweenExpression(left, true)
 		default:
@@ -674,13 +710,22 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 		}
 	}
 
-	// Check for subquery
+	// Check for subquery (SELECT, WITH, or EXPLAIN)
 	if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 		subquery := p.parseSelectWithUnion()
 		p.expect(token.RPAREN)
 		return &ast.Subquery{
 			Position: pos,
 			Query:    subquery,
+		}
+	}
+	// EXPLAIN as subquery
+	if p.currentIs(token.EXPLAIN) {
+		explain := p.parseExplain()
+		p.expect(token.RPAREN)
+		return &ast.Subquery{
+			Position: pos,
+			Query:    explain,
 		}
 	}
 
@@ -1073,6 +1118,30 @@ func (p *Parser) parseLikeExpression(left ast.Expression, not bool) ast.Expressi
 
 	expr.Pattern = p.parseExpression(COMPARE)
 	return expr
+}
+
+func (p *Parser) parseRegexpExpression(left ast.Expression, not bool) ast.Expression {
+	pos := p.current.Pos
+	p.nextToken() // skip REGEXP
+
+	pattern := p.parseExpression(COMPARE)
+
+	// REGEXP translates to match(expr, pattern) function
+	fnCall := &ast.FunctionCall{
+		Position:  pos,
+		Name:      "match",
+		Arguments: []ast.Expression{left, pattern},
+	}
+
+	if not {
+		// NOT REGEXP uses NOT match(...)
+		return &ast.UnaryExpr{
+			Position: pos,
+			Op:       "NOT",
+			Operand:  fnCall,
+		}
+	}
+	return fnCall
 }
 
 func (p *Parser) parseInExpression(left ast.Expression, not bool) ast.Expression {
@@ -1478,7 +1547,11 @@ func (p *Parser) parseKeywordAsFunction() ast.Expression {
 	}
 
 	var args []ast.Expression
-	if !p.currentIs(token.RPAREN) {
+	// Handle view() and similar functions that take a subquery as argument
+	if name == "view" && (p.currentIs(token.SELECT) || p.currentIs(token.WITH)) {
+		subquery := p.parseSelectWithUnion()
+		args = []ast.Expression{&ast.Subquery{Position: pos, Query: subquery}}
+	} else if !p.currentIs(token.RPAREN) {
 		args = p.parseExpressionList()
 	}
 

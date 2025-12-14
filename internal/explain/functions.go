@@ -37,6 +37,13 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 	}
 	fmt.Fprintln(sb)
 	for _, arg := range n.Arguments {
+		// For view() table function, unwrap Subquery wrapper
+		if strings.ToLower(n.Name) == "view" {
+			if sq, ok := arg.(*ast.Subquery); ok {
+				Node(sb, sq.Query, depth+2)
+				continue
+			}
+		}
 		Node(sb, arg, depth+2)
 	}
 	// Settings appear as Set node inside ExpressionList

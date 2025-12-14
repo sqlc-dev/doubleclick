@@ -108,6 +108,7 @@ const (
 	GLOBAL
 	GRANT
 	GROUP
+	GROUPING
 	HAVING
 	IF
 	ILIKE
@@ -146,9 +147,12 @@ const (
 	OUTFILE
 	OVER
 	PARTITION
+	PASTE
 	POPULATE
 	PREWHERE
 	PRIMARY
+	QUALIFY
+	REGEXP
 	RENAME
 	REPLACE
 	REVOKE
@@ -158,6 +162,7 @@ const (
 	SELECT
 	SEMI
 	SET
+	SETS
 	SETTINGS
 	SHOW
 	STEP
@@ -290,6 +295,7 @@ var tokens = [...]string{
 	GLOBAL:       "GLOBAL",
 	GRANT:        "GRANT",
 	GROUP:        "GROUP",
+	GROUPING:     "GROUPING",
 	HAVING:       "HAVING",
 	IF:           "IF",
 	ILIKE:        "ILIKE",
@@ -328,9 +334,12 @@ var tokens = [...]string{
 	OUTFILE:      "OUTFILE",
 	OVER:         "OVER",
 	PARTITION:    "PARTITION",
+	PASTE:        "PASTE",
 	POPULATE:     "POPULATE",
 	PREWHERE:     "PREWHERE",
 	PRIMARY:      "PRIMARY",
+	QUALIFY:      "QUALIFY",
+	REGEXP:       "REGEXP",
 	RENAME:       "RENAME",
 	REPLACE:      "REPLACE",
 	REVOKE:       "REVOKE",
@@ -340,6 +349,7 @@ var tokens = [...]string{
 	SELECT:       "SELECT",
 	SEMI:         "SEMI",
 	SET:          "SET",
+	SETS:         "SETS",
 	SETTINGS:     "SETTINGS",
 	SHOW:         "SHOW",
 	STEP:         "STEP",
