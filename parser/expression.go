@@ -1365,6 +1365,17 @@ func (p *Parser) parseParametricFunctionCall(fn *ast.FunctionCall) *ast.Function
 
 	p.expect(token.RPAREN)
 
+	// Handle IGNORE NULLS / RESPECT NULLS (aggregate function modifiers)
+	if p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		if upper == "IGNORE" || upper == "RESPECT" {
+			p.nextToken()
+			if p.currentIs(token.NULLS) {
+				p.nextToken()
+			}
+		}
+	}
+
 	// Handle OVER clause for window functions
 	if p.currentIs(token.OVER) {
 		p.nextToken()

@@ -1074,6 +1074,23 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 				if idx != nil {
 					create.Indexes = append(create.Indexes, idx)
 				}
+			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
+				// Skip PROJECTION definitions: PROJECTION name (SELECT ...)
+				p.nextToken() // skip PROJECTION
+				p.parseIdentifierName() // projection name
+				// Skip the (SELECT ...) part
+				if p.currentIs(token.LPAREN) {
+					depth := 1
+					p.nextToken()
+					for depth > 0 && !p.currentIs(token.EOF) {
+						if p.currentIs(token.LPAREN) {
+							depth++
+						} else if p.currentIs(token.RPAREN) {
+							depth--
+						}
+						p.nextToken()
+					}
+				}
 			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CONSTRAINT" {
 				// Skip CONSTRAINT definitions
 				p.nextToken()
