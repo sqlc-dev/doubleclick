@@ -270,24 +270,62 @@ func (l *Lexer) readString(quote rune) Item {
 
 	for !l.eof {
 		if l.ch == quote {
-			// Check for escaped quote
+			// Check for escaped quote (e.g., '' becomes ')
 			if l.peekChar() == quote {
-				sb.WriteRune(l.ch)
-				l.readChar()
-				sb.WriteRune(l.ch)
-				l.readChar()
+				sb.WriteRune(l.ch) // Write one quote (the escaped result)
+				l.readChar()       // skip first quote
+				l.readChar()       // skip second quote
 				continue
 			}
 			l.readChar() // skip closing quote
 			break
 		}
 		if l.ch == '\\' {
-			sb.WriteRune(l.ch)
-			l.readChar()
-			if !l.eof {
-				sb.WriteRune(l.ch)
-				l.readChar()
+			l.readChar() // consume backslash
+			if l.eof {
+				break
 			}
+			// Interpret escape sequence
+			switch l.ch {
+			case '\'':
+				sb.WriteRune('\'')
+			case '"':
+				sb.WriteRune('"')
+			case '\\':
+				sb.WriteRune('\\')
+			case 'n':
+				sb.WriteRune('\n')
+			case 't':
+				sb.WriteRune('\t')
+			case 'r':
+				sb.WriteRune('\r')
+			case '0':
+				sb.WriteRune('\x00')
+			case 'b':
+				sb.WriteRune('\b')
+			case 'f':
+				sb.WriteRune('\f')
+			case 'x':
+				// Hex escape: \xNN
+				l.readChar()
+				if l.eof {
+					break
+				}
+				hex1 := l.ch
+				l.readChar()
+				if l.eof {
+					sb.WriteRune(rune(hexValue(hex1)))
+					continue
+				}
+				hex2 := l.ch
+				// Convert hex digits to byte
+				val := hexValue(hex1)*16 + hexValue(hex2)
+				sb.WriteByte(byte(val))
+			default:
+				// Unknown escape, just write the character after backslash
+				sb.WriteRune(l.ch)
+			}
+			l.readChar()
 			continue
 		}
 		sb.WriteRune(l.ch)
@@ -426,6 +464,19 @@ func (l *Lexer) readNumber() Item {
 
 func isHexDigit(ch rune) bool {
 	return unicode.IsDigit(ch) || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F')
+}
+
+func hexValue(ch rune) int {
+	if ch >= '0' && ch <= '9' {
+		return int(ch - '0')
+	}
+	if ch >= 'a' && ch <= 'f' {
+		return int(ch-'a') + 10
+	}
+	if ch >= 'A' && ch <= 'F' {
+		return int(ch-'A') + 10
+	}
+	return 0
 }
 
 func (l *Lexer) readIdentifier() Item {

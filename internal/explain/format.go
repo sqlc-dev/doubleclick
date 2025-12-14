@@ -8,6 +8,41 @@ import (
 	"github.com/kyleconroy/doubleclick/ast"
 )
 
+// FormatFloat formats a float value for EXPLAIN AST output
+func FormatFloat(val float64) string {
+	// Use 'f' format to avoid scientific notation, -1 precision for smallest representation
+	return strconv.FormatFloat(val, 'f', -1, 64)
+}
+
+// escapeStringLiteral escapes special characters in a string for EXPLAIN AST output
+// Uses double-escaping as ClickHouse EXPLAIN AST displays strings
+func escapeStringLiteral(s string) string {
+	var sb strings.Builder
+	for _, r := range s {
+		switch r {
+		case '\\':
+			sb.WriteString("\\\\\\\\") // backslash becomes four backslashes (\\\\)
+		case '\'':
+			sb.WriteString("\\'")
+		case '\n':
+			sb.WriteString("\\\\n") // newline becomes \\n
+		case '\t':
+			sb.WriteString("\\\\t") // tab becomes \\t
+		case '\r':
+			sb.WriteString("\\\\r") // carriage return becomes \\r
+		case '\x00':
+			sb.WriteString("\\\\0") // null becomes \\0
+		case '\b':
+			sb.WriteString("\\\\b") // backspace becomes \\b
+		case '\f':
+			sb.WriteString("\\\\f") // form feed becomes \\f
+		default:
+			sb.WriteRune(r)
+		}
+	}
+	return sb.String()
+}
+
 // FormatLiteral formats a literal value for EXPLAIN AST output
 func FormatLiteral(lit *ast.Literal) string {
 	switch lit.Type {
@@ -26,13 +61,11 @@ func FormatLiteral(lit *ast.Literal) string {
 		}
 	case ast.LiteralFloat:
 		val := lit.Value.(float64)
-		// Use 'f' format to avoid scientific notation, -1 precision for smallest representation
-		s := strconv.FormatFloat(val, 'f', -1, 64)
-		return fmt.Sprintf("Float64_%s", s)
+		return fmt.Sprintf("Float64_%s", FormatFloat(val))
 	case ast.LiteralString:
 		s := lit.Value.(string)
-		// Escape backslashes in strings
-		s = strings.ReplaceAll(s, "\\", "\\\\")
+		// Escape special characters for display
+		s = escapeStringLiteral(s)
 		return fmt.Sprintf("\\'%s\\'", s)
 	case ast.LiteralBoolean:
 		if lit.Value.(bool) {

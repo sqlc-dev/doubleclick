@@ -2,8 +2,8 @@
 
 ## Current State
 
-- **Tests passing:** 5,933 (86.9%)
-- **Tests skipped:** 891 (13.1%)
+- **Tests passing:** 6,006 (88.0%)
+- **Tests skipped:** 819 (12.0%)
 
 ## Recently Fixed (explain layer)
 
@@ -18,26 +18,14 @@
 - ✅ Aliased expression handling for binary/unary/function/identifier
 - ✅ PARTITION BY support in CREATE TABLE
 - ✅ Server error message stripping from expected output
+- ✅ DROP TABLE with multiple tables (e.g., `DROP TABLE t1, t2, t3`)
+- ✅ Negative integer/float literals (e.g., `-1` → `Literal Int64_-1`)
+- ✅ Empty tuple in ORDER BY (e.g., `ORDER BY ()` → `Function tuple` with empty `ExpressionList`)
+- ✅ String escape handling (lexer now unescapes `\'`, `\\`, `\n`, `\t`, `\0`, etc.)
 
 ## Parser Issues (High Priority)
 
 These require changes to `parser/parser.go`:
-
-### DROP TABLE with Multiple Tables
-Parser only captures first table when multiple are specified:
-```sql
-DROP TABLE IF EXISTS t1, t2, t3;
--- Expected: ExpressionList with 3 TableIdentifiers
--- Got: Single Identifier for t1
-```
-
-### Negative Integer Literals
-Negative numbers are parsed as `Function negate` instead of negative literals:
-```sql
-SELECT -1, -10000;
--- Expected: Literal Int64_-1
--- Got: Function negate (children 1) with Literal UInt64_1
-```
 
 ### CREATE TABLE with INDEX Clause
 INDEX definitions in CREATE TABLE are not captured:
@@ -57,22 +45,6 @@ TTL expressions on columns are not captured:
 ```sql
 CREATE TABLE t (c Int TTL expr()) ENGINE=MergeTree;
 -- Expected: ColumnDeclaration with 2 children (type + TTL function)
-```
-
-### Empty Tuple in ORDER BY
-`ORDER BY ()` should capture empty tuple expression:
-```sql
-CREATE TABLE t (...) ENGINE=MergeTree ORDER BY ();
--- Expected: Function tuple (children 1) with empty ExpressionList
--- Got: Storage definition with no ORDER BY
-```
-
-### String Escape Handling
-Parser stores escaped characters literally instead of unescaping:
-```sql
-SELECT 'x\'e2\'';
--- Parser stores: x\'e2\'  (with backslashes)
--- Should store: x'e2'  (unescaped)
 ```
 
 ## Parser Issues (Medium Priority)
@@ -163,11 +135,11 @@ SELECT 2.2250738585072014e-308;
 ```
 
 ### Array Literals with Negative Numbers
-Arrays with negative integers expand to Function instead of Literal:
+Arrays with negative integers may still expand to Function instead of Literal in some cases:
 ```sql
 SELECT [-10000, 5750];
--- Expected: Literal Array_[Int64_-10000, UInt64_5750]
--- Got: Function array with Function negate for -10000
+-- Some cases now work correctly with Literal Int64_-10000
+-- Complex nested arrays may still require additional work
 ```
 
 ### WithElement for CTE Subqueries
