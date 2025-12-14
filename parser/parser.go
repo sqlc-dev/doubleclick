@@ -1179,16 +1179,20 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 	}
 done_table_options:
 
-	// Parse AS SELECT or AS table_function()
+	// Parse AS SELECT or AS table_function() or AS database.table
 	if p.currentIs(token.AS) {
 		p.nextToken()
 		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 			create.AsSelect = p.parseSelectWithUnion()
-		} else if p.currentIs(token.IDENT) {
-			// AS table_function(...) like "AS s3Cluster(...)"
-			// Skip the function call for now
-			p.parseIdentifierName()
-			if p.currentIs(token.LPAREN) {
+		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			// AS table_function(...) or AS database.table
+			name := p.parseIdentifierName()
+			if p.currentIs(token.DOT) {
+				// AS database.table - skip the table name
+				p.nextToken()
+				p.parseIdentifierName()
+			} else if p.currentIs(token.LPAREN) {
+				// AS function(...) - skip the function call
 				depth := 1
 				p.nextToken()
 				for depth > 0 && !p.currentIs(token.EOF) {
@@ -1200,6 +1204,7 @@ done_table_options:
 					p.nextToken()
 				}
 			}
+			_ = name // Use name for future AS table support
 		}
 	}
 }
