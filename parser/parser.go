@@ -1070,12 +1070,9 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
 			// Handle INDEX definition
 			if p.currentIs(token.INDEX) {
-				p.nextToken()
-				// Skip index definition: INDEX name expr TYPE type GRANULARITY n
-				p.parseIdentifierName() // index name
-				// Skip expression and other index parts
-				for !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-					p.nextToken()
+				idx := p.parseIndexDefinition()
+				if idx != nil {
+					create.Indexes = append(create.Indexes, idx)
 				}
 			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CONSTRAINT" {
 				// Skip CONSTRAINT definitions
@@ -1371,6 +1368,50 @@ func (p *Parser) parseCreateGeneric(create *ast.CreateQuery) {
 	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
 		p.nextToken()
 	}
+}
+
+func (p *Parser) parseIndexDefinition() *ast.IndexDefinition {
+	idx := &ast.IndexDefinition{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip INDEX
+
+	// Parse index name
+	idx.Name = p.parseIdentifierName()
+
+	// Parse expression (the column or expression being indexed)
+	idx.Expression = p.parseExpression(LOWEST)
+
+	// Parse TYPE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TYPE" {
+		p.nextToken()
+		// Type is a function call like bloom_filter(0.025) or minmax
+		pos := p.current.Pos
+		typeName := p.parseIdentifierName()
+		if typeName != "" {
+			idx.Type = &ast.FunctionCall{
+				Position: pos,
+				Name:     typeName,
+			}
+			// Check for parentheses (type parameters)
+			if p.currentIs(token.LPAREN) {
+				p.nextToken()
+				if !p.currentIs(token.RPAREN) {
+					idx.Type.Arguments = p.parseExpressionList()
+				}
+				p.expect(token.RPAREN)
+			}
+		}
+	}
+
+	// Parse GRANULARITY
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "GRANULARITY" {
+		p.nextToken()
+		idx.Granularity = p.parseExpression(LOWEST)
+	}
+
+	return idx
 }
 
 func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {

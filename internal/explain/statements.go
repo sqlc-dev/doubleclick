@@ -88,11 +88,26 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, name, children)
 	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
-	if len(n.Columns) > 0 {
-		fmt.Fprintf(sb, "%s Columns definition (children %d)\n", indent, 1)
-		fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Columns))
-		for _, col := range n.Columns {
-			Column(sb, col, depth+3)
+	if len(n.Columns) > 0 || len(n.Indexes) > 0 {
+		childrenCount := 0
+		if len(n.Columns) > 0 {
+			childrenCount++
+		}
+		if len(n.Indexes) > 0 {
+			childrenCount++
+		}
+		fmt.Fprintf(sb, "%s Columns definition (children %d)\n", indent, childrenCount)
+		if len(n.Columns) > 0 {
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Columns))
+			for _, col := range n.Columns {
+				Column(sb, col, depth+3)
+			}
+		}
+		if len(n.Indexes) > 0 {
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Indexes))
+			for _, idx := range n.Indexes {
+				Index(sb, idx, depth+3)
+			}
 		}
 	}
 	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || len(n.Settings) > 0 {

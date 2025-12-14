@@ -230,6 +230,7 @@ type CreateQuery struct {
 	To               string               `json:"to,omitempty"`       // Target table for materialized views
 	Populate         bool                 `json:"populate,omitempty"` // POPULATE for materialized views
 	Columns          []*ColumnDeclaration `json:"columns,omitempty"`
+	Indexes          []*IndexDefinition   `json:"indexes,omitempty"`
 	Constraints      []*Constraint        `json:"constraints,omitempty"`
 	Engine           *EngineClause        `json:"engine,omitempty"`
 	OrderBy          []Expression         `json:"order_by,omitempty"`
@@ -295,12 +296,25 @@ func (n *NameTypePair) expressionNode()     {}
 
 // CodecExpr represents a CODEC expression.
 type CodecExpr struct {
-	Position token.Position    `json:"-"`
-	Codecs   []*FunctionCall   `json:"codecs"`
+	Position token.Position  `json:"-"`
+	Codecs   []*FunctionCall `json:"codecs"`
 }
 
 func (c *CodecExpr) Pos() token.Position { return c.Position }
 func (c *CodecExpr) End() token.Position { return c.Position }
+
+// IndexDefinition represents an INDEX definition in CREATE TABLE.
+type IndexDefinition struct {
+	Position    token.Position `json:"-"`
+	Name        string         `json:"name"`
+	Expression  Expression     `json:"expression"`
+	Type        *FunctionCall  `json:"type"`
+	Granularity Expression     `json:"granularity,omitempty"`
+}
+
+func (i *IndexDefinition) Pos() token.Position { return i.Position }
+func (i *IndexDefinition) End() token.Position { return i.Position }
+func (i *IndexDefinition) expressionNode()     {}
 
 // Constraint represents a table constraint.
 type Constraint struct {
