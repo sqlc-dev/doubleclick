@@ -16,6 +16,9 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 	if len(n.Parameters) > 0 {
 		children++ // parameters ExpressionList
 	}
+	if n.Over != nil {
+		children++ // WindowDefinition for OVER clause
+	}
 	// Normalize function name
 	fnName := NormalizeFunctionName(n.Name)
 	if alias != "" {
@@ -38,6 +41,11 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 		for _, p := range n.Parameters {
 			Node(sb, p, depth+2)
 		}
+	}
+	// Window definition (for window functions with OVER clause)
+	// WindowDefinition is a sibling to ExpressionList, so use the same indent
+	if n.Over != nil {
+		explainWindowSpec(sb, n.Over, indent+" ", depth+1)
 	}
 }
 
@@ -236,4 +244,43 @@ func explainExtractExpr(sb *strings.Builder, n *ast.ExtractExpr, indent string, 
 	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 	Node(sb, n.From, depth+2)
+}
+
+func explainWindowSpec(sb *strings.Builder, n *ast.WindowSpec, indent string, depth int) {
+	// Window spec is represented as WindowDefinition
+	// For simple cases like OVER (), just output WindowDefinition without children
+	children := 0
+	if n.Name != "" {
+		children++
+	}
+	if len(n.PartitionBy) > 0 {
+		children++
+	}
+	if len(n.OrderBy) > 0 {
+		children++
+	}
+	if n.Frame != nil {
+		children++
+	}
+	if children > 0 {
+		fmt.Fprintf(sb, "%sWindowDefinition (children %d)\n", indent, children)
+		if n.Name != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Name)
+		}
+		if len(n.PartitionBy) > 0 {
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.PartitionBy))
+			for _, e := range n.PartitionBy {
+				Node(sb, e, depth+2)
+			}
+		}
+		if len(n.OrderBy) > 0 {
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.OrderBy))
+			for _, o := range n.OrderBy {
+				Node(sb, o.Expression, depth+2)
+			}
+		}
+		// Frame handling would go here if needed
+	} else {
+		fmt.Fprintf(sb, "%sWindowDefinition\n", indent)
+	}
 }
