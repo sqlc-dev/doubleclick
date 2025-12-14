@@ -95,8 +95,38 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 }
 
 func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent string, depth int) {
-	fmt.Fprintf(sb, "%sOrderByElement (children %d)\n", indent, 1)
+	children := 1 // expression
+	if n.WithFill {
+		children++ // FillModifier
+	}
+	fmt.Fprintf(sb, "%sOrderByElement (children %d)\n", indent, children)
 	Node(sb, n.Expression, depth+1)
+	if n.WithFill {
+		fillChildren := 0
+		if n.FillFrom != nil {
+			fillChildren++
+		}
+		if n.FillTo != nil {
+			fillChildren++
+		}
+		if n.FillStep != nil {
+			fillChildren++
+		}
+		if fillChildren > 0 {
+			fmt.Fprintf(sb, "%s FillModifier (children %d)\n", indent, fillChildren)
+			if n.FillFrom != nil {
+				Node(sb, n.FillFrom, depth+2)
+			}
+			if n.FillTo != nil {
+				Node(sb, n.FillTo, depth+2)
+			}
+			if n.FillStep != nil {
+				Node(sb, n.FillStep, depth+2)
+			}
+		} else {
+			fmt.Fprintf(sb, "%s FillModifier\n", indent)
+		}
+	}
 }
 
 func countSelectUnionChildren(n *ast.SelectWithUnionQuery) int {
