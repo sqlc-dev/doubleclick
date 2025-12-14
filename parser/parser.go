@@ -1364,46 +1364,62 @@ func (p *Parser) parseDataType() *ast.DataType {
 		dt.HasParentheses = true
 		p.nextToken()
 
-		// Special handling for Nested type - it contains column declarations, not just types
-		if strings.ToUpper(dt.Name) == "NESTED" {
-			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-				// Parse as column name + type
-				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-					pos := p.current.Pos
-					colName := p.current.Value
-					p.nextToken()
-					// Parse the type for this column
-					colType := p.parseDataType()
-					if colType != nil {
-						// Use NameTypePair for Nested column declarations
-						ntp := &ast.NameTypePair{
-							Position: pos,
-							Name:     colName,
-							Type:     colType,
+		// Determine if this type uses named parameters (Nested, Tuple, JSON)
+		upperName := strings.ToUpper(dt.Name)
+		usesNamedParams := upperName == "NESTED" || upperName == "TUPLE" || upperName == "JSON"
+
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			// Check if this is a named parameter: identifier followed by a type name
+			// e.g., "a UInt32" where "a" is the name and "UInt32" is the type
+			isNamedParam := false
+			if usesNamedParams && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) {
+				// Check if current is NOT a type name and peek IS a type name or LPAREN follows for complex types
+				if !p.isDataTypeName(p.current.Value) {
+					// Current is a name (not a type), next should be a type
+					isNamedParam = true
+				} else if p.peekIs(token.IDENT) || p.peekIs(token.LPAREN) {
+					// Current looks like a type name but is followed by another identifier
+					// This happens with things like "a Tuple(...)" where "a" looks like it could be a type
+					// Check if peek is a known type name
+					if p.peekIs(token.IDENT) && p.isDataTypeName(p.peek.Value) {
+						isNamedParam = true
+					} else if p.peekIs(token.LPAREN) {
+						// Could be a function-like type or named with parenthesized type
+						// Check if current is a valid type name - if so, it's a type, not a name
+						if !p.isDataTypeName(p.current.Value) {
+							isNamedParam = true
 						}
-						dt.Parameters = append(dt.Parameters, ntp)
 					}
 				}
-				if p.currentIs(token.COMMA) {
-					p.nextToken()
-				} else {
-					break
-				}
 			}
-		} else {
-			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-				// Could be another data type or an expression
-				// Type names can be identifiers or keywords (Array, Nested, etc.)
-				if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.isDataTypeName(p.current.Value) {
-					dt.Parameters = append(dt.Parameters, p.parseDataType())
-				} else {
-					dt.Parameters = append(dt.Parameters, p.parseExpression(LOWEST))
+
+			if isNamedParam {
+				// Parse as name + type pair
+				pos := p.current.Pos
+				paramName := p.current.Value
+				p.nextToken()
+				// Parse the type for this parameter
+				paramType := p.parseDataType()
+				if paramType != nil {
+					ntp := &ast.NameTypePair{
+						Position: pos,
+						Name:     paramName,
+						Type:     paramType,
+					}
+					dt.Parameters = append(dt.Parameters, ntp)
 				}
-				if p.currentIs(token.COMMA) {
-					p.nextToken()
-				} else {
-					break
-				}
+			} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.isDataTypeName(p.current.Value) {
+				// It's a type name, parse as data type
+				dt.Parameters = append(dt.Parameters, p.parseDataType())
+			} else {
+				// Parse as expression (for things like Decimal(10, 2))
+				dt.Parameters = append(dt.Parameters, p.parseExpression(LOWEST))
+			}
+
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
 			}
 		}
 		p.expect(token.RPAREN)
@@ -2008,12 +2024,17 @@ func (p *Parser) parseDescribe() *ast.DescribeQuery {
 		p.nextToken()
 	}
 
-	// Parse table name (can be identifier or keyword used as table name like "system")
+	// Parse table name or table function
+	// Table functions look like: format(CSV, '...'), url('...'), s3Cluster(...)
 	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		pos := p.current.Pos
 		tableName := p.current.Value
 		p.nextToken()
 
-		if p.currentIs(token.DOT) {
+		// Check if this is a function call (table function)
+		if p.currentIs(token.LPAREN) {
+			desc.TableFunction = p.parseFunctionCall(tableName, pos)
+		} else if p.currentIs(token.DOT) {
 			p.nextToken()
 			desc.Database = tableName
 			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {

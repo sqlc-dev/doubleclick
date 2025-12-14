@@ -398,8 +398,13 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 		p.nextToken()
 	}
 
-	// Parse arguments
-	if !p.currentIs(token.RPAREN) && !p.currentIs(token.SETTINGS) {
+	// Handle view() and similar functions that take a subquery as argument
+	// view(SELECT ...) should parse SELECT as a subquery, not expression
+	if strings.ToLower(name) == "view" && (p.currentIs(token.SELECT) || p.currentIs(token.WITH)) {
+		subquery := p.parseSelectWithUnion()
+		fn.Arguments = []ast.Expression{&ast.Subquery{Position: pos, Query: subquery}}
+	} else if !p.currentIs(token.RPAREN) && !p.currentIs(token.SETTINGS) {
+		// Parse arguments
 		fn.Arguments = p.parseFunctionArgumentList()
 	}
 

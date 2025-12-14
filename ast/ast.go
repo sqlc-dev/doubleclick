@@ -434,9 +434,10 @@ func (u *UseQuery) statementNode()      {}
 
 // DescribeQuery represents a DESCRIBE statement.
 type DescribeQuery struct {
-	Position token.Position `json:"-"`
-	Database string         `json:"database,omitempty"`
-	Table    string         `json:"table"`
+	Position      token.Position `json:"-"`
+	Database      string         `json:"database,omitempty"`
+	Table         string         `json:"table,omitempty"`
+	TableFunction *FunctionCall  `json:"table_function,omitempty"`
 }
 
 func (d *DescribeQuery) Pos() token.Position { return d.Position }

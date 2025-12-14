@@ -237,11 +237,17 @@ func explainUseQuery(sb *strings.Builder, n *ast.UseQuery, indent string) {
 }
 
 func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent string) {
-	name := n.Table
-	if n.Database != "" {
-		name = n.Database + "." + n.Table
+	if n.TableFunction != nil {
+		// DESCRIBE on a table function
+		fmt.Fprintf(sb, "%sDescribeQuery (children 1)\n", indent)
+		explainFunctionCall(sb, n.TableFunction, indent+" ", 1)
+	} else {
+		name := n.Table
+		if n.Database != "" {
+			name = n.Database + "." + n.Table
+		}
+		fmt.Fprintf(sb, "%sDescribe %s\n", indent, name)
 	}
-	fmt.Fprintf(sb, "%sDescribe %s\n", indent, name)
 }
 
 func explainDataType(sb *strings.Builder, n *ast.DataType, indent string, depth int) {

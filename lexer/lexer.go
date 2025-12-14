@@ -213,7 +213,9 @@ func (l *Lexer) NextToken() Item {
 		return l.readBacktickIdentifier()
 	default:
 		if unicode.IsDigit(l.ch) {
-			return l.readNumber()
+			// Check if this is a number or an identifier starting with digits
+			// In ClickHouse, identifiers like "02422_data" start with digits
+			return l.readNumberOrIdent()
 		}
 		if isIdentStart(l.ch) {
 			return l.readIdentifier()
@@ -454,6 +456,119 @@ func (l *Lexer) readNumber() Item {
 			l.readChar()
 			// Handle underscore separators
 			for l.ch == '_' && unicode.IsDigit(l.peekChar()) {
+				l.readChar()
+			}
+		}
+	}
+
+	return Item{Token: token.NUMBER, Value: sb.String(), Pos: pos}
+}
+
+// readNumberOrIdent handles tokens that start with digits.
+// In ClickHouse, identifiers can start with digits if followed by underscore and letters
+// e.g., "02422_data" is a valid identifier
+func (l *Lexer) readNumberOrIdent() Item {
+	pos := l.pos
+	var sb strings.Builder
+
+	// Peek ahead to see if this will become an identifier
+	// We need to look for pattern: digits followed by underscore followed by letter
+	// Save position for potential rollback
+	startCh := l.ch
+
+	// Read initial digits
+	for unicode.IsDigit(l.ch) {
+		sb.WriteRune(l.ch)
+		l.readChar()
+	}
+
+	// Check if followed by underscore and then letter (identifier pattern)
+	if l.ch == '_' {
+		// Peek to see what follows the underscore
+		nextCh := l.peekChar()
+		if unicode.IsLetter(nextCh) || nextCh == '_' {
+			// This is an identifier that starts with digits
+			sb.WriteRune(l.ch)
+			l.readChar()
+			// Continue reading as identifier
+			for isIdentChar(l.ch) {
+				sb.WriteRune(l.ch)
+				l.readChar()
+			}
+			return Item{Token: token.IDENT, Value: sb.String(), Pos: pos}
+		}
+	}
+
+	// Not an identifier, continue as number
+	// But we already consumed the digits, so continue from here
+	// Handle underscore separators in numbers (only if followed by a digit)
+	for l.ch == '_' && unicode.IsDigit(l.peekChar()) {
+		l.readChar() // skip underscore
+		for unicode.IsDigit(l.ch) {
+			sb.WriteRune(l.ch)
+			l.readChar()
+		}
+	}
+
+	// Check for decimal point
+	if l.ch == '.' && unicode.IsDigit(l.peekChar()) {
+		sb.WriteRune(l.ch)
+		l.readChar()
+		for unicode.IsDigit(l.ch) {
+			sb.WriteRune(l.ch)
+			l.readChar()
+			for l.ch == '_' && unicode.IsDigit(l.peekChar()) {
+				l.readChar()
+			}
+		}
+	}
+
+	// Check for exponent
+	if l.ch == 'e' || l.ch == 'E' {
+		sb.WriteRune(l.ch)
+		l.readChar()
+		if l.ch == '+' || l.ch == '-' {
+			sb.WriteRune(l.ch)
+			l.readChar()
+		}
+		for unicode.IsDigit(l.ch) {
+			sb.WriteRune(l.ch)
+			l.readChar()
+			for l.ch == '_' && unicode.IsDigit(l.peekChar()) {
+				l.readChar()
+			}
+		}
+	}
+
+	// Special case: if the token was just "0" and current char is 'x', 'b', or 'o',
+	// this might be a hex/binary/octal number that we need to handle specially
+	val := sb.String()
+	if val == "0" && (l.ch == 'x' || l.ch == 'X') {
+		sb.WriteRune(l.ch)
+		l.readChar()
+		for isHexDigit(l.ch) {
+			sb.WriteRune(l.ch)
+			l.readChar()
+		}
+	} else if val == "0" && (l.ch == 'b' || l.ch == 'B') && (l.peekChar() == '0' || l.peekChar() == '1') {
+		sb.WriteRune(l.ch)
+		l.readChar()
+		for l.ch == '0' || l.ch == '1' {
+			sb.WriteRune(l.ch)
+			l.readChar()
+		}
+	}
+
+	// Handle special case where number starts with 0 but we're inside readNumberOrIdent
+	// and the number already consumed is just the leading zero (checking for 0x, 0b, 0o)
+	if startCh == '0' && len(sb.String()) == 1 {
+		// Already handled above for 0x, 0b
+		// Handle 0o for octal
+		if l.ch == 'o' || l.ch == 'O' {
+			sb.WriteRune(l.ch)
+			l.readChar()
+			for l.ch >= '0' && l.ch <= '7' {
+				sb.WriteRune(l.ch)
 				l.readChar()
 			}
 		}
