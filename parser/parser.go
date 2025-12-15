@@ -365,6 +365,10 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 	if p.currentIs(token.OFFSET) {
 		p.nextToken()
 		sel.Offset = p.parseExpression(LOWEST)
+		// Skip optional ROWS keyword
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROWS" {
+			p.nextToken()
+		}
 	}
 
 	// Parse FETCH FIRST ... ROW ONLY (SQL standard syntax)
@@ -949,6 +953,15 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 		p.expect(token.RPAREN)
 	}
 
+	// Parse PARTITION BY (for INSERT INTO FUNCTION)
+	if p.currentIs(token.PARTITION) {
+		p.nextToken()
+		if p.currentIs(token.BY) {
+			p.nextToken()
+			ins.PartitionBy = p.parseExpression(LOWEST)
+		}
+	}
+
 	// Parse SETTINGS before VALUES
 	if p.currentIs(token.SETTINGS) {
 		ins.HasSettings = true
@@ -1165,7 +1178,8 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 		case p.currentIs(token.PARTITION):
 			p.nextToken()
 			if p.expect(token.BY) {
-				create.PartitionBy = p.parseExpression(LOWEST)
+				// Use ALIAS_PREC to avoid consuming AS keyword (for AS SELECT)
+				create.PartitionBy = p.parseExpression(ALIAS_PREC)
 			}
 		case p.currentIs(token.ORDER):
 			p.nextToken()
@@ -1187,7 +1201,8 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 						create.OrderBy = exprs
 					}
 				} else {
-					create.OrderBy = []ast.Expression{p.parseExpression(LOWEST)}
+					// Use ALIAS_PREC to avoid consuming AS keyword (for AS SELECT)
+					create.OrderBy = []ast.Expression{p.parseExpression(ALIAS_PREC)}
 				}
 			}
 		case p.currentIs(token.PRIMARY):
@@ -1210,19 +1225,21 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 						create.PrimaryKey = exprs
 					}
 				} else {
-					create.PrimaryKey = []ast.Expression{p.parseExpression(LOWEST)}
+					// Use ALIAS_PREC to avoid consuming AS keyword (for AS SELECT)
+					create.PrimaryKey = []ast.Expression{p.parseExpression(ALIAS_PREC)}
 				}
 			}
 		case p.currentIs(token.SAMPLE):
 			p.nextToken()
 			if p.expect(token.BY) {
-				create.SampleBy = p.parseExpression(LOWEST)
+				// Use ALIAS_PREC to avoid consuming AS keyword (for AS SELECT)
+				create.SampleBy = p.parseExpression(ALIAS_PREC)
 			}
 		case p.currentIs(token.TTL):
 			p.nextToken()
 			create.TTL = &ast.TTLClause{
 				Position:   p.current.Pos,
-				Expression: p.parseExpression(LOWEST),
+				Expression: p.parseExpression(ALIAS_PREC), // Use ALIAS_PREC for AS SELECT
 			}
 		case p.currentIs(token.SETTINGS):
 			p.nextToken()
@@ -1260,6 +1277,15 @@ done_table_options:
 			}
 			_ = name // Use name for future AS table support
 		}
+	}
+
+	// Parse ENGINE after AS (for CREATE TABLE x AS y ENGINE=z syntax)
+	if create.Engine == nil && p.currentIs(token.ENGINE) {
+		p.nextToken()
+		if p.currentIs(token.EQ) {
+			p.nextToken()
+		}
+		create.Engine = p.parseEngineClause()
 	}
 }
 
@@ -1525,6 +1551,15 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 	if p.currentIs(token.TTL) {
 		p.nextToken()
 		col.TTL = p.parseExpression(LOWEST)
+	}
+
+	// Parse PRIMARY KEY (column constraint)
+	if p.currentIs(token.PRIMARY) {
+		p.nextToken()
+		if p.currentIs(token.KEY) {
+			col.PrimaryKey = true
+			p.nextToken()
+		}
 	}
 
 	// Parse COMMENT
@@ -2275,6 +2310,9 @@ func (p *Parser) parseShow() *ast.ShowQuery {
 				p.nextToken()
 			}
 		}
+	case token.SETTINGS:
+		show.ShowType = ast.ShowSettings
+		p.nextToken()
 	default:
 		// Handle SHOW PROCESSLIST, SHOW DICTIONARIES, SHOW FUNCTIONS, etc.
 		if p.currentIs(token.IDENT) {
@@ -2313,8 +2351,8 @@ func (p *Parser) parseShow() *ast.ShowQuery {
 		}
 	}
 
-	// Parse LIKE clause
-	if p.currentIs(token.LIKE) {
+	// Parse LIKE or ILIKE clause
+	if p.currentIs(token.LIKE) || p.currentIs(token.ILIKE) {
 		p.nextToken()
 		if p.currentIs(token.STRING) {
 			show.Like = p.current.Value
@@ -2362,8 +2400,33 @@ func (p *Parser) parseExplain() *ast.ExplainQuery {
 		case "ESTIMATE":
 			explain.ExplainType = ast.ExplainEstimate
 			p.nextToken()
+		case "CURRENT":
+			// EXPLAIN CURRENT TRANSACTION
+			p.nextToken()
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TRANSACTION" {
+				p.nextToken()
+			}
+			explain.ExplainType = ast.ExplainCurrentTransaction
+			return explain // No statement follows CURRENT TRANSACTION
 		default:
 			explain.ExplainType = ast.ExplainPlan
+		}
+	}
+
+	// Parse EXPLAIN options (e.g., header = 1, input_headers = 1)
+	// These come before the actual statement
+	for p.currentIs(token.IDENT) && !p.currentIs(token.SELECT) && !p.currentIs(token.WITH) {
+		// Check if it looks like an option (ident = value)
+		if p.peekIs(token.EQ) {
+			p.nextToken() // skip option name
+			p.nextToken() // skip =
+			p.parseExpression(LOWEST) // skip value
+			// Skip comma if present
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			}
+		} else {
+			break
 		}
 	}
 
@@ -2493,15 +2556,58 @@ func (p *Parser) parseRename() *ast.RenameQuery {
 		return nil
 	}
 
-	// Parse from table name (can start with a number in ClickHouse)
-	rename.From = p.parseIdentifierName()
+	// Parse rename pairs (can have multiple: t1 TO t2, t3 TO t4, ...)
+	for {
+		pair := &ast.RenamePair{}
 
-	if !p.expect(token.TO) {
-		return nil
+		// Parse from table name (can be qualified: database.table)
+		fromName := p.parseIdentifierName()
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			pair.FromDatabase = fromName
+			pair.FromTable = p.parseIdentifierName()
+		} else {
+			pair.FromTable = fromName
+		}
+
+		if !p.expect(token.TO) {
+			break
+		}
+
+		// Parse to table name (can be qualified: database.table)
+		toName := p.parseIdentifierName()
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			pair.ToDatabase = toName
+			pair.ToTable = p.parseIdentifierName()
+		} else {
+			pair.ToTable = toName
+		}
+
+		rename.Pairs = append(rename.Pairs, pair)
+
+		// Check for more pairs
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+		} else {
+			break
+		}
 	}
 
-	// Parse to table name (can start with a number in ClickHouse)
-	rename.To = p.parseIdentifierName()
+	// Set legacy From/To fields for backward compatibility (first pair)
+	if len(rename.Pairs) > 0 {
+		first := rename.Pairs[0]
+		if first.FromDatabase != "" {
+			rename.From = first.FromDatabase + "." + first.FromTable
+		} else {
+			rename.From = first.FromTable
+		}
+		if first.ToDatabase != "" {
+			rename.To = first.ToDatabase + "." + first.ToTable
+		} else {
+			rename.To = first.ToTable
+		}
+	}
 
 	// Handle ON CLUSTER
 	if p.currentIs(token.ON) {

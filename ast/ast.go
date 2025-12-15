@@ -211,6 +211,7 @@ type InsertQuery struct {
 	Table       string         `json:"table,omitempty"`
 	Function    *FunctionCall  `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
 	Columns     []*Identifier  `json:"columns,omitempty"`
+	PartitionBy Expression     `json:"partition_by,omitempty"` // For PARTITION BY clause
 	Select      Statement      `json:"select,omitempty"`
 	Format      *Identifier    `json:"format,omitempty"`
 	HasSettings bool           `json:"has_settings,omitempty"` // For SETTINGS clause
@@ -268,6 +269,7 @@ type ColumnDeclaration struct {
 	DefaultKind   string         `json:"default_kind,omitempty"` // DEFAULT, MATERIALIZED, ALIAS, EPHEMERAL
 	Codec         *CodecExpr     `json:"codec,omitempty"`
 	TTL           Expression     `json:"ttl,omitempty"`
+	PrimaryKey    bool           `json:"primary_key,omitempty"` // PRIMARY KEY constraint
 	Comment       string         `json:"comment,omitempty"`
 }
 
@@ -495,6 +497,7 @@ const (
 	ShowColumns       ShowType = "COLUMNS"
 	ShowDictionaries  ShowType = "DICTIONARIES"
 	ShowFunctions     ShowType = "FUNCTIONS"
+	ShowSettings      ShowType = "SETTINGS"
 )
 
 // ExplainQuery represents an EXPLAIN statement.
@@ -512,11 +515,12 @@ func (e *ExplainQuery) statementNode()      {}
 type ExplainType string
 
 const (
-	ExplainAST       ExplainType = "AST"
-	ExplainSyntax    ExplainType = "SYNTAX"
-	ExplainPlan      ExplainType = "PLAN"
-	ExplainPipeline  ExplainType = "PIPELINE"
-	ExplainEstimate  ExplainType = "ESTIMATE"
+	ExplainAST                ExplainType = "AST"
+	ExplainSyntax             ExplainType = "SYNTAX"
+	ExplainPlan               ExplainType = "PLAN"
+	ExplainPipeline           ExplainType = "PIPELINE"
+	ExplainEstimate           ExplainType = "ESTIMATE"
+	ExplainCurrentTransaction ExplainType = "CURRENT TRANSACTION"
 )
 
 // SetQuery represents a SET statement.
@@ -556,11 +560,20 @@ func (s *SystemQuery) Pos() token.Position { return s.Position }
 func (s *SystemQuery) End() token.Position { return s.Position }
 func (s *SystemQuery) statementNode()      {}
 
+// RenamePair represents a single rename pair in RENAME TABLE.
+type RenamePair struct {
+	FromDatabase string `json:"from_database,omitempty"`
+	FromTable    string `json:"from_table"`
+	ToDatabase   string `json:"to_database,omitempty"`
+	ToTable      string `json:"to_table"`
+}
+
 // RenameQuery represents a RENAME TABLE statement.
 type RenameQuery struct {
 	Position  token.Position `json:"-"`
-	From      string         `json:"from"`
-	To        string         `json:"to"`
+	Pairs     []*RenamePair  `json:"pairs"`             // Multiple rename pairs
+	From      string         `json:"from,omitempty"`    // Deprecated: for backward compat
+	To        string         `json:"to,omitempty"`      // Deprecated: for backward compat
 	OnCluster string         `json:"on_cluster,omitempty"`
 }
 

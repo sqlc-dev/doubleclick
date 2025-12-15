@@ -205,12 +205,42 @@ func (l *Lexer) NextToken() Item {
 	case '?':
 		l.readChar()
 		return Item{Token: token.QUESTION, Value: "?", Pos: pos}
+	case '^':
+		l.readChar()
+		return Item{Token: token.CARET, Value: "^", Pos: pos}
 	case '\'':
 		return l.readString('\'')
+	case '\u2018', '\u2019': // Unicode curly single quotes ' '
+		return l.readUnicodeString(l.ch)
 	case '"':
 		return l.readQuotedIdentifier()
+	case '\u201C', '\u201D': // Unicode curly double quotes " "
+		return l.readUnicodeQuotedIdentifier(l.ch)
+	case '\u2212': // Unicode minus sign −
+		l.readChar()
+		return Item{Token: token.MINUS, Value: "−", Pos: pos}
 	case '`':
 		return l.readBacktickIdentifier()
+	case '@':
+		// Handle @@ system variables and @ for user@host syntax
+		if l.peekChar() == '@' {
+			l.readChar() // skip first @
+			l.readChar() // skip second @
+			// Read the variable name
+			if isIdentStart(l.ch) || unicode.IsDigit(l.ch) {
+				var sb strings.Builder
+				sb.WriteString("@@")
+				for isIdentChar(l.ch) {
+					sb.WriteRune(l.ch)
+					l.readChar()
+				}
+				return Item{Token: token.IDENT, Value: sb.String(), Pos: pos}
+			}
+			return Item{Token: token.IDENT, Value: "@@", Pos: pos}
+		}
+		// Single @ - used in user@host syntax, return as IDENT
+		l.readChar()
+		return Item{Token: token.IDENT, Value: "@", Pos: pos}
 	default:
 		if unicode.IsDigit(l.ch) {
 			// Check if this is a number or an identifier starting with digits
@@ -354,6 +384,50 @@ func (l *Lexer) readQuotedIdentifier() Item {
 		l.readChar()
 	}
 	if l.ch == '"' {
+		l.readChar() // skip closing quote
+	}
+	return Item{Token: token.IDENT, Value: sb.String(), Pos: pos}
+}
+
+// readUnicodeString reads a string enclosed in Unicode curly quotes (' or ')
+func (l *Lexer) readUnicodeString(openQuote rune) Item {
+	pos := l.pos
+	var sb strings.Builder
+	l.readChar() // skip opening quote
+
+	// Unicode curly quotes: ' (U+2018) opens, ' (U+2019) closes
+	closeQuote := '\u2019' // '
+	if openQuote == '\u2019' {
+		closeQuote = '\u2019'
+	}
+
+	for !l.eof && l.ch != closeQuote {
+		sb.WriteRune(l.ch)
+		l.readChar()
+	}
+	if l.ch == closeQuote {
+		l.readChar() // skip closing quote
+	}
+	return Item{Token: token.STRING, Value: sb.String(), Pos: pos}
+}
+
+// readUnicodeQuotedIdentifier reads an identifier enclosed in Unicode curly double quotes (" or ")
+func (l *Lexer) readUnicodeQuotedIdentifier(openQuote rune) Item {
+	pos := l.pos
+	var sb strings.Builder
+	l.readChar() // skip opening quote
+
+	// Unicode curly double quotes: " (U+201C) opens, " (U+201D) closes
+	closeQuote := '\u201D' // "
+	if openQuote == '\u201D' {
+		closeQuote = '\u201D'
+	}
+
+	for !l.eof && l.ch != closeQuote {
+		sb.WriteRune(l.ch)
+		l.readChar()
+	}
+	if l.ch == closeQuote {
 		l.readChar() // skip closing quote
 	}
 	return Item{Token: token.IDENT, Value: sb.String(), Pos: pos}

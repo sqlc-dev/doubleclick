@@ -453,13 +453,16 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 	p.expect(token.RPAREN)
 
 	// Handle IGNORE NULLS / RESPECT NULLS (window function modifiers)
-	if p.currentIs(token.IDENT) {
+	// Can appear multiple times (e.g., RESPECT NULLS IGNORE NULLS)
+	for p.currentIs(token.IDENT) {
 		upper := strings.ToUpper(p.current.Value)
 		if upper == "IGNORE" || upper == "RESPECT" {
 			p.nextToken()
 			if p.currentIs(token.NULLS) {
 				p.nextToken()
 			}
+		} else {
+			break
 		}
 	}
 
@@ -1099,6 +1102,42 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 	prec := p.precedence(p.current.Token)
 	p.nextToken()
 
+	// Check for ANY/ALL subquery comparison modifier: expr >= ANY(subquery)
+	if p.currentIs(token.ANY) || p.currentIs(token.ALL) {
+		modifier := strings.ToUpper(p.current.Value)
+		p.nextToken()
+		if p.currentIs(token.LPAREN) {
+			p.nextToken()
+			// Parse the subquery
+			if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
+				subquery := p.parseSelectWithUnion()
+				p.expect(token.RPAREN)
+				// Wrap the comparison in a function call representing ANY/ALL
+				return &ast.FunctionCall{
+					Position: expr.Position,
+					Name:     strings.ToLower(modifier) + "Match",
+					Arguments: []ast.Expression{
+						left,
+						&ast.Subquery{Position: expr.Position, Query: subquery},
+					},
+				}
+			}
+			// Not a subquery, parse as expression list
+			args := p.parseExpressionList()
+			p.expect(token.RPAREN)
+			return &ast.BinaryExpr{
+				Position: expr.Position,
+				Left:     left,
+				Op:       expr.Op,
+				Right: &ast.FunctionCall{
+					Position:  expr.Position,
+					Name:      strings.ToLower(modifier),
+					Arguments: args,
+				},
+			}
+		}
+	}
+
 	expr.Right = p.parseExpression(prec)
 	return expr
 }
@@ -1289,6 +1328,24 @@ func (p *Parser) parseTupleAccessFromNumber(left ast.Expression) ast.Expression 
 func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
 	p.nextToken() // skip .
 
+	// Check for JSON path parent access with ^ (e.g., x.^c0)
+	if p.currentIs(token.CARET) {
+		p.nextToken() // skip ^
+		if p.currentIs(token.IDENT) {
+			pathPart := "^" + p.current.Value
+			p.nextToken()
+			if ident, ok := left.(*ast.Identifier); ok {
+				ident.Parts = append(ident.Parts, pathPart)
+				return ident
+			}
+			// Create new identifier with JSON path
+			return &ast.Identifier{
+				Position: left.Pos(),
+				Parts:    []string{pathPart},
+			}
+		}
+	}
+
 	// Check for tuple access with number
 	if p.currentIs(token.NUMBER) {
 		expr := &ast.TupleAccess{
@@ -1299,8 +1356,8 @@ func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
 		return expr
 	}
 
-	// Regular identifier access
-	if p.currentIs(token.IDENT) {
+	// Regular identifier access (keywords can also be column/field names after DOT)
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		if ident, ok := left.(*ast.Identifier); ok {
 			ident.Parts = append(ident.Parts, p.current.Value)
 			p.nextToken()
@@ -1435,13 +1492,16 @@ func (p *Parser) parseParametricFunctionCall(fn *ast.FunctionCall) *ast.Function
 	p.expect(token.RPAREN)
 
 	// Handle IGNORE NULLS / RESPECT NULLS (aggregate function modifiers)
-	if p.currentIs(token.IDENT) {
+	// Can appear multiple times (e.g., RESPECT NULLS IGNORE NULLS)
+	for p.currentIs(token.IDENT) {
 		upper := strings.ToUpper(p.current.Value)
 		if upper == "IGNORE" || upper == "RESPECT" {
 			p.nextToken()
 			if p.currentIs(token.NULLS) {
 				p.nextToken()
 			}
+		} else {
+			break
 		}
 	}
 

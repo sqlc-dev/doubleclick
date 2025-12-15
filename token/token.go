@@ -33,6 +33,7 @@ const (
 	ARROW        // ->
 	COLONCOLON   // ::
 	NULL_SAFE_EQ // <=>
+	CARET        // ^
 
 	// Delimiters
 	LPAREN    // (
