@@ -533,14 +533,8 @@ func (p *Parser) parseWithClause() []ast.Expression {
 			// Scalar WITH: expr AS name (ClickHouse style)
 			// Examples: WITH 1 AS x, WITH 'hello' AS s, WITH func() AS f
 			// Also handles lambda: WITH x -> toString(x) AS lambda_1
-
-			// Check for lambda syntax: ident -> expr
-			if p.currentIs(token.IDENT) && p.peekIs(token.ARROW) {
-				// Lambda expression: x -> expr, use LOWEST to parse the full lambda
-				elem.Query = p.parseExpression(LOWEST)
-			} else {
-				elem.Query = p.parseExpression(ALIAS_PREC) // Use ALIAS_PREC to stop before AS
-			}
+			// Arrow has OR_PREC precedence, so it gets parsed with ALIAS_PREC
+			elem.Query = p.parseExpression(ALIAS_PREC) // Use ALIAS_PREC to stop before AS
 
 			if !p.expect(token.AS) {
 				return nil

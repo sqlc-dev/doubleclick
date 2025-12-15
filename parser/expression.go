@@ -56,7 +56,7 @@ func (p *Parser) precedence(tok token.Token) int {
 	case token.DOT:
 		return HIGHEST // Dot access
 	case token.ARROW:
-		return ALIAS_PREC // Lambda arrow (low precedence)
+		return OR_PREC // Lambda arrow (just above ALIAS_PREC to allow parsing before AS)
 	case token.NUMBER:
 		// Handle .1 as tuple access (number starting with dot)
 		return LOWEST
@@ -396,7 +396,8 @@ func (p *Parser) parseIdentifierOrFunction() ast.Expression {
 	parts := []string{name}
 	for p.currentIs(token.DOT) {
 		p.nextToken()
-		if p.currentIs(token.IDENT) {
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			// Keywords can be used as column/field names (e.g., l_t.key, t.index)
 			parts = append(parts, p.current.Value)
 			p.nextToken()
 		} else if p.currentIs(token.ASTERISK) {
@@ -1493,7 +1494,9 @@ func (p *Parser) parseLambda(left ast.Expression) ast.Expression {
 
 	p.nextToken() // skip ->
 
-	lambda.Body = p.parseExpression(LOWEST)
+	// Use ALIAS_PREC to prevent consuming AS keyword that might belong to containing context
+	// e.g., WITH x -> toString(x) AS lambda_1 SELECT...
+	lambda.Body = p.parseExpression(ALIAS_PREC)
 	return lambda
 }
 
@@ -1505,13 +1508,16 @@ func (p *Parser) parseTernary(condition ast.Expression) ast.Expression {
 
 	p.nextToken() // skip ?
 
-	ternary.Then = p.parseExpression(LOWEST)
+	// Use ALIAS_PREC to prevent consuming AS keyword, but still allow nested ternaries
+	ternary.Then = p.parseExpression(ALIAS_PREC)
 
 	if !p.expect(token.COLON) {
 		return nil
 	}
 
-	ternary.Else = p.parseExpression(LOWEST)
+	// Use ALIAS_PREC to prevent consuming AS keyword that might belong to containing context
+	// e.g., WITH cond ? a : b AS x SELECT...
+	ternary.Else = p.parseExpression(ALIAS_PREC)
 
 	return ternary
 }
