@@ -83,9 +83,7 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			}
 			hasComplexExpr := false
 			for _, e := range exprs {
-				lit, isLit := e.(*ast.Literal)
-				// Non-literals or tuple/array literals count as complex
-				if !isLit || (isLit && (lit.Type == ast.LiteralTuple || lit.Type == ast.LiteralArray)) {
+				if !isSimpleLiteralOrNegation(e) {
 					hasComplexExpr = true
 					break
 				}
@@ -107,6 +105,23 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 		}
 	}
 	fmt.Fprintf(sb, "%sLiteral %s\n", indent, FormatLiteral(n))
+}
+
+// isSimpleLiteralOrNegation checks if an expression is a simple literal
+// or a unary negation of a numeric literal (for array elements)
+func isSimpleLiteralOrNegation(e ast.Expression) bool {
+	// Direct literal check
+	if lit, ok := e.(*ast.Literal); ok {
+		// Nested arrays/tuples are complex
+		return lit.Type != ast.LiteralTuple && lit.Type != ast.LiteralArray
+	}
+	// Unary minus of a literal integer/float is also simple (negative number)
+	if unary, ok := e.(*ast.UnaryExpr); ok && unary.Op == "-" {
+		if lit, ok := unary.Operand.(*ast.Literal); ok {
+			return lit.Type == ast.LiteralInteger || lit.Type == ast.LiteralFloat
+		}
+	}
+	return false
 }
 
 func explainBinaryExpr(sb *strings.Builder, n *ast.BinaryExpr, indent string, depth int) {
