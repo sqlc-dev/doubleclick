@@ -2,11 +2,28 @@
 
 ## Current State
 
-- **Tests passing:** ~6,030 (88.4%)
-- **Tests skipped:** ~794 (11.6%)
-- **Parser errors fixed:** 25 (reduced from 53 to 28)
+- **Tests passing:** ~6,066 (88.9%)
+- **Tests skipped:** ~758 (11.1%)
+- **Parser errors:** 7 remaining
 
-## Recently Fixed (parser layer)
+## Recently Fixed (Latest Session)
+
+### Lexer Improvements
+- ✅ Dollar-quoted strings (`$$...$$`)
+- ✅ Hex P notation floats (`0x123p4`, `-0x1P1023`)
+- ✅ Backtick escaping (`` `ta``ble` ``)
+- ✅ BOM (byte order mark) character handling
+- ✅ Dollar signs in identifiers (`$alias$name$`)
+
+### Parser Improvements
+- ✅ SYSTEM DROP FORMAT SCHEMA CACHE
+- ✅ EXPLAIN AST options (`EXPLAIN AST optimize=0 SELECT ...`)
+- ✅ WITH scalar expression without alias (`WITH 1 SELECT 1`)
+- ✅ DROP USER with @ hostname (`test_user@localhost`, `test_user@'192.168.23.15'`)
+- ✅ KEY keyword as implicit alias (`view(select 'foo.com' key)`)
+- ✅ Complex UNION with parentheses (`((SELECT 1) UNION ALL SELECT 2)`)
+
+## Previously Fixed (parser layer)
 
 - ✅ SELECT ALL syntax (`SELECT ALL 'a'`)
 - ✅ FILTER clause on aggregate functions (`argMax() FILTER(WHERE ...)`)
@@ -27,7 +44,7 @@
 - ✅ EXISTS table syntax (`EXISTS db.table`)
 - ✅ DROP TABLE FORMAT (`DROP TABLE IF EXISTS t FORMAT Null`)
 
-## Recently Fixed (explain layer)
+## Previously Fixed (explain layer)
 
 - ✅ TableJoin output - removed join type keywords
 - ✅ Table function aliases (e.g., `remote('127.1') AS t1`)
@@ -45,145 +62,78 @@
 - ✅ Empty tuple in ORDER BY (e.g., `ORDER BY ()` → `Function tuple` with empty `ExpressionList`)
 - ✅ String escape handling (lexer now unescapes `\'`, `\\`, `\n`, `\t`, `\0`, etc.)
 
-## Remaining Parser Issues (28 total)
+## Remaining Parser Issues (7 total)
 
-### Intentionally Invalid SQL (Syntax Errors Expected)
-These are tests for SQL that should produce syntax errors - we need to parse them enough to produce the expected error output:
-- Incomplete CASE expressions (`SELECT CASE number`, `SELECT CASE`)
-- Invalid column type (`create table t (x 123)` - number instead of type)
-- Invalid syntax patterns (`SELECT sum(number number number)`)
-- Parenthesized ALTER (`ALTER TABLE t22 (DELETE WHERE ...)`)
+### Multi-line SQL (Test Framework Limitation)
+These are valid SQL split across multiple lines. Our test framework only reads the first line:
+- Incomplete CASE expressions (`SELECT CASE number`, `SELECT CASE`, `SELECT "number", CASE "number"`)
 
-### Lexer Issues (Need Lexer Changes)
-- Hex P notation floats (`0x123p4`, `-0x1P1023`) - need lexer support
-- Dollar-quoted strings (`$$..$$`) - need lexer support
-- Backtick escaping (`` `ta``ble` ``) - need lexer support
+### QUALIFY Clause with ^ Operator
+Window function filtering with caret operator:
+```sql
+SELECT '{}'::JSON x QUALIFY x.^c0 = 1;
+```
 
-### Parser Issues (Lower Priority)
-- EXPLAIN AST options (`EXPLAIN AST optimize=0 SELECT ...`)
-- SYSTEM DROP FORMAT SCHEMA CACHE
-- view() with implicit alias in subquery (`view(select 'foo.com' key)`)
-- DROP USER with @ hostname (`test_user@localhost`)
-- Complex UNION with parentheses mixing
-- * EXCEPT in nested expressions
-- EXPLAIN SYNTAX WITH scalar (`EXPLAIN SYNTAX WITH 1 SELECT 1`)
+### Parenthesized ALTER
+Multiple ALTER operations in parentheses:
+```sql
+ALTER TABLE t22 (DELETE WHERE ...), (MODIFY SETTING ...), (UPDATE ... WHERE ...);
+```
+
+### INSERT with JSON Data
+JSON data after FORMAT clause:
+```sql
+INSERT INTO FUNCTION null() SELECT * FROM input('x Int') ... FORMAT JSONEachRow {"x": 1};
+```
+
+### EXCEPT in Nested Expressions
+`* EXCEPT` within nested function calls:
+```sql
+SELECT untuple((expr, * EXCEPT b));
+```
 
 ## Parser Issues (High Priority)
 
-These require changes to `parser/parser.go`:
-
 ### CREATE TABLE with INDEX Clause
-INDEX definitions in CREATE TABLE are not captured:
 ```sql
 CREATE TABLE t (x Array(String), INDEX idx1 x TYPE bloom_filter(0.025)) ENGINE=MergeTree;
 ```
 
 ### SETTINGS Inside Function Arguments
-SETTINGS clause within function calls is not parsed:
 ```sql
 SELECT * FROM icebergS3(s3_conn, filename='test', SETTINGS key='value');
--- The SETTINGS should become a Set child of the function
 ```
 
 ### CREATE TABLE with Column TTL
-TTL expressions on columns are not captured:
 ```sql
 CREATE TABLE t (c Int TTL expr()) ENGINE=MergeTree;
--- Expected: ColumnDeclaration with 2 children (type + TTL function)
 ```
 
 ## Parser Issues (Medium Priority)
 
 ### CREATE DICTIONARY
-Dictionary definitions are not supported:
 ```sql
 CREATE DICTIONARY d0 (c1 UInt64) PRIMARY KEY c1 LAYOUT(FLAT()) SOURCE(...);
 ```
 
 ### QUALIFY Clause
-Window function filtering clause:
 ```sql
 SELECT x QUALIFY row_number() OVER () = 1;
 ```
 
-### INTO OUTFILE with TRUNCATE
-Extended INTO OUTFILE syntax:
-```sql
-SELECT 1, 2 INTO OUTFILE '/dev/null' TRUNCATE FORMAT Npy;
-```
-
 ### GROUPING SETS
-Advanced grouping syntax:
 ```sql
 SELECT ... GROUP BY GROUPING SETS ((a), (b));
 ```
 
 ### CREATE TABLE ... AS SELECT
-CREATE TABLE with inline SELECT:
 ```sql
 CREATE TABLE src ENGINE=Memory AS SELECT 1;
 ```
 
-### Variant() Type with PRIMARY KEY
-Complex column definitions:
-```sql
-CREATE TABLE t (c Variant() PRIMARY KEY) ENGINE=Redis(...);
-```
-
-## Parser Issues (Lower Priority)
-
-### INTERVAL with Dynamic Type
-INTERVAL with type cast:
-```sql
-SELECT INTERVAL 1 MINUTE AS c0, INTERVAL c0::Dynamic DAY;
-```
-
-### ALTER TABLE with Multiple Operations
-Multiple ALTER operations in parentheses:
-```sql
-ALTER TABLE t (DELETE WHERE ...), (MODIFY SETTING ...), (UPDATE ... WHERE ...);
-```
-
-### Tuple Type in Column with Subfield Access
-Tuple type with engine using subfield:
-```sql
-CREATE TABLE t (t Tuple(a Int32)) ENGINE=EmbeddedRocksDB() PRIMARY KEY (t.a);
-```
-
-### insert() Function with input()
-INSERT using input() function:
-```sql
-INSERT INTO FUNCTION null() SELECT * FROM input('x Int') ...;
-```
-
-## Explain Issues (Remaining)
-
-### Scientific Notation for Floats
-Very small/large floats should use scientific notation:
-```sql
-SELECT 2.2250738585072014e-308;
--- Expected: Float64_2.2250738585072014e-308
--- Got: Float64_0.0000...22250738585072014
-```
-
-### Array Literals with Negative Numbers
-Arrays with negative integers may still expand to Function instead of Literal in some cases:
-```sql
-SELECT [-10000, 5750];
--- Some cases now work correctly with Literal Int64_-10000
--- Complex nested arrays may still require additional work
-```
-
-### WithElement for CTE Subqueries
-Some CTE subqueries should use WithElement wrapper:
-```sql
-WITH sub AS (SELECT ...) SELECT ...;
--- Expected: WithElement (children 1) > Subquery > SelectWithUnionQuery
-```
-
 ## Testing Notes
 
-Run tests with timeout to catch infinite loops:
+Run tests with timeout:
 ```bash
 go test ./parser -timeout 5s -v
 ```
@@ -191,11 +141,6 @@ go test ./parser -timeout 5s -v
 Count test results:
 ```bash
 go test ./parser -v 2>&1 | grep -E 'PASS:|SKIP:' | wc -l
-```
-
-View explain mismatches:
-```bash
-go test ./parser -v 2>&1 | grep -A 30 "TODO: Explain output mismatch" | head -100
 ```
 
 View parser failures:

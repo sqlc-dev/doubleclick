@@ -163,10 +163,18 @@ func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 
 // parseImplicitAlias handles implicit column aliases like "SELECT 'a' c0" (meaning 'a' AS c0)
 func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
-	// If next token is a plain identifier (not a keyword), treat as implicit alias
-	// Keywords like FROM, WHERE etc. are tokenized as their own token types, not IDENT
-	// INTERSECT is not a keyword but should not be treated as an alias
-	if p.currentIs(token.IDENT) {
+	// Check if current token can be an implicit alias
+	// Can be IDENT or certain keywords that are used as aliases (KEY, VALUE, TYPE, etc.)
+	canBeAlias := p.currentIs(token.IDENT)
+	if !canBeAlias {
+		// Some keywords can be used as implicit aliases in ClickHouse
+		switch p.current.Token {
+		case token.KEY, token.INDEX, token.VIEW, token.DATABASE, token.TABLE:
+			canBeAlias = true
+		}
+	}
+
+	if canBeAlias {
 		upper := strings.ToUpper(p.current.Value)
 		// Don't consume SQL set operation keywords that aren't tokens
 		if upper == "INTERSECT" {

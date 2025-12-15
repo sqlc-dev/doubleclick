@@ -568,15 +568,16 @@ func (p *Parser) parseWithClause() []ast.Expression {
 			// Examples: WITH 1 AS x, WITH 'hello' AS s, WITH func() AS f
 			// Also handles lambda: WITH x -> toString(x) AS lambda_1
 			// Arrow has OR_PREC precedence, so it gets parsed with ALIAS_PREC
+			// Note: AS name is optional in ClickHouse, e.g., WITH 1 SELECT 1 is valid
 			elem.Query = p.parseExpression(ALIAS_PREC) // Use ALIAS_PREC to stop before AS
 
-			if !p.expect(token.AS) {
-				return nil
-			}
-
-			if p.currentIs(token.IDENT) {
-				elem.Name = p.current.Value
+			// AS name is optional
+			if p.currentIs(token.AS) {
 				p.nextToken()
+				if p.currentIs(token.IDENT) {
+					elem.Name = p.current.Value
+					p.nextToken()
+				}
 			}
 		}
 
@@ -747,7 +748,8 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 	// Handle subquery
 	if p.currentIs(token.LPAREN) {
 		p.nextToken()
-		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
+		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) || p.currentIs(token.LPAREN) {
+			// SELECT, WITH, or nested (SELECT...) for UNION queries like ((SELECT 1) UNION ALL SELECT 2)
 			subquery := p.parseSelectWithUnion()
 			expr.Table = &ast.Subquery{Query: subquery}
 		} else if p.currentIs(token.EXPLAIN) {
@@ -1972,6 +1974,15 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 
 		if dropUser {
 			drop.User = tableName
+			// Handle user@host syntax
+			if p.currentIs(token.IDENT) && p.current.Value == "@" {
+				p.nextToken() // skip @
+				// Hostname can be identifier, string, or IP in quotes
+				if p.currentIs(token.IDENT) || p.currentIs(token.STRING) || p.current.Token.IsKeyword() {
+					drop.User = drop.User + "@" + p.current.Value
+					p.nextToken()
+				}
+			}
 		} else if drop.DropDatabase {
 			drop.Database = tableName
 		} else {
@@ -1988,7 +1999,7 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		}
 	}
 
-	// Handle multiple tables (DROP TABLE IF EXISTS t1, t2, t3)
+	// Handle multiple tables/users (DROP TABLE IF EXISTS t1, t2, t3 or DROP USER u1, u2@host)
 	for p.currentIs(token.COMMA) {
 		p.nextToken()
 		pos := p.current.Pos
@@ -2000,6 +2011,14 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 			tableName = p.parseIdentifierName()
 		} else {
 			tableName = name
+		}
+		// Handle user@host syntax for additional users
+		if dropUser && p.currentIs(token.IDENT) && p.current.Value == "@" {
+			p.nextToken() // skip @
+			if p.currentIs(token.IDENT) || p.currentIs(token.STRING) || p.current.Token.IsKeyword() {
+				tableName = tableName + "@" + p.current.Value
+				p.nextToken()
+			}
 		}
 		if tableName != "" {
 			drop.Tables = append(drop.Tables, &ast.TableIdentifier{
@@ -2601,20 +2620,17 @@ func (p *Parser) parseExplain() *ast.ExplainQuery {
 		}
 	}
 
-	// Parse EXPLAIN options (e.g., header = 1, input_headers = 1)
+	// Parse EXPLAIN options (e.g., header = 1, optimize = 0)
 	// These come before the actual statement
-	for p.currentIs(token.IDENT) && !p.currentIs(token.SELECT) && !p.currentIs(token.WITH) {
-		// Check if it looks like an option (ident = value)
-		if p.peekIs(token.EQ) {
-			p.nextToken() // skip option name
-			p.nextToken() // skip =
-			p.parseExpression(LOWEST) // skip value
-			// Skip comma if present
-			if p.currentIs(token.COMMA) {
-				p.nextToken()
-			}
-		} else {
-			break
+	// Options can be identifiers or keywords like OPTIMIZE followed by =
+	for p.peekIs(token.EQ) && !p.currentIs(token.SELECT) && !p.currentIs(token.WITH) {
+		// This is an option (name = value)
+		p.nextToken() // skip option name
+		p.nextToken() // skip =
+		p.parseExpression(LOWEST) // skip value
+		// Skip comma if present
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
 		}
 	}
 
@@ -2727,8 +2743,15 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 // isSystemCommandKeyword returns true if current token is a keyword that can be part of SYSTEM command
 func (p *Parser) isSystemCommandKeyword() bool {
 	switch p.current.Token {
-	case token.TTL, token.SYNC, token.DROP:
+	case token.TTL, token.SYNC, token.DROP, token.FORMAT, token.FOR:
 		return true
+	}
+	// Handle SCHEMA, CACHE as identifiers since they're not keyword tokens
+	if p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		if upper == "SCHEMA" || upper == "CACHE" {
+			return true
+		}
 	}
 	return false
 }
