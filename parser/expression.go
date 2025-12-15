@@ -948,9 +948,10 @@ func (p *Parser) parseInterval() ast.Expression {
 	}
 	p.nextToken() // skip INTERVAL
 
-	expr.Value = p.parseExpression(LOWEST)
+	// Use ALIAS_PREC to prevent consuming the unit as an alias
+	expr.Value = p.parseExpression(ALIAS_PREC)
 
-	// Parse unit
+	// Parse unit (interval units are identifiers like DAY, MONTH, etc.)
 	if p.currentIs(token.IDENT) {
 		expr.Unit = strings.ToUpper(p.current.Value)
 		p.nextToken()
@@ -1295,6 +1296,26 @@ func (p *Parser) parseIsExpression(left ast.Expression) ast.Expression {
 				Type:     ast.LiteralBoolean,
 				Value:    value,
 			},
+		}
+	}
+
+	// IS [NOT] DISTINCT FROM expr
+	if p.currentIs(token.DISTINCT) {
+		p.nextToken() // skip DISTINCT
+		if p.currentIs(token.FROM) {
+			p.nextToken() // skip FROM
+			right := p.parseExpression(COMPARE)
+			// IS NOT DISTINCT FROM is same as =, IS DISTINCT FROM is same as !=
+			op := "="
+			if not {
+				op = "!="
+			}
+			return &ast.BinaryExpr{
+				Position: pos,
+				Left:     left,
+				Op:       op,
+				Right:    right,
+			}
 		}
 	}
 
