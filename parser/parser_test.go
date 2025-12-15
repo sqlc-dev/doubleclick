@@ -51,22 +51,32 @@ func TestParser(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 			defer cancel()
 
-			// Read the query (first non-comment line)
+			// Read the query (handle multi-line queries)
 			queryPath := filepath.Join(testDir, "query.sql")
 			queryBytes, err := os.ReadFile(queryPath)
 			if err != nil {
 				t.Fatalf("Failed to read query.sql: %v", err)
 			}
-			// Get first non-comment, non-empty line
-			var query string
+			// Build query from non-comment lines until we hit a line ending with semicolon
+			var queryParts []string
 			for _, line := range strings.Split(string(queryBytes), "\n") {
-				line = strings.TrimSpace(line)
-				if line == "" || strings.HasPrefix(line, "--") {
+				trimmed := strings.TrimSpace(line)
+				if trimmed == "" || strings.HasPrefix(trimmed, "--") {
 					continue
 				}
-				query = line
-				break
+				// Remove trailing comment if present (but not inside strings - simple heuristic)
+				lineContent := trimmed
+				if idx := strings.Index(trimmed, " -- "); idx >= 0 {
+					lineContent = strings.TrimSpace(trimmed[:idx])
+				}
+				// Check if line ends with semicolon (statement terminator)
+				if strings.HasSuffix(lineContent, ";") {
+					queryParts = append(queryParts, lineContent)
+					break
+				}
+				queryParts = append(queryParts, trimmed)
 			}
+			query := strings.Join(queryParts, " ")
 
 			// Read optional metadata
 			var metadata testMetadata

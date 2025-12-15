@@ -224,6 +224,7 @@ var tokens = [...]string{
 	ARROW:        "->",
 	COLONCOLON:   "::",
 	NULL_SAFE_EQ: "<=>",
+	CARET:        "^",
 
 	LPAREN:    "(",
 	RPAREN:    ")",

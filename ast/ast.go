@@ -403,7 +403,19 @@ type AlterCommand struct {
 	FromTable      string               `json:"from_table,omitempty"`
 	TTL            *TTLClause           `json:"ttl,omitempty"`
 	Settings       []*SettingExpr       `json:"settings,omitempty"`
+	Where          Expression           `json:"where,omitempty"`       // For DELETE WHERE
+	Assignments    []*Assignment        `json:"assignments,omitempty"` // For UPDATE
 }
+
+// Assignment represents a column assignment in UPDATE.
+type Assignment struct {
+	Position token.Position `json:"-"`
+	Column   string         `json:"column"`
+	Value    Expression     `json:"value"`
+}
+
+func (a *Assignment) Pos() token.Position { return a.Position }
+func (a *Assignment) End() token.Position { return a.Position }
 
 func (a *AlterCommand) Pos() token.Position { return a.Position }
 func (a *AlterCommand) End() token.Position { return a.Position }
@@ -432,6 +444,8 @@ const (
 	AlterReplacePartition  AlterCommandType = "REPLACE_PARTITION"
 	AlterFreezePartition   AlterCommandType = "FREEZE_PARTITION"
 	AlterFreeze            AlterCommandType = "FREEZE"
+	AlterDeleteWhere       AlterCommandType = "DELETE_WHERE"
+	AlterUpdate            AlterCommandType = "UPDATE"
 )
 
 // TruncateQuery represents a TRUNCATE statement.

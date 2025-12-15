@@ -448,6 +448,12 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		}
 	}
 
+	// Parse QUALIFY clause (window function filtering)
+	if p.currentIs(token.QUALIFY) {
+		p.nextToken()
+		sel.Qualify = p.parseExpression(LOWEST)
+	}
+
 	// Parse SETTINGS clause
 	if p.currentIs(token.SETTINGS) {
 		p.nextToken()
@@ -559,7 +565,8 @@ func (p *Parser) parseWithClause() []ast.Expression {
 				return nil
 			}
 
-			if p.currentIs(token.IDENT) {
+			// Alias can be IDENT or certain keywords (VALUES, KEY, etc.)
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 				elem.Name = p.current.Value
 				p.nextToken()
 			}
@@ -938,7 +945,8 @@ func (p *Parser) parseSettingsList() []*ast.SettingExpr {
 		// Settings can have optional value (bool settings can be just name)
 		if p.currentIs(token.EQ) {
 			p.nextToken()
-			setting.Value = p.parseExpression(LOWEST)
+			// Use ALIAS_PREC to stop before AS (for AS SELECT in CREATE TABLE AS SELECT)
+			setting.Value = p.parseExpression(ALIAS_PREC)
 		} else {
 			// Boolean setting without value - defaults to true
 			setting.Value = &ast.Literal{
@@ -1231,12 +1239,23 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 						p.nextToken()
 					}
 				}
-			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CONSTRAINT" {
-				// Skip CONSTRAINT definitions
-				p.nextToken()
-				p.parseIdentifierName() // constraint name
-				for !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-					p.nextToken()
+			} else if p.currentIs(token.CONSTRAINT) {
+				// Parse CONSTRAINT name CHECK (expression)
+				p.nextToken() // skip CONSTRAINT
+				constraintName := p.parseIdentifierName() // constraint name
+				if p.currentIs(token.CHECK) {
+					p.nextToken() // skip CHECK
+					constraint := &ast.Constraint{
+						Position:   p.current.Pos,
+						Name:       constraintName,
+						Expression: p.parseExpression(LOWEST),
+					}
+					create.Constraints = append(create.Constraints, constraint)
+				} else {
+					// Skip other constraint types we don't know about
+					for !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+						p.nextToken()
+					}
 				}
 			} else {
 				col := p.parseColumnDeclaration()
@@ -1336,22 +1355,35 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 				p.nextToken()
 				if p.currentIs(token.BY) {
 					p.nextToken()
-					// Skip GROUP BY expression
-					p.parseExpression(LOWEST)
+					// Parse GROUP BY expressions (can have multiple, comma separated)
+					for {
+						p.parseExpression(ALIAS_PREC)
+						if p.currentIs(token.COMMA) {
+							p.nextToken()
+						} else {
+							break
+						}
+					}
 				}
 			}
-			// Handle SET clause in TTL
+			// Handle SET clause in TTL (aggregation expressions for TTL GROUP BY)
 			if p.currentIs(token.SET) {
 				p.nextToken()
-				// Skip SET expressions until we hit a keyword or end
-				for !p.currentIs(token.SETTINGS) && !p.currentIs(token.AS) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.EOF) {
-					p.parseExpression(LOWEST)
+				// Parse SET expressions until we hit a keyword or end
+				for !p.currentIs(token.SETTINGS) && !p.currentIs(token.AS) && !p.currentIs(token.WHERE) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.EOF) {
+					p.parseExpression(ALIAS_PREC)
 					if p.currentIs(token.COMMA) {
 						p.nextToken()
 					} else {
 						break
 					}
 				}
+			}
+			// Handle WHERE clause in TTL (conditional deletion)
+			if p.currentIs(token.WHERE) {
+				p.nextToken()
+				// Parse WHERE condition
+				p.parseExpression(ALIAS_PREC)
 			}
 		case p.currentIs(token.SETTINGS):
 			p.nextToken()
@@ -2124,13 +2156,23 @@ func (p *Parser) parseAlter() *ast.AlterQuery {
 		}
 	}
 
-	// Parse commands
+	// Parse commands (can be parenthesized for multiple mutations)
 	for {
-		cmd := p.parseAlterCommand()
-		if cmd == nil {
-			break
+		// Handle parenthesized command syntax: ALTER TABLE t (DELETE WHERE ...), (UPDATE ...)
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			cmd := p.parseAlterCommand()
+			if cmd != nil {
+				alter.Commands = append(alter.Commands, cmd)
+			}
+			p.expect(token.RPAREN)
+		} else {
+			cmd := p.parseAlterCommand()
+			if cmd == nil {
+				break
+			}
+			alter.Commands = append(alter.Commands, cmd)
 		}
-		alter.Commands = append(alter.Commands, cmd)
 
 		if !p.currentIs(token.COMMA) {
 			break
@@ -2299,7 +2341,8 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				Position:   p.current.Pos,
 				Expression: p.parseExpression(LOWEST),
 			}
-		} else if p.currentIs(token.SETTINGS) {
+		} else if p.currentIs(token.SETTINGS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "SETTING") {
+			// Both SETTINGS and SETTING (singular) are accepted
 			cmd.Type = ast.AlterModifySetting
 			p.nextToken()
 			cmd.Settings = p.parseSettingsList()
@@ -2357,6 +2400,42 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					p.nextToken()
 				}
 			}
+		}
+	case token.DELETE:
+		// DELETE WHERE condition - mutation to delete rows
+		cmd.Type = ast.AlterDeleteWhere
+		p.nextToken() // skip DELETE
+		if p.currentIs(token.WHERE) {
+			p.nextToken() // skip WHERE
+			cmd.Where = p.parseExpression(LOWEST)
+		}
+	case token.UPDATE:
+		// UPDATE col = expr, ... WHERE condition - mutation to update rows
+		cmd.Type = ast.AlterUpdate
+		p.nextToken() // skip UPDATE
+		// Parse assignments
+		for {
+			if !p.currentIs(token.IDENT) {
+				break
+			}
+			assign := &ast.Assignment{
+				Position: p.current.Pos,
+				Column:   p.current.Value,
+			}
+			p.nextToken() // skip column name
+			if p.currentIs(token.EQ) {
+				p.nextToken() // skip =
+				assign.Value = p.parseExpression(LOWEST)
+			}
+			cmd.Assignments = append(cmd.Assignments, assign)
+			if !p.currentIs(token.COMMA) {
+				break
+			}
+			p.nextToken() // skip comma
+		}
+		if p.currentIs(token.WHERE) {
+			p.nextToken() // skip WHERE
+			cmd.Where = p.parseExpression(LOWEST)
 		}
 	default:
 		return nil

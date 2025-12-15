@@ -410,7 +410,16 @@ func (p *Parser) parseIdentifierOrFunction() ast.Expression {
 	parts := []string{name}
 	for p.currentIs(token.DOT) {
 		p.nextToken()
-		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		if p.currentIs(token.CARET) {
+			// JSON path notation: x.^c0 (traverse into JSON field)
+			p.nextToken() // skip ^
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				parts = append(parts, "^"+p.current.Value)
+				p.nextToken()
+			} else {
+				break
+			}
+		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 			// Keywords can be used as column/field names (e.g., l_t.key, t.index)
 			parts = append(parts, p.current.Value)
 			p.nextToken()
@@ -1427,6 +1436,20 @@ func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
 			Index:    p.parseNumber(),
 		}
 		return expr
+	}
+
+	// Handle JSON caret notation: x.^c0 (traverse into JSON field)
+	if p.currentIs(token.CARET) {
+		p.nextToken() // skip ^
+		if ident, ok := left.(*ast.Identifier); ok {
+			// Add ^fieldname as a single part with caret prefix
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				ident.Parts = append(ident.Parts, "^"+p.current.Value)
+				p.nextToken()
+				return ident
+			}
+		}
+		return left
 	}
 
 	// Regular identifier access (keywords can also be column/field names after DOT)
