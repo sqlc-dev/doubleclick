@@ -195,8 +195,17 @@ func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
 			e.Alias = alias
 			return e
 		case *ast.CastExpr:
-			e.Alias = alias
-			return e
+			// Only set alias on CastExpr if using :: operator syntax
+			// Function-style CAST() aliases go to AliasedExpr
+			if e.OperatorSyntax {
+				e.Alias = alias
+				return e
+			}
+			return &ast.AliasedExpr{
+				Position: expr.Pos(),
+				Expr:     expr,
+				Alias:    alias,
+			}
 		case *ast.CaseExpr:
 			e.Alias = alias
 			return e
@@ -1553,9 +1562,6 @@ func (p *Parser) parseAlias(left ast.Expression) ast.Expression {
 		e.Alias = alias
 		return e
 	case *ast.Subquery:
-		e.Alias = alias
-		return e
-	case *ast.CastExpr:
 		e.Alias = alias
 		return e
 	case *ast.CaseExpr:
