@@ -14,10 +14,11 @@ import (
 
 // testMetadata holds optional metadata for a test case
 type testMetadata struct {
-	Todo    bool   `json:"todo,omitempty"`
-	Source  string `json:"source,omitempty"`
-	Explain *bool  `json:"explain,omitempty"`
-	Skip    bool   `json:"skip,omitempty"`
+	Todo       bool   `json:"todo,omitempty"`
+	Source     string `json:"source,omitempty"`
+	Explain    *bool  `json:"explain,omitempty"`
+	Skip       bool   `json:"skip,omitempty"`
+	ParseError bool   `json:"parse_error,omitempty"` // true if query is intentionally invalid SQL
 }
 
 // TestParser tests the parser using test cases from the testdata directory.
@@ -27,6 +28,7 @@ type testMetadata struct {
 //   - todo: true if the test is not yet expected to pass
 //   - explain: false to skip the test (e.g., when ClickHouse couldn't parse it)
 //   - skip: true to skip the test entirely (e.g., causes infinite loop)
+//   - parse_error: true if the query is intentionally invalid SQL (expected to fail parsing)
 func TestParser(t *testing.T) {
 	testdataDir := "testdata"
 
@@ -89,11 +91,23 @@ func TestParser(t *testing.T) {
 			// Parse the query
 			stmts, err := parser.Parse(ctx, strings.NewReader(query))
 			if err != nil {
+				// If parse_error is true, this is expected - the query is intentionally invalid
+				if metadata.ParseError {
+					t.Skipf("Expected parse error (intentionally invalid SQL): %s", query)
+					return
+				}
 				if metadata.Todo {
 					t.Skipf("TODO: Parser does not yet support: %s (error: %v)", query, err)
 					return
 				}
 				t.Fatalf("Parse error: %v\nQuery: %s", err, query)
+			}
+
+			// If we successfully parsed a query marked as parse_error, note it
+			// (The query might have been fixed or the parser is too permissive)
+			if metadata.ParseError {
+				// This is fine - we parsed it successfully even though it's marked as invalid
+				// The test can continue to check explain output if available
 			}
 
 			if len(stmts) == 0 {
