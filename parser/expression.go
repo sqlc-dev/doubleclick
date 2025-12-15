@@ -525,7 +525,7 @@ func (p *Parser) parseWindowSpec() *ast.WindowSpec {
 	}
 
 	if p.currentIs(token.IDENT) {
-		// Window name reference
+		// Window name reference (OVER w0)
 		spec.Name = p.current.Value
 		p.nextToken()
 		return spec
@@ -533,6 +533,19 @@ func (p *Parser) parseWindowSpec() *ast.WindowSpec {
 
 	if !p.expect(token.LPAREN) {
 		return spec
+	}
+
+	// Check for named window reference inside parentheses: OVER (w0)
+	// This happens when the identifier is not a known clause keyword
+	if p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		// If it's not a window clause keyword, it's a named window reference
+		if upper != "PARTITION" && upper != "ORDER" && upper != "ROWS" && upper != "RANGE" && upper != "GROUPS" {
+			spec.Name = p.current.Value
+			p.nextToken()
+			p.expect(token.RPAREN)
+			return spec
+		}
 	}
 
 	// Parse PARTITION BY
@@ -1739,21 +1752,29 @@ func (p *Parser) parseKeywordAsIdentifier() ast.Expression {
 func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
 	p.nextToken() // skip EXCEPT
 
-	if !p.expect(token.LPAREN) {
-		return asterisk
+	// EXCEPT can have optional parentheses: * EXCEPT (col1, col2) or * EXCEPT col
+	hasParens := p.currentIs(token.LPAREN)
+	if hasParens {
+		p.nextToken() // skip (
 	}
 
-	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-		if p.currentIs(token.IDENT) {
+	// Parse column names (can be IDENT or keywords)
+	for {
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 			asterisk.Except = append(asterisk.Except, p.current.Value)
 			p.nextToken()
 		}
-		if p.currentIs(token.COMMA) {
+
+		if hasParens && p.currentIs(token.COMMA) {
 			p.nextToken()
+		} else {
+			break
 		}
 	}
 
-	p.expect(token.RPAREN)
+	if hasParens {
+		p.expect(token.RPAREN)
+	}
 
 	return asterisk
 }

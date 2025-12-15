@@ -490,6 +490,11 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			}
 			p.nextToken()
 		}
+		// Skip any inline data after FORMAT (e.g., FORMAT JSONEachRow {"x": 1}, {"y": 2})
+		// This can happen in INSERT ... SELECT ... FORMAT ... statements
+		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.SETTINGS) {
+			p.nextToken()
+		}
 	}
 
 	// Parse SETTINGS clause (can come after FORMAT)
@@ -1090,6 +1095,11 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 				Position: p.current.Pos,
 				Parts:    []string{p.current.Value},
 			}
+			p.nextToken()
+		}
+		// Skip any inline data after FORMAT (e.g., FORMAT JSONEachRow {"x": 1}, {"y": 2})
+		// The data is raw and should not be parsed as SQL
+		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
 			p.nextToken()
 		}
 	}
