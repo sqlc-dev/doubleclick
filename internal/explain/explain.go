@@ -92,7 +92,7 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	case *ast.CaseExpr:
 		explainCaseExpr(sb, n, indent, depth)
 	case *ast.IntervalExpr:
-		explainIntervalExpr(sb, n, indent, depth)
+		explainIntervalExpr(sb, n, "", indent, depth)
 	case *ast.ExistsExpr:
 		explainExistsExpr(sb, n, indent, depth)
 	case *ast.ExtractExpr:
@@ -166,7 +166,9 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	if col.Type != nil {
 		children++
 	}
-	if col.Default != nil {
+	// EPHEMERAL columns without explicit default get defaultValueOfTypeName
+	hasEphemeralDefault := col.DefaultKind == "EPHEMERAL" && col.Default == nil
+	if col.Default != nil || hasEphemeralDefault {
 		children++
 	}
 	fmt.Fprintf(sb, "%sColumnDeclaration %s (children %d)\n", indent, col.Name, children)
@@ -175,6 +177,9 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	}
 	if col.Default != nil {
 		Node(sb, col.Default, depth+1)
+	} else if hasEphemeralDefault {
+		// EPHEMERAL columns without explicit default value show defaultValueOfTypeName function
+		fmt.Fprintf(sb, "%s Function defaultValueOfTypeName\n", indent)
 	}
 }
 

@@ -194,6 +194,15 @@ func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
 		case *ast.Subquery:
 			e.Alias = alias
 			return e
+		case *ast.CastExpr:
+			e.Alias = alias
+			return e
+		case *ast.CaseExpr:
+			e.Alias = alias
+			return e
+		case *ast.ExtractExpr:
+			e.Alias = alias
+			return e
 		default:
 			return &ast.AliasedExpr{
 				Position: expr.Pos(),
@@ -1544,6 +1553,15 @@ func (p *Parser) parseAlias(left ast.Expression) ast.Expression {
 		e.Alias = alias
 		return e
 	case *ast.Subquery:
+		e.Alias = alias
+		return e
+	case *ast.CastExpr:
+		e.Alias = alias
+		return e
+	case *ast.CaseExpr:
+		e.Alias = alias
+		return e
+	case *ast.ExtractExpr:
 		e.Alias = alias
 		return e
 	default:
