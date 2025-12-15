@@ -333,11 +333,12 @@ func formatElementAsString(expr ast.Expression) string {
 		case ast.LiteralFloat:
 			return fmt.Sprintf("%v", e.Value)
 		case ast.LiteralString:
-			// Quote strings with single quotes
+			// Quote strings with single quotes, triple-escape for nested context
+			// Expected output format is \\\' (three backslashes + quote)
 			s := e.Value.(string)
-			// Escape single quotes in the string
-			s = strings.ReplaceAll(s, "'", "\\'")
-			return "\\'" + s + "\\'"
+			// Triple-escape single quotes for nested string literal context
+			s = strings.ReplaceAll(s, "'", "\\\\\\'")
+			return "\\\\\\'" + s + "\\\\\\'"
 		case ast.LiteralBoolean:
 			if e.Value.(bool) {
 				return "true"
