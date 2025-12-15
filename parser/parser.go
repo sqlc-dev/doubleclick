@@ -2061,6 +2061,52 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		}
 	}
 
+	// Handle PARALLEL WITH (drop multiple tables in parallel)
+	// Syntax: DROP TABLE IF EXISTS t1 PARALLEL WITH DROP TABLE IF EXISTS t2
+	for p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PARALLEL" {
+		p.nextToken() // skip PARALLEL
+		if p.currentIs(token.WITH) {
+			p.nextToken() // skip WITH
+			// Parse the next DROP statement
+			if p.currentIs(token.DROP) {
+				p.nextToken() // skip DROP
+				// Handle TEMPORARY
+				if p.currentIs(token.TEMPORARY) {
+					p.nextToken()
+				}
+				// Skip TABLE/DATABASE/etc
+				if p.currentIs(token.TABLE) || p.currentIs(token.DATABASE) || p.currentIs(token.VIEW) {
+					p.nextToken()
+				}
+				// Handle IF EXISTS
+				if p.currentIs(token.IF) {
+					p.nextToken()
+					if p.currentIs(token.EXISTS) {
+						p.nextToken()
+					}
+				}
+				// Parse table name
+				pos := p.current.Pos
+				name := p.parseIdentifierName()
+				var database, tableName string
+				if p.currentIs(token.DOT) {
+					p.nextToken()
+					database = name
+					tableName = p.parseIdentifierName()
+				} else {
+					tableName = name
+				}
+				if tableName != "" {
+					drop.Tables = append(drop.Tables, &ast.TableIdentifier{
+						Position: pos,
+						Database: database,
+						Table:    tableName,
+					})
+				}
+			}
+		}
+	}
+
 	// Handle ON table or ON CLUSTER
 	if p.currentIs(token.ON) {
 		p.nextToken()
