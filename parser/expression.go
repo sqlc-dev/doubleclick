@@ -36,7 +36,7 @@ func (p *Parser) precedence(tok token.Token) int {
 	case token.NOT:
 		return NOT_PREC
 	case token.EQ, token.NEQ, token.LT, token.GT, token.LTE, token.GTE,
-		token.LIKE, token.ILIKE, token.IN, token.BETWEEN, token.IS,
+		token.LIKE, token.ILIKE, token.REGEXP, token.IN, token.BETWEEN, token.IS,
 		token.NULL_SAFE_EQ, token.GLOBAL:
 		return COMPARE
 	case token.QUESTION:
@@ -56,7 +56,7 @@ func (p *Parser) precedence(tok token.Token) int {
 	case token.DOT:
 		return HIGHEST // Dot access
 	case token.ARROW:
-		return ALIAS_PREC // Lambda arrow (low precedence)
+		return OR_PREC // Lambda arrow (just above ALIAS_PREC to allow parsing before AS)
 	case token.NUMBER:
 		// Handle .1 as tuple access (number starting with dot)
 		return LOWEST
@@ -101,6 +101,38 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 	return exprs
 }
 
+// parseGroupingSets parses GROUPING SETS ((a), (b), (a, b))
+func (p *Parser) parseGroupingSets() []ast.Expression {
+	var exprs []ast.Expression
+
+	if !p.expect(token.LPAREN) {
+		return exprs
+	}
+
+	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+		// Each element in GROUPING SETS is a tuple or a single expression
+		if p.currentIs(token.LPAREN) {
+			// Parse as tuple
+			tuple := p.parseGroupedOrTuple()
+			exprs = append(exprs, tuple)
+		} else {
+			// Single expression
+			expr := p.parseExpression(LOWEST)
+			if expr != nil {
+				exprs = append(exprs, expr)
+			}
+		}
+
+		// Skip comma if present
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+		}
+	}
+
+	p.expect(token.RPAREN)
+	return exprs
+}
+
 // parseFunctionArgumentList parses arguments for function calls, stopping at SETTINGS
 func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 	var exprs []ast.Expression
@@ -133,7 +165,13 @@ func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
 	// If next token is a plain identifier (not a keyword), treat as implicit alias
 	// Keywords like FROM, WHERE etc. are tokenized as their own token types, not IDENT
+	// INTERSECT is not a keyword but should not be treated as an alias
 	if p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		// Don't consume SQL set operation keywords that aren't tokens
+		if upper == "INTERSECT" {
+			return expr
+		}
 		alias := p.current.Value
 		p.nextToken()
 
@@ -191,6 +229,8 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 		return p.parseSpecialNumber()
 	case token.MINUS:
 		return p.parseUnaryMinus()
+	case token.PLUS:
+		return p.parseUnaryPlus()
 	case token.NOT:
 		return p.parseNot()
 	case token.LPAREN:
@@ -208,7 +248,7 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 	case token.INTERVAL:
 		// INTERVAL can be a literal (INTERVAL 1 DAY) or identifier reference
 		// Check if next token can start an interval value
-		if p.peekIs(token.NUMBER) || p.peekIs(token.LPAREN) || p.peekIs(token.MINUS) || p.peekIs(token.STRING) {
+		if p.peekIs(token.NUMBER) || p.peekIs(token.LPAREN) || p.peekIs(token.MINUS) || p.peekIs(token.STRING) || p.peekIs(token.IDENT) {
 			return p.parseInterval()
 		}
 		// Otherwise treat as identifier
@@ -263,8 +303,10 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 		return p.parseTernary(left)
 	case token.LIKE, token.ILIKE:
 		return p.parseLikeExpression(left, false)
+	case token.REGEXP:
+		return p.parseRegexpExpression(left, false)
 	case token.NOT:
-		// NOT IN, NOT LIKE, NOT BETWEEN, IS NOT
+		// NOT IN, NOT LIKE, NOT BETWEEN, NOT REGEXP, IS NOT
 		p.nextToken()
 		switch p.current.Token {
 		case token.IN:
@@ -273,6 +315,8 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 			return p.parseLikeExpression(left, true)
 		case token.ILIKE:
 			return p.parseLikeExpression(left, true)
+		case token.REGEXP:
+			return p.parseRegexpExpression(left, true)
 		case token.BETWEEN:
 			return p.parseBetweenExpression(left, true)
 		default:
@@ -358,7 +402,8 @@ func (p *Parser) parseIdentifierOrFunction() ast.Expression {
 	parts := []string{name}
 	for p.currentIs(token.DOT) {
 		p.nextToken()
-		if p.currentIs(token.IDENT) {
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			// Keywords can be used as column/field names (e.g., l_t.key, t.index)
 			parts = append(parts, p.current.Value)
 			p.nextToken()
 		} else if p.currentIs(token.ASTERISK) {
@@ -398,31 +443,35 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 		p.nextToken()
 	}
 
-	// Parse arguments
-	if !p.currentIs(token.RPAREN) && !p.currentIs(token.SETTINGS) {
+	// Handle view() and similar functions that take a subquery as argument
+	// view(SELECT ...) should parse SELECT as a subquery, not expression
+	if strings.ToLower(name) == "view" && (p.currentIs(token.SELECT) || p.currentIs(token.WITH)) {
+		subquery := p.parseSelectWithUnion()
+		fn.Arguments = []ast.Expression{&ast.Subquery{Position: pos, Query: subquery}}
+	} else if !p.currentIs(token.RPAREN) && !p.currentIs(token.SETTINGS) {
+		// Parse arguments
 		fn.Arguments = p.parseFunctionArgumentList()
 	}
 
 	// Handle SETTINGS inside function call (table functions)
 	if p.currentIs(token.SETTINGS) {
 		p.nextToken()
-		// Parse settings as key=value pairs until )
-		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-			// Just skip the settings for now
-			p.nextToken()
-		}
+		fn.Settings = p.parseSettingsList()
 	}
 
 	p.expect(token.RPAREN)
 
 	// Handle IGNORE NULLS / RESPECT NULLS (window function modifiers)
-	if p.currentIs(token.IDENT) {
+	// Can appear multiple times (e.g., RESPECT NULLS IGNORE NULLS)
+	for p.currentIs(token.IDENT) {
 		upper := strings.ToUpper(p.current.Value)
 		if upper == "IGNORE" || upper == "RESPECT" {
 			p.nextToken()
 			if p.currentIs(token.NULLS) {
 				p.nextToken()
 			}
+		} else {
+			break
 		}
 	}
 
@@ -649,6 +698,16 @@ func (p *Parser) parseUnaryMinus() ast.Expression {
 	return expr
 }
 
+func (p *Parser) parseUnaryPlus() ast.Expression {
+	expr := &ast.UnaryExpr{
+		Position: p.current.Pos,
+		Op:       "+",
+	}
+	p.nextToken()
+	expr.Operand = p.parseExpression(UNARY)
+	return expr
+}
+
 func (p *Parser) parseNot() ast.Expression {
 	expr := &ast.UnaryExpr{
 		Position: p.current.Pos,
@@ -673,13 +732,22 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 		}
 	}
 
-	// Check for subquery
+	// Check for subquery (SELECT, WITH, or EXPLAIN)
 	if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 		subquery := p.parseSelectWithUnion()
 		p.expect(token.RPAREN)
 		return &ast.Subquery{
 			Position: pos,
 			Query:    subquery,
+		}
+	}
+	// EXPLAIN as subquery
+	if p.currentIs(token.EXPLAIN) {
+		explain := p.parseExplain()
+		p.expect(token.RPAREN)
+		return &ast.Subquery{
+			Position: pos,
+			Query:    explain,
 		}
 	}
 
@@ -791,19 +859,22 @@ func (p *Parser) parseCast() ast.Expression {
 	// Use ALIAS_PREC to avoid consuming AS as an alias operator
 	expr.Expr = p.parseExpression(ALIAS_PREC)
 
-	// Handle both CAST(x AS Type) and CAST(x, 'Type') syntax
+	// Handle both CAST(x AS Type) and CAST(x, 'Type') or CAST(x, expr) syntax
 	if p.currentIs(token.AS) {
 		p.nextToken()
 		expr.Type = p.parseDataType()
 	} else if p.currentIs(token.COMMA) {
 		p.nextToken()
-		// Type is given as a string literal
+		// Type can be given as a string literal or an expression (e.g., if(cond, 'Type1', 'Type2'))
 		if p.currentIs(token.STRING) {
 			expr.Type = &ast.DataType{
 				Position: p.current.Pos,
 				Name:     p.current.Value,
 			}
 			p.nextToken()
+		} else {
+			// Parse as expression for dynamic type casting
+			expr.TypeExpr = p.parseExpression(LOWEST)
 		}
 	}
 
@@ -820,49 +891,56 @@ func (p *Parser) parseExtract() ast.Expression {
 		return nil
 	}
 
-	// Check if it's EXTRACT(field FROM expr) or extract(str, pattern) form
-	if p.currentIs(token.IDENT) {
+	// Check if it's EXTRACT(field FROM expr) form
+	// The field must be a known date/time field identifier followed by FROM
+	if p.currentIs(token.IDENT) && !p.peekIs(token.LPAREN) {
 		field := strings.ToUpper(p.current.Value)
-		p.nextToken()
-
-		// Check for FROM keyword - if present, it's the EXTRACT(field FROM expr) form
-		if p.currentIs(token.FROM) {
-			p.nextToken()
-			from := p.parseExpression(LOWEST)
-			p.expect(token.RPAREN)
-			return &ast.ExtractExpr{
-				Position: pos,
-				Field:    field,
-				From:     from,
-			}
+		// Check if it's a known date/time field
+		dateTimeFields := map[string]bool{
+			"YEAR": true, "QUARTER": true, "MONTH": true, "WEEK": true,
+			"DAY": true, "DAYOFWEEK": true, "DAYOFYEAR": true,
+			"HOUR": true, "MINUTE": true, "SECOND": true,
+			"TIMEZONE_HOUR": true, "TIMEZONE_MINUTE": true,
 		}
-
-		// Not FROM, so backtrack and parse as regular function call
-		// This is the extract(str, pattern) regex form
-		// We need to re-parse as a function call
-		args := []ast.Expression{
-			&ast.Identifier{Position: pos, Parts: []string{strings.ToLower(field)}},
-		}
-		if p.currentIs(token.COMMA) {
+		if dateTimeFields[field] {
 			p.nextToken()
-			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-				args = append(args, p.parseExpression(LOWEST))
-				if p.currentIs(token.COMMA) {
-					p.nextToken()
-				} else {
-					break
+			// Check for FROM keyword - if present, it's the EXTRACT(field FROM expr) form
+			if p.currentIs(token.FROM) {
+				p.nextToken()
+				from := p.parseExpression(LOWEST)
+				p.expect(token.RPAREN)
+				return &ast.ExtractExpr{
+					Position: pos,
+					Field:    field,
+					From:     from,
 				}
 			}
-		}
-		p.expect(token.RPAREN)
-		return &ast.FunctionCall{
-			Position:  pos,
-			Name:      "extract",
-			Arguments: args,
+			// Not FROM, so create args starting with the field as identifier
+			args := []ast.Expression{
+				&ast.Identifier{Position: pos, Parts: []string{strings.ToLower(field)}},
+			}
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+				for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+					args = append(args, p.parseExpression(LOWEST))
+					if p.currentIs(token.COMMA) {
+						p.nextToken()
+					} else {
+						break
+					}
+				}
+			}
+			p.expect(token.RPAREN)
+			return &ast.FunctionCall{
+				Position:  pos,
+				Name:      "extract",
+				Arguments: args,
+			}
 		}
 	}
 
-	// If first token is a string, it's the regex form extract(str, pattern)
+	// Parse as regular function call - extract(str, pattern) regex form
+	// or extract(expr, pattern) where expr can be any expression
 	var args []ast.Expression
 	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
 		args = append(args, p.parseExpression(LOWEST))
@@ -887,9 +965,10 @@ func (p *Parser) parseInterval() ast.Expression {
 	}
 	p.nextToken() // skip INTERVAL
 
-	expr.Value = p.parseExpression(LOWEST)
+	// Use ALIAS_PREC to prevent consuming the unit as an alias
+	expr.Value = p.parseExpression(ALIAS_PREC)
 
-	// Parse unit
+	// Parse unit (interval units are identifiers like DAY, MONTH, etc.)
 	if p.currentIs(token.IDENT) {
 		expr.Unit = strings.ToUpper(p.current.Value)
 		p.nextToken()
@@ -1053,6 +1132,42 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 	prec := p.precedence(p.current.Token)
 	p.nextToken()
 
+	// Check for ANY/ALL subquery comparison modifier: expr >= ANY(subquery)
+	if p.currentIs(token.ANY) || p.currentIs(token.ALL) {
+		modifier := strings.ToUpper(p.current.Value)
+		p.nextToken()
+		if p.currentIs(token.LPAREN) {
+			p.nextToken()
+			// Parse the subquery
+			if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
+				subquery := p.parseSelectWithUnion()
+				p.expect(token.RPAREN)
+				// Wrap the comparison in a function call representing ANY/ALL
+				return &ast.FunctionCall{
+					Position: expr.Position,
+					Name:     strings.ToLower(modifier) + "Match",
+					Arguments: []ast.Expression{
+						left,
+						&ast.Subquery{Position: expr.Position, Query: subquery},
+					},
+				}
+			}
+			// Not a subquery, parse as expression list
+			args := p.parseExpressionList()
+			p.expect(token.RPAREN)
+			return &ast.BinaryExpr{
+				Position: expr.Position,
+				Left:     left,
+				Op:       expr.Op,
+				Right: &ast.FunctionCall{
+					Position:  expr.Position,
+					Name:      strings.ToLower(modifier),
+					Arguments: args,
+				},
+			}
+		}
+	}
+
 	expr.Right = p.parseExpression(prec)
 	return expr
 }
@@ -1072,6 +1187,30 @@ func (p *Parser) parseLikeExpression(left ast.Expression, not bool) ast.Expressi
 
 	expr.Pattern = p.parseExpression(COMPARE)
 	return expr
+}
+
+func (p *Parser) parseRegexpExpression(left ast.Expression, not bool) ast.Expression {
+	pos := p.current.Pos
+	p.nextToken() // skip REGEXP
+
+	pattern := p.parseExpression(COMPARE)
+
+	// REGEXP translates to match(expr, pattern) function
+	fnCall := &ast.FunctionCall{
+		Position:  pos,
+		Name:      "match",
+		Arguments: []ast.Expression{left, pattern},
+	}
+
+	if not {
+		// NOT REGEXP uses NOT match(...)
+		return &ast.UnaryExpr{
+			Position: pos,
+			Op:       "NOT",
+			Operand:  fnCall,
+		}
+	}
+	return fnCall
 }
 
 func (p *Parser) parseInExpression(left ast.Expression, not bool) ast.Expression {
@@ -1177,6 +1316,26 @@ func (p *Parser) parseIsExpression(left ast.Expression) ast.Expression {
 		}
 	}
 
+	// IS [NOT] DISTINCT FROM expr
+	if p.currentIs(token.DISTINCT) {
+		p.nextToken() // skip DISTINCT
+		if p.currentIs(token.FROM) {
+			p.nextToken() // skip FROM
+			right := p.parseExpression(COMPARE)
+			// IS NOT DISTINCT FROM is same as =, IS DISTINCT FROM is same as !=
+			op := "="
+			if not {
+				op = "!="
+			}
+			return &ast.BinaryExpr{
+				Position: pos,
+				Left:     left,
+				Op:       op,
+				Right:    right,
+			}
+		}
+	}
+
 	return left
 }
 
@@ -1219,6 +1378,24 @@ func (p *Parser) parseTupleAccessFromNumber(left ast.Expression) ast.Expression 
 func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
 	p.nextToken() // skip .
 
+	// Check for JSON path parent access with ^ (e.g., x.^c0)
+	if p.currentIs(token.CARET) {
+		p.nextToken() // skip ^
+		if p.currentIs(token.IDENT) {
+			pathPart := "^" + p.current.Value
+			p.nextToken()
+			if ident, ok := left.(*ast.Identifier); ok {
+				ident.Parts = append(ident.Parts, pathPart)
+				return ident
+			}
+			// Create new identifier with JSON path
+			return &ast.Identifier{
+				Position: left.Pos(),
+				Parts:    []string{pathPart},
+			}
+		}
+	}
+
 	// Check for tuple access with number
 	if p.currentIs(token.NUMBER) {
 		expr := &ast.TupleAccess{
@@ -1229,8 +1406,8 @@ func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
 		return expr
 	}
 
-	// Regular identifier access
-	if p.currentIs(token.IDENT) {
+	// Regular identifier access (keywords can also be column/field names after DOT)
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		if ident, ok := left.(*ast.Identifier); ok {
 			ident.Parts = append(ident.Parts, p.current.Value)
 			p.nextToken()
@@ -1323,7 +1500,9 @@ func (p *Parser) parseLambda(left ast.Expression) ast.Expression {
 
 	p.nextToken() // skip ->
 
-	lambda.Body = p.parseExpression(LOWEST)
+	// Use ALIAS_PREC to prevent consuming AS keyword that might belong to containing context
+	// e.g., WITH x -> toString(x) AS lambda_1 SELECT...
+	lambda.Body = p.parseExpression(ALIAS_PREC)
 	return lambda
 }
 
@@ -1335,13 +1514,16 @@ func (p *Parser) parseTernary(condition ast.Expression) ast.Expression {
 
 	p.nextToken() // skip ?
 
-	ternary.Then = p.parseExpression(LOWEST)
+	// Use ALIAS_PREC to prevent consuming AS keyword, but still allow nested ternaries
+	ternary.Then = p.parseExpression(ALIAS_PREC)
 
 	if !p.expect(token.COLON) {
 		return nil
 	}
 
-	ternary.Else = p.parseExpression(LOWEST)
+	// Use ALIAS_PREC to prevent consuming AS keyword that might belong to containing context
+	// e.g., WITH cond ? a : b AS x SELECT...
+	ternary.Else = p.parseExpression(ALIAS_PREC)
 
 	return ternary
 }
@@ -1363,6 +1545,20 @@ func (p *Parser) parseParametricFunctionCall(fn *ast.FunctionCall) *ast.Function
 	}
 
 	p.expect(token.RPAREN)
+
+	// Handle IGNORE NULLS / RESPECT NULLS (aggregate function modifiers)
+	// Can appear multiple times (e.g., RESPECT NULLS IGNORE NULLS)
+	for p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		if upper == "IGNORE" || upper == "RESPECT" {
+			p.nextToken()
+			if p.currentIs(token.NULLS) {
+				p.nextToken()
+			}
+		} else {
+			break
+		}
+	}
 
 	// Handle OVER clause for window functions
 	if p.currentIs(token.OVER) {
@@ -1466,7 +1662,11 @@ func (p *Parser) parseKeywordAsFunction() ast.Expression {
 	}
 
 	var args []ast.Expression
-	if !p.currentIs(token.RPAREN) {
+	// Handle view() and similar functions that take a subquery as argument
+	if name == "view" && (p.currentIs(token.SELECT) || p.currentIs(token.WITH)) {
+		subquery := p.parseSelectWithUnion()
+		args = []ast.Expression{&ast.Subquery{Position: pos, Query: subquery}}
+	} else if !p.currentIs(token.RPAREN) {
 		args = p.parseExpressionList()
 	}
 
@@ -1515,16 +1715,29 @@ func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
 func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 	p.nextToken() // skip REPLACE
 
-	if !p.expect(token.LPAREN) {
-		return asterisk
+	// REPLACE can have optional parentheses: REPLACE (expr AS col) or REPLACE expr AS col
+	hasParens := p.currentIs(token.LPAREN)
+	if hasParens {
+		p.nextToken()
 	}
 
-	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+	for {
+		// Stop conditions based on context
+		if hasParens && p.currentIs(token.RPAREN) {
+			break
+		}
+		if !hasParens && (p.currentIs(token.FROM) || p.currentIs(token.WHERE) || p.currentIs(token.EOF) ||
+			p.currentIs(token.GROUP) || p.currentIs(token.ORDER) || p.currentIs(token.HAVING) ||
+			p.currentIs(token.LIMIT) || p.currentIs(token.SETTINGS) || p.currentIs(token.FORMAT) ||
+			p.currentIs(token.UNION) || p.currentIs(token.EXCEPT) || p.currentIs(token.COMMA)) {
+			break
+		}
+
 		replace := &ast.ReplaceExpr{
 			Position: p.current.Pos,
 		}
 
-		replace.Expr = p.parseExpression(LOWEST)
+		replace.Expr = p.parseExpression(ALIAS_PREC)
 
 		if p.currentIs(token.AS) {
 			p.nextToken()
@@ -1538,10 +1751,18 @@ func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 
 		if p.currentIs(token.COMMA) {
 			p.nextToken()
+			// If no parens and we see comma, might be end of select column
+			if !hasParens {
+				break
+			}
+		} else if !hasParens {
+			break
 		}
 	}
 
-	p.expect(token.RPAREN)
+	if hasParens {
+		p.expect(token.RPAREN)
+	}
 
 	return asterisk
 }

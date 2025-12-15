@@ -177,3 +177,27 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 		Node(sb, col.Default, depth+1)
 	}
 }
+
+func Index(sb *strings.Builder, idx *ast.IndexDefinition, depth int) {
+	indent := strings.Repeat(" ", depth)
+	children := 0
+	if idx.Expression != nil {
+		children++
+	}
+	if idx.Type != nil {
+		children++
+	}
+	fmt.Fprintf(sb, "%sIndex (children %d)\n", indent, children)
+	if idx.Expression != nil {
+		// Expression is typically an identifier
+		if ident, ok := idx.Expression.(*ast.Identifier); ok {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, ident.Name())
+		} else {
+			Node(sb, idx.Expression, depth+1)
+		}
+	}
+	if idx.Type != nil {
+		// Type is a function like minmax, bloom_filter, etc.
+		explainFunctionCall(sb, idx.Type, indent+" ", depth+1)
+	}
+}

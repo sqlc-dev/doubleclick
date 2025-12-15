@@ -84,7 +84,11 @@ func explainTableJoin(sb *strings.Builder, n *ast.TableJoin, indent string, dept
 	if len(n.Using) > 0 {
 		children++
 	}
-	fmt.Fprintf(sb, "%sTableJoin (children %d)\n", indent, children)
+	if children > 0 {
+		fmt.Fprintf(sb, "%sTableJoin (children %d)\n", indent, children)
+	} else {
+		fmt.Fprintf(sb, "%sTableJoin\n", indent)
+	}
 	if n.On != nil {
 		Node(sb, n.On, depth+1)
 	}

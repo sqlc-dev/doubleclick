@@ -57,6 +57,7 @@ type SelectQuery struct {
 	WithCube    bool                  `json:"with_cube,omitempty"`
 	WithTotals  bool                  `json:"with_totals,omitempty"`
 	Having      Expression            `json:"having,omitempty"`
+	Qualify     Expression            `json:"qualify,omitempty"`
 	Window      []*WindowDefinition   `json:"window,omitempty"`
 	OrderBy     []*OrderByElement     `json:"order_by,omitempty"`
 	Limit       Expression            `json:"limit,omitempty"`
@@ -90,6 +91,7 @@ func (w *WindowDefinition) End() token.Position { return w.Position }
 type IntoOutfileClause struct {
 	Position token.Position `json:"-"`
 	Filename string         `json:"filename"`
+	Truncate bool           `json:"truncate,omitempty"`
 }
 
 func (i *IntoOutfileClause) Pos() token.Position { return i.Position }
@@ -162,6 +164,7 @@ const (
 	JoinRight JoinType = "RIGHT"
 	JoinFull  JoinType = "FULL"
 	JoinCross JoinType = "CROSS"
+	JoinPaste JoinType = "PASTE"
 )
 
 // JoinStrictness represents the join strictness.
@@ -208,6 +211,7 @@ type InsertQuery struct {
 	Table       string         `json:"table,omitempty"`
 	Function    *FunctionCall  `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
 	Columns     []*Identifier  `json:"columns,omitempty"`
+	PartitionBy Expression     `json:"partition_by,omitempty"` // For PARTITION BY clause
 	Select      Statement      `json:"select,omitempty"`
 	Format      *Identifier    `json:"format,omitempty"`
 	HasSettings bool           `json:"has_settings,omitempty"` // For SETTINGS clause
@@ -219,29 +223,36 @@ func (i *InsertQuery) statementNode()      {}
 
 // CreateQuery represents a CREATE statement.
 type CreateQuery struct {
-	Position       token.Position       `json:"-"`
-	OrReplace      bool                 `json:"or_replace,omitempty"`
-	IfNotExists    bool                 `json:"if_not_exists,omitempty"`
-	Temporary      bool                 `json:"temporary,omitempty"`
-	Database       string               `json:"database,omitempty"`
-	Table          string               `json:"table,omitempty"`
-	View           string               `json:"view,omitempty"`
-	Materialized   bool                 `json:"materialized,omitempty"`
-	To             string               `json:"to,omitempty"`       // Target table for materialized views
-	Populate       bool                 `json:"populate,omitempty"` // POPULATE for materialized views
-	Columns        []*ColumnDeclaration `json:"columns,omitempty"`
-	Constraints    []*Constraint        `json:"constraints,omitempty"`
-	Engine         *EngineClause        `json:"engine,omitempty"`
-	OrderBy        []Expression         `json:"order_by,omitempty"`
-	PartitionBy    Expression           `json:"partition_by,omitempty"`
-	PrimaryKey     []Expression         `json:"primary_key,omitempty"`
-	SampleBy       Expression           `json:"sample_by,omitempty"`
-	TTL            *TTLClause           `json:"ttl,omitempty"`
-	Settings       []*SettingExpr       `json:"settings,omitempty"`
-	AsSelect       Statement            `json:"as_select,omitempty"`
-	Comment        string               `json:"comment,omitempty"`
-	OnCluster      string               `json:"on_cluster,omitempty"`
-	CreateDatabase bool                 `json:"create_database,omitempty"`
+	Position         token.Position       `json:"-"`
+	OrReplace        bool                 `json:"or_replace,omitempty"`
+	IfNotExists      bool                 `json:"if_not_exists,omitempty"`
+	Temporary        bool                 `json:"temporary,omitempty"`
+	Database         string               `json:"database,omitempty"`
+	Table            string               `json:"table,omitempty"`
+	View             string               `json:"view,omitempty"`
+	Materialized     bool                 `json:"materialized,omitempty"`
+	To               string               `json:"to,omitempty"`       // Target table for materialized views
+	Populate         bool                 `json:"populate,omitempty"` // POPULATE for materialized views
+	Columns          []*ColumnDeclaration `json:"columns,omitempty"`
+	Indexes          []*IndexDefinition   `json:"indexes,omitempty"`
+	Constraints      []*Constraint        `json:"constraints,omitempty"`
+	Engine           *EngineClause        `json:"engine,omitempty"`
+	OrderBy          []Expression         `json:"order_by,omitempty"`
+	PartitionBy      Expression           `json:"partition_by,omitempty"`
+	PrimaryKey       []Expression         `json:"primary_key,omitempty"`
+	SampleBy         Expression           `json:"sample_by,omitempty"`
+	TTL              *TTLClause           `json:"ttl,omitempty"`
+	Settings         []*SettingExpr       `json:"settings,omitempty"`
+	AsSelect         Statement            `json:"as_select,omitempty"`
+	Comment          string               `json:"comment,omitempty"`
+	OnCluster        string               `json:"on_cluster,omitempty"`
+	CreateDatabase   bool                 `json:"create_database,omitempty"`
+	CreateFunction   bool                 `json:"create_function,omitempty"`
+	CreateUser       bool                 `json:"create_user,omitempty"`
+	CreateDictionary bool                 `json:"create_dictionary,omitempty"`
+	FunctionName     string               `json:"function_name,omitempty"`
+	FunctionBody     Expression           `json:"function_body,omitempty"`
+	UserName         string               `json:"user_name,omitempty"`
 }
 
 func (c *CreateQuery) Pos() token.Position { return c.Position }
@@ -258,6 +269,7 @@ type ColumnDeclaration struct {
 	DefaultKind   string         `json:"default_kind,omitempty"` // DEFAULT, MATERIALIZED, ALIAS, EPHEMERAL
 	Codec         *CodecExpr     `json:"codec,omitempty"`
 	TTL           Expression     `json:"ttl,omitempty"`
+	PrimaryKey    bool           `json:"primary_key,omitempty"` // PRIMARY KEY constraint
 	Comment       string         `json:"comment,omitempty"`
 }
 
@@ -289,12 +301,25 @@ func (n *NameTypePair) expressionNode()     {}
 
 // CodecExpr represents a CODEC expression.
 type CodecExpr struct {
-	Position token.Position    `json:"-"`
-	Codecs   []*FunctionCall   `json:"codecs"`
+	Position token.Position  `json:"-"`
+	Codecs   []*FunctionCall `json:"codecs"`
 }
 
 func (c *CodecExpr) Pos() token.Position { return c.Position }
 func (c *CodecExpr) End() token.Position { return c.Position }
+
+// IndexDefinition represents an INDEX definition in CREATE TABLE.
+type IndexDefinition struct {
+	Position    token.Position `json:"-"`
+	Name        string         `json:"name"`
+	Expression  Expression     `json:"expression"`
+	Type        *FunctionCall  `json:"type"`
+	Granularity Expression     `json:"granularity,omitempty"`
+}
+
+func (i *IndexDefinition) Pos() token.Position { return i.Position }
+func (i *IndexDefinition) End() token.Position { return i.Position }
+func (i *IndexDefinition) expressionNode()     {}
 
 // Constraint represents a table constraint.
 type Constraint struct {
@@ -434,9 +459,12 @@ func (u *UseQuery) statementNode()      {}
 
 // DescribeQuery represents a DESCRIBE statement.
 type DescribeQuery struct {
-	Position token.Position `json:"-"`
-	Database string         `json:"database,omitempty"`
-	Table    string         `json:"table"`
+	Position      token.Position `json:"-"`
+	Database      string         `json:"database,omitempty"`
+	Table         string         `json:"table,omitempty"`
+	TableFunction *FunctionCall  `json:"table_function,omitempty"`
+	Settings      []*SettingExpr `json:"settings,omitempty"`
+	Format        string         `json:"format,omitempty"`
 }
 
 func (d *DescribeQuery) Pos() token.Position { return d.Position }
@@ -470,6 +498,7 @@ const (
 	ShowColumns       ShowType = "COLUMNS"
 	ShowDictionaries  ShowType = "DICTIONARIES"
 	ShowFunctions     ShowType = "FUNCTIONS"
+	ShowSettings      ShowType = "SETTINGS"
 )
 
 // ExplainQuery represents an EXPLAIN statement.
@@ -487,11 +516,12 @@ func (e *ExplainQuery) statementNode()      {}
 type ExplainType string
 
 const (
-	ExplainAST       ExplainType = "AST"
-	ExplainSyntax    ExplainType = "SYNTAX"
-	ExplainPlan      ExplainType = "PLAN"
-	ExplainPipeline  ExplainType = "PIPELINE"
-	ExplainEstimate  ExplainType = "ESTIMATE"
+	ExplainAST                ExplainType = "AST"
+	ExplainSyntax             ExplainType = "SYNTAX"
+	ExplainPlan               ExplainType = "PLAN"
+	ExplainPipeline           ExplainType = "PIPELINE"
+	ExplainEstimate           ExplainType = "ESTIMATE"
+	ExplainCurrentTransaction ExplainType = "CURRENT TRANSACTION"
 )
 
 // SetQuery represents a SET statement.
@@ -531,11 +561,20 @@ func (s *SystemQuery) Pos() token.Position { return s.Position }
 func (s *SystemQuery) End() token.Position { return s.Position }
 func (s *SystemQuery) statementNode()      {}
 
+// RenamePair represents a single rename pair in RENAME TABLE.
+type RenamePair struct {
+	FromDatabase string `json:"from_database,omitempty"`
+	FromTable    string `json:"from_table"`
+	ToDatabase   string `json:"to_database,omitempty"`
+	ToTable      string `json:"to_table"`
+}
+
 // RenameQuery represents a RENAME TABLE statement.
 type RenameQuery struct {
 	Position  token.Position `json:"-"`
-	From      string         `json:"from"`
-	To        string         `json:"to"`
+	Pairs     []*RenamePair  `json:"pairs"`             // Multiple rename pairs
+	From      string         `json:"from,omitempty"`    // Deprecated: for backward compat
+	To        string         `json:"to,omitempty"`      // Deprecated: for backward compat
 	OnCluster string         `json:"on_cluster,omitempty"`
 }
 
@@ -695,6 +734,7 @@ type FunctionCall struct {
 	Name       string         `json:"name"`
 	Parameters []Expression   `json:"parameters,omitempty"` // For parametric functions like quantile(0.9)(x)
 	Arguments  []Expression   `json:"arguments,omitempty"`
+	Settings   []*SettingExpr `json:"settings,omitempty"` // For table functions with SETTINGS
 	Distinct   bool           `json:"distinct,omitempty"`
 	Over       *WindowSpec    `json:"over,omitempty"`
 	Alias      string         `json:"alias,omitempty"`
@@ -841,7 +881,8 @@ func (w *WhenClause) End() token.Position { return w.Position }
 type CastExpr struct {
 	Position       token.Position `json:"-"`
 	Expr           Expression     `json:"expr"`
-	Type           *DataType      `json:"type"`
+	Type           *DataType      `json:"type,omitempty"`
+	TypeExpr       Expression     `json:"type_expr,omitempty"` // For dynamic type like CAST(x, if(cond, 'Type1', 'Type2'))
 	Alias          string         `json:"alias,omitempty"`
 	OperatorSyntax bool           `json:"operator_syntax,omitempty"` // true if using :: syntax
 }
