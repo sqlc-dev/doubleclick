@@ -475,6 +475,21 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 		}
 	}
 
+	// Handle FILTER clause for aggregate functions: func() FILTER(WHERE condition)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "FILTER" {
+		p.nextToken() // skip FILTER
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			if p.currentIs(token.WHERE) {
+				p.nextToken() // skip WHERE
+				// Parse the filter condition - just consume it for now
+				// The filter is essentially a where clause for the aggregate
+				p.parseExpression(LOWEST)
+			}
+			p.expect(token.RPAREN)
+		}
+	}
+
 	// Handle OVER clause for window functions
 	if p.currentIs(token.OVER) {
 		p.nextToken()

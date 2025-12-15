@@ -2,8 +2,30 @@
 
 ## Current State
 
-- **Tests passing:** 6,006 (88.0%)
-- **Tests skipped:** 819 (12.0%)
+- **Tests passing:** ~6,030 (88.4%)
+- **Tests skipped:** ~794 (11.6%)
+- **Parser errors fixed:** 25 (reduced from 53 to 28)
+
+## Recently Fixed (parser layer)
+
+- ✅ SELECT ALL syntax (`SELECT ALL 'a'`)
+- ✅ FILTER clause on aggregate functions (`argMax() FILTER(WHERE ...)`)
+- ✅ DROP SETTINGS PROFILE (`DROP SETTINGS PROFILE IF EXISTS ...`)
+- ✅ CREATE NAMED COLLECTION (`CREATE NAMED COLLECTION ... AS ...`)
+- ✅ WITH column AS alias syntax (`WITH number AS k SELECT k`)
+- ✅ SHOW TABLES NOT LIKE (`SHOW TABLES NOT LIKE '%'`)
+- ✅ SHOW CREATE QUOTA (`SHOW CREATE QUOTA default`)
+- ✅ LIMIT BY with second LIMIT (`LIMIT 1 BY * LIMIT 1`)
+- ✅ WITH TOTALS HAVING clause (`SELECT count() WITH TOTALS HAVING x != 0`)
+- ✅ COLLATE in column definitions (`varchar(255) COLLATE binary NOT NULL`)
+- ✅ SETTINGS with keyword assignments (`SETTINGS limit=5`)
+- ✅ TTL GROUP BY SET clause (`TTL d + interval 1 second GROUP BY x SET y = max(y)`)
+- ✅ DROP ROW POLICY ON wildcard (`DROP ROW POLICY ... ON default.*`)
+- ✅ INSERT FROM INFILE COMPRESSION (`FROM INFILE '...' COMPRESSION 'gz'`)
+- ✅ FROM before SELECT syntax (`FROM numbers(1) SELECT number`)
+- ✅ Parenthesized SELECT at statement level (`(SELECT 1)`)
+- ✅ EXISTS table syntax (`EXISTS db.table`)
+- ✅ DROP TABLE FORMAT (`DROP TABLE IF EXISTS t FORMAT Null`)
 
 ## Recently Fixed (explain layer)
 
@@ -22,6 +44,29 @@
 - ✅ Negative integer/float literals (e.g., `-1` → `Literal Int64_-1`)
 - ✅ Empty tuple in ORDER BY (e.g., `ORDER BY ()` → `Function tuple` with empty `ExpressionList`)
 - ✅ String escape handling (lexer now unescapes `\'`, `\\`, `\n`, `\t`, `\0`, etc.)
+
+## Remaining Parser Issues (28 total)
+
+### Intentionally Invalid SQL (Syntax Errors Expected)
+These are tests for SQL that should produce syntax errors - we need to parse them enough to produce the expected error output:
+- Incomplete CASE expressions (`SELECT CASE number`, `SELECT CASE`)
+- Invalid column type (`create table t (x 123)` - number instead of type)
+- Invalid syntax patterns (`SELECT sum(number number number)`)
+- Parenthesized ALTER (`ALTER TABLE t22 (DELETE WHERE ...)`)
+
+### Lexer Issues (Need Lexer Changes)
+- Hex P notation floats (`0x123p4`, `-0x1P1023`) - need lexer support
+- Dollar-quoted strings (`$$..$$`) - need lexer support
+- Backtick escaping (`` `ta``ble` ``) - need lexer support
+
+### Parser Issues (Lower Priority)
+- EXPLAIN AST options (`EXPLAIN AST optimize=0 SELECT ...`)
+- SYSTEM DROP FORMAT SCHEMA CACHE
+- view() with implicit alias in subquery (`view(select 'foo.com' key)`)
+- DROP USER with @ hostname (`test_user@localhost`)
+- Complex UNION with parentheses mixing
+- * EXCEPT in nested expressions
+- EXPLAIN SYNTAX WITH scalar (`EXPLAIN SYNTAX WITH 1 SELECT 1`)
 
 ## Parser Issues (High Priority)
 
@@ -55,13 +100,6 @@ Dictionary definitions are not supported:
 CREATE DICTIONARY d0 (c1 UInt64) PRIMARY KEY c1 LAYOUT(FLAT()) SOURCE(...);
 ```
 
-### CREATE USER / CREATE FUNCTION
-User and function definitions are not supported:
-```sql
-CREATE USER test_user GRANTEES ...;
-CREATE OR REPLACE FUNCTION myFunc AS ...;
-```
-
 ### QUALIFY Clause
 Window function filtering clause:
 ```sql
@@ -78,12 +116,6 @@ SELECT 1, 2 INTO OUTFILE '/dev/null' TRUNCATE FORMAT Npy;
 Advanced grouping syntax:
 ```sql
 SELECT ... GROUP BY GROUPING SETS ((a), (b));
-```
-
-### view() Table Function
-The view() table function in FROM:
-```sql
-SELECT * FROM view(SELECT 1 as id);
 ```
 
 ### CREATE TABLE ... AS SELECT

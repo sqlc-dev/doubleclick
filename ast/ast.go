@@ -594,6 +594,17 @@ func (e *ExchangeQuery) Pos() token.Position { return e.Position }
 func (e *ExchangeQuery) End() token.Position { return e.Position }
 func (e *ExchangeQuery) statementNode()      {}
 
+// ExistsQuery represents an EXISTS table_name statement (check if table exists).
+type ExistsQuery struct {
+	Position token.Position `json:"-"`
+	Database string         `json:"database,omitempty"`
+	Table    string         `json:"table"`
+}
+
+func (e *ExistsQuery) Pos() token.Position { return e.Position }
+func (e *ExistsQuery) End() token.Position { return e.Position }
+func (e *ExistsQuery) statementNode()      {}
+
 // -----------------------------------------------------------------------------
 // Expressions
 
