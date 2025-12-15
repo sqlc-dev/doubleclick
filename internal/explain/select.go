@@ -87,13 +87,13 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 			Node(sb, o, depth+2)
 		}
 	}
+	// OFFSET (ClickHouse outputs offset before limit in EXPLAIN AST)
+	if n.Offset != nil {
+		Node(sb, n.Offset, depth+1)
+	}
 	// LIMIT
 	if n.Limit != nil {
 		Node(sb, n.Limit, depth+1)
-	}
-	// OFFSET
-	if n.Offset != nil {
-		Node(sb, n.Offset, depth+1)
 	}
 	// SETTINGS - output here if there's no FORMAT, otherwise it's at SelectWithUnionQuery level
 	if len(n.Settings) > 0 && n.Format == nil {
