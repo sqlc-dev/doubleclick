@@ -248,7 +248,7 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 	case token.INTERVAL:
 		// INTERVAL can be a literal (INTERVAL 1 DAY) or identifier reference
 		// Check if next token can start an interval value
-		if p.peekIs(token.NUMBER) || p.peekIs(token.LPAREN) || p.peekIs(token.MINUS) || p.peekIs(token.STRING) {
+		if p.peekIs(token.NUMBER) || p.peekIs(token.LPAREN) || p.peekIs(token.MINUS) || p.peekIs(token.STRING) || p.peekIs(token.IDENT) {
 			return p.parseInterval()
 		}
 		// Otherwise treat as identifier
