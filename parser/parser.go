@@ -1288,10 +1288,11 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 	}
 done_table_options:
 
-	// Parse AS SELECT or AS table_function() or AS database.table
+	// Parse AS SELECT or AS (subquery) or AS table_function() or AS database.table
 	if p.currentIs(token.AS) {
 		p.nextToken()
-		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
+		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) || p.currentIs(token.LPAREN) {
+			// AS SELECT... or AS (SELECT...) INTERSECT ...
 			create.AsSelect = p.parseSelectWithUnion()
 		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 			// AS table_function(...) or AS database.table

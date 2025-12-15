@@ -165,7 +165,13 @@ func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
 	// If next token is a plain identifier (not a keyword), treat as implicit alias
 	// Keywords like FROM, WHERE etc. are tokenized as their own token types, not IDENT
+	// INTERSECT is not a keyword but should not be treated as an alias
 	if p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		// Don't consume SQL set operation keywords that aren't tokens
+		if upper == "INTERSECT" {
+			return expr
+		}
 		alias := p.current.Value
 		p.nextToken()
 
@@ -1709,16 +1715,29 @@ func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
 func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 	p.nextToken() // skip REPLACE
 
-	if !p.expect(token.LPAREN) {
-		return asterisk
+	// REPLACE can have optional parentheses: REPLACE (expr AS col) or REPLACE expr AS col
+	hasParens := p.currentIs(token.LPAREN)
+	if hasParens {
+		p.nextToken()
 	}
 
-	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+	for {
+		// Stop conditions based on context
+		if hasParens && p.currentIs(token.RPAREN) {
+			break
+		}
+		if !hasParens && (p.currentIs(token.FROM) || p.currentIs(token.WHERE) || p.currentIs(token.EOF) ||
+			p.currentIs(token.GROUP) || p.currentIs(token.ORDER) || p.currentIs(token.HAVING) ||
+			p.currentIs(token.LIMIT) || p.currentIs(token.SETTINGS) || p.currentIs(token.FORMAT) ||
+			p.currentIs(token.UNION) || p.currentIs(token.EXCEPT) || p.currentIs(token.COMMA)) {
+			break
+		}
+
 		replace := &ast.ReplaceExpr{
 			Position: p.current.Pos,
 		}
 
-		replace.Expr = p.parseExpression(LOWEST)
+		replace.Expr = p.parseExpression(ALIAS_PREC)
 
 		if p.currentIs(token.AS) {
 			p.nextToken()
@@ -1732,10 +1751,18 @@ func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 
 		if p.currentIs(token.COMMA) {
 			p.nextToken()
+			// If no parens and we see comma, might be end of select column
+			if !hasParens {
+				break
+			}
+		} else if !hasParens {
+			break
 		}
 	}
 
-	p.expect(token.RPAREN)
+	if hasParens {
+		p.expect(token.RPAREN)
+	}
 
 	return asterisk
 }
