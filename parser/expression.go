@@ -223,6 +223,8 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 		return p.parseSpecialNumber()
 	case token.MINUS:
 		return p.parseUnaryMinus()
+	case token.PLUS:
+		return p.parseUnaryPlus()
 	case token.NOT:
 		return p.parseNot()
 	case token.LPAREN:
@@ -683,6 +685,16 @@ func (p *Parser) parseUnaryMinus() ast.Expression {
 	expr := &ast.UnaryExpr{
 		Position: p.current.Pos,
 		Op:       "-",
+	}
+	p.nextToken()
+	expr.Operand = p.parseExpression(UNARY)
+	return expr
+}
+
+func (p *Parser) parseUnaryPlus() ast.Expression {
+	expr := &ast.UnaryExpr{
+		Position: p.current.Pos,
+		Op:       "+",
 	}
 	p.nextToken()
 	expr.Operand = p.parseExpression(UNARY)

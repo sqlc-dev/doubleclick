@@ -970,6 +970,18 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 		p.parseSettingsList()
 	}
 
+	// Parse FROM INFILE clause (for INSERT ... FROM INFILE '...')
+	if p.currentIs(token.FROM) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "INFILE" {
+			p.nextToken()
+			// Skip the file path
+			if p.currentIs(token.STRING) {
+				p.nextToken()
+			}
+		}
+	}
+
 	// Parse VALUES or SELECT
 	if p.currentIs(token.VALUES) {
 		p.nextToken()
@@ -2277,6 +2289,15 @@ func (p *Parser) parseDescribe() *ast.DescribeQuery {
 	if p.currentIs(token.SETTINGS) {
 		p.nextToken()
 		desc.Settings = p.parseSettingsList()
+	}
+
+	// Parse FORMAT clause
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.currentIs(token.NULL) || p.current.Token.IsKeyword() {
+			desc.Format = p.current.Value
+			p.nextToken()
+		}
 	}
 
 	return desc

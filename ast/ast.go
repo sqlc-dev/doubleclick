@@ -464,6 +464,7 @@ type DescribeQuery struct {
 	Table         string         `json:"table,omitempty"`
 	TableFunction *FunctionCall  `json:"table_function,omitempty"`
 	Settings      []*SettingExpr `json:"settings,omitempty"`
+	Format        string         `json:"format,omitempty"`
 }
 
 func (d *DescribeQuery) Pos() token.Position { return d.Position }
