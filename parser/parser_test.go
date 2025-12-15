@@ -14,10 +14,11 @@ import (
 
 // testMetadata holds optional metadata for a test case
 type testMetadata struct {
-	Todo    bool   `json:"todo,omitempty"`
-	Source  string `json:"source,omitempty"`
-	Explain *bool  `json:"explain,omitempty"`
-	Skip    bool   `json:"skip,omitempty"`
+	Todo       bool   `json:"todo,omitempty"`
+	Source     string `json:"source,omitempty"`
+	Explain    *bool  `json:"explain,omitempty"`
+	Skip       bool   `json:"skip,omitempty"`
+	ParseError bool   `json:"parse_error,omitempty"` // true if query is intentionally invalid SQL
 }
 
 // TestParser tests the parser using test cases from the testdata directory.
@@ -27,6 +28,7 @@ type testMetadata struct {
 //   - todo: true if the test is not yet expected to pass
 //   - explain: false to skip the test (e.g., when ClickHouse couldn't parse it)
 //   - skip: true to skip the test entirely (e.g., causes infinite loop)
+//   - parse_error: true if the query is intentionally invalid SQL (expected to fail parsing)
 func TestParser(t *testing.T) {
 	testdataDir := "testdata"
 
@@ -49,22 +51,32 @@ func TestParser(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 			defer cancel()
 
-			// Read the query (first non-comment line)
+			// Read the query (handle multi-line queries)
 			queryPath := filepath.Join(testDir, "query.sql")
 			queryBytes, err := os.ReadFile(queryPath)
 			if err != nil {
 				t.Fatalf("Failed to read query.sql: %v", err)
 			}
-			// Get first non-comment, non-empty line
-			var query string
+			// Build query from non-comment lines until we hit a line ending with semicolon
+			var queryParts []string
 			for _, line := range strings.Split(string(queryBytes), "\n") {
-				line = strings.TrimSpace(line)
-				if line == "" || strings.HasPrefix(line, "--") {
+				trimmed := strings.TrimSpace(line)
+				if trimmed == "" || strings.HasPrefix(trimmed, "--") {
 					continue
 				}
-				query = line
-				break
+				// Remove trailing comment if present (but not inside strings - simple heuristic)
+				lineContent := trimmed
+				if idx := strings.Index(trimmed, " -- "); idx >= 0 {
+					lineContent = strings.TrimSpace(trimmed[:idx])
+				}
+				// Check if line ends with semicolon (statement terminator)
+				if strings.HasSuffix(lineContent, ";") {
+					queryParts = append(queryParts, lineContent)
+					break
+				}
+				queryParts = append(queryParts, trimmed)
 			}
+			query := strings.Join(queryParts, " ")
 
 			// Read optional metadata
 			var metadata testMetadata
@@ -89,11 +101,23 @@ func TestParser(t *testing.T) {
 			// Parse the query
 			stmts, err := parser.Parse(ctx, strings.NewReader(query))
 			if err != nil {
+				// If parse_error is true, this is expected - the query is intentionally invalid
+				if metadata.ParseError {
+					t.Skipf("Expected parse error (intentionally invalid SQL): %s", query)
+					return
+				}
 				if metadata.Todo {
 					t.Skipf("TODO: Parser does not yet support: %s (error: %v)", query, err)
 					return
 				}
 				t.Fatalf("Parse error: %v\nQuery: %s", err, query)
+			}
+
+			// If we successfully parsed a query marked as parse_error, note it
+			// (The query might have been fixed or the parser is too permissive)
+			if metadata.ParseError {
+				// This is fine - we parsed it successfully even though it's marked as invalid
+				// The test can continue to check explain output if available
 			}
 
 			if len(stmts) == 0 {

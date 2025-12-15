@@ -403,7 +403,19 @@ type AlterCommand struct {
 	FromTable      string               `json:"from_table,omitempty"`
 	TTL            *TTLClause           `json:"ttl,omitempty"`
 	Settings       []*SettingExpr       `json:"settings,omitempty"`
+	Where          Expression           `json:"where,omitempty"`       // For DELETE WHERE
+	Assignments    []*Assignment        `json:"assignments,omitempty"` // For UPDATE
 }
+
+// Assignment represents a column assignment in UPDATE.
+type Assignment struct {
+	Position token.Position `json:"-"`
+	Column   string         `json:"column"`
+	Value    Expression     `json:"value"`
+}
+
+func (a *Assignment) Pos() token.Position { return a.Position }
+func (a *Assignment) End() token.Position { return a.Position }
 
 func (a *AlterCommand) Pos() token.Position { return a.Position }
 func (a *AlterCommand) End() token.Position { return a.Position }
@@ -432,6 +444,8 @@ const (
 	AlterReplacePartition  AlterCommandType = "REPLACE_PARTITION"
 	AlterFreezePartition   AlterCommandType = "FREEZE_PARTITION"
 	AlterFreeze            AlterCommandType = "FREEZE"
+	AlterDeleteWhere       AlterCommandType = "DELETE_WHERE"
+	AlterUpdate            AlterCommandType = "UPDATE"
 )
 
 // TruncateQuery represents a TRUNCATE statement.
@@ -593,6 +607,17 @@ type ExchangeQuery struct {
 func (e *ExchangeQuery) Pos() token.Position { return e.Position }
 func (e *ExchangeQuery) End() token.Position { return e.Position }
 func (e *ExchangeQuery) statementNode()      {}
+
+// ExistsQuery represents an EXISTS table_name statement (check if table exists).
+type ExistsQuery struct {
+	Position token.Position `json:"-"`
+	Database string         `json:"database,omitempty"`
+	Table    string         `json:"table"`
+}
+
+func (e *ExistsQuery) Pos() token.Position { return e.Position }
+func (e *ExistsQuery) End() token.Position { return e.Position }
+func (e *ExistsQuery) statementNode()      {}
 
 // -----------------------------------------------------------------------------
 // Expressions

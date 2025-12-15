@@ -111,6 +111,12 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseSelectWithUnion()
 	case token.WITH:
 		return p.parseSelectWithUnion()
+	case token.FROM:
+		// FROM ... SELECT syntax (ClickHouse extension)
+		return p.parseFromSelectSyntax()
+	case token.LPAREN:
+		// Parenthesized SELECT at statement level: (SELECT 1)
+		return p.parseParenthesizedSelect()
 	case token.INSERT:
 		return p.parseInsert()
 	case token.CREATE:
@@ -139,6 +145,9 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseRename()
 	case token.EXCHANGE:
 		return p.parseExchange()
+	case token.EXISTS:
+		// EXISTS table_name syntax (check if table exists)
+		return p.parseExistsStatement()
 	default:
 		p.errors = append(p.errors, fmt.Errorf("unexpected token %s at line %d, column %d",
 			p.current.Token, p.current.Pos.Line, p.current.Pos.Column))
@@ -230,9 +239,12 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		return nil
 	}
 
-	// Handle DISTINCT
+	// Handle DISTINCT or ALL
 	if p.currentIs(token.DISTINCT) {
 		sel.Distinct = true
+		p.nextToken()
+	} else if p.currentIs(token.ALL) {
+		// ALL is the default, just skip it
 		p.nextToken()
 	}
 
@@ -372,6 +384,11 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 					break
 				}
 			}
+			// After LIMIT BY, there can be another LIMIT for overall output
+			if p.currentIs(token.LIMIT) {
+				p.nextToken()
+				sel.Limit = p.parseExpression(LOWEST)
+			}
 		}
 
 		// WITH TIES modifier
@@ -424,6 +441,17 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		p.nextToken()
 		p.nextToken()
 		sel.WithTotals = true
+		// HAVING can follow WITH TOTALS
+		if p.currentIs(token.HAVING) {
+			p.nextToken()
+			sel.Having = p.parseExpression(LOWEST)
+		}
+	}
+
+	// Parse QUALIFY clause (window function filtering)
+	if p.currentIs(token.QUALIFY) {
+		p.nextToken()
+		sel.Qualify = p.parseExpression(LOWEST)
 	}
 
 	// Parse SETTINGS clause
@@ -462,6 +490,11 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			}
 			p.nextToken()
 		}
+		// Skip any inline data after FORMAT (e.g., FORMAT JSONEachRow {"x": 1}, {"y": 2})
+		// This can happen in INSERT ... SELECT ... FORMAT ... statements
+		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.SETTINGS) {
+			p.nextToken()
+		}
 	}
 
 	// Parse SETTINGS clause (can come after FORMAT)
@@ -485,14 +518,18 @@ func (p *Parser) parseWithClause() []ast.Expression {
 		// or "expr AS name" syntax (ClickHouse scalar)
 		if p.currentIs(token.IDENT) && p.peekIs(token.AS) {
 			// This could be "name AS (subquery)" or "ident AS alias" for scalar
+			// Need to look ahead to determine: if IDENT AS LPAREN (SELECT...) -> CTE
+			// If IDENT AS IDENT -> scalar WITH (first ident is expression, second is alias)
 			name := p.current.Value
+			pos := p.current.Pos
 			p.nextToken() // skip identifier
 			p.nextToken() // skip AS
 
 			if p.currentIs(token.LPAREN) {
-				// Standard CTE: name AS (subquery)
+				// Could be CTE: name AS (subquery) OR could be name AS (expr)
 				p.nextToken()
 				if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
+					// Standard CTE: name AS (SELECT...)
 					subquery := p.parseSelectWithUnion()
 					if !p.expect(token.RPAREN) {
 						return nil
@@ -500,17 +537,25 @@ func (p *Parser) parseWithClause() []ast.Expression {
 					elem.Name = name
 					elem.Query = &ast.Subquery{Query: subquery}
 				} else {
-					// It's an expression in parentheses, parse it and use name as alias
+					// It's an expression in parentheses, use name as alias
+					// e.g., WITH x AS (1 + 2)
 					expr := p.parseExpression(LOWEST)
 					p.expect(token.RPAREN)
 					elem.Name = name
 					elem.Query = expr
 				}
+			} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				// Scalar: IDENT AS IDENT (e.g., WITH number AS k)
+				// The first identifier is a column reference, second is the alias
+				alias := p.current.Value
+				p.nextToken()
+				elem.Name = alias
+				elem.Query = &ast.Identifier{Position: pos, Parts: []string{name}}
 			} else {
 				// Scalar expression where the first identifier is used directly
 				// This is likely "name AS name" which means the CTE name is name with scalar value name
 				elem.Name = name
-				elem.Query = &ast.Identifier{Position: elem.Position, Parts: []string{name}}
+				elem.Query = &ast.Identifier{Position: pos, Parts: []string{name}}
 			}
 		} else if p.currentIs(token.LPAREN) {
 			// Subquery: (SELECT ...) AS name
@@ -525,7 +570,8 @@ func (p *Parser) parseWithClause() []ast.Expression {
 				return nil
 			}
 
-			if p.currentIs(token.IDENT) {
+			// Alias can be IDENT or certain keywords (VALUES, KEY, etc.)
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 				elem.Name = p.current.Value
 				p.nextToken()
 			}
@@ -534,15 +580,16 @@ func (p *Parser) parseWithClause() []ast.Expression {
 			// Examples: WITH 1 AS x, WITH 'hello' AS s, WITH func() AS f
 			// Also handles lambda: WITH x -> toString(x) AS lambda_1
 			// Arrow has OR_PREC precedence, so it gets parsed with ALIAS_PREC
+			// Note: AS name is optional in ClickHouse, e.g., WITH 1 SELECT 1 is valid
 			elem.Query = p.parseExpression(ALIAS_PREC) // Use ALIAS_PREC to stop before AS
 
-			if !p.expect(token.AS) {
-				return nil
-			}
-
-			if p.currentIs(token.IDENT) {
-				elem.Name = p.current.Value
+			// AS name is optional
+			if p.currentIs(token.AS) {
 				p.nextToken()
+				if p.currentIs(token.IDENT) {
+					elem.Name = p.current.Value
+					p.nextToken()
+				}
 			}
 		}
 
@@ -713,7 +760,8 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 	// Handle subquery
 	if p.currentIs(token.LPAREN) {
 		p.nextToken()
-		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
+		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) || p.currentIs(token.LPAREN) {
+			// SELECT, WITH, or nested (SELECT...) for UNION queries like ((SELECT 1) UNION ALL SELECT 2)
 			subquery := p.parseSelectWithUnion()
 			expr.Table = &ast.Subquery{Query: subquery}
 		} else if p.currentIs(token.EXPLAIN) {
@@ -888,7 +936,8 @@ func (p *Parser) parseSettingsList() []*ast.SettingExpr {
 	var settings []*ast.SettingExpr
 
 	for {
-		if !p.currentIs(token.IDENT) {
+		// Setting names can be identifiers or keywords (like 'limit')
+		if !p.currentIs(token.IDENT) && !p.current.Token.IsKeyword() {
 			break
 		}
 
@@ -901,7 +950,8 @@ func (p *Parser) parseSettingsList() []*ast.SettingExpr {
 		// Settings can have optional value (bool settings can be just name)
 		if p.currentIs(token.EQ) {
 			p.nextToken()
-			setting.Value = p.parseExpression(LOWEST)
+			// Use ALIAS_PREC to stop before AS (for AS SELECT in CREATE TABLE AS SELECT)
+			setting.Value = p.parseExpression(ALIAS_PREC)
 		} else {
 			// Boolean setting without value - defaults to true
 			setting.Value = &ast.Literal{
@@ -996,7 +1046,7 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 		p.parseSettingsList()
 	}
 
-	// Parse FROM INFILE clause (for INSERT ... FROM INFILE '...')
+	// Parse FROM INFILE clause (for INSERT ... FROM INFILE '...' COMPRESSION 'gz')
 	if p.currentIs(token.FROM) {
 		p.nextToken()
 		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "INFILE" {
@@ -1004,6 +1054,13 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 			// Skip the file path
 			if p.currentIs(token.STRING) {
 				p.nextToken()
+			}
+			// Handle COMPRESSION clause
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "COMPRESSION" {
+				p.nextToken()
+				if p.currentIs(token.STRING) {
+					p.nextToken()
+				}
 			}
 		}
 	}
@@ -1038,6 +1095,11 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 				Position: p.current.Pos,
 				Parts:    []string{p.current.Value},
 			}
+			p.nextToken()
+		}
+		// Skip any inline data after FORMAT (e.g., FORMAT JSONEachRow {"x": 1}, {"y": 2})
+		// The data is raw and should not be parsed as SQL
+		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
 			p.nextToken()
 		}
 	}
@@ -1096,12 +1158,20 @@ func (p *Parser) parseCreate() *ast.CreateQuery {
 		p.nextToken()
 		p.parseCreateUser(create)
 	case token.IDENT:
-		// Handle CREATE DICTIONARY, CREATE RESOURCE, CREATE WORKLOAD, etc.
+		// Handle CREATE DICTIONARY, CREATE RESOURCE, CREATE WORKLOAD, CREATE NAMED COLLECTION, etc.
 		identUpper := strings.ToUpper(p.current.Value)
 		switch identUpper {
 		case "DICTIONARY":
 			create.CreateDictionary = true
 			p.nextToken()
+			p.parseCreateGeneric(create)
+		case "NAMED":
+			// CREATE NAMED COLLECTION name AS key=value, ...
+			p.nextToken() // skip NAMED
+			// Skip "COLLECTION" if present
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "COLLECTION" {
+				p.nextToken()
+			}
 			p.parseCreateGeneric(create)
 		case "RESOURCE", "WORKLOAD", "POLICY", "ROLE", "QUOTA", "PROFILE":
 			// Skip these statements - just consume tokens until semicolon
@@ -1179,12 +1249,23 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 						p.nextToken()
 					}
 				}
-			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CONSTRAINT" {
-				// Skip CONSTRAINT definitions
-				p.nextToken()
-				p.parseIdentifierName() // constraint name
-				for !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-					p.nextToken()
+			} else if p.currentIs(token.CONSTRAINT) {
+				// Parse CONSTRAINT name CHECK (expression)
+				p.nextToken() // skip CONSTRAINT
+				constraintName := p.parseIdentifierName() // constraint name
+				if p.currentIs(token.CHECK) {
+					p.nextToken() // skip CHECK
+					constraint := &ast.Constraint{
+						Position:   p.current.Pos,
+						Name:       constraintName,
+						Expression: p.parseExpression(LOWEST),
+					}
+					create.Constraints = append(create.Constraints, constraint)
+				} else {
+					// Skip other constraint types we don't know about
+					for !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+						p.nextToken()
+					}
 				}
 			} else {
 				col := p.parseColumnDeclaration()
@@ -1278,6 +1359,41 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 			create.TTL = &ast.TTLClause{
 				Position:   p.current.Pos,
 				Expression: p.parseExpression(ALIAS_PREC), // Use ALIAS_PREC for AS SELECT
+			}
+			// Handle TTL GROUP BY x SET y = max(y) syntax
+			if p.currentIs(token.GROUP) {
+				p.nextToken()
+				if p.currentIs(token.BY) {
+					p.nextToken()
+					// Parse GROUP BY expressions (can have multiple, comma separated)
+					for {
+						p.parseExpression(ALIAS_PREC)
+						if p.currentIs(token.COMMA) {
+							p.nextToken()
+						} else {
+							break
+						}
+					}
+				}
+			}
+			// Handle SET clause in TTL (aggregation expressions for TTL GROUP BY)
+			if p.currentIs(token.SET) {
+				p.nextToken()
+				// Parse SET expressions until we hit a keyword or end
+				for !p.currentIs(token.SETTINGS) && !p.currentIs(token.AS) && !p.currentIs(token.WHERE) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.EOF) {
+					p.parseExpression(ALIAS_PREC)
+					if p.currentIs(token.COMMA) {
+						p.nextToken()
+					} else {
+						break
+					}
+				}
+			}
+			// Handle WHERE clause in TTL (conditional deletion)
+			if p.currentIs(token.WHERE) {
+				p.nextToken()
+				// Parse WHERE condition
+				p.parseExpression(ALIAS_PREC)
 			}
 		case p.currentIs(token.SETTINGS):
 			p.nextToken()
@@ -1560,6 +1676,30 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 		col.Type = p.parseDataType()
 	}
 
+	// Handle COLLATE clause (MySQL compatibility, e.g., varchar(255) COLLATE binary)
+	if p.currentIs(token.COLLATE) {
+		p.nextToken()
+		// Skip collation name
+		if p.currentIs(token.IDENT) || p.currentIs(token.STRING) {
+			p.nextToken()
+		}
+	}
+
+	// Handle NOT NULL / NULL constraint
+	if p.currentIs(token.NOT) {
+		p.nextToken()
+		if p.currentIs(token.NULL) {
+			notNull := false
+			col.Nullable = &notNull
+			p.nextToken()
+		}
+	} else if p.currentIs(token.NULL) {
+		// NULL is explicit nullable (default)
+		nullable := true
+		col.Nullable = &nullable
+		p.nextToken()
+	}
+
 	// Parse DEFAULT/MATERIALIZED/ALIAS/EPHEMERAL
 	switch p.current.Token {
 	case token.DEFAULT:
@@ -1640,7 +1780,8 @@ func (p *Parser) parseDataType() *ast.DataType {
 		upperName := strings.ToUpper(dt.Name)
 		usesNamedParams := upperName == "NESTED" || upperName == "TUPLE" || upperName == "JSON"
 
-		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+		// Parse type parameters, but stop on keywords that can't be part of type params
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) && !p.currentIs(token.COLLATE) {
 			// Check if this is a named parameter: identifier followed by a type name
 			// e.g., "a UInt32" where "a" is the name and "UInt32" is the type
 			isNamedParam := false
@@ -1824,12 +1965,19 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		p.nextToken()
 	case token.INDEX:
 		p.nextToken()
+	case token.SETTINGS:
+		// DROP SETTINGS PROFILE
+		p.nextToken() // skip SETTINGS
+		// Skip "PROFILE" if present
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROFILE" {
+			p.nextToken()
+		}
 	default:
-		// Handle multi-word DROP types: ROW POLICY, NAMED COLLECTION, SETTINGS PROFILE
+		// Handle multi-word DROP types: ROW POLICY, NAMED COLLECTION
 		if p.currentIs(token.IDENT) {
 			upper := strings.ToUpper(p.current.Value)
 			switch upper {
-			case "ROW", "NAMED", "POLICY", "SETTINGS", "QUOTA", "ROLE":
+			case "ROW", "NAMED", "POLICY", "QUOTA", "ROLE":
 				// Skip the DROP type tokens
 				for p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 					if p.currentIs(token.IF) {
@@ -1868,6 +2016,15 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 
 		if dropUser {
 			drop.User = tableName
+			// Handle user@host syntax
+			if p.currentIs(token.IDENT) && p.current.Value == "@" {
+				p.nextToken() // skip @
+				// Hostname can be identifier, string, or IP in quotes
+				if p.currentIs(token.IDENT) || p.currentIs(token.STRING) || p.current.Token.IsKeyword() {
+					drop.User = drop.User + "@" + p.current.Value
+					p.nextToken()
+				}
+			}
 		} else if drop.DropDatabase {
 			drop.Database = tableName
 		} else {
@@ -1884,7 +2041,7 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		}
 	}
 
-	// Handle multiple tables (DROP TABLE IF EXISTS t1, t2, t3)
+	// Handle multiple tables/users (DROP TABLE IF EXISTS t1, t2, t3 or DROP USER u1, u2@host)
 	for p.currentIs(token.COMMA) {
 		p.nextToken()
 		pos := p.current.Pos
@@ -1897,12 +2054,66 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		} else {
 			tableName = name
 		}
+		// Handle user@host syntax for additional users
+		if dropUser && p.currentIs(token.IDENT) && p.current.Value == "@" {
+			p.nextToken() // skip @
+			if p.currentIs(token.IDENT) || p.currentIs(token.STRING) || p.current.Token.IsKeyword() {
+				tableName = tableName + "@" + p.current.Value
+				p.nextToken()
+			}
+		}
 		if tableName != "" {
 			drop.Tables = append(drop.Tables, &ast.TableIdentifier{
 				Position: pos,
 				Database: database,
 				Table:    tableName,
 			})
+		}
+	}
+
+	// Handle PARALLEL WITH (drop multiple tables in parallel)
+	// Syntax: DROP TABLE IF EXISTS t1 PARALLEL WITH DROP TABLE IF EXISTS t2
+	for p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PARALLEL" {
+		p.nextToken() // skip PARALLEL
+		if p.currentIs(token.WITH) {
+			p.nextToken() // skip WITH
+			// Parse the next DROP statement
+			if p.currentIs(token.DROP) {
+				p.nextToken() // skip DROP
+				// Handle TEMPORARY
+				if p.currentIs(token.TEMPORARY) {
+					p.nextToken()
+				}
+				// Skip TABLE/DATABASE/etc
+				if p.currentIs(token.TABLE) || p.currentIs(token.DATABASE) || p.currentIs(token.VIEW) {
+					p.nextToken()
+				}
+				// Handle IF EXISTS
+				if p.currentIs(token.IF) {
+					p.nextToken()
+					if p.currentIs(token.EXISTS) {
+						p.nextToken()
+					}
+				}
+				// Parse table name
+				pos := p.current.Pos
+				name := p.parseIdentifierName()
+				var database, tableName string
+				if p.currentIs(token.DOT) {
+					p.nextToken()
+					database = name
+					tableName = p.parseIdentifierName()
+				} else {
+					tableName = name
+				}
+				if tableName != "" {
+					drop.Tables = append(drop.Tables, &ast.TableIdentifier{
+						Position: pos,
+						Database: database,
+						Table:    tableName,
+					})
+				}
+			}
 		}
 	}
 
@@ -1917,11 +2128,16 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 			}
 		} else {
 			// ON table_name (for DROP ROW POLICY, etc.)
-			// Skip the table reference
+			// Skip the table reference - can be db.table or db.* (wildcard)
 			p.parseIdentifierName()
 			if p.currentIs(token.DOT) {
 				p.nextToken()
-				p.parseIdentifierName()
+				// Handle wildcard (*) or table name
+				if p.currentIs(token.ASTERISK) {
+					p.nextToken()
+				} else {
+					p.parseIdentifierName()
+				}
 			}
 		}
 	}
@@ -1935,6 +2151,15 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 				drop.OnCluster = p.current.Value
 				p.nextToken()
 			}
+		}
+	}
+
+	// Handle FORMAT clause (for things like DROP TABLE ... FORMAT Null)
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		// Skip format name (Null, etc.)
+		if p.currentIs(token.NULL) || p.currentIs(token.IDENT) {
+			p.nextToken()
 		}
 	}
 
@@ -1987,13 +2212,23 @@ func (p *Parser) parseAlter() *ast.AlterQuery {
 		}
 	}
 
-	// Parse commands
+	// Parse commands (can be parenthesized for multiple mutations)
 	for {
-		cmd := p.parseAlterCommand()
-		if cmd == nil {
-			break
+		// Handle parenthesized command syntax: ALTER TABLE t (DELETE WHERE ...), (UPDATE ...)
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			cmd := p.parseAlterCommand()
+			if cmd != nil {
+				alter.Commands = append(alter.Commands, cmd)
+			}
+			p.expect(token.RPAREN)
+		} else {
+			cmd := p.parseAlterCommand()
+			if cmd == nil {
+				break
+			}
+			alter.Commands = append(alter.Commands, cmd)
 		}
-		alter.Commands = append(alter.Commands, cmd)
 
 		if !p.currentIs(token.COMMA) {
 			break
@@ -2162,7 +2397,8 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				Position:   p.current.Pos,
 				Expression: p.parseExpression(LOWEST),
 			}
-		} else if p.currentIs(token.SETTINGS) {
+		} else if p.currentIs(token.SETTINGS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "SETTING") {
+			// Both SETTINGS and SETTING (singular) are accepted
 			cmd.Type = ast.AlterModifySetting
 			p.nextToken()
 			cmd.Settings = p.parseSettingsList()
@@ -2220,6 +2456,42 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					p.nextToken()
 				}
 			}
+		}
+	case token.DELETE:
+		// DELETE WHERE condition - mutation to delete rows
+		cmd.Type = ast.AlterDeleteWhere
+		p.nextToken() // skip DELETE
+		if p.currentIs(token.WHERE) {
+			p.nextToken() // skip WHERE
+			cmd.Where = p.parseExpression(LOWEST)
+		}
+	case token.UPDATE:
+		// UPDATE col = expr, ... WHERE condition - mutation to update rows
+		cmd.Type = ast.AlterUpdate
+		p.nextToken() // skip UPDATE
+		// Parse assignments
+		for {
+			if !p.currentIs(token.IDENT) {
+				break
+			}
+			assign := &ast.Assignment{
+				Position: p.current.Pos,
+				Column:   p.current.Value,
+			}
+			p.nextToken() // skip column name
+			if p.currentIs(token.EQ) {
+				p.nextToken() // skip =
+				assign.Value = p.parseExpression(LOWEST)
+			}
+			cmd.Assignments = append(cmd.Assignments, assign)
+			if !p.currentIs(token.COMMA) {
+				break
+			}
+			p.nextToken() // skip comma
+		}
+		if p.currentIs(token.WHERE) {
+			p.nextToken() // skip WHERE
+			cmd.Where = p.parseExpression(LOWEST)
 		}
 	default:
 		return nil
@@ -2360,8 +2632,14 @@ func (p *Parser) parseShow() *ast.ShowQuery {
 			p.nextToken()
 		} else {
 			show.ShowType = ast.ShowCreate
+			// Handle SHOW CREATE TABLE, SHOW CREATE QUOTA, etc.
 			if p.currentIs(token.TABLE) {
 				p.nextToken()
+			} else if p.currentIs(token.DEFAULT) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "QUOTA") {
+				// SHOW CREATE QUOTA default - skip QUOTA keyword
+				if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "QUOTA" {
+					p.nextToken()
+				}
 			}
 		}
 	case token.SETTINGS:
@@ -2405,8 +2683,18 @@ func (p *Parser) parseShow() *ast.ShowQuery {
 		}
 	}
 
-	// Parse LIKE or ILIKE clause
-	if p.currentIs(token.LIKE) || p.currentIs(token.ILIKE) {
+	// Parse NOT LIKE, LIKE or ILIKE clause
+	if p.currentIs(token.NOT) {
+		p.nextToken()
+		if p.currentIs(token.LIKE) || p.currentIs(token.ILIKE) {
+			p.nextToken()
+			if p.currentIs(token.STRING) {
+				// NOT LIKE - store the pattern with a prefix to indicate negation
+				show.Like = "!" + p.current.Value // Using ! prefix to indicate NOT LIKE
+				p.nextToken()
+			}
+		}
+	} else if p.currentIs(token.LIKE) || p.currentIs(token.ILIKE) {
 		p.nextToken()
 		if p.currentIs(token.STRING) {
 			show.Like = p.current.Value
@@ -2467,20 +2755,17 @@ func (p *Parser) parseExplain() *ast.ExplainQuery {
 		}
 	}
 
-	// Parse EXPLAIN options (e.g., header = 1, input_headers = 1)
+	// Parse EXPLAIN options (e.g., header = 1, optimize = 0)
 	// These come before the actual statement
-	for p.currentIs(token.IDENT) && !p.currentIs(token.SELECT) && !p.currentIs(token.WITH) {
-		// Check if it looks like an option (ident = value)
-		if p.peekIs(token.EQ) {
-			p.nextToken() // skip option name
-			p.nextToken() // skip =
-			p.parseExpression(LOWEST) // skip value
-			// Skip comma if present
-			if p.currentIs(token.COMMA) {
-				p.nextToken()
-			}
-		} else {
-			break
+	// Options can be identifiers or keywords like OPTIMIZE followed by =
+	for p.peekIs(token.EQ) && !p.currentIs(token.SELECT) && !p.currentIs(token.WITH) {
+		// This is an option (name = value)
+		p.nextToken() // skip option name
+		p.nextToken() // skip =
+		p.parseExpression(LOWEST) // skip value
+		// Skip comma if present
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
 		}
 	}
 
@@ -2593,8 +2878,15 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 // isSystemCommandKeyword returns true if current token is a keyword that can be part of SYSTEM command
 func (p *Parser) isSystemCommandKeyword() bool {
 	switch p.current.Token {
-	case token.TTL, token.SYNC, token.DROP:
+	case token.TTL, token.SYNC, token.DROP, token.FORMAT, token.FOR:
 		return true
+	}
+	// Handle SCHEMA, CACHE as identifiers since they're not keyword tokens
+	if p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		if upper == "SCHEMA" || upper == "CACHE" {
+			return true
+		}
 	}
 	return false
 }
@@ -2822,4 +3114,158 @@ func (p *Parser) parseIdentifierName() string {
 	}
 
 	return ""
+}
+
+// parseFromSelectSyntax handles ClickHouse's FROM ... SELECT syntax
+// e.g., FROM numbers(1) SELECT number
+func (p *Parser) parseFromSelectSyntax() *ast.SelectWithUnionQuery {
+	query := &ast.SelectWithUnionQuery{
+		Position: p.current.Pos,
+	}
+
+	sel := &ast.SelectQuery{
+		Position: p.current.Pos,
+	}
+
+	// Skip FROM
+	p.nextToken()
+
+	// Parse table expression
+	sel.From = p.parseTablesInSelect()
+
+	// Parse SELECT
+	if !p.expect(token.SELECT) {
+		return nil
+	}
+
+	// Handle DISTINCT
+	if p.currentIs(token.DISTINCT) {
+		sel.Distinct = true
+		p.nextToken()
+	}
+
+	// Parse column list
+	sel.Columns = p.parseExpressionList()
+
+	// Continue parsing the rest of SELECT (WHERE, GROUP BY, etc.)
+	p.parseSelectRemainder(sel)
+
+	query.Selects = append(query.Selects, sel)
+	return query
+}
+
+// parseSelectRemainder parses the remainder of a SELECT after columns
+func (p *Parser) parseSelectRemainder(sel *ast.SelectQuery) {
+	// Parse WHERE clause
+	if p.currentIs(token.WHERE) {
+		p.nextToken()
+		sel.Where = p.parseExpression(LOWEST)
+	}
+
+	// Parse GROUP BY clause
+	if p.currentIs(token.GROUP) {
+		p.nextToken()
+		if p.expect(token.BY) {
+			sel.GroupBy = p.parseExpressionList()
+		}
+	}
+
+	// Parse HAVING clause
+	if p.currentIs(token.HAVING) {
+		p.nextToken()
+		sel.Having = p.parseExpression(LOWEST)
+	}
+
+	// Parse ORDER BY clause
+	if p.currentIs(token.ORDER) {
+		p.nextToken()
+		if p.expect(token.BY) {
+			sel.OrderBy = p.parseOrderByList()
+		}
+	}
+
+	// Parse LIMIT clause
+	if p.currentIs(token.LIMIT) {
+		p.nextToken()
+		sel.Limit = p.parseExpression(LOWEST)
+	}
+
+	// Parse SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		sel.Settings = p.parseSettingsList()
+	}
+}
+
+// parseParenthesizedSelect handles (SELECT ...) at statement level
+func (p *Parser) parseParenthesizedSelect() *ast.SelectWithUnionQuery {
+	pos := p.current.Pos
+	p.nextToken() // skip (
+
+	// Check if this is actually a SELECT statement
+	if !p.currentIs(token.SELECT) && !p.currentIs(token.WITH) {
+		// Not a SELECT, just skip until we find closing paren
+		depth := 1
+		for depth > 0 && !p.currentIs(token.EOF) {
+			if p.currentIs(token.LPAREN) {
+				depth++
+			} else if p.currentIs(token.RPAREN) {
+				depth--
+			}
+			if depth > 0 {
+				p.nextToken()
+			}
+		}
+		if p.currentIs(token.RPAREN) {
+			p.nextToken()
+		}
+		return &ast.SelectWithUnionQuery{Position: pos}
+	}
+
+	// Parse the inner query
+	inner := p.parseSelectWithUnion()
+
+	p.expect(token.RPAREN)
+
+	// Wrap the result
+	query := &ast.SelectWithUnionQuery{
+		Position: pos,
+	}
+	if inner != nil {
+		for _, s := range inner.Selects {
+			query.Selects = append(query.Selects, s)
+		}
+		query.UnionModes = inner.UnionModes
+		query.UnionAll = inner.UnionAll
+	}
+
+	return query
+}
+
+// parseExistsStatement handles EXISTS table_name syntax
+func (p *Parser) parseExistsStatement() *ast.ExistsQuery {
+	exists := &ast.ExistsQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip EXISTS
+
+	// Skip optional TABLE keyword
+	if p.currentIs(token.TABLE) {
+		p.nextToken()
+	}
+
+	// Parse table name (database.table or just table)
+	tableName := p.parseIdentifierName()
+	if tableName != "" {
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			exists.Database = tableName
+			exists.Table = p.parseIdentifierName()
+		} else {
+			exists.Table = tableName
+		}
+	}
+
+	return exists
 }

@@ -72,7 +72,8 @@ func (l *Lexer) peekChar() rune {
 }
 
 func (l *Lexer) skipWhitespace() {
-	for unicode.IsSpace(l.ch) {
+	// Skip whitespace and BOM (byte order mark U+FEFF)
+	for unicode.IsSpace(l.ch) || l.ch == '\uFEFF' {
 		l.readChar()
 	}
 }
@@ -208,6 +209,13 @@ func (l *Lexer) NextToken() Item {
 	case '^':
 		l.readChar()
 		return Item{Token: token.CARET, Value: "^", Pos: pos}
+	case '$':
+		// Dollar-quoted strings: $$...$$
+		if l.peekChar() == '$' {
+			return l.readDollarQuotedString()
+		}
+		// Otherwise $ starts an identifier (e.g., $alias$name$)
+		return l.readDollarIdentifier()
 	case '\'':
 		return l.readString('\'')
 	case '\u2018', '\u2019': // Unicode curly single quotes ' '
@@ -438,13 +446,57 @@ func (l *Lexer) readBacktickIdentifier() Item {
 	var sb strings.Builder
 	l.readChar() // skip opening backtick
 
-	for !l.eof && l.ch != '`' {
+	for !l.eof {
+		if l.ch == '`' {
+			// Check for escaped backtick (`` becomes `)
+			if l.peekChar() == '`' {
+				sb.WriteRune('`') // Write one backtick (the escaped result)
+				l.readChar()      // skip first backtick
+				l.readChar()      // skip second backtick
+				continue
+			}
+			l.readChar() // skip closing backtick
+			break
+		}
 		sb.WriteRune(l.ch)
 		l.readChar()
 	}
-	if l.ch == '`' {
-		l.readChar() // skip closing backtick
+	return Item{Token: token.IDENT, Value: sb.String(), Pos: pos}
+}
+
+// readDollarQuotedString reads a dollar-quoted string $$...$$
+func (l *Lexer) readDollarQuotedString() Item {
+	pos := l.pos
+	var sb strings.Builder
+	l.readChar() // skip first $
+	l.readChar() // skip second $
+
+	for !l.eof {
+		if l.ch == '$' && l.peekChar() == '$' {
+			l.readChar() // skip first $
+			l.readChar() // skip second $
+			break
+		}
+		sb.WriteRune(l.ch)
+		l.readChar()
 	}
+	return Item{Token: token.STRING, Value: sb.String(), Pos: pos}
+}
+
+// readDollarIdentifier reads an identifier that starts with $ (e.g., $alias$name$)
+func (l *Lexer) readDollarIdentifier() Item {
+	pos := l.pos
+	var sb strings.Builder
+	// Include the initial $
+	sb.WriteRune(l.ch)
+	l.readChar()
+
+	// Continue reading valid identifier characters (including $)
+	for isIdentChar(l.ch) || l.ch == '$' {
+		sb.WriteRune(l.ch)
+		l.readChar()
+	}
+
 	return Item{Token: token.IDENT, Value: sb.String(), Pos: pos}
 }
 
@@ -463,12 +515,34 @@ func (l *Lexer) readNumber() Item {
 		sb.WriteRune(l.ch)
 		l.readChar()
 		if l.ch == 'x' || l.ch == 'X' {
-			// Hex literal
+			// Hex literal (may include P notation for floats: 0x1p4, 0x1.2p-3)
 			sb.WriteRune(l.ch)
 			l.readChar()
 			for isHexDigit(l.ch) {
 				sb.WriteRune(l.ch)
 				l.readChar()
+			}
+			// Check for hex float decimal point
+			if l.ch == '.' {
+				sb.WriteRune(l.ch)
+				l.readChar()
+				for isHexDigit(l.ch) {
+					sb.WriteRune(l.ch)
+					l.readChar()
+				}
+			}
+			// Check for P exponent (hex float notation)
+			if l.ch == 'p' || l.ch == 'P' {
+				sb.WriteRune(l.ch)
+				l.readChar()
+				if l.ch == '+' || l.ch == '-' {
+					sb.WriteRune(l.ch)
+					l.readChar()
+				}
+				for unicode.IsDigit(l.ch) {
+					sb.WriteRune(l.ch)
+					l.readChar()
+				}
 			}
 			return Item{Token: token.NUMBER, Value: sb.String(), Pos: pos}
 		} else if l.ch == 'b' || l.ch == 'B' {
@@ -623,6 +697,28 @@ func (l *Lexer) readNumberOrIdent() Item {
 		for isHexDigit(l.ch) {
 			sb.WriteRune(l.ch)
 			l.readChar()
+		}
+		// Check for hex float decimal point
+		if l.ch == '.' {
+			sb.WriteRune(l.ch)
+			l.readChar()
+			for isHexDigit(l.ch) {
+				sb.WriteRune(l.ch)
+				l.readChar()
+			}
+		}
+		// Check for P exponent (hex float notation)
+		if l.ch == 'p' || l.ch == 'P' {
+			sb.WriteRune(l.ch)
+			l.readChar()
+			if l.ch == '+' || l.ch == '-' {
+				sb.WriteRune(l.ch)
+				l.readChar()
+			}
+			for unicode.IsDigit(l.ch) {
+				sb.WriteRune(l.ch)
+				l.readChar()
+			}
 		}
 	} else if val == "0" && (l.ch == 'b' || l.ch == 'B') && (l.peekChar() == '0' || l.peekChar() == '1') {
 		sb.WriteRune(l.ch)

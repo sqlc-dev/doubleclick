@@ -163,10 +163,18 @@ func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 
 // parseImplicitAlias handles implicit column aliases like "SELECT 'a' c0" (meaning 'a' AS c0)
 func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
-	// If next token is a plain identifier (not a keyword), treat as implicit alias
-	// Keywords like FROM, WHERE etc. are tokenized as their own token types, not IDENT
-	// INTERSECT is not a keyword but should not be treated as an alias
-	if p.currentIs(token.IDENT) {
+	// Check if current token can be an implicit alias
+	// Can be IDENT or certain keywords that are used as aliases (KEY, VALUE, TYPE, etc.)
+	canBeAlias := p.currentIs(token.IDENT)
+	if !canBeAlias {
+		// Some keywords can be used as implicit aliases in ClickHouse
+		switch p.current.Token {
+		case token.KEY, token.INDEX, token.VIEW, token.DATABASE, token.TABLE:
+			canBeAlias = true
+		}
+	}
+
+	if canBeAlias {
 		upper := strings.ToUpper(p.current.Value)
 		// Don't consume SQL set operation keywords that aren't tokens
 		if upper == "INTERSECT" {
@@ -402,7 +410,16 @@ func (p *Parser) parseIdentifierOrFunction() ast.Expression {
 	parts := []string{name}
 	for p.currentIs(token.DOT) {
 		p.nextToken()
-		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		if p.currentIs(token.CARET) {
+			// JSON path notation: x.^c0 (traverse into JSON field)
+			p.nextToken() // skip ^
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				parts = append(parts, "^"+p.current.Value)
+				p.nextToken()
+			} else {
+				break
+			}
+		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 			// Keywords can be used as column/field names (e.g., l_t.key, t.index)
 			parts = append(parts, p.current.Value)
 			p.nextToken()
@@ -475,6 +492,21 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 		}
 	}
 
+	// Handle FILTER clause for aggregate functions: func() FILTER(WHERE condition)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "FILTER" {
+		p.nextToken() // skip FILTER
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			if p.currentIs(token.WHERE) {
+				p.nextToken() // skip WHERE
+				// Parse the filter condition - just consume it for now
+				// The filter is essentially a where clause for the aggregate
+				p.parseExpression(LOWEST)
+			}
+			p.expect(token.RPAREN)
+		}
+	}
+
 	// Handle OVER clause for window functions
 	if p.currentIs(token.OVER) {
 		p.nextToken()
@@ -493,7 +525,7 @@ func (p *Parser) parseWindowSpec() *ast.WindowSpec {
 	}
 
 	if p.currentIs(token.IDENT) {
-		// Window name reference
+		// Window name reference (OVER w0)
 		spec.Name = p.current.Value
 		p.nextToken()
 		return spec
@@ -501,6 +533,19 @@ func (p *Parser) parseWindowSpec() *ast.WindowSpec {
 
 	if !p.expect(token.LPAREN) {
 		return spec
+	}
+
+	// Check for named window reference inside parentheses: OVER (w0)
+	// This happens when the identifier is not a known clause keyword
+	if p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		// If it's not a window clause keyword, it's a named window reference
+		if upper != "PARTITION" && upper != "ORDER" && upper != "ROWS" && upper != "RANGE" && upper != "GROUPS" {
+			spec.Name = p.current.Value
+			p.nextToken()
+			p.expect(token.RPAREN)
+			return spec
+		}
 	}
 
 	// Parse PARTITION BY
@@ -1406,6 +1451,20 @@ func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
 		return expr
 	}
 
+	// Handle JSON caret notation: x.^c0 (traverse into JSON field)
+	if p.currentIs(token.CARET) {
+		p.nextToken() // skip ^
+		if ident, ok := left.(*ast.Identifier); ok {
+			// Add ^fieldname as a single part with caret prefix
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				ident.Parts = append(ident.Parts, "^"+p.current.Value)
+				p.nextToken()
+				return ident
+			}
+		}
+		return left
+	}
+
 	// Regular identifier access (keywords can also be column/field names after DOT)
 	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		if ident, ok := left.(*ast.Identifier); ok {
@@ -1693,21 +1752,29 @@ func (p *Parser) parseKeywordAsIdentifier() ast.Expression {
 func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
 	p.nextToken() // skip EXCEPT
 
-	if !p.expect(token.LPAREN) {
-		return asterisk
+	// EXCEPT can have optional parentheses: * EXCEPT (col1, col2) or * EXCEPT col
+	hasParens := p.currentIs(token.LPAREN)
+	if hasParens {
+		p.nextToken() // skip (
 	}
 
-	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-		if p.currentIs(token.IDENT) {
+	// Parse column names (can be IDENT or keywords)
+	for {
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 			asterisk.Except = append(asterisk.Except, p.current.Value)
 			p.nextToken()
 		}
-		if p.currentIs(token.COMMA) {
+
+		if hasParens && p.currentIs(token.COMMA) {
 			p.nextToken()
+		} else {
+			break
 		}
 	}
 
-	p.expect(token.RPAREN)
+	if hasParens {
+		p.expect(token.RPAREN)
+	}
 
 	return asterisk
 }
