@@ -881,7 +881,8 @@ func (w *WhenClause) End() token.Position { return w.Position }
 type CastExpr struct {
 	Position       token.Position `json:"-"`
 	Expr           Expression     `json:"expr"`
-	Type           *DataType      `json:"type"`
+	Type           *DataType      `json:"type,omitempty"`
+	TypeExpr       Expression     `json:"type_expr,omitempty"` // For dynamic type like CAST(x, if(cond, 'Type1', 'Type2'))
 	Alias          string         `json:"alias,omitempty"`
 	OperatorSyntax bool           `json:"operator_syntax,omitempty"` // true if using :: syntax
 }

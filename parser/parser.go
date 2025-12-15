@@ -147,22 +147,42 @@ func (p *Parser) parseStatement() ast.Statement {
 	}
 }
 
-// parseSelectWithUnion parses SELECT ... UNION ... queries
+// parseSelectWithUnion parses SELECT ... UNION/INTERSECT/EXCEPT ... queries
 func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 	query := &ast.SelectWithUnionQuery{
 		Position: p.current.Pos,
 	}
 
-	// Parse first SELECT
-	sel := p.parseSelect()
-	if sel == nil {
-		return nil
+	// Handle parenthesized start: (SELECT 1) UNION (SELECT 2)
+	if p.currentIs(token.LPAREN) {
+		p.nextToken() // skip (
+		nested := p.parseSelectWithUnion()
+		p.expect(token.RPAREN)
+		for _, s := range nested.Selects {
+			query.Selects = append(query.Selects, s)
+		}
+	} else {
+		// Parse first SELECT
+		sel := p.parseSelect()
+		if sel == nil {
+			return nil
+		}
+		query.Selects = append(query.Selects, sel)
 	}
-	query.Selects = append(query.Selects, sel)
 
-	// Parse UNION clauses
-	for p.currentIs(token.UNION) {
-		p.nextToken() // skip UNION
+	// Parse UNION/INTERSECT/EXCEPT clauses
+	for p.currentIs(token.UNION) || p.currentIs(token.EXCEPT) ||
+		(p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "INTERSECT") {
+		var setOp string
+		if p.currentIs(token.UNION) {
+			setOp = "UNION"
+		} else if p.currentIs(token.EXCEPT) {
+			setOp = "EXCEPT"
+		} else {
+			setOp = "INTERSECT"
+		}
+		p.nextToken() // skip UNION/INTERSECT/EXCEPT
+
 		var mode string
 		if p.currentIs(token.ALL) {
 			query.UnionAll = true
@@ -172,7 +192,7 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 			mode = "DISTINCT"
 			p.nextToken()
 		}
-		query.UnionModes = append(query.UnionModes, mode)
+		query.UnionModes = append(query.UnionModes, setOp+" "+mode)
 
 		// Handle parenthesized subqueries: UNION ALL (SELECT ... UNION ALL SELECT ...)
 		if p.currentIs(token.LPAREN) {
@@ -512,7 +532,15 @@ func (p *Parser) parseWithClause() []ast.Expression {
 		} else {
 			// Scalar WITH: expr AS name (ClickHouse style)
 			// Examples: WITH 1 AS x, WITH 'hello' AS s, WITH func() AS f
-			elem.Query = p.parseExpression(ALIAS_PREC) // Use ALIAS_PREC to stop before AS
+			// Also handles lambda: WITH x -> toString(x) AS lambda_1
+
+			// Check for lambda syntax: ident -> expr
+			if p.currentIs(token.IDENT) && p.peekIs(token.ARROW) {
+				// Lambda expression: x -> expr, use LOWEST to parse the full lambda
+				elem.Query = p.parseExpression(LOWEST)
+			} else {
+				elem.Query = p.parseExpression(ALIAS_PREC) // Use ALIAS_PREC to stop before AS
+			}
 
 			if !p.expect(token.AS) {
 				return nil
@@ -694,6 +722,10 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 			subquery := p.parseSelectWithUnion()
 			expr.Table = &ast.Subquery{Query: subquery}
+		} else if p.currentIs(token.EXPLAIN) {
+			// EXPLAIN as subquery in FROM clause
+			explain := p.parseExplain()
+			expr.Table = &ast.Subquery{Query: explain}
 		} else {
 			// Table function or expression
 			expr.Table = p.parseExpression(LOWEST)
@@ -1391,10 +1423,10 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		p.nextToken()
 	}
 
-	// Parse AS SELECT
+	// Parse AS SELECT or AS (subquery) INTERSECT/UNION (subquery)
 	if p.currentIs(token.AS) {
 		p.nextToken()
-		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
+		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) || p.currentIs(token.LPAREN) {
 			create.AsSelect = p.parseSelectWithUnion()
 		}
 	}
@@ -1524,8 +1556,14 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 		return nil
 	}
 
-	// Parse data type
-	col.Type = p.parseDataType()
+	// Check if next token is DEFAULT/MATERIALIZED/ALIAS (type omitted)
+	// These keywords indicate the type is omitted and we go straight to default expression
+	if p.currentIs(token.DEFAULT) || p.currentIs(token.MATERIALIZED) || p.currentIs(token.ALIAS) {
+		// Type is omitted, skip to default parsing below
+	} else {
+		// Parse data type
+		col.Type = p.parseDataType()
+	}
 
 	// Parse DEFAULT/MATERIALIZED/ALIAS/EPHEMERAL
 	switch p.current.Token {

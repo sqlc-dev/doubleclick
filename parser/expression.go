@@ -852,19 +852,22 @@ func (p *Parser) parseCast() ast.Expression {
 	// Use ALIAS_PREC to avoid consuming AS as an alias operator
 	expr.Expr = p.parseExpression(ALIAS_PREC)
 
-	// Handle both CAST(x AS Type) and CAST(x, 'Type') syntax
+	// Handle both CAST(x AS Type) and CAST(x, 'Type') or CAST(x, expr) syntax
 	if p.currentIs(token.AS) {
 		p.nextToken()
 		expr.Type = p.parseDataType()
 	} else if p.currentIs(token.COMMA) {
 		p.nextToken()
-		// Type is given as a string literal
+		// Type can be given as a string literal or an expression (e.g., if(cond, 'Type1', 'Type2'))
 		if p.currentIs(token.STRING) {
 			expr.Type = &ast.DataType{
 				Position: p.current.Pos,
 				Name:     p.current.Value,
 			}
 			p.nextToken()
+		} else {
+			// Parse as expression for dynamic type casting
+			expr.TypeExpr = p.parseExpression(LOWEST)
 		}
 	}
 
@@ -881,49 +884,56 @@ func (p *Parser) parseExtract() ast.Expression {
 		return nil
 	}
 
-	// Check if it's EXTRACT(field FROM expr) or extract(str, pattern) form
-	if p.currentIs(token.IDENT) {
+	// Check if it's EXTRACT(field FROM expr) form
+	// The field must be a known date/time field identifier followed by FROM
+	if p.currentIs(token.IDENT) && !p.peekIs(token.LPAREN) {
 		field := strings.ToUpper(p.current.Value)
-		p.nextToken()
-
-		// Check for FROM keyword - if present, it's the EXTRACT(field FROM expr) form
-		if p.currentIs(token.FROM) {
-			p.nextToken()
-			from := p.parseExpression(LOWEST)
-			p.expect(token.RPAREN)
-			return &ast.ExtractExpr{
-				Position: pos,
-				Field:    field,
-				From:     from,
-			}
+		// Check if it's a known date/time field
+		dateTimeFields := map[string]bool{
+			"YEAR": true, "QUARTER": true, "MONTH": true, "WEEK": true,
+			"DAY": true, "DAYOFWEEK": true, "DAYOFYEAR": true,
+			"HOUR": true, "MINUTE": true, "SECOND": true,
+			"TIMEZONE_HOUR": true, "TIMEZONE_MINUTE": true,
 		}
-
-		// Not FROM, so backtrack and parse as regular function call
-		// This is the extract(str, pattern) regex form
-		// We need to re-parse as a function call
-		args := []ast.Expression{
-			&ast.Identifier{Position: pos, Parts: []string{strings.ToLower(field)}},
-		}
-		if p.currentIs(token.COMMA) {
+		if dateTimeFields[field] {
 			p.nextToken()
-			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-				args = append(args, p.parseExpression(LOWEST))
-				if p.currentIs(token.COMMA) {
-					p.nextToken()
-				} else {
-					break
+			// Check for FROM keyword - if present, it's the EXTRACT(field FROM expr) form
+			if p.currentIs(token.FROM) {
+				p.nextToken()
+				from := p.parseExpression(LOWEST)
+				p.expect(token.RPAREN)
+				return &ast.ExtractExpr{
+					Position: pos,
+					Field:    field,
+					From:     from,
 				}
 			}
-		}
-		p.expect(token.RPAREN)
-		return &ast.FunctionCall{
-			Position:  pos,
-			Name:      "extract",
-			Arguments: args,
+			// Not FROM, so create args starting with the field as identifier
+			args := []ast.Expression{
+				&ast.Identifier{Position: pos, Parts: []string{strings.ToLower(field)}},
+			}
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+				for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+					args = append(args, p.parseExpression(LOWEST))
+					if p.currentIs(token.COMMA) {
+						p.nextToken()
+					} else {
+						break
+					}
+				}
+			}
+			p.expect(token.RPAREN)
+			return &ast.FunctionCall{
+				Position:  pos,
+				Name:      "extract",
+				Arguments: args,
+			}
 		}
 	}
 
-	// If first token is a string, it's the regex form extract(str, pattern)
+	// Parse as regular function call - extract(str, pattern) regex form
+	// or extract(expr, pattern) where expr can be any expression
 	var args []ast.Expression
 	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
 		args = append(args, p.parseExpression(LOWEST))
