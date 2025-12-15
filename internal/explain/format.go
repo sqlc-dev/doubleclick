@@ -96,7 +96,7 @@ func formatArrayLiteral(val interface{}) string {
 		} else if ident, ok := e.(*ast.Identifier); ok {
 			parts = append(parts, ident.Name())
 		} else {
-			parts = append(parts, fmt.Sprintf("%v", e))
+			parts = append(parts, formatExprAsString(e))
 		}
 	}
 	return fmt.Sprintf("Array_[%s]", strings.Join(parts, ", "))
@@ -115,7 +115,7 @@ func formatTupleLiteral(val interface{}) string {
 		} else if ident, ok := e.(*ast.Identifier); ok {
 			parts = append(parts, ident.Name())
 		} else {
-			parts = append(parts, fmt.Sprintf("%v", e))
+			parts = append(parts, formatExprAsString(e))
 		}
 	}
 	return fmt.Sprintf("Tuple_(%s)", strings.Join(parts, ", "))
@@ -255,6 +255,43 @@ func formatExprAsString(expr ast.Expression) string {
 		}
 	case *ast.Identifier:
 		return e.Name()
+	case *ast.FunctionCall:
+		// Format function call as name(args)
+		var args []string
+		for _, arg := range e.Arguments {
+			args = append(args, formatExprAsString(arg))
+		}
+		return e.Name + "(" + strings.Join(args, ", ") + ")"
+	case *ast.BinaryExpr:
+		// Format binary expression as left op right
+		left := formatExprAsString(e.Left)
+		right := formatExprAsString(e.Right)
+		return left + " " + e.Op + " " + right
+	case *ast.UnaryExpr:
+		// Format unary expression (prefix operators)
+		operand := formatExprAsString(e.Operand)
+		return e.Op + operand
+	case *ast.InExpr:
+		// Format IN expression as expr IN (...)
+		exprStr := formatExprAsString(e.Expr)
+		var listStr string
+		if e.Query != nil {
+			listStr = "(SELECT ...)" // Simplified for nested queries
+		} else if len(e.List) > 0 {
+			var parts []string
+			for _, item := range e.List {
+				parts = append(parts, formatExprAsString(item))
+			}
+			listStr = "(" + strings.Join(parts, ", ") + ")"
+		}
+		keyword := "IN"
+		if e.Not {
+			keyword = "NOT IN"
+		}
+		if e.Global {
+			keyword = "GLOBAL " + keyword
+		}
+		return exprStr + " " + keyword + " " + listStr
 	default:
 		return fmt.Sprintf("%v", expr)
 	}
@@ -317,6 +354,22 @@ func formatElementAsString(expr ast.Expression) string {
 		}
 	case *ast.Identifier:
 		return e.Name()
+	case *ast.FunctionCall:
+		// Format function call as name(args)
+		var args []string
+		for _, arg := range e.Arguments {
+			args = append(args, formatElementAsString(arg))
+		}
+		return e.Name + "(" + strings.Join(args, ", ") + ")"
+	case *ast.BinaryExpr:
+		// Format binary expression as left op right
+		left := formatElementAsString(e.Left)
+		right := formatElementAsString(e.Right)
+		return left + " " + e.Op + " " + right
+	case *ast.UnaryExpr:
+		// Format unary expression (prefix operators)
+		operand := formatElementAsString(e.Operand)
+		return e.Op + operand
 	default:
 		return formatExprAsString(expr)
 	}

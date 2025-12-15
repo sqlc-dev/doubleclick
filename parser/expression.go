@@ -656,8 +656,19 @@ func (p *Parser) parseNumber() ast.Expression {
 	value := p.current.Value
 	p.nextToken()
 
-	// Check if it's a float
-	if strings.Contains(value, ".") || strings.ContainsAny(value, "eE") {
+	// Check if this is a hex, binary, or octal number
+	isHex := strings.HasPrefix(value, "0x") || strings.HasPrefix(value, "0X")
+	isBin := strings.HasPrefix(value, "0b") || strings.HasPrefix(value, "0B")
+	isOctal := strings.HasPrefix(value, "0o") || strings.HasPrefix(value, "0O")
+
+	// Check for hex float (e.g., 0x1.2p3)
+	isHexFloat := isHex && (strings.ContainsAny(value, "pP") || strings.Contains(value, "."))
+
+	// Check if it's a decimal float (but not a hex/binary/octal integer)
+	// Note: hex numbers can contain 'e' as a hex digit, so we need to exclude them
+	isDecimalFloat := !isHex && !isBin && !isOctal && (strings.Contains(value, ".") || strings.ContainsAny(value, "eE"))
+
+	if isDecimalFloat {
 		f, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			lit.Type = ast.LiteralString
@@ -666,12 +677,33 @@ func (p *Parser) parseNumber() ast.Expression {
 			lit.Type = ast.LiteralFloat
 			lit.Value = f
 		}
+	} else if isHexFloat {
+		// Parse hex float (Go doesn't support this directly, approximate)
+		// For now, store as string - ClickHouse will interpret it
+		lit.Type = ast.LiteralString
+		lit.Value = value
 	} else {
+		// Determine the base for parsing
+		// - 0x/0X: hex (base 16)
+		// - 0b/0B: binary (base 2)
+		// - 0o/0O: octal (base 8, explicit notation)
+		// - Otherwise: decimal (base 10) - ClickHouse does NOT use leading zero for octal
+		base := 10
+		if isHex {
+			base = 0 // Let strconv detect hex
+		} else if isBin {
+			base = 0 // Let strconv detect binary
+		} else if isOctal {
+			base = 0 // Let strconv detect octal with 0o prefix
+		}
+		// Note: We explicitly use base 10 for numbers like "077" because
+		// ClickHouse does NOT interpret leading zeros as octal
+
 		// Try signed int64 first
-		i, err := strconv.ParseInt(value, 10, 64)
+		i, err := strconv.ParseInt(value, base, 64)
 		if err != nil {
 			// Try unsigned uint64 for large positive numbers
-			u, uerr := strconv.ParseUint(value, 10, 64)
+			u, uerr := strconv.ParseUint(value, base, 64)
 			if uerr != nil {
 				lit.Type = ast.LiteralString
 				lit.Value = value
