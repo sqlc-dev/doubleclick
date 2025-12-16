@@ -93,6 +93,27 @@ func formatArrayLiteral(val interface{}) string {
 	for _, e := range exprs {
 		if lit, ok := e.(*ast.Literal); ok {
 			parts = append(parts, FormatLiteral(lit))
+		} else if unary, ok := e.(*ast.UnaryExpr); ok && unary.Op == "-" {
+			// Handle negation of numeric literals
+			if lit, ok := unary.Operand.(*ast.Literal); ok {
+				if lit.Type == ast.LiteralInteger {
+					switch val := lit.Value.(type) {
+					case int64:
+						parts = append(parts, fmt.Sprintf("Int64_%d", -val))
+					case uint64:
+						parts = append(parts, fmt.Sprintf("Int64_-%d", val))
+					default:
+						parts = append(parts, fmt.Sprintf("Int64_-%v", lit.Value))
+					}
+				} else if lit.Type == ast.LiteralFloat {
+					val := lit.Value.(float64)
+					parts = append(parts, fmt.Sprintf("Float64_%s", FormatFloat(-val)))
+				} else {
+					parts = append(parts, formatExprAsString(e))
+				}
+			} else {
+				parts = append(parts, formatExprAsString(e))
+			}
 		} else if ident, ok := e.(*ast.Identifier); ok {
 			parts = append(parts, ident.Name())
 		} else {
@@ -333,11 +354,12 @@ func formatElementAsString(expr ast.Expression) string {
 		case ast.LiteralFloat:
 			return fmt.Sprintf("%v", e.Value)
 		case ast.LiteralString:
-			// Quote strings with single quotes
+			// Quote strings with single quotes, triple-escape for nested context
+			// Expected output format is \\\' (three backslashes + quote)
 			s := e.Value.(string)
-			// Escape single quotes in the string
-			s = strings.ReplaceAll(s, "'", "\\'")
-			return "\\'" + s + "\\'"
+			// Triple-escape single quotes for nested string literal context
+			s = strings.ReplaceAll(s, "'", "\\\\\\'")
+			return "\\\\\\'" + s + "\\\\\\'"
 		case ast.LiteralBoolean:
 			if e.Value.(bool) {
 				return "true"

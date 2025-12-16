@@ -80,7 +80,11 @@ func explainLambda(sb *strings.Builder, n *ast.Lambda, indent string, depth int)
 
 func explainCastExpr(sb *strings.Builder, n *ast.CastExpr, indent string, depth int) {
 	// CAST is represented as Function CAST with expr and type as arguments
-	fmt.Fprintf(sb, "%sFunction CAST (children %d)\n", indent, 1)
+	if n.Alias != "" {
+		fmt.Fprintf(sb, "%sFunction CAST (alias %s) (children %d)\n", indent, n.Alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction CAST (children %d)\n", indent, 1)
+	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
 	// For :: operator syntax with simple literals, format as string literal
 	// For function syntax or complex expressions, use normal AST node
@@ -281,7 +285,7 @@ func explainCaseExpr(sb *strings.Builder, n *ast.CaseExpr, indent string, depth 
 	}
 }
 
-func explainIntervalExpr(sb *strings.Builder, n *ast.IntervalExpr, indent string, depth int) {
+func explainIntervalExpr(sb *strings.Builder, n *ast.IntervalExpr, alias string, indent string, depth int) {
 	// INTERVAL is represented as Function toInterval<Unit>
 	// Unit needs to be title-cased (e.g., YEAR -> Year)
 	unit := n.Unit
@@ -289,7 +293,11 @@ func explainIntervalExpr(sb *strings.Builder, n *ast.IntervalExpr, indent string
 		unit = strings.ToUpper(unit[:1]) + strings.ToLower(unit[1:])
 	}
 	fnName := "toInterval" + unit
-	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 	Node(sb, n.Value, depth+2)
 }

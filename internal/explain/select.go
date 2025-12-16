@@ -80,6 +80,17 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 	if n.Having != nil {
 		Node(sb, n.Having, depth+1)
 	}
+	// QUALIFY
+	if n.Qualify != nil {
+		Node(sb, n.Qualify, depth+1)
+	}
+	// WINDOW clause (named window definitions)
+	if len(n.Window) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Window))
+		for range n.Window {
+			fmt.Fprintf(sb, "%s  WindowListElement\n", indent)
+		}
+	}
 	// ORDER BY
 	if len(n.OrderBy) > 0 {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.OrderBy))
@@ -186,6 +197,12 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 		count++
 	}
 	if n.Having != nil {
+		count++
+	}
+	if n.Qualify != nil {
+		count++
+	}
+	if len(n.Window) > 0 {
 		count++
 	}
 	if len(n.OrderBy) > 0 {

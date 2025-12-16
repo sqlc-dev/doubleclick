@@ -46,8 +46,9 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, depth int) {
 	// Handle special CREATE types
 	if n.CreateFunction {
-		children := 1 // lambda
+		children := 2 // identifier + lambda
 		fmt.Fprintf(sb, "%sCreateFunctionQuery %s (children %d)\n", indent, n.FunctionName, children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.FunctionName)
 		if n.FunctionBody != nil {
 			Node(sb, n.FunctionBody, depth+1)
 		}

@@ -8,12 +8,32 @@ import (
 )
 
 func explainIdentifier(sb *strings.Builder, n *ast.Identifier, indent string) {
-	name := n.Name()
+	name := formatIdentifierName(n)
 	if n.Alias != "" {
 		fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, name, n.Alias)
 	} else {
 		fmt.Fprintf(sb, "%sIdentifier %s\n", indent, name)
 	}
+}
+
+// formatIdentifierName formats an identifier name, handling JSON path notation
+func formatIdentifierName(n *ast.Identifier) string {
+	if len(n.Parts) == 0 {
+		return ""
+	}
+	if len(n.Parts) == 1 {
+		return n.Parts[0]
+	}
+	result := n.Parts[0]
+	for _, p := range n.Parts[1:] {
+		// JSON path notation: ^fieldname should be formatted as ^`fieldname`
+		if strings.HasPrefix(p, "^") {
+			result += ".^`" + p[1:] + "`"
+		} else {
+			result += "." + p
+		}
+	}
+	return result
 }
 
 func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth int) {
@@ -63,9 +83,7 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			}
 			hasComplexExpr := false
 			for _, e := range exprs {
-				lit, isLit := e.(*ast.Literal)
-				// Non-literals or tuple/array literals count as complex
-				if !isLit || (isLit && (lit.Type == ast.LiteralTuple || lit.Type == ast.LiteralArray)) {
+				if !isSimpleLiteralOrNegation(e) {
 					hasComplexExpr = true
 					break
 				}
@@ -87,6 +105,23 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 		}
 	}
 	fmt.Fprintf(sb, "%sLiteral %s\n", indent, FormatLiteral(n))
+}
+
+// isSimpleLiteralOrNegation checks if an expression is a simple literal
+// or a unary negation of a numeric literal (for array elements)
+func isSimpleLiteralOrNegation(e ast.Expression) bool {
+	// Direct literal check
+	if lit, ok := e.(*ast.Literal); ok {
+		// Nested arrays/tuples are complex
+		return lit.Type != ast.LiteralTuple && lit.Type != ast.LiteralArray
+	}
+	// Unary minus of a literal integer/float is also simple (negative number)
+	if unary, ok := e.(*ast.UnaryExpr); ok && unary.Op == "-" {
+		if lit, ok := unary.Operand.(*ast.Literal); ok {
+			return lit.Type == ast.LiteralInteger || lit.Type == ast.LiteralFloat
+		}
+	}
+	return false
 }
 
 func explainBinaryExpr(sb *strings.Builder, n *ast.BinaryExpr, indent string, depth int) {
@@ -224,6 +259,16 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 	case *ast.Identifier:
 		// Identifiers with alias
 		fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, e.Name(), n.Alias)
+	case *ast.IntervalExpr:
+		// Interval expressions with alias
+		explainIntervalExpr(sb, e, n.Alias, indent, depth)
+	case *ast.TernaryExpr:
+		// Ternary expressions become if functions with alias
+		fmt.Fprintf(sb, "%sFunction if (alias %s) (children %d)\n", indent, n.Alias, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 3)
+		Node(sb, e.Condition, depth+2)
+		Node(sb, e.Then, depth+2)
+		Node(sb, e.Else, depth+2)
 	default:
 		// For other types, recursively explain and add alias info
 		Node(sb, n.Expr, depth)
