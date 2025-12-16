@@ -1,0 +1,78 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "lat",
+          "query": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "-",
+            "right": {
+              "type": "Integer",
+              "value": 90
+            }
+          }
+        }
+      ],
+      "distinct": true,
+      "columns": [
+        {
+          "left": {
+            "name": "greatCircleAngle",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 0
+              },
+              {
+                "type": "Integer",
+                "value": 0
+              },
+              {
+                "type": "Integer",
+                "value": 0
+              },
+              {
+                "parts": [
+                  "lat"
+                ]
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "abs",
+            "arguments": [
+              {
+                "parts": [
+                  "lat"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 180
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

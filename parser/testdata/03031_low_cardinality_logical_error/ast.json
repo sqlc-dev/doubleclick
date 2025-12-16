@@ -1,0 +1,213 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "expr": {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "name": "toString",
+                                  "arguments": [
+                                    {
+                                      "left": {
+                                        "parts": [
+                                          "number"
+                                        ]
+                                      },
+                                      "op": "%",
+                                      "right": {
+                                        "type": "Integer",
+                                        "value": 2
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            "type": {
+                              "name": "Array",
+                              "parameters": [
+                                {
+                                  "name": "LowCardinality",
+                                  "parameters": [
+                                    {
+                                      "name": "String"
+                                    }
+                                  ],
+                                  "has_parentheses": true
+                                }
+                              ],
+                              "has_parentheses": true
+                            },
+                            "operator_syntax": true
+                          },
+                          "alias": "item_id"
+                        },
+                        {
+                          "name": "count"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 3
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "item_id"
+                          ]
+                        }
+                      ],
+                      "with_totals": true
+                    }
+                  ]
+                }
+              },
+              "alias": "l"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "expr": {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "name": "toString",
+                                  "arguments": [
+                                    {
+                                      "left": {
+                                        "left": {
+                                          "parts": [
+                                            "number"
+                                          ]
+                                        },
+                                        "op": "%",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 2
+                                        }
+                                      },
+                                      "op": "*",
+                                      "right": {
+                                        "type": "Integer",
+                                        "value": 2
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            "type": {
+                              "name": "Array",
+                              "parameters": [
+                                {
+                                  "name": "String"
+                                }
+                              ],
+                              "has_parentheses": true
+                            },
+                            "operator_syntax": true
+                          },
+                          "alias": "item_id"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 3
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "r"
+            },
+            "join": {
+              "type": "FULL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "l",
+                    "item_id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "r",
+                    "item_id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 2
+          }
+        },
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 3
+          }
+        }
+      ]
+    }
+  ]
+}

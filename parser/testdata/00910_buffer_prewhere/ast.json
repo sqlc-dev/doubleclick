@@ -1,0 +1,53 @@
+{
+  "table": "mt",
+  "columns": [
+    {
+      "name": "uid",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "ts",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "Float64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "uid"
+          ]
+        },
+        {
+          "parts": [
+            "ts"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDate",
+    "arguments": [
+      {
+        "parts": [
+          "ts"
+        ]
+      }
+    ]
+  }
+}

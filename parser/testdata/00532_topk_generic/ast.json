@@ -1,0 +1,171 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "k"
+          ]
+        },
+        {
+          "name": "arraySort",
+          "arguments": [
+            {
+              "name": "topK",
+              "arguments": [
+                {
+                  "parts": [
+                    "v"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          },
+                          "alias": "k"
+                        },
+                        {
+                          "name": "arrayMap",
+                          "arguments": [
+                            {
+                              "parameters": [
+                                "x"
+                              ],
+                              "body": {
+                                "name": "arrayMap",
+                                "arguments": [
+                                  {
+                                    "parameters": [
+                                      "x"
+                                    ],
+                                    "body": {
+                                      "condition": {
+                                        "left": {
+                                          "parts": [
+                                            "x"
+                                          ]
+                                        },
+                                        "op": "=",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 0
+                                        }
+                                      },
+                                      "then": {
+                                        "type": "Null",
+                                        "value": null
+                                      },
+                                      "else": {
+                                        "name": "toString",
+                                        "arguments": [
+                                          {
+                                            "parts": [
+                                              "x"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "range",
+                                    "arguments": [
+                                      {
+                                        "parts": [
+                                          "x"
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "name": "range",
+                              "arguments": [
+                                {
+                                  "name": "intDiv",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "number"
+                                      ]
+                                    },
+                                    {
+                                      "type": "Integer",
+                                      "value": 13
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "v"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 100
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

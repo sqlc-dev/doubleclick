@@ -1,0 +1,115 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "exp2",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "alias": "e2d"
+        },
+        {
+          "name": "intExp2",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "alias": "e2i"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "toUInt64",
+              "arguments": [
+                {
+                  "parts": [
+                    "e2d"
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "e2i"
+              ]
+            }
+          },
+          "alias": "e2eq"
+        },
+        {
+          "name": "exp10",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "alias": "e10d"
+        },
+        {
+          "name": "intExp10",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "alias": "e10i"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "toString",
+              "arguments": [
+                {
+                  "parts": [
+                    "e10d"
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "toString",
+              "arguments": [
+                {
+                  "parts": [
+                    "e10i"
+                  ]
+                }
+              ]
+            }
+          },
+          "alias": "e10eq"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 64
+      }
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "format",
+                "arguments": [
+                  {
+                    "parts": [
+                      "TSVRaw"
+                    ]
+                  },
+                  {
+                    "query": {
+                      "selects": [
+                        {
+                          "columns": [
+                            {
+                              "expr": {
+                                "name": "arrayStringConcat",
+                                "arguments": [
+                                  {
+                                    "name": "groupArray",
+                                    "arguments": [
+                                      {
+                                        "type": "String",
+                                        "value": "some long string"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "String",
+                                    "value": "\n"
+                                  }
+                                ]
+                              },
+                              "type": {
+                                "name": "LowCardinality(String)"
+                              }
+                            }
+                          ],
+                          "from": {
+                            "tables": [
+                              {
+                                "table": {
+                                  "table": {
+                                    "name": "numbers",
+                                    "arguments": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 10000
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "TSVRaw"
+        ]
+      }
+    }
+  ]
+}

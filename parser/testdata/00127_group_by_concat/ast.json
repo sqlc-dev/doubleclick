@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "materialize",
+          "arguments": [
+            {
+              "type": "String",
+              "value": ""
+            }
+          ],
+          "alias": "k1"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 123
+            }
+          },
+          "alias": "k2"
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 1000
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k1"
+          ]
+        },
+        {
+          "parts": [
+            "k2"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k1"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "k2"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

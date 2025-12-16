@@ -1,0 +1,60 @@
+{
+  "table": "sums",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "sumOfSums",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "sumsMap",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "key",
+            "type": {
+              "name": "LowCardinality",
+              "parameters": [
+                {
+                  "name": "String"
+                }
+              ],
+              "has_parentheses": true
+            }
+          },
+          {
+            "name": "sum",
+            "type": {
+              "name": "UInt64"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree"
+  },
+  "primary_key": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayFilter",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "notEmpty",
+                "arguments": [
+                  {
+                    "name": "concat",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "x"
+                        ]
+                      },
+                      {
+                        "type": "String",
+                        "value": "hello"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "String",
+                  "value": ""
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              }
+            }
+          }
+        ]
+      },
+      "array_join": {
+        "columns": [
+          {
+            "expr": {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "Integer",
+                  "value": 0
+                }
+              ]
+            },
+            "alias": "elem"
+          },
+          {
+            "name": "arrayMap",
+            "arguments": [
+              {
+                "parameters": [
+                  "x"
+                ],
+                "body": {
+                  "name": "concat",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "x"
+                      ]
+                    },
+                    {
+                      "type": "String",
+                      "value": "hello"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "String",
+                    "value": ""
+                  }
+                ]
+              }
+            ],
+            "alias": "unused"
+          }
+        ]
+      },
+      "where": {
+        "op": "NOT",
+        "operand": {
+          "name": "ignore",
+          "arguments": [
+            {
+              "parts": [
+                "elem"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

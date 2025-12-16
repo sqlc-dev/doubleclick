@@ -1,0 +1,86 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 0
+                }
+              ]
+            },
+            {
+              "name": "extract",
+              "arguments": [
+                {
+                  "name": "materialize",
+                  "arguments": [
+                    {
+                      "expr": {
+                        "type": "String",
+                        "value": "aaaaaa"
+                      },
+                      "type": {
+                        "name": "LowCardinality(String)"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "\\w"
+                }
+              ]
+            },
+            {
+              "name": "extract",
+              "arguments": [
+                {
+                  "name": "materialize",
+                  "arguments": [
+                    {
+                      "expr": {
+                        "type": "String",
+                        "value": "bbbbb"
+                      },
+                      "type": {
+                        "name": "LowCardinality(String)"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "\\w*"
+                }
+              ]
+            }
+          ],
+          "alias": "res"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

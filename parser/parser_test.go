@@ -156,6 +156,21 @@ func TestParser(t *testing.T) {
 					t.Errorf("Explain output mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", query, expected, actual)
 				}
 			}
+
+			// Check AST JSON output if ast.json exists (golden file for AST regression testing)
+			astPath := filepath.Join(testDir, "ast.json")
+			if expectedASTBytes, err := os.ReadFile(astPath); err == nil {
+				actualASTBytes, _ := json.MarshalIndent(stmts[0], "", "  ")
+				expectedAST := strings.TrimSpace(string(expectedASTBytes))
+				actualAST := strings.TrimSpace(string(actualASTBytes))
+				if actualAST != expectedAST {
+					if metadata.Todo {
+						t.Skipf("TODO: AST JSON mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", query, expectedAST, actualAST)
+						return
+					}
+					t.Errorf("AST JSON mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", query, expectedAST, actualAST)
+				}
+			}
 		})
 	}
 }

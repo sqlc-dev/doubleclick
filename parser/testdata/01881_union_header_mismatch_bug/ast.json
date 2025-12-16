@@ -1,0 +1,109 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "table"
+                          },
+                          "alias": "table"
+                        },
+                        {
+                          "name": "toInt64",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          ],
+                          "alias": "rows"
+                        },
+                        {
+                          "name": "toInt64",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 101
+                            }
+                          ],
+                          "alias": "elements"
+                        }
+                      ]
+                    },
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "another table"
+                          },
+                          "alias": "table"
+                        },
+                        {
+                          "name": "toInt64",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 0
+                            }
+                          ],
+                          "alias": "rows"
+                        },
+                        {
+                          "name": "toInt64",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 0
+                            }
+                          ],
+                          "alias": "elements"
+                        }
+                      ]
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "rows"
+            ]
+          },
+          "op": "-",
+          "right": {
+            "parts": [
+              "elements"
+            ]
+          }
+        },
+        "op": "\u003c\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      }
+    }
+  ]
+}

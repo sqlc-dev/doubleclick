@@ -1,0 +1,118 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "01:02:03:04:05:06"
+          },
+          "alias": "mac_str"
+        },
+        {
+          "name": "MACStringToNum",
+          "arguments": [
+            {
+              "parts": [
+                "mac_str"
+              ]
+            }
+          ],
+          "alias": "mac_num"
+        },
+        {
+          "name": "hex",
+          "arguments": [
+            {
+              "parts": [
+                "mac_num"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "MACNumToString",
+          "arguments": [
+            {
+              "parts": [
+                "mac_num"
+              ]
+            }
+          ],
+          "alias": "mac_str2"
+        },
+        {
+          "left": {
+            "parts": [
+              "mac_str"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "mac_str2"
+            ]
+          }
+        },
+        {
+          "name": "MACStringToOUI",
+          "arguments": [
+            {
+              "parts": [
+                "mac_str"
+              ]
+            }
+          ],
+          "alias": "oui_num"
+        },
+        {
+          "name": "hex",
+          "arguments": [
+            {
+              "parts": [
+                "oui_num"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "MACStringToOUI",
+          "arguments": [
+            {
+              "name": "substring",
+              "arguments": [
+                {
+                  "parts": [
+                    "mac_str"
+                  ]
+                },
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "type": "Integer",
+                  "value": 8
+                }
+              ]
+            }
+          ],
+          "alias": "oui_num2"
+        },
+        {
+          "left": {
+            "parts": [
+              "oui_num"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "oui_num2"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "table": "post_state",
+  "columns": [
+    {
+      "name": "ts",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "id",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "state",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "UInt8"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "ttl": {
+        "left": {
+          "parts": [
+            "ts"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "value": {
+            "type": "Integer",
+            "value": 1
+          },
+          "unit": "MONTH"
+        }
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "ts"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "name": "toIntervalSecond",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      }
+    }
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "deduplicate_merge_projection_mode",
+      "value": {
+        "type": "String",
+        "value": "rebuild"
+      }
+    }
+  ]
+}

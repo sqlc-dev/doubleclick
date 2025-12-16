@@ -1,0 +1,61 @@
+{
+  "if_not_exists": true,
+  "table": "test_break_ddl",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "event_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "event_time",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "message",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "event_date"
+          ]
+        },
+        {
+          "parts": [
+            "event_time"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "event_date"
+    ]
+  }
+}

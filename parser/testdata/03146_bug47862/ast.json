@@ -1,0 +1,151 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toInt64",
+          "arguments": [
+            {
+              "parts": [
+                "lookup_res"
+              ]
+            }
+          ],
+          "alias": "cast_res"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "indexOf",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "field_id"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          ],
+                          "alias": "val_idx"
+                        },
+                        {
+                          "expr": {
+                            "array": {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "String",
+                                  "value": "110"
+                                }
+                              ]
+                            },
+                            "index": {
+                              "parts": [
+                                "val_idx"
+                              ]
+                            }
+                          },
+                          "alias": "lookup_res"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "arrayJoin",
+                                          "arguments": [
+                                            {
+                                              "type": "Array",
+                                              "value": [
+                                                {
+                                                  "type": "Array",
+                                                  "value": [
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 10
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "Array",
+                                                  "value": [
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 15
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "field_id"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "val_idx"
+                          ]
+                        },
+                        "op": "!=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "cast_res"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      },
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}
