@@ -1,0 +1,71 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "table": "t1"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.1"
+                  }
+                ]
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.1"
+                  }
+                ]
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "FULL",
+              "global": true,
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "dummy"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "dummy"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "allow_experimental_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

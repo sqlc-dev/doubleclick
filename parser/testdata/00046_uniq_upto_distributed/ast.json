@@ -1,0 +1,103 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "RegionID"
+          ]
+        },
+        {
+          "name": "uniqExact",
+          "arguments": [
+            {
+              "parts": [
+                "UserID"
+              ]
+            }
+          ],
+          "alias": "u1"
+        },
+        {
+          "name": "uniqUpTo",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 10
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "UserID"
+              ]
+            }
+          ],
+          "alias": "u2"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "parts": [
+                      "test"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "visits"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "RegionID"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "left": {
+            "parts": [
+              "u1"
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "type": "Integer",
+            "value": 11
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "u1"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "parts": [
+              "u2"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "PP",
+            "Key1"
+          ],
+          "alias": "ym:s:paramsLevel1"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "name": "arrayAll",
+              "arguments": [
+                {
+                  "parameters": [
+                    "x_1"
+                  ],
+                  "body": {
+                    "left": {
+                      "parts": [
+                        "x_1"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": ""
+                    }
+                  }
+                },
+                {
+                  "parts": [
+                    "ParsedParams",
+                    "Key2"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "ym:s:visits"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "array_join": {
+        "columns": [
+          {
+            "parts": [
+              "ParsedParams"
+            ],
+            "alias": "PP"
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 1704509
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "ym:s:paramsLevel1"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "PP",
+              "Key1"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "ym:s:visits"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 100
+      },
+      "offset": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "concat",
+          "arguments": [
+            {
+              "type": "String",
+              "value": ""
+            },
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "left": {
+                    "name": "toDateTime",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "1981-09-29 00:00:00"
+                      },
+                      {
+                        "type": "String",
+                        "value": "Europe/Moscow"
+                      }
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "value": {
+                      "left": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "op": "*",
+                      "right": {
+                        "type": "Integer",
+                        "value": 300
+                      }
+                    },
+                    "unit": "SECOND"
+                  }
+                }
+              ]
+            }
+          ],
+          "alias": "k"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "name": "count"
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

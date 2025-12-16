@@ -1,0 +1,101 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "n",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "groupBitmapState",
+                      "arguments": [
+                        {
+                          "expr": {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          "type": {
+                            "name": "Nullable",
+                            "parameters": [
+                              {
+                                "name": "UInt8"
+                              }
+                            ],
+                            "has_parentheses": true
+                          },
+                          "operator_syntax": true
+                        }
+                      ],
+                      "alias": "n"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ],
+          "alias": "x"
+        },
+        {
+          "name": "bitmapContains",
+          "arguments": [
+            {
+              "parts": [
+                "n"
+              ]
+            },
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

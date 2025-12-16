@@ -1,0 +1,104 @@
+{
+  "table": "test_table",
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "a_table",
+              "a"
+            ]
+          },
+          {
+            "parts": [
+              "b_table",
+              "b_arr"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "arrayJoin",
+                            "arguments": [
+                              {
+                                "name": "range",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10000
+                                  }
+                                ]
+                              }
+                            ],
+                            "alias": "a"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "alias": "a_table"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "range",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 10000
+                              }
+                            ],
+                            "alias": "b_arr"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "alias": "b_table"
+              },
+              "join": {
+                "type": "CROSS"
+              }
+            }
+          ]
+        },
+        "settings": [
+          {
+            "name": "max_memory_usage",
+            "value": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

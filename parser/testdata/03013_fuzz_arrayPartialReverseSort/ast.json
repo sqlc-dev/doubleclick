@@ -1,0 +1,121 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "res"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayPartialReverseSort",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 2
+                            },
+                            {
+                              "name": "if",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  "op": "%",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                },
+                                {
+                                  "name": "emptyArrayUInt64"
+                                },
+                                {
+                                  "name": "range",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "number"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "arr"
+                        },
+                        {
+                          "name": "arrayResize",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "arr"
+                              ]
+                            },
+                            {
+                              "name": "if",
+                              "arguments": [
+                                {
+                                  "name": "empty",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "arr"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 0
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "res"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 7
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "if_not_exists": true,
+  "table": "test",
+  "columns": [
+    {
+      "name": "value",
+      "type": {
+        "name": "Float64"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "Delta"
+          },
+          {
+            "name": "LZ4"
+          }
+        ]
+      }
+    },
+    {
+      "name": "uuid",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "time",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 3
+          },
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "DoubleDelta"
+          },
+          {
+            "name": "LZ4"
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "uuid"
+      ]
+    }
+  ]
+}

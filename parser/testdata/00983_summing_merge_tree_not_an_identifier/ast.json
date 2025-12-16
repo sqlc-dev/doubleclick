@@ -1,0 +1,87 @@
+{
+  "table": "xx",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "id",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "clicks",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "price",
+      "type": {
+        "name": "Float64"
+      }
+    },
+    {
+      "name": "spend",
+      "type": {
+        "name": "Float64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "parameters": [
+      {
+        "type": "Array",
+        "value": [
+          {
+            "parts": [
+              "price"
+            ]
+          },
+          {
+            "parts": [
+              "spend"
+            ]
+          }
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "date"
+        ]
+      }
+    ]
+  },
+  "sample_by": {
+    "parts": [
+      "id"
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ]
+}

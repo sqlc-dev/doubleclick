@@ -1,0 +1,55 @@
+{
+  "table": "dt64test",
+  "columns": [
+    {
+      "name": "dt64_column",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 3
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "dt_column",
+      "type": {
+        "name": "DateTime"
+      },
+      "default": {
+        "name": "toDateTime",
+        "arguments": [
+          {
+            "parts": [
+              "dt64_column"
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "dt64_column"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "dt64_column"
+        ]
+      }
+    ]
+  }
+}

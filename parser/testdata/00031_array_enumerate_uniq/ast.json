@@ -1,0 +1,221 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "UserID"
+          ]
+        },
+        {
+          "name": "arrayEnumerateUniq",
+          "arguments": [
+            {
+              "name": "groupArray",
+              "arguments": [
+                {
+                  "parts": [
+                    "SearchPhrase"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "arr"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "UserID"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "SearchPhrase"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "test",
+                                "table": "hits"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "CounterID"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 1704509
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "expr": {
+                            "parts": [
+                              "UserID"
+                            ]
+                          },
+                          "query": {
+                            "selects": [
+                              {
+                                "columns": [
+                                  {
+                                    "parts": [
+                                      "UserID"
+                                    ]
+                                  }
+                                ],
+                                "from": {
+                                  "tables": [
+                                    {
+                                      "table": {
+                                        "table": {
+                                          "database": "test",
+                                          "table": "hits"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                },
+                                "where": {
+                                  "left": {
+                                    "name": "notEmpty",
+                                    "arguments": [
+                                      {
+                                        "parts": [
+                                          "SearchPhrase"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "op": "AND",
+                                  "right": {
+                                    "left": {
+                                      "parts": [
+                                        "CounterID"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "type": "Integer",
+                                      "value": 1704509
+                                    }
+                                  }
+                                },
+                                "group_by": [
+                                  {
+                                    "parts": [
+                                      "UserID"
+                                    ]
+                                  }
+                                ],
+                                "having": {
+                                  "left": {
+                                    "name": "count"
+                                  },
+                                  "op": "\u003e",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "UserID"
+                            ]
+                          }
+                        },
+                        {
+                          "expression": {
+                            "parts": [
+                              "WatchID"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "name": "notEmpty",
+        "arguments": [
+          {
+            "parts": [
+              "SearchPhrase"
+            ]
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "UserID"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "arr"
+              ]
+            }
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "UserID"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 20
+      }
+    }
+  ]
+}

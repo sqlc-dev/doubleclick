@@ -1,0 +1,87 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        {
+          "name": "count"
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "GoalsReached"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "GoalsReached"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "minIf",
+          "arguments": [
+            {
+              "parts": [
+                "GoalsReached"
+              ]
+            },
+            {
+              "name": "notEmpty",
+              "arguments": [
+                {
+                  "parts": [
+                    "GoalsReached"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "name": "count"
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 20
+      }
+    }
+  ]
+}

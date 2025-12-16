@@ -1,0 +1,62 @@
+{
+  "table": "t",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "FixedString",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 3
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "d"
+          ]
+        },
+        {
+          "parts": [
+            "s"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "d"
+    ]
+  }
+}

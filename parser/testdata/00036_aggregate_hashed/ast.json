@@ -1,0 +1,76 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "SearchEngineID"
+          ],
+          "alias": "k1"
+        },
+        {
+          "parts": [
+            "SearchPhrase"
+          ],
+          "alias": "k2"
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k1"
+          ]
+        },
+        {
+          "parts": [
+            "k2"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "k1"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "k2"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

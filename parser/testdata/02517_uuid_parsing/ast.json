@@ -1,0 +1,169 @@
+{
+  "table": "temp",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "field1",
+      "type": {
+        "name": "UUID"
+      }
+    },
+    {
+      "name": "field2",
+      "type": {
+        "name": "UUID"
+      }
+    },
+    {
+      "name": "field3",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "field4",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "field5",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "field6",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 3
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "field7",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "field8",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "UUID"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "event_at",
+      "type": {
+        "name": "DateTime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "UUID"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "identity",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "field1"
+          ]
+        },
+        {
+          "parts": [
+            "event_at"
+          ]
+        },
+        {
+          "parts": [
+            "field2"
+          ]
+        },
+        {
+          "parts": [
+            "field5"
+          ]
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "event_at"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ]
+}

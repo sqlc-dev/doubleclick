@@ -1,0 +1,65 @@
+{
+  "table": "rmt",
+  "columns": [
+    {
+      "name": "n",
+      "type": {
+        "name": "int"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/test/02468/{database}"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "parts": [
+        "n"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 2
+    }
+  },
+  "settings": [
+    {
+      "name": "replicated_max_ratio_of_wrong_parts",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "max_suspicious_broken_parts",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "max_suspicious_broken_parts_bytes",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ]
+}

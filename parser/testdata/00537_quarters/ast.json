@@ -1,0 +1,159 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2017-01-01"
+                }
+              ],
+              "alias": "base"
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "unit": "MONTH"
+            }
+          },
+          "alias": "d"
+        },
+        {
+          "name": "toDateTime",
+          "arguments": [
+            {
+              "parts": [
+                "d"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "UTC"
+            }
+          ],
+          "alias": "t"
+        },
+        {
+          "name": "toQuarter",
+          "arguments": [
+            {
+              "parts": [
+                "d"
+              ]
+            }
+          ],
+          "alias": "qd"
+        },
+        {
+          "name": "toQuarter",
+          "arguments": [
+            {
+              "parts": [
+                "t"
+              ]
+            }
+          ],
+          "alias": "qt"
+        },
+        {
+          "name": "toStartOfQuarter",
+          "arguments": [
+            {
+              "parts": [
+                "d"
+              ]
+            }
+          ],
+          "alias": "sqd"
+        },
+        {
+          "name": "toStartOfQuarter",
+          "arguments": [
+            {
+              "parts": [
+                "t"
+              ]
+            }
+          ],
+          "alias": "sqt"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "toRelativeQuarterNum",
+              "arguments": [
+                {
+                  "parts": [
+                    "d"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "name": "toRelativeQuarterNum",
+              "arguments": [
+                {
+                  "parts": [
+                    "base"
+                  ]
+                }
+              ]
+            }
+          },
+          "alias": "qdiff_d"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "toRelativeQuarterNum",
+              "arguments": [
+                {
+                  "parts": [
+                    "t"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "name": "toRelativeQuarterNum",
+              "arguments": [
+                {
+                  "parts": [
+                    "base"
+                  ]
+                }
+              ]
+            }
+          },
+          "alias": "qdiff_t"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 24
+      }
+    }
+  ]
+}

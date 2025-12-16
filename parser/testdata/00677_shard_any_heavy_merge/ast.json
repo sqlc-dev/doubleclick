@@ -1,0 +1,82 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "s",
+          "query": {
+            "name": "arrayJoin",
+            "arguments": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "String",
+                    "value": "hello"
+                  },
+                  {
+                    "type": "String",
+                    "value": "world"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "arraySort",
+          "arguments": [
+            {
+              "name": "groupUniqArray",
+              "arguments": [
+                {
+                  "parts": [
+                    "s"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "anyHeavy",
+          "arguments": [
+            {
+              "parts": [
+                "s"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{2,3}"
+                  },
+                  {
+                    "parts": [
+                      "system",
+                      "one"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

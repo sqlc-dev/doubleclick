@@ -1,0 +1,86 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "extract",
+          "arguments": [
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "10000000"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers_mt"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "name": "concat",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "..."
+            },
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "pattern": {
+          "type": "String",
+          "value": "%10000000%"
+        }
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      },
+      "settings": [
+        {
+          "name": "max_rows_to_read",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

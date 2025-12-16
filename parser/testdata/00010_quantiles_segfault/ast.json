@@ -1,0 +1,284 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "URL"
+          ],
+          "alias": "ym:ah:URL"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "left": {
+                "op": "NOT",
+                "operand": {
+                  "parts": [
+                    "DontCountHits"
+                  ]
+                }
+              },
+              "op": "AND",
+              "right": {
+                "op": "NOT",
+                "operand": {
+                  "parts": [
+                    "Refresh"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "quantilesTimingIf",
+          "parameters": [
+            {
+              "type": "Float",
+              "value": 0.1
+            },
+            {
+              "type": "Float",
+              "value": 0.5
+            },
+            {
+              "type": "Float",
+              "value": 0.9
+            }
+          ],
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "DOMCompleteTiming"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "parts": [
+                  "LoadEventEndTiming"
+                ]
+              }
+            },
+            {
+              "left": {
+                "left": {
+                  "parts": [
+                    "DOMCompleteTiming"
+                  ]
+                },
+                "op": "!=",
+                "right": {
+                  "op": "-",
+                  "operand": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "LoadEventEndTiming"
+                  ]
+                },
+                "op": "!=",
+                "right": {
+                  "op": "-",
+                  "operand": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              }
+            }
+          ],
+          "alias": "t"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "parts": [
+                      "test"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "hits"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "CounterID"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 800784
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "DontCountHits"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            "op": "OR",
+            "right": {
+              "left": {
+                "parts": [
+                  "IsNotBounce"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "URL"
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "type": "String",
+              "value": ""
+            }
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "ym:ah:URL"
+          ]
+        }
+      ],
+      "with_totals": true,
+      "having": {
+        "left": {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "op": "NOT",
+                  "operand": {
+                    "parts": [
+                      "DontCountHits"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "op": "NOT",
+                  "operand": {
+                    "parts": [
+                      "Refresh"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "op": "NOT",
+                  "operand": {
+                    "parts": [
+                      "DontCountHits"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "op": "NOT",
+                  "operand": {
+                    "parts": [
+                      "Refresh"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "URL"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      },
+      "offset": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ]
+}

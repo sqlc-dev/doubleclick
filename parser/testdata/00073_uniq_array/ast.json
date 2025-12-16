@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "EventDate"
+          ]
+        },
+        {
+          "name": "uniqExact",
+          "arguments": [
+            {
+              "parts": [
+                "UserID"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "name": "groupUniqArray",
+              "arguments": [
+                {
+                  "parts": [
+                    "UserID"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "arrayUniq",
+          "arguments": [
+            {
+              "name": "groupArray",
+              "arguments": [
+                {
+                  "parts": [
+                    "UserID"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 1704509
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "EventDate"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "EventDate"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

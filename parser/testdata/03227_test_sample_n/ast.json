@@ -1,0 +1,38 @@
+{
+  "if_not_exists": true,
+  "table": "table_name",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "cityHash64",
+      "arguments": [
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ],
+  "sample_by": {
+    "name": "cityHash64",
+    "arguments": [
+      {
+        "parts": [
+          "id"
+        ]
+      }
+    ]
+  }
+}

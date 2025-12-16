@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "UUIDNumToString",
+          "arguments": [
+            {
+              "name": "toFixedString",
+              "arguments": [
+                {
+                  "name": "unhex",
+                  "arguments": [
+                    {
+                      "expr": {
+                        "type": "String",
+                        "value": "0123456789ABCDEF0123456789ABCDEF"
+                      },
+                      "alias": "hex"
+                    }
+                  ],
+                  "alias": "bytes"
+                },
+                {
+                  "type": "Integer",
+                  "value": 16
+                }
+              ],
+              "alias": "uuid_binary"
+            }
+          ],
+          "alias": "uuid_string"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "hex",
+              "arguments": [
+                {
+                  "name": "UUIDStringToNum",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "uuid_string"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "hex"
+              ]
+            }
+          },
+          "alias": "test1"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "UUIDStringToNum",
+              "arguments": [
+                {
+                  "parts": [
+                    "uuid_string"
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "bytes"
+              ]
+            }
+          },
+          "alias": "test2"
+        }
+      ]
+    }
+  ]
+}

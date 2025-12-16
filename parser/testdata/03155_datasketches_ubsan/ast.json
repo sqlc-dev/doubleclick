@@ -1,0 +1,85 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "uniqTheta",
+          "arguments": [
+            {
+              "name": "toFixedString",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "uniqTheta distinct"
+                },
+                {
+                  "type": "Integer",
+                  "value": 18
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 2
+                            }
+                          },
+                          "alias": "x"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "name": "materialize",
+                        "arguments": [
+                          {
+                            "type": "Integer",
+                            "value": 16
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

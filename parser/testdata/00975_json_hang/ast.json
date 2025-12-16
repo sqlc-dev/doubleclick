@@ -1,0 +1,78 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "name": "JSONExtractRaw",
+          "arguments": [
+            {
+              "name": "concat",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "{\"x\":"
+                },
+                {
+                  "condition": {
+                    "left": {
+                      "name": "rand"
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  },
+                  "then": {
+                    "type": "String",
+                    "value": "true"
+                  },
+                  "else": {
+                    "type": "String",
+                    "value": "false"
+                  }
+                },
+                {
+                  "type": "String",
+                  "value": "}"
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "x"
+            }
+          ],
+          "alias": "res"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1000000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "res"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

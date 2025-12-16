@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "bitmapMax",
+          "arguments": [
+            {
+              "name": "argMax",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                },
+                {
+                  "parts": [
+                    "y"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{2,3}"
+                  },
+                  {
+                    "name": "view",
+                    "arguments": [
+                      {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {
+                                  "name": "groupBitmapState",
+                                  "arguments": [
+                                    {
+                                      "name": "toUInt32",
+                                      "arguments": [
+                                        {
+                                          "parts": [
+                                            "number"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "alias": "x"
+                                },
+                                {
+                                  "parts": [
+                                    "number"
+                                  ],
+                                  "alias": "y"
+                                }
+                              ],
+                              "from": {
+                                "tables": [
+                                  {
+                                    "table": {
+                                      "table": {
+                                        "name": "numbers",
+                                        "arguments": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 10
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "group_by": [
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

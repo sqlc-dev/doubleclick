@@ -1,0 +1,65 @@
+{
+  "function": {
+    "name": "file",
+    "arguments": [
+      {
+        "type": "String",
+        "value": "03147_parquet_memory_tracking.parquet"
+      }
+    ]
+  },
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10000000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "settings": [
+          {
+            "name": "output_format_parquet_compression_method",
+            "value": {
+              "type": "String",
+              "value": "none"
+            }
+          },
+          {
+            "name": "output_format_parquet_row_group_size",
+            "value": {
+              "type": "Integer",
+              "value": 1000000000000
+            }
+          },
+          {
+            "name": "engine_file_truncate_on_insert",
+            "value": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true
+}

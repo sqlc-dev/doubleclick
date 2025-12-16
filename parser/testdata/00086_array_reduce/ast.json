@@ -1,0 +1,103 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayFilter",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "left": {
+                  "parts": [
+                    "x"
+                  ]
+                },
+                "op": "!=",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            },
+            {
+              "name": "arrayMap",
+              "arguments": [
+                {
+                  "parameters": [
+                    "a",
+                    "b"
+                  ],
+                  "body": {
+                    "left": {
+                      "parts": [
+                        "a"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "parts": [
+                        "b"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "parts": [
+                    "GeneralInterests"
+                  ]
+                },
+                {
+                  "name": "arrayReduce",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "groupArray"
+                    },
+                    {
+                      "parts": [
+                        "GeneralInterests"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "res"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "res"
+              ]
+            }
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      }
+    }
+  ]
+}
