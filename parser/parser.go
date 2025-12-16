@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"strconv"
 	"strings"
 
@@ -72,9 +73,27 @@ func (p *Parser) expectPeek(t token.Token) bool {
 }
 
 // Parse parses SQL statements from the input.
+// It supports multiple statements separated by semicolons.
 func Parse(ctx context.Context, r io.Reader) ([]ast.Statement, error) {
 	p := New(r)
 	return p.ParseStatements(ctx)
+}
+
+// ParseString parses SQL statements from a string.
+// It supports multiple statements separated by semicolons.
+func ParseString(ctx context.Context, sql string) ([]ast.Statement, error) {
+	return Parse(ctx, strings.NewReader(sql))
+}
+
+// ParseFile parses SQL statements from a file.
+// It supports multiple statements separated by semicolons.
+func ParseFile(ctx context.Context, path string) ([]ast.Statement, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file: %w", err)
+	}
+	defer f.Close()
+	return Parse(ctx, f)
 }
 
 // ParseStatements parses multiple SQL statements.
