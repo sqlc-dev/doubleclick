@@ -106,6 +106,8 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 	if n.Limit != nil {
 		Node(sb, n.Limit, depth+1)
 	}
+	// Note: LIMIT BY expressions are stored in the AST but not output in EXPLAIN AST
+	// (ClickHouse doesn't output them in EXPLAIN AST)
 	// SETTINGS - output here if there's no FORMAT, otherwise it's at SelectWithUnionQuery level
 	if len(n.Settings) > 0 && n.Format == nil {
 		fmt.Fprintf(sb, "%s Set\n", indent)
@@ -214,6 +216,7 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 	if n.Offset != nil {
 		count++
 	}
+	// Note: LimitBy is stored in AST but not counted in EXPLAIN AST children
 	// SETTINGS is counted here only if there's no FORMAT
 	// If FORMAT is present, SETTINGS is at SelectWithUnionQuery level
 	if len(n.Settings) > 0 && n.Format == nil {

@@ -375,9 +375,9 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		// LIMIT BY clause (ClickHouse specific: LIMIT n BY expr1, expr2, ...)
 		if p.currentIs(token.BY) {
 			p.nextToken()
-			// Parse LIMIT BY expressions - skip them for now
+			// Parse LIMIT BY expressions
 			for !p.isEndOfExpression() {
-				p.parseExpression(LOWEST)
+				sel.LimitBy = append(sel.LimitBy, p.parseExpression(LOWEST))
 				if p.currentIs(token.COMMA) {
 					p.nextToken()
 				} else {

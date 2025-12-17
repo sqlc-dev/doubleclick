@@ -61,6 +61,7 @@ type SelectQuery struct {
 	Window      []*WindowDefinition   `json:"window,omitempty"`
 	OrderBy     []*OrderByElement     `json:"order_by,omitempty"`
 	Limit       Expression            `json:"limit,omitempty"`
+	LimitBy     []Expression          `json:"limit_by,omitempty"`
 	Offset      Expression            `json:"offset,omitempty"`
 	Settings    []*SettingExpr        `json:"settings,omitempty"`
 	IntoOutfile *IntoOutfileClause    `json:"into_outfile,omitempty"`
