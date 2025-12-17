@@ -12,18 +12,9 @@ CreateQuery ttl_01280_error (children 3)
     DataType Int64
    ColumnDeclaration d (children 1)
     DataType DateTime
- Storage definition (children 3)
+ Storage definition (children 2)
   Function MergeTree
   Function tuple (children 1)
    ExpressionList (children 2)
     Identifier a
     Identifier b
-  ExpressionList (children 1)
-   TTLElement (children 1)
-    Function plus (children 1)
-     ExpressionList (children 2)
-      Identifier d
-      Function toIntervalSecond (children 1)
-       ExpressionList (children 1)
-        Literal UInt64_1
-The query succeeded but the server error '450' was expected (query: EXPLAIN AST create table ttl_01280_error (a Int, b Int, x Int64, y Int64, d DateTime) engine = MergeTree order by (a, b) ttl d + interval 1 second group by x set y = max(y); -- { serverError BAD_TTL_EXPRESSION}).

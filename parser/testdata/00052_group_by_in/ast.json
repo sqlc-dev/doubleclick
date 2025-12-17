@@ -1,0 +1,101 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "StartDate"
+          ]
+        },
+        {
+          "expr": {
+            "condition": {
+              "expr": {
+                "parts": [
+                  "TraficSourceID"
+                ]
+              },
+              "list": [
+                {
+                  "type": "Integer",
+                  "value": 0
+                }
+              ]
+            },
+            "then": {
+              "type": "String",
+              "value": "type_in"
+            },
+            "else": {
+              "type": "String",
+              "value": "other"
+            }
+          },
+          "alias": "traf_type"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "Sign"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "visits"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 842440
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "StartDate"
+          ]
+        },
+        {
+          "parts": [
+            "traf_type"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "StartDate"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "traf_type"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "table": "x",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "t",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "argMax"
+            ]
+          },
+          {
+            "name": "Enum8",
+            "parameters": [
+              {
+                "left": {
+                  "type": "String",
+                  "value": "\u003cEmpty\u003e"
+                },
+                "op": "=",
+                "right": {
+                  "op": "-",
+                  "operand": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              },
+              {
+                "left": {
+                  "type": "String",
+                  "value": "Male"
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              {
+                "left": {
+                  "type": "String",
+                  "value": "Female"
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              }
+            ],
+            "has_parentheses": true
+          },
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "arrayReduce",
+        "arguments": [
+          {
+            "type": "String",
+            "value": "argMaxState"
+          },
+          {
+            "type": "Array",
+            "value": [
+              {
+                "type": "String",
+                "value": "cast(-1, 'Enum8('\u003cEmpty\u003e' = -1, 'Male' = 1, 'Female' = 2)"
+              }
+            ]
+          },
+          {
+            "type": "Array",
+            "value": [
+              {
+                "name": "toUInt64",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

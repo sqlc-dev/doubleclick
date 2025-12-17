@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "x",
+          "query": {
+            "condition": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 1000
+                }
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            "then": {
+              "condition": {
+                "left": {
+                  "name": "rand"
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              },
+              "then": {
+                "type": "Float",
+                "value": 0
+              },
+              "else": {
+                "op": "-",
+                "operand": {
+                  "type": "Float",
+                  "value": 0
+                }
+              }
+            },
+            "else": {
+              "expr": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "type": {
+                "name": "Float64"
+              },
+              "operator_syntax": true
+            }
+          }
+        }
+      ],
+      "columns": [
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "expr": {
+                "name": "uniqExactState",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  }
+                ]
+              },
+              "type": {
+                "name": "String"
+              },
+              "operator_syntax": true
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1000000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

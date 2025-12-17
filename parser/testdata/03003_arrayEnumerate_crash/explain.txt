@@ -6,7 +6,11 @@ SelectWithUnionQuery (children 1)
      ExpressionList (children 2)
       Function arrayEnumerateUniqRanked (children 1)
        ExpressionList (children 1)
-        Literal Array_[Array_[UInt64_1, UInt64_2, UInt64_3], Array_[UInt64_2, UInt64_2, UInt64_1], Array_[UInt64_3]]
+        Function array (children 1)
+         ExpressionList (children 3)
+          Literal Array_[UInt64_1, UInt64_2, UInt64_3]
+          Literal Array_[UInt64_2, UInt64_2, UInt64_1]
+          Literal Array_[UInt64_3]
       Function or (children 1)
        ExpressionList (children 2)
         Function materialize (children 1)
@@ -15,4 +19,3 @@ SelectWithUnionQuery (children 1)
         Function toLowCardinality (children 1)
          ExpressionList (children 1)
           Literal Int64_-9223372036854775808
-The query succeeded but the server error '36' was expected (query: EXPLAIN AST SELECT arrayEnumerateUniqRanked(arrayEnumerateUniqRanked([[1, 2, 3], [2, 2, 1], [3]]), materialize(1 AS x) OR toLowCardinality(-9223372036854775808)); -- { serverError BAD_ARGUMENTS }).

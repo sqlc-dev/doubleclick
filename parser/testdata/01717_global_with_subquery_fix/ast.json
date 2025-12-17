@@ -1,0 +1,219 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "withA",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "colU"
+                          ]
+                        }
+                      ],
+                      "distinct": true
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "tabA"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "withB",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "colU"
+                          ]
+                        }
+                      ],
+                      "distinct": true
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "tabA"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "withA"
+              ]
+            },
+            "op": "/",
+            "right": {
+              "parts": [
+                "withB"
+              ]
+            }
+          },
+          "alias": "ratio"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "date"
+                          ],
+                          "alias": "period"
+                        },
+                        {
+                          "parts": [
+                            "colX"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "date"
+                                          ]
+                                        },
+                                        {
+                                          "name": "if",
+                                          "arguments": [
+                                            {
+                                              "expr": {
+                                                "parts": [
+                                                  "colA"
+                                                ]
+                                              },
+                                              "query": {
+                                                "selects": [
+                                                  {
+                                                    "columns": [
+                                                      {
+                                                        "parts": [
+                                                          "colB"
+                                                        ]
+                                                      }
+                                                    ],
+                                                    "from": {
+                                                      "tables": [
+                                                        {
+                                                          "table": {
+                                                            "table": {
+                                                              "table": "tabC"
+                                                            }
+                                                          }
+                                                        }
+                                                      ]
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            },
+                                            {
+                                              "type": "Integer",
+                                              "value": 0
+                                            },
+                                            {
+                                              "parts": [
+                                                "colA"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "colX"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "tabB"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "tempB"
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "period"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "colX"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "main"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

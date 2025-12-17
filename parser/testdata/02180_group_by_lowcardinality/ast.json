@@ -1,0 +1,44 @@
+{
+  "if_not_exists": true,
+  "table": "t_group_by_lowcardinality",
+  "columns": [
+    {
+      "name": "p_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "Nullable",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "p_date"
+    ]
+  }
+}

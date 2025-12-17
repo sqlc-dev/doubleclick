@@ -1,0 +1,109 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "date_time"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "toDateTime",
+                                          "arguments": [
+                                            {
+                                              "type": "String",
+                                              "value": "2019-11-14 22:15:00"
+                                            }
+                                          ],
+                                          "alias": "date_time"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "toDateTime",
+                                          "arguments": [
+                                            {
+                                              "type": "String",
+                                              "value": "2019-11-15 01:15:00"
+                                            }
+                                          ],
+                                          "alias": "date_time"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "union_all": true,
+                                  "union_modes": [
+                                    "UNION ALL"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "date_time"
+                            ]
+                          },
+                          "with_fill": true,
+                          "fill_step": {
+                            "type": "Integer",
+                            "value": 900
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "date_time"
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "name": "toDateTime",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "2019-11-15 00:15:00"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

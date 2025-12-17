@@ -1,9 +1,9 @@
 SelectWithUnionQuery (children 1)
  ExpressionList (children 1)
-  SelectQuery (children 2)
+  SelectQuery (children 3)
    ExpressionList (children 1)
     Asterisk
-   TablesInSelectQuery (children 1)
+   TablesInSelectQuery (children 2)
     TablesInSelectQueryElement (children 1)
      TableExpression (children 1)
       Subquery (alias a) (children 1)
@@ -13,3 +13,19 @@ SelectWithUnionQuery (children 1)
           ExpressionList (children 2)
            Literal UInt64_1 (alias id)
            Literal \'\' (alias test)
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias b) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 1)
+          ExpressionList (children 3)
+           Identifier test
+           Literal UInt64_1 (alias id)
+           Literal NULL (alias test)
+     TableJoin (children 1)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier b.id
+        Identifier a.id
+   Set

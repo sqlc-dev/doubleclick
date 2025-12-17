@@ -1,0 +1,117 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "id"
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": ""
+                          },
+                          "alias": "test"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "a"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "test"
+                          ]
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "id"
+                        },
+                        {
+                          "expr": {
+                            "type": "Null",
+                            "value": null
+                          },
+                          "alias": "test"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "b"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "b",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "a",
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "join_algorithm",
+          "value": {
+            "type": "String",
+            "value": "auto"
+          }
+        },
+        {
+          "name": "max_rows_in_join",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}
