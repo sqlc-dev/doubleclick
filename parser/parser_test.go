@@ -3,6 +3,7 @@ package parser_test
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,6 +12,10 @@ import (
 
 	"github.com/kyleconroy/doubleclick/parser"
 )
+
+// checkSkipped runs skipped todo tests to see which ones now pass.
+// Use with: go test ./parser -check-skipped -v
+var checkSkipped = flag.Bool("check-skipped", false, "Run skipped todo tests to see which ones now pass")
 
 // testMetadata holds optional metadata for a test case
 type testMetadata struct {
@@ -87,15 +92,18 @@ func TestParser(t *testing.T) {
 				}
 			}
 
-			// Skip tests marked with skip: true
+			// Skip tests marked with skip: true (these cause infinite loops or other critical issues)
 			if metadata.Skip {
 				t.Skip("Skipping: skip is true in metadata")
 			}
 
 			// Skip tests where explain is explicitly false (e.g., ClickHouse couldn't parse it)
+			// Unless -check-skipped is set and the test is a todo test
 			if metadata.Explain != nil && !*metadata.Explain {
-				t.Skipf("Skipping: explain is false in metadata")
-				return
+				if !(*checkSkipped && metadata.Todo) {
+					t.Skipf("Skipping: explain is false in metadata")
+					return
+				}
 			}
 
 			// Parse the query
@@ -107,7 +115,11 @@ func TestParser(t *testing.T) {
 					return
 				}
 				if metadata.Todo {
-					t.Skipf("TODO: Parser does not yet support: %s (error: %v)", query, err)
+					if *checkSkipped {
+						t.Skipf("STILL FAILING (parse error): %v", err)
+					} else {
+						t.Skipf("TODO: Parser does not yet support: %s (error: %v)", query, err)
+					}
 					return
 				}
 				t.Fatalf("Parse error: %v\nQuery: %s", err, query)
@@ -122,7 +134,11 @@ func TestParser(t *testing.T) {
 
 			if len(stmts) == 0 {
 				if metadata.Todo {
-					t.Skipf("TODO: Parser returned no statements for: %s", query)
+					if *checkSkipped {
+						t.Skipf("STILL FAILING (no statements): parser returned no statements")
+					} else {
+						t.Skipf("TODO: Parser returned no statements for: %s", query)
+					}
 					return
 				}
 				t.Fatalf("Expected at least 1 statement, got 0\nQuery: %s", query)
@@ -132,7 +148,11 @@ func TestParser(t *testing.T) {
 			_, jsonErr := json.Marshal(stmts[0])
 			if jsonErr != nil {
 				if metadata.Todo {
-					t.Skipf("TODO: JSON serialization failed: %v", jsonErr)
+					if *checkSkipped {
+						t.Skipf("STILL FAILING (JSON serialization): %v", jsonErr)
+					} else {
+						t.Skipf("TODO: JSON serialization failed: %v", jsonErr)
+					}
 					return
 				}
 				t.Fatalf("JSON marshal error: %v\nQuery: %s", jsonErr, query)
@@ -150,7 +170,11 @@ func TestParser(t *testing.T) {
 				actual := strings.TrimSpace(parser.Explain(stmts[0]))
 				if actual != expected {
 					if metadata.Todo {
-						t.Skipf("TODO: Explain output mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", query, expected, actual)
+						if *checkSkipped {
+							t.Skipf("STILL FAILING (explain mismatch):\nExpected:\n%s\n\nGot:\n%s", expected, actual)
+						} else {
+							t.Skipf("TODO: Explain output mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", query, expected, actual)
+						}
 						return
 					}
 					t.Errorf("Explain output mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", query, expected, actual)
@@ -165,11 +189,20 @@ func TestParser(t *testing.T) {
 				actualAST := strings.TrimSpace(string(actualASTBytes))
 				if actualAST != expectedAST {
 					if metadata.Todo {
-						t.Skipf("TODO: AST JSON mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", query, expectedAST, actualAST)
+						if *checkSkipped {
+							t.Skipf("STILL FAILING (AST mismatch):\nExpected:\n%s\n\nGot:\n%s", expectedAST, actualAST)
+						} else {
+							t.Skipf("TODO: AST JSON mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", query, expectedAST, actualAST)
+						}
 						return
 					}
 					t.Errorf("AST JSON mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", query, expectedAST, actualAST)
 				}
+			}
+
+			// If we get here with a todo test and -check-skipped is set, the test passes!
+			if metadata.Todo && *checkSkipped {
+				t.Logf("PASSES NOW - can remove todo flag from: %s", entry.Name())
 			}
 		})
 	}
