@@ -229,17 +229,37 @@ func explainLikeExpr(sb *strings.Builder, n *ast.LikeExpr, indent string, depth 
 }
 
 func explainBetweenExpr(sb *strings.Builder, n *ast.BetweenExpr, indent string, depth int) {
-	// BETWEEN is represented as Function and with two comparisons
-	// But for explain, we can use a simpler form
-	fnName := "between"
 	if n.Not {
-		fnName = "notBetween"
+		// NOT BETWEEN is transformed to: expr < low OR expr > high
+		// Represented as: Function or with two comparisons: less and greater
+		fmt.Fprintf(sb, "%sFunction or (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+		// less(expr, low)
+		fmt.Fprintf(sb, "%s  Function less (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 2)
+		Node(sb, n.Expr, depth+4)
+		Node(sb, n.Low, depth+4)
+		// greater(expr, high)
+		fmt.Fprintf(sb, "%s  Function greater (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 2)
+		Node(sb, n.Expr, depth+4)
+		Node(sb, n.High, depth+4)
+	} else {
+		// BETWEEN is represented as Function and with two comparisons
+		// expr >= low AND expr <= high
+		fmt.Fprintf(sb, "%sFunction and (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+		// greaterOrEquals(expr, low)
+		fmt.Fprintf(sb, "%s  Function greaterOrEquals (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 2)
+		Node(sb, n.Expr, depth+4)
+		Node(sb, n.Low, depth+4)
+		// lessOrEquals(expr, high)
+		fmt.Fprintf(sb, "%s  Function lessOrEquals (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 2)
+		Node(sb, n.Expr, depth+4)
+		Node(sb, n.High, depth+4)
 	}
-	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
-	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 3)
-	Node(sb, n.Expr, depth+2)
-	Node(sb, n.Low, depth+2)
-	Node(sb, n.High, depth+2)
 }
 
 func explainIsNullExpr(sb *strings.Builder, n *ast.IsNullExpr, indent string, depth int) {
