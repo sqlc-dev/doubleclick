@@ -83,8 +83,19 @@ func explainCastExpr(sb *strings.Builder, n *ast.CastExpr, indent string, depth 
 }
 
 func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string, indent string, depth int) {
+	// For :: operator syntax, ClickHouse hides alias only when expression is
+	// an array/tuple with complex content that gets formatted as string
+	hideAlias := false
+	if n.OperatorSyntax {
+		if lit, ok := n.Expr.(*ast.Literal); ok {
+			if lit.Type == ast.LiteralArray || lit.Type == ast.LiteralTuple {
+				hideAlias = !containsOnlyPrimitives(lit)
+			}
+		}
+	}
+
 	// CAST is represented as Function CAST with expr and type as arguments
-	if alias != "" {
+	if alias != "" && !hideAlias {
 		fmt.Fprintf(sb, "%sFunction CAST (alias %s) (children %d)\n", indent, alias, 1)
 	} else {
 		fmt.Fprintf(sb, "%sFunction CAST (children %d)\n", indent, 1)

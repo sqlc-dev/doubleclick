@@ -2,6 +2,7 @@ package explain
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -10,6 +11,16 @@ import (
 
 // FormatFloat formats a float value for EXPLAIN AST output
 func FormatFloat(val float64) string {
+	// Handle special float values - ClickHouse uses lowercase
+	if math.IsInf(val, 1) {
+		return "inf"
+	}
+	if math.IsInf(val, -1) {
+		return "-inf"
+	}
+	if math.IsNaN(val) {
+		return "nan"
+	}
 	// Use 'f' format to avoid scientific notation, -1 precision for smallest representation
 	return strconv.FormatFloat(val, 'f', -1, 64)
 }
@@ -161,6 +172,9 @@ func FormatDataType(dt *ast.DataType) string {
 			}
 		} else if nested, ok := p.(*ast.DataType); ok {
 			params = append(params, FormatDataType(nested))
+		} else if ntp, ok := p.(*ast.NameTypePair); ok {
+			// Named tuple field: "name Type"
+			params = append(params, ntp.Name+" "+FormatDataType(ntp.Type))
 		} else {
 			params = append(params, fmt.Sprintf("%v", p))
 		}

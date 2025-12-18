@@ -911,6 +911,7 @@ type CastExpr struct {
 	TypeExpr       Expression     `json:"type_expr,omitempty"` // For dynamic type like CAST(x, if(cond, 'Type1', 'Type2'))
 	Alias          string         `json:"alias,omitempty"`
 	OperatorSyntax bool           `json:"operator_syntax,omitempty"` // true if using :: syntax
+	UsedASSyntax   bool           `json:"-"`                         // true if CAST(x AS Type) syntax used (not CAST(x, 'Type'))
 }
 
 func (c *CastExpr) Pos() token.Position { return c.Position }
