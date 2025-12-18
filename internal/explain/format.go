@@ -153,6 +153,21 @@ func formatTupleLiteral(val interface{}) string {
 	return fmt.Sprintf("Tuple_(%s)", strings.Join(parts, ", "))
 }
 
+// formatInListAsTuple formats an IN expression's value list as a tuple literal
+func formatInListAsTuple(list []ast.Expression) string {
+	var parts []string
+	for _, e := range list {
+		if lit, ok := e.(*ast.Literal); ok {
+			parts = append(parts, FormatLiteral(lit))
+		} else if ident, ok := e.(*ast.Identifier); ok {
+			parts = append(parts, ident.Name())
+		} else {
+			parts = append(parts, formatExprAsString(e))
+		}
+	}
+	return fmt.Sprintf("Tuple_(%s)", strings.Join(parts, ", "))
+}
+
 // FormatDataType formats a DataType for EXPLAIN AST output
 func FormatDataType(dt *ast.DataType) string {
 	if dt == nil {

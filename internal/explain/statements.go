@@ -316,8 +316,12 @@ func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string
 }
 
 func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
-	// Capitalize ShowType correctly for display
+	// ClickHouse maps certain SHOW types to ShowTables in EXPLAIN AST
 	showType := strings.Title(strings.ToLower(string(n.ShowType)))
+	// SHOW SETTINGS is displayed as ShowTables in ClickHouse
+	if showType == "Settings" {
+		showType = "Tables"
+	}
 	fmt.Fprintf(sb, "%sShow%s\n", indent, showType)
 }
 
@@ -327,13 +331,14 @@ func explainUseQuery(sb *strings.Builder, n *ast.UseQuery, indent string) {
 
 func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent string) {
 	if n.TableFunction != nil {
-		// DESCRIBE on a table function
+		// DESCRIBE on a table function - wrap in TableExpression
 		children := 1
 		if len(n.Settings) > 0 {
 			children++
 		}
 		fmt.Fprintf(sb, "%sDescribeQuery (children %d)\n", indent, children)
-		explainFunctionCall(sb, n.TableFunction, indent+" ", 1)
+		fmt.Fprintf(sb, "%s TableExpression (children 1)\n", indent)
+		explainFunctionCall(sb, n.TableFunction, indent+"  ", 2)
 		if len(n.Settings) > 0 {
 			fmt.Fprintf(sb, "%s Set\n", indent)
 		}

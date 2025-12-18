@@ -216,9 +216,33 @@ func explainArrayAccess(sb *strings.Builder, n *ast.ArrayAccess, indent string, 
 	Node(sb, n.Index, depth+2)
 }
 
+func explainArrayAccessWithAlias(sb *strings.Builder, n *ast.ArrayAccess, alias string, indent string, depth int) {
+	// Array access is represented as Function arrayElement
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction arrayElement (alias %s) (children %d)\n", indent, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction arrayElement (children %d)\n", indent, 1)
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+	Node(sb, n.Array, depth+2)
+	Node(sb, n.Index, depth+2)
+}
+
 func explainTupleAccess(sb *strings.Builder, n *ast.TupleAccess, indent string, depth int) {
 	// Tuple access is represented as Function tupleElement
 	fmt.Fprintf(sb, "%sFunction tupleElement (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+	Node(sb, n.Tuple, depth+2)
+	Node(sb, n.Index, depth+2)
+}
+
+func explainTupleAccessWithAlias(sb *strings.Builder, n *ast.TupleAccess, alias string, indent string, depth int) {
+	// Tuple access is represented as Function tupleElement
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction tupleElement (alias %s) (children %d)\n", indent, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction tupleElement (children %d)\n", indent, 1)
+	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
 	Node(sb, n.Tuple, depth+2)
 	Node(sb, n.Index, depth+2)
@@ -356,6 +380,7 @@ func explainExtractExpr(sb *strings.Builder, n *ast.ExtractExpr, indent string, 
 func explainWindowSpec(sb *strings.Builder, n *ast.WindowSpec, indent string, depth int) {
 	// Window spec is represented as WindowDefinition
 	// For simple cases like OVER (), just output WindowDefinition without children
+	// Note: ClickHouse's EXPLAIN AST does not output frame info (ROWS BETWEEN etc)
 	children := 0
 	if n.Name != "" {
 		children++
@@ -364,9 +389,6 @@ func explainWindowSpec(sb *strings.Builder, n *ast.WindowSpec, indent string, de
 		children++
 	}
 	if len(n.OrderBy) > 0 {
-		children++
-	}
-	if n.Frame != nil {
 		children++
 	}
 	if children > 0 {
@@ -383,7 +405,7 @@ func explainWindowSpec(sb *strings.Builder, n *ast.WindowSpec, indent string, de
 		if len(n.OrderBy) > 0 {
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.OrderBy))
 			for _, o := range n.OrderBy {
-				Node(sb, o.Expression, depth+2)
+				explainOrderByElement(sb, o, strings.Repeat(" ", depth+2), depth+2)
 			}
 		}
 		// Frame handling would go here if needed
