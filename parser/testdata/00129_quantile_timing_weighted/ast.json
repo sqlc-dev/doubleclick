@@ -1,0 +1,98 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "medianTiming",
+          "arguments": [
+            {
+              "parts": [
+                "t"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "medianTimingWeighted",
+          "arguments": [
+            {
+              "parts": [
+                "t"
+              ]
+            },
+            {
+              "parts": [
+                "w"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "t"
+                        },
+                        {
+                          "expr": {
+                            "condition": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 77
+                              }
+                            },
+                            "then": {
+                              "type": "Integer",
+                              "value": 10
+                            },
+                            "else": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          },
+                          "alias": "w"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 100
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
