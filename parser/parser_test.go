@@ -66,7 +66,7 @@ func TestParser(t *testing.T) {
 			var queryParts []string
 			for _, line := range strings.Split(string(queryBytes), "\n") {
 				trimmed := strings.TrimSpace(line)
-				if trimmed == "" || strings.HasPrefix(trimmed, "--") {
+				if trimmed == "" || strings.HasPrefix(trimmed, "--") || strings.HasPrefix(trimmed, "#") {
 					continue
 				}
 				// Remove trailing comment if present (but not inside strings - simple heuristic)
