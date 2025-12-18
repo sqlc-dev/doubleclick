@@ -10,7 +10,7 @@ PID_FILE="$CLICKHOUSE_DIR/clickhouse.pid"
 
 # ClickHouse version - use a specific stable version for reproducible test output
 # Update this when regenerating test expectations
-CLICKHOUSE_VERSION="${CLICKHOUSE_VERSION:-24.8.4.13}"
+CLICKHOUSE_VERSION="${CLICKHOUSE_VERSION:-25.12.1.646}"
 
 # Download ClickHouse if not present
 download() {
