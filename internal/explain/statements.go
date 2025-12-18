@@ -297,10 +297,21 @@ func explainSystemQuery(sb *strings.Builder, indent string) {
 func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string, depth int) {
 	// EXPLAIN CURRENT TRANSACTION has no children
 	if n.ExplainType == ast.ExplainCurrentTransaction {
-		fmt.Fprintf(sb, "%sExplain %s\n", indent, n.ExplainType)
+		// At top level (depth 0), ClickHouse outputs "Explain EXPLAIN <TYPE>"
+		if depth == 0 {
+			fmt.Fprintf(sb, "%sExplain EXPLAIN %s\n", indent, n.ExplainType)
+		} else {
+			fmt.Fprintf(sb, "%sExplain %s\n", indent, n.ExplainType)
+		}
 		return
 	}
-	fmt.Fprintf(sb, "%sExplain %s (children %d)\n", indent, n.ExplainType, 1)
+	// At top level (depth 0), ClickHouse outputs "Explain EXPLAIN <TYPE>"
+	// Nested in subqueries, it outputs "Explain <TYPE>"
+	if depth == 0 {
+		fmt.Fprintf(sb, "%sExplain EXPLAIN %s (children %d)\n", indent, n.ExplainType, 1)
+	} else {
+		fmt.Fprintf(sb, "%sExplain %s (children %d)\n", indent, n.ExplainType, 1)
+	}
 	Node(sb, n.Statement, depth+1)
 }
 
