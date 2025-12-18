@@ -3098,6 +3098,13 @@ func (p *Parser) parseIdentifierName() string {
 		return name
 	}
 
+	// Handle parameterized identifiers like {CLICKHOUSE_DATABASE:Identifier}
+	if p.currentIs(token.PARAM) {
+		name = "{" + p.current.Value + "}"
+		p.nextToken()
+		return name
+	}
+
 	// Handle name starting with number (e.g., 03657_test)
 	if p.currentIs(token.NUMBER) {
 		name = p.current.Value

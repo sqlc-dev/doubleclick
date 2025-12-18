@@ -92,6 +92,9 @@ func (l *Lexer) NextToken() Item {
 	if l.ch == '-' && l.peekChar() == '-' {
 		return l.readLineComment()
 	}
+	if l.ch == '#' {
+		return l.readHashComment()
+	}
 	if l.ch == '/' && l.peekChar() == '*' {
 		return l.readBlockComment()
 	}
@@ -270,6 +273,20 @@ func (l *Lexer) readLineComment() Item {
 	// Skip --
 	sb.WriteRune(l.ch)
 	l.readChar()
+	sb.WriteRune(l.ch)
+	l.readChar()
+
+	for l.ch != '\n' && l.ch != 0 && !l.eof {
+		sb.WriteRune(l.ch)
+		l.readChar()
+	}
+	return Item{Token: token.COMMENT, Value: sb.String(), Pos: pos}
+}
+
+func (l *Lexer) readHashComment() Item {
+	pos := l.pos
+	var sb strings.Builder
+	// Skip #
 	sb.WriteRune(l.ch)
 	l.readChar()
 
