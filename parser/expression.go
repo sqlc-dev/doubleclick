@@ -958,6 +958,7 @@ func (p *Parser) parseCast() ast.Expression {
 	if p.currentIs(token.AS) {
 		p.nextToken()
 		expr.Type = p.parseDataType()
+		expr.UsedASSyntax = true
 	} else if p.currentIs(token.COMMA) {
 		p.nextToken()
 		// Type can be given as a string literal or an expression (e.g., if(cond, 'Type1', 'Type2'))
@@ -1564,6 +1565,18 @@ func (p *Parser) parseAlias(left ast.Expression) ast.Expression {
 	case *ast.Subquery:
 		e.Alias = alias
 		return e
+	case *ast.CastExpr:
+		// For :: operator syntax, set alias directly on CastExpr
+		// For function-style CAST(), wrap in AliasedExpr
+		if e.OperatorSyntax {
+			e.Alias = alias
+			return e
+		}
+		return &ast.AliasedExpr{
+			Position: left.Pos(),
+			Expr:     left,
+			Alias:    alias,
+		}
 	case *ast.CaseExpr:
 		e.Alias = alias
 		return e

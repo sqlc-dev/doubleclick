@@ -2,6 +2,7 @@ package explain
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -10,6 +11,16 @@ import (
 
 // FormatFloat formats a float value for EXPLAIN AST output
 func FormatFloat(val float64) string {
+	// Handle special float values - ClickHouse uses lowercase
+	if math.IsInf(val, 1) {
+		return "inf"
+	}
+	if math.IsInf(val, -1) {
+		return "-inf"
+	}
+	if math.IsNaN(val) {
+		return "nan"
+	}
 	// Use 'f' format to avoid scientific notation, -1 precision for smallest representation
 	return strconv.FormatFloat(val, 'f', -1, 64)
 }
@@ -142,6 +153,21 @@ func formatTupleLiteral(val interface{}) string {
 	return fmt.Sprintf("Tuple_(%s)", strings.Join(parts, ", "))
 }
 
+// formatInListAsTuple formats an IN expression's value list as a tuple literal
+func formatInListAsTuple(list []ast.Expression) string {
+	var parts []string
+	for _, e := range list {
+		if lit, ok := e.(*ast.Literal); ok {
+			parts = append(parts, FormatLiteral(lit))
+		} else if ident, ok := e.(*ast.Identifier); ok {
+			parts = append(parts, ident.Name())
+		} else {
+			parts = append(parts, formatExprAsString(e))
+		}
+	}
+	return fmt.Sprintf("Tuple_(%s)", strings.Join(parts, ", "))
+}
+
 // FormatDataType formats a DataType for EXPLAIN AST output
 func FormatDataType(dt *ast.DataType) string {
 	if dt == nil {
@@ -161,6 +187,9 @@ func FormatDataType(dt *ast.DataType) string {
 			}
 		} else if nested, ok := p.(*ast.DataType); ok {
 			params = append(params, FormatDataType(nested))
+		} else if ntp, ok := p.(*ast.NameTypePair); ok {
+			// Named tuple field: "name Type"
+			params = append(params, ntp.Name+" "+FormatDataType(ntp.Type))
 		} else {
 			params = append(params, fmt.Sprintf("%v", p))
 		}

@@ -594,16 +594,21 @@ func (l *Lexer) readNumber() Item {
 		}
 	}
 
-	// Check for decimal point
-	if l.ch == '.' && unicode.IsDigit(l.peekChar()) {
-		sb.WriteRune(l.ch)
-		l.readChar()
-		for unicode.IsDigit(l.ch) {
+	// Check for decimal point (either followed by digit or end of number like 1.)
+	if l.ch == '.' {
+		nextCh := l.peekChar()
+		// Allow 1. (trailing dot with no digits) and 1.5 (dot with digits)
+		// But not 1.something (identifier-like)
+		if unicode.IsDigit(nextCh) || (!isIdentStart(nextCh) && nextCh != '.') {
 			sb.WriteRune(l.ch)
 			l.readChar()
-			// Handle underscore separators
-			for l.ch == '_' && unicode.IsDigit(l.peekChar()) {
+			for unicode.IsDigit(l.ch) {
+				sb.WriteRune(l.ch)
 				l.readChar()
+				// Handle underscore separators
+				for l.ch == '_' && unicode.IsDigit(l.peekChar()) {
+					l.readChar()
+				}
 			}
 		}
 	}
@@ -675,15 +680,20 @@ func (l *Lexer) readNumberOrIdent() Item {
 		}
 	}
 
-	// Check for decimal point
-	if l.ch == '.' && unicode.IsDigit(l.peekChar()) {
-		sb.WriteRune(l.ch)
-		l.readChar()
-		for unicode.IsDigit(l.ch) {
+	// Check for decimal point (either followed by digit or end of number like 1.)
+	if l.ch == '.' {
+		nextCh := l.peekChar()
+		// Allow 1. (trailing dot with no digits) and 1.5 (dot with digits)
+		// But not 1.something (identifier-like)
+		if unicode.IsDigit(nextCh) || (!isIdentStart(nextCh) && nextCh != '.') {
 			sb.WriteRune(l.ch)
 			l.readChar()
-			for l.ch == '_' && unicode.IsDigit(l.peekChar()) {
+			for unicode.IsDigit(l.ch) {
+				sb.WriteRune(l.ch)
 				l.readChar()
+				for l.ch == '_' && unicode.IsDigit(l.peekChar()) {
+					l.readChar()
+				}
 			}
 		}
 	}

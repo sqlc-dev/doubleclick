@@ -83,8 +83,19 @@ func explainCastExpr(sb *strings.Builder, n *ast.CastExpr, indent string, depth 
 }
 
 func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string, indent string, depth int) {
+	// For :: operator syntax, ClickHouse hides alias only when expression is
+	// an array/tuple with complex content that gets formatted as string
+	hideAlias := false
+	if n.OperatorSyntax {
+		if lit, ok := n.Expr.(*ast.Literal); ok {
+			if lit.Type == ast.LiteralArray || lit.Type == ast.LiteralTuple {
+				hideAlias = !containsOnlyPrimitives(lit)
+			}
+		}
+	}
+
 	// CAST is represented as Function CAST with expr and type as arguments
-	if alias != "" {
+	if alias != "" && !hideAlias {
 		fmt.Fprintf(sb, "%sFunction CAST (alias %s) (children %d)\n", indent, alias, 1)
 	} else {
 		fmt.Fprintf(sb, "%sFunction CAST (children %d)\n", indent, 1)
@@ -205,9 +216,33 @@ func explainArrayAccess(sb *strings.Builder, n *ast.ArrayAccess, indent string, 
 	Node(sb, n.Index, depth+2)
 }
 
+func explainArrayAccessWithAlias(sb *strings.Builder, n *ast.ArrayAccess, alias string, indent string, depth int) {
+	// Array access is represented as Function arrayElement
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction arrayElement (alias %s) (children %d)\n", indent, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction arrayElement (children %d)\n", indent, 1)
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+	Node(sb, n.Array, depth+2)
+	Node(sb, n.Index, depth+2)
+}
+
 func explainTupleAccess(sb *strings.Builder, n *ast.TupleAccess, indent string, depth int) {
 	// Tuple access is represented as Function tupleElement
 	fmt.Fprintf(sb, "%sFunction tupleElement (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+	Node(sb, n.Tuple, depth+2)
+	Node(sb, n.Index, depth+2)
+}
+
+func explainTupleAccessWithAlias(sb *strings.Builder, n *ast.TupleAccess, alias string, indent string, depth int) {
+	// Tuple access is represented as Function tupleElement
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction tupleElement (alias %s) (children %d)\n", indent, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction tupleElement (children %d)\n", indent, 1)
+	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
 	Node(sb, n.Tuple, depth+2)
 	Node(sb, n.Index, depth+2)
@@ -229,17 +264,37 @@ func explainLikeExpr(sb *strings.Builder, n *ast.LikeExpr, indent string, depth 
 }
 
 func explainBetweenExpr(sb *strings.Builder, n *ast.BetweenExpr, indent string, depth int) {
-	// BETWEEN is represented as Function and with two comparisons
-	// But for explain, we can use a simpler form
-	fnName := "between"
 	if n.Not {
-		fnName = "notBetween"
+		// NOT BETWEEN is transformed to: expr < low OR expr > high
+		// Represented as: Function or with two comparisons: less and greater
+		fmt.Fprintf(sb, "%sFunction or (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+		// less(expr, low)
+		fmt.Fprintf(sb, "%s  Function less (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 2)
+		Node(sb, n.Expr, depth+4)
+		Node(sb, n.Low, depth+4)
+		// greater(expr, high)
+		fmt.Fprintf(sb, "%s  Function greater (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 2)
+		Node(sb, n.Expr, depth+4)
+		Node(sb, n.High, depth+4)
+	} else {
+		// BETWEEN is represented as Function and with two comparisons
+		// expr >= low AND expr <= high
+		fmt.Fprintf(sb, "%sFunction and (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+		// greaterOrEquals(expr, low)
+		fmt.Fprintf(sb, "%s  Function greaterOrEquals (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 2)
+		Node(sb, n.Expr, depth+4)
+		Node(sb, n.Low, depth+4)
+		// lessOrEquals(expr, high)
+		fmt.Fprintf(sb, "%s  Function lessOrEquals (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 2)
+		Node(sb, n.Expr, depth+4)
+		Node(sb, n.High, depth+4)
 	}
-	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
-	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 3)
-	Node(sb, n.Expr, depth+2)
-	Node(sb, n.Low, depth+2)
-	Node(sb, n.High, depth+2)
 }
 
 func explainIsNullExpr(sb *strings.Builder, n *ast.IsNullExpr, indent string, depth int) {
@@ -325,6 +380,7 @@ func explainExtractExpr(sb *strings.Builder, n *ast.ExtractExpr, indent string, 
 func explainWindowSpec(sb *strings.Builder, n *ast.WindowSpec, indent string, depth int) {
 	// Window spec is represented as WindowDefinition
 	// For simple cases like OVER (), just output WindowDefinition without children
+	// Note: ClickHouse's EXPLAIN AST does not output frame info (ROWS BETWEEN etc)
 	children := 0
 	if n.Name != "" {
 		children++
@@ -333,9 +389,6 @@ func explainWindowSpec(sb *strings.Builder, n *ast.WindowSpec, indent string, de
 		children++
 	}
 	if len(n.OrderBy) > 0 {
-		children++
-	}
-	if n.Frame != nil {
 		children++
 	}
 	if children > 0 {
@@ -352,7 +405,7 @@ func explainWindowSpec(sb *strings.Builder, n *ast.WindowSpec, indent string, de
 		if len(n.OrderBy) > 0 {
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.OrderBy))
 			for _, o := range n.OrderBy {
-				Node(sb, o.Expression, depth+2)
+				explainOrderByElement(sb, o, strings.Repeat(" ", depth+2), depth+2)
 			}
 		}
 		// Frame handling would go here if needed

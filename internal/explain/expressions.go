@@ -198,7 +198,11 @@ func explainUnaryExpr(sb *strings.Builder, n *ast.UnaryExpr, indent string, dept
 
 func explainSubquery(sb *strings.Builder, n *ast.Subquery, indent string, depth int) {
 	children := 1
-	fmt.Fprintf(sb, "%sSubquery (children %d)\n", indent, children)
+	if n.Alias != "" {
+		fmt.Fprintf(sb, "%sSubquery (alias %s) (children %d)\n", indent, n.Alias, children)
+	} else {
+		fmt.Fprintf(sb, "%sSubquery (children %d)\n", indent, children)
+	}
 	Node(sb, n.Query, depth+1)
 }
 
@@ -270,8 +274,12 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 		Node(sb, e.Then, depth+2)
 		Node(sb, e.Else, depth+2)
 	case *ast.CastExpr:
-		// CAST expressions - ClickHouse doesn't show aliases on CAST in EXPLAIN AST
-		explainCastExpr(sb, e, indent, depth)
+		// CAST expressions - show alias only for CAST(x AS Type) syntax, not CAST(x, 'Type')
+		if e.UsedASSyntax {
+			explainCastExprWithAlias(sb, e, n.Alias, indent, depth)
+		} else {
+			explainCastExpr(sb, e, indent, depth)
+		}
 	case *ast.ArrayAccess:
 		// Array access - ClickHouse doesn't show aliases on arrayElement in EXPLAIN AST
 		explainArrayAccess(sb, e, indent, depth)
