@@ -179,7 +179,7 @@ func NormalizeFunctionName(name string) string {
 		"mid":         "substring",
 		"substr":      "substring",
 		"pow":         "power",
-		"ceil":        "ceiling",
+		"ceiling":     "ceil",
 		"ln":          "log",
 		"log10":       "log10",
 		"log2":        "log2",

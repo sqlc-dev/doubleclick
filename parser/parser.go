@@ -1950,6 +1950,7 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 
 	// What are we dropping?
 	dropUser := false
+	dropFunction := false
 	switch p.current.Token {
 	case token.TABLE:
 		p.nextToken()
@@ -1962,6 +1963,7 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		dropUser = true
 		p.nextToken()
 	case token.FUNCTION:
+		dropFunction = true
 		p.nextToken()
 	case token.INDEX:
 		p.nextToken()
@@ -2025,6 +2027,8 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 					p.nextToken()
 				}
 			}
+		} else if dropFunction {
+			drop.Function = tableName
 		} else if drop.DropDatabase {
 			drop.Database = tableName
 		} else {

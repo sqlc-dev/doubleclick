@@ -360,6 +360,7 @@ type DropQuery struct {
 	Tables       []*TableIdentifier `json:"tables,omitempty"` // For DROP TABLE t1, t2, t3
 	View         string             `json:"view,omitempty"`
 	User         string             `json:"user,omitempty"`
+	Function     string             `json:"function,omitempty"` // For DROP FUNCTION
 	Temporary    bool               `json:"temporary,omitempty"`
 	OnCluster    string             `json:"on_cluster,omitempty"`
 	DropDatabase bool               `json:"drop_database,omitempty"`

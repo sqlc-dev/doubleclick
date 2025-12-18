@@ -168,7 +168,9 @@ func TestParser(t *testing.T) {
 					expected = strings.TrimSpace(expected[:idx])
 				}
 				actual := strings.TrimSpace(parser.Explain(stmts[0]))
-				if actual != expected {
+				// Use case-insensitive comparison since ClickHouse EXPLAIN AST has inconsistent casing
+				// (e.g., Float64_NaN vs Float64_nan, GREATEST vs greatest)
+				if !strings.EqualFold(actual, expected) {
 					if metadata.Todo {
 						if *checkSkipped {
 							t.Skipf("STILL FAILING (explain mismatch):\nExpected:\n%s\n\nGot:\n%s", expected, actual)
