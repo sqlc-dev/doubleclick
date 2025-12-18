@@ -269,6 +269,15 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 		Node(sb, e.Condition, depth+2)
 		Node(sb, e.Then, depth+2)
 		Node(sb, e.Else, depth+2)
+	case *ast.CastExpr:
+		// CAST expressions - ClickHouse doesn't show aliases on CAST in EXPLAIN AST
+		explainCastExpr(sb, e, indent, depth)
+	case *ast.ArrayAccess:
+		// Array access - ClickHouse doesn't show aliases on arrayElement in EXPLAIN AST
+		explainArrayAccess(sb, e, indent, depth)
+	case *ast.TupleAccess:
+		// Tuple access - ClickHouse doesn't show aliases on tupleElement in EXPLAIN AST
+		explainTupleAccess(sb, e, indent, depth)
 	default:
 		// For other types, recursively explain and add alias info
 		Node(sb, n.Expr, depth)

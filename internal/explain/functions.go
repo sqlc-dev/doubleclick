@@ -79,9 +79,13 @@ func explainLambda(sb *strings.Builder, n *ast.Lambda, indent string, depth int)
 }
 
 func explainCastExpr(sb *strings.Builder, n *ast.CastExpr, indent string, depth int) {
+	explainCastExprWithAlias(sb, n, n.Alias, indent, depth)
+}
+
+func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string, indent string, depth int) {
 	// CAST is represented as Function CAST with expr and type as arguments
-	if n.Alias != "" {
-		fmt.Fprintf(sb, "%sFunction CAST (alias %s) (children %d)\n", indent, n.Alias, 1)
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction CAST (alias %s) (children %d)\n", indent, alias, 1)
 	} else {
 		fmt.Fprintf(sb, "%sFunction CAST (children %d)\n", indent, 1)
 	}

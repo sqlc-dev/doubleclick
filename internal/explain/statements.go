@@ -222,6 +222,12 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 		return
 	}
 
+	// DROP FUNCTION has a special output format
+	if n.Function != "" {
+		fmt.Fprintf(sb, "%sDropFunctionQuery\n", indent)
+		return
+	}
+
 	// Handle multiple tables: DROP TABLE t1, t2, t3
 	if len(n.Tables) > 1 {
 		fmt.Fprintf(sb, "%sDropQuery   (children %d)\n", indent, 1)
@@ -239,13 +245,45 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 	if n.DropDatabase {
 		name = n.Database
 	}
-	// DROP DATABASE uses different spacing than DROP TABLE
-	if n.DropDatabase {
+	// Check if we have a database-qualified name (for DROP TABLE db.table)
+	hasDatabase := n.Database != "" && !n.DropDatabase
+	if hasDatabase {
+		// Database-qualified: DropQuery db table (children 2)
+		fmt.Fprintf(sb, "%sDropQuery %s %s (children %d)\n", indent, n.Database, name, 2)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+	} else if n.DropDatabase {
+		// DROP DATABASE uses different spacing
 		fmt.Fprintf(sb, "%sDropQuery %s  (children %d)\n", indent, name, 1)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 	} else {
 		fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, name, 1)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 	}
-	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+}
+
+func explainRenameQuery(sb *strings.Builder, n *ast.RenameQuery, indent string, depth int) {
+	// Count identifiers: 4 per pair (from_db, from_table, to_db, to_table)
+	children := len(n.Pairs) * 4
+	fmt.Fprintf(sb, "%sRename (children %d)\n", indent, children)
+	for _, pair := range n.Pairs {
+		// From database
+		fromDB := pair.FromDatabase
+		if fromDB == "" {
+			fromDB = "default"
+		}
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, fromDB)
+		// From table
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, pair.FromTable)
+		// To database
+		toDB := pair.ToDatabase
+		if toDB == "" {
+			toDB = "default"
+		}
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, toDB)
+		// To table
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, pair.ToTable)
+	}
 }
 
 func explainSetQuery(sb *strings.Builder, indent string) {
@@ -257,6 +295,11 @@ func explainSystemQuery(sb *strings.Builder, indent string) {
 }
 
 func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string, depth int) {
+	// EXPLAIN CURRENT TRANSACTION has no children
+	if n.ExplainType == ast.ExplainCurrentTransaction {
+		fmt.Fprintf(sb, "%sExplain %s\n", indent, n.ExplainType)
+		return
+	}
 	fmt.Fprintf(sb, "%sExplain %s (children %d)\n", indent, n.ExplainType, 1)
 	Node(sb, n.Statement, depth+1)
 }
