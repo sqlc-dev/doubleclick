@@ -69,11 +69,13 @@ for ((i=START_IDX; i<END_IDX; i++)); do
         echo "[$i] OK $name"
         ((SUCCESS++))
     else
-        # Update metadata.json with explain: false
+        # Update metadata.json with explain: false (only if not already present)
         if [ -f "$metadata_file" ]; then
-            # Read existing metadata and merge with explain: false
             existing=$(cat "$metadata_file" | tr -d '\n')
-            if [[ "$existing" == "{}"* ]]; then
+            if [[ "$existing" == *'"explain"'* ]]; then
+                # Already has explain key, don't modify
+                :
+            elif [[ "$existing" == "{}" ]]; then
                 echo '{"explain":false}' > "$metadata_file"
             elif [[ "$existing" == "{"* ]]; then
                 # Remove leading { and prepend with {"explain":false,
