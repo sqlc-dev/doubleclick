@@ -8,15 +8,30 @@ CLICKHOUSE_DIR="$PROJECT_DIR/.clickhouse"
 CONFIG_FILE="$CLICKHOUSE_DIR/config.xml"
 PID_FILE="$CLICKHOUSE_DIR/clickhouse.pid"
 
+# ClickHouse version - use a specific stable version for reproducible test output
+# Update this when regenerating test expectations
+CLICKHOUSE_VERSION="${CLICKHOUSE_VERSION:-24.8.4.13}"
+
 # Download ClickHouse if not present
 download() {
     if [ -f "$CLICKHOUSE_BIN" ]; then
         echo "ClickHouse binary already exists"
+        "$CLICKHOUSE_BIN" --version
         return 0
     fi
 
-    echo "Downloading ClickHouse..."
-    curl -k -L -o "$CLICKHOUSE_BIN" https://builds.clickhouse.com/master/amd64/clickhouse
+    echo "Downloading ClickHouse v$CLICKHOUSE_VERSION..."
+
+    # Use stable release URL format
+    DOWNLOAD_URL="https://github.com/ClickHouse/ClickHouse/releases/download/v${CLICKHOUSE_VERSION}-stable/clickhouse-linux-amd64"
+
+    if ! curl -k -L -f -o "$CLICKHOUSE_BIN" "$DOWNLOAD_URL"; then
+        echo "Failed to download from releases, trying builds.clickhouse.com..."
+        # Fallback to builds server with version tag
+        DOWNLOAD_URL="https://builds.clickhouse.com/master/amd64/clickhouse"
+        curl -k -L -o "$CLICKHOUSE_BIN" "$DOWNLOAD_URL"
+    fi
+
     chmod +x "$CLICKHOUSE_BIN"
     echo "Downloaded ClickHouse"
     "$CLICKHOUSE_BIN" --version
@@ -150,9 +165,33 @@ client() {
     "$CLICKHOUSE_BIN" client "$@"
 }
 
+# Force download (remove existing binary first)
+force_download() {
+    if [ -f "$CLICKHOUSE_BIN" ]; then
+        echo "Removing existing ClickHouse binary..."
+        rm -f "$CLICKHOUSE_BIN"
+    fi
+    download
+}
+
+# Show version info
+version() {
+    echo "Configured version: $CLICKHOUSE_VERSION"
+    echo "Override with: CLICKHOUSE_VERSION=X.Y.Z.W $0 download"
+    if [ -f "$CLICKHOUSE_BIN" ]; then
+        echo "Installed:"
+        "$CLICKHOUSE_BIN" --version
+    else
+        echo "Binary not installed yet"
+    fi
+}
+
 case "$1" in
     download)
         download
+        ;;
+    force-download)
+        force_download
         ;;
     init)
         init
@@ -170,12 +209,22 @@ case "$1" in
     status)
         status
         ;;
+    version)
+        version
+        ;;
     client)
         shift
         client "$@"
         ;;
     *)
-        echo "Usage: $0 {download|init|start|stop|restart|status|client}"
+        echo "Usage: $0 {download|force-download|init|start|stop|restart|status|version|client}"
+        echo ""
+        echo "Environment variables:"
+        echo "  CLICKHOUSE_VERSION  - Override the ClickHouse version (default: $CLICKHOUSE_VERSION)"
+        echo ""
+        echo "Examples:"
+        echo "  $0 download                           # Download default version"
+        echo "  CLICKHOUSE_VERSION=24.3.1.5 $0 force-download  # Download specific version"
         exit 1
         ;;
 esac
