@@ -330,6 +330,8 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 	case *ast.Subquery:
 		fmt.Fprintf(sb, "%sSubquery (alias %s) (children %d)\n", indent, n.Name, 1)
 		Node(sb, e.Query, depth+1)
+	case *ast.CastExpr:
+		explainCastExprWithAlias(sb, e, n.Name, indent, depth)
 	default:
 		// For other types, just output the expression (alias may be lost)
 		Node(sb, n.Query, depth)

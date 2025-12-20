@@ -34,7 +34,7 @@ func escapeStringLiteral(s string) string {
 		case '\\':
 			sb.WriteString("\\\\\\\\") // backslash becomes four backslashes (\\\\)
 		case '\'':
-			sb.WriteString("\\'")
+			sb.WriteString("\\'") // single quote becomes \' (one backslash + quote)
 		case '\n':
 			sb.WriteString("\\\\n") // newline becomes \\n
 		case '\t':
@@ -200,6 +200,7 @@ func FormatDataType(dt *ast.DataType) string {
 // NormalizeFunctionName normalizes function names to match ClickHouse's EXPLAIN AST output
 func NormalizeFunctionName(name string) string {
 	// ClickHouse normalizes certain function names in EXPLAIN AST
+	// Note: pow is NOT normalized to power in EXPLAIN AST
 	normalized := map[string]string{
 		"ltrim":       "trimLeft",
 		"rtrim":       "trimRight",
@@ -207,7 +208,6 @@ func NormalizeFunctionName(name string) string {
 		"ucase":       "upper",
 		"mid":         "substring",
 		"substr":      "substring",
-		"pow":         "power",
 		"ceiling":     "ceil",
 		"ln":          "log",
 		"log10":       "log10",
