@@ -30,37 +30,13 @@ func main() {
 		panic(err)
 	}
 
-	// Print EXPLAIN AST output (matches ClickHouse format)
-	fmt.Println(parser.Explain(stmts[0]))
-
-	// Or serialize to JSON
+	// Serialize to JSON
 	jsonBytes, _ := json.MarshalIndent(stmts[0], "", "  ")
 	fmt.Println(string(jsonBytes))
+
+	// Or print EXPLAIN AST output (matches ClickHouse format)
+	fmt.Println(parser.Explain(stmts[0]))
 }
-```
-
-Output:
-
-```
-SelectWithUnionQuery (children 1)
- ExpressionList (children 1)
-  SelectQuery (children 4)
-   ExpressionList (children 2)
-    Identifier id
-    Identifier name
-   TablesInSelectQuery (children 1)
-    TablesInSelectQueryElement (children 1)
-     TableExpression (children 1)
-      TableIdentifier (children 1)
-       Identifier users
-   Function equals (children 1)
-    ExpressionList (children 2)
-     Identifier active
-     Literal UInt64_1
-   ExpressionList (children 1)
-    OrderByElement (children 1)
-     Identifier created_at
-   Literal UInt64_10
 ```
 
 JSON output:
@@ -93,6 +69,30 @@ JSON output:
     }
   ]
 }
+```
+
+EXPLAIN output:
+
+```
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 2)
+    Identifier id
+    Identifier name
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier (children 1)
+       Identifier users
+   Function equals (children 1)
+    ExpressionList (children 2)
+     Identifier active
+     Literal UInt64_1
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier created_at
+   Literal UInt64_10
 ```
 
 ## Features
