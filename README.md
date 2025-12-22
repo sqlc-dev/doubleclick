@@ -5,7 +5,7 @@ A ClickHouse SQL parser written in Go. Parses ClickHouse SQL syntax into an Abst
 ## Installation
 
 ```bash
-go get github.com/kyleconroy/doubleclick
+go get github.com/sqlc-dev/doubleclick
 ```
 
 ## Usage
@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyleconroy/doubleclick/parser"
+	"github.com/sqlc-dev/doubleclick/parser"
 )
 
 func main() {
