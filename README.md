@@ -1,5 +1,7 @@
 # doubleclick
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/sqlc-dev/doubleclick.svg)](https://pkg.go.dev/github.com/sqlc-dev/doubleclick)
+
 A ClickHouse SQL parser written in Go. Parses ClickHouse SQL syntax into an Abstract Syntax Tree (AST) and generates EXPLAIN output matching ClickHouse's format.
 
 ## Installation
