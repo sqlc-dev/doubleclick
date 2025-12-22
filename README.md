@@ -15,6 +15,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -31,6 +32,10 @@ func main() {
 
 	// Print EXPLAIN AST output (matches ClickHouse format)
 	fmt.Println(parser.Explain(stmts[0]))
+
+	// Or serialize to JSON
+	jsonBytes, _ := json.MarshalIndent(stmts[0], "", "  ")
+	fmt.Println(string(jsonBytes))
 }
 ```
 
@@ -58,6 +63,38 @@ SelectWithUnionQuery (children 1)
    Literal UInt64_10
 ```
 
+JSON output:
+
+```json
+{
+  "selects": [
+    {
+      "columns": [
+        { "parts": ["id"] },
+        { "parts": ["name"] }
+      ],
+      "from": {
+        "tables": [
+          { "table": { "table": { "table": "users" } } }
+        ]
+      },
+      "where": {
+        "left": { "parts": ["active"] },
+        "op": "=",
+        "right": { "type": "Integer", "value": 1 }
+      },
+      "order_by": [
+        {
+          "expression": { "parts": ["created_at"] },
+          "descending": true
+        }
+      ],
+      "limit": { "type": "Integer", "value": 10 }
+    }
+  ]
+}
+```
+
 ## Features
 
 - Parses SELECT, INSERT, CREATE, DROP, ALTER, and other ClickHouse statements
@@ -65,7 +102,3 @@ SelectWithUnionQuery (children 1)
 - Supports JOINs, subqueries, CTEs, window functions, and complex expressions
 - Generates JSON-serializable AST nodes
 - Produces EXPLAIN AST output matching ClickHouse's format
-
-## License
-
-MIT
