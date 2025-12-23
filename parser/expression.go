@@ -809,7 +809,15 @@ func (p *Parser) parseNot() ast.Expression {
 		Op:       "NOT",
 	}
 	p.nextToken()
-	expr.Operand = p.parseExpression(NOT_PREC)
+	// When NOT is followed by a parenthesized expression, use UNARY precedence
+	// so that binary operators after the group don't continue as part of the NOT operand.
+	// e.g., NOT (0) + 1 should parse as (NOT(0)) + 1, not NOT((0) + 1)
+	// But NOT 0 + 1 should parse as NOT(0 + 1)
+	if p.currentIs(token.LPAREN) {
+		expr.Operand = p.parseExpression(UNARY)
+	} else {
+		expr.Operand = p.parseExpression(NOT_PREC)
+	}
 	return expr
 }
 
