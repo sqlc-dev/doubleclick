@@ -115,6 +115,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainExplainQuery(sb, n, indent, depth)
 	case *ast.ShowQuery:
 		explainShowQuery(sb, n, indent)
+	case *ast.ShowPrivilegesQuery:
+		fmt.Fprintf(sb, "%sShowPrivilegesQuery\n", indent)
 	case *ast.UseQuery:
 		explainUseQuery(sb, n, indent)
 	case *ast.DescribeQuery:

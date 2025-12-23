@@ -2612,12 +2612,20 @@ func (p *Parser) parseDescribe() *ast.DescribeQuery {
 	return desc
 }
 
-func (p *Parser) parseShow() *ast.ShowQuery {
-	show := &ast.ShowQuery{
-		Position: p.current.Pos,
-	}
+func (p *Parser) parseShow() ast.Statement {
+	pos := p.current.Pos
 
 	p.nextToken() // skip SHOW
+
+	// Handle SHOW PRIVILEGES first - it has its own statement type
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PRIVILEGES" {
+		p.nextToken()
+		return &ast.ShowPrivilegesQuery{Position: pos}
+	}
+
+	show := &ast.ShowQuery{
+		Position: pos,
+	}
 
 	switch p.current.Token {
 	case token.TABLES:
