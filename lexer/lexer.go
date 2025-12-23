@@ -8,7 +8,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/kyleconroy/doubleclick/token"
+	"github.com/sqlc-dev/doubleclick/token"
 )
 
 // Lexer tokenizes ClickHouse SQL input.

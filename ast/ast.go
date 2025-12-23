@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"math"
 
-	"github.com/kyleconroy/doubleclick/token"
+	"github.com/sqlc-dev/doubleclick/token"
 )
 
 // Node is the interface implemented by all AST nodes.

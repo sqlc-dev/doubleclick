@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyleconroy/doubleclick/parser"
+	"github.com/sqlc-dev/doubleclick/parser"
 )
 
 type testMetadata struct {

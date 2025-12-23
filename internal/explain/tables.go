@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyleconroy/doubleclick/ast"
+	"github.com/sqlc-dev/doubleclick/ast"
 )
 
 func explainTablesInSelectQuery(sb *strings.Builder, n *ast.TablesInSelectQuery, indent string, depth int) {

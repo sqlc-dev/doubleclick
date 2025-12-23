@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyleconroy/doubleclick/parser"
+	"github.com/sqlc-dev/doubleclick/parser"
 )
 
 // checkSkipped runs skipped todo tests to see which ones now pass.
