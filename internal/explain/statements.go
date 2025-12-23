@@ -318,8 +318,8 @@ func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string
 func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 	// ClickHouse maps certain SHOW types to ShowTables in EXPLAIN AST
 	showType := strings.Title(strings.ToLower(string(n.ShowType)))
-	// SHOW SETTINGS is displayed as ShowTables in ClickHouse
-	if showType == "Settings" {
+	// SHOW SETTINGS and SHOW DATABASES are displayed as ShowTables in ClickHouse
+	if showType == "Settings" || showType == "Databases" {
 		showType = "Tables"
 	}
 	fmt.Fprintf(sb, "%sShow%s\n", indent, showType)
