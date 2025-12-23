@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kyleconroy/doubleclick/ast"
+	"github.com/sqlc-dev/doubleclick/ast"
 )
 
 // FormatFloat formats a float value for EXPLAIN AST output

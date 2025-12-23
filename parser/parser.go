@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kyleconroy/doubleclick/ast"
-	"github.com/kyleconroy/doubleclick/lexer"
-	"github.com/kyleconroy/doubleclick/token"
+	"github.com/sqlc-dev/doubleclick/ast"
+	"github.com/sqlc-dev/doubleclick/lexer"
+	"github.com/sqlc-dev/doubleclick/token"
 )
 
 // Parser parses ClickHouse SQL statements.

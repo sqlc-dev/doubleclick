@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyleconroy/doubleclick/ast"
+	"github.com/sqlc-dev/doubleclick/ast"
 )
 
 func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, depth int) {

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/kyleconroy/doubleclick/parser"
+	"github.com/sqlc-dev/doubleclick/parser"
 )
 
 type testMetadata struct {

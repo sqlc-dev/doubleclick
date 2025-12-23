@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyleconroy/doubleclick/parser"
+	"github.com/sqlc-dev/doubleclick/parser"
 )
 
 func main() {

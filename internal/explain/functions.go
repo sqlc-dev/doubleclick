@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyleconroy/doubleclick/ast"
+	"github.com/sqlc-dev/doubleclick/ast"
 )
 
 func explainFunctionCall(sb *strings.Builder, n *ast.FunctionCall, indent string, depth int) {

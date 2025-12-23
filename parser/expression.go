@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kyleconroy/doubleclick/ast"
-	"github.com/kyleconroy/doubleclick/token"
+	"github.com/sqlc-dev/doubleclick/ast"
+	"github.com/sqlc-dev/doubleclick/token"
 )
 
 // Operator precedence levels

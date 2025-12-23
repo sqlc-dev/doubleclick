@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyleconroy/doubleclick/ast"
+	"github.com/sqlc-dev/doubleclick/ast"
 )
 
 func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuery, indent string, depth int) {
