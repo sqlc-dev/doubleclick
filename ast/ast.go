@@ -620,6 +620,15 @@ func (e *ExistsQuery) Pos() token.Position { return e.Position }
 func (e *ExistsQuery) End() token.Position { return e.Position }
 func (e *ExistsQuery) statementNode()      {}
 
+// ShowPrivilegesQuery represents a SHOW PRIVILEGES statement.
+type ShowPrivilegesQuery struct {
+	Position token.Position `json:"-"`
+}
+
+func (s *ShowPrivilegesQuery) Pos() token.Position { return s.Position }
+func (s *ShowPrivilegesQuery) End() token.Position { return s.Position }
+func (s *ShowPrivilegesQuery) statementNode()      {}
+
 // -----------------------------------------------------------------------------
 // Expressions
 
