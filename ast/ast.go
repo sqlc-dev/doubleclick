@@ -629,6 +629,16 @@ func (s *ShowPrivilegesQuery) Pos() token.Position { return s.Position }
 func (s *ShowPrivilegesQuery) End() token.Position { return s.Position }
 func (s *ShowPrivilegesQuery) statementNode()      {}
 
+// ShowCreateQuotaQuery represents a SHOW CREATE QUOTA statement.
+type ShowCreateQuotaQuery struct {
+	Position token.Position `json:"-"`
+	Name     string         `json:"name,omitempty"`
+}
+
+func (s *ShowCreateQuotaQuery) Pos() token.Position { return s.Position }
+func (s *ShowCreateQuotaQuery) End() token.Position { return s.Position }
+func (s *ShowCreateQuotaQuery) statementNode()      {}
+
 // -----------------------------------------------------------------------------
 // Expressions
 
