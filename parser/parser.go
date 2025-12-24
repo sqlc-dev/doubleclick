@@ -2642,16 +2642,20 @@ func (p *Parser) parseShow() ast.Statement {
 		if p.currentIs(token.DATABASE) {
 			show.ShowType = ast.ShowCreateDB
 			p.nextToken()
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "QUOTA" {
+			// SHOW CREATE QUOTA <name>
+			p.nextToken()
+			name := ""
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				name = p.current.Value
+				p.nextToken()
+			}
+			return &ast.ShowCreateQuotaQuery{Position: pos, Name: name}
 		} else {
 			show.ShowType = ast.ShowCreate
-			// Handle SHOW CREATE TABLE, SHOW CREATE QUOTA, etc.
+			// Handle SHOW CREATE TABLE, etc.
 			if p.currentIs(token.TABLE) {
 				p.nextToken()
-			} else if p.currentIs(token.DEFAULT) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "QUOTA") {
-				// SHOW CREATE QUOTA default - skip QUOTA keyword
-				if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "QUOTA" {
-					p.nextToken()
-				}
 			}
 		}
 	case token.SETTINGS:
