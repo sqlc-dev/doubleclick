@@ -34,7 +34,7 @@ func escapeStringLiteral(s string) string {
 		case '\\':
 			sb.WriteString("\\\\\\\\") // backslash becomes four backslashes (\\\\)
 		case '\'':
-			sb.WriteString("\\'")
+			sb.WriteString("\\\\\\'") // single quote becomes \\\' (escaped backslash + escaped quote)
 		case '\n':
 			sb.WriteString("\\\\n") // newline becomes \\n
 		case '\t':
