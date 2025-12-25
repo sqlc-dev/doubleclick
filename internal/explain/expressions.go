@@ -382,6 +382,9 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 	case *ast.TupleAccess:
 		// Tuple access - ClickHouse doesn't show aliases on tupleElement in EXPLAIN AST
 		explainTupleAccess(sb, e, indent, depth)
+	case *ast.InExpr:
+		// IN expressions with alias
+		explainInExprWithAlias(sb, e, n.Alias, indent, depth)
 	default:
 		// For other types, recursively explain and add alias info
 		Node(sb, n.Expr, depth)

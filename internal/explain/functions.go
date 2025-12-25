@@ -86,10 +86,13 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 	// For :: operator syntax, ClickHouse hides alias only when expression is
 	// an array/tuple with complex content that gets formatted as string
 	hideAlias := false
+	useArrayFormat := false
 	if n.OperatorSyntax {
 		if lit, ok := n.Expr.(*ast.Literal); ok {
 			if lit.Type == ast.LiteralArray || lit.Type == ast.LiteralTuple {
-				hideAlias = !containsOnlyPrimitives(lit)
+				// Determine format based on both content and target type
+				useArrayFormat = shouldUseArrayFormat(lit, n.Type)
+				hideAlias = !useArrayFormat
 			}
 		}
 	}
@@ -108,7 +111,7 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 			// For arrays/tuples of simple primitives, use FormatLiteral (Array_[...] format)
 			// For strings and other types, use string format
 			if lit.Type == ast.LiteralArray || lit.Type == ast.LiteralTuple {
-				if containsOnlyPrimitives(lit) {
+				if useArrayFormat {
 					fmt.Fprintf(sb, "%s  Literal %s\n", indent, FormatLiteral(lit))
 				} else {
 					// Complex content - format as string
@@ -127,12 +130,94 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 	} else {
 		Node(sb, n.Expr, depth+2)
 	}
-	// Type is formatted as a literal string
-	typeStr := FormatDataType(n.Type)
-	fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, typeStr)
+	// Type is formatted as a literal string, or as a node if it's a dynamic type expression
+	if n.TypeExpr != nil {
+		Node(sb, n.TypeExpr, depth+2)
+	} else {
+		typeStr := FormatDataType(n.Type)
+		fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, typeStr)
+	}
+}
+
+// shouldUseArrayFormat determines whether to use Array_[...] format or string format
+// for array/tuple literals in :: cast expressions.
+// This depends on both the literal content and the target type.
+func shouldUseArrayFormat(lit *ast.Literal, targetType *ast.DataType) bool {
+	// First check if the literal contains only primitive literals (not expressions)
+	if !containsOnlyLiterals(lit) {
+		return false
+	}
+
+	// For arrays of strings, check the target type to determine format
+	if lit.Type == ast.LiteralArray && hasStringElements(lit) {
+		// Only use Array_ format when casting to Array(String) specifically
+		// For other types like Array(JSON), Array(LowCardinality(String)), etc., use string format
+		if targetType != nil && strings.ToLower(targetType.Name) == "array" && len(targetType.Parameters) > 0 {
+			if innerType, ok := targetType.Parameters[0].(*ast.DataType); ok {
+				// Only use Array_ format if inner type is exactly "String" with no parameters
+				if strings.ToLower(innerType.Name) == "string" && len(innerType.Parameters) == 0 {
+					return true
+				}
+			}
+		}
+		// For any other type (JSON, LowCardinality, etc.), use string format
+		return false
+	}
+
+	// For non-string primitives, always use Array_ format
+	return true
+}
+
+// containsOnlyLiterals checks if a literal array/tuple contains only literal values (no expressions)
+func containsOnlyLiterals(lit *ast.Literal) bool {
+	var exprs []ast.Expression
+	switch lit.Type {
+	case ast.LiteralArray, ast.LiteralTuple:
+		var ok bool
+		exprs, ok = lit.Value.([]ast.Expression)
+		if !ok {
+			return false
+		}
+	default:
+		return true
+	}
+
+	for _, e := range exprs {
+		innerLit, ok := e.(*ast.Literal)
+		if !ok {
+			return false
+		}
+		// Nested arrays/tuples need recursive check
+		if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
+			if !containsOnlyLiterals(innerLit) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// hasStringElements checks if an array literal contains any string elements
+func hasStringElements(lit *ast.Literal) bool {
+	if lit.Type != ast.LiteralArray {
+		return false
+	}
+	exprs, ok := lit.Value.([]ast.Expression)
+	if !ok {
+		return false
+	}
+	for _, e := range exprs {
+		if innerLit, ok := e.(*ast.Literal); ok {
+			if innerLit.Type == ast.LiteralString {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // containsOnlyPrimitives checks if a literal array/tuple contains only primitive literals
+// Deprecated: Use shouldUseArrayFormat instead for :: cast expressions
 func containsOnlyPrimitives(lit *ast.Literal) bool {
 	var exprs []ast.Expression
 	switch lit.Type {
@@ -151,14 +236,6 @@ func containsOnlyPrimitives(lit *ast.Literal) bool {
 		if !ok {
 			return false
 		}
-		// Strings with special chars are not considered primitive for this purpose
-		if innerLit.Type == ast.LiteralString {
-			s := innerLit.Value.(string)
-			// Strings that look like JSON or contain special chars should be converted to string format
-			if strings.ContainsAny(s, "{}[]\"\\") {
-				return false
-			}
-		}
 		// Nested arrays/tuples need recursive check
 		if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
 			if !containsOnlyPrimitives(innerLit) {
@@ -167,6 +244,67 @@ func containsOnlyPrimitives(lit *ast.Literal) bool {
 		}
 	}
 	return true
+}
+
+// isNumericExpr checks if an expression is a numeric value (literal or unary minus of numeric)
+func isNumericExpr(expr ast.Expression) bool {
+	if lit, ok := expr.(*ast.Literal); ok {
+		return lit.Type == ast.LiteralInteger || lit.Type == ast.LiteralFloat
+	}
+	if unary, ok := expr.(*ast.UnaryExpr); ok && unary.Op == "-" {
+		if lit, ok := unary.Operand.(*ast.Literal); ok {
+			return lit.Type == ast.LiteralInteger || lit.Type == ast.LiteralFloat
+		}
+	}
+	return false
+}
+
+// containsOnlyPrimitiveLiterals checks if a tuple literal contains only primitive literals (recursively)
+func containsOnlyPrimitiveLiterals(lit *ast.Literal) bool {
+	if lit.Type != ast.LiteralTuple {
+		// Non-tuple literals are primitive
+		return true
+	}
+	exprs, ok := lit.Value.([]ast.Expression)
+	if !ok {
+		return false
+	}
+	for _, e := range exprs {
+		innerLit, ok := e.(*ast.Literal)
+		if !ok {
+			// Non-literal expression in tuple
+			return false
+		}
+		// Recursively check nested tuples
+		if innerLit.Type == ast.LiteralTuple {
+			if !containsOnlyPrimitiveLiterals(innerLit) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// exprToLiteral converts a numeric expression to a literal (handles unary minus)
+func exprToLiteral(expr ast.Expression) *ast.Literal {
+	if lit, ok := expr.(*ast.Literal); ok {
+		return lit
+	}
+	if unary, ok := expr.(*ast.UnaryExpr); ok && unary.Op == "-" {
+		if lit, ok := unary.Operand.(*ast.Literal); ok {
+			// Create a new literal with negated value
+			switch val := lit.Value.(type) {
+			case int64:
+				return &ast.Literal{Type: ast.LiteralInteger, Value: -val}
+			case uint64:
+				// Convert to int64 and negate
+				return &ast.Literal{Type: ast.LiteralInteger, Value: -int64(val)}
+			case float64:
+				return &ast.Literal{Type: ast.LiteralFloat, Value: -val}
+			}
+		}
+	}
+	return nil
 }
 
 func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int) {
@@ -181,28 +319,49 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 
 	// Determine if the IN list should be combined into a single tuple literal
-	// This happens when we have multiple literals of the same type:
-	// - All numeric literals (integers/floats)
-	// - All tuple literals
+	// This happens when we have multiple literals of compatible types:
+	// - All numeric literals/expressions (integers/floats, including unary minus)
+	// - All string literals (only for small lists, max 10 items)
+	// - All tuple literals that contain only primitive literals (recursively)
 	canBeTupleLiteral := false
+	// Only combine strings into tuple for small lists (up to 10 items)
+	// Large string lists are kept as separate children in ClickHouse EXPLAIN AST
+	const maxStringTupleSize = 10
 	if n.Query == nil && len(n.List) > 1 {
 		allNumeric := true
+		allStrings := true
 		allTuples := true
+		allTuplesArePrimitive := true
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
 				if lit.Type != ast.LiteralInteger && lit.Type != ast.LiteralFloat {
 					allNumeric = false
 				}
+				if lit.Type != ast.LiteralString {
+					allStrings = false
+				}
 				if lit.Type != ast.LiteralTuple {
 					allTuples = false
+				} else {
+					// Check if this tuple contains only primitive literals
+					if !containsOnlyPrimitiveLiterals(lit) {
+						allTuplesArePrimitive = false
+					}
 				}
+			} else if isNumericExpr(item) {
+				// Unary minus of numeric is still numeric
+				allStrings = false
+				allTuples = false
 			} else {
 				allNumeric = false
+				allStrings = false
 				allTuples = false
 				break
 			}
 		}
-		canBeTupleLiteral = allNumeric || allTuples
+		// For strings, only combine if list is small enough
+		// For tuples, only combine if all contain primitive literals
+		canBeTupleLiteral = allNumeric || (allStrings && len(n.List) <= maxStringTupleSize) || (allTuples && allTuplesArePrimitive)
 	}
 
 	// Count arguments: expr + list items or subquery
@@ -222,7 +381,20 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				argCount += len(n.List)
 			}
 		} else {
-			argCount += len(n.List)
+			// Check if all items are tuples
+			allTuples := true
+			for _, item := range n.List {
+				if lit, ok := item.(*ast.Literal); !ok || lit.Type != ast.LiteralTuple {
+					allTuples = false
+					break
+				}
+			}
+			if allTuples {
+				// All tuples get wrapped in a single Function tuple
+				argCount++
+			} else {
+				argCount += len(n.List)
+			}
 		}
 	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, argCount)
@@ -253,8 +425,170 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 			Node(sb, n.List[0], depth+2)
 		}
 	} else {
+		// Check if all items are tuple literals (some may have expressions)
+		allTuples := true
 		for _, item := range n.List {
-			Node(sb, item, depth+2)
+			if lit, ok := item.(*ast.Literal); !ok || lit.Type != ast.LiteralTuple {
+				allTuples = false
+				break
+			}
+		}
+		if allTuples {
+			// Wrap all tuples in Function tuple
+			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.List))
+			for _, item := range n.List {
+				explainTupleInInList(sb, item.(*ast.Literal), indent+"   ", depth+4)
+			}
+		} else {
+			for _, item := range n.List {
+				Node(sb, item, depth+2)
+			}
+		}
+	}
+}
+
+// explainTupleInInList renders a tuple in an IN list - either as Literal or Function tuple
+func explainTupleInInList(sb *strings.Builder, lit *ast.Literal, indent string, depth int) {
+	if containsOnlyPrimitiveLiterals(lit) {
+		// All primitives - render as Literal Tuple_
+		fmt.Fprintf(sb, "%s Literal %s\n", indent, FormatLiteral(lit))
+	} else {
+		// Contains expressions - render as Function tuple
+		exprs, ok := lit.Value.([]ast.Expression)
+		if !ok {
+			fmt.Fprintf(sb, "%s Literal %s\n", indent, FormatLiteral(lit))
+			return
+		}
+		fmt.Fprintf(sb, "%s Function tuple (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(exprs))
+		for _, e := range exprs {
+			Node(sb, e, depth+2)
+		}
+	}
+}
+
+func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, indent string, depth int) {
+	// IN is represented as Function in with alias
+	fnName := "in"
+	if n.Not {
+		fnName = "notIn"
+	}
+	if n.Global {
+		fnName = "global" + strings.Title(fnName)
+	}
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	}
+
+	// Determine if the IN list should be combined into a single tuple literal
+	// Only combine strings into tuple for small lists (up to 10 items)
+	const maxStringTupleSizeWithAlias = 10
+	canBeTupleLiteral := false
+	if n.Query == nil && len(n.List) > 1 {
+		allNumeric := true
+		allStrings := true
+		allTuples := true
+		allTuplesArePrimitive := true
+		for _, item := range n.List {
+			if lit, ok := item.(*ast.Literal); ok {
+				if lit.Type != ast.LiteralInteger && lit.Type != ast.LiteralFloat {
+					allNumeric = false
+				}
+				if lit.Type != ast.LiteralString {
+					allStrings = false
+				}
+				if lit.Type != ast.LiteralTuple {
+					allTuples = false
+				} else {
+					if !containsOnlyPrimitiveLiterals(lit) {
+						allTuplesArePrimitive = false
+					}
+				}
+			} else if isNumericExpr(item) {
+				allStrings = false
+				allTuples = false
+			} else {
+				allNumeric = false
+				allStrings = false
+				allTuples = false
+				break
+			}
+		}
+		canBeTupleLiteral = allNumeric || (allStrings && len(n.List) <= maxStringTupleSizeWithAlias) || (allTuples && allTuplesArePrimitive)
+	}
+
+	// Count arguments
+	argCount := 1
+	if n.Query != nil {
+		argCount++
+	} else if canBeTupleLiteral {
+		argCount++
+	} else {
+		if len(n.List) == 1 {
+			if lit, ok := n.List[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+				argCount++
+			} else {
+				argCount += len(n.List)
+			}
+		} else {
+			// Check if all items are tuples
+			allTuples := true
+			for _, item := range n.List {
+				if lit, ok := item.(*ast.Literal); !ok || lit.Type != ast.LiteralTuple {
+					allTuples = false
+					break
+				}
+			}
+			if allTuples {
+				argCount++
+			} else {
+				argCount += len(n.List)
+			}
+		}
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, argCount)
+	Node(sb, n.Expr, depth+2)
+
+	if n.Query != nil {
+		fmt.Fprintf(sb, "%s  Subquery (children %d)\n", indent, 1)
+		Node(sb, n.Query, depth+3)
+	} else if canBeTupleLiteral {
+		tupleLit := &ast.Literal{
+			Type:  ast.LiteralTuple,
+			Value: n.List,
+		}
+		fmt.Fprintf(sb, "%s  Literal %s\n", indent, FormatLiteral(tupleLit))
+	} else if len(n.List) == 1 {
+		if lit, ok := n.List[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
+			Node(sb, n.List[0], depth+4)
+		} else {
+			Node(sb, n.List[0], depth+2)
+		}
+	} else {
+		// Check if all items are tuple literals (some may have expressions)
+		allTuples := true
+		for _, item := range n.List {
+			if lit, ok := item.(*ast.Literal); !ok || lit.Type != ast.LiteralTuple {
+				allTuples = false
+				break
+			}
+		}
+		if allTuples {
+			// Wrap all tuples in Function tuple
+			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.List))
+			for _, item := range n.List {
+				explainTupleInInList(sb, item.(*ast.Literal), indent+"   ", depth+4)
+			}
+		} else {
+			for _, item := range n.List {
+				Node(sb, item, depth+2)
+			}
 		}
 	}
 }

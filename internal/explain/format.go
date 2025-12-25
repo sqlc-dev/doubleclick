@@ -136,6 +136,28 @@ func formatArrayLiteral(val interface{}) string {
 	return fmt.Sprintf("Array_[%s]", strings.Join(parts, ", "))
 }
 
+// formatNumericExpr formats a numeric expression (literal or unary minus of literal)
+func formatNumericExpr(e ast.Expression) (string, bool) {
+	if lit, ok := e.(*ast.Literal); ok {
+		if lit.Type == ast.LiteralInteger || lit.Type == ast.LiteralFloat {
+			return FormatLiteral(lit), true
+		}
+	}
+	if unary, ok := e.(*ast.UnaryExpr); ok && unary.Op == "-" {
+		if lit, ok := unary.Operand.(*ast.Literal); ok {
+			switch val := lit.Value.(type) {
+			case int64:
+				return fmt.Sprintf("Int64_%d", -val), true
+			case uint64:
+				return fmt.Sprintf("Int64_%d", -int64(val)), true
+			case float64:
+				return fmt.Sprintf("Float64_%s", FormatFloat(-val)), true
+			}
+		}
+	}
+	return "", false
+}
+
 // formatTupleLiteral formats a tuple literal for EXPLAIN AST output
 func formatTupleLiteral(val interface{}) string {
 	exprs, ok := val.([]ast.Expression)
@@ -144,7 +166,9 @@ func formatTupleLiteral(val interface{}) string {
 	}
 	var parts []string
 	for _, e := range exprs {
-		if lit, ok := e.(*ast.Literal); ok {
+		if formatted, ok := formatNumericExpr(e); ok {
+			parts = append(parts, formatted)
+		} else if lit, ok := e.(*ast.Literal); ok {
 			parts = append(parts, FormatLiteral(lit))
 		} else if ident, ok := e.(*ast.Identifier); ok {
 			parts = append(parts, ident.Name())
@@ -159,7 +183,9 @@ func formatTupleLiteral(val interface{}) string {
 func formatInListAsTuple(list []ast.Expression) string {
 	var parts []string
 	for _, e := range list {
-		if lit, ok := e.(*ast.Literal); ok {
+		if formatted, ok := formatNumericExpr(e); ok {
+			parts = append(parts, formatted)
+		} else if lit, ok := e.(*ast.Literal); ok {
 			parts = append(parts, FormatLiteral(lit))
 		} else if ident, ok := e.(*ast.Identifier); ok {
 			parts = append(parts, ident.Name())
