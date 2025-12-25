@@ -203,8 +203,17 @@ func TestParser(t *testing.T) {
 			}
 
 			// If we get here with a todo test and -check-skipped is set, the test passes!
+			// Automatically remove the todo flag from metadata.json
 			if metadata.Todo && *checkSkipped {
-				t.Logf("PASSES NOW - can remove todo flag from: %s", entry.Name())
+				metadata.Todo = false
+				updatedBytes, err := json.Marshal(metadata)
+				if err != nil {
+					t.Errorf("Failed to marshal updated metadata: %v", err)
+				} else if err := os.WriteFile(metadataPath, append(updatedBytes, '\n'), 0644); err != nil {
+					t.Errorf("Failed to write updated metadata.json: %v", err)
+				} else {
+					t.Logf("ENABLED - removed todo flag from: %s", entry.Name())
+				}
 			}
 		})
 	}
