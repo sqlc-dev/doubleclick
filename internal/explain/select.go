@@ -7,6 +7,13 @@ import (
 	"github.com/sqlc-dev/doubleclick/ast"
 )
 
+func explainSelectIntersectExceptQuery(sb *strings.Builder, n *ast.SelectIntersectExceptQuery, indent string, depth int) {
+	fmt.Fprintf(sb, "%sSelectIntersectExceptQuery (children %d)\n", indent, len(n.Selects))
+	for _, sel := range n.Selects {
+		Node(sb, sel, depth+1)
+	}
+}
+
 func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuery, indent string, depth int) {
 	children := countSelectUnionChildren(n)
 	fmt.Fprintf(sb, "%sSelectWithUnionQuery (children %d)\n", indent, children)

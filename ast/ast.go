@@ -41,6 +41,16 @@ func (s *SelectWithUnionQuery) Pos() token.Position { return s.Position }
 func (s *SelectWithUnionQuery) End() token.Position { return s.Position }
 func (s *SelectWithUnionQuery) statementNode()      {}
 
+// SelectIntersectExceptQuery represents SELECT ... INTERSECT/EXCEPT ... queries.
+type SelectIntersectExceptQuery struct {
+	Position token.Position `json:"-"`
+	Selects  []Statement    `json:"selects"`
+}
+
+func (s *SelectIntersectExceptQuery) Pos() token.Position { return s.Position }
+func (s *SelectIntersectExceptQuery) End() token.Position { return s.Position }
+func (s *SelectIntersectExceptQuery) statementNode()      {}
+
 // SelectQuery represents a SELECT statement.
 type SelectQuery struct {
 	Position    token.Position        `json:"-"`
@@ -212,6 +222,8 @@ type InsertQuery struct {
 	Function    *FunctionCall  `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
 	Columns     []*Identifier  `json:"columns,omitempty"`
 	PartitionBy Expression     `json:"partition_by,omitempty"` // For PARTITION BY clause
+	Infile      string         `json:"infile,omitempty"`       // For FROM INFILE clause
+	Compression string         `json:"compression,omitempty"`  // For COMPRESSION clause
 	Select      Statement      `json:"select,omitempty"`
 	Format      *Identifier    `json:"format,omitempty"`
 	HasSettings bool           `json:"has_settings,omitempty"` // For SETTINGS clause

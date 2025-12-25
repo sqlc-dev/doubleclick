@@ -31,6 +31,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	// Select statements
 	case *ast.SelectWithUnionQuery:
 		explainSelectWithUnionQuery(sb, n, indent, depth)
+	case *ast.SelectIntersectExceptQuery:
+		explainSelectIntersectExceptQuery(sb, n, indent, depth)
 	case *ast.SelectQuery:
 		explainSelectQuery(sb, n, indent, depth)
 
