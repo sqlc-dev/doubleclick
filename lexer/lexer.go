@@ -98,6 +98,11 @@ func (l *Lexer) NextToken() Item {
 	if l.ch == '/' && l.peekChar() == '*' {
 		return l.readBlockComment()
 	}
+	// Unicode minus (U+2212) is treated as starting a line comment
+	// ClickHouse doesn't recognize it as an operator
+	if l.ch == '\u2212' {
+		return l.readUnicodeMinusComment()
+	}
 
 	switch l.ch {
 	case '+':
@@ -227,9 +232,6 @@ func (l *Lexer) NextToken() Item {
 		return l.readQuotedIdentifier()
 	case '\u201C', '\u201D': // Unicode curly double quotes " "
 		return l.readUnicodeQuotedIdentifier(l.ch)
-	case '\u2212': // Unicode minus sign −
-		l.readChar()
-		return Item{Token: token.MINUS, Value: "−", Pos: pos}
 	case '`':
 		return l.readBacktickIdentifier()
 	case '@':
@@ -291,6 +293,22 @@ func (l *Lexer) readHashComment() Item {
 	l.readChar()
 
 	for l.ch != '\n' && l.ch != 0 && !l.eof {
+		sb.WriteRune(l.ch)
+		l.readChar()
+	}
+	return Item{Token: token.COMMENT, Value: sb.String(), Pos: pos}
+}
+
+// readUnicodeMinusComment reads from a unicode minus (U+2212) to the end of line or semicolon.
+// ClickHouse doesn't recognize unicode minus as an operator, so we treat it as a comment.
+func (l *Lexer) readUnicodeMinusComment() Item {
+	pos := l.pos
+	var sb strings.Builder
+	// Skip −
+	sb.WriteRune(l.ch)
+	l.readChar()
+
+	for l.ch != '\n' && l.ch != ';' && l.ch != 0 && !l.eof {
 		sb.WriteRune(l.ch)
 		l.readChar()
 	}
