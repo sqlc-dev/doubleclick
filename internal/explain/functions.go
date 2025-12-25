@@ -184,7 +184,17 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 	if n.Query != nil {
 		argCount++
 	} else {
-		argCount += len(n.List)
+		// Check if we have a single tuple literal that should be wrapped in Function tuple
+		if len(n.List) == 1 {
+			if lit, ok := n.List[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+				// Single tuple literal gets wrapped in Function tuple, so count as 1
+				argCount++
+			} else {
+				argCount += len(n.List)
+			}
+		} else {
+			argCount += len(n.List)
+		}
 	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, argCount)
 	Node(sb, n.Expr, depth+2)
@@ -192,6 +202,19 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 		// Subqueries in IN should be wrapped in Subquery node
 		fmt.Fprintf(sb, "%s  Subquery (children %d)\n", indent, 1)
 		Node(sb, n.Query, depth+3)
+	} else if len(n.List) == 1 {
+		// Single element in the list
+		// If it's a tuple literal, wrap it in Function tuple
+		// Otherwise, output the element directly
+		if lit, ok := n.List[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+			// Wrap tuple literal in Function tuple
+			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
+			Node(sb, n.List[0], depth+4)
+		} else {
+			// Single non-tuple element - output directly
+			Node(sb, n.List[0], depth+2)
+		}
 	} else {
 		for _, item := range n.List {
 			Node(sb, item, depth+2)
