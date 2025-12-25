@@ -397,7 +397,8 @@ func (l *Lexer) readString(quote rune) Item {
 				val := hexValue(hex1)*16 + hexValue(hex2)
 				sb.WriteByte(byte(val))
 			default:
-				// Unknown escape, just write the character after backslash
+				// Unknown escape, preserve both the backslash and the character
+				sb.WriteRune('\\')
 				sb.WriteRune(l.ch)
 			}
 			l.readChar()
