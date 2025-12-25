@@ -209,7 +209,6 @@ func NormalizeFunctionName(name string) string {
 		"ucase":       "upper",
 		"mid":         "substring",
 		"substr":      "substring",
-		"pow":         "power",
 		"ceiling":     "ceil",
 		"ln":          "log",
 		"log10":       "log10",
