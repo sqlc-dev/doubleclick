@@ -324,16 +324,26 @@ func (l *Lexer) readBlockComment() Item {
 	sb.WriteRune(l.ch)
 	l.readChar()
 
-	for !l.eof {
+	// Track nesting level for nested comments (ClickHouse supports nested /* */ comments)
+	nesting := 1
+
+	for !l.eof && nesting > 0 {
 		if l.ch == '*' && l.peekChar() == '/' {
 			sb.WriteRune(l.ch)
 			l.readChar()
 			sb.WriteRune(l.ch)
 			l.readChar()
-			break
+			nesting--
+		} else if l.ch == '/' && l.peekChar() == '*' {
+			sb.WriteRune(l.ch)
+			l.readChar()
+			sb.WriteRune(l.ch)
+			l.readChar()
+			nesting++
+		} else {
+			sb.WriteRune(l.ch)
+			l.readChar()
 		}
-		sb.WriteRune(l.ch)
-		l.readChar()
 	}
 	return Item{Token: token.COMMENT, Value: sb.String(), Pos: pos}
 }

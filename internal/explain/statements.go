@@ -10,6 +10,12 @@ import (
 func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, depth int) {
 	// Count children
 	children := 0
+	if n.Infile != "" {
+		children++
+	}
+	if n.Compression != "" {
+		children++
+	}
 	if n.Function != nil {
 		children++
 	} else if n.Table != "" {
@@ -23,6 +29,15 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 	}
 	// Note: InsertQuery uses 3 spaces after name in ClickHouse explain
 	fmt.Fprintf(sb, "%sInsertQuery   (children %d)\n", indent, children)
+
+	// FROM INFILE path comes first
+	if n.Infile != "" {
+		fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, n.Infile)
+	}
+	// COMPRESSION value comes next
+	if n.Compression != "" {
+		fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, n.Compression)
+	}
 
 	if n.Function != nil {
 		Node(sb, n.Function, depth+1)

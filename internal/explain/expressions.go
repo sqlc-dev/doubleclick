@@ -81,14 +81,58 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 				fmt.Fprintf(sb, "%s ExpressionList\n", indent)
 				return
 			}
-			hasComplexExpr := false
+			// Check if we should render as Function array
+			// This happens when:
+			// 1. Contains non-literal, non-negation expressions OR
+			// 2. Contains tuples OR
+			// 3. Contains nested arrays that all have exactly 1 element (homogeneous single-element arrays) OR
+			// 4. Contains nested arrays with non-literal expressions OR
+			// 5. Contains nested arrays that are empty or contain tuples/non-literals
+			shouldUseFunctionArray := false
+			allAreSingleElementArrays := true
+			hasNestedArrays := false
+			nestedArraysNeedFunctionFormat := false
+
 			for _, e := range exprs {
-				if !isSimpleLiteralOrNegation(e) {
-					hasComplexExpr = true
-					break
+				if lit, ok := e.(*ast.Literal); ok {
+					if lit.Type == ast.LiteralArray {
+						hasNestedArrays = true
+						// Check if this inner array has exactly 1 element
+						if innerExprs, ok := lit.Value.([]ast.Expression); ok {
+							if len(innerExprs) != 1 {
+								allAreSingleElementArrays = false
+							}
+							// Check if inner array needs Function array format:
+							// - Contains non-literal expressions OR
+							// - Contains tuples OR
+							// - Is empty OR
+							// - Contains empty arrays
+							if containsNonLiteralExpressions(innerExprs) ||
+								len(innerExprs) == 0 ||
+								containsTuples(innerExprs) ||
+								containsEmptyArrays(innerExprs) {
+								nestedArraysNeedFunctionFormat = true
+							}
+						} else {
+							allAreSingleElementArrays = false
+						}
+					} else if lit.Type == ast.LiteralTuple {
+						// Tuples are complex
+						shouldUseFunctionArray = true
+					}
+				} else if !isSimpleLiteralOrNegation(e) {
+					shouldUseFunctionArray = true
 				}
 			}
-			if hasComplexExpr {
+
+			// Use Function array when:
+			// - nested arrays that are ALL single-element
+			// - nested arrays that need Function format (contain non-literals, tuples, or empty arrays)
+			if hasNestedArrays && (allAreSingleElementArrays || nestedArraysNeedFunctionFormat) {
+				shouldUseFunctionArray = true
+			}
+
+			if shouldUseFunctionArray {
 				// Render as Function array instead of Literal
 				fmt.Fprintf(sb, "%sFunction array (children %d)\n", indent, 1)
 				fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
@@ -119,6 +163,58 @@ func isSimpleLiteralOrNegation(e ast.Expression) bool {
 	if unary, ok := e.(*ast.UnaryExpr); ok && unary.Op == "-" {
 		if lit, ok := unary.Operand.(*ast.Literal); ok {
 			return lit.Type == ast.LiteralInteger || lit.Type == ast.LiteralFloat
+		}
+	}
+	return false
+}
+
+// containsOnlyArraysOrTuples checks if a slice of expressions contains
+// only array or tuple literals (including empty arrays).
+// Returns true if the slice is empty or contains only arrays/tuples.
+func containsOnlyArraysOrTuples(exprs []ast.Expression) bool {
+	if len(exprs) == 0 {
+		return true // empty is considered "only arrays"
+	}
+	for _, e := range exprs {
+		if lit, ok := e.(*ast.Literal); ok {
+			if lit.Type != ast.LiteralArray && lit.Type != ast.LiteralTuple {
+				return false
+			}
+		} else {
+			return false
+		}
+	}
+	return true
+}
+
+// containsNonLiteralExpressions checks if a slice of expressions contains
+// any non-literal expressions (identifiers, function calls, etc.)
+func containsNonLiteralExpressions(exprs []ast.Expression) bool {
+	for _, e := range exprs {
+		if _, ok := e.(*ast.Literal); !ok {
+			return true
+		}
+	}
+	return false
+}
+
+// containsTuples checks if a slice of expressions contains any tuple literals
+func containsTuples(exprs []ast.Expression) bool {
+	for _, e := range exprs {
+		if lit, ok := e.(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+			return true
+		}
+	}
+	return false
+}
+
+// containsEmptyArrays checks if a slice of expressions contains any empty array literals
+func containsEmptyArrays(exprs []ast.Expression) bool {
+	for _, e := range exprs {
+		if lit, ok := e.(*ast.Literal); ok && lit.Type == ast.LiteralArray {
+			if innerExprs, ok := lit.Value.([]ast.Expression); ok && len(innerExprs) == 0 {
+				return true
+			}
 		}
 	}
 	return false
@@ -303,11 +399,20 @@ func explainAsterisk(sb *strings.Builder, n *ast.Asterisk, indent string) {
 
 func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, depth int) {
 	// For WITH elements, we need to show the underlying expression with the name as alias
+	// When name is empty, don't show the alias part
 	switch e := n.Query.(type) {
 	case *ast.Literal:
-		fmt.Fprintf(sb, "%sLiteral %s (alias %s)\n", indent, FormatLiteral(e), n.Name)
+		if n.Name != "" {
+			fmt.Fprintf(sb, "%sLiteral %s (alias %s)\n", indent, FormatLiteral(e), n.Name)
+		} else {
+			fmt.Fprintf(sb, "%sLiteral %s\n", indent, FormatLiteral(e))
+		}
 	case *ast.Identifier:
-		fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, e.Name(), n.Name)
+		if n.Name != "" {
+			fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, e.Name(), n.Name)
+		} else {
+			fmt.Fprintf(sb, "%sIdentifier %s\n", indent, e.Name())
+		}
 	case *ast.FunctionCall:
 		explainFunctionCallWithAlias(sb, e, n.Name, indent, depth)
 	case *ast.BinaryExpr:
@@ -316,19 +421,31 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 		// For || (concat) operator, flatten chained concatenations
 		if e.Op == "||" {
 			operands := collectConcatOperands(e)
-			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Name, 1)
+			if n.Name != "" {
+				fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Name, 1)
+			} else {
+				fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+			}
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(operands))
 			for _, op := range operands {
 				Node(sb, op, depth+2)
 			}
 		} else {
-			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Name, 1)
+			if n.Name != "" {
+				fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Name, 1)
+			} else {
+				fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+			}
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
 			Node(sb, e.Left, depth+2)
 			Node(sb, e.Right, depth+2)
 		}
 	case *ast.Subquery:
-		fmt.Fprintf(sb, "%sSubquery (alias %s) (children %d)\n", indent, n.Name, 1)
+		if n.Name != "" {
+			fmt.Fprintf(sb, "%sSubquery (alias %s) (children %d)\n", indent, n.Name, 1)
+		} else {
+			fmt.Fprintf(sb, "%sSubquery (children %d)\n", indent, 1)
+		}
 		Node(sb, e.Query, depth+1)
 	default:
 		// For other types, just output the expression (alias may be lost)

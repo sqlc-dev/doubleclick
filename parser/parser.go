@@ -162,24 +162,78 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 		Position: p.current.Pos,
 	}
 
-	// Handle parenthesized start: (SELECT 1) UNION (SELECT 2)
+	// Parse first select item (could be parenthesized or direct SELECT)
+	var firstItem ast.Statement
+	var firstWasParenthesized bool
+
 	if p.currentIs(token.LPAREN) {
+		firstWasParenthesized = true
 		p.nextToken() // skip (
 		nested := p.parseSelectWithUnion()
 		p.expect(token.RPAREN)
-		for _, s := range nested.Selects {
-			query.Selects = append(query.Selects, s)
-		}
+		firstItem = nested
 	} else {
 		// Parse first SELECT
 		sel := p.parseSelect()
 		if sel == nil {
 			return nil
 		}
-		query.Selects = append(query.Selects, sel)
+		firstItem = sel
 	}
 
-	// Parse UNION/INTERSECT/EXCEPT clauses
+	// Check if this is INTERSECT/EXCEPT that needs SelectIntersectExceptQuery wrapper
+	// Only INTERSECT ALL and EXCEPT ALL are treated like UNION ALL (flattened into ExpressionList)
+	if p.isIntersectExceptWithWrapper() {
+		intersectExcept := &ast.SelectIntersectExceptQuery{
+			Position: p.current.Pos,
+		}
+		// Add first item
+		if firstWasParenthesized {
+			intersectExcept.Selects = append(intersectExcept.Selects, firstItem)
+		} else {
+			intersectExcept.Selects = append(intersectExcept.Selects, firstItem)
+		}
+
+		// Parse INTERSECT/EXCEPT clauses (those that need wrapper)
+		for p.isIntersectExceptWithWrapper() {
+			p.nextToken() // skip INTERSECT/EXCEPT
+
+			// Skip DISTINCT if present (ALL case is handled in the loop condition)
+			if p.currentIs(token.DISTINCT) {
+				p.nextToken()
+			}
+
+			// Parse the next select
+			if p.currentIs(token.LPAREN) {
+				p.nextToken() // skip (
+				nested := p.parseSelectWithUnion()
+				p.expect(token.RPAREN)
+				intersectExcept.Selects = append(intersectExcept.Selects, nested)
+			} else {
+				sel := p.parseSelect()
+				if sel == nil {
+					break
+				}
+				intersectExcept.Selects = append(intersectExcept.Selects, sel)
+			}
+		}
+
+		query.Selects = append(query.Selects, intersectExcept)
+		return query
+	}
+
+	// Handle regular case (UNION, INTERSECT ALL, EXCEPT ALL, or single SELECT)
+	if firstWasParenthesized {
+		if nested, ok := firstItem.(*ast.SelectWithUnionQuery); ok {
+			for _, s := range nested.Selects {
+				query.Selects = append(query.Selects, s)
+			}
+		}
+	} else {
+		query.Selects = append(query.Selects, firstItem)
+	}
+
+	// Parse UNION/INTERSECT ALL/EXCEPT ALL clauses
 	for p.currentIs(token.UNION) || p.currentIs(token.EXCEPT) ||
 		(p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "INTERSECT") {
 		var setOp string
@@ -203,12 +257,12 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 		}
 		query.UnionModes = append(query.UnionModes, setOp+" "+mode)
 
-		// Handle parenthesized subqueries: UNION ALL (SELECT ... UNION ALL SELECT ...)
+		// Handle parenthesized subqueries
 		if p.currentIs(token.LPAREN) {
 			p.nextToken() // skip (
 			nested := p.parseSelectWithUnion()
 			p.expect(token.RPAREN)
-			// Flatten nested union selects into current query
+			// Flatten nested selects into current query
 			for _, s := range nested.Selects {
 				query.Selects = append(query.Selects, s)
 			}
@@ -222,6 +276,21 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 	}
 
 	return query
+}
+
+// isIntersectExceptWithWrapper checks if the current token is INTERSECT or EXCEPT
+// that should use a SelectIntersectExceptQuery wrapper.
+// Only INTERSECT ALL and EXCEPT ALL are flattened (no wrapper).
+// INTERSECT DISTINCT, INTERSECT, EXCEPT DISTINCT, and EXCEPT all use the wrapper.
+func (p *Parser) isIntersectExceptWithWrapper() bool {
+	if !p.currentIs(token.EXCEPT) &&
+		!(p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "INTERSECT") {
+		return false
+	}
+	// INTERSECT ALL and EXCEPT ALL are flattened (no wrapper)
+	// All other cases (DISTINCT or no modifier) use the wrapper
+	nextTok := p.peek.Token
+	return nextTok != token.ALL
 }
 
 func (p *Parser) parseSelect() *ast.SelectQuery {
@@ -1051,14 +1120,16 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 		p.nextToken()
 		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "INFILE" {
 			p.nextToken()
-			// Skip the file path
+			// Store the file path
 			if p.currentIs(token.STRING) {
+				ins.Infile = p.current.Value
 				p.nextToken()
 			}
 			// Handle COMPRESSION clause
 			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "COMPRESSION" {
 				p.nextToken()
 				if p.currentIs(token.STRING) {
+					ins.Compression = p.current.Value
 					p.nextToken()
 				}
 			}

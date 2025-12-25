@@ -179,9 +179,38 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 		fnName = "global" + strings.Title(fnName)
 	}
 	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+
+	// Determine if the IN list should be combined into a single tuple literal
+	// This happens when we have multiple literals of the same type:
+	// - All numeric literals (integers/floats)
+	// - All tuple literals
+	canBeTupleLiteral := false
+	if n.Query == nil && len(n.List) > 1 {
+		allNumeric := true
+		allTuples := true
+		for _, item := range n.List {
+			if lit, ok := item.(*ast.Literal); ok {
+				if lit.Type != ast.LiteralInteger && lit.Type != ast.LiteralFloat {
+					allNumeric = false
+				}
+				if lit.Type != ast.LiteralTuple {
+					allTuples = false
+				}
+			} else {
+				allNumeric = false
+				allTuples = false
+				break
+			}
+		}
+		canBeTupleLiteral = allNumeric || allTuples
+	}
+
 	// Count arguments: expr + list items or subquery
 	argCount := 1
 	if n.Query != nil {
+		argCount++
+	} else if canBeTupleLiteral {
+		// Multiple literals will be combined into a single tuple
 		argCount++
 	} else {
 		// Check if we have a single tuple literal that should be wrapped in Function tuple
@@ -198,10 +227,18 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, argCount)
 	Node(sb, n.Expr, depth+2)
+
 	if n.Query != nil {
 		// Subqueries in IN should be wrapped in Subquery node
 		fmt.Fprintf(sb, "%s  Subquery (children %d)\n", indent, 1)
 		Node(sb, n.Query, depth+3)
+	} else if canBeTupleLiteral {
+		// Combine multiple literals into a single Tuple literal
+		tupleLit := &ast.Literal{
+			Type:  ast.LiteralTuple,
+			Value: n.List,
+		}
+		fmt.Fprintf(sb, "%s  Literal %s\n", indent, FormatLiteral(tupleLit))
 	} else if len(n.List) == 1 {
 		// Single element in the list
 		// If it's a tuple literal, wrap it in Function tuple
