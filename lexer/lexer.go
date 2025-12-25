@@ -429,7 +429,19 @@ func (l *Lexer) readQuotedIdentifier() Item {
 	var sb strings.Builder
 	l.readChar() // skip opening quote
 
-	for !l.eof && l.ch != '"' {
+	for !l.eof {
+		if l.ch == '"' {
+			// Check for SQL-style doubled quote escape ""
+			l.readChar()
+			if l.ch == '"' {
+				// Doubled quote - add single quote and continue
+				sb.WriteRune('"')
+				l.readChar()
+				continue
+			}
+			// Single quote - end of identifier
+			break
+		}
 		if l.ch == '\\' {
 			l.readChar()
 			if !l.eof {
@@ -440,9 +452,6 @@ func (l *Lexer) readQuotedIdentifier() Item {
 		}
 		sb.WriteRune(l.ch)
 		l.readChar()
-	}
-	if l.ch == '"' {
-		l.readChar() // skip closing quote
 	}
 	return Item{Token: token.IDENT, Value: sb.String(), Pos: pos}
 }

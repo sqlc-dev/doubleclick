@@ -49,12 +49,27 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			}
 			hasComplexExpr := false
 			for _, e := range exprs {
-				lit, isLit := e.(*ast.Literal)
-				// Non-literals or tuple/array literals count as complex
-				if !isLit || (isLit && (lit.Type == ast.LiteralTuple || lit.Type == ast.LiteralArray)) {
-					hasComplexExpr = true
-					break
+				// Simple literals (numbers, strings, etc.) are OK
+				if lit, isLit := e.(*ast.Literal); isLit {
+					// Nested tuples/arrays are complex
+					if lit.Type == ast.LiteralTuple || lit.Type == ast.LiteralArray {
+						hasComplexExpr = true
+						break
+					}
+					// Other literals are simple
+					continue
 				}
+				// Unary negation of numeric literals is also simple
+				if unary, isUnary := e.(*ast.UnaryExpr); isUnary && unary.Op == "-" {
+					if lit, isLit := unary.Operand.(*ast.Literal); isLit {
+						if lit.Type == ast.LiteralInteger || lit.Type == ast.LiteralFloat {
+							continue
+						}
+					}
+				}
+				// Everything else is complex
+				hasComplexExpr = true
+				break
 			}
 			if hasComplexExpr {
 				// Render as Function tuple instead of Literal
@@ -329,6 +344,33 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 				}
 			}
 		}
+		// Check if this is an array containing specific expressions that need Function array format
+		if e.Type == ast.LiteralArray {
+			if exprs, ok := e.Value.([]ast.Expression); ok {
+				needsFunctionFormat := false
+				for _, expr := range exprs {
+					// Check for tuples - use Function array
+					if lit, ok := expr.(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+						needsFunctionFormat = true
+						break
+					}
+					// Check for identifiers - use Function array
+					if _, ok := expr.(*ast.Identifier); ok {
+						needsFunctionFormat = true
+						break
+					}
+				}
+				if needsFunctionFormat {
+					// Render as Function array with alias
+					fmt.Fprintf(sb, "%sFunction array (alias %s) (children %d)\n", indent, n.Alias, 1)
+					fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
+					for _, expr := range exprs {
+						Node(sb, expr, depth+2)
+					}
+					return
+				}
+			}
+		}
 		fmt.Fprintf(sb, "%sLiteral %s (alias %s)\n", indent, FormatLiteral(e), n.Alias)
 	case *ast.BinaryExpr:
 		// Binary expressions become functions with alias
@@ -450,6 +492,8 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 			fmt.Fprintf(sb, "%sSubquery (children %d)\n", indent, 1)
 		}
 		Node(sb, e.Query, depth+1)
+	case *ast.CastExpr:
+		explainCastExprWithAlias(sb, e, n.Name, indent, depth)
 	default:
 		// For other types, just output the expression (alias may be lost)
 		Node(sb, n.Query, depth)
