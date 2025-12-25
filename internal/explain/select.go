@@ -120,13 +120,19 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 }
 
 func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent string, depth int) {
-	children := 1 // expression
-	if n.WithFill {
-		children++ // FillModifier
-	}
-	fmt.Fprintf(sb, "%sOrderByElement (children %d)\n", indent, children)
-	Node(sb, n.Expression, depth+1)
-	if n.WithFill {
+	// ClickHouse uses different formats for WITH FILL:
+	// - When FROM/TO are simple literals: direct children on OrderByElement
+	// - When FROM/TO are complex expressions or only STEP present: uses FillModifier wrapper
+	hasFromOrTo := n.FillFrom != nil || n.FillTo != nil
+	hasComplexFillExpr := hasFromOrTo && (isComplexExpr(n.FillFrom) || isComplexExpr(n.FillTo))
+
+	// Use FillModifier when:
+	// 1. Only STEP is present (no FROM/TO), or
+	// 2. FROM/TO contain complex expressions (not simple literals)
+	useFillModifier := n.WithFill && ((n.FillStep != nil && !hasFromOrTo) || hasComplexFillExpr)
+
+	if useFillModifier {
+		// Use FillModifier wrapper
 		fillChildren := 0
 		if n.FillFrom != nil {
 			fillChildren++
@@ -137,20 +143,55 @@ func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent st
 		if n.FillStep != nil {
 			fillChildren++
 		}
-		if fillChildren > 0 {
-			fmt.Fprintf(sb, "%s FillModifier (children %d)\n", indent, fillChildren)
-			if n.FillFrom != nil {
-				Node(sb, n.FillFrom, depth+2)
-			}
-			if n.FillTo != nil {
-				Node(sb, n.FillTo, depth+2)
-			}
-			if n.FillStep != nil {
-				Node(sb, n.FillStep, depth+2)
-			}
-		} else {
-			fmt.Fprintf(sb, "%s FillModifier\n", indent)
+		children := 2 // expression + FillModifier
+		fmt.Fprintf(sb, "%sOrderByElement (children %d)\n", indent, children)
+		Node(sb, n.Expression, depth+1)
+		fmt.Fprintf(sb, "%s FillModifier (children %d)\n", indent, fillChildren)
+		if n.FillFrom != nil {
+			Node(sb, n.FillFrom, depth+2)
 		}
+		if n.FillTo != nil {
+			Node(sb, n.FillTo, depth+2)
+		}
+		if n.FillStep != nil {
+			Node(sb, n.FillStep, depth+2)
+		}
+	} else {
+		// Use direct children for simple literal FROM/TO cases
+		children := 1 // expression
+		if n.FillFrom != nil {
+			children++
+		}
+		if n.FillTo != nil {
+			children++
+		}
+		if n.FillStep != nil {
+			children++
+		}
+		fmt.Fprintf(sb, "%sOrderByElement (children %d)\n", indent, children)
+		Node(sb, n.Expression, depth+1)
+		if n.FillFrom != nil {
+			Node(sb, n.FillFrom, depth+1)
+		}
+		if n.FillTo != nil {
+			Node(sb, n.FillTo, depth+1)
+		}
+		if n.FillStep != nil {
+			Node(sb, n.FillStep, depth+1)
+		}
+	}
+}
+
+// isComplexExpr checks if an expression is complex (not a simple literal)
+func isComplexExpr(expr ast.Expression) bool {
+	if expr == nil {
+		return false
+	}
+	switch expr.(type) {
+	case *ast.Literal:
+		return false
+	default:
+		return true
 	}
 }
 
