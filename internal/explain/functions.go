@@ -21,6 +21,10 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 	}
 	// Normalize function name
 	fnName := NormalizeFunctionName(n.Name)
+	// Append "Distinct" if the function has DISTINCT modifier
+	if n.Distinct {
+		fnName = fnName + "Distinct"
+	}
 	if alias != "" {
 		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, children)
 	} else {
@@ -774,7 +778,6 @@ func explainExtractExpr(sb *strings.Builder, n *ast.ExtractExpr, indent string, 
 func explainWindowSpec(sb *strings.Builder, n *ast.WindowSpec, indent string, depth int) {
 	// Window spec is represented as WindowDefinition
 	// For simple cases like OVER (), just output WindowDefinition without children
-	// Note: ClickHouse's EXPLAIN AST does not output frame info (ROWS BETWEEN etc)
 	children := 0
 	if n.Name != "" {
 		children++
@@ -783,6 +786,10 @@ func explainWindowSpec(sb *strings.Builder, n *ast.WindowSpec, indent string, de
 		children++
 	}
 	if len(n.OrderBy) > 0 {
+		children++
+	}
+	// Count frame offset as child if present
+	if n.Frame != nil && n.Frame.StartBound != nil && n.Frame.StartBound.Offset != nil {
 		children++
 	}
 	if children > 0 {
@@ -802,7 +809,10 @@ func explainWindowSpec(sb *strings.Builder, n *ast.WindowSpec, indent string, de
 				explainOrderByElement(sb, o, strings.Repeat(" ", depth+2), depth+2)
 			}
 		}
-		// Frame handling would go here if needed
+		// Frame start offset
+		if n.Frame != nil && n.Frame.StartBound != nil && n.Frame.StartBound.Offset != nil {
+			Node(sb, n.Frame.StartBound.Offset, depth+1)
+		}
 	} else {
 		fmt.Fprintf(sb, "%sWindowDefinition\n", indent)
 	}

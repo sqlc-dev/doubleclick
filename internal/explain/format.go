@@ -21,7 +21,14 @@ func FormatFloat(val float64) string {
 	if math.IsNaN(val) {
 		return "nan"
 	}
-	// Use 'f' format to avoid scientific notation, -1 precision for smallest representation
+	// Use scientific notation for extremely small numbers (< 1e-10)
+	// This matches ClickHouse's behavior where numbers like 0.000001 stay decimal
+	// but extremely small numbers like 1e-38 use scientific notation
+	absVal := math.Abs(val)
+	if absVal > 0 && absVal < 1e-10 {
+		return strconv.FormatFloat(val, 'e', -1, 64)
+	}
+	// Use decimal notation for normal-sized numbers
 	return strconv.FormatFloat(val, 'f', -1, 64)
 }
 
@@ -218,6 +225,9 @@ func FormatDataType(dt *ast.DataType) string {
 		} else if ntp, ok := p.(*ast.NameTypePair); ok {
 			// Named tuple field: "name Type"
 			params = append(params, ntp.Name+" "+FormatDataType(ntp.Type))
+		} else if binExpr, ok := p.(*ast.BinaryExpr); ok {
+			// Binary expression (e.g., 'hello' = 1 for Enum types)
+			params = append(params, formatBinaryExprForType(binExpr))
 		} else {
 			params = append(params, fmt.Sprintf("%v", p))
 		}
@@ -225,28 +235,55 @@ func FormatDataType(dt *ast.DataType) string {
 	return fmt.Sprintf("%s(%s)", dt.Name, strings.Join(params, ", "))
 }
 
+// formatBinaryExprForType formats a binary expression for use in type parameters
+func formatBinaryExprForType(expr *ast.BinaryExpr) string {
+	var left, right string
+
+	// Format left side
+	if lit, ok := expr.Left.(*ast.Literal); ok {
+		if lit.Type == ast.LiteralString {
+			left = fmt.Sprintf("\\\\\\'%s\\\\\\'", lit.Value)
+		} else {
+			left = fmt.Sprintf("%v", lit.Value)
+		}
+	} else if ident, ok := expr.Left.(*ast.Identifier); ok {
+		left = ident.Name()
+	} else {
+		left = fmt.Sprintf("%v", expr.Left)
+	}
+
+	// Format right side
+	if lit, ok := expr.Right.(*ast.Literal); ok {
+		right = fmt.Sprintf("%v", lit.Value)
+	} else if ident, ok := expr.Right.(*ast.Identifier); ok {
+		right = ident.Name()
+	} else {
+		right = fmt.Sprintf("%v", expr.Right)
+	}
+
+	return left + " " + expr.Op + " " + right
+}
+
 // NormalizeFunctionName normalizes function names to match ClickHouse's EXPLAIN AST output
 func NormalizeFunctionName(name string) string {
 	// ClickHouse normalizes certain function names in EXPLAIN AST
 	normalized := map[string]string{
-		"ltrim":       "trimLeft",
-		"rtrim":       "trimRight",
-		"lcase":       "lower",
-		"ucase":       "upper",
-		"mid":         "substring",
-		"ceiling":     "ceil",
-		"ln":          "log",
-		"log10":       "log10",
-		"log2":        "log2",
-		"rand":        "rand",
-		"ifnull":      "ifNull",
-		"nullif":      "nullIf",
-		"coalesce":    "coalesce",
-		"greatest":    "greatest",
-		"least":       "least",
-		"concat_ws":   "concat",
-		"length":      "length",
-		"char_length": "length",
+		"ltrim":      "trimLeft",
+		"rtrim":      "trimRight",
+		"lcase":      "lower",
+		"ucase":      "upper",
+		"mid":        "substring",
+		"ceiling":    "ceil",
+		"ln":         "log",
+		"log10":      "log10",
+		"log2":       "log2",
+		"rand":       "rand",
+		"ifnull":     "ifNull",
+		"nullif":     "nullIf",
+		"coalesce":   "coalesce",
+		"greatest":   "greatest",
+		"least":      "least",
+		"concat_ws":  "concat",
 	}
 	if n, ok := normalized[strings.ToLower(name)]; ok {
 		return n
