@@ -376,10 +376,14 @@ func (l *Lexer) readString(quote rune) Item {
 				sb.WriteRune('\r')
 			case '0':
 				sb.WriteRune('\x00')
+			case 'a':
+				sb.WriteRune('\a')
 			case 'b':
 				sb.WriteRune('\b')
 			case 'f':
 				sb.WriteRune('\f')
+			case 'v':
+				sb.WriteRune('\v')
 			case 'x':
 				// Hex escape: \xNN
 				l.readChar()

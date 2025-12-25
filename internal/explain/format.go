@@ -27,10 +27,12 @@ func FormatFloat(val float64) string {
 
 // escapeStringLiteral escapes special characters in a string for EXPLAIN AST output
 // Uses double-escaping as ClickHouse EXPLAIN AST displays strings
+// Iterates over bytes to preserve raw bytes (including invalid UTF-8)
 func escapeStringLiteral(s string) string {
 	var sb strings.Builder
-	for _, r := range s {
-		switch r {
+	for i := 0; i < len(s); i++ {
+		b := s[i]
+		switch b {
 		case '\\':
 			sb.WriteString("\\\\\\\\") // backslash becomes four backslashes (\\\\)
 		case '\'':
@@ -48,7 +50,7 @@ func escapeStringLiteral(s string) string {
 		case '\f':
 			sb.WriteString("\\\\f") // form feed becomes \\f
 		default:
-			sb.WriteRune(r)
+			sb.WriteByte(b)
 		}
 	}
 	return sb.String()
