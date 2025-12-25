@@ -30,6 +30,9 @@ func explainTablesInSelectQueryElement(sb *strings.Builder, n *ast.TablesInSelec
 
 func explainTableExpression(sb *strings.Builder, n *ast.TableExpression, indent string, depth int) {
 	children := 1 // table
+	if n.Sample != nil {
+		children++
+	}
 	fmt.Fprintf(sb, "%sTableExpression (children %d)\n", indent, children)
 	// If there's a subquery with an alias, pass the alias to the subquery output
 	if subq, ok := n.Table.(*ast.Subquery); ok {
@@ -50,6 +53,46 @@ func explainTableExpression(sb *strings.Builder, n *ast.TableExpression, indent 
 		explainTableIdentifierWithAlias(sb, ti, n.Alias, indent+" ")
 	} else {
 		Node(sb, n.Table, depth+1)
+	}
+	// Output SAMPLE clause if present
+	if n.Sample != nil {
+		explainSampleClause(sb, n.Sample, indent+" ", depth+1)
+	}
+}
+
+func explainSampleClause(sb *strings.Builder, n *ast.SampleClause, indent string, depth int) {
+	// Format the sample ratio as "SampleRatio num / den" or just the expression
+	sb.WriteString(indent)
+	sb.WriteString("SampleRatio ")
+	formatSampleRatio(sb, n.Ratio)
+	sb.WriteString("\n")
+}
+
+func formatSampleRatio(sb *strings.Builder, expr ast.Expression) {
+	// Handle binary expressions like 1 / 2
+	if binExpr, ok := expr.(*ast.BinaryExpr); ok && binExpr.Op == "/" {
+		formatSampleRatioOperand(sb, binExpr.Left)
+		sb.WriteString(" / ")
+		formatSampleRatioOperand(sb, binExpr.Right)
+	} else {
+		formatSampleRatioOperand(sb, expr)
+	}
+}
+
+func formatSampleRatioOperand(sb *strings.Builder, expr ast.Expression) {
+	if lit, ok := expr.(*ast.Literal); ok {
+		switch v := lit.Value.(type) {
+		case int64:
+			fmt.Fprintf(sb, "%d", v)
+		case uint64:
+			fmt.Fprintf(sb, "%d", v)
+		case float64:
+			fmt.Fprintf(sb, "%g", v)
+		default:
+			fmt.Fprintf(sb, "%v", v)
+		}
+	} else {
+		fmt.Fprintf(sb, "%v", expr)
 	}
 }
 

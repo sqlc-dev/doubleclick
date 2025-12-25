@@ -70,7 +70,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		return
 	}
 	if n.CreateUser {
-		fmt.Fprintf(sb, "%sCreateUserQuery %s\n", indent, n.UserName)
+		fmt.Fprintf(sb, "%sCreateUserQuery\n", indent)
 		return
 	}
 	if n.CreateDictionary {
@@ -358,11 +358,21 @@ func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent stri
 			fmt.Fprintf(sb, "%s Set\n", indent)
 		}
 	} else {
+		// Regular table describe
 		name := n.Table
 		if n.Database != "" {
 			name = n.Database + "." + n.Table
 		}
-		fmt.Fprintf(sb, "%sDescribe %s\n", indent, name)
+		children := 1
+		if len(n.Settings) > 0 {
+			children++
+		}
+		fmt.Fprintf(sb, "%sDescribeQuery (children %d)\n", indent, children)
+		fmt.Fprintf(sb, "%s TableExpression (children 1)\n", indent)
+		fmt.Fprintf(sb, "%s  TableIdentifier %s\n", indent, name)
+		if len(n.Settings) > 0 {
+			fmt.Fprintf(sb, "%s Set\n", indent)
+		}
 	}
 }
 

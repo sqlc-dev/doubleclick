@@ -707,6 +707,10 @@ func explainIsNullExpr(sb *strings.Builder, n *ast.IsNullExpr, indent string, de
 }
 
 func explainCaseExpr(sb *strings.Builder, n *ast.CaseExpr, indent string, depth int) {
+	explainCaseExprWithAlias(sb, n, "", indent, depth)
+}
+
+func explainCaseExprWithAlias(sb *strings.Builder, n *ast.CaseExpr, alias string, indent string, depth int) {
 	// CASE is represented as Function multiIf or caseWithExpression
 	if n.Operand != nil {
 		// CASE x WHEN ... form
@@ -714,7 +718,11 @@ func explainCaseExpr(sb *strings.Builder, n *ast.CaseExpr, indent string, depth 
 		if n.Else != nil {
 			argCount++
 		}
-		fmt.Fprintf(sb, "%sFunction caseWithExpression (children %d)\n", indent, 1)
+		if alias != "" {
+			fmt.Fprintf(sb, "%sFunction caseWithExpression (alias %s) (children %d)\n", indent, alias, 1)
+		} else {
+			fmt.Fprintf(sb, "%sFunction caseWithExpression (children %d)\n", indent, 1)
+		}
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, argCount)
 		Node(sb, n.Operand, depth+2)
 		for _, w := range n.Whens {
@@ -730,7 +738,11 @@ func explainCaseExpr(sb *strings.Builder, n *ast.CaseExpr, indent string, depth 
 		if n.Else != nil {
 			argCount++
 		}
-		fmt.Fprintf(sb, "%sFunction multiIf (children %d)\n", indent, 1)
+		if alias != "" {
+			fmt.Fprintf(sb, "%sFunction multiIf (alias %s) (children %d)\n", indent, alias, 1)
+		} else {
+			fmt.Fprintf(sb, "%sFunction multiIf (children %d)\n", indent, 1)
+		}
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, argCount)
 		for _, w := range n.Whens {
 			Node(sb, w.Condition, depth+2)
