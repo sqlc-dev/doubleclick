@@ -175,6 +175,9 @@ func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent st
 		if n.FillStep != nil {
 			children++
 		}
+		if n.Collate != "" {
+			children++
+		}
 		fmt.Fprintf(sb, "%sOrderByElement (children %d)\n", indent, children)
 		Node(sb, n.Expression, depth+1)
 		if n.FillFrom != nil {
@@ -185,6 +188,10 @@ func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent st
 		}
 		if n.FillStep != nil {
 			Node(sb, n.FillStep, depth+1)
+		}
+		if n.Collate != "" {
+			// COLLATE is output as a string literal
+			fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, n.Collate)
 		}
 	}
 }

@@ -131,6 +131,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainUseQuery(sb, n, indent)
 	case *ast.DescribeQuery:
 		explainDescribeQuery(sb, n, indent)
+	case *ast.ExistsQuery:
+		explainExistsTableQuery(sb, n, indent)
 
 	// Types
 	case *ast.DataType:

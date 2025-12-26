@@ -363,6 +363,13 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 		showType = "Tables"
 	}
 
+	// SHOW CREATE DATABASE has special output format
+	if n.ShowType == ast.ShowCreateDB && n.From != "" {
+		fmt.Fprintf(sb, "%sShowCreateDatabaseQuery %s  (children 1)\n", indent, n.From)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+		return
+	}
+
 	// SHOW CREATE TABLE has special output format with database and table identifiers
 	if n.ShowType == ast.ShowCreate && (n.Database != "" || n.From != "") {
 		// Format: ShowCreateTableQuery database table (children 2)
@@ -383,11 +390,19 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 		return
 	}
 
+	// SHOW TABLES FROM database - include database as child
+	if n.ShowType == ast.ShowTables && n.From != "" {
+		fmt.Fprintf(sb, "%sShowTables (children 1)\n", indent)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+		return
+	}
+
 	fmt.Fprintf(sb, "%sShow%s\n", indent, showType)
 }
 
 func explainUseQuery(sb *strings.Builder, n *ast.UseQuery, indent string) {
-	fmt.Fprintf(sb, "%sUse %s\n", indent, n.Database)
+	fmt.Fprintf(sb, "%sUseQuery %s (children %d)\n", indent, n.Database, 1)
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 }
 
 func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent string) {
@@ -420,6 +435,19 @@ func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent stri
 			fmt.Fprintf(sb, "%s Set\n", indent)
 		}
 	}
+}
+
+func explainExistsTableQuery(sb *strings.Builder, n *ast.ExistsQuery, indent string) {
+	// EXISTS TABLE/DATABASE/DICTIONARY query
+	name := n.Table
+	if n.Database != "" {
+		name = n.Database + " " + n.Table
+	}
+	fmt.Fprintf(sb, "%sExistsTableQuery %s (children %d)\n", indent, name, 2)
+	if n.Database != "" {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+	}
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 }
 
 func explainDataType(sb *strings.Builder, n *ast.DataType, indent string, depth int) {
