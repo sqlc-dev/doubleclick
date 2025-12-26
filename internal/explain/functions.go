@@ -800,10 +800,36 @@ func explainExistsExpr(sb *strings.Builder, n *ast.ExistsExpr, indent string, de
 
 func explainExtractExpr(sb *strings.Builder, n *ast.ExtractExpr, indent string, depth int) {
 	// EXTRACT is represented as Function toYear, toMonth, etc.
-	fnName := "to" + strings.Title(strings.ToLower(n.Field))
+	// ClickHouse uses specific function names for date/time extraction
+	fnName := extractFieldToFunction(n.Field)
 	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 	Node(sb, n.From, depth+2)
+}
+
+// extractFieldToFunction maps EXTRACT field names to ClickHouse function names
+func extractFieldToFunction(field string) string {
+	switch strings.ToUpper(field) {
+	case "DAY":
+		return "toDayOfMonth"
+	case "MONTH":
+		return "toMonth"
+	case "YEAR":
+		return "toYear"
+	case "SECOND":
+		return "toSecond"
+	case "MINUTE":
+		return "toMinute"
+	case "HOUR":
+		return "toHour"
+	case "QUARTER":
+		return "toQuarter"
+	case "WEEK":
+		return "toWeek"
+	default:
+		// Fallback to generic "to" + TitleCase(field)
+		return "to" + strings.Title(strings.ToLower(field))
+	}
 }
 
 func explainWindowSpec(sb *strings.Builder, n *ast.WindowSpec, indent string, depth int) {
