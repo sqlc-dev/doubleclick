@@ -97,6 +97,9 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if n.AsSelect != nil {
 		children++
 	}
+	if n.AsTableFunction != nil {
+		children++
+	}
 	// ClickHouse adds an extra space before (children N) for CREATE DATABASE
 	if n.CreateDatabase {
 		fmt.Fprintf(sb, "%sCreateQuery %s  (children %d)\n", indent, name, children)
@@ -112,6 +115,16 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		if len(n.Indexes) > 0 {
 			childrenCount++
 		}
+		// Check for PRIMARY KEY constraints in column declarations
+		var primaryKeyColumns []string
+		for _, col := range n.Columns {
+			if col.PrimaryKey {
+				primaryKeyColumns = append(primaryKeyColumns, col.Name)
+			}
+		}
+		if len(primaryKeyColumns) > 0 {
+			childrenCount++ // Add for Function tuple containing PRIMARY KEY columns
+		}
 		fmt.Fprintf(sb, "%s Columns definition (children %d)\n", indent, childrenCount)
 		if len(n.Columns) > 0 {
 			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Columns))
@@ -123,6 +136,14 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Indexes))
 			for _, idx := range n.Indexes {
 				Index(sb, idx, depth+3)
+			}
+		}
+		// Output PRIMARY KEY columns as Function tuple
+		if len(primaryKeyColumns) > 0 {
+			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(primaryKeyColumns))
+			for _, colName := range primaryKeyColumns {
+				fmt.Fprintf(sb, "%s    Identifier %s\n", indent, colName)
 			}
 		}
 	}
@@ -227,6 +248,10 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if n.AsSelect != nil {
 		// AS SELECT is output directly without Subquery wrapper
 		Node(sb, n.AsSelect, depth+1)
+	}
+	if n.AsTableFunction != nil {
+		// AS table_function(...) is output directly
+		Node(sb, n.AsTableFunction, depth+1)
 	}
 }
 
@@ -337,6 +362,27 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 	if showType == "Settings" || showType == "Databases" {
 		showType = "Tables"
 	}
+
+	// SHOW CREATE TABLE has special output format with database and table identifiers
+	if n.ShowType == ast.ShowCreate && (n.Database != "" || n.From != "") {
+		// Format: ShowCreateTableQuery database table (children 2)
+		name := n.From
+		if n.Database != "" && n.From != "" {
+			fmt.Fprintf(sb, "%sShowCreateTableQuery %s %s (children 2)\n", indent, n.Database, n.From)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+		} else if n.From != "" {
+			fmt.Fprintf(sb, "%sShowCreateTableQuery %s (children 1)\n", indent, name)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+		} else if n.Database != "" {
+			fmt.Fprintf(sb, "%sShowCreateTableQuery %s (children 1)\n", indent, n.Database)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		} else {
+			fmt.Fprintf(sb, "%sShow%s\n", indent, showType)
+		}
+		return
+	}
+
 	fmt.Fprintf(sb, "%sShow%s\n", indent, showType)
 }
 

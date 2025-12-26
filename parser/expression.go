@@ -506,7 +506,7 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 	}
 
 	// Handle view() and similar functions that take a subquery as argument
-	// view(SELECT ...) should parse SELECT as a subquery, not expression
+	// view(SELECT ...) should parse SELECT as a subquery
 	if strings.ToLower(name) == "view" && (p.currentIs(token.SELECT) || p.currentIs(token.WITH)) {
 		subquery := p.parseSelectWithUnion()
 		fn.Arguments = []ast.Expression{&ast.Subquery{Position: pos, Query: subquery}}

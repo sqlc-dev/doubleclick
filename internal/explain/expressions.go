@@ -314,7 +314,12 @@ func explainSubquery(sb *strings.Builder, n *ast.Subquery, indent string, depth 
 	} else {
 		fmt.Fprintf(sb, "%sSubquery (children %d)\n", indent, children)
 	}
+	// Set context flag before recursing into subquery content
+	// This affects how negated literals with aliases are formatted
+	prevContext := inSubqueryContext
+	inSubqueryContext = true
 	Node(sb, n.Query, depth+1)
+	inSubqueryContext = prevContext
 }
 
 func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
@@ -398,6 +403,28 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 			Node(sb, e.Right, depth+2)
 		}
 	case *ast.UnaryExpr:
+		// When inside a Subquery context, negated numeric literals should be output as Literal Int64_-N
+		// Otherwise, output as Function negate
+		if inSubqueryContext && e.Op == "-" {
+			if lit, ok := e.Operand.(*ast.Literal); ok {
+				switch lit.Type {
+				case ast.LiteralInteger:
+					switch val := lit.Value.(type) {
+					case int64:
+						fmt.Fprintf(sb, "%sLiteral Int64_%d (alias %s)\n", indent, -val, n.Alias)
+						return
+					case uint64:
+						fmt.Fprintf(sb, "%sLiteral Int64_-%d (alias %s)\n", indent, val, n.Alias)
+						return
+					}
+				case ast.LiteralFloat:
+					val := lit.Value.(float64)
+					s := FormatFloat(-val)
+					fmt.Fprintf(sb, "%sLiteral Float64_%s (alias %s)\n", indent, s, n.Alias)
+					return
+				}
+			}
+		}
 		// Unary expressions become functions with alias
 		fnName := UnaryOperatorToFunction(e.Op)
 		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Alias, 1)

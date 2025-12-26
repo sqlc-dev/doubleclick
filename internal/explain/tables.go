@@ -41,7 +41,11 @@ func explainTableExpression(sb *strings.Builder, n *ast.TableExpression, indent 
 			explainViewExplain(sb, explainQ, n.Alias, indent+" ", depth+1)
 		} else if n.Alias != "" {
 			fmt.Fprintf(sb, "%s Subquery (alias %s) (children %d)\n", indent, n.Alias, 1)
+			// Set context flag for subquery - affects how negated literals with aliases are formatted
+			prevContext := inSubqueryContext
+			inSubqueryContext = true
 			Node(sb, subq.Query, depth+2)
+			inSubqueryContext = prevContext
 		} else {
 			Node(sb, n.Table, depth+1)
 		}

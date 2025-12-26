@@ -1500,17 +1500,16 @@ done_table_options:
 				p.nextToken()
 				p.parseIdentifierName()
 			} else if p.currentIs(token.LPAREN) {
-				// AS function(...) - skip the function call
-				depth := 1
-				p.nextToken()
-				for depth > 0 && !p.currentIs(token.EOF) {
-					if p.currentIs(token.LPAREN) {
-						depth++
-					} else if p.currentIs(token.RPAREN) {
-						depth--
-					}
+				// AS function(...) - parse as a function call
+				fn := &ast.FunctionCall{Name: name}
+				p.nextToken() // skip (
+				if !p.currentIs(token.RPAREN) {
+					fn.Arguments = p.parseExpressionList()
+				}
+				if p.currentIs(token.RPAREN) {
 					p.nextToken()
 				}
+				create.AsTableFunction = fn
 			}
 			_ = name // Use name for future AS table support
 		}
@@ -1595,8 +1594,13 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		}
 	}
 
-	// Handle TO (target table for materialized views)
+	// Handle TO (target table for materialized views only)
+	// TO clause is not valid for regular views - only for MATERIALIZED VIEW
 	if p.currentIs(token.TO) {
+		if !create.Materialized {
+			p.errors = append(p.errors, fmt.Errorf("TO clause is only valid for MATERIALIZED VIEW, not VIEW"))
+			return
+		}
 		p.nextToken()
 		create.To = p.parseIdentifierName()
 	}
