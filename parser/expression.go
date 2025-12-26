@@ -969,6 +969,7 @@ func (p *Parser) parseCase() ast.Expression {
 		p.nextToken()
 		if p.currentIs(token.IDENT) {
 			expr.Alias = p.current.Value
+			expr.QuotedAlias = p.current.Quoted
 			p.nextToken()
 		}
 	}

@@ -21,9 +21,10 @@ type Lexer struct {
 
 // Item represents a lexical token with its value and position.
 type Item struct {
-	Token token.Token
-	Value string
-	Pos   token.Position
+	Token  token.Token
+	Value  string
+	Pos    token.Position
+	Quoted bool // true if this identifier was double-quoted
 }
 
 // New creates a new Lexer from an io.Reader.
@@ -453,7 +454,7 @@ func (l *Lexer) readQuotedIdentifier() Item {
 		sb.WriteRune(l.ch)
 		l.readChar()
 	}
-	return Item{Token: token.IDENT, Value: sb.String(), Pos: pos}
+	return Item{Token: token.IDENT, Value: sb.String(), Pos: pos, Quoted: true}
 }
 
 // readUnicodeString reads a string enclosed in Unicode curly quotes (' or ')
@@ -497,7 +498,7 @@ func (l *Lexer) readUnicodeQuotedIdentifier(openQuote rune) Item {
 	if l.ch == closeQuote {
 		l.readChar() // skip closing quote
 	}
-	return Item{Token: token.IDENT, Value: sb.String(), Pos: pos}
+	return Item{Token: token.IDENT, Value: sb.String(), Pos: pos, Quoted: true}
 }
 
 func (l *Lexer) readBacktickIdentifier() Item {
