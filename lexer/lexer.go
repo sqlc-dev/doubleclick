@@ -425,6 +425,35 @@ func (l *Lexer) readString(quote rune) Item {
 	return Item{Token: token.STRING, Value: sb.String(), Pos: pos}
 }
 
+func (l *Lexer) readHexString() Item {
+	pos := l.pos
+	var sb strings.Builder
+	l.readChar() // skip opening quote
+
+	for !l.eof {
+		if l.ch == '\'' {
+			l.readChar() // skip closing quote
+			break
+		}
+		// Read two hex digits and convert to byte
+		hex1 := l.ch
+		l.readChar()
+		if l.eof || l.ch == '\'' {
+			// Odd number of hex digits - write single value
+			sb.WriteByte(byte(hexValue(hex1)))
+			if l.ch == '\'' {
+				l.readChar() // skip closing quote
+			}
+			break
+		}
+		hex2 := l.ch
+		val := hexValue(hex1)*16 + hexValue(hex2)
+		sb.WriteByte(byte(val))
+		l.readChar()
+	}
+	return Item{Token: token.STRING, Value: sb.String(), Pos: pos}
+}
+
 func (l *Lexer) readQuotedIdentifier() Item {
 	pos := l.pos
 	var sb strings.Builder
@@ -841,7 +870,7 @@ func (l *Lexer) readIdentifier() Item {
 	// Check for hex string literal: x'...' or X'...'
 	if (l.ch == 'x' || l.ch == 'X') && l.peekChar() == '\'' {
 		l.readChar() // skip x
-		return l.readString('\'') // read as regular string
+		return l.readHexString() // read as hex-decoded string
 	}
 
 	// Check for binary string literal: b'...' or B'...'
