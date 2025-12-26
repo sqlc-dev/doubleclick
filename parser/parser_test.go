@@ -39,22 +39,41 @@ func splitOnDelimiter(content string) []string {
 	return blocks
 }
 
-// parseQueryBlock parses a single query block (handles comments and multi-line)
+// parseQueryBlock parses a query block, returning all statements (handles comments)
+// Only non-comment lines are included. The parser will handle multiple statements.
 func parseQueryBlock(content string) string {
-	var queryParts []string
+	var lines []string
 	for _, line := range strings.Split(content, "\n") {
 		trimmed := strings.TrimSpace(line)
 		if trimmed == "" || strings.HasPrefix(trimmed, "--") || strings.HasPrefix(trimmed, "#") {
 			continue
 		}
 		// Remove trailing comment if present (but not inside strings - simple heuristic)
-		lineContent := trimmed
 		if idx := strings.Index(trimmed, " -- "); idx >= 0 {
-			lineContent = strings.TrimSpace(trimmed[:idx])
+			trimmed = strings.TrimSpace(trimmed[:idx])
 		}
-		// Check if line ends with semicolon (statement terminator)
-		if strings.HasSuffix(lineContent, ";") {
-			queryParts = append(queryParts, lineContent)
+		if trimmed != "" {
+			lines = append(lines, trimmed)
+		}
+	}
+	return strings.Join(lines, " ")
+}
+
+// parseFirstStatement extracts only the first statement from a query block (fallback)
+func parseFirstStatement(content string) string {
+	var queryParts []string
+	for _, line := range strings.Split(content, "\n") {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" || strings.HasPrefix(trimmed, "--") || strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		// Remove trailing comment if present
+		if idx := strings.Index(trimmed, " -- "); idx >= 0 {
+			trimmed = strings.TrimSpace(trimmed[:idx])
+		}
+		// Stop at first semicolon
+		if strings.HasSuffix(trimmed, ";") {
+			queryParts = append(queryParts, trimmed)
 			break
 		}
 		queryParts = append(queryParts, trimmed)
@@ -135,16 +154,10 @@ func TestParser(t *testing.T) {
 				t.Fatalf("Failed to read query.sql: %v", err)
 			}
 
-			// Split into query blocks and parse each one
+			// Split into query blocks (separated by ---)
 			queryBlocks := splitOnDelimiter(string(queryBytes))
 			if len(queryBlocks) == 0 {
 				t.Fatalf("No query blocks found in query.sql")
-			}
-
-			// Parse each query block
-			queries := make([]string, len(queryBlocks))
-			for i, block := range queryBlocks {
-				queries[i] = parseQueryBlock(block)
 			}
 
 			// Read explain.txt and split into expected outputs
@@ -160,14 +173,22 @@ func TestParser(t *testing.T) {
 				}
 			}
 
-			// Validate query count matches explain count (if multiple explains exist)
-			// For backward compatibility: if only 1 explain exists, only test the first query
-			if len(expectedExplains) > 1 && len(queries) != len(expectedExplains) {
-				t.Fatalf("Query count (%d) does not match explain count (%d)", len(queries), len(expectedExplains))
-			}
-			// If only 1 explain exists but multiple queries, only test the first query
-			if len(expectedExplains) == 1 && len(queries) > 1 {
-				queries = queries[:1]
+			// Parse query blocks based on explain count:
+			// - If multiple explains: parse all statements in each block (multi-statement test)
+			// - If single explain: parse only first statement (backward compatible)
+			var queries []string
+			if len(expectedExplains) > 1 {
+				// Multi-statement test: parse all statements
+				queries = make([]string, len(queryBlocks))
+				for i, block := range queryBlocks {
+					queries[i] = parseQueryBlock(block)
+				}
+				if len(queries) != len(expectedExplains) {
+					t.Fatalf("Query count (%d) does not match explain count (%d)", len(queries), len(expectedExplains))
+				}
+			} else {
+				// Single explain: parse only first statement from first block
+				queries = []string{parseFirstStatement(queryBlocks[0])}
 			}
 
 			// Read ast.json and split into expected outputs (if exists)
