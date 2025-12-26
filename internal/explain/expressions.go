@@ -471,12 +471,60 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 	}
 }
 
-func explainAsterisk(sb *strings.Builder, n *ast.Asterisk, indent string) {
+func explainAsterisk(sb *strings.Builder, n *ast.Asterisk, indent string, depth int) {
+	// Check if there are any column transformers (EXCEPT, REPLACE)
+	hasTransformers := len(n.Except) > 0 || len(n.Replace) > 0
+
 	if n.Table != "" {
-		fmt.Fprintf(sb, "%sQualifiedAsterisk (children %d)\n", indent, 1)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		if hasTransformers {
+			fmt.Fprintf(sb, "%sQualifiedAsterisk (children %d)\n", indent, 2)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+			explainColumnsTransformers(sb, n, indent+" ", depth+1)
+		} else {
+			fmt.Fprintf(sb, "%sQualifiedAsterisk (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		}
 	} else {
-		fmt.Fprintf(sb, "%sAsterisk\n", indent)
+		if hasTransformers {
+			fmt.Fprintf(sb, "%sAsterisk (children %d)\n", indent, 1)
+			explainColumnsTransformers(sb, n, indent+" ", depth+1)
+		} else {
+			fmt.Fprintf(sb, "%sAsterisk\n", indent)
+		}
+	}
+}
+
+func explainColumnsTransformers(sb *strings.Builder, n *ast.Asterisk, indent string, depth int) {
+	transformerCount := 0
+	if len(n.Except) > 0 {
+		transformerCount++
+	}
+	if len(n.Replace) > 0 {
+		transformerCount++
+	}
+
+	fmt.Fprintf(sb, "%sColumnsTransformerList (children %d)\n", indent, transformerCount)
+
+	if len(n.Except) > 0 {
+		fmt.Fprintf(sb, "%s ColumnsExceptTransformer (children %d)\n", indent, len(n.Except))
+		for _, col := range n.Except {
+			fmt.Fprintf(sb, "%s  Identifier %s\n", indent, col)
+		}
+	}
+
+	if len(n.Replace) > 0 {
+		fmt.Fprintf(sb, "%s ColumnsReplaceTransformer (children %d)\n", indent, len(n.Replace))
+		for _, replace := range n.Replace {
+			children := 0
+			if replace.Expr != nil {
+				children = 1
+			}
+			fmt.Fprintf(sb, "%s  ColumnsReplaceTransformer::Replacement (children %d)\n", indent, children)
+			if replace.Expr != nil {
+				// Output the expression without alias - the replacement name is implied
+				Node(sb, replace.Expr, depth+3)
+			}
+		}
 	}
 }
 
