@@ -10,6 +10,14 @@ go run ./cmd/next-test
 
 This tool finds all tests with `todo: true` in their metadata and returns the one with the shortest `query.sql` file.
 
+To find the next format roundtrip test to work on, run:
+
+```bash
+go run ./cmd/next-test -format
+```
+
+This finds tests with `todo_format: true` in their metadata.
+
 ## Workflow
 
 1. Run `go run ./cmd/next-test` to find the next test to implement
@@ -42,6 +50,16 @@ go test ./parser/... -check-skipped -v 2>&1 | grep "PASSES NOW"
 
 Tests that output `PASSES NOW` can have their `todo` flag removed from `metadata.json`. This helps identify when parser improvements fix multiple tests at once.
 
+## Checking for Newly Passing Format Tests
+
+After implementing format changes, run:
+
+```bash
+go test ./parser/... -check-format -v 2>&1 | grep "FORMAT PASSES NOW"
+```
+
+Tests that output `FORMAT PASSES NOW` can have their `todo_format` flag removed from `metadata.json`.
+
 ## Test Structure
 
 Each test in `parser/testdata/` contains:
@@ -52,7 +70,8 @@ Each test in `parser/testdata/` contains:
 
 ### Metadata Options
 
-- `todo: true` - Test is pending implementation
+- `todo: true` - Test is pending parser/explain implementation
+- `todo_format: true` - Format roundtrip test is pending implementation
 - `skip: true` - Skip test entirely (e.g., causes infinite loop)
 - `explain: false` - Skip test (e.g., ClickHouse couldn't parse it)
 - `parse_error: true` - Query is intentionally invalid SQL
