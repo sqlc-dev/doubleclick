@@ -1500,17 +1500,16 @@ done_table_options:
 				p.nextToken()
 				p.parseIdentifierName()
 			} else if p.currentIs(token.LPAREN) {
-				// AS function(...) - skip the function call
-				depth := 1
-				p.nextToken()
-				for depth > 0 && !p.currentIs(token.EOF) {
-					if p.currentIs(token.LPAREN) {
-						depth++
-					} else if p.currentIs(token.RPAREN) {
-						depth--
-					}
+				// AS function(...) - parse as a function call
+				fn := &ast.FunctionCall{Name: name}
+				p.nextToken() // skip (
+				if !p.currentIs(token.RPAREN) {
+					fn.Arguments = p.parseExpressionList()
+				}
+				if p.currentIs(token.RPAREN) {
 					p.nextToken()
 				}
+				create.AsTableFunction = fn
 			}
 			_ = name // Use name for future AS table support
 		}

@@ -258,6 +258,7 @@ type CreateQuery struct {
 	TTL              *TTLClause           `json:"ttl,omitempty"`
 	Settings         []*SettingExpr       `json:"settings,omitempty"`
 	AsSelect         Statement            `json:"as_select,omitempty"`
+	AsTableFunction  Expression           `json:"as_table_function,omitempty"` // AS table_function(...) in CREATE TABLE
 	Comment          string               `json:"comment,omitempty"`
 	OnCluster        string               `json:"on_cluster,omitempty"`
 	CreateDatabase   bool                 `json:"create_database,omitempty"`
