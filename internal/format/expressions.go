@@ -30,6 +30,44 @@ func Expression(sb *strings.Builder, expr ast.Expression) {
 		formatAsterisk(sb, e)
 	case *ast.AliasedExpr:
 		formatAliasedExpr(sb, e)
+	case *ast.Subquery:
+		formatSubquery(sb, e)
+	case *ast.LikeExpr:
+		formatLikeExpr(sb, e)
+	case *ast.CaseExpr:
+		formatCaseExpr(sb, e)
+	case *ast.CastExpr:
+		formatCastExpr(sb, e)
+	case *ast.InExpr:
+		formatInExpr(sb, e)
+	case *ast.BetweenExpr:
+		formatBetweenExpr(sb, e)
+	case *ast.IsNullExpr:
+		formatIsNullExpr(sb, e)
+	case *ast.TernaryExpr:
+		formatTernaryExpr(sb, e)
+	case *ast.ArrayAccess:
+		formatArrayAccess(sb, e)
+	case *ast.TupleAccess:
+		formatTupleAccess(sb, e)
+	case *ast.IntervalExpr:
+		formatIntervalExpr(sb, e)
+	case *ast.ExtractExpr:
+		formatExtractExpr(sb, e)
+	case *ast.Lambda:
+		formatLambda(sb, e)
+	case *ast.ColumnsMatcher:
+		formatColumnsMatcher(sb, e)
+	case *ast.WithElement:
+		formatWithElement(sb, e)
+	case *ast.ExistsExpr:
+		formatExistsExpr(sb, e)
+	case *ast.DataType:
+		formatDataType(sb, e)
+	case *ast.NameTypePair:
+		formatNameTypePair(sb, e)
+	case *ast.Parameter:
+		formatParameter(sb, e)
 	default:
 		// Fallback for unhandled expressions
 		sb.WriteString(fmt.Sprintf("%v", expr))
@@ -163,4 +201,217 @@ func formatAliasedExpr(sb *strings.Builder, a *ast.AliasedExpr) {
 	Expression(sb, a.Expr)
 	sb.WriteString(" AS ")
 	sb.WriteString(a.Alias)
+}
+
+// formatSubquery formats a subquery expression.
+func formatSubquery(sb *strings.Builder, s *ast.Subquery) {
+	sb.WriteString("(")
+	Statement(sb, s.Query)
+	sb.WriteString(")")
+}
+
+// formatLikeExpr formats a LIKE expression.
+func formatLikeExpr(sb *strings.Builder, l *ast.LikeExpr) {
+	Expression(sb, l.Expr)
+	if l.Not {
+		sb.WriteString(" NOT")
+	}
+	if l.CaseInsensitive {
+		sb.WriteString(" ILIKE ")
+	} else {
+		sb.WriteString(" LIKE ")
+	}
+	Expression(sb, l.Pattern)
+}
+
+// formatCaseExpr formats a CASE expression.
+func formatCaseExpr(sb *strings.Builder, c *ast.CaseExpr) {
+	sb.WriteString("CASE")
+	if c.Operand != nil {
+		sb.WriteString(" ")
+		Expression(sb, c.Operand)
+	}
+	for _, when := range c.Whens {
+		sb.WriteString(" WHEN ")
+		Expression(sb, when.Condition)
+		sb.WriteString(" THEN ")
+		Expression(sb, when.Result)
+	}
+	if c.Else != nil {
+		sb.WriteString(" ELSE ")
+		Expression(sb, c.Else)
+	}
+	sb.WriteString(" END")
+}
+
+// formatCastExpr formats a CAST expression.
+func formatCastExpr(sb *strings.Builder, c *ast.CastExpr) {
+	if c.OperatorSyntax {
+		Expression(sb, c.Expr)
+		sb.WriteString("::")
+		formatDataType(sb, c.Type)
+	} else {
+		sb.WriteString("CAST(")
+		Expression(sb, c.Expr)
+		if c.UsedASSyntax {
+			sb.WriteString(" AS ")
+			formatDataType(sb, c.Type)
+		} else if c.TypeExpr != nil {
+			sb.WriteString(", ")
+			Expression(sb, c.TypeExpr)
+		} else if c.Type != nil {
+			sb.WriteString(", '")
+			sb.WriteString(c.Type.Name)
+			sb.WriteString("'")
+		}
+		sb.WriteString(")")
+	}
+}
+
+// formatInExpr formats an IN expression.
+func formatInExpr(sb *strings.Builder, i *ast.InExpr) {
+	Expression(sb, i.Expr)
+	if i.Global {
+		sb.WriteString(" GLOBAL")
+	}
+	if i.Not {
+		sb.WriteString(" NOT IN ")
+	} else {
+		sb.WriteString(" IN ")
+	}
+	if i.Query != nil {
+		sb.WriteString("(")
+		Statement(sb, i.Query)
+		sb.WriteString(")")
+	} else {
+		sb.WriteString("(")
+		for j, e := range i.List {
+			if j > 0 {
+				sb.WriteString(", ")
+			}
+			Expression(sb, e)
+		}
+		sb.WriteString(")")
+	}
+}
+
+// formatBetweenExpr formats a BETWEEN expression.
+func formatBetweenExpr(sb *strings.Builder, b *ast.BetweenExpr) {
+	Expression(sb, b.Expr)
+	if b.Not {
+		sb.WriteString(" NOT BETWEEN ")
+	} else {
+		sb.WriteString(" BETWEEN ")
+	}
+	Expression(sb, b.Low)
+	sb.WriteString(" AND ")
+	Expression(sb, b.High)
+}
+
+// formatIsNullExpr formats an IS NULL expression.
+func formatIsNullExpr(sb *strings.Builder, i *ast.IsNullExpr) {
+	Expression(sb, i.Expr)
+	if i.Not {
+		sb.WriteString(" IS NOT NULL")
+	} else {
+		sb.WriteString(" IS NULL")
+	}
+}
+
+// formatTernaryExpr formats a ternary expression.
+func formatTernaryExpr(sb *strings.Builder, t *ast.TernaryExpr) {
+	Expression(sb, t.Condition)
+	sb.WriteString(" ? ")
+	Expression(sb, t.Then)
+	sb.WriteString(" : ")
+	Expression(sb, t.Else)
+}
+
+// formatArrayAccess formats an array access expression.
+func formatArrayAccess(sb *strings.Builder, a *ast.ArrayAccess) {
+	Expression(sb, a.Array)
+	sb.WriteString("[")
+	Expression(sb, a.Index)
+	sb.WriteString("]")
+}
+
+// formatTupleAccess formats a tuple access expression.
+func formatTupleAccess(sb *strings.Builder, t *ast.TupleAccess) {
+	Expression(sb, t.Tuple)
+	sb.WriteString(".")
+	Expression(sb, t.Index)
+}
+
+// formatIntervalExpr formats an INTERVAL expression.
+func formatIntervalExpr(sb *strings.Builder, i *ast.IntervalExpr) {
+	sb.WriteString("INTERVAL ")
+	Expression(sb, i.Value)
+	sb.WriteString(" ")
+	sb.WriteString(i.Unit)
+}
+
+// formatExtractExpr formats an EXTRACT expression.
+func formatExtractExpr(sb *strings.Builder, e *ast.ExtractExpr) {
+	sb.WriteString("EXTRACT(")
+	sb.WriteString(e.Field)
+	sb.WriteString(" FROM ")
+	Expression(sb, e.From)
+	sb.WriteString(")")
+}
+
+// formatLambda formats a lambda expression.
+func formatLambda(sb *strings.Builder, l *ast.Lambda) {
+	if len(l.Parameters) == 1 {
+		sb.WriteString(l.Parameters[0])
+	} else {
+		sb.WriteString("(")
+		for i, p := range l.Parameters {
+			if i > 0 {
+				sb.WriteString(", ")
+			}
+			sb.WriteString(p)
+		}
+		sb.WriteString(")")
+	}
+	sb.WriteString(" -> ")
+	Expression(sb, l.Body)
+}
+
+// formatColumnsMatcher formats a COLUMNS expression.
+func formatColumnsMatcher(sb *strings.Builder, c *ast.ColumnsMatcher) {
+	sb.WriteString("COLUMNS('")
+	sb.WriteString(c.Pattern)
+	sb.WriteString("')")
+}
+
+// formatWithElement formats a WITH element.
+func formatWithElement(sb *strings.Builder, w *ast.WithElement) {
+	Expression(sb, w.Query)
+	sb.WriteString(" AS ")
+	sb.WriteString(w.Name)
+}
+
+// formatExistsExpr formats an EXISTS expression.
+func formatExistsExpr(sb *strings.Builder, e *ast.ExistsExpr) {
+	sb.WriteString("EXISTS (")
+	Statement(sb, e.Query)
+	sb.WriteString(")")
+}
+
+// formatNameTypePair formats a name-type pair.
+func formatNameTypePair(sb *strings.Builder, n *ast.NameTypePair) {
+	sb.WriteString(n.Name)
+	sb.WriteString(" ")
+	formatDataType(sb, n.Type)
+}
+
+// formatParameter formats a parameter.
+func formatParameter(sb *strings.Builder, p *ast.Parameter) {
+	sb.WriteString("{")
+	sb.WriteString(p.Name)
+	if p.Type != nil {
+		sb.WriteString(":")
+		formatDataType(sb, p.Type)
+	}
+	sb.WriteString("}")
 }
