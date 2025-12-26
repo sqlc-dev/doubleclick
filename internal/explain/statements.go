@@ -363,6 +363,13 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 		showType = "Tables"
 	}
 
+	// SHOW CREATE DATABASE has special output format
+	if n.ShowType == ast.ShowCreateDB && n.From != "" {
+		fmt.Fprintf(sb, "%sShowCreateDatabaseQuery %s  (children 1)\n", indent, n.From)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+		return
+	}
+
 	// SHOW CREATE TABLE has special output format with database and table identifiers
 	if n.ShowType == ast.ShowCreate && (n.Database != "" || n.From != "") {
 		// Format: ShowCreateTableQuery database table (children 2)
