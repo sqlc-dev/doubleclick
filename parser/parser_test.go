@@ -202,6 +202,14 @@ func TestParser(t *testing.T) {
 				}
 			}
 
+			// Check Format output for 00007_array test
+			if entry.Name() == "00007_array" {
+				formatted := parser.Format(stmts)
+				if formatted != query {
+					t.Errorf("Format output mismatch\nQuery:    %s\nFormatted: %s", query, formatted)
+				}
+			}
+
 			// If we get here with a todo test and -check-skipped is set, the test passes!
 			// Automatically remove the todo flag from metadata.json
 			if metadata.Todo && *checkSkipped {
