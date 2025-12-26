@@ -348,6 +348,10 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 		if e.Type == ast.LiteralArray {
 			if exprs, ok := e.Value.([]ast.Expression); ok {
 				needsFunctionFormat := false
+				// Empty arrays always use Function array format
+				if len(exprs) == 0 {
+					needsFunctionFormat = true
+				}
 				for _, expr := range exprs {
 					// Check for tuples - use Function array
 					if lit, ok := expr.(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
@@ -363,7 +367,11 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 				if needsFunctionFormat {
 					// Render as Function array with alias
 					fmt.Fprintf(sb, "%sFunction array (alias %s) (children %d)\n", indent, n.Alias, 1)
-					fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
+					if len(exprs) > 0 {
+						fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
+					} else {
+						fmt.Fprintf(sb, "%s ExpressionList\n", indent)
+					}
 					for _, expr := range exprs {
 						Node(sb, expr, depth+2)
 					}
@@ -427,6 +435,9 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 	case *ast.InExpr:
 		// IN expressions with alias
 		explainInExprWithAlias(sb, e, n.Alias, indent, depth)
+	case *ast.CaseExpr:
+		// CASE expressions with alias
+		explainCaseExprWithAlias(sb, e, n.Alias, indent, depth)
 	default:
 		// For other types, recursively explain and add alias info
 		Node(sb, n.Expr, depth)
