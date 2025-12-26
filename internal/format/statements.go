@@ -8,6 +8,9 @@ import (
 
 // formatSelectWithUnionQuery formats a SELECT with UNION query.
 func formatSelectWithUnionQuery(sb *strings.Builder, q *ast.SelectWithUnionQuery) {
+	if q == nil {
+		return
+	}
 	for i, sel := range q.Selects {
 		if i > 0 {
 			sb.WriteString(" UNION ")
@@ -23,6 +26,9 @@ func formatSelectWithUnionQuery(sb *strings.Builder, q *ast.SelectWithUnionQuery
 
 // formatSelectQuery formats a SELECT query.
 func formatSelectQuery(sb *strings.Builder, q *ast.SelectQuery) {
+	if q == nil {
+		return
+	}
 	sb.WriteString("SELECT ")
 
 	if q.Distinct {
