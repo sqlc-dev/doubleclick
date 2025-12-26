@@ -70,8 +70,10 @@ type SelectQuery struct {
 	Qualify     Expression            `json:"qualify,omitempty"`
 	Window      []*WindowDefinition   `json:"window,omitempty"`
 	OrderBy     []*OrderByElement     `json:"order_by,omitempty"`
-	Limit       Expression            `json:"limit,omitempty"`
-	Offset      Expression            `json:"offset,omitempty"`
+	Limit            Expression            `json:"limit,omitempty"`
+	LimitBy          []Expression          `json:"limit_by,omitempty"`
+	LimitByHasLimit  bool                  `json:"limit_by_has_limit,omitempty"` // true if LIMIT BY was followed by another LIMIT
+	Offset           Expression            `json:"offset,omitempty"`
 	Settings    []*SettingExpr        `json:"settings,omitempty"`
 	IntoOutfile *IntoOutfileClause    `json:"into_outfile,omitempty"`
 	Format      *Identifier           `json:"format,omitempty"`
@@ -1067,11 +1069,12 @@ func (i *IsNullExpr) expressionNode()     {}
 
 // LikeExpr represents a LIKE or ILIKE expression.
 type LikeExpr struct {
-	Position    token.Position `json:"-"`
-	Expr        Expression     `json:"expr"`
-	Not         bool           `json:"not,omitempty"`
-	CaseInsensitive bool       `json:"case_insensitive,omitempty"` // true for ILIKE
-	Pattern     Expression     `json:"pattern"`
+	Position        token.Position `json:"-"`
+	Expr            Expression     `json:"expr"`
+	Not             bool           `json:"not,omitempty"`
+	CaseInsensitive bool           `json:"case_insensitive,omitempty"` // true for ILIKE
+	Pattern         Expression     `json:"pattern"`
+	Alias           string         `json:"alias,omitempty"`
 }
 
 func (l *LikeExpr) Pos() token.Position { return l.Position }

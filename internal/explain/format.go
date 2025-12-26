@@ -21,12 +21,16 @@ func FormatFloat(val float64) string {
 	if math.IsNaN(val) {
 		return "nan"
 	}
-	// Use scientific notation for extremely small numbers (< 1e-10)
-	// This matches ClickHouse's behavior where numbers like 0.000001 stay decimal
-	// but extremely small numbers like 1e-38 use scientific notation
+	// Use scientific notation for very small numbers (< 1e-6)
+	// This matches ClickHouse's behavior where numbers like 0.0000001 (-1e-7)
+	// are displayed in scientific notation
 	absVal := math.Abs(val)
-	if absVal > 0 && absVal < 1e-10 {
-		return strconv.FormatFloat(val, 'e', -1, 64)
+	if absVal > 0 && absVal < 1e-6 {
+		s := strconv.FormatFloat(val, 'e', -1, 64)
+		// Remove leading zeros from exponent (e-07 -> e-7)
+		s = strings.Replace(s, "e-0", "e-", 1)
+		s = strings.Replace(s, "e+0", "e+", 1)
+		return s
 	}
 	// Use decimal notation for normal-sized numbers
 	return strconv.FormatFloat(val, 'f', -1, 64)
