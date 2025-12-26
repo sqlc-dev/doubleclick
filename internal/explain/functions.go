@@ -655,7 +655,11 @@ func explainLikeExpr(sb *strings.Builder, n *ast.LikeExpr, indent string, depth 
 	if n.Not {
 		fnName = "not" + strings.Title(fnName)
 	}
-	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	if n.Alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
 	Node(sb, n.Expr, depth+2)
 	Node(sb, n.Pattern, depth+2)

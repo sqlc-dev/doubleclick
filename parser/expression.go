@@ -419,6 +419,33 @@ func (p *Parser) parseIdentifierOrFunction() ast.Expression {
 	name := p.current.Value
 	p.nextToken()
 
+	// Check for MySQL-style @@variable syntax (system variables)
+	// Convert to globalVariable('varname') function call with alias @@varname
+	if strings.HasPrefix(name, "@@") {
+		varName := name[2:] // Strip @@
+		// Handle @@session.var or @@global.var
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				varName = varName + "." + p.current.Value
+				name = name + "." + p.current.Value
+				p.nextToken()
+			}
+		}
+		return &ast.FunctionCall{
+			Position: pos,
+			Name:     "globalVariable",
+			Alias:    name,
+			Arguments: []ast.Expression{
+				&ast.Literal{
+					Position: pos,
+					Type:     "String",
+					Value:    varName,
+				},
+			},
+		}
+	}
+
 	// Check for function call
 	if p.currentIs(token.LPAREN) {
 		return p.parseFunctionCall(name, pos)
@@ -1589,6 +1616,9 @@ func (p *Parser) parseAlias(left ast.Expression) ast.Expression {
 		e.Alias = alias
 		return e
 	case *ast.ExtractExpr:
+		e.Alias = alias
+		return e
+	case *ast.LikeExpr:
 		e.Alias = alias
 		return e
 	default:

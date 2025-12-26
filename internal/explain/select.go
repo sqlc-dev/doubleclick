@@ -113,6 +113,13 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 	if n.Limit != nil {
 		Node(sb, n.Limit, depth+1)
 	}
+	// LIMIT BY - only output when there's no ORDER BY and no second LIMIT (matches ClickHouse behavior)
+	if len(n.LimitBy) > 0 && len(n.OrderBy) == 0 && !n.LimitByHasLimit {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.LimitBy))
+		for _, expr := range n.LimitBy {
+			Node(sb, expr, depth+2)
+		}
+	}
 	// SETTINGS - output here if there's no FORMAT, otherwise it's at SelectWithUnionQuery level
 	if len(n.Settings) > 0 && n.Format == nil {
 		fmt.Fprintf(sb, "%s Set\n", indent)
@@ -195,6 +202,16 @@ func isComplexExpr(expr ast.Expression) bool {
 	}
 }
 
+// hasOnlyLiterals checks if all expressions in a slice are literals
+func hasOnlyLiterals(exprs []ast.Expression) bool {
+	for _, expr := range exprs {
+		if _, ok := expr.(*ast.Literal); !ok {
+			return false
+		}
+	}
+	return true
+}
+
 func countSelectUnionChildren(n *ast.SelectWithUnionQuery) int {
 	count := 1 // ExpressionList of selects
 	// Check if any SelectQuery has IntoOutfile set
@@ -257,6 +274,9 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 		count++
 	}
 	if n.Limit != nil {
+		count++
+	}
+	if len(n.LimitBy) > 0 && len(n.OrderBy) == 0 && !n.LimitByHasLimit {
 		count++
 	}
 	if n.Offset != nil {
