@@ -8,6 +8,10 @@ import (
 	"github.com/sqlc-dev/doubleclick/ast"
 )
 
+// inSubqueryContext is a package-level flag to track when we're inside a Subquery
+// This affects how negated literals with aliases are formatted
+var inSubqueryContext bool
+
 // Explain returns the EXPLAIN AST output for a statement, matching ClickHouse's format.
 func Explain(stmt ast.Statement) string {
 	var sb strings.Builder

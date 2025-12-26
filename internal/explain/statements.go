@@ -112,6 +112,16 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		if len(n.Indexes) > 0 {
 			childrenCount++
 		}
+		// Check for PRIMARY KEY constraints in column declarations
+		var primaryKeyColumns []string
+		for _, col := range n.Columns {
+			if col.PrimaryKey {
+				primaryKeyColumns = append(primaryKeyColumns, col.Name)
+			}
+		}
+		if len(primaryKeyColumns) > 0 {
+			childrenCount++ // Add for Function tuple containing PRIMARY KEY columns
+		}
 		fmt.Fprintf(sb, "%s Columns definition (children %d)\n", indent, childrenCount)
 		if len(n.Columns) > 0 {
 			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Columns))
@@ -123,6 +133,14 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Indexes))
 			for _, idx := range n.Indexes {
 				Index(sb, idx, depth+3)
+			}
+		}
+		// Output PRIMARY KEY columns as Function tuple
+		if len(primaryKeyColumns) > 0 {
+			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(primaryKeyColumns))
+			for _, colName := range primaryKeyColumns {
+				fmt.Fprintf(sb, "%s    Identifier %s\n", indent, colName)
 			}
 		}
 	}

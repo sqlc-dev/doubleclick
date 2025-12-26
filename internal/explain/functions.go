@@ -42,9 +42,13 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 	fmt.Fprintln(sb)
 	for _, arg := range n.Arguments {
 		// For view() table function, unwrap Subquery wrapper
+		// Also reset the subquery context since view() SELECT is not in a Subquery node
 		if strings.ToLower(n.Name) == "view" {
 			if sq, ok := arg.(*ast.Subquery); ok {
+				prevContext := inSubqueryContext
+				inSubqueryContext = false
 				Node(sb, sq.Query, depth+2)
+				inSubqueryContext = prevContext
 				continue
 			}
 		}

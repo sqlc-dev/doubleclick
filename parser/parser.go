@@ -1595,8 +1595,13 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		}
 	}
 
-	// Handle TO (target table for materialized views)
+	// Handle TO (target table for materialized views only)
+	// TO clause is not valid for regular views - only for MATERIALIZED VIEW
 	if p.currentIs(token.TO) {
+		if !create.Materialized {
+			p.errors = append(p.errors, fmt.Errorf("TO clause is only valid for MATERIALIZED VIEW, not VIEW"))
+			return
+		}
 		p.nextToken()
 		create.To = p.parseIdentifierName()
 	}
