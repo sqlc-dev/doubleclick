@@ -15,16 +15,23 @@ import (
 
 // Parser parses ClickHouse SQL statements.
 type Parser struct {
-	lexer   *lexer.Lexer
-	current lexer.Item
-	peek    lexer.Item
-	errors  []error
+	lexer            *lexer.Lexer
+	current          lexer.Item
+	peek             lexer.Item
+	errors           []error
+	pendingComments  []*ast.Comment // comments collected but not yet assigned to a statement
+	source           string         // buffered source for extracting original text
 }
 
 // New creates a new Parser from an io.Reader.
 func New(r io.Reader) *Parser {
+	// Buffer the input for source extraction
+	sourceBytes, _ := io.ReadAll(r)
+	source := string(sourceBytes)
+
 	p := &Parser{
-		lexer: lexer.New(r),
+		lexer:  lexer.New(strings.NewReader(source)),
+		source: source,
 	}
 	// Read two tokens to initialize current and peek
 	p.nextToken()
@@ -36,11 +43,26 @@ func (p *Parser) nextToken() {
 	p.current = p.peek
 	for {
 		p.peek = p.lexer.NextToken()
-		// Skip comments and whitespace
-		if p.peek.Token != token.COMMENT && p.peek.Token != token.WHITESPACE {
-			break
+		// Skip whitespace but collect comments
+		if p.peek.Token == token.WHITESPACE {
+			continue
 		}
+		if p.peek.Token == token.COMMENT {
+			p.pendingComments = append(p.pendingComments, &ast.Comment{
+				Position: p.peek.Pos,
+				Text:     p.peek.Value,
+			})
+			continue
+		}
+		break
 	}
+}
+
+// consumePendingComments returns all pending comments and clears the list.
+func (p *Parser) consumePendingComments() []*ast.Comment {
+	comments := p.pendingComments
+	p.pendingComments = nil
+	return comments
 }
 
 func (p *Parser) currentIs(t token.Token) bool {
@@ -80,6 +102,7 @@ func Parse(ctx context.Context, r io.Reader) ([]ast.Statement, error) {
 // ParseStatements parses multiple SQL statements.
 func (p *Parser) ParseStatements(ctx context.Context) ([]ast.Statement, error) {
 	var statements []ast.Statement
+	lastEndOffset := 0 // Track where the previous statement ended
 
 	for !p.currentIs(token.EOF) {
 		select {
@@ -88,9 +111,54 @@ func (p *Parser) ParseStatements(ctx context.Context) ([]ast.Statement, error) {
 		default:
 		}
 
+		// Record start position
+		// For the first statement, start from 0; for subsequent statements, start from
+		// the previous statement's end to capture inter-statement whitespace/comments
+		currentTokenStart := p.current.Pos.Offset - 1
+		startOffset := currentTokenStart
+
+		if len(p.pendingComments) > 0 {
+			// Only use comment's offset if it appears BEFORE the current token (true leading comment)
+			commentOffset := p.pendingComments[0].Position.Offset - 1
+			if commentOffset < currentTokenStart {
+				startOffset = commentOffset
+			}
+		}
+
+		// For statements after the first, include inter-statement content
+		if len(statements) > 0 && lastEndOffset < startOffset {
+			startOffset = lastEndOffset
+		}
+
+		// Collect leading comments before the statement
+		leadingComments := p.consumePendingComments()
+
 		stmt := p.parseStatement()
 		if stmt != nil {
+			// Collect trailing comments after the statement (before semicolon or next statement)
+			trailingComments := p.consumePendingComments()
+
+			// Calculate end position (after semicolon if present)
+			endOffset := p.current.Pos.Offset
+			if p.currentIs(token.SEMICOLON) {
+				endOffset = p.current.Pos.Offset + len(p.current.Value)
+			}
+
+			// Extract original source
+			var originalSource string
+			if startOffset >= 0 && endOffset <= len(p.source) && startOffset < endOffset {
+				originalSource = p.source[startOffset:endOffset]
+			}
+
+			// Always wrap in StatementWithComments to preserve original source
+			stmt = &ast.StatementWithComments{
+				Statement:        stmt,
+				LeadingComments:  leadingComments,
+				TrailingComments: trailingComments,
+				OriginalSource:   originalSource,
+			}
 			statements = append(statements, stmt)
+			lastEndOffset = endOffset
 		}
 
 		// Skip semicolons between statements
