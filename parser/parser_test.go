@@ -17,9 +17,14 @@ import (
 // Use with: go test ./parser -check-skipped -v
 var checkSkipped = flag.Bool("check-skipped", false, "Run skipped todo tests to see which ones now pass")
 
+// checkFormat runs skipped todo_format tests to see which ones now pass.
+// Use with: go test ./parser -check-format -v
+var checkFormat = flag.Bool("check-format", false, "Run skipped todo_format tests to see which ones now pass")
+
 // testMetadata holds optional metadata for a test case
 type testMetadata struct {
 	Todo       bool   `json:"todo,omitempty"`
+	TodoFormat bool   `json:"todo_format,omitempty"` // true if format roundtrip test is pending
 	Source     string `json:"source,omitempty"`
 	Explain    *bool  `json:"explain,omitempty"`
 	Skip       bool   `json:"skip,omitempty"`
@@ -170,12 +175,21 @@ func TestParser(t *testing.T) {
 				}
 			}
 
-			// Check Format output for 00007_array test
-			if entry.Name() == "00007_array" {
+			// Check Format output (roundtrip test)
+			// Skip if todo_format is true, unless -check-format flag is set
+			if !metadata.TodoFormat || *checkFormat {
 				formatted := parser.Format(stmts)
 				expected := strings.TrimSpace(query)
 				if formatted != expected {
-					t.Errorf("Format output mismatch\nExpected:\n%s\n\nGot:\n%s", expected, formatted)
+					if metadata.TodoFormat {
+						if *checkFormat {
+							t.Logf("FORMAT STILL FAILING:\nExpected:\n%s\n\nGot:\n%s", expected, formatted)
+						}
+					} else {
+						t.Errorf("Format output mismatch\nExpected:\n%s\n\nGot:\n%s", expected, formatted)
+					}
+				} else if metadata.TodoFormat && *checkFormat {
+					t.Logf("FORMAT PASSES NOW: %s", entry.Name())
 				}
 			}
 
