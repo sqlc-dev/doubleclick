@@ -189,7 +189,16 @@ func TestParser(t *testing.T) {
 						t.Errorf("Format output mismatch\nExpected:\n%s\n\nGot:\n%s", expected, formatted)
 					}
 				} else if metadata.TodoFormat && *checkFormat {
-					t.Logf("FORMAT PASSES NOW: %s", entry.Name())
+					// Automatically remove the todo_format flag from metadata.json
+					metadata.TodoFormat = false
+					updatedBytes, err := json.Marshal(metadata)
+					if err != nil {
+						t.Errorf("Failed to marshal updated metadata: %v", err)
+					} else if err := os.WriteFile(metadataPath, append(updatedBytes, '\n'), 0644); err != nil {
+						t.Errorf("Failed to write updated metadata.json: %v", err)
+					} else {
+						t.Logf("FORMAT ENABLED - removed todo_format flag from: %s", entry.Name())
+					}
 				}
 			}
 
