@@ -230,9 +230,15 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	}
 
 	for !p.currentIs(token.EOF) && precedence < p.precedenceForCurrent() {
+		// Track position to detect infinite loops (when infix parsing doesn't consume tokens)
+		startPos := p.current.Pos
 		left = p.parseInfixExpression(left)
 		if left == nil {
 			return nil
+		}
+		// If we didn't advance, break to avoid infinite loop
+		if p.current.Pos == startPos {
+			break
 		}
 	}
 
