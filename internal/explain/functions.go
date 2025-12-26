@@ -139,6 +139,12 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 		Node(sb, n.TypeExpr, depth+2)
 	} else {
 		typeStr := FormatDataType(n.Type)
+		// Only escape if the DataType doesn't have parameters - this means the entire
+		// type was parsed from a string literal and may contain unescaped quotes.
+		// If it has parameters, FormatDataType already handles escaping.
+		if n.Type == nil || len(n.Type.Parameters) == 0 {
+			typeStr = escapeStringLiteral(typeStr)
+		}
 		fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, typeStr)
 	}
 }
@@ -711,7 +717,12 @@ func explainIsNullExpr(sb *strings.Builder, n *ast.IsNullExpr, indent string, de
 }
 
 func explainCaseExpr(sb *strings.Builder, n *ast.CaseExpr, indent string, depth int) {
-	explainCaseExprWithAlias(sb, n, "", indent, depth)
+	// Only output alias if it's unquoted (ClickHouse doesn't show quoted aliases)
+	alias := ""
+	if n.Alias != "" && !n.QuotedAlias {
+		alias = n.Alias
+	}
+	explainCaseExprWithAlias(sb, n, alias, indent, depth)
 }
 
 func explainCaseExprWithAlias(sb *strings.Builder, n *ast.CaseExpr, alias string, indent string, depth int) {

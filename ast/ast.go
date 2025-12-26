@@ -920,6 +920,7 @@ type CaseExpr struct {
 	Whens       []*WhenClause   `json:"whens"`
 	Else        Expression      `json:"else,omitempty"`
 	Alias       string          `json:"alias,omitempty"`
+	QuotedAlias bool            `json:"quoted_alias,omitempty"` // true if alias was double-quoted
 }
 
 func (c *CaseExpr) Pos() token.Position { return c.Position }
