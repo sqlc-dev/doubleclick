@@ -15,6 +15,9 @@ func explainSelectIntersectExceptQuery(sb *strings.Builder, n *ast.SelectInterse
 }
 
 func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuery, indent string, depth int) {
+	if n == nil {
+		return
+	}
 	children := countSelectUnionChildren(n)
 	fmt.Fprintf(sb, "%sSelectWithUnionQuery (children %d)\n", indent, children)
 	// Wrap selects in ExpressionList

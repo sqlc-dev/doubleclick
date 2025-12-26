@@ -170,6 +170,9 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 		firstWasParenthesized = true
 		p.nextToken() // skip (
 		nested := p.parseSelectWithUnion()
+		if nested == nil {
+			return nil
+		}
 		p.expect(token.RPAREN)
 		firstItem = nested
 	} else {
@@ -207,6 +210,9 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 			if p.currentIs(token.LPAREN) {
 				p.nextToken() // skip (
 				nested := p.parseSelectWithUnion()
+				if nested == nil {
+					break
+				}
 				p.expect(token.RPAREN)
 				intersectExcept.Selects = append(intersectExcept.Selects, nested)
 			} else {
@@ -261,6 +267,9 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 		if p.currentIs(token.LPAREN) {
 			p.nextToken() // skip (
 			nested := p.parseSelectWithUnion()
+			if nested == nil {
+				break
+			}
 			p.expect(token.RPAREN)
 			// Flatten nested selects into current query
 			for _, s := range nested.Selects {
