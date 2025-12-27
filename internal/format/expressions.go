@@ -145,6 +145,10 @@ func formatTupleLiteral(sb *strings.Builder, val interface{}) {
 // formatIdentifier formats an identifier.
 func formatIdentifier(sb *strings.Builder, id *ast.Identifier) {
 	sb.WriteString(id.Name())
+	if id.Alias != "" {
+		sb.WriteString(" AS ")
+		sb.WriteString(id.Alias)
+	}
 }
 
 // formatTableIdentifier formats a table identifier.

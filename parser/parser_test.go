@@ -269,9 +269,10 @@ func TestParser(t *testing.T) {
 				// Strip comments from expected since formatter doesn't preserve them
 				expected := strings.TrimSpace(stripComments(query))
 				// Compare with format normalization (whitespace + trailing semicolons)
+				// Use case-insensitive comparison since formatter uses uppercase keywords
 				formattedNorm := normalizeForFormat(formatted)
 				expectedNorm := normalizeForFormat(expected)
-				if formattedNorm != expectedNorm {
+				if !strings.EqualFold(formattedNorm, expectedNorm) {
 					if metadata.TodoFormat {
 						if *checkFormat {
 							t.Logf("FORMAT STILL FAILING:\nExpected:\n%s\n\nGot:\n%s", expected, formatted)
