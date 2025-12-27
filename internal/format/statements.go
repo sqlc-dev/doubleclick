@@ -13,11 +13,38 @@ func formatSelectWithUnionQuery(sb *strings.Builder, q *ast.SelectWithUnionQuery
 	}
 	for i, sel := range q.Selects {
 		if i > 0 {
-			sb.WriteString(" UNION ")
-			if len(q.UnionModes) > i-1 && q.UnionModes[i-1] == "ALL" {
-				sb.WriteString("ALL ")
-			} else if len(q.UnionModes) > i-1 && q.UnionModes[i-1] == "DISTINCT" {
-				sb.WriteString("DISTINCT ")
+			// Get the mode for this union - modes are stored as "UNION ALL", "UNION DISTINCT", etc.
+			modeIdx := i - 1
+			if modeIdx < len(q.UnionModes) {
+				mode := q.UnionModes[modeIdx]
+				// Parse the mode to extract the operator and modifier
+				// Format: "OPERATOR MODIFIER" (e.g., "UNION ALL", "EXCEPT DISTINCT")
+				sb.WriteString(" ")
+				if strings.HasPrefix(mode, "EXCEPT") {
+					sb.WriteString("EXCEPT ")
+					if strings.Contains(mode, "ALL") {
+						sb.WriteString("ALL ")
+					} else if strings.Contains(mode, "DISTINCT") {
+						sb.WriteString("DISTINCT ")
+					}
+				} else if strings.HasPrefix(mode, "INTERSECT") {
+					sb.WriteString("INTERSECT ")
+					if strings.Contains(mode, "ALL") {
+						sb.WriteString("ALL ")
+					} else if strings.Contains(mode, "DISTINCT") {
+						sb.WriteString("DISTINCT ")
+					}
+				} else {
+					// Default to UNION
+					sb.WriteString("UNION ")
+					if strings.Contains(mode, "ALL") {
+						sb.WriteString("ALL ")
+					} else if strings.Contains(mode, "DISTINCT") {
+						sb.WriteString("DISTINCT ")
+					}
+				}
+			} else {
+				sb.WriteString(" UNION ")
 			}
 		}
 		Statement(sb, sel)
@@ -376,6 +403,8 @@ func formatDropQuery(sb *strings.Builder, q *ast.DropQuery) {
 		sb.WriteString("VIEW ")
 	} else if q.Function != "" {
 		sb.WriteString("FUNCTION ")
+	} else if q.Dictionary != "" {
+		sb.WriteString("DICTIONARY ")
 	} else if q.User != "" {
 		sb.WriteString("USER ")
 	} else {
@@ -397,6 +426,12 @@ func formatDropQuery(sb *strings.Builder, q *ast.DropQuery) {
 		sb.WriteString(q.View)
 	} else if q.Function != "" {
 		sb.WriteString(q.Function)
+	} else if q.Dictionary != "" {
+		if q.Database != "" {
+			sb.WriteString(q.Database)
+			sb.WriteString(".")
+		}
+		sb.WriteString(q.Dictionary)
 	} else if q.User != "" {
 		sb.WriteString(q.User)
 	} else if len(q.Tables) > 0 {
@@ -669,6 +704,35 @@ func formatInsertQuery(sb *strings.Builder, q *ast.InsertQuery) {
 			sb.WriteString(col.Name())
 		}
 		sb.WriteString(")")
+	}
+	// Format SETTINGS before VALUES if present
+	if len(q.Settings) > 0 {
+		sb.WriteString(" SETTINGS ")
+		for i, s := range q.Settings {
+			if i > 0 {
+				sb.WriteString(", ")
+			}
+			sb.WriteString(s.Name)
+			sb.WriteString(" = ")
+			Expression(sb, s.Value)
+		}
+	}
+	// Format VALUES clause
+	if len(q.Values) > 0 {
+		sb.WriteString(" VALUES ")
+		for i, row := range q.Values {
+			if i > 0 {
+				sb.WriteString(", ")
+			}
+			sb.WriteString("(")
+			for j, expr := range row {
+				if j > 0 {
+					sb.WriteString(", ")
+				}
+				Expression(sb, expr)
+			}
+			sb.WriteString(")")
+		}
 	}
 	if q.Select != nil {
 		sb.WriteString(" ")
@@ -988,6 +1052,32 @@ func formatExistsQueryStmt(sb *strings.Builder, q *ast.ExistsQuery) {
 		return
 	}
 	sb.WriteString("EXISTS ")
+	if q.Database != "" {
+		sb.WriteString(q.Database)
+		sb.WriteString(".")
+	}
+	sb.WriteString(q.Table)
+}
+
+// formatDetachQuery formats a DETACH statement.
+func formatDetachQuery(sb *strings.Builder, q *ast.DetachQuery) {
+	if q == nil {
+		return
+	}
+	sb.WriteString("DETACH TABLE ")
+	if q.Database != "" {
+		sb.WriteString(q.Database)
+		sb.WriteString(".")
+	}
+	sb.WriteString(q.Table)
+}
+
+// formatAttachQuery formats an ATTACH statement.
+func formatAttachQuery(sb *strings.Builder, q *ast.AttachQuery) {
+	if q == nil {
+		return
+	}
+	sb.WriteString("ATTACH TABLE ")
 	if q.Database != "" {
 		sb.WriteString(q.Database)
 		sb.WriteString(".")

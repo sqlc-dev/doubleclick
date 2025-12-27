@@ -320,6 +320,9 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 	if n.View != "" {
 		name = n.View
 	}
+	if n.Dictionary != "" {
+		name = n.Dictionary
+	}
 	if n.DropDatabase {
 		name = n.Database
 	}
@@ -516,4 +519,12 @@ func explainParameter(sb *strings.Builder, n *ast.Parameter, indent string) {
 	} else {
 		fmt.Fprintf(sb, "%sQueryParameter\n", indent)
 	}
+}
+
+func explainDetachQuery(sb *strings.Builder, n *ast.DetachQuery, indent string) {
+	fmt.Fprintf(sb, "%sDetachQuery\n", indent)
+}
+
+func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string) {
+	fmt.Fprintf(sb, "%sAttachQuery\n", indent)
 }

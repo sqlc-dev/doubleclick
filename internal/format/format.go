@@ -63,6 +63,10 @@ func Statement(sb *strings.Builder, stmt ast.Statement) {
 		formatExchangeQuery(sb, s)
 	case *ast.ExistsQuery:
 		formatExistsQueryStmt(sb, s)
+	case *ast.DetachQuery:
+		formatDetachQuery(sb, s)
+	case *ast.AttachQuery:
+		formatAttachQuery(sb, s)
 	default:
 		// Fallback for unhandled statements
 	}
