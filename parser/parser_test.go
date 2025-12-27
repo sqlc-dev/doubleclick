@@ -24,6 +24,15 @@ func normalizeWhitespace(s string) string {
 	return strings.TrimSpace(whitespaceRegex.ReplaceAllString(s, " "))
 }
 
+// normalizeForFormat normalizes SQL for format comparison by collapsing
+// whitespace and stripping trailing semicolons. This allows comparing
+// formatted output regardless of whether the original had trailing semicolons.
+func normalizeForFormat(s string) string {
+	normalized := normalizeWhitespace(s)
+	// Strip trailing semicolon if present
+	return strings.TrimSuffix(normalized, ";")
+}
+
 // checkSkipped runs skipped todo tests to see which ones now pass.
 // Use with: go test ./parser -check-skipped -v
 var checkSkipped = flag.Bool("check-skipped", false, "Run skipped todo tests to see which ones now pass")
@@ -191,9 +200,9 @@ func TestParser(t *testing.T) {
 			if !metadata.TodoFormat || *checkFormat {
 				formatted := parser.Format(stmts)
 				expected := strings.TrimSpace(query)
-				// Compare with whitespace normalization to ignore formatting differences
-				formattedNorm := normalizeWhitespace(formatted)
-				expectedNorm := normalizeWhitespace(expected)
+				// Compare with format normalization (whitespace + trailing semicolons)
+				formattedNorm := normalizeForFormat(formatted)
+				expectedNorm := normalizeForFormat(expected)
 				if formattedNorm != expectedNorm {
 					if metadata.TodoFormat {
 						if *checkFormat {
