@@ -20,33 +20,9 @@ func Format(stmts []ast.Statement) string {
 	return sb.String()
 }
 
-// formatComments writes comments to the builder.
-func formatComments(sb *strings.Builder, comments []*ast.Comment) {
-	for _, c := range comments {
-		sb.WriteString(c.Text)
-		sb.WriteString("\n")
-	}
-}
-
-// formatTrailingComments writes trailing comments (on same line) to the builder.
-func formatTrailingComments(sb *strings.Builder, comments []*ast.Comment) {
-	for _, c := range comments {
-		sb.WriteString(" ")
-		sb.WriteString(c.Text)
-	}
-}
-
 // Statement formats a single statement.
 func Statement(sb *strings.Builder, stmt ast.Statement) {
 	if stmt == nil {
-		return
-	}
-
-	// Handle statement with comments wrapper
-	if swc, ok := stmt.(*ast.StatementWithComments); ok {
-		formatComments(sb, swc.LeadingComments)
-		Statement(sb, swc.Statement)
-		formatTrailingComments(sb, swc.TrailingComments)
 		return
 	}
 

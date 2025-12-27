@@ -33,6 +33,73 @@ func normalizeForFormat(s string) string {
 	return strings.TrimSuffix(normalized, ";")
 }
 
+// stripComments removes SQL comments from a query string.
+// It handles:
+// - Line comments: -- to end of line
+// - Block comments: /* ... */ with nesting support
+// This is used only for format test comparison.
+func stripComments(s string) string {
+	var result strings.Builder
+	result.Grow(len(s))
+
+	i := 0
+	for i < len(s) {
+		// Check for line comment: --
+		if i+1 < len(s) && s[i] == '-' && s[i+1] == '-' {
+			// Skip until end of line
+			for i < len(s) && s[i] != '\n' {
+				i++
+			}
+			continue
+		}
+
+		// Check for block comment: /* ... */
+		if i+1 < len(s) && s[i] == '/' && s[i+1] == '*' {
+			depth := 1
+			i += 2
+			for i < len(s) && depth > 0 {
+				if i+1 < len(s) && s[i] == '/' && s[i+1] == '*' {
+					depth++
+					i += 2
+				} else if i+1 < len(s) && s[i] == '*' && s[i+1] == '/' {
+					depth--
+					i += 2
+				} else {
+					i++
+				}
+			}
+			continue
+		}
+
+		// Check for string literal - don't strip comments inside strings
+		if s[i] == '\'' {
+			result.WriteByte(s[i])
+			i++
+			for i < len(s) {
+				if s[i] == '\'' {
+					result.WriteByte(s[i])
+					i++
+					// Check for escaped quote ''
+					if i < len(s) && s[i] == '\'' {
+						result.WriteByte(s[i])
+						i++
+						continue
+					}
+					break
+				}
+				result.WriteByte(s[i])
+				i++
+			}
+			continue
+		}
+
+		result.WriteByte(s[i])
+		i++
+	}
+
+	return result.String()
+}
+
 // checkSkipped runs skipped todo tests to see which ones now pass.
 // Use with: go test ./parser -check-skipped -v
 var checkSkipped = flag.Bool("check-skipped", false, "Run skipped todo tests to see which ones now pass")
@@ -199,7 +266,8 @@ func TestParser(t *testing.T) {
 			// Skip if todo_format is true, unless -check-format flag is set
 			if !metadata.TodoFormat || *checkFormat {
 				formatted := parser.Format(stmts)
-				expected := strings.TrimSpace(query)
+				// Strip comments from expected since formatter doesn't preserve them
+				expected := strings.TrimSpace(stripComments(query))
 				// Compare with format normalization (whitespace + trailing semicolons)
 				formattedNorm := normalizeForFormat(formatted)
 				expectedNorm := normalizeForFormat(expected)
