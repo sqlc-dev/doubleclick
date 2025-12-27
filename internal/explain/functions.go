@@ -395,19 +395,20 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				argCount += len(n.List)
 			}
 		} else {
-			// Check if all items are tuples
-			allTuples := true
+			// Check if all items are string literals (large list case - no wrapper)
+			allStringLiterals := true
 			for _, item := range n.List {
-				if lit, ok := item.(*ast.Literal); !ok || lit.Type != ast.LiteralTuple {
-					allTuples = false
+				if lit, ok := item.(*ast.Literal); !ok || lit.Type != ast.LiteralString {
+					allStringLiterals = false
 					break
 				}
 			}
-			if allTuples {
-				// All tuples get wrapped in a single Function tuple
-				argCount++
-			} else {
+			if allStringLiterals {
+				// Large string list - separate children
 				argCount += len(n.List)
+			} else {
+				// Non-string items get wrapped in a single Function tuple
+				argCount++
 			}
 		}
 	}
@@ -455,8 +456,26 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				explainTupleInInList(sb, item.(*ast.Literal), indent+"   ", depth+4)
 			}
 		} else {
+			// Check if all items are string literals (large list case)
+			allStringLiterals := true
 			for _, item := range n.List {
-				Node(sb, item, depth+2)
+				if lit, ok := item.(*ast.Literal); !ok || lit.Type != ast.LiteralString {
+					allStringLiterals = false
+					break
+				}
+			}
+			if allStringLiterals {
+				// Large string list - output as separate children (no tuple wrapper)
+				for _, item := range n.List {
+					Node(sb, item, depth+2)
+				}
+			} else {
+				// Wrap non-literal/non-tuple list items in Function tuple
+				fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.List))
+				for _, item := range n.List {
+					Node(sb, item, depth+4)
+				}
 			}
 		}
 	}
@@ -548,18 +567,20 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 				argCount += len(n.List)
 			}
 		} else {
-			// Check if all items are tuples
-			allTuples := true
+			// Check if all items are string literals (large list case - no wrapper)
+			allStringLiterals := true
 			for _, item := range n.List {
-				if lit, ok := item.(*ast.Literal); !ok || lit.Type != ast.LiteralTuple {
-					allTuples = false
+				if lit, ok := item.(*ast.Literal); !ok || lit.Type != ast.LiteralString {
+					allStringLiterals = false
 					break
 				}
 			}
-			if allTuples {
-				argCount++
-			} else {
+			if allStringLiterals {
+				// Large string list - separate children
 				argCount += len(n.List)
+			} else {
+				// Non-string items get wrapped in a single Function tuple
+				argCount++
 			}
 		}
 	}
@@ -600,8 +621,26 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 				explainTupleInInList(sb, item.(*ast.Literal), indent+"   ", depth+4)
 			}
 		} else {
+			// Check if all items are string literals (large list case)
+			allStringLiterals := true
 			for _, item := range n.List {
-				Node(sb, item, depth+2)
+				if lit, ok := item.(*ast.Literal); !ok || lit.Type != ast.LiteralString {
+					allStringLiterals = false
+					break
+				}
+			}
+			if allStringLiterals {
+				// Large string list - output as separate children (no tuple wrapper)
+				for _, item := range n.List {
+					Node(sb, item, depth+2)
+				}
+			} else {
+				// Wrap non-literal/non-tuple list items in Function tuple
+				fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.List))
+				for _, item := range n.List {
+					Node(sb, item, depth+4)
+				}
 			}
 		}
 	}
