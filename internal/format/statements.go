@@ -48,6 +48,13 @@ func formatSelectQuery(sb *strings.Builder, q *ast.SelectQuery) {
 		sb.WriteString("DISTINCT ")
 	}
 
+	// Format TOP clause
+	if q.Top != nil {
+		sb.WriteString("TOP ")
+		Expression(sb, q.Top)
+		sb.WriteString(" ")
+	}
+
 	// Format columns
 	for i, col := range q.Columns {
 		if i > 0 {
@@ -105,6 +112,25 @@ func formatSelectQuery(sb *strings.Builder, q *ast.SelectQuery) {
 		Expression(sb, q.Having)
 	}
 
+	// Format QUALIFY clause
+	if q.Qualify != nil {
+		sb.WriteString(" QUALIFY ")
+		Expression(sb, q.Qualify)
+	}
+
+	// Format WINDOW clause
+	if len(q.Window) > 0 {
+		sb.WriteString(" WINDOW ")
+		for i, w := range q.Window {
+			if i > 0 {
+				sb.WriteString(", ")
+			}
+			sb.WriteString(w.Name)
+			sb.WriteString(" AS ")
+			formatWindowSpec(sb, w.Spec)
+		}
+	}
+
 	// Format ORDER BY clause
 	if len(q.OrderBy) > 0 {
 		sb.WriteString(" ORDER BY ")
@@ -126,6 +152,17 @@ func formatSelectQuery(sb *strings.Builder, q *ast.SelectQuery) {
 		Expression(sb, q.Offset)
 	}
 
+	// Format LIMIT BY clause
+	if len(q.LimitBy) > 0 {
+		sb.WriteString(" BY ")
+		for i, expr := range q.LimitBy {
+			if i > 0 {
+				sb.WriteString(", ")
+			}
+			Expression(sb, expr)
+		}
+	}
+
 	// Format SETTINGS clause
 	if len(q.Settings) > 0 {
 		sb.WriteString(" SETTINGS ")
@@ -136,6 +173,16 @@ func formatSelectQuery(sb *strings.Builder, q *ast.SelectQuery) {
 			sb.WriteString(s.Name)
 			sb.WriteString(" = ")
 			Expression(sb, s.Value)
+		}
+	}
+
+	// Format INTO OUTFILE clause
+	if q.IntoOutfile != nil {
+		sb.WriteString(" INTO OUTFILE '")
+		sb.WriteString(q.IntoOutfile.Filename)
+		sb.WriteString("'")
+		if q.IntoOutfile.Truncate {
+			sb.WriteString(" TRUNCATE")
 		}
 	}
 
