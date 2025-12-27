@@ -10,40 +10,14 @@ import (
 // Format returns the SQL string representation of the statements.
 func Format(stmts []ast.Statement) string {
 	var sb strings.Builder
-	hasOriginalSource := false
-
-	// Check if all statements have original source
-	for _, stmt := range stmts {
-		if swc, ok := stmt.(*ast.StatementWithComments); ok && swc.OriginalSource != "" {
-			hasOriginalSource = true
-		} else {
-			hasOriginalSource = false
-			break
-		}
-	}
-
 	for i, stmt := range stmts {
-		// Check if we have original source available
-		if swc, ok := stmt.(*ast.StatementWithComments); ok && swc.OriginalSource != "" {
-			if hasOriginalSource {
-				// When using original source, don't add separators - they're in the source
-				sb.WriteString(swc.OriginalSource)
-			} else {
-				// Mixed mode - still need to handle separators
-				if i > 0 {
-					sb.WriteString("\n")
-				}
-				sb.WriteString(strings.TrimSpace(swc.OriginalSource))
-			}
-			continue
-		}
 		if i > 0 {
 			sb.WriteString("\n")
 		}
 		Statement(&sb, stmt)
 		sb.WriteString(";")
 	}
-	return strings.TrimSpace(sb.String())
+	return sb.String()
 }
 
 // formatComments writes comments to the builder.

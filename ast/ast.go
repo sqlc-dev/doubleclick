@@ -39,7 +39,6 @@ type StatementWithComments struct {
 	Statement        Statement  `json:"-"`
 	LeadingComments  []*Comment `json:"-"`
 	TrailingComments []*Comment `json:"-"`
-	OriginalSource   string     `json:"-"` // Original source text for perfect roundtrip
 }
 
 // MarshalJSON delegates JSON serialization to the wrapped statement.
