@@ -16,7 +16,12 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 	if len(n.Parameters) > 0 {
 		children++ // parameters ExpressionList
 	}
-	if n.Over != nil {
+	// Only count WindowDefinition as a child for inline window specs (not named references)
+	// When it's just a reference like "OVER w", it's shown in the SELECT's WINDOW clause instead
+	// Inline specs include OVER () - empty window, and OVER (ORDER BY x) - window with spec
+	// Named refs have n.Over.Name set and no inline definition
+	hasInlineWindowSpec := n.Over != nil && n.Over.Name == ""
+	if hasInlineWindowSpec {
 		children++ // WindowDefinition for OVER clause
 	}
 	// Normalize function name
@@ -65,9 +70,10 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 			Node(sb, p, depth+2)
 		}
 	}
-	// Window definition (for window functions with OVER clause)
+	// Window definition (for window functions with inline OVER clause)
 	// WindowDefinition is a sibling to ExpressionList, so use the same indent
-	if n.Over != nil {
+	// Only output for inline specs, not named references like "OVER w"
+	if hasInlineWindowSpec {
 		explainWindowSpec(sb, n.Over, indent+" ", depth+1)
 	}
 }
