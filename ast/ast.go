@@ -218,17 +218,19 @@ func (s *SettingExpr) End() token.Position { return s.Position }
 
 // InsertQuery represents an INSERT statement.
 type InsertQuery struct {
-	Position    token.Position `json:"-"`
-	Database    string         `json:"database,omitempty"`
-	Table       string         `json:"table,omitempty"`
-	Function    *FunctionCall  `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
-	Columns     []*Identifier  `json:"columns,omitempty"`
-	PartitionBy Expression     `json:"partition_by,omitempty"` // For PARTITION BY clause
-	Infile      string         `json:"infile,omitempty"`       // For FROM INFILE clause
-	Compression string         `json:"compression,omitempty"`  // For COMPRESSION clause
-	Select      Statement      `json:"select,omitempty"`
-	Format      *Identifier    `json:"format,omitempty"`
-	HasSettings bool           `json:"has_settings,omitempty"` // For SETTINGS clause
+	Position    token.Position   `json:"-"`
+	Database    string           `json:"database,omitempty"`
+	Table       string           `json:"table,omitempty"`
+	Function    *FunctionCall    `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
+	Columns     []*Identifier    `json:"columns,omitempty"`
+	PartitionBy Expression       `json:"partition_by,omitempty"` // For PARTITION BY clause
+	Infile      string           `json:"infile,omitempty"`       // For FROM INFILE clause
+	Compression string           `json:"compression,omitempty"`  // For COMPRESSION clause
+	Values      [][]Expression   `json:"-"`                      // For VALUES clause (format only, not in AST JSON)
+	Select      Statement        `json:"select,omitempty"`
+	Format      *Identifier      `json:"format,omitempty"`
+	HasSettings bool             `json:"has_settings,omitempty"` // For SETTINGS clause
+	Settings    []*SettingExpr   `json:"settings,omitempty"`     // For SETTINGS clause in INSERT
 }
 
 func (i *InsertQuery) Pos() token.Position { return i.Position }
@@ -375,7 +377,8 @@ type DropQuery struct {
 	Tables       []*TableIdentifier `json:"tables,omitempty"` // For DROP TABLE t1, t2, t3
 	View         string             `json:"view,omitempty"`
 	User         string             `json:"user,omitempty"`
-	Function     string             `json:"function,omitempty"` // For DROP FUNCTION
+	Function     string             `json:"function,omitempty"`   // For DROP FUNCTION
+	Dictionary   string             `json:"-"` // For DROP DICTIONARY (format only, not in AST JSON)
 	Temporary    bool               `json:"temporary,omitempty"`
 	OnCluster    string             `json:"on_cluster,omitempty"`
 	DropDatabase bool               `json:"drop_database,omitempty"`
@@ -486,6 +489,28 @@ type UseQuery struct {
 func (u *UseQuery) Pos() token.Position { return u.Position }
 func (u *UseQuery) End() token.Position { return u.Position }
 func (u *UseQuery) statementNode()      {}
+
+// DetachQuery represents a DETACH statement.
+type DetachQuery struct {
+	Position token.Position `json:"-"`
+	Database string         `json:"database,omitempty"`
+	Table    string         `json:"table,omitempty"`
+}
+
+func (d *DetachQuery) Pos() token.Position { return d.Position }
+func (d *DetachQuery) End() token.Position { return d.Position }
+func (d *DetachQuery) statementNode()      {}
+
+// AttachQuery represents an ATTACH statement.
+type AttachQuery struct {
+	Position token.Position `json:"-"`
+	Database string         `json:"database,omitempty"`
+	Table    string         `json:"table,omitempty"`
+}
+
+func (a *AttachQuery) Pos() token.Position { return a.Position }
+func (a *AttachQuery) End() token.Position { return a.Position }
+func (a *AttachQuery) statementNode()      {}
 
 // DescribeQuery represents a DESCRIBE statement.
 type DescribeQuery struct {

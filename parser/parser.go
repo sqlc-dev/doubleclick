@@ -149,6 +149,10 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.EXISTS:
 		// EXISTS table_name syntax (check if table exists)
 		return p.parseExistsStatement()
+	case token.DETACH:
+		return p.parseDetach()
+	case token.ATTACH:
+		return p.parseAttach()
 	default:
 		p.errors = append(p.errors, fmt.Errorf("unexpected token %s at line %d, column %d",
 			p.current.Token, p.current.Pos.Line, p.current.Pos.Column))
@@ -1160,9 +1164,34 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 	// Parse VALUES or SELECT
 	if p.currentIs(token.VALUES) {
 		p.nextToken()
-		// Skip VALUES data - consume until end of statement
-		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) && !p.currentIs(token.SETTINGS) {
-			p.nextToken()
+		// Parse VALUES rows: (expr, expr, ...), (expr, expr, ...), ...
+		for {
+			if !p.currentIs(token.LPAREN) {
+				break
+			}
+			p.nextToken() // skip (
+			var row []ast.Expression
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				expr := p.parseExpression(LOWEST)
+				if expr != nil {
+					row = append(row, expr)
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+			if p.currentIs(token.RPAREN) {
+				p.nextToken() // skip )
+			}
+			ins.Values = append(ins.Values, row)
+			// Check for more rows
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
 		}
 	} else if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 		ins.Select = p.parseSelectWithUnion()
@@ -2047,6 +2076,7 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 	// What are we dropping?
 	dropUser := false
 	dropFunction := false
+	dropDictionary := false
 	switch p.current.Token {
 	case token.TABLE:
 		p.nextToken()
@@ -2071,10 +2101,13 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 			p.nextToken()
 		}
 	default:
-		// Handle multi-word DROP types: ROW POLICY, NAMED COLLECTION
+		// Handle multi-word DROP types: ROW POLICY, NAMED COLLECTION, DICTIONARY
 		if p.currentIs(token.IDENT) {
 			upper := strings.ToUpper(p.current.Value)
 			switch upper {
+			case "DICTIONARY":
+				dropDictionary = true
+				p.nextToken()
 			case "ROW", "NAMED", "POLICY", "QUOTA", "ROLE":
 				// Skip the DROP type tokens
 				for p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
@@ -2125,6 +2158,18 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 			}
 		} else if dropFunction {
 			drop.Function = tableName
+		} else if dropDictionary {
+			drop.Dictionary = tableName
+			// Also set Table/Tables for backward compatibility with AST JSON
+			drop.Tables = append(drop.Tables, &ast.TableIdentifier{
+				Position: drop.Position,
+				Database: database,
+				Table:    tableName,
+			})
+			drop.Table = tableName
+			if database != "" {
+				drop.Database = database
+			}
 		} else if drop.DropDatabase {
 			drop.Database = tableName
 		} else {
@@ -3110,6 +3155,56 @@ func (p *Parser) parseExchange() *ast.ExchangeQuery {
 	}
 
 	return exchange
+}
+
+func (p *Parser) parseDetach() *ast.DetachQuery {
+	detach := &ast.DetachQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip DETACH
+
+	// Skip optional TABLE keyword
+	if p.currentIs(token.TABLE) {
+		p.nextToken()
+	}
+
+	// Parse table name (can be qualified: database.table)
+	tableName := p.parseIdentifierName()
+	if p.currentIs(token.DOT) {
+		p.nextToken()
+		detach.Database = tableName
+		detach.Table = p.parseIdentifierName()
+	} else {
+		detach.Table = tableName
+	}
+
+	return detach
+}
+
+func (p *Parser) parseAttach() *ast.AttachQuery {
+	attach := &ast.AttachQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip ATTACH
+
+	// Skip optional TABLE keyword
+	if p.currentIs(token.TABLE) {
+		p.nextToken()
+	}
+
+	// Parse table name (can be qualified: database.table)
+	tableName := p.parseIdentifierName()
+	if p.currentIs(token.DOT) {
+		p.nextToken()
+		attach.Database = tableName
+		attach.Table = p.parseIdentifierName()
+	} else {
+		attach.Table = tableName
+	}
+
+	return attach
 }
 
 func (p *Parser) parseArrayJoin() *ast.ArrayJoinClause {
