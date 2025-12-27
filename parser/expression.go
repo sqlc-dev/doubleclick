@@ -895,6 +895,10 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 		elements := []ast.Expression{first}
 		for p.currentIs(token.COMMA) {
 			p.nextToken()
+			// Handle trailing comma: (1,) should create tuple with single element
+			if p.currentIs(token.RPAREN) {
+				break
+			}
 			elements = append(elements, p.parseExpression(LOWEST))
 		}
 		p.expect(token.RPAREN)

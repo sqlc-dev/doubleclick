@@ -47,6 +47,15 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 				fmt.Fprintf(sb, "%s ExpressionList\n", indent)
 				return
 			}
+			// Single-element tuples (from trailing comma syntax like (1,)) always render as Function tuple
+			if len(exprs) == 1 {
+				fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
+				fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
+				for _, e := range exprs {
+					Node(sb, e, depth+2)
+				}
+				return
+			}
 			hasComplexExpr := false
 			for _, e := range exprs {
 				// Simple literals (numbers, strings, etc.) are OK
@@ -454,11 +463,16 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 			explainCastExpr(sb, e, indent, depth)
 		}
 	case *ast.ArrayAccess:
-		// Array access - ClickHouse doesn't show aliases on arrayElement in EXPLAIN AST
-		explainArrayAccess(sb, e, indent, depth)
+		// Array access - show alias only when array is not a literal
+		// ClickHouse hides alias when array access is on a literal
+		if _, isLit := e.Array.(*ast.Literal); isLit {
+			explainArrayAccess(sb, e, indent, depth)
+		} else {
+			explainArrayAccessWithAlias(sb, e, n.Alias, indent, depth)
+		}
 	case *ast.TupleAccess:
-		// Tuple access - ClickHouse doesn't show aliases on tupleElement in EXPLAIN AST
-		explainTupleAccess(sb, e, indent, depth)
+		// Tuple access with alias
+		explainTupleAccessWithAlias(sb, e, n.Alias, indent, depth)
 	case *ast.InExpr:
 		// IN expressions with alias
 		explainInExprWithAlias(sb, e, n.Alias, indent, depth)
