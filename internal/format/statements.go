@@ -550,6 +550,18 @@ func formatCreateQuery(sb *strings.Builder, q *ast.CreateQuery) {
 			sb.WriteString(" SAMPLE BY ")
 			Expression(sb, q.SampleBy)
 		}
+		// Format SETTINGS clause (before AS SELECT)
+		if len(q.Settings) > 0 {
+			sb.WriteString(" SETTINGS ")
+			for i, s := range q.Settings {
+				if i > 0 {
+					sb.WriteString(", ")
+				}
+				sb.WriteString(s.Name)
+				sb.WriteString(" = ")
+				Expression(sb, s.Value)
+			}
+		}
 		if q.AsSelect != nil {
 			sb.WriteString(" AS ")
 			Statement(sb, q.AsSelect)
