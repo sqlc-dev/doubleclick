@@ -159,6 +159,17 @@ func formatTableIdentifier(sb *strings.Builder, t *ast.TableIdentifier) {
 // formatFunctionCall formats a function call.
 func formatFunctionCall(sb *strings.Builder, fn *ast.FunctionCall) {
 	sb.WriteString(fn.Name)
+	// Handle parametric functions like quantile(0.9)(x)
+	if len(fn.Parameters) > 0 {
+		sb.WriteString("(")
+		for i, p := range fn.Parameters {
+			if i > 0 {
+				sb.WriteString(", ")
+			}
+			Expression(sb, p)
+		}
+		sb.WriteString(")")
+	}
 	sb.WriteString("(")
 	if fn.Distinct {
 		sb.WriteString("DISTINCT ")
@@ -170,7 +181,97 @@ func formatFunctionCall(sb *strings.Builder, fn *ast.FunctionCall) {
 		Expression(sb, arg)
 	}
 	sb.WriteString(")")
+	// Handle SETTINGS for table functions
+	if len(fn.Settings) > 0 {
+		sb.WriteString(" SETTINGS ")
+		for i, s := range fn.Settings {
+			if i > 0 {
+				sb.WriteString(", ")
+			}
+			sb.WriteString(s.Name)
+			sb.WriteString(" = ")
+			Expression(sb, s.Value)
+		}
+	}
+	// Handle window functions (OVER clause)
+	if fn.Over != nil {
+		sb.WriteString(" OVER ")
+		formatWindowSpec(sb, fn.Over)
+	}
+	// Handle alias
+	if fn.Alias != "" {
+		sb.WriteString(" AS ")
+		sb.WriteString(fn.Alias)
+	}
 }
+
+// formatWindowSpec formats a window specification.
+func formatWindowSpec(sb *strings.Builder, w *ast.WindowSpec) {
+	if w.Name != "" {
+		sb.WriteString(w.Name)
+		return
+	}
+	sb.WriteString("(")
+	if len(w.PartitionBy) > 0 {
+		sb.WriteString("PARTITION BY ")
+		for i, expr := range w.PartitionBy {
+			if i > 0 {
+				sb.WriteString(", ")
+			}
+			Expression(sb, expr)
+		}
+	}
+	if len(w.OrderBy) > 0 {
+		if len(w.PartitionBy) > 0 {
+			sb.WriteString(" ")
+		}
+		sb.WriteString("ORDER BY ")
+		for i, elem := range w.OrderBy {
+			if i > 0 {
+				sb.WriteString(", ")
+			}
+			formatOrderByElement(sb, elem)
+		}
+	}
+	if w.Frame != nil {
+		sb.WriteString(" ")
+		formatWindowFrame(sb, w.Frame)
+	}
+	sb.WriteString(")")
+}
+
+// formatWindowFrame formats a window frame.
+func formatWindowFrame(sb *strings.Builder, f *ast.WindowFrame) {
+	sb.WriteString(string(f.Type))
+	sb.WriteString(" ")
+	if f.EndBound != nil {
+		sb.WriteString("BETWEEN ")
+		formatFrameBound(sb, f.StartBound)
+		sb.WriteString(" AND ")
+		formatFrameBound(sb, f.EndBound)
+	} else {
+		formatFrameBound(sb, f.StartBound)
+	}
+}
+
+// formatFrameBound formats a frame bound.
+func formatFrameBound(sb *strings.Builder, b *ast.FrameBound) {
+	switch b.Type {
+	case ast.BoundCurrentRow:
+		sb.WriteString("CURRENT ROW")
+	case ast.BoundUnboundedPre:
+		sb.WriteString("UNBOUNDED PRECEDING")
+	case ast.BoundUnboundedFol:
+		sb.WriteString("UNBOUNDED FOLLOWING")
+	case ast.BoundPreceding:
+		Expression(sb, b.Offset)
+		sb.WriteString(" PRECEDING")
+	case ast.BoundFollowing:
+		Expression(sb, b.Offset)
+		sb.WriteString(" FOLLOWING")
+	}
+}
+
 
 // formatBinaryExpr formats a binary expression.
 func formatBinaryExpr(sb *strings.Builder, expr *ast.BinaryExpr) {
@@ -194,6 +295,28 @@ func formatAsterisk(sb *strings.Builder, a *ast.Asterisk) {
 		sb.WriteString(".")
 	}
 	sb.WriteString("*")
+	if len(a.Except) > 0 {
+		sb.WriteString(" EXCEPT (")
+		for i, col := range a.Except {
+			if i > 0 {
+				sb.WriteString(", ")
+			}
+			sb.WriteString(col)
+		}
+		sb.WriteString(")")
+	}
+	if len(a.Replace) > 0 {
+		sb.WriteString(" REPLACE (")
+		for i, r := range a.Replace {
+			if i > 0 {
+				sb.WriteString(", ")
+			}
+			Expression(sb, r.Expr)
+			sb.WriteString(" AS ")
+			sb.WriteString(r.Name)
+		}
+		sb.WriteString(")")
+	}
 }
 
 // formatAliasedExpr formats an aliased expression.
