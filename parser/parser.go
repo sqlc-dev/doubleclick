@@ -15,10 +15,11 @@ import (
 
 // Parser parses ClickHouse SQL statements.
 type Parser struct {
-	lexer   *lexer.Lexer
-	current lexer.Item
-	peek    lexer.Item
-	errors  []error
+	lexer           *lexer.Lexer
+	current         lexer.Item
+	peek            lexer.Item
+	errors          []error
+	pendingComments []*ast.Comment // comments collected but not yet assigned to a statement
 }
 
 // New creates a new Parser from an io.Reader.
@@ -36,11 +37,26 @@ func (p *Parser) nextToken() {
 	p.current = p.peek
 	for {
 		p.peek = p.lexer.NextToken()
-		// Skip comments and whitespace
-		if p.peek.Token != token.COMMENT && p.peek.Token != token.WHITESPACE {
-			break
+		// Skip whitespace but collect comments
+		if p.peek.Token == token.WHITESPACE {
+			continue
 		}
+		if p.peek.Token == token.COMMENT {
+			p.pendingComments = append(p.pendingComments, &ast.Comment{
+				Position: p.peek.Pos,
+				Text:     p.peek.Value,
+			})
+			continue
+		}
+		break
 	}
+}
+
+// consumePendingComments returns all pending comments and clears the list.
+func (p *Parser) consumePendingComments() []*ast.Comment {
+	comments := p.pendingComments
+	p.pendingComments = nil
+	return comments
 }
 
 func (p *Parser) currentIs(t token.Token) bool {
@@ -88,8 +104,22 @@ func (p *Parser) ParseStatements(ctx context.Context) ([]ast.Statement, error) {
 		default:
 		}
 
+		// Collect leading comments before the statement
+		leadingComments := p.consumePendingComments()
+
 		stmt := p.parseStatement()
 		if stmt != nil {
+			// Collect trailing comments after the statement (before semicolon or next statement)
+			trailingComments := p.consumePendingComments()
+
+			// Wrap the statement with its comments if there are any
+			if len(leadingComments) > 0 || len(trailingComments) > 0 {
+				stmt = &ast.StatementWithComments{
+					Statement:        stmt,
+					LeadingComments:  leadingComments,
+					TrailingComments: trailingComments,
+				}
+			}
 			statements = append(statements, stmt)
 		}
 

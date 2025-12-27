@@ -14,6 +14,63 @@ type Node interface {
 	End() token.Position
 }
 
+// Comment represents a SQL comment with its position.
+type Comment struct {
+	Position token.Position `json:"-"`
+	Text     string         `json:"text"`
+}
+
+func (c *Comment) Pos() token.Position { return c.Position }
+func (c *Comment) End() token.Position { return c.Position }
+
+// EndsOnLine returns true if the comment ends on or before the given line.
+func (c *Comment) EndsOnLine(line int) bool {
+	endLine := c.Position.Line
+	for _, r := range c.Text {
+		if r == '\n' {
+			endLine++
+		}
+	}
+	return endLine <= line
+}
+
+// StatementWithComments wraps a statement with its associated comments.
+type StatementWithComments struct {
+	Statement        Statement  `json:"-"`
+	LeadingComments  []*Comment `json:"-"`
+	TrailingComments []*Comment `json:"-"`
+}
+
+// MarshalJSON delegates JSON serialization to the wrapped statement.
+func (s *StatementWithComments) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.Statement)
+}
+
+func (s *StatementWithComments) Pos() token.Position {
+	if s.Statement != nil {
+		return s.Statement.Pos()
+	}
+	return token.Position{}
+}
+
+func (s *StatementWithComments) End() token.Position {
+	if s.Statement != nil {
+		return s.Statement.End()
+	}
+	return token.Position{}
+}
+
+func (s *StatementWithComments) statementNode() {}
+
+// UnwrapStatement extracts the underlying statement from a StatementWithComments,
+// or returns the statement as-is if it's not wrapped.
+func UnwrapStatement(stmt Statement) Statement {
+	if wrapped, ok := stmt.(*StatementWithComments); ok {
+		return wrapped.Statement
+	}
+	return stmt
+}
+
 // Statement is the interface implemented by all statement nodes.
 type Statement interface {
 	Node

@@ -32,6 +32,11 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	indent := strings.Repeat(" ", depth)
 
 	switch n := node.(type) {
+	// Handle statement with comments wrapper - unwrap and explain the inner statement
+	case *ast.StatementWithComments:
+		Node(sb, n.Statement, depth)
+		return
+
 	// Select statements
 	case *ast.SelectWithUnionQuery:
 		explainSelectWithUnionQuery(sb, n, indent, depth)

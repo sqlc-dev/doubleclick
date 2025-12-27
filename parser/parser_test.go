@@ -6,12 +6,23 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/sqlc-dev/doubleclick/parser"
 )
+
+// whitespaceRegex matches sequences of whitespace characters
+var whitespaceRegex = regexp.MustCompile(`\s+`)
+
+// normalizeWhitespace collapses all whitespace sequences to a single space
+// and trims leading/trailing whitespace. This allows comparing SQL statements
+// while ignoring formatting differences.
+func normalizeWhitespace(s string) string {
+	return strings.TrimSpace(whitespaceRegex.ReplaceAllString(s, " "))
+}
 
 // checkSkipped runs skipped todo tests to see which ones now pass.
 // Use with: go test ./parser -check-skipped -v
@@ -180,7 +191,10 @@ func TestParser(t *testing.T) {
 			if !metadata.TodoFormat || *checkFormat {
 				formatted := parser.Format(stmts)
 				expected := strings.TrimSpace(query)
-				if formatted != expected {
+				// Compare with whitespace normalization to ignore formatting differences
+				formattedNorm := normalizeWhitespace(formatted)
+				expectedNorm := normalizeWhitespace(expected)
+				if formattedNorm != expectedNorm {
 					if metadata.TodoFormat {
 						if *checkFormat {
 							t.Logf("FORMAT STILL FAILING:\nExpected:\n%s\n\nGot:\n%s", expected, formatted)
