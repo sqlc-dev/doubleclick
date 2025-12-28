@@ -369,7 +369,15 @@ func formatOrderByElement(sb *strings.Builder, o *ast.OrderByElement) {
 func formatSelectIntersectExceptQuery(sb *strings.Builder, q *ast.SelectIntersectExceptQuery) {
 	for i, sel := range q.Selects {
 		if i > 0 {
-			sb.WriteString(" ")
+			// Get the operator between selects (operators[i-1] corresponds to the operator before selects[i])
+			opIdx := i - 1
+			if opIdx < len(q.Operators) {
+				sb.WriteString(" ")
+				sb.WriteString(q.Operators[opIdx])
+				sb.WriteString(" ")
+			} else {
+				sb.WriteString(" ")
+			}
 		}
 		Statement(sb, sel)
 	}
@@ -1083,4 +1091,24 @@ func formatAttachQuery(sb *strings.Builder, q *ast.AttachQuery) {
 		sb.WriteString(".")
 	}
 	sb.WriteString(q.Table)
+}
+
+// formatShowPrivilegesQuery formats a SHOW PRIVILEGES statement.
+func formatShowPrivilegesQuery(sb *strings.Builder, q *ast.ShowPrivilegesQuery) {
+	if q == nil {
+		return
+	}
+	sb.WriteString("SHOW PRIVILEGES")
+}
+
+// formatShowCreateQuotaQuery formats a SHOW CREATE QUOTA statement.
+func formatShowCreateQuotaQuery(sb *strings.Builder, q *ast.ShowCreateQuotaQuery) {
+	if q == nil {
+		return
+	}
+	sb.WriteString("SHOW CREATE QUOTA")
+	if q.Name != "" {
+		sb.WriteString(" ")
+		sb.WriteString(q.Name)
+	}
 }

@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"os"
@@ -13,6 +14,29 @@ import (
 
 	"github.com/sqlc-dev/doubleclick/parser"
 )
+
+// decodeHexEscapes decodes \xNN escape sequences in a string to raw bytes
+// This allows comparing strings with hex escapes to decoded strings
+func decodeHexEscapes(s string) string {
+	hexEscapeRegex := regexp.MustCompile(`(\\x[0-9A-Fa-f]{2})+`)
+	return hexEscapeRegex.ReplaceAllStringFunc(s, func(match string) string {
+		// Decode all consecutive hex escapes together
+		var result []byte
+		for i := 0; i < len(match); i += 4 {
+			// Each \xNN is 4 characters
+			if i+4 > len(match) {
+				break
+			}
+			hexStr := match[i+2 : i+4] // Skip \x prefix
+			b, err := hex.DecodeString(hexStr)
+			if err != nil || len(b) != 1 {
+				return match // Return original on error
+			}
+			result = append(result, b[0])
+		}
+		return string(result)
+	})
+}
 
 // whitespaceRegex matches sequences of whitespace characters
 var whitespaceRegex = regexp.MustCompile(`\s+`)
@@ -33,6 +57,105 @@ var numericUnderscoreRegex = regexp.MustCompile(`(\d)_(\d)`)
 // backtickIdentRegex normalizes backtick identifiers to unquoted
 var backtickIdentRegex = regexp.MustCompile("`([^`]+)`")
 
+// normalizeEscapesInStrings normalizes escape sequences within string literals:
+// - \' -> '' (backslash-escaped quote to SQL-standard)
+// - \\ -> \ (double backslash to single backslash)
+// This allows comparing strings with different escape styles.
+func normalizeEscapesInStrings(s string) string {
+	var result strings.Builder
+	result.Grow(len(s))
+	i := 0
+	for i < len(s) {
+		ch := s[i]
+		if ch == '\'' {
+			// Start of a single-quoted string
+			result.WriteByte(ch)
+			i++
+			for i < len(s) {
+				ch = s[i]
+				if ch == '\\' && i+1 < len(s) && s[i+1] == '\'' {
+					// Backslash-escaped quote -> convert to SQL-standard ''
+					result.WriteString("''")
+					i += 2
+				} else if ch == '\\' && i+1 < len(s) && s[i+1] == '\\' {
+					// Escaped backslash \\ -> single backslash \
+					result.WriteByte('\\')
+					i += 2
+				} else if ch == '\'' {
+					// Either end of string or escaped quote
+					result.WriteByte(ch)
+					i++
+					if i < len(s) && s[i] == '\'' {
+						// Escaped quote ''
+						result.WriteByte(s[i])
+						i++
+					} else {
+						// End of string
+						break
+					}
+				} else {
+					result.WriteByte(ch)
+					i++
+				}
+			}
+		} else {
+			result.WriteByte(ch)
+			i++
+		}
+	}
+	return result.String()
+}
+
+// normalizeCommasOutsideStrings removes spaces after commas that are outside of string literals
+func normalizeCommasOutsideStrings(s string) string {
+	var result strings.Builder
+	result.Grow(len(s))
+	inString := false
+	stringChar := byte(0)
+	i := 0
+	for i < len(s) {
+		ch := s[i]
+		if !inString {
+			if ch == '\'' || ch == '"' {
+				inString = true
+				stringChar = ch
+				result.WriteByte(ch)
+				i++
+			} else if ch == ',' && i+1 < len(s) && s[i+1] == ' ' {
+				// Skip space after comma outside of strings
+				result.WriteByte(ch)
+				i += 2
+			} else {
+				result.WriteByte(ch)
+				i++
+			}
+		} else {
+			// Inside string
+			if ch == stringChar {
+				// Check for escaped quote ('' or "")
+				if i+1 < len(s) && s[i+1] == stringChar {
+					result.WriteByte(ch)
+					result.WriteByte(s[i+1])
+					i += 2
+				} else {
+					inString = false
+					result.WriteByte(ch)
+					i++
+				}
+			} else if ch == '\\' && i+1 < len(s) {
+				// Escaped character - keep both
+				result.WriteByte(ch)
+				result.WriteByte(s[i+1])
+				i += 2
+			} else {
+				result.WriteByte(ch)
+				i++
+			}
+		}
+	}
+	return result.String()
+}
+
 // normalizeForFormat normalizes SQL for format comparison by collapsing
 // whitespace, normalizing spaces around operators, and stripping trailing
 // semicolons. This allows comparing formatted output regardless of whitespace
@@ -41,12 +164,32 @@ func normalizeForFormat(s string) string {
 	normalized := normalizeWhitespace(s)
 	// Normalize spaces around operators (remove spaces)
 	normalized = operatorSpaceRegex.ReplaceAllString(normalized, "$1")
+	// Normalize commas: remove spaces after commas outside of strings
+	normalized = normalizeCommasOutsideStrings(normalized)
+	// Normalize backslash-escaped quotes to SQL-standard (\' -> '')
+	normalized = normalizeEscapesInStrings(normalized)
 	// Remove underscores from numeric literals (100_000 -> 100000)
 	for numericUnderscoreRegex.MatchString(normalized) {
 		normalized = numericUnderscoreRegex.ReplaceAllString(normalized, "$1$2")
 	}
 	// Normalize backtick identifiers to unquoted
 	normalized = backtickIdentRegex.ReplaceAllString(normalized, "$1")
+	// Normalize double-quoted identifiers to unquoted (but not in strings)
+	// This handles "identifier" -> identifier (e.g., 2 "union" -> 2 union)
+	normalized = regexp.MustCompile(`(\s)"([^"]+)"`).ReplaceAllString(normalized, "$1$2")
+	// Normalize AS keyword case: as -> AS
+	normalized = regexp.MustCompile(`\bas\b`).ReplaceAllString(normalized, "AS")
+	// Remove leading zeros from integer literals (077 -> 77)
+	normalized = regexp.MustCompile(`\b0+(\d+)\b`).ReplaceAllString(normalized, "$1")
+	// Normalize heredocs ($$...$$ -> '...')
+	normalized = regexp.MustCompile(`\$\$([^$]*)\$\$`).ReplaceAllString(normalized, "'$1'")
+	// Normalize empty tuple () to tuple()
+	normalized = regexp.MustCompile(`\(\)`).ReplaceAllString(normalized, "tuple()")
+	// Normalize hex string literals x'...' to just '...' (decoded form)
+	// The formatter outputs the decoded string, so we need to normalize for comparison
+	normalized = regexp.MustCompile(`[xX]'([^']*)'`).ReplaceAllString(normalized, "'$1'")
+	// Decode hex escape sequences (\xNN -> actual character)
+	normalized = decodeHexEscapes(normalized)
 	// Normalize "INNER JOIN" to "JOIN" (they're equivalent) - case insensitive
 	normalized = regexp.MustCompile(`(?i)\bINNER\s+JOIN\b`).ReplaceAllString(normalized, "JOIN")
 	// Normalize "LEFT OUTER JOIN" to "LEFT JOIN"
@@ -57,8 +200,6 @@ func normalizeForFormat(s string) string {
 	normalized = regexp.MustCompile(`\bASC\b`).ReplaceAllString(normalized, "")
 	// Normalize "OFFSET n ROWS" to "OFFSET n"
 	normalized = regexp.MustCompile(`\bOFFSET\s+(\S+)\s+ROWS?\b`).ReplaceAllString(normalized, "OFFSET $1")
-	// Normalize escaped backslashes in strings (\\x -> \x)
-	normalized = strings.ReplaceAll(normalized, `\\`, `\`)
 	// Normalize CROSS JOIN to comma
 	normalized = strings.ReplaceAll(normalized, "CROSS JOIN", ",")
 	// Normalize ENGINE = X to ENGINE X (and engine X to ENGINE X)
@@ -67,6 +208,9 @@ func normalizeForFormat(s string) string {
 	normalized = regexp.MustCompile(`(?i)\bINSERT\s+INTO\s+TABLE\b`).ReplaceAllString(normalized, "INSERT INTO")
 	// Normalize UNION DISTINCT to UNION (DISTINCT is default)
 	normalized = regexp.MustCompile(`(?i)\bUNION\s+DISTINCT\b`).ReplaceAllString(normalized, "UNION")
+	// Normalize REGEXP operator to match() function (they're equivalent)
+	// 'x' REGEXP 'y' -> match('x','y')
+	normalized = regexp.MustCompile(`('[^']*')\s+REGEXP\s+('[^']*')`).ReplaceAllString(normalized, "match($1,$2)")
 	// Normalize PARTITION BY () to PARTITION BY (for empty ORDER BY)
 	normalized = regexp.MustCompile(`\bORDER BY \(\)\b`).ReplaceAllString(normalized, "ORDER BY tuple()")
 	// Normalize INSERT INTO table (cols) to have no space before ( (or consistent spacing)
@@ -76,16 +220,18 @@ func normalizeForFormat(s string) string {
 	normalized = regexp.MustCompile(`(?i)\bWITH\s+TIES\b`).ReplaceAllString(normalized, "TIES")
 	// Normalize parentheses around simple column references in WHERE: (database=...) to database=...
 	normalized = regexp.MustCompile(`\((\w+)=`).ReplaceAllString(normalized, "$1=")
-	// Normalize parentheses around lambda bodies: (x -> (expr)) to (x -> expr)
-	normalized = regexp.MustCompile(`->\s*\(`).ReplaceAllString(normalized, "-> ")
-	// Now we need to remove extra closing parens, but this is tricky
-	// Let's try a simpler approach: remove redundant parens around IS NULL, IS NOT NULL
-	normalized = regexp.MustCompile(`\((\w+\s+IS\s+NOT\s+NULL)\)`).ReplaceAllString(normalized, "$1")
-	normalized = regexp.MustCompile(`\((\w+\s+IS\s+NULL)\)`).ReplaceAllString(normalized, "$1")
+	// Normalize parentheses around single values after operators like NOT
+	normalized = regexp.MustCompile(`\bNOT\s*\((\d+)\)`).ReplaceAllString(normalized, "NOT $1")
+	normalized = regexp.MustCompile(`\bnot\s*\((\d+)\)`).ReplaceAllString(normalized, "not $1")
+	// Normalize parentheses around IS NULL and IS NOT NULL expressions
+	// This handles both standalone (x IS NULL) and inside lambdas x -> (x IS NULL)
+	normalized = regexp.MustCompile(`\((\w+)\s+IS\s+NOT\s+NULL\)`).ReplaceAllString(normalized, "$1 IS NOT NULL")
+	normalized = regexp.MustCompile(`\((\w+)\s+IS\s+NULL\)`).ReplaceAllString(normalized, "$1 IS NULL")
 	// Re-normalize whitespace after replacements
 	normalized = normalizeWhitespace(normalized)
-	// Strip trailing semicolon if present
-	return strings.TrimSuffix(normalized, ";")
+	// Strip trailing semicolon and any spaces before it
+	normalized = strings.TrimSuffix(strings.TrimSpace(normalized), ";")
+	return strings.TrimSpace(normalized)
 }
 
 // stripComments removes SQL comments from a query string.

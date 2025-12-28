@@ -204,12 +204,21 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 
 		// Parse INTERSECT/EXCEPT clauses (those that need wrapper)
 		for p.isIntersectExceptWithWrapper() {
+			// Record the operator type
+			var op string
+			if p.currentIs(token.EXCEPT) {
+				op = "EXCEPT"
+			} else {
+				op = "INTERSECT"
+			}
 			p.nextToken() // skip INTERSECT/EXCEPT
 
-			// Skip DISTINCT if present (ALL case is handled in the loop condition)
+			// Handle DISTINCT if present (ALL case is handled in the loop condition)
 			if p.currentIs(token.DISTINCT) {
+				op += " DISTINCT"
 				p.nextToken()
 			}
+			intersectExcept.Operators = append(intersectExcept.Operators, op)
 
 			// Parse the next select
 			if p.currentIs(token.LPAREN) {
