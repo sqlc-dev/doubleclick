@@ -379,7 +379,7 @@ func explainSetQuery(sb *strings.Builder, indent string) {
 	fmt.Fprintf(sb, "%sSet\n", indent)
 }
 
-func explainSystemQuery(sb *strings.Builder, indent string) {
+func explainSystemQuery(sb *strings.Builder, n *ast.SystemQuery, indent string) {
 	fmt.Fprintf(sb, "%sSYSTEM query\n", indent)
 }
 
@@ -442,10 +442,10 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
 		} else if n.From != "" {
-			fmt.Fprintf(sb, "%sShowCreateTableQuery %s (children 1)\n", indent, name)
+			fmt.Fprintf(sb, "%sShowCreateTableQuery  %s (children 1)\n", indent, name)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 		} else if n.Database != "" {
-			fmt.Fprintf(sb, "%sShowCreateTableQuery %s (children 1)\n", indent, n.Database)
+			fmt.Fprintf(sb, "%sShowCreateTableQuery  %s (children 1)\n", indent, n.Database)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 		} else {
 			fmt.Fprintf(sb, "%sShow%s\n", indent, showType)
@@ -544,11 +544,29 @@ func explainParameter(sb *strings.Builder, n *ast.Parameter, indent string) {
 }
 
 func explainDetachQuery(sb *strings.Builder, n *ast.DetachQuery, indent string) {
-	fmt.Fprintf(sb, "%sDetachQuery\n", indent)
+	name := n.Table
+	if name == "" {
+		name = n.Database
+	}
+	if name != "" {
+		fmt.Fprintf(sb, "%sDetachQuery  %s (children 1)\n", indent, name)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+	} else {
+		fmt.Fprintf(sb, "%sDetachQuery\n", indent)
+	}
 }
 
 func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string) {
-	fmt.Fprintf(sb, "%sAttachQuery\n", indent)
+	name := n.Table
+	if name == "" {
+		name = n.Database
+	}
+	if name != "" {
+		fmt.Fprintf(sb, "%sAttachQuery %s (children 1)\n", indent, name)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+	} else {
+		fmt.Fprintf(sb, "%sAttachQuery\n", indent)
+	}
 }
 
 func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, depth int) {
