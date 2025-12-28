@@ -2,6 +2,14 @@
 
 ## Next Steps
 
+To find the next explain test to work on (fewest pending statements first), run:
+
+```bash
+go run ./cmd/next-test -explain
+```
+
+This finds tests with `explain_todo` entries in their metadata.
+
 To find the next format roundtrip test to work on, run:
 
 ```bash
