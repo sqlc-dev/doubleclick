@@ -766,6 +766,22 @@ func (l *Lexer) readNumberOrIdent() Item {
 		}
 	}
 
+	// Check if directly followed by letter (identifier like 1alias1name1)
+	// Exclude exponent (e/E followed by digit/+/-) and base prefixes (0x, 0b, 0o)
+	if unicode.IsLetter(l.ch) {
+		val := sb.String()
+		isExponent := (l.ch == 'e' || l.ch == 'E') && (unicode.IsDigit(l.peekChar()) || l.peekChar() == '+' || l.peekChar() == '-')
+		isBasePrefix := val == "0" && (l.ch == 'x' || l.ch == 'X' || l.ch == 'b' || l.ch == 'B' || l.ch == 'o' || l.ch == 'O')
+		if !isExponent && !isBasePrefix {
+			// This is an identifier that starts with digits (e.g., 1alias1name1)
+			for isIdentChar(l.ch) {
+				sb.WriteRune(l.ch)
+				l.readChar()
+			}
+			return Item{Token: token.IDENT, Value: sb.String(), Pos: pos}
+		}
+	}
+
 	// Not an identifier, continue as number
 	// But we already consumed the digits, so continue from here
 	// Handle underscore separators in numbers (only if followed by a digit)
