@@ -1,0 +1,39 @@
+CreateQuery t_github_json (children 3)
+ Identifier t_github_json
+ Columns definition (children 1)
+  ExpressionList (children 4)
+   ColumnDeclaration event_type (children 2)
+    DataType LowCardinality (children 1)
+     ExpressionList (children 1)
+      DataType String
+    Function JSONExtractString (children 1)
+     ExpressionList (children 2)
+      Identifier message_raw
+      Literal \'type\'
+   ColumnDeclaration repo_name (children 2)
+    DataType LowCardinality (children 1)
+     ExpressionList (children 1)
+      DataType String
+    Function JSONExtractString (children 1)
+     ExpressionList (children 3)
+      Identifier message_raw
+      Literal \'repo\'
+      Literal \'name\'
+   ColumnDeclaration message (children 2)
+    DataType JSON
+    Function if (children 1)
+     ExpressionList (children 3)
+      Function empty (children 1)
+       ExpressionList (children 1)
+        Identifier message_raw
+      Literal \'{}\'
+      Identifier message_raw
+   ColumnDeclaration message_raw (children 2)
+    DataType String
+    Function defaultValueOfTypeName
+ Storage definition (children 2)
+  Function MergeTree
+  Function tuple (children 1)
+   ExpressionList (children 2)
+    Identifier event_type
+    Identifier repo_name

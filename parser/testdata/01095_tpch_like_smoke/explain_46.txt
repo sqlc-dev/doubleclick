@@ -1,0 +1,71 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 1)
+    Function divide (alias promo_revenue) (children 1)
+     ExpressionList (children 2)
+      Function multiply (children 1)
+       ExpressionList (children 2)
+        Function toDecimal32 (children 1)
+         ExpressionList (children 2)
+          Literal Float64_100
+          Literal UInt64_2
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Function multiIf (children 1)
+           ExpressionList (children 3)
+            Function like (children 1)
+             ExpressionList (children 2)
+              Identifier p_type
+              Literal \'PROMO%\'
+            Function multiply (children 1)
+             ExpressionList (children 2)
+              Identifier l_extendedprice
+              Function minus (children 1)
+               ExpressionList (children 2)
+                Literal UInt64_1
+                Identifier l_discount
+            Literal UInt64_0
+      Function plus (children 1)
+       ExpressionList (children 2)
+        Literal UInt64_1
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Function multiply (children 1)
+           ExpressionList (children 2)
+            Identifier l_extendedprice
+            Function minus (children 1)
+             ExpressionList (children 2)
+              Literal UInt64_1
+              Identifier l_discount
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier lineitem
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier part
+     TableJoin
+   Function and (children 1)
+    ExpressionList (children 3)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier l_partkey
+       Identifier p_partkey
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier l_shipdate
+       Function toDate (children 1)
+        ExpressionList (children 1)
+         Literal \'1995-09-01\'
+     Function less (children 1)
+      ExpressionList (children 2)
+       Identifier l_shipdate
+       Function plus (children 1)
+        ExpressionList (children 2)
+         Function toDate (children 1)
+          ExpressionList (children 1)
+           Literal \'1995-09-01\'
+         Function toIntervalMonth (children 1)
+          ExpressionList (children 1)
+           Literal \'1\'

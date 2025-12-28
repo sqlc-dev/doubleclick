@@ -1,0 +1,53 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 3)
+    Identifier subquery1.period (alias period)
+    Function if (alias data) (children 1)
+     ExpressionList (children 3)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal UInt64_1
+        Literal UInt64_1
+      Literal UInt64_0
+      Identifier subquery1.data1
+    Function if (alias other_data) (children 1)
+     ExpressionList (children 3)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal UInt64_1
+        Literal UInt64_1
+      Literal UInt64_0
+      Identifier subquery2.data
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias subquery1) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 2)
+           Identifier date (alias period)
+           Identifier data (alias data1)
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier hits
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias subquery2) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 2)
+           Identifier date (alias period)
+           Identifier data (alias data)
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier hits
+     TableJoin (children 1)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier subquery1.period
+        Identifier subquery2.period

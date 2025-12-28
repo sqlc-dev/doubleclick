@@ -1,0 +1,91 @@
+SelectWithUnionQuery (children 2)
+ ExpressionList (children 1)
+  SelectQuery (children 6)
+   ExpressionList (children 1)
+    Subquery (alias table_uuid) (children 1)
+     SelectWithUnionQuery (children 1)
+      ExpressionList (children 1)
+       SelectQuery (children 3)
+        ExpressionList (children 1)
+         Identifier uuid
+        TablesInSelectQuery (children 1)
+         TablesInSelectQueryElement (children 1)
+          TableExpression (children 1)
+           TableIdentifier system.tables
+        Function and (children 1)
+         ExpressionList (children 2)
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier database
+            Function currentDatabase (children 1)
+             ExpressionList
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier name
+            Literal \'02581_trips\'
+   ExpressionList (children 3)
+    Function CAST (alias mutation_version) (children 1)
+     ExpressionList (children 2)
+      Function arrayElement (children 1)
+       ExpressionList (children 2)
+        Function splitByChar (children 1)
+         ExpressionList (children 2)
+          Literal \'_\'
+          Identifier query_id
+        Literal UInt64_5
+      Literal \'UInt64\'
+    Function greaterOrEquals (alias has_parts_for_which_set_was_built) (children 1)
+     ExpressionList (children 2)
+      Function sum (children 1)
+       ExpressionList (children 1)
+        Function like (children 1)
+         ExpressionList (children 2)
+          Identifier message
+          Literal \'Created Set with % entries%\'
+      Literal UInt64_1
+    Function greaterOrEquals (alias has_parts_that_shared_set) (children 1)
+     ExpressionList (children 2)
+      Function sum (children 1)
+       ExpressionList (children 1)
+        Function like (children 1)
+         ExpressionList (children 2)
+          Identifier message
+          Literal \'Got set from cache%\'
+      Literal UInt64_1
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.text_log
+   Function and (children 1)
+    ExpressionList (children 3)
+     Function like (children 1)
+      ExpressionList (children 2)
+       Identifier query_id
+       Function concat (children 1)
+        ExpressionList (children 2)
+         Function CAST (children 1)
+          ExpressionList (children 2)
+           Identifier table_uuid
+           Literal \'String\'
+         Literal \'::all\\\\_%\'
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier event_date
+       Function yesterday (children 1)
+        ExpressionList
+     Function or (children 1)
+      ExpressionList (children 2)
+       Function like (children 1)
+        ExpressionList (children 2)
+         Identifier message
+         Literal \'Created Set with % entries%\'
+       Function like (children 1)
+        ExpressionList (children 2)
+         Identifier message
+         Literal \'Got set from cache%\'
+   ExpressionList (children 1)
+    Identifier mutation_version
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier mutation_version
+ Identifier TSVWithNames

@@ -1,0 +1,19 @@
+CreateQuery partitioned_table (children 3)
+ Identifier partitioned_table
+ Columns definition (children 1)
+  ExpressionList (children 2)
+   ColumnDeclaration key (children 1)
+    DataType Int64
+   ColumnDeclaration value (children 1)
+    DataType String
+ Storage definition (children 3)
+  Function ReplicatedMergeTree (children 1)
+   ExpressionList (children 2)
+    Literal \'/clickhouse/tables/{database}/03008_deduplication_insert_into_partitioned_table\'
+    Literal \'{replica}\'
+  Function modulo (children 1)
+   ExpressionList (children 2)
+    Identifier key
+    Literal UInt64_10
+  Function tuple (children 1)
+   ExpressionList

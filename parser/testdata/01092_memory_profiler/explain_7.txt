@@ -1,0 +1,71 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 1)
+    Function addressToSymbol (alias symbol) (children 1)
+     ExpressionList (children 1)
+      Function arrayJoin (children 1)
+       ExpressionList (children 1)
+        Identifier trace
+   ExpressionList (children 1)
+    Function greater (children 1)
+     ExpressionList (children 2)
+      Function count (children 1)
+       ExpressionList
+      Literal UInt64_0
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.trace_log (alias t)
+   Function and (children 1)
+    ExpressionList (children 3)
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier event_date
+       Function yesterday (children 1)
+        ExpressionList
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier trace_type
+       Literal \'Memory\'
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier query_id
+       Subquery (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 5)
+           ExpressionList (children 1)
+            Identifier query_id
+           TablesInSelectQuery (children 1)
+            TablesInSelectQueryElement (children 1)
+             TableExpression (children 1)
+              TableIdentifier system.query_log
+           Function and (children 1)
+            ExpressionList (children 5)
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier current_database
+               Function currentDatabase (children 1)
+                ExpressionList
+             Function greaterOrEquals (children 1)
+              ExpressionList (children 2)
+               Identifier event_date
+               Function yesterday (children 1)
+                ExpressionList
+             Function like (children 1)
+              ExpressionList (children 2)
+               Identifier query
+               Literal \'%test memory profiler%\'
+             Function has (children 1)
+              ExpressionList (children 2)
+               Identifier used_table_functions
+               Literal \'numbers\'
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier log_comment
+               Literal \'01092_memory_profiler\'
+           ExpressionList (children 1)
+            OrderByElement (children 1)
+             Identifier event_time
+           Literal UInt64_1

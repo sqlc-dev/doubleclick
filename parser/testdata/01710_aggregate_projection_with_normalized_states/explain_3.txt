@@ -1,0 +1,45 @@
+CreateQuery r (children 3)
+ Identifier r
+ Columns definition (children 2)
+  ExpressionList (children 4)
+   ColumnDeclaration x (children 1)
+    DataType String
+   ColumnDeclaration a (children 1)
+    DataType LowCardinality (children 1)
+     ExpressionList (children 1)
+      DataType String
+   ColumnDeclaration q (children 1)
+    DataType AggregateFunction (children 1)
+     ExpressionList (children 2)
+      Function quantilesTiming (children 1)
+       ExpressionList (children 3)
+        Literal Float64_0.5
+        Literal Float64_0.95
+        Literal Float64_0.99
+      DataType Int64
+   ColumnDeclaration s (children 1)
+    DataType Int64
+  ExpressionList (children 1)
+   Projection (children 1)
+    ProjectionSelectQuery (children 2)
+     ExpressionList (children 3)
+      Identifier a
+      Function quantilesTimingMerge (children 2)
+       ExpressionList (children 1)
+        Identifier q
+       ExpressionList (children 3)
+        Literal Float64_0.5
+        Literal Float64_0.95
+        Literal Float64_0.99
+      Function sum (children 1)
+       ExpressionList (children 1)
+        Identifier s
+     ExpressionList (children 1)
+      Identifier a
+ Storage definition (children 3)
+  Function SummingMergeTree
+  Function tuple (children 1)
+   ExpressionList (children 2)
+    Identifier x
+    Identifier a
+  Set

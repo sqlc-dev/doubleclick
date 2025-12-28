@@ -1,0 +1,81 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 5)
+   ExpressionList (children 4)
+    Function if (children 1)
+     ExpressionList (children 3)
+      Identifier is_initial_query
+      Literal \'inital\'
+      Literal \'secondary\'
+    Function if (alias threads_limit) (children 1)
+     ExpressionList (children 3)
+      Function and (children 1)
+       ExpressionList (children 2)
+        Function equals (children 1)
+         ExpressionList (children 2)
+          Function toUInt64OrZero (children 1)
+           ExpressionList (children 1)
+            Function arrayElement (children 1)
+             ExpressionList (children 2)
+              Identifier Settings
+              Literal \'parallel_replicas_insert_select_local_pipeline\'
+          Literal UInt64_0
+        Identifier is_initial_query
+      Literal UInt64_1
+      Literal UInt64_8
+    Function least (children 1)
+     ExpressionList (children 2)
+      Identifier peak_threads_usage
+      Identifier threads_limit
+    Function format (children 1)
+     ExpressionList (children 2)
+      Literal \'local_pipeline={}\'
+      Function arrayElement (children 1)
+       ExpressionList (children 2)
+        Identifier Settings
+        Literal \'parallel_replicas_insert_select_local_pipeline\'
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_log
+   Function and (children 1)
+    ExpressionList (children 5)
+     Function or (children 1)
+      ExpressionList (children 2)
+       Function equals (children 1)
+        ExpressionList (children 2)
+         Identifier current_database
+         Function currentDatabase (children 1)
+          ExpressionList
+       Function has (children 1)
+        ExpressionList (children 2)
+         Identifier databases
+         Function currentDatabase (children 1)
+          ExpressionList
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier type
+       Literal \'QueryFinish\'
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Function arrayElement (children 1)
+        ExpressionList (children 2)
+         Identifier Settings
+         Literal \'allow_experimental_parallel_reading_from_replicas\'
+       Literal \'1\'
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier query_kind
+       Literal \'Insert\'
+     Function has (children 1)
+      ExpressionList (children 2)
+       Identifier tables
+       Function concat (children 1)
+        ExpressionList (children 2)
+         Function currentDatabase (children 1)
+          ExpressionList
+         Literal \'.t_rmt_target\'
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier event_time_microseconds
+   Set

@@ -1,0 +1,61 @@
+CreateQuery fx_1m (children 3)
+ Identifier fx_1m
+ Columns definition (children 1)
+  ExpressionList (children 7)
+   ColumnDeclaration symbol (children 2)
+    DataType LowCardinality (children 1)
+     ExpressionList (children 1)
+      DataType String
+    Function CODEC (children 1)
+     ExpressionList (children 1)
+      Function ZSTD
+   ColumnDeclaration dt_close (children 2)
+    DataType DateTime64 (children 1)
+     ExpressionList (children 2)
+      Literal UInt64_3
+      Literal \'UTC\'
+    Function CODEC (children 1)
+     ExpressionList (children 2)
+      Function DoubleDelta
+      Function ZSTD
+   ColumnDeclaration open (children 2)
+    DataType Float32
+    Function CODEC (children 1)
+     ExpressionList (children 2)
+      Function Delta
+      Function ZSTD
+   ColumnDeclaration high (children 2)
+    DataType Float32
+    Function CODEC (children 1)
+     ExpressionList (children 2)
+      Function Delta
+      Function ZSTD
+   ColumnDeclaration low (children 2)
+    DataType Float32
+    Function CODEC (children 1)
+     ExpressionList (children 2)
+      Function Delta
+      Function ZSTD
+   ColumnDeclaration close (children 2)
+    DataType Float32
+    Function CODEC (children 1)
+     ExpressionList (children 2)
+      Function Delta
+      Function ZSTD
+   ColumnDeclaration volume (children 2)
+    DataType Float32
+    Function CODEC (children 1)
+     ExpressionList (children 2)
+      Function Delta
+      Function ZSTD
+ Storage definition (children 4)
+  Function MergeTree (children 1)
+   ExpressionList
+  Function toYear (children 1)
+   ExpressionList (children 1)
+    Identifier dt_close
+  Function tuple (children 1)
+   ExpressionList (children 2)
+    Identifier symbol
+    Identifier dt_close
+  Set

@@ -1,0 +1,51 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 2)
+    Literal Array_[\'asynchronous_metric_log\', \'asynchronous_insert_log\', \'opentelemetry_span_log\', \'coverage_log\'] (alias known_tables)
+    Literal \'event_date, event_time\' (alias default_sorting_key)
+   ExpressionList (children 1)
+    Function concat (children 1)
+     ExpressionList (children 4)
+      Literal \'Table \'
+      Identifier name
+      Literal \' has non-default sorting key: \'
+      Identifier sorting_key
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.tables
+   Function and (children 1)
+    ExpressionList (children 5)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier database
+       Literal \'system\'
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier engine
+       Literal \'MergeTree\'
+     Function notLike (children 1)
+      ExpressionList (children 2)
+       Identifier name
+       Literal \'minio%\'
+     Function not (children 1)
+      ExpressionList (children 1)
+       Function arraySum (children 1)
+        ExpressionList (children 1)
+         Function arrayMap (children 1)
+          ExpressionList (children 2)
+           Function lambda (children 1)
+            ExpressionList (children 2)
+             Function tuple (children 1)
+              ExpressionList (children 1)
+               Identifier x
+             Function position (children 1)
+              ExpressionList (children 2)
+               Identifier name
+               Identifier x
+           Identifier known_tables
+     Function notEquals (children 1)
+      ExpressionList (children 2)
+       Identifier sorting_key
+       Identifier default_sorting_key

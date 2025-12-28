@@ -1,0 +1,85 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 5)
+   ExpressionList (children 3)
+    Identifier l_shipmode
+    Function sum (alias high_line_count) (children 1)
+     ExpressionList (children 1)
+      Function multiIf (children 1)
+       ExpressionList (children 3)
+        Function or (children 1)
+         ExpressionList (children 2)
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier o_orderpriority
+            Literal \'1-URGENT\'
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier o_orderpriority
+            Literal \'2-HIGH\'
+        Literal UInt64_1
+        Literal UInt64_0
+    Function sum (alias low_line_count) (children 1)
+     ExpressionList (children 1)
+      Function multiIf (children 1)
+       ExpressionList (children 3)
+        Function and (children 1)
+         ExpressionList (children 2)
+          Function notEquals (children 1)
+           ExpressionList (children 2)
+            Identifier o_orderpriority
+            Literal \'1-URGENT\'
+          Function notEquals (children 1)
+           ExpressionList (children 2)
+            Identifier o_orderpriority
+            Literal \'2-HIGH\'
+        Literal UInt64_1
+        Literal UInt64_0
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier orders
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier lineitem
+     TableJoin
+   Function and (children 1)
+    ExpressionList (children 6)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier o_orderkey
+       Identifier l_orderkey
+     Function in (children 1)
+      ExpressionList (children 2)
+       Identifier l_shipmode
+       Literal Tuple_(\'MAIL\', \'SHIP\')
+     Function less (children 1)
+      ExpressionList (children 2)
+       Identifier l_commitdate
+       Identifier l_receiptdate
+     Function less (children 1)
+      ExpressionList (children 2)
+       Identifier l_shipdate
+       Identifier l_commitdate
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier l_receiptdate
+       Function toDate (children 1)
+        ExpressionList (children 1)
+         Literal \'1994-01-01\'
+     Function less (children 1)
+      ExpressionList (children 2)
+       Identifier l_receiptdate
+       Function plus (children 1)
+        ExpressionList (children 2)
+         Function toDate (children 1)
+          ExpressionList (children 1)
+           Literal \'1994-01-01\'
+         Function toIntervalYear (children 1)
+          ExpressionList (children 1)
+           Literal \'1\'
+   ExpressionList (children 1)
+    Identifier l_shipmode
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier l_shipmode

@@ -1,0 +1,33 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 6)
+    Identifier date (alias period)
+    Literal UInt64_1 (alias having_check)
+    Function min (alias period_start) (children 1)
+     ExpressionList (children 1)
+      Identifier date
+    Function addDays (alias period_end) (children 1)
+     ExpressionList (children 2)
+      Function max (children 1)
+       ExpressionList (children 1)
+        Identifier date
+      Literal UInt64_1
+    Function dateDiff (alias total_duration) (children 1)
+     ExpressionList (children 3)
+      Literal \'second\'
+      Identifier period_start
+      Identifier period_end
+    Function sum (alias metric_) (children 1)
+     ExpressionList (children 1)
+      Identifier metric
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier repro_hits
+   ExpressionList (children 1)
+    Identifier period
+   Function notEquals (children 1)
+    ExpressionList (children 2)
+     Identifier having_check
+     Literal Int64_-1

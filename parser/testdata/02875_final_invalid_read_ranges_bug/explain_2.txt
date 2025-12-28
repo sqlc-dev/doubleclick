@@ -1,0 +1,35 @@
+CreateQuery t (children 3)
+ Identifier t
+ Columns definition (children 1)
+  ExpressionList (children 4)
+   ColumnDeclaration tid (children 1)
+    DataType UInt64
+   ColumnDeclaration processed_at (children 1)
+    DataType DateTime
+   ColumnDeclaration created_at (children 1)
+    DataType DateTime
+   ColumnDeclaration amount (children 1)
+    DataType Int64
+ Storage definition (children 5)
+  Function ReplacingMergeTree
+  Function toStartOfQuarter (children 1)
+   ExpressionList (children 1)
+    Identifier created_at
+  Function tuple (children 1)
+   ExpressionList (children 2)
+    Function toStartOfDay (children 1)
+     ExpressionList (children 1)
+      Identifier created_at
+    Function toStartOfDay (children 1)
+     ExpressionList (children 1)
+      Identifier processed_at
+  Function tuple (children 1)
+   ExpressionList (children 3)
+    Function toStartOfDay (children 1)
+     ExpressionList (children 1)
+      Identifier created_at
+    Function toStartOfDay (children 1)
+     ExpressionList (children 1)
+      Identifier processed_at
+    Identifier tid
+  Set

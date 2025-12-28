@@ -1,0 +1,56 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 1)
+    WithElement (children 1)
+     Subquery (children 1)
+      SelectWithUnionQuery (children 1)
+       ExpressionList (children 1)
+        SelectQuery (children 2)
+         ExpressionList (children 2)
+          Function arrayAUCPR (alias partial_pr_auc) (children 1)
+           ExpressionList (children 3)
+            Identifier scores
+            Identifier labels
+            Identifier pr_offsets
+          Function arrayROCAUC (alias partial_roc_auc) (children 1)
+           ExpressionList (children 4)
+            Identifier scores
+            Identifier labels
+            Literal Bool_1
+            Identifier roc_offsets
+         TablesInSelectQuery (children 1)
+          TablesInSelectQueryElement (children 1)
+           TableExpression (children 1)
+            Subquery (children 1)
+             SelectWithUnionQuery (children 1)
+              ExpressionList (children 2)
+               SelectQuery (children 1)
+                ExpressionList (children 4)
+                 Literal Array_[Float64_0.8, Float64_0.4] (alias scores)
+                 Literal Array_[UInt64_1, UInt64_0] (alias labels)
+                 Literal Array_[UInt64_0, UInt64_0, UInt64_2] (alias pr_offsets)
+                 Literal Array_[UInt64_0, UInt64_0, UInt64_2, UInt64_2] (alias roc_offsets)
+               SelectQuery (children 1)
+                ExpressionList (children 4)
+                 Literal Array_[Float64_0.35, Float64_0.1] (alias scores)
+                 Literal Array_[UInt64_1, UInt64_0] (alias labels)
+                 Literal Array_[UInt64_1, UInt64_1, UInt64_2] (alias pr_offsets)
+                 Literal Array_[UInt64_1, UInt64_1, UInt64_2, UInt64_2] (alias roc_offsets)
+   ExpressionList (children 2)
+    Function floor (children 1)
+     ExpressionList (children 2)
+      Function sum (children 1)
+       ExpressionList (children 1)
+        Identifier partial_pr_auc
+      Literal UInt64_10
+    Function floor (children 1)
+     ExpressionList (children 2)
+      Function sum (children 1)
+       ExpressionList (children 1)
+        Identifier partial_roc_auc
+      Literal UInt64_10
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier partial_aucs

@@ -1,0 +1,1026 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 29)
+    Literal UInt64_44100 (alias sample_frequency)
+    Identifier number (alias tick)
+    Function divide (alias time) (children 1)
+     ExpressionList (children 2)
+      Identifier tick
+      Identifier sample_frequency
+    Literal UInt64_1 (alias master_volume)
+    Function lambda (alias clamp) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 1)
+        Identifier level
+      Function least (children 1)
+       ExpressionList (children 2)
+        Literal Float64_1
+        Function greatest (children 1)
+         ExpressionList (children 2)
+          Literal Float64_-1
+          Identifier level
+    Function lambda (alias output) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 1)
+        Identifier level
+      Function CAST (children 1)
+       ExpressionList (children 2)
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Function multiply (children 1)
+           ExpressionList (children 2)
+            Function clamp (children 1)
+             ExpressionList (children 1)
+              Identifier level
+            Literal UInt64_32767
+          Identifier master_volume
+        Literal \'Int16\'
+    Function lambda (alias mono) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 1)
+        Identifier x
+      Function tuple (children 1)
+       ExpressionList (children 2)
+        Identifier x
+        Identifier x
+    Function lambda (alias sine_wave) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 1)
+        Identifier time
+      Function sin (children 1)
+       ExpressionList (children 1)
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Function multiply (children 1)
+           ExpressionList (children 2)
+            Identifier time
+            Literal UInt64_2
+          Function pi (children 1)
+           ExpressionList
+    Function lambda (alias square_wave) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 1)
+        Identifier time
+      Function minus (children 1)
+       ExpressionList (children 2)
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Function modulo (children 1)
+           ExpressionList (children 2)
+            Function CAST (children 1)
+             ExpressionList (children 2)
+              Identifier time
+              Literal \'UInt64\'
+            Literal UInt64_2
+          Literal UInt64_2
+        Literal UInt64_1
+    Function lambda (alias sawtooth_wave) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 1)
+        Identifier time
+      Function minus (children 1)
+       ExpressionList (children 2)
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Function minus (children 1)
+           ExpressionList (children 2)
+            Identifier time
+            Function floor (children 1)
+             ExpressionList (children 1)
+              Identifier time
+          Literal UInt64_2
+        Literal UInt64_1
+    Function lambda (alias triangle_wave) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 1)
+        Identifier time
+      Function minus (children 1)
+       ExpressionList (children 2)
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Function abs (children 1)
+           ExpressionList (children 1)
+            Function sawtooth_wave (children 1)
+             ExpressionList (children 1)
+              Identifier time
+          Literal UInt64_2
+        Literal UInt64_1
+    Function lambda (alias lfo) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 4)
+        Identifier from
+        Identifier to
+        Identifier wave
+        Identifier time
+      Function plus (children 1)
+       ExpressionList (children 2)
+        Identifier from
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Function divide (children 1)
+           ExpressionList (children 2)
+            Function plus (children 1)
+             ExpressionList (children 2)
+              Function wave (children 1)
+               ExpressionList (children 1)
+                Identifier time
+              Literal UInt64_1
+            Literal UInt64_2
+          Function minus (children 1)
+           ExpressionList (children 2)
+            Identifier to
+            Identifier from
+    Function lambda (alias step_lfo) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 4)
+        Identifier from
+        Identifier to
+        Identifier steps
+        Identifier time
+      Function plus (children 1)
+       ExpressionList (children 2)
+        Identifier from
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Function divide (children 1)
+           ExpressionList (children 2)
+            Function floor (children 1)
+             ExpressionList (children 1)
+              Function multiply (children 1)
+               ExpressionList (children 2)
+                Function minus (children 1)
+                 ExpressionList (children 2)
+                  Identifier time
+                  Function floor (children 1)
+                   ExpressionList (children 1)
+                    Identifier time
+                Identifier steps
+            Identifier steps
+          Function minus (children 1)
+           ExpressionList (children 2)
+            Identifier to
+            Identifier from
+    Function lambda (alias exp_step_lfo) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 4)
+        Identifier from
+        Identifier to
+        Identifier steps
+        Identifier time
+      Function exp (children 1)
+       ExpressionList (children 1)
+        Function step_lfo (children 1)
+         ExpressionList (children 4)
+          Function log (children 1)
+           ExpressionList (children 1)
+            Identifier from
+          Function log (children 1)
+           ExpressionList (children 1)
+            Identifier to
+          Identifier steps
+          Identifier time
+    Function lambda (alias uniform_noise) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 1)
+        Identifier time
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function cityHash64 (children 1)
+         ExpressionList (children 1)
+          Identifier time
+        Literal UInt64_18446744073709551615
+    Function lambda (alias white_noise) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 1)
+        Identifier time
+      Function erf (children 1)
+       ExpressionList (children 1)
+        Function uniform_noise (children 1)
+         ExpressionList (children 1)
+          Identifier time
+    Function lambda (alias bernoulli_noise) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 1)
+        Identifier time
+      Function if (children 1)
+       ExpressionList (children 3)
+        Function modulo (children 1)
+         ExpressionList (children 2)
+          Function cityHash64 (children 1)
+           ExpressionList (children 1)
+            Identifier time
+          Literal UInt64_2
+        Literal UInt64_1
+        Literal Int64_-1
+    Function lambda (alias clipping) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 2)
+        Identifier x
+        Identifier amount
+      Function clamp (children 1)
+       ExpressionList (children 1)
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Identifier x
+          Identifier amount
+    Function lambda (alias power_distortion) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 2)
+        Identifier x
+        Identifier amount
+      Function clamp (children 1)
+       ExpressionList (children 1)
+        Function if (children 1)
+         ExpressionList (children 3)
+          Function greater (children 1)
+           ExpressionList (children 2)
+            Identifier x
+            Literal UInt64_0
+          Function pow (children 1)
+           ExpressionList (children 2)
+            Identifier x
+            Identifier amount
+          Function negate (children 1)
+           ExpressionList (children 1)
+            Function pow (children 1)
+             ExpressionList (children 2)
+              Function negate (children 1)
+               ExpressionList (children 1)
+                Identifier x
+              Identifier amount
+    Function lambda (alias bitcrush) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 2)
+        Identifier x
+        Identifier amount
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function round (children 1)
+         ExpressionList (children 1)
+          Function multiply (children 1)
+           ExpressionList (children 2)
+            Identifier x
+            Function exp2 (children 1)
+             ExpressionList (children 1)
+              Identifier amount
+        Function exp2 (children 1)
+         ExpressionList (children 1)
+          Identifier amount
+    Function lambda (alias desample) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 2)
+        Identifier time
+        Identifier sample_frequency
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function round (children 1)
+         ExpressionList (children 1)
+          Function multiply (children 1)
+           ExpressionList (children 2)
+            Identifier time
+            Identifier sample_frequency
+        Identifier sample_frequency
+    Function lambda (alias thin) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 3)
+        Identifier time
+        Identifier wave
+        Identifier amount
+      Function if (children 1)
+       ExpressionList (children 3)
+        Function less (children 1)
+         ExpressionList (children 2)
+          Function minus (children 1)
+           ExpressionList (children 2)
+            Identifier time
+            Function floor (children 1)
+             ExpressionList (children 1)
+              Identifier time
+          Function minus (children 1)
+           ExpressionList (children 2)
+            Literal UInt64_1
+            Identifier amount
+        Function wave (children 1)
+         ExpressionList (children 1)
+          Function multiply (children 1)
+           ExpressionList (children 2)
+            Identifier time
+            Function minus (children 1)
+             ExpressionList (children 2)
+              Literal UInt64_1
+              Identifier amount
+        Literal UInt64_0
+    Function lambda (alias skew) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 3)
+        Identifier time
+        Identifier wave
+        Identifier amount
+      Function wave (children 1)
+       ExpressionList (children 1)
+        Function plus (children 1)
+         ExpressionList (children 2)
+          Function floor (children 1)
+           ExpressionList (children 1)
+            Identifier time
+          Function pow (children 1)
+           ExpressionList (children 2)
+            Function minus (children 1)
+             ExpressionList (children 2)
+              Identifier time
+              Function floor (children 1)
+               ExpressionList (children 1)
+                Identifier time
+            Identifier amount
+    Function lambda (alias combine) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 3)
+        Identifier a
+        Identifier b
+        Identifier weight
+      Function plus (children 1)
+       ExpressionList (children 2)
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Identifier a
+          Function minus (children 1)
+           ExpressionList (children 2)
+            Literal UInt64_1
+            Identifier weight
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Identifier b
+          Identifier weight
+    Function lambda (alias envelope) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 5)
+        Identifier time
+        Identifier offset
+        Identifier attack
+        Identifier hold
+        Identifier release
+      Function if (children 1)
+       ExpressionList (children 3)
+        Function less (children 1)
+         ExpressionList (children 2)
+          Identifier time
+          Identifier offset
+        Literal UInt64_0
+        Function if (children 1)
+         ExpressionList (children 3)
+          Function less (children 1)
+           ExpressionList (children 2)
+            Identifier time
+            Function plus (children 1)
+             ExpressionList (children 2)
+              Identifier offset
+              Identifier attack
+          Function divide (children 1)
+           ExpressionList (children 2)
+            Function minus (children 1)
+             ExpressionList (children 2)
+              Identifier time
+              Identifier offset
+            Identifier attack
+          Function if (children 1)
+           ExpressionList (children 3)
+            Function less (children 1)
+             ExpressionList (children 2)
+              Identifier time
+              Function plus (children 1)
+               ExpressionList (children 2)
+                Function plus (children 1)
+                 ExpressionList (children 2)
+                  Identifier offset
+                  Identifier attack
+                Identifier hold
+            Literal UInt64_1
+            Function if (children 1)
+             ExpressionList (children 3)
+              Function less (children 1)
+               ExpressionList (children 2)
+                Identifier time
+                Function plus (children 1)
+                 ExpressionList (children 2)
+                  Function plus (children 1)
+                   ExpressionList (children 2)
+                    Function plus (children 1)
+                     ExpressionList (children 2)
+                      Identifier offset
+                      Identifier attack
+                    Identifier hold
+                  Identifier release
+              Function divide (children 1)
+               ExpressionList (children 2)
+                Function minus (children 1)
+                 ExpressionList (children 2)
+                  Function plus (children 1)
+                   ExpressionList (children 2)
+                    Function plus (children 1)
+                     ExpressionList (children 2)
+                      Function plus (children 1)
+                       ExpressionList (children 2)
+                        Identifier offset
+                        Identifier attack
+                      Identifier hold
+                    Identifier release
+                  Identifier time
+                Identifier release
+              Literal UInt64_0
+    Function lambda (alias running_envelope) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 6)
+        Identifier bpm
+        Identifier time
+        Identifier offset
+        Identifier attack
+        Identifier hold
+        Identifier release
+      Function envelope (children 1)
+       ExpressionList (children 5)
+        Function minus (children 1)
+         ExpressionList (children 2)
+          Function multiply (children 1)
+           ExpressionList (children 2)
+            Identifier time
+            Function divide (children 1)
+             ExpressionList (children 2)
+              Identifier bpm
+              Literal UInt64_60
+          Function floor (children 1)
+           ExpressionList (children 1)
+            Function multiply (children 1)
+             ExpressionList (children 2)
+              Identifier time
+              Function divide (children 1)
+               ExpressionList (children 2)
+                Identifier bpm
+                Literal UInt64_60
+        Identifier offset
+        Identifier attack
+        Identifier hold
+        Identifier release
+    Function lambda (alias sequencer) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 2)
+        Identifier sequence
+        Identifier time
+      Function arrayElement (children 1)
+       ExpressionList (children 2)
+        Identifier sequence
+        Function plus (children 1)
+         ExpressionList (children 2)
+          Literal UInt64_1
+          Function modulo (children 1)
+           ExpressionList (children 2)
+            Function CAST (children 1)
+             ExpressionList (children 2)
+              Identifier time
+              Literal \'UInt64\'
+            Function length (children 1)
+             ExpressionList (children 1)
+              Identifier sequence
+    Function lambda (alias delay) (children 1)
+     ExpressionList (children 2)
+      Function tuple (children 1)
+       ExpressionList (children 5)
+        Identifier time
+        Identifier wave
+        Identifier delay
+        Identifier decay
+        Identifier count
+      Function arraySum (children 1)
+       ExpressionList (children 2)
+        Function lambda (children 1)
+         ExpressionList (children 2)
+          Function tuple (children 1)
+           ExpressionList (children 1)
+            Identifier n
+          Function multiply (children 1)
+           ExpressionList (children 2)
+            Function wave (children 1)
+             ExpressionList (children 1)
+              Function minus (children 1)
+               ExpressionList (children 2)
+                Identifier time
+                Function multiply (children 1)
+                 ExpressionList (children 2)
+                  Identifier delay
+                  Identifier n
+            Function pow (children 1)
+             ExpressionList (children 2)
+              Identifier decay
+              Identifier n
+        Function range (children 1)
+         ExpressionList (children 1)
+          Identifier count
+    Function delay (alias kick) (children 1)
+     ExpressionList (children 5)
+      Identifier time
+      Function lambda (children 1)
+       ExpressionList (children 2)
+        Function tuple (children 1)
+         ExpressionList (children 1)
+          Identifier time
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Function power_distortion (children 1)
+           ExpressionList (children 2)
+            Function sine_wave (children 1)
+             ExpressionList (children 1)
+              Function plus (children 1)
+               ExpressionList (children 2)
+                Function multiply (children 1)
+                 ExpressionList (children 2)
+                  Identifier time
+                  Literal UInt64_80
+                Function sine_wave (children 1)
+                 ExpressionList (children 1)
+                  Function multiply (children 1)
+                   ExpressionList (children 2)
+                    Identifier time
+                    Literal UInt64_2
+            Function lfo (children 1)
+             ExpressionList (children 4)
+              Literal Float64_0.5
+              Literal UInt64_1
+              Identifier sine_wave
+              Function divide (children 1)
+               ExpressionList (children 2)
+                Identifier time
+                Literal UInt64_16
+          Function running_envelope (children 1)
+           ExpressionList (children 6)
+            Literal UInt64_60
+            Identifier time
+            Literal UInt64_0
+            Literal Float64_0
+            Literal Float64_0.01
+            Literal Float64_0.1
+      Literal Float64_0.2
+      Literal Float64_0.5
+      Literal UInt64_5
+   ExpressionList (children 1)
+    Function tuple (children 1)
+     ExpressionList (children 2)
+      Function output (children 1)
+       ExpressionList (children 1)
+        Function plus (children 1)
+         ExpressionList (children 2)
+          Function plus (children 1)
+           ExpressionList (children 2)
+            Function plus (children 1)
+             ExpressionList (children 2)
+              Function plus (children 1)
+               ExpressionList (children 2)
+                Identifier kick
+                Function multiply (children 1)
+                 ExpressionList (children 2)
+                  Function delay (children 1)
+                   ExpressionList (children 5)
+                    Identifier time
+                    Function lambda (children 1)
+                     ExpressionList (children 2)
+                      Function tuple (children 1)
+                       ExpressionList (children 1)
+                        Identifier time
+                      Function power_distortion (children 1)
+                       ExpressionList (children 2)
+                        Function multiply (children 1)
+                         ExpressionList (children 2)
+                          Function sine_wave (children 1)
+                           ExpressionList (children 1)
+                            Function plus (children 1)
+                             ExpressionList (children 2)
+                              Function multiply (children 1)
+                               ExpressionList (children 2)
+                                Identifier time
+                                Literal UInt64_50
+                              Function multiply (children 1)
+                               ExpressionList (children 2)
+                                Literal UInt64_1
+                                Function sine_wave (children 1)
+                                 ExpressionList (children 1)
+                                  Function plus (children 1)
+                                   ExpressionList (children 2)
+                                    Function multiply (children 1)
+                                     ExpressionList (children 2)
+                                      Identifier time
+                                      Literal UInt64_100
+                                    Function divide (children 1)
+                                     ExpressionList (children 2)
+                                      Literal UInt64_1
+                                      Literal UInt64_4
+                          Function running_envelope (children 1)
+                           ExpressionList (children 6)
+                            Literal UInt64_60
+                            Identifier time
+                            Literal UInt64_0
+                            Literal Float64_0.01
+                            Literal Float64_0.01
+                            Literal Float64_0.1
+                        Function lfo (children 1)
+                         ExpressionList (children 4)
+                          Literal UInt64_1
+                          Literal Float64_0.75
+                          Identifier triangle_wave
+                          Function divide (children 1)
+                           ExpressionList (children 2)
+                            Identifier time
+                            Literal UInt64_8
+                    Literal Float64_0.2
+                    Literal Float64_0.5
+                    Literal UInt64_10
+                  Function lfo (children 1)
+                   ExpressionList (children 4)
+                    Literal Float64_0.5
+                    Literal UInt64_1
+                    Identifier triangle_wave
+                    Function divide (children 1)
+                     ExpressionList (children 2)
+                      Identifier time
+                      Literal UInt64_7
+              Function multiply (children 1)
+               ExpressionList (children 2)
+                Function delay (children 1)
+                 ExpressionList (children 5)
+                  Identifier time
+                  Function lambda (children 1)
+                   ExpressionList (children 2)
+                    Function tuple (children 1)
+                     ExpressionList (children 1)
+                      Identifier time
+                    Function power_distortion (children 1)
+                     ExpressionList (children 2)
+                      Function multiply (children 1)
+                       ExpressionList (children 2)
+                        Function sine_wave (children 1)
+                         ExpressionList (children 1)
+                          Function plus (children 1)
+                           ExpressionList (children 2)
+                            Function multiply (children 1)
+                             ExpressionList (children 2)
+                              Identifier time
+                              Function sequencer (children 1)
+                               ExpressionList (children 2)
+                                Literal Array_[UInt64_50, UInt64_100, UInt64_200, UInt64_400]
+                                Function divide (children 1)
+                                 ExpressionList (children 2)
+                                  Identifier time
+                                  Literal UInt64_2
+                            Function multiply (children 1)
+                             ExpressionList (children 2)
+                              Literal UInt64_1
+                              Function sine_wave (children 1)
+                               ExpressionList (children 1)
+                                Function plus (children 1)
+                                 ExpressionList (children 2)
+                                  Function multiply (children 1)
+                                   ExpressionList (children 2)
+                                    Identifier time
+                                    Function sequencer (children 1)
+                                     ExpressionList (children 2)
+                                      Literal Array_[UInt64_50, UInt64_100, UInt64_200]
+                                      Function divide (children 1)
+                                       ExpressionList (children 2)
+                                        Identifier time
+                                        Literal UInt64_4
+                                  Function divide (children 1)
+                                   ExpressionList (children 2)
+                                    Literal UInt64_1
+                                    Literal UInt64_4
+                        Function running_envelope (children 1)
+                         ExpressionList (children 6)
+                          Literal UInt64_60
+                          Identifier time
+                          Literal Float64_0.5
+                          Literal Float64_0.01
+                          Literal Float64_0.01
+                          Literal Float64_0.1
+                      Function lfo (children 1)
+                       ExpressionList (children 4)
+                        Literal UInt64_1
+                        Literal Float64_0.75
+                        Identifier triangle_wave
+                        Function divide (children 1)
+                         ExpressionList (children 2)
+                          Identifier time
+                          Literal UInt64_8
+                  Literal Float64_0.2
+                  Literal Float64_0.5
+                  Literal UInt64_10
+                Function lfo (children 1)
+                 ExpressionList (children 4)
+                  Literal Float64_0.5
+                  Literal UInt64_1
+                  Identifier triangle_wave
+                  Function plus (children 1)
+                   ExpressionList (children 2)
+                    Literal UInt64_16
+                    Function divide (children 1)
+                     ExpressionList (children 2)
+                      Identifier time
+                      Literal UInt64_11
+            Function multiply (children 1)
+             ExpressionList (children 2)
+              Function delay (children 1)
+               ExpressionList (children 5)
+                Identifier time
+                Function lambda (children 1)
+                 ExpressionList (children 2)
+                  Function tuple (children 1)
+                   ExpressionList (children 1)
+                    Identifier time
+                  Function multiply (children 1)
+                   ExpressionList (children 2)
+                    Function white_noise (children 1)
+                     ExpressionList (children 1)
+                      Identifier time
+                    Function running_envelope (children 1)
+                     ExpressionList (children 6)
+                      Literal UInt64_60
+                      Identifier time
+                      Literal Float64_0.75
+                      Literal Float64_0.01
+                      Literal Float64_0.01
+                      Literal Float64_0.1
+                Literal Float64_0.2
+                Literal Float64_0.5
+                Literal UInt64_10
+              Function lfo (children 1)
+               ExpressionList (children 4)
+                Literal Float64_0.5
+                Literal UInt64_1
+                Identifier triangle_wave
+                Function plus (children 1)
+                 ExpressionList (children 2)
+                  Literal UInt64_24
+                  Function divide (children 1)
+                   ExpressionList (children 2)
+                    Identifier time
+                    Literal UInt64_13
+          Function multiply (children 1)
+           ExpressionList (children 2)
+            Function sine_wave (children 1)
+             ExpressionList (children 1)
+              Function plus (children 1)
+               ExpressionList (children 2)
+                Function multiply (children 1)
+                 ExpressionList (children 2)
+                  Identifier time
+                  Literal UInt64_100
+                Function multiply (children 1)
+                 ExpressionList (children 2)
+                  Literal UInt64_1
+                  Function sine_wave (children 1)
+                   ExpressionList (children 1)
+                    Function plus (children 1)
+                     ExpressionList (children 2)
+                      Function multiply (children 1)
+                       ExpressionList (children 2)
+                        Identifier time
+                        Literal UInt64_10
+                      Function divide (children 1)
+                       ExpressionList (children 2)
+                        Literal UInt64_1
+                        Literal UInt64_4
+            Function running_envelope (children 1)
+             ExpressionList (children 6)
+              Literal UInt64_120
+              Identifier time
+              Literal UInt64_0
+              Literal Float64_0.01
+              Literal Float64_0.01
+              Literal Float64_0.1
+      Function output (children 1)
+       ExpressionList (children 1)
+        Function plus (children 1)
+         ExpressionList (children 2)
+          Function plus (children 1)
+           ExpressionList (children 2)
+            Function plus (children 1)
+             ExpressionList (children 2)
+              Identifier kick
+              Function multiply (children 1)
+               ExpressionList (children 2)
+                Function delay (children 1)
+                 ExpressionList (children 5)
+                  Function plus (children 1)
+                   ExpressionList (children 2)
+                    Identifier time
+                    Literal Float64_0.01
+                  Function lambda (children 1)
+                   ExpressionList (children 2)
+                    Function tuple (children 1)
+                     ExpressionList (children 1)
+                      Identifier time
+                    Function power_distortion (children 1)
+                     ExpressionList (children 2)
+                      Function multiply (children 1)
+                       ExpressionList (children 2)
+                        Function sine_wave (children 1)
+                         ExpressionList (children 1)
+                          Function plus (children 1)
+                           ExpressionList (children 2)
+                            Function multiply (children 1)
+                             ExpressionList (children 2)
+                              Identifier time
+                              Literal UInt64_50
+                            Function multiply (children 1)
+                             ExpressionList (children 2)
+                              Literal UInt64_1
+                              Function sine_wave (children 1)
+                               ExpressionList (children 1)
+                                Function plus (children 1)
+                                 ExpressionList (children 2)
+                                  Function multiply (children 1)
+                                   ExpressionList (children 2)
+                                    Identifier time
+                                    Literal UInt64_100
+                                  Function divide (children 1)
+                                   ExpressionList (children 2)
+                                    Literal UInt64_1
+                                    Literal UInt64_4
+                        Function running_envelope (children 1)
+                         ExpressionList (children 6)
+                          Literal UInt64_60
+                          Identifier time
+                          Literal UInt64_0
+                          Literal Float64_0.01
+                          Literal Float64_0.01
+                          Literal Float64_0.1
+                      Function lfo (children 1)
+                       ExpressionList (children 4)
+                        Literal UInt64_1
+                        Literal Float64_0.75
+                        Identifier triangle_wave
+                        Function divide (children 1)
+                         ExpressionList (children 2)
+                          Identifier time
+                          Literal UInt64_8
+                  Literal Float64_0.2
+                  Literal Float64_0.5
+                  Literal UInt64_10
+                Function lfo (children 1)
+                 ExpressionList (children 4)
+                  Literal Float64_0.5
+                  Literal UInt64_1
+                  Identifier triangle_wave
+                  Function divide (children 1)
+                   ExpressionList (children 2)
+                    Identifier time
+                    Literal UInt64_7
+            Function multiply (children 1)
+             ExpressionList (children 2)
+              Function delay (children 1)
+               ExpressionList (children 5)
+                Function minus (children 1)
+                 ExpressionList (children 2)
+                  Identifier time
+                  Literal Float64_0.01
+                Function lambda (children 1)
+                 ExpressionList (children 2)
+                  Function tuple (children 1)
+                   ExpressionList (children 1)
+                    Identifier time
+                  Function power_distortion (children 1)
+                   ExpressionList (children 2)
+                    Function multiply (children 1)
+                     ExpressionList (children 2)
+                      Function sine_wave (children 1)
+                       ExpressionList (children 1)
+                        Function plus (children 1)
+                         ExpressionList (children 2)
+                          Function multiply (children 1)
+                           ExpressionList (children 2)
+                            Identifier time
+                            Function sequencer (children 1)
+                             ExpressionList (children 2)
+                              Literal Array_[UInt64_50, UInt64_100, UInt64_200, UInt64_400]
+                              Function divide (children 1)
+                               ExpressionList (children 2)
+                                Identifier time
+                                Literal UInt64_2
+                          Function multiply (children 1)
+                           ExpressionList (children 2)
+                            Literal UInt64_1
+                            Function sine_wave (children 1)
+                             ExpressionList (children 1)
+                              Function plus (children 1)
+                               ExpressionList (children 2)
+                                Function multiply (children 1)
+                                 ExpressionList (children 2)
+                                  Identifier time
+                                  Function sequencer (children 1)
+                                   ExpressionList (children 2)
+                                    Literal Array_[UInt64_50, UInt64_100, UInt64_200]
+                                    Function divide (children 1)
+                                     ExpressionList (children 2)
+                                      Identifier time
+                                      Literal UInt64_4
+                                Function divide (children 1)
+                                 ExpressionList (children 2)
+                                  Literal UInt64_1
+                                  Literal UInt64_4
+                      Function running_envelope (children 1)
+                       ExpressionList (children 6)
+                        Literal UInt64_60
+                        Identifier time
+                        Literal Float64_0.5
+                        Literal Float64_0.01
+                        Literal Float64_0.01
+                        Literal Float64_0.1
+                    Function lfo (children 1)
+                     ExpressionList (children 4)
+                      Literal UInt64_1
+                      Literal Float64_0.75
+                      Identifier triangle_wave
+                      Function divide (children 1)
+                       ExpressionList (children 2)
+                        Identifier time
+                        Literal UInt64_8
+                Literal Float64_0.2
+                Literal Float64_0.5
+                Literal UInt64_10
+              Function lfo (children 1)
+               ExpressionList (children 4)
+                Literal Float64_0.5
+                Literal UInt64_1
+                Identifier triangle_wave
+                Function plus (children 1)
+                 ExpressionList (children 2)
+                  Literal UInt64_16
+                  Function divide (children 1)
+                   ExpressionList (children 2)
+                    Identifier time
+                    Literal UInt64_11
+          Function multiply (children 1)
+           ExpressionList (children 2)
+            Function delay (children 1)
+             ExpressionList (children 5)
+              Function plus (children 1)
+               ExpressionList (children 2)
+                Identifier time
+                Literal Float64_0.005
+              Function lambda (children 1)
+               ExpressionList (children 2)
+                Function tuple (children 1)
+                 ExpressionList (children 1)
+                  Identifier time
+                Function multiply (children 1)
+                 ExpressionList (children 2)
+                  Function white_noise (children 1)
+                   ExpressionList (children 1)
+                    Identifier time
+                  Function running_envelope (children 1)
+                   ExpressionList (children 6)
+                    Literal UInt64_60
+                    Identifier time
+                    Literal Float64_0.75
+                    Literal Float64_0.01
+                    Literal Float64_0.01
+                    Literal Float64_0.1
+              Literal Float64_0.2
+              Literal Float64_0.5
+              Literal UInt64_10
+            Function lfo (children 1)
+             ExpressionList (children 4)
+              Literal Float64_0.5
+              Literal UInt64_1
+              Identifier triangle_wave
+              Function plus (children 1)
+               ExpressionList (children 2)
+                Literal UInt64_24
+                Function divide (children 1)
+                 ExpressionList (children 2)
+                  Identifier time
+                  Literal UInt64_13
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.numbers
+   Literal UInt64_10

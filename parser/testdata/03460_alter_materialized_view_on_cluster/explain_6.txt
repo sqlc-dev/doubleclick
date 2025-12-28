@@ -1,0 +1,37 @@
+CreateQuery mview (children 4)
+ Identifier mview
+ Columns definition (children 1)
+  ExpressionList (children 3)
+   ColumnDeclaration day (children 1)
+    DataType Date
+   ColumnDeclaration card_id (children 1)
+    DataType UInt64
+   ColumnDeclaration card_view (children 1)
+    DataType Int64
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 3)
+    ExpressionList (children 3)
+     Function toDate (alias day) (children 1)
+      ExpressionList (children 1)
+       Identifier timestamp
+     Identifier card_id
+     Function count (alias card_view) (children 1)
+      ExpressionList (children 1)
+       Asterisk
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier source
+    ExpressionList (children 1)
+     Function tuple (children 1)
+      ExpressionList (children 2)
+       Identifier day
+       Identifier card_id
+ ViewTargets (children 1)
+  Storage definition (children 2)
+   Function SummingMergeTree
+   Function tuple (children 1)
+    ExpressionList (children 2)
+     Identifier day
+     Identifier card_id

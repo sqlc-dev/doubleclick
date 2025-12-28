@@ -1,0 +1,55 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 1)
+    Function CAST (alias data) (children 1)
+     ExpressionList (children 2)
+      Literal \'[ (1600000000, 10), (1600000010, 20), (1600000020, 30), (1600000030, 40), (1600000040, 10), (1600000050, 70), (1600000060, 90), (1600000270, 20), (1600000330, 10) ]\'
+      Literal \'Array(Tuple(UInt32, Float64))\'
+   ExpressionList (children 1)
+    Asterisk
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 2)
+         SelectQuery (children 1)
+          ExpressionList (children 2)
+           Literal \'delta\' (alias name)
+           Function timeSeriesDeltaToGrid (children 2)
+            ExpressionList (children 2)
+             Function tupleElement (children 1)
+              ExpressionList (children 2)
+               Identifier data
+               Literal UInt64_1
+             Function tupleElement (children 1)
+              ExpressionList (children 2)
+               Identifier data
+               Literal UInt64_2
+            ExpressionList (children 4)
+             Literal UInt64_1600000010
+             Literal UInt64_1600000320
+             Literal UInt64_10
+             Literal UInt64_300
+         SelectQuery (children 1)
+          ExpressionList (children 2)
+           Literal \'idelta\' (alias name)
+           Function timeSeriesInstantDeltaToGrid (children 2)
+            ExpressionList (children 2)
+             Function tupleElement (children 1)
+              ExpressionList (children 2)
+               Identifier data
+               Literal UInt64_1
+             Function tupleElement (children 1)
+              ExpressionList (children 2)
+               Identifier data
+               Literal UInt64_2
+            ExpressionList (children 4)
+             Literal UInt64_1600000010
+             Literal UInt64_1600000320
+             Literal UInt64_10
+             Literal UInt64_300
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier name

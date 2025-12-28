@@ -1,0 +1,26 @@
+CreateQuery users (children 3)
+ Identifier users
+ Columns definition (children 1)
+  ExpressionList (children 2)
+   ColumnDeclaration uid (children 1)
+    DataType Int16
+   ColumnDeclaration d (children 1)
+    DataType DateTime (children 1)
+     ExpressionList (children 1)
+      Literal \'UTC\'
+ Storage definition (children 4)
+  Function MergeTree
+  Identifier uid
+  ExpressionList (children 1)
+   TTLElement (children 2)
+    Function plus (children 1)
+     ExpressionList (children 2)
+      Identifier d
+      Function toIntervalMonth (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_1
+    Function equals (children 1)
+     ExpressionList (children 2)
+      Identifier uid
+      Literal UInt64_1
+  Set

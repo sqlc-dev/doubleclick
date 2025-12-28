@@ -1,0 +1,74 @@
+SelectWithUnionQuery (children 2)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 14)
+    Literal \'Depending views 2\' (alias stage)
+    Identifier view_name
+    Identifier view_type
+    Identifier status
+    Identifier view_target
+    Identifier view_query
+    Identifier read_rows
+    Identifier written_rows
+    Function arrayElement (alias sleep_calls) (children 1)
+     ExpressionList (children 2)
+      Identifier ProfileEvents
+      Literal \'SleepFunctionCalls\'
+    Function arrayElement (alias sleep_us) (children 1)
+     ExpressionList (children 2)
+      Identifier ProfileEvents
+      Literal \'SleepFunctionMicroseconds\'
+    Function arrayElement (alias profile_select_rows) (children 1)
+     ExpressionList (children 2)
+      Identifier ProfileEvents
+      Literal \'SelectedRows\'
+    Function arrayElement (alias profile_select_bytes) (children 1)
+     ExpressionList (children 2)
+      Identifier ProfileEvents
+      Literal \'SelectedBytes\'
+    Function arrayElement (alias profile_insert_rows) (children 1)
+     ExpressionList (children 2)
+      Identifier ProfileEvents
+      Literal \'InsertedRows\'
+    Function arrayElement (alias profile_insert_bytes) (children 1)
+     ExpressionList (children 2)
+      Identifier ProfileEvents
+      Literal \'InsertedBytes\'
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_views_log
+   Function equals (children 1)
+    ExpressionList (children 2)
+     Identifier initial_query_id
+     Subquery (children 1)
+      SelectWithUnionQuery (children 1)
+       ExpressionList (children 1)
+        SelectQuery (children 4)
+         ExpressionList (children 1)
+          Identifier initial_query_id
+         TablesInSelectQuery (children 1)
+          TablesInSelectQueryElement (children 1)
+           TableExpression (children 1)
+            TableIdentifier system.query_log
+         Function and (children 1)
+          ExpressionList (children 3)
+           Function like (children 1)
+            ExpressionList (children 2)
+             Identifier query
+             Literal \'-- INSERT 2%INSERT INTO table_d%\'
+           Function equals (children 1)
+            ExpressionList (children 2)
+             Identifier current_database
+             Function currentDatabase (children 1)
+              ExpressionList
+           Function greaterOrEquals (children 1)
+            ExpressionList (children 2)
+             Identifier event_date
+             Function yesterday (children 1)
+              ExpressionList
+         Literal UInt64_1
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier view_name
+ Identifier Vertical

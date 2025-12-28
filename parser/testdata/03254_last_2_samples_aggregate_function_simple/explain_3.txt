@@ -1,0 +1,30 @@
+CreateQuery t_resampled_timeseries_15_sec (children 3)
+ Identifier t_resampled_timeseries_15_sec
+ Columns definition (children 1)
+  ExpressionList (children 3)
+   ColumnDeclaration metric_id (children 1)
+    DataType UInt64
+   ColumnDeclaration grid_timestamp (children 2)
+    DataType DateTime (children 1)
+     ExpressionList (children 1)
+      Literal \'UTC\'
+    Function CODEC (children 1)
+     ExpressionList (children 2)
+      Function DoubleDelta
+      Function ZSTD
+   ColumnDeclaration samples (children 1)
+    DataType AggregateFunction (children 1)
+     ExpressionList (children 3)
+      Identifier timeSeriesLastTwoSamples
+      DataType DateTime64 (children 1)
+       ExpressionList (children 2)
+        Literal UInt64_3
+        Literal \'UTC\'
+      DataType Float64
+ Storage definition (children 2)
+  Function AggregatingMergeTree (children 1)
+   ExpressionList
+  Function tuple (children 1)
+   ExpressionList (children 2)
+    Identifier metric_id
+    Identifier grid_timestamp

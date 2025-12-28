@@ -1,0 +1,82 @@
+CreateQuery mv_checkouts2target (children 3)
+ Identifier mv_checkouts2target
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 3)
+    ExpressionList (children 5)
+     Identifier id
+     Function maxState (alias latest_login_time) (children 1)
+      ExpressionList (children 1)
+       Function toDateTime (children 1)
+        ExpressionList (children 2)
+         Literal UInt64_0
+         Literal \'UTC\'
+     Function maxState (alias latest_checkout_time) (children 1)
+      ExpressionList (children 1)
+       Identifier ts
+     Function if (alias fastest_session) (children 1)
+      ExpressionList (children 3)
+       Function greater (children 1)
+        ExpressionList (children 2)
+         Function max (children 1)
+          ExpressionList (children 1)
+           Identifier current_latest_login_time
+         Literal UInt64_0
+       Function minState (children 1)
+        ExpressionList (children 1)
+         Function toUInt64 (children 1)
+          ExpressionList (children 1)
+           Function minus (children 1)
+            ExpressionList (children 2)
+             Identifier ts
+             Identifier current_latest_login_time
+       Function minState (children 1)
+        ExpressionList (children 1)
+         Function toUInt64 (children 1)
+          ExpressionList (children 1)
+           Literal Int64_-1
+     Function maxState (alias biggest_inactivity_period) (children 1)
+      ExpressionList (children 1)
+       Function toUInt64 (children 1)
+        ExpressionList (children 1)
+         Literal UInt64_0
+    TablesInSelectQuery (children 2)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier checkouts
+     TablesInSelectQueryElement (children 2)
+      TableExpression (children 1)
+       Subquery (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 4)
+           ExpressionList (children 2)
+            Identifier id
+            Function maxMerge (alias current_latest_login_time) (children 1)
+             ExpressionList (children 1)
+              Identifier latest_login_time
+           TablesInSelectQuery (children 1)
+            TablesInSelectQueryElement (children 1)
+             TableExpression (children 1)
+              TableIdentifier target_table
+           Function in (children 1)
+            ExpressionList (children 2)
+             Identifier id
+             Subquery (children 1)
+              SelectWithUnionQuery (children 1)
+               ExpressionList (children 1)
+                SelectQuery (children 2)
+                 ExpressionList (children 1)
+                  Identifier id
+                 TablesInSelectQuery (children 1)
+                  TablesInSelectQueryElement (children 1)
+                   TableExpression (children 1)
+                    TableIdentifier checkouts
+           ExpressionList (children 1)
+            Identifier id
+      TableJoin (children 1)
+       ExpressionList (children 1)
+        Identifier id
+    ExpressionList (children 1)
+     Identifier id
+ ViewTargets

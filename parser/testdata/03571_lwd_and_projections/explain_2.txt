@@ -1,0 +1,25 @@
+CreateQuery weird_projections (children 3)
+ Identifier weird_projections
+ Columns definition (children 2)
+  ExpressionList (children 2)
+   ColumnDeclaration account_id (children 1)
+    DataType UInt64
+   ColumnDeclaration user_id (children 1)
+    DataType String
+  ExpressionList (children 1)
+   Projection (children 1)
+    ProjectionSelectQuery (children 2)
+     ExpressionList (children 2)
+      Identifier account_id
+      Function countDistinct (alias total_users) (children 1)
+       ExpressionList (children 1)
+        Identifier user_id
+     ExpressionList (children 1)
+      Identifier account_id
+ Storage definition (children 3)
+  Function ReplicatedMergeTree (children 1)
+   ExpressionList (children 2)
+    Literal \'/clickhouse/{database}/tables/test\'
+    Literal \'1\'
+  Identifier account_id
+  Set

@@ -1,0 +1,62 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 3)
+    Identifier first
+    Identifier second
+    Identifier result
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 3)
+          ExpressionList (children 4)
+           Function s2ToGeo (alias output_geo) (children 1)
+            ExpressionList (children 1)
+             Function geoToS2 (children 1)
+              ExpressionList (children 2)
+               Identifier longitude
+               Identifier latitude
+           Function tuple (alias first) (children 1)
+            ExpressionList (children 2)
+             Function roundBankers (children 1)
+              ExpressionList (children 2)
+               Identifier longitude
+               Literal UInt64_5
+             Function roundBankers (children 1)
+              ExpressionList (children 2)
+               Identifier latitude
+               Literal UInt64_5
+           Function tuple (alias second) (children 1)
+            ExpressionList (children 2)
+             Function roundBankers (children 1)
+              ExpressionList (children 2)
+               Function tupleElement (children 1)
+                ExpressionList (children 2)
+                 Identifier output_geo
+                 Literal UInt64_1
+               Literal UInt64_5
+             Function roundBankers (children 1)
+              ExpressionList (children 2)
+               Function tupleElement (children 1)
+                ExpressionList (children 2)
+                 Identifier output_geo
+                 Literal UInt64_2
+               Literal UInt64_5
+           Function if (alias result) (children 1)
+            ExpressionList (children 3)
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier first
+               Identifier second
+             Literal \'ok\'
+             Literal \'fail\'
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier s2_indexes
+          ExpressionList (children 1)
+           OrderByElement (children 1)
+            Identifier s2_index

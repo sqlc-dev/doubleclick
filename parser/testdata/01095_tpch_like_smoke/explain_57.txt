@@ -1,0 +1,67 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 6)
+   ExpressionList (children 6)
+    Identifier c_name
+    Identifier c_custkey
+    Identifier o_orderkey
+    Identifier o_orderdate
+    Identifier o_totalprice
+    Function sum (children 1)
+     ExpressionList (children 1)
+      Identifier l_quantity
+   TablesInSelectQuery (children 3)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier customer
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier orders
+     TableJoin
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier lineitem
+     TableJoin
+   Function and (children 1)
+    ExpressionList (children 3)
+     Function in (children 1)
+      ExpressionList (children 2)
+       Identifier o_orderkey
+       Subquery (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 4)
+           ExpressionList (children 1)
+            Identifier l_orderkey
+           TablesInSelectQuery (children 1)
+            TablesInSelectQueryElement (children 1)
+             TableExpression (children 1)
+              TableIdentifier lineitem
+           ExpressionList (children 1)
+            Identifier l_orderkey
+           Function greater (children 1)
+            ExpressionList (children 2)
+             Function sum (children 1)
+              ExpressionList (children 1)
+               Identifier l_quantity
+             Literal UInt64_300
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier c_custkey
+       Identifier o_custkey
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier o_orderkey
+       Identifier l_orderkey
+   ExpressionList (children 5)
+    Identifier c_name
+    Identifier c_custkey
+    Identifier o_orderkey
+    Identifier o_orderdate
+    Identifier o_totalprice
+   ExpressionList (children 2)
+    OrderByElement (children 1)
+     Identifier o_totalprice
+    OrderByElement (children 1)
+     Identifier o_orderdate
+   Literal UInt64_100

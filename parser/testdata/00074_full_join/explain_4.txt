@@ -1,0 +1,76 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 5)
+   ExpressionList (children 3)
+    Identifier CounterID
+    Identifier hits
+    Identifier visits
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 3)
+          ExpressionList (children 2)
+           Function modulo (alias CounterID) (children 1)
+            ExpressionList (children 2)
+             Identifier CounterID
+             Literal UInt64_100000
+           Function count (alias hits) (children 1)
+            ExpressionList
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier test.hits
+          ExpressionList (children 1)
+           Identifier CounterID
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 4)
+          ExpressionList (children 2)
+           Function modulo (alias CounterID) (children 1)
+            ExpressionList (children 2)
+             Identifier CounterID
+             Literal UInt64_100000
+           Function sum (alias visits) (children 1)
+            ExpressionList (children 1)
+             Identifier Sign
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier test.visits
+          ExpressionList (children 1)
+           Identifier CounterID
+          Function greater (children 1)
+           ExpressionList (children 2)
+            Identifier visits
+            Literal UInt64_0
+     TableJoin (children 1)
+      ExpressionList (children 1)
+       Identifier CounterID
+   Function or (children 1)
+    ExpressionList (children 2)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier hits
+       Literal UInt64_0
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier visits
+       Literal UInt64_0
+   ExpressionList (children 2)
+    OrderByElement (children 1)
+     Function plus (children 1)
+      ExpressionList (children 2)
+       Identifier hits
+       Function multiply (children 1)
+        ExpressionList (children 2)
+         Identifier visits
+         Literal UInt64_10
+    OrderByElement (children 1)
+     Identifier CounterID
+   Literal UInt64_20

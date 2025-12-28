@@ -1,0 +1,47 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 3)
+    Identifier ps_partkey
+    Identifier ps_suppkey
+    Subquery (alias half_sum_quantity) (children 1)
+     SelectWithUnionQuery (children 1)
+      ExpressionList (children 1)
+       SelectQuery (children 3)
+        ExpressionList (children 1)
+         Function multiply (children 1)
+          ExpressionList (children 2)
+           Literal Float64_0.5
+           Function sum (children 1)
+            ExpressionList (children 1)
+             Identifier l_quantity
+        TablesInSelectQuery (children 1)
+         TablesInSelectQueryElement (children 1)
+          TableExpression (children 1)
+           TableIdentifier lineitem
+        Function and (children 1)
+         ExpressionList (children 2)
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier l_partkey
+            Identifier ps_partkey
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier l_suppkey
+            Identifier ps_suppkey
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier partsupp
+   Function in (children 1)
+    ExpressionList (children 2)
+     Function tuple (children 1)
+      ExpressionList (children 2)
+       Identifier ps_partkey
+       Identifier ps_suppkey
+     Literal Tuple_(Tuple_(UInt64_114, UInt64_115), Tuple_(UInt64_369, UInt64_7870))
+   ExpressionList (children 2)
+    OrderByElement (children 1)
+     Identifier ps_partkey
+    OrderByElement (children 1)
+     Identifier ps_suppkey

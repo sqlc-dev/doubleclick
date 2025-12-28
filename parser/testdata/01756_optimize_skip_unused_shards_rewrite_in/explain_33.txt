@@ -1,0 +1,55 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 1)
+    Function arrayElement (children 1)
+     ExpressionList (children 2)
+      Function splitByString (children 1)
+       ExpressionList (children 2)
+        Literal \'IN\'
+        Identifier query
+      Literal Int64_-1
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_log
+   Function and (children 1)
+    ExpressionList (children 6)
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier event_date
+       Function yesterday (children 1)
+        ExpressionList
+     Function greater (children 1)
+      ExpressionList (children 2)
+       Identifier event_time
+       Function minus (children 1)
+        ExpressionList (children 2)
+         Function now (children 1)
+          ExpressionList
+         Function toIntervalHour (children 1)
+          ExpressionList (children 1)
+           Literal UInt64_1
+     Function not (children 1)
+      ExpressionList (children 1)
+       Identifier is_initial_query
+     Function notLike (children 1)
+      ExpressionList (children 2)
+       Identifier query
+       Literal \'%system%query_log%\'
+     Function like (children 1)
+      ExpressionList (children 2)
+       Identifier query
+       Function concat (children 1)
+        ExpressionList (children 3)
+         Literal \'%\'
+         Function currentDatabase (children 1)
+          ExpressionList
+         Literal \'%AS%key_signed%\'
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier type
+       Literal \'QueryFinish\'
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier query

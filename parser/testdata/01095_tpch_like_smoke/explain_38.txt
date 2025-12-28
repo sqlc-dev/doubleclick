@@ -1,0 +1,83 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 6)
+   ExpressionList (children 8)
+    Identifier c_custkey
+    Identifier c_name
+    Function sum (alias revenue) (children 1)
+     ExpressionList (children 1)
+      Function multiply (children 1)
+       ExpressionList (children 2)
+        Identifier l_extendedprice
+        Function minus (children 1)
+         ExpressionList (children 2)
+          Literal UInt64_1
+          Identifier l_discount
+    Identifier c_acctbal
+    Identifier n_name
+    Identifier c_address
+    Identifier c_phone
+    Identifier c_comment
+   TablesInSelectQuery (children 4)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier customer
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier orders
+     TableJoin
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier lineitem
+     TableJoin
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier nation
+     TableJoin
+   Function and (children 1)
+    ExpressionList (children 6)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier c_custkey
+       Identifier o_custkey
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier l_orderkey
+       Identifier o_orderkey
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier o_orderdate
+       Function toDate (children 1)
+        ExpressionList (children 1)
+         Literal \'1993-10-01\'
+     Function less (children 1)
+      ExpressionList (children 2)
+       Identifier o_orderdate
+       Function plus (children 1)
+        ExpressionList (children 2)
+         Function toDate (children 1)
+          ExpressionList (children 1)
+           Literal \'1993-10-01\'
+         Function toIntervalMonth (children 1)
+          ExpressionList (children 1)
+           Literal \'3\'
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier l_returnflag
+       Literal \'R\'
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier c_nationkey
+       Identifier n_nationkey
+   ExpressionList (children 7)
+    Identifier c_custkey
+    Identifier c_name
+    Identifier c_acctbal
+    Identifier c_phone
+    Identifier n_name
+    Identifier c_address
+    Identifier c_comment
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier revenue
+   Literal UInt64_20

@@ -1,0 +1,61 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 2)
+    Function arrayElement (children 1)
+     ExpressionList (children 2)
+      Identifier ProfileEvents
+      Literal \'ParallelReplicasQueryCount\'
+    Function replaceRegexpAll (alias query) (children 1)
+     ExpressionList (children 3)
+      Identifier query
+      Literal \'_data_(\\\\d+)_(\\\\d+)\'
+      Literal \'_data_\'
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_log
+   Function and (children 1)
+    ExpressionList (children 3)
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier event_date
+       Function yesterday (children 1)
+        ExpressionList
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier type
+       Literal \'QueryFinish\'
+     Function in (children 1)
+      ExpressionList (children 2)
+       Identifier query_id
+       Subquery (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 3)
+           ExpressionList (children 1)
+            Identifier query_id
+           TablesInSelectQuery (children 1)
+            TablesInSelectQueryElement (children 1)
+             TableExpression (children 1)
+              TableIdentifier system.query_log
+           Function and (children 1)
+            ExpressionList (children 4)
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier current_database
+               Function currentDatabase (children 1)
+                ExpressionList
+             Function greaterOrEquals (children 1)
+              ExpressionList (children 2)
+               Identifier event_date
+               Function yesterday (children 1)
+                ExpressionList
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier type
+               Literal \'QueryFinish\'
+             Function like (children 1)
+              ExpressionList (children 2)
+               Identifier query
+               Literal \'-- Parallel inner query alone without analyzer%\'

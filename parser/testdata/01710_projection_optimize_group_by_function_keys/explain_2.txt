@@ -1,0 +1,47 @@
+CreateQuery proj (children 3)
+ Identifier proj
+ Columns definition (children 2)
+  ExpressionList (children 6)
+   ColumnDeclaration bool_value (children 1)
+    DataType UInt8
+   ColumnDeclaration zero_integer_value (children 1)
+    DataType Int32
+   ColumnDeclaration integer_value (children 1)
+    DataType Int32
+   ColumnDeclaration float_value (children 1)
+    DataType Float32
+   ColumnDeclaration datetime_value (children 1)
+    DataType DateTime
+   ColumnDeclaration string_value (children 1)
+    DataType String
+  ExpressionList (children 1)
+   Projection (children 1)
+    ProjectionSelectQuery (children 2)
+     ExpressionList (children 4)
+      Function toStartOfDay (alias Day) (children 1)
+       ExpressionList (children 1)
+        Function toDateTime (children 1)
+         ExpressionList (children 1)
+          Identifier datetime_value
+      Identifier datetime_value
+      Identifier float_value
+      Function countDistinct (children 1)
+       ExpressionList (children 1)
+        Function if (children 1)
+         ExpressionList (children 3)
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier zero_integer_value
+            Literal UInt64_1
+          Identifier string_value
+          Literal NULL
+     ExpressionList (children 3)
+      Identifier Day
+      Identifier datetime_value
+      Identifier float_value
+ Storage definition (children 3)
+  Function MergeTree
+  Function toDate (children 1)
+   ExpressionList (children 1)
+    Identifier datetime_value
+  Identifier bool_value

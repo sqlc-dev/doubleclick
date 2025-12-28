@@ -1,0 +1,36 @@
+CreateQuery session_events (children 3)
+ Identifier session_events
+ Columns definition (children 1)
+  ExpressionList (children 7)
+   ColumnDeclaration clientId (children 1)
+    DataType UInt64
+   ColumnDeclaration sessionId (children 1)
+    DataType String
+   ColumnDeclaration pageId (children 1)
+    DataType UInt64
+   ColumnDeclaration eventNumber (children 1)
+    DataType UInt64
+   ColumnDeclaration timestamp (children 1)
+    DataType UInt64
+   ColumnDeclaration type (children 1)
+    DataType LowCardinality (children 1)
+     ExpressionList (children 1)
+      DataType String
+   ColumnDeclaration data (children 1)
+    DataType String
+ Storage definition (children 3)
+  Function MergeTree
+  Function toYYYYMM (children 1)
+   ExpressionList (children 1)
+    Function toDate (children 1)
+     ExpressionList (children 1)
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Identifier pageId
+        Literal UInt64_1000
+  Function tuple (children 1)
+   ExpressionList (children 4)
+    Identifier clientId
+    Identifier sessionId
+    Identifier pageId
+    Identifier timestamp

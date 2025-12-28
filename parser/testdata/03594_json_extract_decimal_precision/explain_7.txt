@@ -1,0 +1,47 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 1)
+   ExpressionList (children 6)
+    Literal \'Test 4: Original issue #69082 verification\' (alias test_name)
+    Function JSONExtract (alias direct_extraction) (children 1)
+     ExpressionList (children 3)
+      Literal \'{"dec": 111244542.003}\'
+      Literal \'dec\'
+      Literal \'Decimal(31,16)\'
+    Function CAST (alias string_cast) (children 1)
+     ExpressionList (children 2)
+      Function JSONExtractString (children 1)
+       ExpressionList (children 2)
+        Literal \'{"dec": 111244542.003}\'
+        Literal \'dec\'
+      Literal \'Decimal(32, 16)\'
+    Function toString (alias direct_extraction_str) (children 1)
+     ExpressionList (children 1)
+      Function JSONExtract (children 1)
+       ExpressionList (children 3)
+        Literal \'{"dec": 111244542.003}\'
+        Literal \'dec\'
+        Literal \'Decimal(31,16)\'
+    Function toString (alias string_cast_str) (children 1)
+     ExpressionList (children 1)
+      Function CAST (children 1)
+       ExpressionList (children 2)
+        Function JSONExtractString (children 1)
+         ExpressionList (children 2)
+          Literal \'{"dec": 111244542.003}\'
+          Literal \'dec\'
+        Literal \'Decimal(32, 16)\'
+    Function equals (alias issue_resolved) (children 1)
+     ExpressionList (children 2)
+      Function JSONExtract (children 1)
+       ExpressionList (children 3)
+        Literal \'{"dec": 111244542.003}\'
+        Literal \'dec\'
+        Literal \'Decimal(31,16)\'
+      Function CAST (children 1)
+       ExpressionList (children 2)
+        Function JSONExtractString (children 1)
+         ExpressionList (children 2)
+          Literal \'{"dec": 111244542.003}\'
+          Literal \'dec\'
+        Literal \'Decimal(32, 16)\'

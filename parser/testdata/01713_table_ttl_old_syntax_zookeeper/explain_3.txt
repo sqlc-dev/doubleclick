@@ -1,0 +1,24 @@
+CreateQuery ttl_table (children 3)
+ Identifier ttl_table
+ Columns definition (children 1)
+  ExpressionList (children 2)
+   ColumnDeclaration date (children 1)
+    DataType Date
+   ColumnDeclaration value (children 1)
+    DataType UInt64
+ Storage definition (children 2)
+  Function ReplicatedMergeTree (children 1)
+   ExpressionList (children 5)
+    Literal \'/clickhouse/tables/{database}/test_01713_table_ttl\'
+    Literal \'1\'
+    Identifier date
+    Identifier date
+    Literal UInt64_8192
+  ExpressionList (children 1)
+   TTLElement (children 1)
+    Function plus (children 1)
+     ExpressionList (children 2)
+      Identifier date
+      Function toIntervalMonth (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_2

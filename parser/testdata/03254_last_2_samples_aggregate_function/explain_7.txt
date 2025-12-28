@@ -1,0 +1,39 @@
+InsertQuery   (children 3)
+ Identifier t_raw_timeseries
+ ExpressionList (children 3)
+  Identifier metric_id
+  Identifier timestamp
+  Identifier value
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 2)
+    ExpressionList (children 3)
+     Function modulo (alias metric_id) (children 1)
+      ExpressionList (children 2)
+       Identifier number
+       Literal UInt64_10
+     Function plus (alias timestamp) (children 1)
+      ExpressionList (children 2)
+       Function CAST (children 1)
+        ExpressionList (children 2)
+         Literal \'2024-12-12 12:00:00\'
+         Literal \'DateTime64(3, \\\'UTC\\\')\'
+       Function toIntervalMillisecond (children 1)
+        ExpressionList (children 1)
+         Function multiply (children 1)
+          ExpressionList (children 2)
+           Function modulo (children 1)
+            ExpressionList (children 2)
+             Function divide (children 1)
+              ExpressionList (children 2)
+               Identifier number
+               Literal UInt64_10
+             Literal UInt64_100
+           Literal UInt64_900
+     Identifier number (alias value)
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       Function numbers (children 1)
+        ExpressionList (children 1)
+         Literal UInt64_1000

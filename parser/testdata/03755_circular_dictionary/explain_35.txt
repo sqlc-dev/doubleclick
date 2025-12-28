@@ -1,0 +1,22 @@
+CreateQuery filesystem_metrics (children 3)
+ Identifier filesystem_metrics
+ Columns definition (children 2)
+  ExpressionList (children 2)
+   ColumnDeclaration metric (children 1)
+    DataType String
+   ColumnDeclaration value (children 1)
+    DataType Int64
+  ExpressionList (children 1)
+   Projection (children 1)
+    ProjectionSelectQuery (children 2)
+     ExpressionList (children 2)
+      Identifier metric
+      Function dictGet (alias value) (children 1)
+       ExpressionList (children 3)
+        Literal \'filesystem_dict\'
+        Literal \'value\'
+        Identifier metric
+     Identifier value
+ Storage definition (children 2)
+  Function MergeTree
+  Identifier metric

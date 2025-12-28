@@ -1,0 +1,138 @@
+CreateQuery audience_local (children 3)
+ Identifier audience_local
+ Columns definition (children 1)
+  ExpressionList (children 15)
+   ColumnDeclaration Date (children 1)
+    DataType Date
+   ColumnDeclaration AudienceType (children 1)
+    DataType Enum8 (children 1)
+     ExpressionList (children 3)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'other\'
+        Literal UInt64_0
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'client\'
+        Literal UInt64_1
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'group\'
+        Literal UInt64_2
+   ColumnDeclaration UMA (children 1)
+    DataType UInt64
+   ColumnDeclaration APIKey (children 1)
+    DataType String
+   ColumnDeclaration TrialNameID (children 1)
+    DataType UInt32
+   ColumnDeclaration TrialGroupID (children 1)
+    DataType UInt32
+   ColumnDeclaration AppVersion (children 1)
+    DataType String
+   ColumnDeclaration Arch (children 1)
+    DataType Enum8 (children 1)
+     ExpressionList (children 3)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'other\'
+        Literal UInt64_0
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'x32\'
+        Literal UInt64_1
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'x64\'
+        Literal UInt64_2
+   ColumnDeclaration UserID (children 1)
+    DataType UInt32
+   ColumnDeclaration GroupID (children 1)
+    DataType UInt8
+   ColumnDeclaration OSName (children 1)
+    DataType Enum8 (children 1)
+     ExpressionList (children 6)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'other\'
+        Literal UInt64_0
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'Android\'
+        Literal UInt64_1
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'iOS\'
+        Literal UInt64_2
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'macOS\'
+        Literal UInt64_3
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'Windows\'
+        Literal UInt64_4
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'Linux\'
+        Literal UInt64_5
+   ColumnDeclaration Channel (children 1)
+    DataType Enum8 (children 1)
+     ExpressionList (children 5)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'other\'
+        Literal UInt64_0
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'Canary\'
+        Literal UInt64_1
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'Dev\'
+        Literal UInt64_2
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'Beta\'
+        Literal UInt64_3
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'Stable\'
+        Literal UInt64_4
+   ColumnDeclaration Hits (children 1)
+    DataType UInt64
+   ColumnDeclaration Sum (children 1)
+    DataType Int64
+   ColumnDeclaration Release (children 2)
+    DataType String
+    Function arrayElement (children 1)
+     ExpressionList (children 2)
+      Function splitByChar (children 1)
+       ExpressionList (children 2)
+        Literal \'-\'
+        Identifier AppVersion
+      Literal UInt64_1
+ Storage definition (children 4)
+  Function SummingMergeTree
+  Function tuple (children 1)
+   ExpressionList (children 2)
+    Function toISOYear (children 1)
+     ExpressionList (children 1)
+      Identifier Date
+    Function toISOWeek (children 1)
+     ExpressionList (children 1)
+      Identifier Date
+  Function tuple (children 1)
+   ExpressionList (children 12)
+    Identifier AudienceType
+    Identifier UMA
+    Identifier APIKey
+    Identifier Date
+    Identifier TrialNameID
+    Identifier TrialGroupID
+    Identifier AppVersion
+    Identifier Arch
+    Identifier UserID
+    Identifier GroupID
+    Identifier OSName
+    Identifier Channel
+  Set

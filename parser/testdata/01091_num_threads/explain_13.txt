@@ -1,0 +1,70 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 1)
+    Subquery (alias id) (children 1)
+     SelectWithUnionQuery (children 1)
+      ExpressionList (children 1)
+       SelectQuery (children 5)
+        ExpressionList (children 1)
+         Identifier query_id
+        TablesInSelectQuery (children 1)
+         TablesInSelectQueryElement (children 1)
+          TableExpression (children 1)
+           TableIdentifier system.query_log
+        Function and (children 1)
+         ExpressionList (children 3)
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier current_database
+            Function currentDatabase (children 1)
+             ExpressionList
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Function normalizeQuery (children 1)
+             ExpressionList (children 1)
+              Identifier query
+            Function normalizeQuery (children 1)
+             ExpressionList (children 1)
+              Literal \'with 01091 as id select sum(number) from numbers_mt(1000000);\'
+          Function greaterOrEquals (children 1)
+           ExpressionList (children 2)
+            Identifier event_date
+            Function minus (children 1)
+             ExpressionList (children 2)
+              Function today (children 1)
+               ExpressionList
+              Literal UInt64_1
+        ExpressionList (children 1)
+         OrderByElement (children 1)
+          Identifier event_time
+        Literal UInt64_1
+   ExpressionList (children 1)
+    Function greater (children 1)
+     ExpressionList (children 2)
+      Function uniqExact (children 1)
+       ExpressionList (children 1)
+        Identifier thread_id
+      Literal UInt64_2
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_thread_log
+   Function and (children 1)
+    ExpressionList (children 3)
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier event_date
+       Function minus (children 1)
+        ExpressionList (children 2)
+         Function today (children 1)
+          ExpressionList
+         Literal UInt64_1
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier query_id
+       Identifier id
+     Function notEquals (children 1)
+      ExpressionList (children 2)
+       Identifier thread_id
+       Identifier master_thread_id

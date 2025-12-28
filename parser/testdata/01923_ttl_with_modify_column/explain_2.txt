@@ -1,0 +1,25 @@
+CreateQuery t_ttl_modify_column (children 3)
+ Identifier t_ttl_modify_column
+ Columns definition (children 1)
+  ExpressionList (children 2)
+   ColumnDeclaration InsertionDateTime (children 1)
+    DataType DateTime
+   ColumnDeclaration TTLDays (children 2)
+    DataType Int32
+    Function CAST (children 1)
+     ExpressionList (children 2)
+      Literal UInt64_365
+      Literal \'Int32\'
+ Storage definition (children 4)
+  Function MergeTree
+  Function tuple (children 1)
+   ExpressionList
+  ExpressionList (children 1)
+   TTLElement (children 1)
+    Function plus (children 1)
+     ExpressionList (children 2)
+      Identifier InsertionDateTime
+      Function toIntervalDay (children 1)
+       ExpressionList (children 1)
+        Identifier TTLDays
+  Set

@@ -1,0 +1,49 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 2)
+    Identifier join_key
+    Function toTimeZone (alias datetime) (children 1)
+     ExpressionList (children 2)
+      Function dictGetDateTime (children 1)
+       ExpressionList (children 3)
+        Literal \'system.dict1\'
+        Literal \'loading_start_time\'
+        Function toUInt64 (children 1)
+         ExpressionList (children 1)
+          Identifier dict_key
+      Literal \'UTC\'
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias js1) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 1)
+          ExpressionList (children 2)
+           Function dictGetInt32 (alias join_key) (children 1)
+            ExpressionList (children 3)
+             Literal \'system.dict1\'
+             Literal \'element_count\'
+             Function toUInt64 (children 1)
+              ExpressionList (children 1)
+               Identifier dict_key
+           Literal UInt64_1 (alias dict_key)
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias js2) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 1)
+          ExpressionList (children 1)
+           Function toInt32 (alias join_key) (children 1)
+            ExpressionList (children 1)
+             Literal UInt64_2
+     TableJoin (children 1)
+      ExpressionList (children 1)
+       Identifier join_key
+   Function greaterOrEquals (children 1)
+    ExpressionList (children 2)
+     Function now (children 1)
+      ExpressionList
+     Identifier datetime

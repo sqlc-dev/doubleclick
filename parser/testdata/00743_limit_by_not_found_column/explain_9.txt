@@ -1,0 +1,65 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 1)
+    Function concat (children 1)
+     ExpressionList (children 4)
+      Literal \'http://reddit.com/r/\'
+      Identifier subreddit
+      Literal \'/comments/\'
+      Function replaceRegexpOne (children 1)
+       ExpressionList (children 3)
+        Identifier link_id
+        Literal \'t[0-9]_\'
+        Literal \'\'
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 5)
+          ExpressionList (children 4)
+           Identifier y
+           Identifier subreddit
+           Identifier link_id
+           Identifier cnt
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             Subquery (children 1)
+              SelectWithUnionQuery (children 1)
+               ExpressionList (children 1)
+                SelectQuery (children 5)
+                 ExpressionList (children 4)
+                  Identifier created_date (alias y)
+                  Identifier link_id
+                  Identifier subreddit
+                  Function count (alias cnt) (children 1)
+                   ExpressionList (children 1)
+                    Asterisk
+                 TablesInSelectQuery (children 1)
+                  TablesInSelectQueryElement (children 1)
+                   TableExpression (children 1)
+                    TableIdentifier commententry1
+                 Function equals (children 1)
+                  ExpressionList (children 2)
+                   Function toYear (children 1)
+                    ExpressionList (children 1)
+                     Identifier created_date
+                   Literal UInt64_2016
+                 ExpressionList (children 3)
+                  Identifier y
+                  Identifier link_id
+                  Identifier subreddit
+                 ExpressionList (children 1)
+                  OrderByElement (children 1)
+                   Identifier y
+          ExpressionList (children 2)
+           OrderByElement (children 1)
+            Identifier y
+           OrderByElement (children 1)
+            Identifier cnt
+          Literal UInt64_1
+          ExpressionList (children 1)
+           Identifier y

@@ -1,0 +1,68 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 1)
+    Function trimBoth (children 1)
+     ExpressionList (children 1)
+      Identifier explain
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 1)
+           Asterisk
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             Function viewExplain (children 1)
+              ExpressionList (children 3)
+               Literal \'EXPLAIN\'
+               Literal \'actions = 1\'
+               Subquery (children 1)
+                SelectWithUnionQuery (children 1)
+                 ExpressionList (children 1)
+                  SelectQuery (children 5)
+                   ExpressionList (children 5)
+                    Identifier check_start_time
+                    Identifier check_name
+                    Identifier test_name
+                    Identifier test_status
+                    Identifier check_status
+                   TablesInSelectQuery (children 1)
+                    TablesInSelectQueryElement (children 1)
+                     TableExpression (children 1)
+                      TableIdentifier checks
+                   Function and (children 1)
+                    ExpressionList (children 5)
+                     Literal UInt64_1
+                     Function notEquals (children 1)
+                      ExpressionList (children 2)
+                       Identifier test_status
+                       Literal \'SKIPPED\'
+                     Function notEquals (children 1)
+                      ExpressionList (children 2)
+                       Identifier test_status
+                       Literal \'OK\'
+                     Function notEquals (children 1)
+                      ExpressionList (children 2)
+                       Identifier check_status
+                       Literal \'success\'
+                     Function ilike (children 1)
+                      ExpressionList (children 2)
+                       Identifier test_name
+                       Literal \'%parallel_replicas%\'
+                   ExpressionList (children 3)
+                    OrderByElement (children 1)
+                     Identifier check_start_time
+                    OrderByElement (children 1)
+                     Identifier check_name
+                    OrderByElement (children 1)
+                     Identifier test_name
+                   Set
+   Function like (children 1)
+    ExpressionList (children 2)
+     Identifier explain
+     Literal \'%InReverseOrder%\'

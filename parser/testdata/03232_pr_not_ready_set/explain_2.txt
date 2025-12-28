@@ -1,0 +1,93 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 6)
+   ExpressionList (children 3)
+    Identifier is_initial_query
+    Function count (alias c) (children 1)
+     ExpressionList
+    Function replaceRegexpAll (alias query) (children 1)
+     ExpressionList (children 3)
+      Identifier query
+      Literal \'_data_(\\\\d+)_(\\\\d+)\'
+      Literal \'_data_\'
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_log
+   Function and (children 1)
+    ExpressionList (children 3)
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier event_date
+       Function yesterday (children 1)
+        ExpressionList
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier type
+       Literal \'QueryFinish\'
+     Function in (children 1)
+      ExpressionList (children 2)
+       Function ignore (children 1)
+        ExpressionList (children 6)
+         Literal UInt64_54
+         Literal UInt64_0
+         Function ignore (children 1)
+          ExpressionList (children 6)
+           Literal \'QueryFinish\'
+           Literal UInt64_11
+           Function toLowCardinality (children 1)
+            ExpressionList (children 1)
+             Function toLowCardinality (children 1)
+              ExpressionList (children 1)
+               Literal UInt64_11
+           Literal UInt64_11
+           Literal UInt64_11
+           Literal UInt64_11
+         Literal \'QueryFinish\'
+         Function materialize (children 1)
+          ExpressionList (children 1)
+           Literal UInt64_11
+         Function toUInt128 (children 1)
+          ExpressionList (children 1)
+           Literal UInt64_11
+       Subquery (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 3)
+           ExpressionList (children 1)
+            Identifier query_id
+           TablesInSelectQuery (children 1)
+            TablesInSelectQueryElement (children 1)
+             TableExpression (children 1)
+              TableIdentifier system.query_log
+           Function and (children 1)
+            ExpressionList (children 4)
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier current_database
+               Function currentDatabase (children 1)
+                ExpressionList
+             Function greaterOrEquals (children 1)
+              ExpressionList (children 2)
+               Identifier event_date
+               Function yesterday (children 1)
+                ExpressionList
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier type
+               Literal \'QueryFinish\'
+             Function like (children 1)
+              ExpressionList (children 2)
+               Identifier query
+               Literal \'-- Parallel inner query alone%\'
+   ExpressionList (children 2)
+    Identifier is_initial_query
+    Identifier query
+   ExpressionList (children 3)
+    OrderByElement (children 1)
+     Identifier is_initial_query
+    OrderByElement (children 1)
+     Identifier c
+    OrderByElement (children 1)
+     Identifier query
+   Set

@@ -1,0 +1,79 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 5)
+   ExpressionList (children 1)
+    Subquery (alias query_id_) (children 1)
+     SelectWithUnionQuery (children 1)
+      ExpressionList (children 1)
+       SelectQuery (children 3)
+        ExpressionList (children 1)
+         Identifier query_id
+        TablesInSelectQuery (children 1)
+         TablesInSelectQueryElement (children 1)
+          TableExpression (children 1)
+           TableIdentifier system.query_log
+        Function and (children 1)
+         ExpressionList (children 2)
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier current_database
+            Function currentDatabase (children 1)
+             ExpressionList
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Function arrayElement (children 1)
+             ExpressionList (children 2)
+              Identifier Settings
+              Literal \'log_processors_profiles\'
+            Literal \'1\'
+   ExpressionList (children 6)
+    Identifier name
+    Function multiIf (alias elapsed) (children 1)
+     ExpressionList (children 5)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier name
+        Literal \'ExpressionTransform\'
+      Function if (children 1)
+       ExpressionList (children 3)
+        Function greaterOrEquals (children 1)
+         ExpressionList (children 2)
+          Identifier elapsed_us
+          Literal Float64_900000
+        Literal UInt64_1
+        Identifier elapsed_us
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier name
+        Literal \'SourceFromSingleChunk\'
+      Function if (children 1)
+       ExpressionList (children 3)
+        Function greaterOrEquals (children 1)
+         ExpressionList (children 2)
+          Identifier output_wait_elapsed_us
+          Literal Float64_900000
+        Literal UInt64_1
+        Identifier output_wait_elapsed_us
+      Function if (children 1)
+       ExpressionList (children 3)
+        Function greaterOrEquals (children 1)
+         ExpressionList (children 2)
+          Identifier input_wait_elapsed_us
+          Literal Float64_1000000
+        Literal UInt64_1
+        Identifier input_wait_elapsed_us
+    Identifier input_rows
+    Identifier input_bytes
+    Identifier output_rows
+    Identifier output_bytes
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.processors_profile_log
+   Function equals (children 1)
+    ExpressionList (children 2)
+     Identifier query_id
+     Identifier query_id_
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier name

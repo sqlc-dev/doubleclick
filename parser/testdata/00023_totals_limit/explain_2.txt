@@ -1,0 +1,41 @@
+SelectWithUnionQuery (children 2)
+ ExpressionList (children 1)
+  SelectQuery (children 7)
+   ExpressionList (children 2)
+    Identifier goals_alias.ID (alias ym:s:goalDimension)
+    Function uniqIf (children 1)
+     ExpressionList (children 2)
+      Identifier UserID
+      Function and (children 1)
+       ExpressionList (children 2)
+        Function notEquals (children 1)
+         ExpressionList (children 2)
+          Identifier UserID
+          Literal UInt64_0
+        Function equals (children 1)
+         ExpressionList (children 2)
+          Identifier _uniq_Goals
+          Literal UInt64_1
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier test.visits
+    TablesInSelectQueryElement (children 1)
+     ArrayJoin (children 1)
+      ExpressionList (children 2)
+       Identifier Goals (alias goals_alias)
+       Function arrayEnumerateUniq (alias _uniq_Goals) (children 1)
+        ExpressionList (children 1)
+         Identifier Goals.ID
+   Function equals (children 1)
+    ExpressionList (children 2)
+     Identifier CounterID
+     Literal UInt64_842440
+   ExpressionList (children 1)
+    Identifier ym:s:goalDimension
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier ym:s:goalDimension
+   Literal UInt64_0
+   Literal UInt64_1
+ Identifier JSONCompact

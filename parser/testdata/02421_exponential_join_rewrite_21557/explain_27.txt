@@ -1,0 +1,364 @@
+Explain EXPLAIN SYNTAX (children 2)
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 5)
+    ExpressionList (children 2)
+     WithElement (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 5)
+          ExpressionList (children 3)
+           Identifier cs_item_sk
+           Function sum (alias sale) (children 1)
+            ExpressionList (children 1)
+             Identifier cs_ext_list_price
+           Function sum (alias refund) (children 1)
+            ExpressionList (children 1)
+             Function plus (children 1)
+              ExpressionList (children 2)
+               Function plus (children 1)
+                ExpressionList (children 2)
+                 Identifier cr_refunded_cash
+                 Identifier cr_reversed_charge
+               Identifier cr_store_credit
+          TablesInSelectQuery (children 2)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier catalog_sales
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier catalog_returns
+            TableJoin
+          Function and (children 1)
+           ExpressionList (children 2)
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier cs_item_sk
+              Identifier cr_item_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier cs_order_number
+              Identifier cr_order_number
+          ExpressionList (children 1)
+           Identifier cs_item_sk
+          Function greater (children 1)
+           ExpressionList (children 2)
+            Function sum (children 1)
+             ExpressionList (children 1)
+              Identifier cs_ext_list_price
+            Function multiply (children 1)
+             ExpressionList (children 2)
+              Literal UInt64_2
+              Function sum (children 1)
+               ExpressionList (children 1)
+                Function plus (children 1)
+                 ExpressionList (children 2)
+                  Function plus (children 1)
+                   ExpressionList (children 2)
+                    Identifier cr_refunded_cash
+                    Identifier cr_reversed_charge
+                  Identifier cr_store_credit
+     WithElement (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 4)
+          ExpressionList (children 19)
+           Identifier i_product_name (alias product_name)
+           Identifier i_item_sk (alias item_sk)
+           Identifier s_store_name (alias store_name)
+           Identifier s_zip (alias store_zip)
+           Identifier ad1.ca_street_number (alias b_street_number)
+           Identifier ad1.ca_street_name (alias b_street_name)
+           Identifier ad1.ca_city (alias b_city)
+           Identifier ad1.ca_zip (alias b_zip)
+           Identifier ad2.ca_street_number (alias c_street_number)
+           Identifier ad2.ca_street_name (alias c_street_name)
+           Identifier ad2.ca_city (alias c_city)
+           Identifier ad2.ca_zip (alias c_zip)
+           Identifier d1.d_year (alias syear)
+           Identifier d2.d_year (alias fsyear)
+           Identifier d3.d_year (alias s2year)
+           Function count (alias cnt) (children 1)
+            ExpressionList (children 1)
+             Asterisk
+           Function sum (alias s1) (children 1)
+            ExpressionList (children 1)
+             Identifier ss_wholesale_cost
+           Function sum (alias s2) (children 1)
+            ExpressionList (children 1)
+             Identifier ss_list_price
+           Function sum (alias s3) (children 1)
+            ExpressionList (children 1)
+             Identifier ss_coupon_amt
+          TablesInSelectQuery (children 18)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier store_sales
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier store_returns
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier cs_ui
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier date_dim (alias d1)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier date_dim (alias d2)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier date_dim (alias d3)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier store
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier customer
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier customer_demographics (alias cd1)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier customer_demographics (alias cd2)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier promotion
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier household_demographics (alias hd1)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier household_demographics (alias hd2)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier customer_address (alias ad1)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier customer_address (alias ad2)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier income_band (alias ib1)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier income_band (alias ib2)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier item
+            TableJoin
+          Function and (children 1)
+           ExpressionList (children 22)
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier ss_store_sk
+              Identifier s_store_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier ss_sold_date_sk
+              Identifier d1.d_date_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier ss_customer_sk
+              Identifier c_customer_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier ss_cdemo_sk
+              Identifier cd1.cd_demo_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier ss_hdemo_sk
+              Identifier hd1.hd_demo_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier ss_addr_sk
+              Identifier ad1.ca_address_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier ss_item_sk
+              Identifier i_item_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier ss_item_sk
+              Identifier sr_item_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier ss_ticket_number
+              Identifier sr_ticket_number
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier ss_item_sk
+              Identifier cs_ui.cs_item_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier c_current_cdemo_sk
+              Identifier cd2.cd_demo_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier c_current_hdemo_sk
+              Identifier hd2.hd_demo_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier c_current_addr_sk
+              Identifier ad2.ca_address_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier c_first_sales_date_sk
+              Identifier d2.d_date_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier c_first_shipto_date_sk
+              Identifier d3.d_date_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier ss_promo_sk
+              Identifier p_promo_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier hd1.hd_income_band_sk
+              Identifier ib1.ib_income_band_sk
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier hd2.hd_income_band_sk
+              Identifier ib2.ib_income_band_sk
+            Function notEquals (children 1)
+             ExpressionList (children 2)
+              Identifier cd1.cd_marital_status
+              Identifier cd2.cd_marital_status
+            Function in (children 1)
+             ExpressionList (children 2)
+              Identifier i_color
+              Literal Tuple_(\'maroon\', \'burnished\', \'dim\', \'steel\', \'navajo\', \'chocolate\')
+            Function and (children 1)
+             ExpressionList (children 2)
+              Function greaterOrEquals (children 1)
+               ExpressionList (children 2)
+                Identifier i_current_price
+                Literal UInt64_35
+              Function lessOrEquals (children 1)
+               ExpressionList (children 2)
+                Identifier i_current_price
+                Function plus (children 1)
+                 ExpressionList (children 2)
+                  Literal UInt64_35
+                  Literal UInt64_10
+            Function and (children 1)
+             ExpressionList (children 2)
+              Function greaterOrEquals (children 1)
+               ExpressionList (children 2)
+                Identifier i_current_price
+                Function plus (children 1)
+                 ExpressionList (children 2)
+                  Literal UInt64_35
+                  Literal UInt64_1
+              Function lessOrEquals (children 1)
+               ExpressionList (children 2)
+                Identifier i_current_price
+                Function plus (children 1)
+                 ExpressionList (children 2)
+                  Literal UInt64_35
+                  Literal UInt64_15
+          ExpressionList (children 15)
+           Identifier i_product_name
+           Identifier i_item_sk
+           Identifier s_store_name
+           Identifier s_zip
+           Identifier ad1.ca_street_number
+           Identifier ad1.ca_street_name
+           Identifier ad1.ca_city
+           Identifier ad1.ca_zip
+           Identifier ad2.ca_street_number
+           Identifier ad2.ca_street_name
+           Identifier ad2.ca_city
+           Identifier ad2.ca_zip
+           Identifier d1.d_year
+           Identifier d2.d_year
+           Identifier d3.d_year
+    ExpressionList (children 21)
+     Identifier cs1.product_name
+     Identifier cs1.store_name
+     Identifier cs1.store_zip
+     Identifier cs1.b_street_number
+     Identifier cs1.b_street_name
+     Identifier cs1.b_city
+     Identifier cs1.b_zip
+     Identifier cs1.c_street_number
+     Identifier cs1.c_street_name
+     Identifier cs1.c_city
+     Identifier cs1.c_zip
+     Identifier cs1.syear
+     Identifier cs1.cnt
+     Identifier cs1.s1 (alias s11)
+     Identifier cs1.s2 (alias s21)
+     Identifier cs1.s3 (alias s31)
+     Identifier cs2.s1 (alias s12)
+     Identifier cs2.s2 (alias s22)
+     Identifier cs2.s3 (alias s32)
+     Identifier cs2.syear
+     Identifier cs2.cnt
+    TablesInSelectQuery (children 2)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier cross_sales (alias cs1)
+     TablesInSelectQueryElement (children 2)
+      TableExpression (children 1)
+       TableIdentifier cross_sales (alias cs2)
+      TableJoin
+    Function and (children 1)
+     ExpressionList (children 6)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier cs1.item_sk
+        Identifier cs2.item_sk
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier cs1.syear
+        Literal UInt64_2000
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier cs2.syear
+        Function plus (children 1)
+         ExpressionList (children 2)
+          Literal UInt64_2000
+          Literal UInt64_1
+      Function lessOrEquals (children 1)
+       ExpressionList (children 2)
+        Identifier cs2.cnt
+        Identifier cs1.cnt
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier cs1.store_name
+        Identifier cs2.store_name
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier cs1.store_zip
+        Identifier cs2.store_zip
+    ExpressionList (children 5)
+     OrderByElement (children 1)
+      Identifier cs1.product_name
+     OrderByElement (children 1)
+      Identifier cs1.store_name
+     OrderByElement (children 1)
+      Identifier cs2.cnt
+     OrderByElement (children 1)
+      Identifier cs1.s1
+     OrderByElement (children 1)
+      Identifier cs2.s1
+ Identifier Null

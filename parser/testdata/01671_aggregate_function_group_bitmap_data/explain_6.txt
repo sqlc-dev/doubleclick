@@ -1,0 +1,94 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 6)
+    Function bitmapCardinality (alias today_users) (children 1)
+     ExpressionList (children 1)
+      Identifier day_today
+    Function bitmapCardinality (alias before_users) (children 1)
+     ExpressionList (children 1)
+      Identifier day_before
+    Function bitmapCardinality (alias ll_users) (children 1)
+     ExpressionList (children 1)
+      Function bitmapOr (children 1)
+       ExpressionList (children 2)
+        Identifier day_today
+        Identifier day_before
+    Function bitmapCardinality (alias old_users) (children 1)
+     ExpressionList (children 1)
+      Function bitmapAnd (children 1)
+       ExpressionList (children 2)
+        Identifier day_today
+        Identifier day_before
+    Function bitmapCardinality (alias new_users) (children 1)
+     ExpressionList (children 1)
+      Function bitmapAndnot (children 1)
+       ExpressionList (children 2)
+        Identifier day_today
+        Identifier day_before
+    Function bitmapCardinality (alias diff_users) (children 1)
+     ExpressionList (children 1)
+      Function bitmapXor (children 1)
+       ExpressionList (children 2)
+        Identifier day_today
+        Identifier day_before
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias js1) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 4)
+          ExpressionList (children 2)
+           Identifier city_id
+           Function groupBitmapState (alias day_today) (children 1)
+            ExpressionList (children 1)
+             Identifier uid
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier group_bitmap_data_test
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier pickup_date
+            Literal \'2019-01-02\'
+          ExpressionList (children 2)
+           Identifier uid
+           Identifier city_id
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias js2) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 4)
+          ExpressionList (children 2)
+           Identifier city_id
+           Function groupBitmapState (alias day_before) (children 1)
+            ExpressionList (children 1)
+             Identifier uid
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier group_bitmap_data_test
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier pickup_date
+            Literal \'2019-01-01\'
+          ExpressionList (children 1)
+           Identifier city_id
+     TableJoin (children 1)
+      ExpressionList (children 1)
+       Identifier city_id
+   ExpressionList (children 6)
+    OrderByElement (children 1)
+     Identifier today_users
+    OrderByElement (children 1)
+     Identifier before_users
+    OrderByElement (children 1)
+     Identifier ll_users
+    OrderByElement (children 1)
+     Identifier old_users
+    OrderByElement (children 1)
+     Identifier new_users
+    OrderByElement (children 1)
+     Identifier diff_users

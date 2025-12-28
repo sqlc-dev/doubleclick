@@ -1,0 +1,55 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 5)
+    Identifier log_comment
+    Function equals (children 1)
+     ExpressionList (children 2)
+      Identifier type
+      Literal \'QueryFinish\'
+    Function intDiv (children 1)
+     ExpressionList (children 2)
+      Identifier query_duration_ms
+      Literal UInt64_2000
+    Function notEquals (children 1)
+     ExpressionList (children 2)
+      Identifier exception_code
+      Literal UInt64_0
+    Function or (alias has_selectPartsToRead) (children 1)
+     ExpressionList (children 2)
+      Function greater (children 1)
+       ExpressionList (children 2)
+        Function position (children 1)
+         ExpressionList (children 2)
+          Identifier stack_trace
+          Literal \'selectPartsToRead\'
+        Literal UInt64_0
+      Function greater (children 1)
+       ExpressionList (children 2)
+        Function position (children 1)
+         ExpressionList (children 2)
+          Identifier stack_trace
+          Literal \'filterPartsByPartition\'
+        Literal UInt64_0
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_log
+   Function and (children 1)
+    ExpressionList (children 3)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier current_database
+       Function currentDatabase (children 1)
+        ExpressionList
+     Function like (children 1)
+      ExpressionList (children 2)
+       Identifier log_comment
+       Literal \'03176_q_\'
+     Function in (children 1)
+      ExpressionList (children 2)
+       Identifier type
+       Literal Tuple_(\'QueryFinish\', \'ExceptionBeforeStart\')
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier log_comment

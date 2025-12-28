@@ -1,0 +1,42 @@
+SelectWithUnionQuery (children 2)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 3)
+    Function count (alias queries) (children 1)
+     ExpressionList
+    Function less (alias min_less_then_20mb) (children 1)
+     ExpressionList (children 2)
+      Function min (children 1)
+       ExpressionList (children 1)
+        Identifier memory_usage
+      Literal UInt64_20000000
+    Function less (alias max_less_then_20mb) (children 1)
+     ExpressionList (children 2)
+      Function max (children 1)
+       ExpressionList (children 1)
+        Identifier memory_usage
+      Literal UInt64_20000000
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_log
+   Function and (children 1)
+    ExpressionList (children 4)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier current_database
+       Function currentDatabase (children 1)
+        ExpressionList
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier type
+       Literal \'QueryFinish\'
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier query_kind
+       Literal \'Select\'
+     Function like (children 1)
+      ExpressionList (children 2)
+       Identifier query
+       Literal \'%test_function(number, 0)%\'
+ Identifier Vertical

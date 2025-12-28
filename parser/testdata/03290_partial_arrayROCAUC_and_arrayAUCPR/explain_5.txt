@@ -1,0 +1,163 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 3)
+    WithElement (children 1)
+     Subquery (children 1)
+      SelectWithUnionQuery (children 1)
+       ExpressionList (children 1)
+        SelectQuery (children 2)
+         ExpressionList (children 3)
+          Function arrayElement (alias score) (children 1)
+           ExpressionList (children 2)
+            Identifier scores
+            Identifier idx
+          Function arrayElement (alias label) (children 1)
+           ExpressionList (children 2)
+            Identifier labels
+            Identifier idx
+          Function FLOOR (alias group) (children 1)
+           ExpressionList (children 1)
+            Function divide (children 1)
+             ExpressionList (children 2)
+              Identifier score
+              Literal UInt64_3
+         TablesInSelectQuery (children 2)
+          TablesInSelectQueryElement (children 1)
+           TableExpression (children 1)
+            Subquery (children 1)
+             SelectWithUnionQuery (children 1)
+              ExpressionList (children 1)
+               SelectQuery (children 1)
+                ExpressionList (children 3)
+                 Function range (alias idx) (children 1)
+                  ExpressionList (children 2)
+                   Literal UInt64_1
+                   Literal UInt64_11
+                 Literal Array_[UInt64_0, UInt64_1, UInt64_2, UInt64_3, UInt64_4, UInt64_5, UInt64_6, UInt64_7, UInt64_8, UInt64_9] (alias scores)
+                 Literal Array_[UInt64_1, UInt64_0, UInt64_1, UInt64_0, UInt64_0, UInt64_0, UInt64_1, UInt64_0, UInt64_0, UInt64_1] (alias labels)
+          TablesInSelectQueryElement (children 1)
+           ArrayJoin (children 1)
+            ExpressionList (children 1)
+             Identifier idx
+    WithElement (children 1)
+     Subquery (children 1)
+      SelectWithUnionQuery (children 1)
+       ExpressionList (children 1)
+        SelectQuery (children 3)
+         ExpressionList (children 7)
+          Identifier group
+          Function groupArrayArray (alias scores) (children 1)
+           ExpressionList (children 1)
+            Function array (children 1)
+             ExpressionList (children 1)
+              Identifier score
+          Function groupArrayArray (alias labels) (children 1)
+           ExpressionList (children 1)
+            Function array (children 1)
+             ExpressionList (children 1)
+              Identifier label
+          Function countIf (alias group_tp) (children 1)
+           ExpressionList (children 1)
+            Function greater (children 1)
+             ExpressionList (children 2)
+              Identifier label
+              Literal UInt64_0
+          Function countIf (alias group_fp) (children 1)
+           ExpressionList (children 1)
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier label
+              Literal UInt64_0
+          Function COALESCE (alias prev_group_tp) (children 1)
+           ExpressionList (children 2)
+            Function SUM (children 1)
+             ExpressionList (children 1)
+              Identifier group_tp
+            Literal UInt64_0
+          Function COALESCE (alias prev_group_fp) (children 1)
+           ExpressionList (children 2)
+            Function SUM (children 1)
+             ExpressionList (children 1)
+              Identifier group_fp
+            Literal UInt64_0
+         TablesInSelectQuery (children 1)
+          TablesInSelectQueryElement (children 1)
+           TableExpression (children 1)
+            TableIdentifier score_with_group
+         ExpressionList (children 1)
+          Identifier group
+    WithElement (children 1)
+     Subquery (children 1)
+      SelectWithUnionQuery (children 1)
+       ExpressionList (children 1)
+        SelectQuery (children 2)
+         ExpressionList (children 2)
+          Function arrayAUCPR (alias partial_pr_auc) (children 1)
+           ExpressionList (children 3)
+            Identifier scores
+            Identifier labels
+            Function array (children 1)
+             ExpressionList (children 3)
+              Function COALESCE (children 1)
+               ExpressionList (children 2)
+                Identifier prev_group_tp
+                Literal UInt64_0
+              Function COALESCE (children 1)
+               ExpressionList (children 2)
+                Identifier prev_group_fp
+                Literal UInt64_0
+              Function COALESCE (children 1)
+               ExpressionList (children 2)
+                Function SUM (children 1)
+                 ExpressionList (children 1)
+                  Identifier group_tp
+                Literal UInt64_0
+          Function arrayROCAUC (alias partial_roc_auc) (children 1)
+           ExpressionList (children 4)
+            Identifier scores
+            Identifier labels
+            Literal Bool_1
+            Function array (children 1)
+             ExpressionList (children 4)
+              Function COALESCE (children 1)
+               ExpressionList (children 2)
+                Identifier prev_group_tp
+                Literal UInt64_0
+              Function COALESCE (children 1)
+               ExpressionList (children 2)
+                Identifier prev_group_fp
+                Literal UInt64_0
+              Function COALESCE (children 1)
+               ExpressionList (children 2)
+                Function SUM (children 1)
+                 ExpressionList (children 1)
+                  Identifier group_tp
+                Literal UInt64_0
+              Function COALESCE (children 1)
+               ExpressionList (children 2)
+                Function SUM (children 1)
+                 ExpressionList (children 1)
+                  Identifier group_fp
+                Literal UInt64_0
+         TablesInSelectQuery (children 1)
+          TablesInSelectQueryElement (children 1)
+           TableExpression (children 1)
+            TableIdentifier grouped_scores
+   ExpressionList (children 2)
+    Function floor (alias pr_auc) (children 1)
+     ExpressionList (children 2)
+      Function sum (children 1)
+       ExpressionList (children 1)
+        Identifier partial_pr_auc
+      Literal UInt64_10
+    Function floor (alias roc_auc) (children 1)
+     ExpressionList (children 2)
+      Function sum (children 1)
+       ExpressionList (children 1)
+        Identifier partial_roc_auc
+      Literal UInt64_10
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier partial_aucs

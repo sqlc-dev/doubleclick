@@ -1,0 +1,44 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 6)
+    Literal \'Test 5: Edge cases with extreme precision\' (alias test_name)
+    Identifier id
+    Identifier json_data
+    Function JSONExtract (alias extracted_decimal) (children 1)
+     ExpressionList (children 3)
+      Identifier json_data
+      Literal \'dec\'
+      Literal \'Decimal(38,37)\'
+    Function CAST (alias string_cast_decimal) (children 1)
+     ExpressionList (children 2)
+      Function JSONExtractString (children 1)
+       ExpressionList (children 2)
+        Identifier json_data
+        Literal \'dec\'
+      Literal \'Decimal(38, 37)\'
+    Function equals (alias precision_preserved) (children 1)
+     ExpressionList (children 2)
+      Function JSONExtract (children 1)
+       ExpressionList (children 3)
+        Identifier json_data
+        Literal \'dec\'
+        Literal \'Decimal(38,37)\'
+      Function CAST (children 1)
+       ExpressionList (children 2)
+        Function JSONExtractString (children 1)
+         ExpressionList (children 2)
+          Identifier json_data
+          Literal \'dec\'
+        Literal \'Decimal(38, 37)\'
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier test_json_decimal_precision
+   Function in (children 1)
+    ExpressionList (children 2)
+     Identifier id
+     Literal Tuple_(UInt64_9, UInt64_10, UInt64_11, UInt64_12)
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier id

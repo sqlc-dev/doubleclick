@@ -1,0 +1,40 @@
+CreateQuery r_prop_table1 (children 3)
+ Identifier r_prop_table1
+ Columns definition (children 1)
+  ExpressionList (children 4)
+   ColumnDeclaration column_default (children 2)
+    DataType UInt64
+    Literal UInt64_42
+   ColumnDeclaration column_codec (children 2)
+    DataType String
+    Function CODEC (children 1)
+     ExpressionList (children 1)
+      Function ZSTD (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_10
+   ColumnDeclaration column_comment (children 2)
+    DataType Date
+    Literal \'Some comment\'
+   ColumnDeclaration column_ttl (children 2)
+    DataType UInt64
+    Function plus (children 1)
+     ExpressionList (children 2)
+      Identifier column_comment
+      Function toIntervalMonth (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_1
+ Storage definition (children 3)
+  Function ReplicatedMergeTree (children 1)
+   ExpressionList (children 2)
+    Literal \'/clickhouse/{database}/test_01493/r_prop_table\'
+    Literal \'1\'
+  Function tuple (children 1)
+   ExpressionList
+  ExpressionList (children 1)
+   TTLElement (children 1)
+    Function plus (children 1)
+     ExpressionList (children 2)
+      Identifier column_comment
+      Function toIntervalMonth (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_2

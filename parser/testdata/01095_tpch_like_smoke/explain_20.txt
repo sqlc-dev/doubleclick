@@ -1,0 +1,71 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 5)
+   ExpressionList (children 10)
+    Identifier l_returnflag
+    Identifier l_linestatus
+    Function sum (alias sum_qty) (children 1)
+     ExpressionList (children 1)
+      Identifier l_quantity
+    Function sum (alias sum_base_price) (children 1)
+     ExpressionList (children 1)
+      Identifier l_extendedprice
+    Function sum (alias sum_disc_price) (children 1)
+     ExpressionList (children 1)
+      Function multiply (children 1)
+       ExpressionList (children 2)
+        Identifier l_extendedprice
+        Function minus (children 1)
+         ExpressionList (children 2)
+          Literal UInt64_1
+          Identifier l_discount
+    Function sum (alias sum_charge) (children 1)
+     ExpressionList (children 1)
+      Function multiply (children 1)
+       ExpressionList (children 2)
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Identifier l_extendedprice
+          Function minus (children 1)
+           ExpressionList (children 2)
+            Literal UInt64_1
+            Identifier l_discount
+        Function plus (children 1)
+         ExpressionList (children 2)
+          Literal UInt64_1
+          Identifier l_tax
+    Function avg (alias avg_qty) (children 1)
+     ExpressionList (children 1)
+      Identifier l_quantity
+    Function avg (alias avg_price) (children 1)
+     ExpressionList (children 1)
+      Identifier l_extendedprice
+    Function avg (alias avg_disc) (children 1)
+     ExpressionList (children 1)
+      Identifier l_discount
+    Function count (alias count_order) (children 1)
+     ExpressionList (children 1)
+      Asterisk
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier lineitem
+   Function lessOrEquals (children 1)
+    ExpressionList (children 2)
+     Identifier l_shipdate
+     Function minus (children 1)
+      ExpressionList (children 2)
+       Function toDate (children 1)
+        ExpressionList (children 1)
+         Literal \'1998-12-01\'
+       Function toIntervalDay (children 1)
+        ExpressionList (children 1)
+         Literal UInt64_90
+   ExpressionList (children 2)
+    Identifier l_returnflag
+    Identifier l_linestatus
+   ExpressionList (children 2)
+    OrderByElement (children 1)
+     Identifier l_returnflag
+    OrderByElement (children 1)
+     Identifier l_linestatus

@@ -1,0 +1,105 @@
+SelectWithUnionQuery (children 2)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 3)
+    Identifier host_id
+    Identifier path_id
+    Function max (alias rank) (children 1)
+     ExpressionList (children 1)
+      Identifier rank
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias t) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 4)
+          ExpressionList (children 2)
+           WithElement (children 1)
+            Subquery (children 1)
+             SelectWithUnionQuery (children 1)
+              ExpressionList (children 1)
+               SelectQuery (children 3)
+                ExpressionList (children 2)
+                 Asterisk
+                 Function row_number (alias row_num) (children 1)
+                  ExpressionList
+                TablesInSelectQuery (children 1)
+                 TablesInSelectQueryElement (children 1)
+                  TableExpression (children 1)
+                   TableIdentifier posts
+                Function and (children 1)
+                 ExpressionList (children 2)
+                  Function greaterOrEquals (children 1)
+                   ExpressionList (children 2)
+                    Identifier created
+                    Function subtractHours (children 1)
+                     ExpressionList (children 2)
+                      Function now (children 1)
+                       ExpressionList
+                      Literal UInt64_24
+                  Function greater (children 1)
+                   ExpressionList (children 2)
+                    Identifier host_id
+                    Literal UInt64_0
+           WithElement (children 1)
+            Subquery (children 1)
+             SelectWithUnionQuery (children 1)
+              ExpressionList (children 1)
+               SelectQuery (children 3)
+                ExpressionList (children 2)
+                 Asterisk
+                 Function row_number (alias row_num) (children 1)
+                  ExpressionList
+                TablesInSelectQuery (children 1)
+                 TablesInSelectQueryElement (children 1)
+                  TableExpression (children 1)
+                   TableIdentifier post_metrics
+                Function greaterOrEquals (children 1)
+                 ExpressionList (children 2)
+                  Identifier created
+                  Function subtractHours (children 1)
+                   ExpressionList (children 2)
+                    Function now (children 1)
+                     ExpressionList
+                    Literal UInt64_24
+          ExpressionList (children 7)
+           Identifier page_id
+           Identifier post_id
+           Identifier host_id
+           Identifier path_id
+           Identifier impressions
+           Identifier clicks
+           Function ntile (alias rank) (children 1)
+            ExpressionList (children 1)
+             Literal UInt64_20
+          TablesInSelectQuery (children 2)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier as_of_posts
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier as_of_post_metrics
+            TableJoin (children 1)
+             ExpressionList (children 3)
+              Identifier page_id
+              Identifier post_id
+              Identifier row_num
+          Function and (children 1)
+           ExpressionList (children 2)
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier row_num
+              Literal UInt64_1
+            Function greater (children 1)
+             ExpressionList (children 2)
+              Identifier impressions
+              Literal UInt64_0
+   Function greater (children 1)
+    ExpressionList (children 2)
+     Identifier t.rank
+     Literal UInt64_18
+   ExpressionList (children 2)
+    Identifier host_id
+    Identifier path_id
+ Identifier Null

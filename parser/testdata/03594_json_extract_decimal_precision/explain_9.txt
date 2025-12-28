@@ -1,0 +1,43 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 4)
+    Literal \'Test 6: Performance test with multiple values\' (alias test_name)
+    Function count (alias total_rows) (children 1)
+     ExpressionList
+    Function countIf (alias precision_preserved_count) (children 1)
+     ExpressionList (children 1)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Function JSONExtract (children 1)
+         ExpressionList (children 3)
+          Identifier json_data
+          Literal \'dec\'
+          Literal \'Decimal(32,16)\'
+        Function CAST (children 1)
+         ExpressionList (children 2)
+          Function JSONExtractString (children 1)
+           ExpressionList (children 2)
+            Identifier json_data
+            Literal \'dec\'
+          Literal \'Decimal(32, 16)\'
+    Function countIf (alias precision_lost_count) (children 1)
+     ExpressionList (children 1)
+      Function notEquals (children 1)
+       ExpressionList (children 2)
+        Function JSONExtract (children 1)
+         ExpressionList (children 3)
+          Identifier json_data
+          Literal \'dec\'
+          Literal \'Decimal(32,16)\'
+        Function CAST (children 1)
+         ExpressionList (children 2)
+          Function JSONExtractString (children 1)
+           ExpressionList (children 2)
+            Identifier json_data
+            Literal \'dec\'
+          Literal \'Decimal(32, 16)\'
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier test_json_decimal_precision

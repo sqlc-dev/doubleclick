@@ -1,0 +1,139 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 3)
+    Subquery (alias bad_v4) (children 1)
+     SelectWithUnionQuery (children 1)
+      ExpressionList (children 1)
+       SelectQuery (children 3)
+        ExpressionList (children 1)
+         Function count (children 1)
+          ExpressionList
+        TablesInSelectQuery (children 1)
+         TablesInSelectQueryElement (children 1)
+          TableExpression (children 1)
+           TableIdentifier t
+        Function and (children 1)
+         ExpressionList (children 2)
+          Function isNotNull (children 1)
+           ExpressionList (children 1)
+            Function accurateCastOrNull (children 1)
+             ExpressionList (children 2)
+              Identifier d
+              Literal \'IPv4\'
+          Function notIn (children 1)
+           ExpressionList (children 2)
+            Function toIPv4 (children 1)
+             ExpressionList (children 1)
+              Function accurateCastOrNull (children 1)
+               ExpressionList (children 2)
+                Identifier d
+                Literal \'IPv4\'
+            Function tuple (children 1)
+             ExpressionList (children 2)
+              Function toIPv4 (children 1)
+               ExpressionList (children 1)
+                Literal \'0.0.0.0\'
+              Function toIPv4 (children 1)
+               ExpressionList (children 1)
+                Literal \'192.168.0.1\'
+    Subquery (alias bad_v6) (children 1)
+     SelectWithUnionQuery (children 1)
+      ExpressionList (children 1)
+       SelectQuery (children 3)
+        ExpressionList (children 1)
+         Function count (children 1)
+          ExpressionList
+        TablesInSelectQuery (children 1)
+         TablesInSelectQueryElement (children 1)
+          TableExpression (children 1)
+           TableIdentifier t
+        Function and (children 1)
+         ExpressionList (children 2)
+          Function isNotNull (children 1)
+           ExpressionList (children 1)
+            Function accurateCastOrNull (children 1)
+             ExpressionList (children 2)
+              Identifier d
+              Literal \'IPv6\'
+          Function notIn (children 1)
+           ExpressionList (children 2)
+            Function toIPv6 (children 1)
+             ExpressionList (children 1)
+              Function accurateCastOrNull (children 1)
+               ExpressionList (children 2)
+                Identifier d
+                Literal \'IPv6\'
+            Function tuple (children 1)
+             ExpressionList (children 3)
+              Function toIPv6 (children 1)
+               ExpressionList (children 1)
+                Literal \'::\'
+              Function toIPv6 (children 1)
+               ExpressionList (children 1)
+                Literal \'::1\'
+              Function toIPv6 (children 1)
+               ExpressionList (children 1)
+                Literal \'::ffff:192.168.0.1\'
+    Function plus (alias bad_cnt) (children 1)
+     ExpressionList (children 2)
+      Identifier bad_v4
+      Identifier bad_v6
+   ExpressionList (children 8)
+    Literal \'ch_dbg_summary\' (alias tag)
+    Subquery (alias total) (children 1)
+     SelectWithUnionQuery (children 1)
+      ExpressionList (children 1)
+       SelectQuery (children 2)
+        ExpressionList (children 1)
+         Function count (children 1)
+          ExpressionList
+        TablesInSelectQuery (children 1)
+         TablesInSelectQueryElement (children 1)
+          TableExpression (children 1)
+           TableIdentifier t
+    Subquery (alias typed_v4) (children 1)
+     SelectWithUnionQuery (children 1)
+      ExpressionList (children 1)
+       SelectQuery (children 3)
+        ExpressionList (children 1)
+         Function count (children 1)
+          ExpressionList
+        TablesInSelectQuery (children 1)
+         TablesInSelectQueryElement (children 1)
+          TableExpression (children 1)
+           TableIdentifier t
+        Function isNotNull (children 1)
+         ExpressionList (children 1)
+          Function accurateCastOrNull (children 1)
+           ExpressionList (children 2)
+            Identifier d
+            Literal \'IPv4\'
+    Subquery (alias typed_v6) (children 1)
+     SelectWithUnionQuery (children 1)
+      ExpressionList (children 1)
+       SelectQuery (children 3)
+        ExpressionList (children 1)
+         Function count (children 1)
+          ExpressionList
+        TablesInSelectQuery (children 1)
+         TablesInSelectQueryElement (children 1)
+          TableExpression (children 1)
+           TableIdentifier t
+        Function isNotNull (children 1)
+         ExpressionList (children 1)
+          Function accurateCastOrNull (children 1)
+           ExpressionList (children 2)
+            Identifier d
+            Literal \'IPv6\'
+    Identifier bad_v4
+    Identifier bad_v6
+    Function version (alias ver) (children 1)
+     ExpressionList
+    Function getSetting (alias tz) (children 1)
+     ExpressionList (children 1)
+      Literal \'session_timezone\'
+   Function greater (children 1)
+    ExpressionList (children 2)
+     Identifier bad_cnt
+     Literal UInt64_0

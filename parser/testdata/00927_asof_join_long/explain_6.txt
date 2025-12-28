@@ -1,0 +1,67 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 1)
+    Function SUM (children 1)
+     ExpressionList (children 1)
+      Function minus (children 1)
+       ExpressionList (children 2)
+        Identifier trades.price
+        Identifier tvs.tv
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias trades) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 3)
+          ExpressionList (children 3)
+           Identifier k
+           Identifier t
+           Identifier t (alias price)
+          TablesInSelectQuery (children 2)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             Subquery (alias keys) (children 1)
+              SelectWithUnionQuery (children 1)
+               ExpressionList (children 1)
+                SelectQuery (children 2)
+                 ExpressionList (children 1)
+                  Function toUInt32 (alias k) (children 1)
+                   ExpressionList (children 1)
+                    Identifier number
+                 TablesInSelectQuery (children 1)
+                  TablesInSelectQueryElement (children 1)
+                   TableExpression (children 1)
+                    Function numbers (children 1)
+                     ExpressionList (children 1)
+                      Literal UInt64_1000
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             Subquery (alias trade_times) (children 1)
+              SelectWithUnionQuery (children 1)
+               ExpressionList (children 1)
+                SelectQuery (children 2)
+                 ExpressionList (children 1)
+                  Function toUInt32 (alias t) (children 1)
+                   ExpressionList (children 1)
+                    Function multiply (children 1)
+                     ExpressionList (children 2)
+                      Identifier number
+                      Literal UInt64_10
+                 TablesInSelectQuery (children 1)
+                  TablesInSelectQueryElement (children 1)
+                   TableExpression (children 1)
+                    Function numbers (children 1)
+                     ExpressionList (children 1)
+                      Literal UInt64_3000
+            TableJoin
+          Set
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier tvs
+     TableJoin (children 1)
+      ExpressionList (children 2)
+       Identifier k
+       Identifier t
+   Set

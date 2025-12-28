@@ -1,0 +1,61 @@
+CreateQuery goal_view (children 4)
+ Identifier goal_view
+ Columns definition (children 1)
+  ExpressionList (children 5)
+   ColumnDeclaration CounterID (children 1)
+    DataType UInt32
+   ColumnDeclaration StartDate (children 1)
+    DataType Date
+   ColumnDeclaration GoalID (children 1)
+    DataType UInt32
+   ColumnDeclaration Visits (children 1)
+    DataType AggregateFunction (children 1)
+     ExpressionList (children 3)
+      Identifier sumIf
+      DataType Int8
+      DataType UInt8
+   ColumnDeclaration GoalReaches (children 1)
+    DataType AggregateFunction (children 1)
+     ExpressionList (children 2)
+      Identifier sum
+      DataType Int8
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 4)
+    ExpressionList (children 5)
+     Identifier CounterID
+     Identifier StartDate
+     Identifier GoalID
+     Function sumIfState (alias Visits) (children 1)
+      ExpressionList (children 2)
+       Identifier Sign
+       Function equals (children 1)
+        ExpressionList (children 2)
+         Identifier _uniq
+         Literal UInt64_1
+     Function sumState (alias GoalReaches) (children 1)
+      ExpressionList (children 1)
+       Identifier Sign
+    TablesInSelectQuery (children 2)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier visits
+     TablesInSelectQueryElement (children 1)
+      ArrayJoin (children 1)
+       ExpressionList (children 2)
+        Identifier GoalsID (alias GoalID)
+        Function arrayEnumerateUniq (alias _uniq) (children 1)
+         ExpressionList (children 1)
+          Identifier GoalsID
+    ExpressionList (children 3)
+     Identifier CounterID
+     Identifier StartDate
+     Identifier GoalID
+    ExpressionList (children 3)
+     OrderByElement (children 1)
+      Identifier CounterID
+     OrderByElement (children 1)
+      Identifier StartDate
+     OrderByElement (children 1)
+      Identifier GoalID
+ ViewTargets

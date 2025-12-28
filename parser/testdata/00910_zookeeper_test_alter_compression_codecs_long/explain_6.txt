@@ -1,0 +1,26 @@
+CreateQuery alter_compression_codec2 (children 3)
+ Identifier alter_compression_codec2
+ Columns definition (children 1)
+  ExpressionList (children 2)
+   ColumnDeclaration somedate (children 2)
+    DataType Date
+    Function CODEC (children 1)
+     ExpressionList (children 1)
+      Function LZ4
+   ColumnDeclaration id (children 2)
+    DataType UInt64
+    Function CODEC (children 1)
+     ExpressionList (children 1)
+      Function NONE
+ Storage definition (children 3)
+  Function ReplicatedMergeTree (children 1)
+   ExpressionList (children 2)
+    Function concat (children 1)
+     ExpressionList (children 3)
+      Literal \'/clickhouse/tables/{database}/test_00910/\'
+      Function currentDatabase (children 1)
+       ExpressionList
+      Literal \'alter_compression_codecs/{shard}\'
+    Literal \'2_{replica}\'
+  Identifier somedate
+  Identifier id

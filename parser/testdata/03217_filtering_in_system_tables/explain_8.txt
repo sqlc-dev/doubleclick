@@ -1,0 +1,28 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 1)
+    Function argMax (children 1)
+     ExpressionList (children 2)
+      Identifier read_rows
+      Identifier event_time_microseconds
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_log
+   Function and (children 1)
+    ExpressionList (children 4)
+     Literal UInt64_1
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier current_database
+       Function currentDatabase (children 1)
+        ExpressionList
+     Function like (children 1)
+      ExpressionList (children 2)
+       Identifier query
+       Literal \'%SELECT database, table, left(replica_name, 2) FROM system.replicas WHERE database = currentDatabase() AND table = \\\'test_03217_system_tables_replica_1\\\' AND replica_name LIKE \\\'r1\\\\%\\\';\'
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier type
+       Literal \'QueryFinish\'

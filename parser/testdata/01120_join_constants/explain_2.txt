@@ -1,0 +1,43 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 4)
+    QualifiedAsterisk (children 1)
+     Identifier t1
+    QualifiedAsterisk (children 1)
+     Identifier t2
+    Literal UInt64_123 (alias constant)
+    Function isConstant (children 1)
+     ExpressionList (children 1)
+      Literal \'world\'
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias t1) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 1)
+          ExpressionList (children 2)
+           Function arrayJoin (alias k) (children 1)
+            ExpressionList (children 1)
+             Literal Array_[UInt64_1, UInt64_2]
+           Literal UInt64_321
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias t2) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 1)
+          ExpressionList (children 2)
+           Function arrayJoin (alias k) (children 1)
+            ExpressionList (children 1)
+             Literal Array_[UInt64_1, UInt64_3]
+           Literal UInt64_123
+     TableJoin (children 1)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier t1.k
+        Identifier t2.k
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier t1.k

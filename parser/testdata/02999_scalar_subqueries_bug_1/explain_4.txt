@@ -1,0 +1,55 @@
+CreateQuery t_test (children 3)
+ Identifier t_test
+ Columns definition (children 1)
+  ExpressionList (children 2)
+   ColumnDeclaration x (children 1)
+    DataType UInt32
+   ColumnDeclaration y (children 1)
+    DataType Nullable (children 1)
+     ExpressionList (children 1)
+      DataType UInt32
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 3)
+    ExpressionList (children 2)
+     Identifier a.id
+     Identifier b.id
+    TablesInSelectQuery (children 2)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       Function remote (alias a) (children 1)
+        ExpressionList (children 3)
+         Literal \'127.0.0.{1,2}\'
+         Function currentDatabase (children 1)
+          ExpressionList
+         Identifier t_table_select
+     TablesInSelectQueryElement (children 2)
+      TableExpression (children 1)
+       Subquery (alias b) (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 3)
+           ExpressionList (children 1)
+            Identifier id
+           TablesInSelectQuery (children 1)
+            TablesInSelectQueryElement (children 1)
+             TableExpression (children 1)
+              Function remote (alias b) (children 1)
+               ExpressionList (children 3)
+                Literal \'127.0.0.{1,2}\'
+                Function currentDatabase (children 1)
+                 ExpressionList
+                Identifier t_table_select
+           Function equals (children 1)
+            ExpressionList (children 2)
+             Function modulo (children 1)
+              ExpressionList (children 2)
+               Identifier b.id
+               Literal UInt64_10
+             Literal UInt64_0
+      TableJoin (children 1)
+       Function equals (children 1)
+        ExpressionList (children 2)
+         Identifier b.id
+         Identifier a.id
+    Set

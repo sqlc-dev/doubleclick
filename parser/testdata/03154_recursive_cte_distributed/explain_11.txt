@@ -1,0 +1,71 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 1)
+    WithElement (children 1)
+     Subquery (children 1)
+      SelectWithUnionQuery (children 1)
+       ExpressionList (children 2)
+        SelectQuery (children 2)
+         ExpressionList (children 4)
+          Identifier id
+          Identifier parent_id
+          Function array (alias path) (children 1)
+           ExpressionList (children 1)
+            Identifier parent_id
+          Function toUInt64 (alias depth) (children 1)
+           ExpressionList (children 1)
+            Literal UInt64_0
+         TablesInSelectQuery (children 1)
+          TablesInSelectQueryElement (children 1)
+           TableExpression (children 1)
+            Function remote (children 1)
+             ExpressionList (children 3)
+              Literal \'127.0.0.{1,2}\'
+              Function currentDatabase (children 1)
+               ExpressionList
+              Identifier test_table
+        SelectQuery (children 3)
+         ExpressionList (children 4)
+          Identifier t.id
+          Identifier t.parent_id
+          Function arrayConcat (alias path) (children 1)
+           ExpressionList (children 2)
+            Identifier path
+            Function array (children 1)
+             ExpressionList (children 1)
+              Identifier t.id
+          Function plus (children 1)
+           ExpressionList (children 2)
+            Identifier depth
+            Literal UInt64_1
+         TablesInSelectQuery (children 2)
+          TablesInSelectQueryElement (children 1)
+           TableExpression (children 1)
+            Function remote (alias t) (children 1)
+             ExpressionList (children 3)
+              Literal \'127.0.0.{1,2}\'
+              Function currentDatabase (children 1)
+               ExpressionList
+              Identifier test_table
+          TablesInSelectQueryElement (children 2)
+           TableExpression (children 1)
+            TableIdentifier search_tree (alias st)
+           TableJoin
+         Function equals (children 1)
+          ExpressionList (children 2)
+           Identifier t.parent_id
+           Identifier st.id
+   ExpressionList (children 1)
+    Asterisk
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier search_tree
+   ExpressionList (children 3)
+    OrderByElement (children 1)
+     Identifier depth
+    OrderByElement (children 1)
+     Identifier id
+    OrderByElement (children 1)
+     Identifier parent_id

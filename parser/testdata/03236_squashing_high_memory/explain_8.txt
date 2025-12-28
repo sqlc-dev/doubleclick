@@ -1,0 +1,36 @@
+CreateQuery test_table (children 3)
+ Identifier test_table
+ Storage definition (children 2)
+  Function MergeTree
+  Identifier id
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 3)
+    ExpressionList (children 3)
+     Identifier id_values.id1 (alias id)
+     Identifier string_values.string_val1 (alias string_val1)
+     Identifier string_values.string_val2 (alias string_val2)
+    TablesInSelectQuery (children 2)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier id_values
+     TablesInSelectQueryElement (children 2)
+      TableExpression (children 1)
+       Subquery (alias string_values) (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 1)
+           ExpressionList (children 3)
+            Function arrayJoin (alias id1) (children 1)
+             ExpressionList (children 1)
+              Function range (children 1)
+               ExpressionList (children 1)
+                Literal UInt64_10
+            Literal \'qwe\' (alias string_val1)
+            Literal \'asd\' (alias string_val2)
+      TableJoin (children 1)
+       Function equals (children 1)
+        ExpressionList (children 2)
+         Identifier id_values.id1
+         Identifier string_values.id1
+    Set
