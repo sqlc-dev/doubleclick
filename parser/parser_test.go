@@ -15,17 +15,12 @@ import (
 	"github.com/sqlc-dev/doubleclick/parser"
 )
 
-// checkSkipped runs skipped todo tests to see which ones now pass.
-// Use with: go test ./parser -check-skipped -v
-var checkSkipped = flag.Bool("check-skipped", false, "Run skipped todo tests to see which ones now pass")
-
 // checkFormat runs skipped todo_format tests to see which ones now pass.
 // Use with: go test ./parser -check-format -v
 var checkFormat = flag.Bool("check-format", false, "Run skipped todo_format tests to see which ones now pass")
 
 // testMetadata holds optional metadata for a test case
 type testMetadata struct {
-	Todo        bool            `json:"todo,omitempty"`
 	TodoFormat  bool            `json:"todo_format,omitempty"`  // true if format roundtrip test is pending
 	ExplainTodo map[string]bool `json:"explain_todo,omitempty"` // map of stmtN -> true to skip specific statements
 	Source      string          `json:"source,omitempty"`
@@ -116,7 +111,6 @@ func findCommentStart(line string) int {
 // Each subdirectory in testdata represents a test case with:
 // - query.sql: The SQL query to parse (may contain multiple statements)
 // - metadata.json (optional): Metadata including:
-//   - todo: true if the test is not yet expected to pass
 //   - explain: false to skip the test (e.g., when ClickHouse couldn't parse it)
 //   - skip: true to skip the test entirely (e.g., causes infinite loop)
 //   - parse_error: true if the query is intentionally invalid SQL (expected to fail parsing)
@@ -164,12 +158,9 @@ func TestParser(t *testing.T) {
 			}
 
 			// Skip tests where explain is explicitly false (e.g., ClickHouse couldn't parse it)
-			// Unless -check-skipped is set and the test is a todo test
 			if metadata.Explain != nil && !*metadata.Explain {
-				if !(*checkSkipped && metadata.Todo) {
-					t.Skipf("Skipping: explain is false in metadata")
-					return
-				}
+				t.Skipf("Skipping: explain is false in metadata")
+				return
 			}
 
 			// Split into individual statements
@@ -219,14 +210,6 @@ func TestParser(t *testing.T) {
 							t.Skipf("Expected parse error (intentionally invalid SQL)")
 							return
 						}
-						if metadata.Todo {
-							if *checkSkipped {
-								t.Skipf("STILL FAILING (parse error): %v", parseErr)
-							} else {
-								t.Skipf("TODO: Parser does not yet support (error: %v)", parseErr)
-							}
-							return
-						}
 						t.Fatalf("Parse error: %v", parseErr)
 					}
 
@@ -239,14 +222,6 @@ func TestParser(t *testing.T) {
 					// Verify we can serialize to JSON
 					_, jsonErr := json.Marshal(stmts[0])
 					if jsonErr != nil {
-						if metadata.Todo {
-							if *checkSkipped {
-								t.Skipf("STILL FAILING (JSON serialization): %v", jsonErr)
-							} else {
-								t.Skipf("TODO: JSON serialization failed: %v", jsonErr)
-							}
-							return
-						}
 						t.Fatalf("JSON marshal error: %v\nQuery: %s", jsonErr, stmt)
 					}
 
@@ -260,14 +235,6 @@ func TestParser(t *testing.T) {
 						actual := strings.TrimSpace(parser.Explain(stmts[0]))
 						// Use case-insensitive comparison since ClickHouse EXPLAIN AST has inconsistent casing
 						if !strings.EqualFold(actual, expected) {
-							if metadata.Todo {
-								if *checkSkipped {
-									t.Skipf("STILL FAILING (explain mismatch):\nExpected:\n%s\n\nGot:\n%s", expected, actual)
-								} else {
-									t.Skipf("TODO: Explain output mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", stmt, expected, actual)
-								}
-								return
-							}
 							t.Errorf("Explain output mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", stmt, expected, actual)
 						}
 					}
@@ -302,18 +269,6 @@ func TestParser(t *testing.T) {
 						}
 					}
 
-					// If we get here with a todo test and -check-skipped is set on first statement, the test passes!
-					if stmtIndex == 1 && metadata.Todo && *checkSkipped {
-						metadata.Todo = false
-						updatedBytes, err := json.Marshal(metadata)
-						if err != nil {
-							t.Errorf("Failed to marshal updated metadata: %v", err)
-						} else if err := os.WriteFile(metadataPath, append(updatedBytes, '\n'), 0644); err != nil {
-							t.Errorf("Failed to write updated metadata.json: %v", err)
-						} else {
-							t.Logf("ENABLED - removed todo flag from: %s", entry.Name())
-						}
-					}
 				})
 			}
 		})

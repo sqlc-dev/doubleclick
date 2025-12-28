@@ -9,10 +9,9 @@ import (
 	"sort"
 )
 
-var formatFlag = flag.Bool("format", false, "Find tests with todo_format instead of todo")
+var formatFlag = flag.Bool("format", false, "Find tests with todo_format (required)")
 
 type testMetadata struct {
-	Todo       bool  `json:"todo,omitempty"`
 	TodoFormat bool  `json:"todo_format,omitempty"`
 	Explain    *bool `json:"explain,omitempty"`
 	Skip       bool  `json:"skip,omitempty"`
@@ -26,6 +25,12 @@ type todoTest struct {
 
 func main() {
 	flag.Parse()
+
+	if !*formatFlag {
+		fmt.Fprintf(os.Stderr, "Usage: go run ./cmd/next-test -format\n")
+		fmt.Fprintf(os.Stderr, "Finds tests with todo_format: true in metadata.\n")
+		os.Exit(1)
+	}
 
 	testdataDir := "parser/testdata"
 	entries, err := os.ReadDir(testdataDir)
@@ -55,15 +60,9 @@ func main() {
 			continue
 		}
 
-		// Check for todo or todo_format based on flag
-		if *formatFlag {
-			if !metadata.TodoFormat {
-				continue
-			}
-		} else {
-			if !metadata.Todo {
-				continue
-			}
+		// Check for todo_format
+		if !metadata.TodoFormat {
+			continue
 		}
 
 		// Skip tests with skip or explain=false or parse_error
@@ -84,13 +83,8 @@ func main() {
 		})
 	}
 
-	todoType := "todo"
-	if *formatFlag {
-		todoType = "todo_format"
-	}
-
 	if len(todoTests) == 0 {
-		fmt.Printf("No %s tests found!\n", todoType)
+		fmt.Printf("No todo_format tests found!\n")
 		return
 	}
 
@@ -103,7 +97,7 @@ func main() {
 	next := todoTests[0]
 	testDir := filepath.Join(testdataDir, next.name)
 
-	fmt.Printf("Next %s test: %s\n\n", todoType, next.name)
+	fmt.Printf("Next todo_format test: %s\n\n", next.name)
 
 	// Print query.sql contents
 	queryPath := filepath.Join(testDir, "query.sql")
@@ -116,5 +110,5 @@ func main() {
 		fmt.Printf("\nExpected EXPLAIN output:\n%s\n", string(explainBytes))
 	}
 
-	fmt.Printf("\nRemaining %s tests: %d\n", todoType, len(todoTests))
+	fmt.Printf("\nRemaining todo_format tests: %d\n", len(todoTests))
 }
