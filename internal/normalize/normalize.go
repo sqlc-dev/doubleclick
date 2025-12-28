@@ -38,6 +38,31 @@ var (
 	notLowerParenRegex     = regexp.MustCompile(`\bnot\s*\((\d+)\)`)
 	isNotNullParenRegex    = regexp.MustCompile(`\((\w+)\s+IS\s+NOT\s+NULL\)`)
 	isNullParenRegex       = regexp.MustCompile(`\((\w+)\s+IS\s+NULL\)`)
+	// Alias AS normalization: remove optional AS keyword in alias contexts
+	// Matches: expr AS alias (where expr ends with word/digit/closing paren)
+	aliasAsRegex = regexp.MustCompile(`(\d+|\)|\w)\s+AS\s+(\w)`)
+	// ORDER BY single column parentheses normalization
+	// ORDER BY (col) -> ORDER BY col
+	orderBySingleParenRegex = regexp.MustCompile(`(?i)\bORDER BY\s+\((\w+)\)`)
+	// PRIMARY KEY single column parentheses normalization
+	// PRIMARY KEY (col) -> PRIMARY KEY col
+	primaryKeySingleParenRegex = regexp.MustCompile(`(?i)\bPRIMARY KEY\s+\((\w+)\)`)
+	// Parentheses around IN expressions: (x IN(...)) -> x IN(...)
+	// Handles both with and without space after IN
+	// Must be preceded by space or comma (not a function call like sum(x IN ...))
+	parenInExprRegex = regexp.MustCompile(`([\s,])\((\w+\s*IN\s*\([^)]*\))\)`)
+	// LIMIT syntax normalization: LIMIT offset, count -> LIMIT count OFFSET offset
+	limitCommaRegex = regexp.MustCompile(`(?i)\bLIMIT\s+(\d+)\s*,\s*(\d+)\b`)
+	// Spaces around dots in identifiers: system . one -> system.one
+	spaceDotSpaceRegex = regexp.MustCompile(`(\w)\s*\.\s*(\w)`)
+	// Trailing .0 in float literals: 1.0 -> 1
+	trailingDotZeroRegex = regexp.MustCompile(`\b(\d+)\.0+\b`)
+	// Add spaces around arithmetic operators: num/2 -> num / 2, 1+1 -> 1 + 1, 1+-a -> 1 + -a
+	// Match when operator is between word chars or ), or word and - (for unary minus)
+	arithmeticNoSpaceRegex = regexp.MustCompile(`([\w)])([/*%+])([\w-])`)
+	// Add spaces around binary minus: x-1 -> x - 1 (but not -1 which is unary)
+	// Match when ) or word is directly followed by - and then a word/digit
+	binaryMinusNoSpaceRegex = regexp.MustCompile(`([\w)])-([\w])`)
 )
 
 // DecodeHexEscapes decodes \xNN escape sequences in a string to raw bytes.
@@ -93,6 +118,53 @@ func EscapesInStrings(s string) string {
 					// Escaped backslash \\ -> single backslash \
 					result.WriteByte('\\')
 					i += 2
+				} else if ch == '\\' && i+1 < len(s) && s[i+1] == 't' {
+					// Escaped tab \t -> actual tab
+					result.WriteByte('\t')
+					i += 2
+				} else if ch == '\\' && i+1 < len(s) && s[i+1] == 'n' {
+					// Escaped newline \n -> actual newline
+					result.WriteByte('\n')
+					i += 2
+				} else if ch == '\\' && i+1 < len(s) && s[i+1] == 'r' {
+					// Escaped carriage return \r -> actual carriage return
+					result.WriteByte('\r')
+					i += 2
+				} else if ch == '\\' && i+1 < len(s) && s[i+1] == 'a' {
+					// Escaped alert \a -> actual alert (bell)
+					result.WriteByte('\a')
+					i += 2
+				} else if ch == '\\' && i+1 < len(s) && s[i+1] == 'b' {
+					// Escaped backspace \b -> actual backspace
+					result.WriteByte('\b')
+					i += 2
+				} else if ch == '\\' && i+1 < len(s) && s[i+1] == 'f' {
+					// Escaped form feed \f -> actual form feed
+					result.WriteByte('\f')
+					i += 2
+				} else if ch == '\\' && i+1 < len(s) && s[i+1] == 'v' {
+					// Escaped vertical tab \v -> actual vertical tab
+					result.WriteByte('\v')
+					i += 2
+				} else if ch == '\\' && i+1 < len(s) && s[i+1] == '?' {
+					// Escaped question mark \? -> actual question mark
+					result.WriteByte('?')
+					i += 2
+				} else if ch == '\\' && i+1 < len(s) && s[i+1] == '"' {
+					// Escaped double quote \" -> actual double quote
+					result.WriteByte('"')
+					i += 2
+				} else if ch == '\\' && i+3 < len(s) && s[i+1] == 'x' {
+					// Hex escape \xNN -> decoded byte
+					hexStr := s[i+2 : i+4]
+					b, err := hex.DecodeString(hexStr)
+					if err == nil && len(b) == 1 {
+						result.WriteByte(b[0])
+						i += 4
+					} else {
+						result.WriteByte(ch)
+						i++
+					}
 				} else if ch == '\'' {
 					// Either end of string or escaped quote
 					result.WriteByte(ch)
@@ -191,6 +263,9 @@ func ForFormat(s string) string {
 	normalized = doubleQuotedIdentRegex.ReplaceAllString(normalized, "$1$2")
 	// Normalize AS keyword case: as -> AS
 	normalized = asKeywordRegex.ReplaceAllString(normalized, "AS")
+	// Remove optional AS keyword in alias contexts (1 AS x -> 1 x)
+	// This handles the equivalence of "expr AS alias" and "expr alias"
+	normalized = aliasAsRegex.ReplaceAllString(normalized, "$1 $2")
 	// Remove leading zeros from integer literals (077 -> 77)
 	normalized = leadingZerosRegex.ReplaceAllString(normalized, "$1")
 	// Normalize heredocs ($$...$$ -> '...')
@@ -225,6 +300,9 @@ func ForFormat(s string) string {
 	normalized = regexpOperatorRegex.ReplaceAllString(normalized, "match($1,$2)")
 	// Normalize ORDER BY () to ORDER BY tuple()
 	normalized = orderByEmptyRegex.ReplaceAllString(normalized, "ORDER BY tuple()")
+	// Remove parentheses around IN expressions BEFORE removing spaces
+	// (x IN (...)) -> x IN (...) - this must be done before spaceBeforeParenRegex
+	normalized = parenInExprRegex.ReplaceAllString(normalized, "$1$2")
 	// Normalize INSERT INTO table (cols) to have no space before ( (or consistent spacing)
 	// This matches "tablename (" and removes the space: "tablename("
 	normalized = spaceBeforeParenRegex.ReplaceAllString(normalized, "$1($2")
@@ -239,6 +317,20 @@ func ForFormat(s string) string {
 	// This handles both standalone (x IS NULL) and inside lambdas x -> (x IS NULL)
 	normalized = isNotNullParenRegex.ReplaceAllString(normalized, "$1 IS NOT NULL")
 	normalized = isNullParenRegex.ReplaceAllString(normalized, "$1 IS NULL")
+	// Normalize ORDER BY (col) to ORDER BY col
+	normalized = orderBySingleParenRegex.ReplaceAllString(normalized, "ORDER BY $1")
+	// Normalize PRIMARY KEY (col) to PRIMARY KEY col
+	normalized = primaryKeySingleParenRegex.ReplaceAllString(normalized, "PRIMARY KEY $1")
+	// Normalize LIMIT offset, count to LIMIT count OFFSET offset
+	normalized = limitCommaRegex.ReplaceAllString(normalized, "LIMIT $2 OFFSET $1")
+	// Normalize spaces around dots in identifiers: system . one -> system.one
+	normalized = spaceDotSpaceRegex.ReplaceAllString(normalized, "$1.$2")
+	// Normalize trailing .0 in float literals: 1.0 -> 1
+	normalized = trailingDotZeroRegex.ReplaceAllString(normalized, "$1")
+	// Add spaces around arithmetic operators (/, *, %): num/2 -> num / 2
+	normalized = arithmeticNoSpaceRegex.ReplaceAllString(normalized, "$1 $2 $3")
+	// Add spaces around binary minus: x-1 -> x - 1
+	normalized = binaryMinusNoSpaceRegex.ReplaceAllString(normalized, "$1 - $2")
 	// Re-normalize whitespace after replacements
 	normalized = Whitespace(normalized)
 	// Strip trailing semicolon and any spaces before it
