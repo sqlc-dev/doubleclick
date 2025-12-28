@@ -59,6 +59,10 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 }
 
 func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, depth int) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.CreateQuery\n", indent)
+		return
+	}
 	// Handle special CREATE types
 	if n.CreateFunction {
 		children := 2 // identifier + lambda
@@ -344,6 +348,10 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 }
 
 func explainRenameQuery(sb *strings.Builder, n *ast.RenameQuery, indent string, depth int) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.RenameQuery\n", indent)
+		return
+	}
 	// Count identifiers: 4 per pair (from_db, from_table, to_db, to_table)
 	children := len(n.Pairs) * 4
 	fmt.Fprintf(sb, "%sRename (children %d)\n", indent, children)
