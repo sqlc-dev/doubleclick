@@ -21,6 +21,9 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 	} else if n.Table != "" {
 		children++ // Table identifier
 	}
+	if len(n.Columns) > 0 {
+		children++ // Column list
+	}
 	if n.Select != nil {
 		children++
 	}
@@ -47,6 +50,14 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 			name = n.Database + "." + n.Table
 		}
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+	}
+
+	// Column list
+	if len(n.Columns) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Columns))
+		for _, col := range n.Columns {
+			fmt.Fprintf(sb, "%s  Identifier %s\n", indent, col.Parts[len(col.Parts)-1])
+		}
 	}
 
 	if n.Select != nil {
