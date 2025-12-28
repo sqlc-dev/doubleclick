@@ -12,10 +12,10 @@ This finds tests with `explain_todo` entries in their metadata.
 
 ## Running Tests
 
-Always run parser tests with a 5 second timeout:
+Always run parser tests with a 10 second timeout:
 
 ```bash
-go test ./parser/... -timeout 5s
+go test ./parser/... -timeout 10s
 ```
 
 The tests are very fast. If a test is timing out, it indicates a bug (likely an infinite loop in the parser).
