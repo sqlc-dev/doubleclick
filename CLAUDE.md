@@ -5,18 +5,10 @@
 To find the next explain test to work on (fewest pending statements first), run:
 
 ```bash
-go run ./cmd/next-test -explain
+go run ./cmd/next-test
 ```
 
 This finds tests with `explain_todo` entries in their metadata.
-
-To find the next format roundtrip test to work on, run:
-
-```bash
-go run ./cmd/next-test -format
-```
-
-This finds tests with `todo_format: true` in their metadata.
 
 ## Running Tests
 
@@ -27,16 +19,6 @@ go test ./parser/... -timeout 5s
 ```
 
 The tests are very fast. If a test is timing out, it indicates a bug (likely an infinite loop in the parser).
-
-## Checking for Newly Passing Format Tests
-
-After implementing format changes, run:
-
-```bash
-go test ./parser/... -check-format -v 2>&1 | grep "FORMAT PASSES NOW"
-```
-
-Tests that output `FORMAT PASSES NOW` can have their `todo_format` flag removed from `metadata.json`.
 
 ## Checking for Newly Passing Explain Tests
 
@@ -59,7 +41,6 @@ Each test in `parser/testdata/` contains:
 
 ### Metadata Options
 
-- `todo_format: true` - Format roundtrip test is pending implementation
 - `explain_todo: {"stmt2": true}` - Skip specific statement subtests
 - `skip: true` - Skip test entirely (e.g., causes infinite loop)
 - `explain: false` - Skip test (e.g., ClickHouse couldn't parse it)

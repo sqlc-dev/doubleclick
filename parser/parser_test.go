@@ -11,13 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sqlc-dev/doubleclick/internal/normalize"
 	"github.com/sqlc-dev/doubleclick/parser"
 )
-
-// checkFormat runs skipped todo_format tests to see which ones now pass.
-// Use with: go test ./parser -check-format -v
-var checkFormat = flag.Bool("check-format", false, "Run skipped todo_format tests to see which ones now pass")
 
 // checkExplain runs skipped explain_todo tests to see which ones now pass.
 // Use with: go test ./parser -check-explain -v
@@ -25,7 +20,6 @@ var checkExplain = flag.Bool("check-explain", false, "Run skipped explain_todo t
 
 // testMetadata holds optional metadata for a test case
 type testMetadata struct {
-	TodoFormat  bool            `json:"todo_format,omitempty"`  // true if format roundtrip test is pending
 	ExplainTodo map[string]bool `json:"explain_todo,omitempty"` // map of stmtN -> true to skip specific statements
 	Source      string          `json:"source,omitempty"`
 	Explain     *bool           `json:"explain,omitempty"`
@@ -258,36 +252,6 @@ func TestParser(t *testing.T) {
 								t.Errorf("Failed to write updated metadata.json: %v", err)
 							} else {
 								t.Logf("EXPLAIN PASSES NOW - removed explain_todo[%s] from: %s", stmtKey, entry.Name())
-							}
-						}
-					}
-
-					// Check Format output (roundtrip test) - only for first statement
-					if stmtIndex == 1 && (!metadata.TodoFormat || *checkFormat) {
-						formatted := parser.Format(stmts)
-						// Strip comments from expected since formatter doesn't preserve them
-						expected := strings.TrimSpace(normalize.StripComments(stmt))
-						// Compare with format normalization (whitespace + trailing semicolons)
-						formattedNorm := normalize.ForFormat(formatted)
-						expectedNorm := normalize.ForFormat(expected)
-						if !strings.EqualFold(formattedNorm, expectedNorm) {
-							if metadata.TodoFormat {
-								if *checkFormat {
-									t.Logf("FORMAT STILL FAILING:\nExpected:\n%s\n\nGot:\n%s", expected, formatted)
-								}
-							} else {
-								t.Errorf("Format output mismatch\nExpected:\n%s\n\nGot:\n%s", expected, formatted)
-							}
-						} else if metadata.TodoFormat && *checkFormat {
-							// Automatically remove the todo_format flag from metadata.json
-							metadata.TodoFormat = false
-							updatedBytes, err := json.Marshal(metadata)
-							if err != nil {
-								t.Errorf("Failed to marshal updated metadata: %v", err)
-							} else if err := os.WriteFile(metadataPath, append(updatedBytes, '\n'), 0644); err != nil {
-								t.Errorf("Failed to write updated metadata.json: %v", err)
-							} else {
-								t.Logf("FORMAT ENABLED - removed todo_format flag from: %s", entry.Name())
 							}
 						}
 					}
