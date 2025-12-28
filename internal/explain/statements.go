@@ -21,6 +21,9 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 	} else if n.Table != "" {
 		children++ // Table identifier
 	}
+	if len(n.Columns) > 0 {
+		children++ // Column list
+	}
 	if n.Select != nil {
 		children++
 	}
@@ -47,6 +50,14 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 			name = n.Database + "." + n.Table
 		}
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+	}
+
+	// Column list
+	if len(n.Columns) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Columns))
+		for _, col := range n.Columns {
+			fmt.Fprintf(sb, "%s  Identifier %s\n", indent, col.Parts[len(col.Parts)-1])
+		}
 	}
 
 	if n.Select != nil {
@@ -672,9 +683,57 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		if cmd.Where != nil {
 			Node(sb, cmd.Where, depth+1)
 		}
+	case ast.AlterAddProjection:
+		if cmd.Projection != nil {
+			explainProjection(sb, cmd.Projection, indent, depth+1)
+		}
+	case ast.AlterDropProjection, ast.AlterMaterializeProjection, ast.AlterClearProjection:
+		if cmd.ProjectionName != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ProjectionName)
+		}
 	default:
 		if cmd.Partition != nil {
 			Node(sb, cmd.Partition, depth+1)
+		}
+	}
+}
+
+func explainProjection(sb *strings.Builder, p *ast.Projection, indent string, depth int) {
+	children := 0
+	if p.Select != nil {
+		children++
+	}
+	fmt.Fprintf(sb, "%s Projection (children %d)\n", indent, children)
+	if p.Select != nil {
+		explainProjectionSelectQuery(sb, p.Select, indent+"  ", depth+1)
+	}
+}
+
+func explainProjectionSelectQuery(sb *strings.Builder, q *ast.ProjectionSelectQuery, indent string, depth int) {
+	children := 0
+	if len(q.Columns) > 0 {
+		children++
+	}
+	if q.OrderBy != nil {
+		children++
+	}
+	if len(q.GroupBy) > 0 {
+		children++
+	}
+	fmt.Fprintf(sb, "%sProjectionSelectQuery (children %d)\n", indent, children)
+	if len(q.Columns) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(q.Columns))
+		for _, col := range q.Columns {
+			Node(sb, col, depth+2)
+		}
+	}
+	if q.OrderBy != nil {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, q.OrderBy.Parts[len(q.OrderBy.Parts)-1])
+	}
+	if len(q.GroupBy) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(q.GroupBy))
+		for _, expr := range q.GroupBy {
+			Node(sb, expr, depth+2)
 		}
 	}
 }
@@ -741,6 +800,14 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 			children++
 		}
 		if cmd.Where != nil {
+			children++
+		}
+	case ast.AlterAddProjection:
+		if cmd.Projection != nil {
+			children++
+		}
+	case ast.AlterDropProjection, ast.AlterMaterializeProjection, ast.AlterClearProjection:
+		if cmd.ProjectionName != "" {
 			children++
 		}
 	default:

@@ -75,7 +75,8 @@ type SelectQuery struct {
 	LimitBy          []Expression          `json:"limit_by,omitempty"`
 	LimitByHasLimit  bool                  `json:"limit_by_has_limit,omitempty"` // true if LIMIT BY was followed by another LIMIT
 	Offset           Expression            `json:"offset,omitempty"`
-	Settings    []*SettingExpr        `json:"settings,omitempty"`
+	Settings           []*SettingExpr        `json:"settings,omitempty"`
+	SettingsAfterFormat bool                 `json:"settings_after_format,omitempty"` // true if SETTINGS came after FORMAT
 	IntoOutfile *IntoOutfileClause    `json:"into_outfile,omitempty"`
 	Format      *Identifier           `json:"format,omitempty"`
 }
@@ -425,6 +426,26 @@ type AlterCommand struct {
 	Settings       []*SettingExpr       `json:"settings,omitempty"`
 	Where          Expression           `json:"where,omitempty"`       // For DELETE WHERE
 	Assignments    []*Assignment        `json:"assignments,omitempty"` // For UPDATE
+	Projection     *Projection          `json:"projection,omitempty"`  // For ADD PROJECTION
+	ProjectionName string               `json:"projection_name,omitempty"` // For DROP/MATERIALIZE/CLEAR PROJECTION
+}
+
+// Projection represents a projection definition.
+type Projection struct {
+	Position token.Position            `json:"-"`
+	Name     string                    `json:"name"`
+	Select   *ProjectionSelectQuery    `json:"select"`
+}
+
+func (p *Projection) Pos() token.Position { return p.Position }
+func (p *Projection) End() token.Position { return p.Position }
+
+// ProjectionSelectQuery represents the SELECT part of a projection.
+type ProjectionSelectQuery struct {
+	Position token.Position   `json:"-"`
+	Columns  []Expression     `json:"columns"`
+	GroupBy  []Expression     `json:"group_by,omitempty"`
+	OrderBy  *Identifier      `json:"order_by,omitempty"` // Single column for ORDER BY
 }
 
 // Assignment represents a column assignment in UPDATE.
@@ -456,16 +477,20 @@ const (
 	AlterMaterializeIndex  AlterCommandType = "MATERIALIZE_INDEX"
 	AlterAddConstraint     AlterCommandType = "ADD_CONSTRAINT"
 	AlterDropConstraint    AlterCommandType = "DROP_CONSTRAINT"
-	AlterModifyTTL         AlterCommandType = "MODIFY_TTL"
-	AlterModifySetting     AlterCommandType = "MODIFY_SETTING"
-	AlterDropPartition     AlterCommandType = "DROP_PARTITION"
-	AlterDetachPartition   AlterCommandType = "DETACH_PARTITION"
-	AlterAttachPartition   AlterCommandType = "ATTACH_PARTITION"
-	AlterReplacePartition  AlterCommandType = "REPLACE_PARTITION"
-	AlterFreezePartition   AlterCommandType = "FREEZE_PARTITION"
-	AlterFreeze            AlterCommandType = "FREEZE"
-	AlterDeleteWhere       AlterCommandType = "DELETE_WHERE"
-	AlterUpdate            AlterCommandType = "UPDATE"
+	AlterModifyTTL          AlterCommandType = "MODIFY_TTL"
+	AlterModifySetting      AlterCommandType = "MODIFY_SETTING"
+	AlterDropPartition      AlterCommandType = "DROP_PARTITION"
+	AlterDetachPartition    AlterCommandType = "DETACH_PARTITION"
+	AlterAttachPartition    AlterCommandType = "ATTACH_PARTITION"
+	AlterReplacePartition   AlterCommandType = "REPLACE_PARTITION"
+	AlterFreezePartition    AlterCommandType = "FREEZE_PARTITION"
+	AlterFreeze             AlterCommandType = "FREEZE"
+	AlterDeleteWhere        AlterCommandType = "DELETE_WHERE"
+	AlterUpdate             AlterCommandType = "UPDATE"
+	AlterAddProjection      AlterCommandType = "ADD_PROJECTION"
+	AlterDropProjection     AlterCommandType = "DROP_PROJECTION"
+	AlterMaterializeProjection AlterCommandType = "MATERIALIZE_PROJECTION"
+	AlterClearProjection    AlterCommandType = "CLEAR_PROJECTION"
 )
 
 // TruncateQuery represents a TRUNCATE statement.

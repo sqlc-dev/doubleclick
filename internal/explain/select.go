@@ -36,21 +36,17 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 		}
 	}
 	// FORMAT clause - check if any SelectQuery has Format set
-	var hasFormat bool
 	for _, sel := range n.Selects {
 		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
 			Node(sb, sq.Format, depth+1)
-			hasFormat = true
 			break
 		}
 	}
 	// When FORMAT is present, SETTINGS is output at SelectWithUnionQuery level
-	if hasFormat {
-		for _, sel := range n.Selects {
-			if sq, ok := sel.(*ast.SelectQuery); ok && len(sq.Settings) > 0 {
-				fmt.Fprintf(sb, "%s Set\n", indent)
-				break
-			}
+	for _, sel := range n.Selects {
+		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil && len(sq.Settings) > 0 {
+			fmt.Fprintf(sb, "%s Set\n", indent)
+			break
 		}
 	}
 }
@@ -126,7 +122,8 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 			Node(sb, expr, depth+2)
 		}
 	}
-	// SETTINGS - output here if there's no FORMAT, otherwise it's at SelectWithUnionQuery level
+	// SETTINGS - output at SelectQuery level only if there's no FORMAT
+	// When FORMAT is present, SETTINGS is at SelectWithUnionQuery level instead
 	if len(n.Settings) > 0 && n.Format == nil {
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
@@ -235,21 +232,17 @@ func countSelectUnionChildren(n *ast.SelectWithUnionQuery) int {
 		}
 	}
 	// Check if any SelectQuery has Format set
-	var hasFormat bool
 	for _, sel := range n.Selects {
 		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
 			count++
-			hasFormat = true
 			break
 		}
 	}
-	// When FORMAT is present, SETTINGS is counted at this level
-	if hasFormat {
-		for _, sel := range n.Selects {
-			if sq, ok := sel.(*ast.SelectQuery); ok && len(sq.Settings) > 0 {
-				count++
-				break
-			}
+	// When FORMAT is present, SETTINGS is counted at SelectWithUnionQuery level
+	for _, sel := range n.Selects {
+		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil && len(sq.Settings) > 0 {
+			count++
+			break
 		}
 	}
 	return count
@@ -390,8 +383,8 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 	if n.Offset != nil {
 		count++
 	}
-	// SETTINGS is counted here only if there's no FORMAT
-	// If FORMAT is present, SETTINGS is at SelectWithUnionQuery level
+	// SETTINGS is counted at SelectQuery level only if there's no FORMAT
+	// When FORMAT is present, SETTINGS is at SelectWithUnionQuery level instead
 	if len(n.Settings) > 0 && n.Format == nil {
 		count++
 	}

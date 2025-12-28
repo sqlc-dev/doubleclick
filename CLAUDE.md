@@ -22,13 +22,18 @@ The tests are very fast. If a test is timing out, it indicates a bug (likely an 
 
 ## Checking for Newly Passing Explain Tests
 
-After implementing parser/explain changes, run:
+**IMPORTANT:** After implementing parser/explain changes, ALWAYS run check-explain to update metadata files:
 
 ```bash
 go test ./parser/... -check-explain -v 2>&1 | grep "EXPLAIN PASSES NOW"
 ```
 
-Tests that output `EXPLAIN PASSES NOW` can have their statement removed from `explain_todo` in `metadata.json`.
+This command:
+1. Runs all explain tests including those in `explain_todo`
+2. Automatically updates `metadata.json` files to remove passing statements from `explain_todo`
+3. Reports which tests now pass
+
+**You must run this after every change to parser or explain code**, then commit the updated metadata.json files along with your code changes.
 
 ## Test Structure
 
