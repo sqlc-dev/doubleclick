@@ -85,31 +85,34 @@ func processTest(testDir, clickhouseBin string, dryRun bool) error {
 
 	fmt.Printf("Processing %s (%d statements)\n", filepath.Base(testDir), len(statements))
 
+	// Only process statements 2+ (skip first statement, keep existing explain.txt)
 	for i, stmt := range statements {
+		stmtNum := i + 1 // 1-indexed
 		if dryRun {
-			fmt.Printf("  [%d] %s\n", i+1, truncate(stmt, 80))
+			fmt.Printf("  [%d] %s\n", stmtNum, truncate(stmt, 80))
+			continue
+		}
+
+		// Skip the first statement - don't touch explain.txt
+		if i == 0 {
+			fmt.Printf("  [%d] (skipped - keeping existing explain.txt)\n", stmtNum)
 			continue
 		}
 
 		explain, err := explainAST(clickhouseBin, stmt)
 		if err != nil {
-			fmt.Printf("  [%d] ERROR: %v\n", i+1, err)
+			fmt.Printf("  [%d] ERROR: %v\n", stmtNum, err)
 			// Skip statements that fail - they might be intentionally invalid
 			continue
 		}
 
-		// Determine output filename
-		var outputPath string
-		if i == 0 {
-			outputPath = filepath.Join(testDir, "explain.txt")
-		} else {
-			outputPath = filepath.Join(testDir, fmt.Sprintf("explain_%d.txt", i+1))
-		}
+		// Output filename: explain_N.txt for N >= 2
+		outputPath := filepath.Join(testDir, fmt.Sprintf("explain_%d.txt", stmtNum))
 
 		if err := os.WriteFile(outputPath, []byte(explain+"\n"), 0644); err != nil {
 			return fmt.Errorf("writing %s: %w", outputPath, err)
 		}
-		fmt.Printf("  [%d] -> %s\n", i+1, filepath.Base(outputPath))
+		fmt.Printf("  [%d] -> %s\n", stmtNum, filepath.Base(outputPath))
 	}
 
 	return nil
