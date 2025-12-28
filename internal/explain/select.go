@@ -42,10 +42,9 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 			break
 		}
 	}
-	// When SETTINGS comes AFTER FORMAT, it is ALSO output at SelectWithUnionQuery level
-	// (in addition to being at SelectQuery level)
+	// When FORMAT is present, SETTINGS is output at SelectWithUnionQuery level
 	for _, sel := range n.Selects {
-		if sq, ok := sel.(*ast.SelectQuery); ok && sq.SettingsAfterFormat && len(sq.Settings) > 0 {
+		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil && len(sq.Settings) > 0 {
 			fmt.Fprintf(sb, "%s Set\n", indent)
 			break
 		}
@@ -123,11 +122,9 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 			Node(sb, expr, depth+2)
 		}
 	}
-	// SETTINGS - output at SelectQuery level in these cases:
-	// 1. SETTINGS is before FORMAT (not after)
-	// 2. SETTINGS is after FORMAT AND there's a FROM clause
-	// When SETTINGS is after FORMAT without FROM, it's only at SelectWithUnionQuery level
-	if len(n.Settings) > 0 && (!n.SettingsAfterFormat || n.From != nil) {
+	// SETTINGS - output at SelectQuery level only if there's no FORMAT
+	// When FORMAT is present, SETTINGS is at SelectWithUnionQuery level instead
+	if len(n.Settings) > 0 && n.Format == nil {
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
@@ -241,9 +238,9 @@ func countSelectUnionChildren(n *ast.SelectWithUnionQuery) int {
 			break
 		}
 	}
-	// When SETTINGS comes AFTER FORMAT, it is ALSO counted at this level
+	// When FORMAT is present, SETTINGS is counted at SelectWithUnionQuery level
 	for _, sel := range n.Selects {
-		if sq, ok := sel.(*ast.SelectQuery); ok && sq.SettingsAfterFormat && len(sq.Settings) > 0 {
+		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil && len(sq.Settings) > 0 {
 			count++
 			break
 		}
@@ -386,11 +383,9 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 	if n.Offset != nil {
 		count++
 	}
-	// SETTINGS is counted at SelectQuery level in these cases:
-	// 1. SETTINGS is before FORMAT (not after)
-	// 2. SETTINGS is after FORMAT AND there's a FROM clause
-	// When SETTINGS is after FORMAT without FROM, it's only at SelectWithUnionQuery level
-	if len(n.Settings) > 0 && (!n.SettingsAfterFormat || n.From != nil) {
+	// SETTINGS is counted at SelectQuery level only if there's no FORMAT
+	// When FORMAT is present, SETTINGS is at SelectWithUnionQuery level instead
+	if len(n.Settings) > 0 && n.Format == nil {
 		count++
 	}
 	return count
