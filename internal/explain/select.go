@@ -123,9 +123,11 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 			Node(sb, expr, depth+2)
 		}
 	}
-	// SETTINGS - output at SelectQuery level only if NOT after FORMAT
-	// When SETTINGS comes after FORMAT, it's only at SelectWithUnionQuery level
-	if len(n.Settings) > 0 && !n.SettingsAfterFormat {
+	// SETTINGS - output at SelectQuery level in these cases:
+	// 1. SETTINGS is before FORMAT (not after)
+	// 2. SETTINGS is after FORMAT AND there's a FROM clause
+	// When SETTINGS is after FORMAT without FROM, it's only at SelectWithUnionQuery level
+	if len(n.Settings) > 0 && (!n.SettingsAfterFormat || n.From != nil) {
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
@@ -384,9 +386,11 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 	if n.Offset != nil {
 		count++
 	}
-	// SETTINGS is counted at SelectQuery level only if NOT after FORMAT
-	// When SETTINGS comes after FORMAT, it's only counted at SelectWithUnionQuery level
-	if len(n.Settings) > 0 && !n.SettingsAfterFormat {
+	// SETTINGS is counted at SelectQuery level in these cases:
+	// 1. SETTINGS is before FORMAT (not after)
+	// 2. SETTINGS is after FORMAT AND there's a FROM clause
+	// When SETTINGS is after FORMAT without FROM, it's only at SelectWithUnionQuery level
+	if len(n.Settings) > 0 && (!n.SettingsAfterFormat || n.From != nil) {
 		count++
 	}
 	return count
