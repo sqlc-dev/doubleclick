@@ -550,3 +550,215 @@ func explainDetachQuery(sb *strings.Builder, n *ast.DetachQuery, indent string) 
 func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string) {
 	fmt.Fprintf(sb, "%sAttachQuery\n", indent)
 }
+
+func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, depth int) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.AlterQuery\n", indent)
+		return
+	}
+
+	name := n.Table
+	if n.Database != "" {
+		name = n.Database + "." + n.Table
+	}
+
+	children := 2
+	fmt.Fprintf(sb, "%sAlterQuery  %s (children %d)\n", indent, name, children)
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Commands))
+	for _, cmd := range n.Commands {
+		explainAlterCommand(sb, cmd, indent+"  ", depth+2)
+	}
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+}
+
+func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent string, depth int) {
+	children := countAlterCommandChildren(cmd)
+	fmt.Fprintf(sb, "%sAlterCommand %s (children %d)\n", indent, cmd.Type, children)
+
+	switch cmd.Type {
+	case ast.AlterAddColumn:
+		if cmd.Column != nil {
+			Column(sb, cmd.Column, depth+1)
+		}
+		if cmd.AfterColumn != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.AfterColumn)
+		}
+	case ast.AlterModifyColumn:
+		if cmd.Column != nil {
+			Column(sb, cmd.Column, depth+1)
+		}
+		if cmd.AfterColumn != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.AfterColumn)
+		}
+	case ast.AlterDropColumn:
+		if cmd.ColumnName != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ColumnName)
+		}
+	case ast.AlterRenameColumn:
+		if cmd.ColumnName != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ColumnName)
+		}
+		if cmd.NewName != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.NewName)
+		}
+	case ast.AlterClearColumn:
+		if cmd.ColumnName != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ColumnName)
+		}
+		if cmd.Partition != nil {
+			Node(sb, cmd.Partition, depth+1)
+		}
+	case ast.AlterCommentColumn:
+		if cmd.ColumnName != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ColumnName)
+		}
+	case ast.AlterAddIndex, ast.AlterDropIndex, ast.AlterClearIndex, ast.AlterMaterializeIndex:
+		if cmd.Index != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
+		}
+	case ast.AlterAddConstraint:
+		if cmd.Constraint != nil {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Constraint.Name)
+		}
+	case ast.AlterDropConstraint:
+		if cmd.ConstraintName != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ConstraintName)
+		}
+	case ast.AlterModifyTTL:
+		if cmd.TTL != nil && cmd.TTL.Expression != nil {
+			Node(sb, cmd.TTL.Expression, depth+1)
+		}
+	case ast.AlterModifySetting:
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
+		ast.AlterReplacePartition, ast.AlterFreezePartition:
+		if cmd.Partition != nil {
+			Node(sb, cmd.Partition, depth+1)
+		}
+	case ast.AlterFreeze:
+		// No children
+	case ast.AlterDeleteWhere:
+		if cmd.Where != nil {
+			Node(sb, cmd.Where, depth+1)
+		}
+	case ast.AlterUpdate:
+		if len(cmd.Assignments) > 0 {
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(cmd.Assignments))
+			for _, assign := range cmd.Assignments {
+				fmt.Fprintf(sb, "%s  Function equals (children 1)\n", indent)
+				fmt.Fprintf(sb, "%s   ExpressionList (children 2)\n", indent)
+				fmt.Fprintf(sb, "%s    Identifier %s\n", indent, assign.Column)
+				Node(sb, assign.Value, depth+4)
+			}
+		}
+		if cmd.Where != nil {
+			Node(sb, cmd.Where, depth+1)
+		}
+	default:
+		if cmd.Partition != nil {
+			Node(sb, cmd.Partition, depth+1)
+		}
+	}
+}
+
+func countAlterCommandChildren(cmd *ast.AlterCommand) int {
+	children := 0
+	switch cmd.Type {
+	case ast.AlterAddColumn, ast.AlterModifyColumn:
+		if cmd.Column != nil {
+			children++
+		}
+		if cmd.AfterColumn != "" {
+			children++
+		}
+	case ast.AlterDropColumn, ast.AlterCommentColumn:
+		if cmd.ColumnName != "" {
+			children++
+		}
+	case ast.AlterRenameColumn:
+		if cmd.ColumnName != "" {
+			children++
+		}
+		if cmd.NewName != "" {
+			children++
+		}
+	case ast.AlterClearColumn:
+		if cmd.ColumnName != "" {
+			children++
+		}
+		if cmd.Partition != nil {
+			children++
+		}
+	case ast.AlterAddIndex, ast.AlterDropIndex, ast.AlterClearIndex, ast.AlterMaterializeIndex:
+		if cmd.Index != "" {
+			children++
+		}
+	case ast.AlterAddConstraint:
+		if cmd.Constraint != nil {
+			children++
+		}
+	case ast.AlterDropConstraint:
+		if cmd.ConstraintName != "" {
+			children++
+		}
+	case ast.AlterModifyTTL:
+		if cmd.TTL != nil && cmd.TTL.Expression != nil {
+			children++
+		}
+	case ast.AlterModifySetting:
+		children = 1
+	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
+		ast.AlterReplacePartition, ast.AlterFreezePartition:
+		if cmd.Partition != nil {
+			children++
+		}
+	case ast.AlterFreeze:
+		// No children
+	case ast.AlterDeleteWhere:
+		if cmd.Where != nil {
+			children++
+		}
+	case ast.AlterUpdate:
+		if len(cmd.Assignments) > 0 {
+			children++
+		}
+		if cmd.Where != nil {
+			children++
+		}
+	default:
+		if cmd.Partition != nil {
+			children++
+		}
+	}
+	return children
+}
+
+func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent string) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.OptimizeQuery\n", indent)
+		return
+	}
+
+	name := n.Table
+	if n.Final {
+		name += "_final"
+	}
+
+	fmt.Fprintf(sb, "%sOptimizeQuery  %s (children %d)\n", indent, name, 1)
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+}
+
+func explainTruncateQuery(sb *strings.Builder, n *ast.TruncateQuery, indent string) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.TruncateQuery\n", indent)
+		return
+	}
+
+	name := n.Table
+	if n.Database != "" {
+		name = n.Database + "." + n.Table
+	}
+
+	fmt.Fprintf(sb, "%sTruncateQuery  %s (children %d)\n", indent, name, 1)
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+}
