@@ -137,6 +137,12 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainDetachQuery(sb, n, indent)
 	case *ast.AttachQuery:
 		explainAttachQuery(sb, n, indent)
+	case *ast.AlterQuery:
+		explainAlterQuery(sb, n, indent, depth)
+	case *ast.OptimizeQuery:
+		explainOptimizeQuery(sb, n, indent)
+	case *ast.TruncateQuery:
+		explainTruncateQuery(sb, n, indent)
 
 	// Types
 	case *ast.DataType:
