@@ -79,8 +79,9 @@ func formatLiteral(sb *strings.Builder, lit *ast.Literal) {
 	switch lit.Type {
 	case ast.LiteralString:
 		sb.WriteString("'")
-		// Escape single quotes in the string
+		// Escape backslashes and single quotes in the string
 		s := lit.Value.(string)
+		s = strings.ReplaceAll(s, `\`, `\\`)
 		s = strings.ReplaceAll(s, "'", "''")
 		sb.WriteString(s)
 		sb.WriteString("'")
@@ -289,6 +290,11 @@ func formatBinaryExpr(sb *strings.Builder, expr *ast.BinaryExpr) {
 // formatUnaryExpr formats a unary expression.
 func formatUnaryExpr(sb *strings.Builder, expr *ast.UnaryExpr) {
 	sb.WriteString(expr.Op)
+	// Add space after word operators like NOT
+	op := strings.ToUpper(expr.Op)
+	if op == "NOT" {
+		sb.WriteString(" ")
+	}
 	Expression(sb, expr.Operand)
 }
 

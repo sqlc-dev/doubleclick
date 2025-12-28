@@ -6,154 +6,13 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/sqlc-dev/doubleclick/internal/normalize"
 	"github.com/sqlc-dev/doubleclick/parser"
 )
-
-// whitespaceRegex matches sequences of whitespace characters
-var whitespaceRegex = regexp.MustCompile(`\s+`)
-
-// normalizeWhitespace collapses all whitespace sequences to a single space
-// and trims leading/trailing whitespace. This allows comparing SQL statements
-// while ignoring formatting differences.
-func normalizeWhitespace(s string) string {
-	return strings.TrimSpace(whitespaceRegex.ReplaceAllString(s, " "))
-}
-
-// operatorSpaceRegex normalizes spaces around operators for comparison
-var operatorSpaceRegex = regexp.MustCompile(`\s*([=<>!]+|::|->|\|\||&&)\s*`)
-
-// numericUnderscoreRegex removes underscores from numeric literals
-var numericUnderscoreRegex = regexp.MustCompile(`(\d)_(\d)`)
-
-// backtickIdentRegex normalizes backtick identifiers to unquoted
-var backtickIdentRegex = regexp.MustCompile("`([^`]+)`")
-
-// normalizeForFormat normalizes SQL for format comparison by collapsing
-// whitespace, normalizing spaces around operators, and stripping trailing
-// semicolons. This allows comparing formatted output regardless of whitespace
-// differences around operators.
-func normalizeForFormat(s string) string {
-	normalized := normalizeWhitespace(s)
-	// Normalize spaces around operators (remove spaces)
-	normalized = operatorSpaceRegex.ReplaceAllString(normalized, "$1")
-	// Remove underscores from numeric literals (100_000 -> 100000)
-	for numericUnderscoreRegex.MatchString(normalized) {
-		normalized = numericUnderscoreRegex.ReplaceAllString(normalized, "$1$2")
-	}
-	// Normalize backtick identifiers to unquoted
-	normalized = backtickIdentRegex.ReplaceAllString(normalized, "$1")
-	// Normalize "INNER JOIN" to "JOIN" (they're equivalent) - case insensitive
-	normalized = regexp.MustCompile(`(?i)\bINNER\s+JOIN\b`).ReplaceAllString(normalized, "JOIN")
-	// Normalize "LEFT OUTER JOIN" to "LEFT JOIN"
-	normalized = regexp.MustCompile(`(?i)\bLEFT\s+OUTER\s+JOIN\b`).ReplaceAllString(normalized, "LEFT JOIN")
-	// Normalize "RIGHT OUTER JOIN" to "RIGHT JOIN"
-	normalized = regexp.MustCompile(`(?i)\bRIGHT\s+OUTER\s+JOIN\b`).ReplaceAllString(normalized, "RIGHT JOIN")
-	// Normalize "ORDER BY x ASC" to "ORDER BY x" (ASC is default)
-	normalized = regexp.MustCompile(`\bASC\b`).ReplaceAllString(normalized, "")
-	// Normalize "OFFSET n ROWS" to "OFFSET n"
-	normalized = regexp.MustCompile(`\bOFFSET\s+(\S+)\s+ROWS?\b`).ReplaceAllString(normalized, "OFFSET $1")
-	// Normalize escaped backslashes in strings (\\x -> \x)
-	normalized = strings.ReplaceAll(normalized, `\\`, `\`)
-	// Normalize CROSS JOIN to comma
-	normalized = strings.ReplaceAll(normalized, "CROSS JOIN", ",")
-	// Normalize ENGINE = X to ENGINE X (and engine X to ENGINE X)
-	normalized = regexp.MustCompile(`(?i)\bENGINE\s*=\s*`).ReplaceAllString(normalized, "ENGINE ")
-	// Normalize INSERT INTO TABLE to INSERT INTO
-	normalized = regexp.MustCompile(`(?i)\bINSERT\s+INTO\s+TABLE\b`).ReplaceAllString(normalized, "INSERT INTO")
-	// Normalize UNION DISTINCT to UNION (DISTINCT is default)
-	normalized = regexp.MustCompile(`(?i)\bUNION\s+DISTINCT\b`).ReplaceAllString(normalized, "UNION")
-	// Normalize PARTITION BY () to PARTITION BY (for empty ORDER BY)
-	normalized = regexp.MustCompile(`\bORDER BY \(\)\b`).ReplaceAllString(normalized, "ORDER BY tuple()")
-	// Normalize INSERT INTO table (cols) to have no space before ( (or consistent spacing)
-	// This matches "tablename (" and removes the space: "tablename("
-	normalized = regexp.MustCompile(`(\w+)\s+\((\w)`).ReplaceAllString(normalized, "$1($2")
-	// Normalize WITH TIES to TIES (for LIMIT)
-	normalized = regexp.MustCompile(`(?i)\bWITH\s+TIES\b`).ReplaceAllString(normalized, "TIES")
-	// Normalize parentheses around simple column references in WHERE: (database=...) to database=...
-	normalized = regexp.MustCompile(`\((\w+)=`).ReplaceAllString(normalized, "$1=")
-	// Normalize parentheses around lambda bodies: (x -> (expr)) to (x -> expr)
-	normalized = regexp.MustCompile(`->\s*\(`).ReplaceAllString(normalized, "-> ")
-	// Now we need to remove extra closing parens, but this is tricky
-	// Let's try a simpler approach: remove redundant parens around IS NULL, IS NOT NULL
-	normalized = regexp.MustCompile(`\((\w+\s+IS\s+NOT\s+NULL)\)`).ReplaceAllString(normalized, "$1")
-	normalized = regexp.MustCompile(`\((\w+\s+IS\s+NULL)\)`).ReplaceAllString(normalized, "$1")
-	// Re-normalize whitespace after replacements
-	normalized = normalizeWhitespace(normalized)
-	// Strip trailing semicolon if present
-	return strings.TrimSuffix(normalized, ";")
-}
-
-// stripComments removes SQL comments from a query string.
-// It handles:
-// - Line comments: -- to end of line
-// - Block comments: /* ... */ with nesting support
-// This is used only for format test comparison.
-func stripComments(s string) string {
-	var result strings.Builder
-	result.Grow(len(s))
-
-	i := 0
-	for i < len(s) {
-		// Check for line comment: --
-		if i+1 < len(s) && s[i] == '-' && s[i+1] == '-' {
-			// Skip until end of line
-			for i < len(s) && s[i] != '\n' {
-				i++
-			}
-			continue
-		}
-
-		// Check for block comment: /* ... */
-		if i+1 < len(s) && s[i] == '/' && s[i+1] == '*' {
-			depth := 1
-			i += 2
-			for i < len(s) && depth > 0 {
-				if i+1 < len(s) && s[i] == '/' && s[i+1] == '*' {
-					depth++
-					i += 2
-				} else if i+1 < len(s) && s[i] == '*' && s[i+1] == '/' {
-					depth--
-					i += 2
-				} else {
-					i++
-				}
-			}
-			continue
-		}
-
-		// Check for string literal - don't strip comments inside strings
-		if s[i] == '\'' {
-			result.WriteByte(s[i])
-			i++
-			for i < len(s) {
-				if s[i] == '\'' {
-					result.WriteByte(s[i])
-					i++
-					// Check for escaped quote ''
-					if i < len(s) && s[i] == '\'' {
-						result.WriteByte(s[i])
-						i++
-						continue
-					}
-					break
-				}
-				result.WriteByte(s[i])
-				i++
-			}
-			continue
-		}
-
-		result.WriteByte(s[i])
-		i++
-	}
-
-	return result.String()
-}
 
 // checkSkipped runs skipped todo tests to see which ones now pass.
 // Use with: go test ./parser -check-skipped -v
@@ -322,11 +181,11 @@ func TestParser(t *testing.T) {
 			if !metadata.TodoFormat || *checkFormat {
 				formatted := parser.Format(stmts)
 				// Strip comments from expected since formatter doesn't preserve them
-				expected := strings.TrimSpace(stripComments(query))
+				expected := strings.TrimSpace(normalize.StripComments(query))
 				// Compare with format normalization (whitespace + trailing semicolons)
 				// Use case-insensitive comparison since formatter uses uppercase keywords
-				formattedNorm := normalizeForFormat(formatted)
-				expectedNorm := normalizeForFormat(expected)
+				formattedNorm := normalize.ForFormat(formatted)
+				expectedNorm := normalize.ForFormat(expected)
 				if !strings.EqualFold(formattedNorm, expectedNorm) {
 					if metadata.TodoFormat {
 						if *checkFormat {

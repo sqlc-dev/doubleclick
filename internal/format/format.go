@@ -67,6 +67,10 @@ func Statement(sb *strings.Builder, stmt ast.Statement) {
 		formatDetachQuery(sb, s)
 	case *ast.AttachQuery:
 		formatAttachQuery(sb, s)
+	case *ast.ShowPrivilegesQuery:
+		formatShowPrivilegesQuery(sb, s)
+	case *ast.ShowCreateQuotaQuery:
+		formatShowCreateQuotaQuery(sb, s)
 	default:
 		// Fallback for unhandled statements
 	}

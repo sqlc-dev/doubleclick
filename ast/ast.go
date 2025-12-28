@@ -43,8 +43,9 @@ func (s *SelectWithUnionQuery) statementNode()      {}
 
 // SelectIntersectExceptQuery represents SELECT ... INTERSECT/EXCEPT ... queries.
 type SelectIntersectExceptQuery struct {
-	Position token.Position `json:"-"`
-	Selects  []Statement    `json:"selects"`
+	Position  token.Position `json:"-"`
+	Selects   []Statement    `json:"selects"`
+	Operators []string       `json:"operators,omitempty"` // "INTERSECT", "EXCEPT", etc. for each operator between selects
 }
 
 func (s *SelectIntersectExceptQuery) Pos() token.Position { return s.Position }
