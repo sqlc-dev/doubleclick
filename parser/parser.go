@@ -2895,18 +2895,23 @@ func (p *Parser) parseExplain() *ast.ExplainQuery {
 		switch strings.ToUpper(p.current.Value) {
 		case "AST":
 			explain.ExplainType = ast.ExplainAST
+			explain.ExplicitType = true
 			p.nextToken()
 		case "SYNTAX":
 			explain.ExplainType = ast.ExplainSyntax
+			explain.ExplicitType = true
 			p.nextToken()
 		case "PLAN":
 			explain.ExplainType = ast.ExplainPlan
+			explain.ExplicitType = true
 			p.nextToken()
 		case "PIPELINE":
 			explain.ExplainType = ast.ExplainPipeline
+			explain.ExplicitType = true
 			p.nextToken()
 		case "ESTIMATE":
 			explain.ExplainType = ast.ExplainEstimate
+			explain.ExplicitType = true
 			p.nextToken()
 		case "CURRENT":
 			// EXPLAIN CURRENT TRANSACTION
@@ -2915,6 +2920,7 @@ func (p *Parser) parseExplain() *ast.ExplainQuery {
 				p.nextToken()
 			}
 			explain.ExplainType = ast.ExplainCurrentTransaction
+			explain.ExplicitType = true
 			return explain // No statement follows CURRENT TRANSACTION
 		default:
 			explain.ExplainType = ast.ExplainPlan
@@ -2926,6 +2932,7 @@ func (p *Parser) parseExplain() *ast.ExplainQuery {
 	// Options can be identifiers or keywords like OPTIMIZE followed by =
 	for p.peekIs(token.EQ) && !p.currentIs(token.SELECT) && !p.currentIs(token.WITH) {
 		// This is an option (name = value)
+		explain.HasSettings = true
 		p.nextToken() // skip option name
 		p.nextToken() // skip =
 		p.parseExpression(LOWEST) // skip value

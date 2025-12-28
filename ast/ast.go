@@ -559,9 +559,11 @@ const (
 
 // ExplainQuery represents an EXPLAIN statement.
 type ExplainQuery struct {
-	Position    token.Position `json:"-"`
-	ExplainType ExplainType    `json:"explain_type"`
-	Statement   Statement      `json:"statement"`
+	Position     token.Position `json:"-"`
+	ExplainType  ExplainType    `json:"explain_type"`
+	Statement    Statement      `json:"statement"`
+	HasSettings  bool           `json:"has_settings,omitempty"`
+	ExplicitType bool           `json:"explicit_type,omitempty"` // true if type was explicitly specified
 }
 
 func (e *ExplainQuery) Pos() token.Position { return e.Position }

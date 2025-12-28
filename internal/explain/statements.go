@@ -384,22 +384,36 @@ func explainSystemQuery(sb *strings.Builder, indent string) {
 }
 
 func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string, depth int) {
+	// Determine the type string - only show if explicitly specified
+	typeStr := ""
+	if n.ExplicitType {
+		typeStr = " " + string(n.ExplainType)
+	}
+
 	// EXPLAIN CURRENT TRANSACTION has no children
 	if n.ExplainType == ast.ExplainCurrentTransaction {
 		// At top level (depth 0), ClickHouse outputs "Explain EXPLAIN <TYPE>"
 		if depth == 0 {
-			fmt.Fprintf(sb, "%sExplain EXPLAIN %s\n", indent, n.ExplainType)
+			fmt.Fprintf(sb, "%sExplain EXPLAIN%s\n", indent, typeStr)
 		} else {
-			fmt.Fprintf(sb, "%sExplain %s\n", indent, n.ExplainType)
+			fmt.Fprintf(sb, "%sExplain%s\n", indent, typeStr)
 		}
 		return
+	}
+	// Count children: settings (if present) + statement
+	children := 1
+	if n.HasSettings {
+		children++
 	}
 	// At top level (depth 0), ClickHouse outputs "Explain EXPLAIN <TYPE>"
 	// Nested in subqueries, it outputs "Explain <TYPE>"
 	if depth == 0 {
-		fmt.Fprintf(sb, "%sExplain EXPLAIN %s (children %d)\n", indent, n.ExplainType, 1)
+		fmt.Fprintf(sb, "%sExplain EXPLAIN%s (children %d)\n", indent, typeStr, children)
 	} else {
-		fmt.Fprintf(sb, "%sExplain %s (children %d)\n", indent, n.ExplainType, 1)
+		fmt.Fprintf(sb, "%sExplain%s (children %d)\n", indent, typeStr, children)
+	}
+	if n.HasSettings {
+		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 	Node(sb, n.Statement, depth+1)
 }
