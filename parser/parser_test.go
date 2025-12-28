@@ -245,7 +245,7 @@ func TestParser(t *testing.T) {
 							if len(metadata.ExplainTodo) == 0 {
 								metadata.ExplainTodo = nil
 							}
-							updatedBytes, err := json.Marshal(metadata)
+							updatedBytes, err := json.MarshalIndent(metadata, "", "  ")
 							if err != nil {
 								t.Errorf("Failed to marshal updated metadata: %v", err)
 							} else if err := os.WriteFile(metadataPath, append(updatedBytes, '\n'), 0644); err != nil {
