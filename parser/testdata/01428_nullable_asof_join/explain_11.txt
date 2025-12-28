@@ -1,0 +1,72 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 8)
+    Identifier a.pk
+    Identifier b.pk
+    Identifier a.dt
+    Identifier b.dt
+    Function toTypeName (children 1)
+     ExpressionList (children 1)
+      Identifier a.pk
+    Function toTypeName (children 1)
+     ExpressionList (children 1)
+      Identifier b.pk
+    Function toTypeName (children 1)
+     ExpressionList (children 1)
+      Function materialize (children 1)
+       ExpressionList (children 1)
+        Identifier a.dt
+    Function toTypeName (children 1)
+     ExpressionList (children 1)
+      Function materialize (children 1)
+       ExpressionList (children 1)
+        Identifier b.dt
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias a) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 2)
+           Function greater (alias pk) (children 1)
+            ExpressionList (children 2)
+             Function toUInt8 (children 1)
+              ExpressionList (children 1)
+               Identifier number
+             Literal UInt64_0
+           Function toUInt8 (alias dt) (children 1)
+            ExpressionList (children 1)
+             Identifier number
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             Function numbers (children 1)
+              ExpressionList (children 1)
+               Literal UInt64_3
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias b) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 1)
+          ExpressionList (children 2)
+           Literal UInt64_1 (alias pk)
+           Function toNullable (alias dt) (children 1)
+            ExpressionList (children 1)
+             Literal UInt64_0
+     TableJoin (children 1)
+      Function and (children 1)
+       ExpressionList (children 2)
+        Function equals (children 1)
+         ExpressionList (children 2)
+          Identifier a.pk
+          Identifier b.pk
+        Function greaterOrEquals (children 1)
+         ExpressionList (children 2)
+          Identifier a.dt
+          Identifier b.dt
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier a.dt

@@ -1,0 +1,96 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 3)
+    Identifier nation
+    Identifier o_year
+    Function sum (alias sum_profit) (children 1)
+     ExpressionList (children 1)
+      Identifier amount
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias profit) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 3)
+          ExpressionList (children 3)
+           Identifier n_name (alias nation)
+           Function toYear (alias o_year) (children 1)
+            ExpressionList (children 1)
+             Identifier o_orderdate
+           Function minus (alias amount) (children 1)
+            ExpressionList (children 2)
+             Function multiply (children 1)
+              ExpressionList (children 2)
+               Identifier l_extendedprice
+               Function minus (children 1)
+                ExpressionList (children 2)
+                 Literal UInt64_1
+                 Identifier l_discount
+             Function multiply (children 1)
+              ExpressionList (children 2)
+               Identifier ps_supplycost
+               Identifier l_quantity
+          TablesInSelectQuery (children 6)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier part
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier supplier
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier lineitem
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier partsupp
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier orders
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier nation
+            TableJoin
+          Function and (children 1)
+           ExpressionList (children 7)
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier s_suppkey
+              Identifier l_suppkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier ps_suppkey
+              Identifier l_suppkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier ps_partkey
+              Identifier l_partkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier p_partkey
+              Identifier l_partkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier o_orderkey
+              Identifier l_orderkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier s_nationkey
+              Identifier n_nationkey
+            Function like (children 1)
+             ExpressionList (children 2)
+              Identifier p_name
+              Literal \'%green%\'
+   ExpressionList (children 2)
+    Identifier nation
+    Identifier o_year
+   ExpressionList (children 2)
+    OrderByElement (children 1)
+     Identifier nation
+    OrderByElement (children 1)
+     Identifier o_year

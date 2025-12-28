@@ -1,0 +1,74 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 3)
+    Identifier step
+    Function count (children 1)
+     ExpressionList
+    Function sum (children 1)
+     ExpressionList (children 1)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier ts1
+        Identifier ts2
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 3)
+           Identifier t.step (alias step)
+           Function tupleElement (alias ts1) (children 1)
+            ExpressionList (children 2)
+             Function finalizeAggregation (children 1)
+              ExpressionList (children 1)
+               Identifier t.samples
+             Literal UInt64_1
+           Function arrayMap (alias ts2) (children 1)
+            ExpressionList (children 2)
+             Function lambda (children 1)
+              ExpressionList (children 2)
+               Function tuple (children 1)
+                ExpressionList (children 1)
+                 Identifier x
+               Function plus (children 1)
+                ExpressionList (children 2)
+                 Identifier t_delta.grid_timestamp
+                 Function toIntervalMillisecond (children 1)
+                  ExpressionList (children 1)
+                   Identifier x
+             Function tupleElement (children 1)
+              ExpressionList (children 2)
+               Function finalizeAggregation (children 1)
+                ExpressionList (children 1)
+                 Identifier t_delta.samples
+               Literal UInt64_1
+          TablesInSelectQuery (children 2)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier t_resampled_timeseries (alias t)
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier t_resampled_timeseries_delta (alias t_delta)
+            TableJoin (children 1)
+             Function and (children 1)
+              ExpressionList (children 3)
+               Function equals (children 1)
+                ExpressionList (children 2)
+                 Identifier t.step
+                 Identifier t_delta.step
+               Function equals (children 1)
+                ExpressionList (children 2)
+                 Identifier t.metric_id
+                 Identifier t_delta.metric_id
+               Function equals (children 1)
+                ExpressionList (children 2)
+                 Identifier t.grid_timestamp
+                 Identifier t_delta.grid_timestamp
+   ExpressionList (children 1)
+    Identifier step
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier step

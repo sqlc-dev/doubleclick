@@ -1,0 +1,66 @@
+CreateQuery explain_index_has (children 2)
+ Identifier explain_index_has
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 5)
+    ExpressionList (children 1)
+     Function trimLeft (alias explain) (children 1)
+      ExpressionList (children 1)
+       Identifier explain
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       Subquery (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 2)
+           ExpressionList (children 1)
+            Asterisk
+           TablesInSelectQuery (children 1)
+            TablesInSelectQueryElement (children 1)
+             TableExpression (children 1)
+              Function viewExplain (children 1)
+               ExpressionList (children 3)
+                Literal \'EXPLAIN\'
+                Literal \'indexes = 1\'
+                Subquery (children 1)
+                 SelectWithUnionQuery (children 1)
+                  ExpressionList (children 1)
+                   SelectQuery (children 3)
+                    ExpressionList (children 1)
+                     Function count (children 1)
+                      ExpressionList
+                    TablesInSelectQuery (children 1)
+                     TablesInSelectQueryElement (children 1)
+                      TableExpression (children 1)
+                       TableIdentifier tab
+                    Function multiIf (children 1)
+                     ExpressionList (children 3)
+                      Function equals (children 1)
+                       ExpressionList (children 2)
+                        QueryParameter use_idx_fixed:boolean
+                        Literal UInt64_1
+                      Function has (children 1)
+                       ExpressionList (children 2)
+                        Identifier map_fixed
+                        QueryParameter filter:FixedString(2)
+                      Function has (children 1)
+                       ExpressionList (children 2)
+                        Identifier map
+                        QueryParameter filter:String
+    Function or (children 1)
+     ExpressionList (children 3)
+      Function like (children 1)
+       ExpressionList (children 2)
+        Identifier explain
+        Literal \'%Description:%\'
+      Function like (children 1)
+       ExpressionList (children 2)
+        Identifier explain
+        Literal \'%Parts:%\'
+      Function like (children 1)
+       ExpressionList (children 2)
+        Identifier explain
+        Literal \'%Granules:%\'
+    Literal UInt64_2
+    Literal UInt64_3

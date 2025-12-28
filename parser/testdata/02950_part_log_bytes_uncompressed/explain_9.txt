@@ -1,0 +1,66 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 5)
+    Identifier event_type
+    Identifier table
+    Identifier part_name
+    Function greater (children 1)
+     ExpressionList (children 2)
+      Identifier bytes_uncompressed
+      Literal UInt64_0
+    Function if (children 1)
+     ExpressionList (children 3)
+      Function greater (children 1)
+       ExpressionList (children 2)
+        Identifier bytes_uncompressed
+        Literal UInt64_0
+      Function if (children 1)
+       ExpressionList (children 3)
+        Function less (children 1)
+         ExpressionList (children 2)
+          Identifier size_in_bytes
+          Identifier bytes_uncompressed
+        Literal \'1\'
+        Function toString (children 1)
+         ExpressionList (children 1)
+          Function tuple (children 1)
+           ExpressionList (children 2)
+            Identifier size_in_bytes
+            Identifier bytes_uncompressed
+      Literal \'0\'
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.part_log
+   Function and (children 1)
+    ExpressionList (children 4)
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier event_date
+       Function yesterday (children 1)
+        ExpressionList
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier database
+       Function currentDatabase (children 1)
+        ExpressionList
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier table
+       Literal \'part_log_bytes_uncompressed\'
+     Function or (children 1)
+      ExpressionList (children 2)
+       Function notEquals (children 1)
+        ExpressionList (children 2)
+         Identifier event_type
+         Literal \'RemovePart\'
+       Function equals (children 1)
+        ExpressionList (children 2)
+         Identifier part_name
+         Literal \'all_4_4_0\'
+   ExpressionList (children 2)
+    OrderByElement (children 1)
+     Identifier part_name
+    OrderByElement (children 1)
+     Identifier event_type

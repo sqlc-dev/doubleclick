@@ -1,0 +1,49 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 1)
+    Subquery (alias time) (children 1)
+     SelectWithUnionQuery (children 1)
+      ExpressionList (children 1)
+       SelectQuery (children 5)
+        ExpressionList (children 2)
+         Identifier event_time_microseconds
+         Identifier event_time
+        TablesInSelectQuery (children 1)
+         TablesInSelectQueryElement (children 1)
+          TableExpression (children 1)
+           TableIdentifier system.query_log
+        Function equals (children 1)
+         ExpressionList (children 2)
+          Identifier current_database
+          Function currentDatabase (children 1)
+           ExpressionList
+        ExpressionList (children 1)
+         OrderByElement (children 1)
+          Identifier event_time
+        Literal UInt64_1
+   ExpressionList (children 1)
+    Function if (children 1)
+     ExpressionList (children 3)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Function dateDiff (children 1)
+         ExpressionList (children 3)
+          Literal \'second\'
+          Function toDateTime (children 1)
+           ExpressionList (children 1)
+            Function tupleElement (children 1)
+             ExpressionList (children 2)
+              Identifier time
+              Literal UInt64_1
+          Function toDateTime (children 1)
+           ExpressionList (children 1)
+            Function tupleElement (children 1)
+             ExpressionList (children 2)
+              Identifier time
+              Literal UInt64_2
+        Literal UInt64_0
+      Literal \'ok\'
+      Function toString (children 1)
+       ExpressionList (children 1)
+        Identifier time

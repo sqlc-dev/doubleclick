@@ -1,0 +1,23 @@
+CreateQuery monthly_aggregated_data_mv (children 3)
+ Identifier monthly_aggregated_data_mv
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 3)
+    ExpressionList (children 3)
+     Function toDate (alias month) (children 1)
+      ExpressionList (children 1)
+       Function toStartOfMonth (children 1)
+        ExpressionList (children 1)
+         Identifier event_time
+     Identifier domain_name
+     Function sumState (alias sumCountViews) (children 1)
+      ExpressionList (children 1)
+       Identifier count_views
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier hourly_data
+    ExpressionList (children 2)
+     Identifier domain_name
+     Identifier month
+ ViewTargets

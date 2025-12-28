@@ -1,0 +1,88 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 18)
+    Function geohashDecode (alias actual) (children 1)
+     ExpressionList (children 1)
+      Identifier encoded
+    Literal \'expected:\'
+    Identifier encoded
+    Literal \'=>\'
+    Identifier latitude
+    Identifier longitude
+    Literal \'length:\'
+    Function length (children 1)
+     ExpressionList (children 1)
+      Identifier encoded
+    Literal \'max lat error:\'
+    Function divide (alias latitude_max_error) (children 1)
+     ExpressionList (children 2)
+      Literal UInt64_180
+      Function power (children 1)
+       ExpressionList (children 2)
+        Literal UInt64_2
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Literal Float64_2.5
+          Function length (children 1)
+           ExpressionList (children 1)
+            Identifier encoded
+    Literal \'max lon error:\'
+    Function divide (alias longitude_max_error) (children 1)
+     ExpressionList (children 2)
+      Literal UInt64_360
+      Function power (children 1)
+       ExpressionList (children 2)
+        Literal UInt64_2
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Literal Float64_2.5
+          Function length (children 1)
+           ExpressionList (children 1)
+            Identifier encoded
+    Literal \'err:\'
+    Function minus (alias lat_error) (children 1)
+     ExpressionList (children 2)
+      Function tupleElement (children 1)
+       ExpressionList (children 2)
+        Identifier actual
+        Literal UInt64_2
+      Identifier latitude
+    Function minus (alias lon_error) (children 1)
+     ExpressionList (children 2)
+      Function tupleElement (children 1)
+       ExpressionList (children 2)
+        Identifier actual
+        Literal UInt64_1
+      Identifier longitude
+    Literal \'derr:\'
+    Function minus (children 1)
+     ExpressionList (children 2)
+      Function abs (children 1)
+       ExpressionList (children 1)
+        Identifier lat_error
+      Identifier latitude_max_error
+    Function minus (children 1)
+     ExpressionList (children 2)
+      Function abs (children 1)
+       ExpressionList (children 1)
+        Identifier lon_error
+      Identifier longitude_max_error
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier geohash_test_data
+   Function or (children 1)
+    ExpressionList (children 2)
+     Function greater (children 1)
+      ExpressionList (children 2)
+       Function abs (children 1)
+        ExpressionList (children 1)
+         Identifier lat_error
+       Identifier latitude_max_error
+     Function greater (children 1)
+      ExpressionList (children 2)
+       Function abs (children 1)
+        ExpressionList (children 1)
+         Identifier lon_error
+       Identifier longitude_max_error

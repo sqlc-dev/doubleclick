@@ -1,0 +1,62 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 5)
+   ExpressionList (children 5)
+    Identifier table
+    Function sum (alias rows) (children 1)
+     ExpressionList (children 1)
+      Identifier rows
+    Function floor (alias data_size_uncompressed) (children 1)
+     ExpressionList (children 1)
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier data_uncompressed_bytes
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Literal UInt64_1024
+          Literal UInt64_1024
+    Function floor (alias data_size_compressed) (children 1)
+     ExpressionList (children 1)
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier data_compressed_bytes
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Literal UInt64_1024
+          Literal UInt64_1024
+    Function floor (alias total_size_on_disk) (children 1)
+     ExpressionList (children 1)
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier bytes_on_disk
+        Function multiply (children 1)
+         ExpressionList (children 2)
+          Literal UInt64_1024
+          Literal UInt64_1024
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.parts
+   Function and (children 1)
+    ExpressionList (children 3)
+     Identifier active
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier database
+       Function currentDatabase (children 1)
+        ExpressionList
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier table
+       Literal \'test\'
+   ExpressionList (children 1)
+    Identifier table
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier table

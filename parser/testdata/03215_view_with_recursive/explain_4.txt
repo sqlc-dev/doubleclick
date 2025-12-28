@@ -1,0 +1,62 @@
+CreateQuery 03215_multi_v (children 2)
+ Identifier 03215_multi_v
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 3)
+    ExpressionList (children 2)
+     WithElement (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 2)
+           Identifier number (alias task_id)
+           Function minus (alias parent_id) (children 1)
+            ExpressionList (children 2)
+             Identifier number
+             Literal UInt64_1
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             Function numbers (children 1)
+              ExpressionList (children 1)
+               Literal UInt64_10
+     WithElement (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 2)
+         SelectQuery (children 3)
+          ExpressionList (children 2)
+           Identifier task_id
+           Identifier parent_id
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier task (alias t)
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier t.parent_id
+            Literal UInt64_1
+         SelectQuery (children 3)
+          ExpressionList (children 2)
+           Identifier t.task_id
+           Identifier t.parent_id
+          TablesInSelectQuery (children 2)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier task (alias t)
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier rtq (alias r)
+            TableJoin
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier t.parent_id
+            Identifier r.task_id
+    ExpressionList (children 1)
+     Function count (children 1)
+      ExpressionList
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier rtq

@@ -1,0 +1,50 @@
+CreateQuery prop_table (children 3)
+ Identifier prop_table
+ Columns definition (children 1)
+  ExpressionList (children 6)
+   ColumnDeclaration column_default (children 2)
+    DataType UInt64
+    Literal UInt64_42
+   ColumnDeclaration column_materialized (children 2)
+    DataType UInt64
+    Function multiply (children 1)
+     ExpressionList (children 2)
+      Identifier column_default
+      Literal UInt64_42
+   ColumnDeclaration column_alias (children 2)
+    DataType UInt64
+    Function plus (children 1)
+     ExpressionList (children 2)
+      Identifier column_default
+      Literal UInt64_1
+   ColumnDeclaration column_codec (children 2)
+    DataType String
+    Function CODEC (children 1)
+     ExpressionList (children 1)
+      Function ZSTD (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_10
+   ColumnDeclaration column_comment (children 2)
+    DataType Date
+    Literal \'Some comment\'
+   ColumnDeclaration column_ttl (children 2)
+    DataType UInt64
+    Function plus (children 1)
+     ExpressionList (children 2)
+      Identifier column_comment
+      Function toIntervalMonth (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_1
+ Storage definition (children 3)
+  Function MergeTree (children 1)
+   ExpressionList
+  Function tuple (children 1)
+   ExpressionList
+  ExpressionList (children 1)
+   TTLElement (children 1)
+    Function plus (children 1)
+     ExpressionList (children 2)
+      Identifier column_comment
+      Function toIntervalMonth (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_2

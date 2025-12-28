@@ -1,0 +1,47 @@
+SelectWithUnionQuery (children 2)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 2)
+    Function count (alias num) (children 1)
+     ExpressionList (children 1)
+      Function materialize (children 1)
+       ExpressionList (children 1)
+        Function toLowCardinality (children 1)
+         ExpressionList (children 1)
+          Literal UInt64_1
+    Function hostName (alias hostName) (children 1)
+     ExpressionList
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_log (alias a)
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier system.processes (alias b)
+     TableJoin (children 1)
+      Function and (children 1)
+       ExpressionList (children 3)
+        Function equals (children 1)
+         ExpressionList (children 2)
+          Identifier type
+          Function toFixedString (children 1)
+           ExpressionList (children 2)
+            Function toNullable (children 1)
+             ExpressionList (children 1)
+              Literal \'QueryStart\'
+            Literal UInt64_10
+        Function greater (children 1)
+         ExpressionList (children 2)
+          Function dateDiff (children 1)
+           ExpressionList (children 3)
+            Literal \'second\'
+            Identifier event_time
+            Function now (children 1)
+             ExpressionList
+          Literal UInt64_5
+        Function equals (children 1)
+         ExpressionList (children 2)
+          Identifier current_database
+          Function currentDatabase (children 1)
+           ExpressionList
+ Identifier Null

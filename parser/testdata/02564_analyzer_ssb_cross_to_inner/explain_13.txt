@@ -1,0 +1,96 @@
+Explain EXPLAIN QUERY TREE (children 2)
+ Set
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 5)
+    ExpressionList (children 4)
+     Identifier D_YEARMONTHNUM
+     Identifier S_CITY
+     Identifier P_BRAND
+     Function sum (alias profit) (children 1)
+      ExpressionList (children 1)
+       Function minus (children 1)
+        ExpressionList (children 2)
+         Identifier LO_REVENUE
+         Identifier LO_SUPPLYCOST
+    TablesInSelectQuery (children 5)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier date
+     TablesInSelectQueryElement (children 2)
+      TableExpression (children 1)
+       TableIdentifier customer
+      TableJoin
+     TablesInSelectQueryElement (children 2)
+      TableExpression (children 1)
+       TableIdentifier supplier
+      TableJoin
+     TablesInSelectQueryElement (children 2)
+      TableExpression (children 1)
+       TableIdentifier part
+      TableJoin
+     TablesInSelectQueryElement (children 2)
+      TableExpression (children 1)
+       TableIdentifier lineorder
+      TableJoin
+    Function and (children 1)
+     ExpressionList (children 8)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier LO_CUSTKEY
+        Identifier C_CUSTKEY
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier LO_SUPPKEY
+        Identifier S_SUPPKEY
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier LO_PARTKEY
+        Identifier P_PARTKEY
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier LO_ORDERDATE
+        Identifier D_DATEKEY
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier S_NATION
+        Literal \'UNITED KINGDOM\'
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier P_CATEGORY
+        Literal \'MFGR#21\'
+      Function and (children 1)
+       ExpressionList (children 2)
+        Function greaterOrEquals (children 1)
+         ExpressionList (children 2)
+          Identifier LO_QUANTITY
+          Literal UInt64_34
+        Function lessOrEquals (children 1)
+         ExpressionList (children 2)
+          Identifier LO_QUANTITY
+          Literal UInt64_44
+      Function and (children 1)
+       ExpressionList (children 2)
+        Function greaterOrEquals (children 1)
+         ExpressionList (children 2)
+          Identifier LO_ORDERDATE
+          Function toDate (children 1)
+           ExpressionList (children 1)
+            Literal \'1996-01-01\'
+        Function lessOrEquals (children 1)
+         ExpressionList (children 2)
+          Identifier LO_ORDERDATE
+          Function toDate (children 1)
+           ExpressionList (children 1)
+            Literal \'1996-12-31\'
+    ExpressionList (children 3)
+     Identifier D_YEARMONTHNUM
+     Identifier S_CITY
+     Identifier P_BRAND
+    ExpressionList (children 3)
+     OrderByElement (children 1)
+      Identifier D_YEARMONTHNUM
+     OrderByElement (children 1)
+      Identifier S_CITY
+     OrderByElement (children 1)
+      Identifier P_BRAND

@@ -1,0 +1,47 @@
+InsertQuery   (children 2)
+ Identifier video_log
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 3)
+    ExpressionList (children 6)
+     Function plus (children 1)
+      ExpressionList (children 2)
+       Function toUnixTimestamp (children 1)
+        ExpressionList (children 1)
+         Literal \'2022-07-22 01:00:00\'
+       Function divide (children 1)
+        ExpressionList (children 2)
+         Function rowNumberInAllBlocks (children 1)
+          ExpressionList
+         Literal UInt64_20000
+     Function modulo (alias user_id) (children 1)
+      ExpressionList (children 2)
+       Identifier user_id_raw
+       Literal UInt64_100000000
+     Function modulo (alias device_id) (children 1)
+      ExpressionList (children 2)
+       Identifier device_id_raw
+       Literal UInt64_200000000
+     Function modulo (children 1)
+      ExpressionList (children 2)
+       Identifier domain_raw
+       Literal UInt64_100
+     Function plus (children 1)
+      ExpressionList (children 2)
+       Function modulo (children 1)
+        ExpressionList (children 2)
+         Identifier bytes_raw
+         Literal UInt64_1024
+       Literal UInt64_128
+     Function plus (children 1)
+      ExpressionList (children 2)
+       Function modulo (children 1)
+        ExpressionList (children 2)
+         Identifier duration_raw
+         Literal UInt64_300
+       Literal UInt64_100
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier rng
+    Literal UInt64_1728000

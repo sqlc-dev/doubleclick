@@ -1,0 +1,34 @@
+CreateQuery Test (children 3)
+ Identifier Test
+ Columns definition (children 1)
+  ExpressionList (children 4)
+   ColumnDeclaration impression_id (children 1)
+    DataType String
+   ColumnDeclaration impression_id_compressed (children 2)
+    DataType FixedString (children 1)
+     ExpressionList (children 1)
+      Literal UInt64_16
+    Function UUIDStringToNum (children 1)
+     ExpressionList (children 1)
+      Function substring (children 1)
+       ExpressionList (children 3)
+        Identifier impression_id
+        Literal UInt64_1
+        Literal UInt64_36
+   ColumnDeclaration impression_id_hashed (children 2)
+    DataType UInt16
+    Function reinterpretAsUInt16 (children 1)
+     ExpressionList (children 1)
+      Identifier impression_id_compressed
+   ColumnDeclaration event_date (children 1)
+    DataType Date
+ Storage definition (children 1)
+  Function MergeTree (children 1)
+   ExpressionList (children 4)
+    Identifier event_date
+    Identifier impression_id_hashed
+    Function tuple (children 1)
+     ExpressionList (children 2)
+      Identifier event_date
+      Identifier impression_id_hashed
+    Literal UInt64_8192

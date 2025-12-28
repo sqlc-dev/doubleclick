@@ -1,0 +1,43 @@
+CreateQuery target_table (children 3)
+ Identifier target_table
+ Storage definition (children 3)
+  Function SummingMergeTree (children 1)
+   ExpressionList
+  Identifier id
+  Set
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 4)
+    ExpressionList (children 5)
+     Identifier number (alias id)
+     Function maxState (alias latest_login_time) (children 1)
+      ExpressionList (children 1)
+       Function toDateTime (children 1)
+        ExpressionList (children 2)
+         Literal UInt64_0
+         Literal \'UTC\'
+     Function maxState (alias latest_checkout_time) (children 1)
+      ExpressionList (children 1)
+       Function toDateTime (children 1)
+        ExpressionList (children 2)
+         Literal UInt64_0
+         Literal \'UTC\'
+     Function minState (alias fastest_session) (children 1)
+      ExpressionList (children 1)
+       Function toUInt64 (children 1)
+        ExpressionList (children 1)
+         Literal Int64_-1
+     Function maxState (alias biggest_inactivity_period) (children 1)
+      ExpressionList (children 1)
+       Function toUInt64 (children 1)
+        ExpressionList (children 1)
+         Literal UInt64_0
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       Function numbers (children 1)
+        ExpressionList (children 1)
+         Literal UInt64_50000
+    ExpressionList (children 1)
+     Identifier id
+    Set

@@ -1,0 +1,98 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 6)
+   ExpressionList (children 1)
+    WithElement (children 1)
+     Subquery (children 1)
+      SelectWithUnionQuery (children 1)
+       ExpressionList (children 1)
+        SelectQuery (children 3)
+         ExpressionList (children 2)
+          Identifier query_id
+          Function row_number (alias ordinal) (children 1)
+           ExpressionList
+         TablesInSelectQuery (children 1)
+          TablesInSelectQueryElement (children 1)
+           TableExpression (children 1)
+            TableIdentifier system.query_log
+         Function and (children 1)
+          ExpressionList (children 4)
+           Function equals (children 1)
+            ExpressionList (children 2)
+             Identifier type
+             Literal \'QueryFinish\'
+           Function equals (children 1)
+            ExpressionList (children 2)
+             Identifier current_database
+             Function currentDatabase (children 1)
+              ExpressionList
+           Function equals (children 1)
+            ExpressionList (children 2)
+             Identifier query_kind
+             Literal \'Select\'
+           Function equals (children 1)
+            ExpressionList (children 2)
+             Function arrayElement (children 1)
+              ExpressionList (children 2)
+               Identifier Settings
+               Literal \'min_bytes_to_use_direct_io\'
+             Literal \'1\'
+   ExpressionList (children 3)
+    Identifier queries.ordinal
+    Identifier thread_name
+    Function greater (alias disk_reading) (children 1)
+     ExpressionList (children 2)
+      Function sum (children 1)
+       ExpressionList (children 1)
+        Function arrayElement (children 1)
+         ExpressionList (children 2)
+          Identifier ProfileEvents
+          Literal \'OSReadBytes\'
+      Literal UInt64_0
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_thread_log (alias qtl)
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier queries
+     TableJoin (children 1)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier queries.query_id
+        Identifier qtl.query_id
+   Function and (children 1)
+    ExpressionList (children 3)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier current_database
+       Function currentDatabase (children 1)
+        ExpressionList
+     Function in (children 1)
+      ExpressionList (children 2)
+       Identifier query_id
+       Subquery (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 2)
+           ExpressionList (children 1)
+            Identifier query_id
+           TablesInSelectQuery (children 1)
+            TablesInSelectQueryElement (children 1)
+             TableExpression (children 1)
+              TableIdentifier queries
+     Function greater (children 1)
+      ExpressionList (children 2)
+       Function arrayElement (children 1)
+        ExpressionList (children 2)
+         Identifier ProfileEvents
+         Literal \'OSReadBytes\'
+       Literal UInt64_0
+   ExpressionList (children 2)
+    Literal UInt64_1
+    Literal UInt64_2
+   ExpressionList (children 2)
+    OrderByElement (children 1)
+     Literal UInt64_1
+    OrderByElement (children 1)
+     Literal UInt64_2

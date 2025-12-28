@@ -1,0 +1,37 @@
+CreateQuery alter_01355 (children 3)
+ Identifier alter_01355
+ Columns definition (children 1)
+  ExpressionList (children 6)
+   ColumnDeclaration CounterID (children 1)
+    DataType UInt32
+   ColumnDeclaration StartDate (children 1)
+    DataType Date
+   ColumnDeclaration UserID (children 1)
+    DataType UInt32
+   ColumnDeclaration VisitID (children 1)
+    DataType UInt32
+   ColumnDeclaration NestedColumn (children 1)
+    DataType Nested (children 1)
+     ExpressionList (children 2)
+      NameTypePair A (children 1)
+       DataType UInt8
+      NameTypePair S (children 1)
+       DataType String
+   ColumnDeclaration ToDrop (children 1)
+    DataType UInt32
+ Storage definition (children 1)
+  Function MergeTree (children 1)
+   ExpressionList (children 4)
+    Identifier StartDate
+    Function intHash32 (children 1)
+     ExpressionList (children 1)
+      Identifier UserID
+    Function tuple (children 1)
+     ExpressionList (children 4)
+      Identifier CounterID
+      Identifier StartDate
+      Function intHash32 (children 1)
+       ExpressionList (children 1)
+        Identifier UserID
+      Identifier VisitID
+    Literal UInt64_8192

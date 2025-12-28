@@ -1,0 +1,64 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 4)
+    Function arrayElement (children 1)
+     ExpressionList (children 2)
+      Identifier Settings
+      Literal \'output_format_tsv_crlf_end_of_line\'
+    Function arrayElement (children 1)
+     ExpressionList (children 2)
+      Identifier Settings
+      Literal \'max_block_size\'
+    Function if (children 1)
+     ExpressionList (children 3)
+      Function greater (children 1)
+       ExpressionList (children 2)
+        Function arrayElement (children 1)
+         ExpressionList (children 2)
+          Identifier ProfileEvents
+          Literal \'QueryCacheHits\'
+        Literal UInt64_0
+      Literal \'hit\'
+      Literal \'\'
+    Function if (children 1)
+     ExpressionList (children 3)
+      Function greater (children 1)
+       ExpressionList (children 2)
+        Function arrayElement (children 1)
+         ExpressionList (children 2)
+          Identifier ProfileEvents
+          Literal \'QueryCacheMisses\'
+        Literal UInt64_0
+      Literal \'miss\'
+      Literal \'\'
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_log
+   Function and (children 1)
+    ExpressionList (children 4)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier type
+       Literal \'QueryFinish\'
+     Function greater (children 1)
+      ExpressionList (children 2)
+       Identifier event_time
+       Function minus (children 1)
+        ExpressionList (children 2)
+         Function now (children 1)
+          ExpressionList
+         Literal UInt64_600
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier current_database
+       Function currentDatabase (children 1)
+        ExpressionList
+     Function like (children 1)
+      ExpressionList (children 2)
+       Identifier query
+       Literal \'SELECT \\\'03710\\\', %\'
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier event_time_microseconds

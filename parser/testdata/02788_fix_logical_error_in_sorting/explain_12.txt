@@ -1,0 +1,77 @@
+Explain EXPLAIN PIPELINE (children 2)
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 4)
+    ExpressionList (children 4)
+     Identifier pageId
+     Function array (alias inactivity_timestamps) (children 1)
+      ExpressionList (children 2)
+       Identifier prev_active_ts
+       Identifier timestamp
+     Function minus (alias inactive_duration) (children 1)
+      ExpressionList (children 2)
+       Identifier timestamp
+       Identifier prev_active_ts
+     Identifier timestamp
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       Subquery (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 4)
+           ExpressionList (children 3)
+            Identifier pageId
+            Identifier timestamp
+            Function neighbor (alias prev_active_ts) (children 1)
+             ExpressionList (children 2)
+              Identifier timestamp
+              Literal Int64_-1
+           TablesInSelectQuery (children 1)
+            TablesInSelectQueryElement (children 1)
+             TableExpression (children 1)
+              TableIdentifier session_events
+           Function and (children 1)
+            ExpressionList (children 4)
+             Function in (children 1)
+              ExpressionList (children 2)
+               Identifier type
+               Subquery (children 1)
+                SelectWithUnionQuery (children 1)
+                 ExpressionList (children 1)
+                  SelectQuery (children 3)
+                   ExpressionList (children 1)
+                    Identifier type
+                   TablesInSelectQuery (children 1)
+                    TablesInSelectQueryElement (children 1)
+                     TableExpression (children 1)
+                      TableIdentifier event_types
+                   Function equals (children 1)
+                    ExpressionList (children 2)
+                     Identifier active
+                     Literal UInt64_1
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier sessionId
+               Literal \'693de636-6d9b-47b7-b52a-33bd303b6255\'
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier session_events.clientId
+               Literal UInt64_141
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier pageId
+               Literal UInt64_1686053240314
+           ExpressionList (children 1)
+            OrderByElement (children 1)
+             Identifier timestamp
+    Function greaterOrEquals (children 1)
+     ExpressionList (children 2)
+      Function runningDifference (children 1)
+       ExpressionList (children 1)
+        Identifier timestamp
+      Literal UInt64_500
+    ExpressionList (children 1)
+     OrderByElement (children 1)
+      Identifier timestamp
+ Identifier Null

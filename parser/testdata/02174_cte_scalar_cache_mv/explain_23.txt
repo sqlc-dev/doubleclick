@@ -1,0 +1,51 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 4)
+    Literal \'02177_MV_2\'
+    Function arrayElement (alias scalar_cache_global_hit) (children 1)
+     ExpressionList (children 2)
+      Identifier ProfileEvents
+      Literal \'ScalarSubqueriesGlobalCacheHit\'
+    Function arrayElement (alias scalar_cache_local_hit) (children 1)
+     ExpressionList (children 2)
+      Identifier ProfileEvents
+      Literal \'ScalarSubqueriesLocalCacheHit\'
+    Function arrayElement (alias scalar_cache_miss) (children 1)
+     ExpressionList (children 2)
+      Identifier ProfileEvents
+      Literal \'ScalarSubqueriesCacheMiss\'
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_log
+   Function and (children 1)
+    ExpressionList (children 5)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier current_database
+       Function currentDatabase (children 1)
+        ExpressionList
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier type
+       Literal \'QueryFinish\'
+     Function like (children 1)
+      ExpressionList (children 2)
+       Identifier query
+       Literal \'-- SECOND INSERT\\nINSERT INTO t1%\'
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier event_date
+       Function yesterday (children 1)
+        ExpressionList
+     Function greater (children 1)
+      ExpressionList (children 2)
+       Identifier event_time
+       Function minus (children 1)
+        ExpressionList (children 2)
+         Function now (children 1)
+          ExpressionList
+         Function toIntervalMinute (children 1)
+          ExpressionList (children 1)
+           Literal UInt64_10

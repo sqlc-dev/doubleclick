@@ -1,0 +1,47 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 2)
+    Identifier c_count
+    Function count (alias custdist) (children 1)
+     ExpressionList (children 1)
+      Asterisk
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias c_orders) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 3)
+          ExpressionList (children 2)
+           Identifier c_custkey
+           Function count (alias c_count) (children 1)
+            ExpressionList (children 1)
+             Identifier o_orderkey
+          TablesInSelectQuery (children 2)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier customer
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier orders
+            TableJoin (children 1)
+             Function and (children 1)
+              ExpressionList (children 2)
+               Function equals (children 1)
+                ExpressionList (children 2)
+                 Identifier c_custkey
+                 Identifier o_custkey
+               Function notLike (children 1)
+                ExpressionList (children 2)
+                 Identifier o_comment
+                 Literal \'%special%requests%\'
+          ExpressionList (children 1)
+           Identifier c_custkey
+   ExpressionList (children 1)
+    Identifier c_count
+   ExpressionList (children 2)
+    OrderByElement (children 1)
+     Identifier custdist
+    OrderByElement (children 1)
+     Identifier c_count

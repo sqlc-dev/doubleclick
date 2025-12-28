@@ -1,0 +1,54 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 5)
+   ExpressionList (children 3)
+    Function splitByChar (alias name_parts) (children 1)
+     ExpressionList (children 2)
+      Literal \'_\'
+      Identifier part_name
+    Function CAST (alias min_block) (children 1)
+     ExpressionList (children 2)
+      Function arrayElement (children 1)
+       ExpressionList (children 2)
+        Identifier name_parts
+        Literal UInt64_2
+      Literal \'UInt64\'
+    Function CAST (alias max_block) (children 1)
+     ExpressionList (children 2)
+      Function arrayElement (children 1)
+       ExpressionList (children 2)
+        Identifier name_parts
+        Literal UInt64_3
+      Literal \'UInt64\'
+   ExpressionList (children 5)
+    Identifier min_block
+    Identifier max_block
+    Identifier event_type
+    Identifier merge_algorithm
+    Identifier part_type
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.part_log
+   Function and (children 1)
+    ExpressionList (children 4)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier database
+       Function currentDatabase (children 1)
+        ExpressionList
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier table
+       Literal \'t_compact_vertical_merge\'
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier min_block
+       Literal UInt64_1
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier max_block
+       Literal UInt64_3
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier event_time_microseconds

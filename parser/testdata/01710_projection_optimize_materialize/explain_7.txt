@@ -1,0 +1,50 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 5)
+   ExpressionList (children 7)
+    Identifier name
+    Identifier partition
+    Function formatReadableSize (alias compressed) (children 1)
+     ExpressionList (children 1)
+      Function sum (alias size) (children 1)
+       ExpressionList (children 1)
+        Identifier data_compressed_bytes
+    Function formatReadableSize (alias uncompressed) (children 1)
+     ExpressionList (children 1)
+      Function sum (alias usize) (children 1)
+       ExpressionList (children 1)
+        Identifier data_uncompressed_bytes
+    Function round (alias compr_rate) (children 1)
+     ExpressionList (children 2)
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Identifier usize
+        Identifier size
+      Literal UInt64_2
+    Function sum (alias rows) (children 1)
+     ExpressionList (children 1)
+      Identifier rows
+    Function count (alias part_count) (children 1)
+     ExpressionList
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.projection_parts
+   Function and (children 1)
+    ExpressionList (children 3)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier database
+       Function currentDatabase (children 1)
+        ExpressionList
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier table
+       Literal \'z\'
+     Identifier active
+   ExpressionList (children 2)
+    Identifier name
+    Identifier partition
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier size

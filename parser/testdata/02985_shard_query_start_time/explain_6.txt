@@ -1,0 +1,88 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 5)
+   ExpressionList (children 1)
+    Subquery (alias id_and_start_tuple) (children 1)
+     SelectWithUnionQuery (children 1)
+      ExpressionList (children 1)
+       SelectQuery (children 3)
+        ExpressionList (children 1)
+         Function tuple (children 1)
+          ExpressionList (children 3)
+           Identifier query_id
+           Identifier query_start_time
+           Identifier query_start_time_microseconds
+        TablesInSelectQuery (children 1)
+         TablesInSelectQueryElement (children 1)
+          TableExpression (children 1)
+           TableIdentifier system.query_log
+        Function and (children 1)
+         ExpressionList (children 4)
+          Function greaterOrEquals (children 1)
+           ExpressionList (children 2)
+            Identifier event_date
+            Function yesterday (children 1)
+             ExpressionList
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier current_database
+            Function currentDatabase (children 1)
+             ExpressionList
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier log_comment
+            Literal \'02985_shard_query_start_time_query_1\'
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier type
+            Literal \'QueryFinish\'
+   ExpressionList (children 5)
+    Identifier type
+    Function countIf (children 1)
+     ExpressionList (children 1)
+      Function greaterOrEquals (children 1)
+       ExpressionList (children 2)
+        Identifier query_start_time
+        Identifier initial_query_start_time
+    Function countIf (children 1)
+     ExpressionList (children 1)
+      Function greater (children 1)
+       ExpressionList (children 2)
+        Identifier query_start_time_microseconds
+        Identifier initial_query_start_time_microseconds
+    Function countIf (children 1)
+     ExpressionList (children 1)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier initial_query_start_time
+        Function tupleElement (children 1)
+         ExpressionList (children 2)
+          Identifier id_and_start_tuple
+          Literal UInt64_2
+    Function countIf (children 1)
+     ExpressionList (children 1)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier initial_query_start_time_microseconds
+        Function tupleElement (children 1)
+         ExpressionList (children 2)
+          Identifier id_and_start_tuple
+          Literal UInt64_3
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_log
+   Function and (children 1)
+    ExpressionList (children 2)
+     Function not (children 1)
+      ExpressionList (children 1)
+       Identifier is_initial_query
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier initial_query_id
+       Function tupleElement (children 1)
+        ExpressionList (children 2)
+         Identifier id_and_start_tuple
+         Literal UInt64_1
+   ExpressionList (children 1)
+    Identifier type

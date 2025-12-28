@@ -1,0 +1,68 @@
+CreateQuery mv_test_mv (children 4)
+ Identifier mv_test_mv
+ Columns definition (children 1)
+  ExpressionList (children 4)
+   ColumnDeclaration id (children 1)
+    DataType UInt64
+   ColumnDeclaration ref_id (children 1)
+    DataType UInt64
+   ColumnDeclaration final_id (children 1)
+    DataType Nullable (children 1)
+     ExpressionList (children 1)
+      DataType UInt64
+   ColumnDeclaration display (children 1)
+    DataType String
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 4)
+    ExpressionList (children 2)
+     WithElement (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 4)
+           Identifier id
+           Identifier ref_id
+           Identifier final_id
+           Identifier display
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier mv_test
+     WithElement (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 3)
+          ExpressionList (children 2)
+           Identifier display
+           Function max (alias max_id) (children 1)
+            ExpressionList (children 1)
+             Identifier id
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier mv_test
+          ExpressionList (children 1)
+           Identifier display
+    ExpressionList (children 1)
+     Asterisk
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier tester
+    Function in (children 1)
+     ExpressionList (children 2)
+      Identifier id
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 1)
+           Identifier max_id
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier id_set
+ ViewTargets

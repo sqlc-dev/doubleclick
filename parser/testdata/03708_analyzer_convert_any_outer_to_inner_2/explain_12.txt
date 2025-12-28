@@ -1,0 +1,42 @@
+Explain EXPLAIN (children 2)
+ Set
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 3)
+    ExpressionList (children 1)
+     Asterisk
+    TablesInSelectQuery (children 2)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier users (alias u1)
+     TablesInSelectQueryElement (children 2)
+      TableExpression (children 1)
+       Subquery (alias u2) (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 3)
+           ExpressionList (children 2)
+            Function CAST (alias age_sum) (children 1)
+             ExpressionList (children 2)
+              Function sum (children 1)
+               ExpressionList (children 1)
+                Identifier age
+              Literal \'Nullable(Int64)\'
+            Identifier name
+           TablesInSelectQuery (children 1)
+            TablesInSelectQueryElement (children 1)
+             TableExpression (children 1)
+              TableIdentifier users
+           ExpressionList (children 2)
+            ExpressionList (children 1)
+             Identifier name
+            ExpressionList
+      TableJoin (children 1)
+       Function equals (children 1)
+        ExpressionList (children 2)
+         Identifier u1.name
+         Identifier u2.name
+    Function less (children 1)
+     ExpressionList (children 2)
+      Identifier uid
+      Identifier age_sum

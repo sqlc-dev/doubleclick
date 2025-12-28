@@ -1,0 +1,201 @@
+CreateQuery projection_test (children 3)
+ Identifier projection_test
+ Columns definition (children 2)
+  ExpressionList (children 17)
+   ColumnDeclaration sum(block_count) (children 1)
+    DataType UInt64
+   ColumnDeclaration domain_alias (children 2)
+    DataType UInt64
+    Function length (children 1)
+     ExpressionList (children 1)
+      Identifier domain
+   ColumnDeclaration datetime (children 1)
+    DataType DateTime
+   ColumnDeclaration domain (children 1)
+    DataType LowCardinality (children 1)
+     ExpressionList (children 1)
+      DataType String
+   ColumnDeclaration x_id (children 1)
+    DataType String
+   ColumnDeclaration y_id (children 1)
+    DataType String
+   ColumnDeclaration block_count (children 1)
+    DataType Int64
+   ColumnDeclaration retry_count (children 1)
+    DataType Int64
+   ColumnDeclaration duration (children 1)
+    DataType Int64
+   ColumnDeclaration kbytes (children 1)
+    DataType Int64
+   ColumnDeclaration buffer_time (children 1)
+    DataType Int64
+   ColumnDeclaration first_time (children 1)
+    DataType Int64
+   ColumnDeclaration total_bytes (children 1)
+    DataType Nullable (children 1)
+     ExpressionList (children 1)
+      DataType UInt64
+   ColumnDeclaration valid_bytes (children 1)
+    DataType Nullable (children 1)
+     ExpressionList (children 1)
+      DataType UInt64
+   ColumnDeclaration completed_bytes (children 1)
+    DataType Nullable (children 1)
+     ExpressionList (children 1)
+      DataType UInt64
+   ColumnDeclaration fixed_bytes (children 1)
+    DataType Nullable (children 1)
+     ExpressionList (children 1)
+      DataType UInt64
+   ColumnDeclaration force_bytes (children 1)
+    DataType Nullable (children 1)
+     ExpressionList (children 1)
+      DataType UInt64
+  ExpressionList (children 1)
+   Projection (children 1)
+    ProjectionSelectQuery (children 2)
+     ExpressionList (children 19)
+      Function toStartOfMinute (alias dt_m) (children 1)
+       ExpressionList (children 1)
+        Identifier datetime
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function countIf (children 1)
+         ExpressionList (children 1)
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier first_time
+            Literal UInt64_0
+        Function count (children 1)
+         ExpressionList
+      Function avg (children 1)
+       ExpressionList (children 1)
+        Function divide (children 1)
+         ExpressionList (children 2)
+          Function multiply (children 1)
+           ExpressionList (children 2)
+            Identifier kbytes
+            Literal UInt64_8
+          Identifier duration
+      Function count (children 1)
+       ExpressionList
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier block_count
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier duration
+      Function avg (children 1)
+       ExpressionList (children 1)
+        Function divide (children 1)
+         ExpressionList (children 2)
+          Identifier block_count
+          Identifier duration
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier buffer_time
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier duration
+      Function avg (children 1)
+       ExpressionList (children 1)
+        Function divide (children 1)
+         ExpressionList (children 2)
+          Identifier buffer_time
+          Identifier duration
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier valid_bytes
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier total_bytes
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier completed_bytes
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier total_bytes
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier fixed_bytes
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier total_bytes
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier force_bytes
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier total_bytes
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier valid_bytes
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier total_bytes
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier retry_count
+        Function sum (children 1)
+         ExpressionList (children 1)
+          Identifier duration
+      Function avg (children 1)
+       ExpressionList (children 1)
+        Function divide (children 1)
+         ExpressionList (children 2)
+          Identifier retry_count
+          Identifier duration
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function countIf (children 1)
+         ExpressionList (children 1)
+          Function greater (children 1)
+           ExpressionList (children 2)
+            Identifier block_count
+            Literal UInt64_0
+        Function count (children 1)
+         ExpressionList
+      Function divide (children 1)
+       ExpressionList (children 2)
+        Function countIf (children 1)
+         ExpressionList (children 1)
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier first_time
+            Literal UInt64_0
+        Function count (children 1)
+         ExpressionList
+      Function uniqHLL12 (children 1)
+       ExpressionList (children 1)
+        Identifier x_id
+      Function uniqHLL12 (children 1)
+       ExpressionList (children 1)
+        Identifier y_id
+     ExpressionList (children 2)
+      Identifier dt_m
+      Identifier domain
+ Storage definition (children 4)
+  Function MergeTree
+  Function toDate (children 1)
+   ExpressionList (children 1)
+    Identifier datetime
+  Function toStartOfTenMinutes (children 1)
+   ExpressionList (children 1)
+    Identifier datetime
+  Set

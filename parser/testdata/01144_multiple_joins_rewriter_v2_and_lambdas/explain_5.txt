@@ -1,0 +1,260 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 6)
+    Function arrayMap (alias l_rounded) (children 1)
+     ExpressionList (children 2)
+      Function lambda (children 1)
+       ExpressionList (children 2)
+        Function tuple (children 1)
+         ExpressionList (children 1)
+          Identifier x
+        Function floor (children 1)
+         ExpressionList (children 2)
+          Identifier x
+          Literal UInt64_4
+      Function arrayElement (alias l) (children 1)
+       ExpressionList (children 2)
+        Identifier original_medians_array.medians_by_version
+        Literal UInt64_1
+    Function arrayMap (alias r_rounded) (children 1)
+     ExpressionList (children 2)
+      Function lambda (children 1)
+       ExpressionList (children 2)
+        Function tuple (children 1)
+         ExpressionList (children 1)
+          Identifier x
+        Function floor (children 1)
+         ExpressionList (children 2)
+          Identifier x
+          Literal UInt64_4
+      Function arrayElement (alias r) (children 1)
+       ExpressionList (children 2)
+        Identifier original_medians_array.medians_by_version
+        Literal UInt64_2
+    Function arrayMap (alias diff_percent) (children 1)
+     ExpressionList (children 3)
+      Function lambda (children 1)
+       ExpressionList (children 2)
+        Function tuple (children 1)
+         ExpressionList (children 2)
+          Identifier x
+          Identifier y
+        Function floor (children 1)
+         ExpressionList (children 2)
+          Function divide (children 1)
+           ExpressionList (children 2)
+            Function minus (children 1)
+             ExpressionList (children 2)
+              Identifier y
+              Identifier x
+            Identifier x
+          Literal UInt64_3
+      Identifier l
+      Identifier r
+    Function arrayMap (alias threshold_percent) (children 1)
+     ExpressionList (children 3)
+      Function lambda (children 1)
+       ExpressionList (children 2)
+        Function tuple (children 1)
+         ExpressionList (children 2)
+          Identifier x
+          Identifier y
+        Function floor (children 1)
+         ExpressionList (children 2)
+          Function divide (children 1)
+           ExpressionList (children 2)
+            Identifier x
+            Identifier y
+          Literal UInt64_3
+      Identifier threshold
+      Identifier l
+    Identifier test
+    Identifier query
+   TablesInSelectQuery (children 4)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias rd) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 1)
+           Function quantileExactForEach (alias threshold) (children 2)
+            ExpressionList (children 1)
+             Function arrayMap (alias d) (children 1)
+              ExpressionList (children 3)
+               Function lambda (children 1)
+                ExpressionList (children 2)
+                 Function tuple (children 1)
+                  ExpressionList (children 2)
+                   Identifier x
+                   Identifier y
+                 Function abs (children 1)
+                  ExpressionList (children 1)
+                   Function minus (children 1)
+                    ExpressionList (children 2)
+                     Identifier x
+                     Identifier y
+               Function arrayElement (children 1)
+                ExpressionList (children 2)
+                 Identifier metrics_by_label
+                 Literal UInt64_1
+               Function arrayElement (children 1)
+                ExpressionList (children 2)
+                 Identifier metrics_by_label
+                 Literal UInt64_2
+            ExpressionList (children 1)
+             Literal Float64_0.999
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             Subquery (alias virtual_medians_array) (children 1)
+              SelectWithUnionQuery (children 1)
+               ExpressionList (children 1)
+                SelectQuery (children 3)
+                 ExpressionList (children 2)
+                  Identifier virtual_run
+                  Function groupArrayInsertAt (alias metrics_by_label) (children 1)
+                   ExpressionList (children 2)
+                    Identifier median_metrics
+                    Identifier random_label
+                 TablesInSelectQuery (children 1)
+                  TablesInSelectQueryElement (children 1)
+                   TableExpression (children 1)
+                    Subquery (alias virtual_medians) (children 1)
+                     SelectWithUnionQuery (children 1)
+                      ExpressionList (children 1)
+                       SelectQuery (children 3)
+                        ExpressionList (children 3)
+                         Function medianExactForEach (alias median_metrics) (children 1)
+                          ExpressionList (children 1)
+                           Identifier metrics
+                         Identifier virtual_run
+                         Identifier random_label
+                        TablesInSelectQuery (children 1)
+                         TablesInSelectQueryElement (children 1)
+                          TableExpression (children 1)
+                           Subquery (alias relabeled) (children 1)
+                            SelectWithUnionQuery (children 1)
+                             ExpressionList (children 1)
+                              SelectQuery (children 2)
+                               ExpressionList (children 2)
+                                Asterisk
+                                Function toUInt32 (alias random_label) (children 1)
+                                 ExpressionList (children 1)
+                                  Function modulo (children 1)
+                                   ExpressionList (children 2)
+                                    Function rowNumberInAllBlocks (children 1)
+                                     ExpressionList
+                                    Literal UInt64_2
+                               TablesInSelectQuery (children 1)
+                                TablesInSelectQueryElement (children 1)
+                                 TableExpression (children 1)
+                                  Subquery (alias virtual_runs) (children 1)
+                                   SelectWithUnionQuery (children 1)
+                                    ExpressionList (children 1)
+                                     SelectQuery (children 3)
+                                      ExpressionList (children 2)
+                                       Identifier metrics
+                                       Identifier number (alias virtual_run)
+                                      TablesInSelectQuery (children 2)
+                                       TablesInSelectQueryElement (children 1)
+                                        TableExpression (children 1)
+                                         Subquery (alias no_query) (children 1)
+                                          SelectWithUnionQuery (children 1)
+                                           ExpressionList (children 1)
+                                            SelectQuery (children 2)
+                                             ExpressionList (children 3)
+                                              Identifier metrics
+                                              Identifier run
+                                              Identifier version
+                                             TablesInSelectQuery (children 1)
+                                              TablesInSelectQueryElement (children 1)
+                                               TableExpression (children 1)
+                                                TableIdentifier table
+                                       TablesInSelectQueryElement (children 2)
+                                        TableExpression (children 1)
+                                         Function numbers (alias nn) (children 1)
+                                          ExpressionList (children 2)
+                                           Literal UInt64_1
+                                           Literal UInt64_100000
+                                        TableJoin
+                                      ExpressionList (children 2)
+                                       OrderByElement (children 1)
+                                        Identifier virtual_run
+                                       OrderByElement (children 1)
+                                        Function rand (children 1)
+                                         ExpressionList
+                        ExpressionList (children 2)
+                         Identifier virtual_run
+                         Identifier random_label
+                 ExpressionList (children 1)
+                  Identifier virtual_run
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias original_medians_array) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 1)
+           Function groupArrayInsertAt (alias medians_by_version) (children 1)
+            ExpressionList (children 2)
+             Identifier median_metrics
+             Identifier version
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             Subquery (alias original_medians) (children 1)
+              SelectWithUnionQuery (children 1)
+               ExpressionList (children 1)
+                SelectQuery (children 3)
+                 ExpressionList (children 2)
+                  Function medianExactForEach (alias median_metrics) (children 1)
+                   ExpressionList (children 1)
+                    Identifier metrics
+                  Identifier version
+                 TablesInSelectQuery (children 1)
+                  TablesInSelectQueryElement (children 1)
+                   TableExpression (children 1)
+                    TableIdentifier table
+                 ExpressionList (children 1)
+                  Identifier version
+     TableJoin
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias any_query) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 2)
+           Function any (alias test) (children 1)
+            ExpressionList (children 1)
+             Identifier test
+           Function any (alias query) (children 1)
+            ExpressionList (children 1)
+             Identifier query
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier table
+     TableJoin
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias check_single_query) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 1)
+           Function throwIf (children 1)
+            ExpressionList (children 1)
+             Function uniq (children 1)
+              ExpressionList (children 1)
+               Function tuple (children 1)
+                ExpressionList (children 2)
+                 Identifier test
+                 Identifier query
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier table
+     TableJoin

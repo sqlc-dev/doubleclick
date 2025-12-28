@@ -1,0 +1,116 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 5)
+   ExpressionList (children 4)
+    Function if (children 1)
+     ExpressionList (children 3)
+      Function and (children 1)
+       ExpressionList (children 2)
+        Function greaterOrEquals (children 1)
+         ExpressionList (children 2)
+          Function arrayElement (children 1)
+           ExpressionList (children 2)
+            Identifier ProfileEvents
+            Literal \'JoinBuildTableRowCount\'
+          Literal UInt64_100
+        Function lessOrEquals (children 1)
+         ExpressionList (children 2)
+          Function arrayElement (children 1)
+           ExpressionList (children 2)
+            Identifier ProfileEvents
+            Literal \'JoinBuildTableRowCount\'
+          Literal UInt64_2000
+      Literal \'ok\'
+      Function format (children 1)
+       ExpressionList (children 3)
+        Literal \'fail({}): {}\'
+        Identifier query_id
+        Function arrayElement (children 1)
+         ExpressionList (children 2)
+          Identifier ProfileEvents
+          Literal \'JoinBuildTableRowCount\'
+    Function if (children 1)
+     ExpressionList (children 3)
+      Function and (children 1)
+       ExpressionList (children 2)
+        Function greaterOrEquals (children 1)
+         ExpressionList (children 2)
+          Function arrayElement (children 1)
+           ExpressionList (children 2)
+            Identifier ProfileEvents
+            Literal \'JoinProbeTableRowCount\'
+          Literal UInt64_90000
+        Function lessOrEquals (children 1)
+         ExpressionList (children 2)
+          Function arrayElement (children 1)
+           ExpressionList (children 2)
+            Identifier ProfileEvents
+            Literal \'JoinProbeTableRowCount\'
+          Literal UInt64_110000
+      Literal \'ok\'
+      Function format (children 1)
+       ExpressionList (children 3)
+        Literal \'fail({}): {}\'
+        Identifier query_id
+        Function arrayElement (children 1)
+         ExpressionList (children 2)
+          Identifier ProfileEvents
+          Literal \'JoinProbeTableRowCount\'
+    Function if (children 1)
+     ExpressionList (children 3)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Function arrayElement (children 1)
+         ExpressionList (children 2)
+          Identifier ProfileEvents
+          Literal \'JoinResultRowCount\'
+        Literal UInt64_1000
+      Literal \'ok\'
+      Function format (children 1)
+       ExpressionList (children 3)
+        Literal \'fail({}): {}\'
+        Identifier query_id
+        Function arrayElement (children 1)
+         ExpressionList (children 2)
+          Identifier ProfileEvents
+          Literal \'JoinResultRowCount\'
+    Function arrayElement (children 1)
+     ExpressionList (children 2)
+      Identifier Settings
+      Literal \'query_plan_join_swap_table\'
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_log
+   Function and (children 1)
+    ExpressionList (children 6)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier type
+       Literal \'QueryFinish\'
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier event_date
+       Function yesterday (children 1)
+        ExpressionList
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier query_kind
+       Literal \'Select\'
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier current_database
+       Function currentDatabase (children 1)
+        ExpressionList
+     Function like (children 1)
+      ExpressionList (children 2)
+       Identifier query
+       Literal \'%products, sales%\'
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier log_comment
+       Literal \'03279_join_choose_build_table_no_idx\'
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier event_time
+   Literal UInt64_1

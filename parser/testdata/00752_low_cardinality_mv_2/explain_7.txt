@@ -1,0 +1,57 @@
+CreateQuery mv_traffic_by_tadig15min (children 3)
+ Identifier mv_traffic_by_tadig15min
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 4)
+    ExpressionList (children 7)
+     Function toStartOfFifteenMinutes (alias ts) (children 1)
+      ExpressionList (children 1)
+       Identifier timestamp
+     Function toDayOfWeek (alias dow) (children 1)
+      ExpressionList (children 1)
+       Identifier timestamp
+     Identifier tadig
+     Function sumState (alias traffic_bytes) (children 1)
+      ExpressionList (children 1)
+       Function plus (children 1)
+        ExpressionList (children 2)
+         Identifier acctinputoctets
+         Identifier acctoutputoctets
+     Function maxState (alias last_stop) (children 1)
+      ExpressionList (children 1)
+       Identifier timestamp
+     Function minState (alias min_radacctid) (children 1)
+      ExpressionList (children 1)
+       Identifier radacctid
+     Function maxState (alias max_radacctid) (children 1)
+      ExpressionList (children 1)
+       Identifier radacctid
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier radacct
+    Function and (children 1)
+     ExpressionList (children 2)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier acctstatustype
+        Literal \'Stop\'
+      Function greater (children 1)
+       ExpressionList (children 2)
+        Function plus (children 1)
+         ExpressionList (children 2)
+          Identifier acctinputoctets
+          Identifier acctoutputoctets
+        Literal UInt64_0
+    ExpressionList (children 3)
+     Identifier tadig
+     Identifier ts
+     Identifier dow
+ ViewTargets (children 1)
+  Storage definition (children 3)
+   Function AggregatingMergeTree
+   Identifier tadig
+   Function tuple (children 1)
+    ExpressionList (children 2)
+     Identifier ts
+     Identifier tadig

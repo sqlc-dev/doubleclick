@@ -1,0 +1,41 @@
+CreateQuery summing_merge_tree_aggregate_function (children 4)
+ Identifier summing_merge_tree_aggregate_function
+ Columns definition (children 1)
+  ExpressionList (children 4)
+   ColumnDeclaration d (children 1)
+    DataType Date
+   ColumnDeclaration k (children 1)
+    DataType UInt64
+   ColumnDeclaration c (children 1)
+    DataType UInt64
+   ColumnDeclaration u (children 1)
+    DataType AggregateFunction (children 1)
+     ExpressionList (children 2)
+      Identifier uniq
+      DataType UInt64
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 3)
+    ExpressionList (children 4)
+     Identifier d
+     Identifier k
+     Function sum (alias c) (children 1)
+      ExpressionList (children 1)
+       Identifier c
+     Function uniqState (alias u) (children 1)
+      ExpressionList (children 1)
+       Identifier u
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier summing_merge_tree_null
+    ExpressionList (children 2)
+     Identifier d
+     Identifier k
+ ViewTargets (children 1)
+  Storage definition (children 1)
+   Function SummingMergeTree (children 1)
+    ExpressionList (children 3)
+     Identifier d
+     Identifier k
+     Literal UInt64_8192

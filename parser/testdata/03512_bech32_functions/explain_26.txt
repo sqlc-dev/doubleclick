@@ -1,0 +1,47 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 4)
+    Identifier hrp
+    Identifier data
+    Function equals (alias match_hrp) (children 1)
+     ExpressionList (children 2)
+      Identifier hrp
+      Function tupleElement (children 1)
+       ExpressionList (children 2)
+        Identifier tup
+        Literal UInt64_1
+    Function equals (alias match_data) (children 1)
+     ExpressionList (children 2)
+      Identifier data
+      Function lower (children 1)
+       ExpressionList (children 1)
+        Function hex (children 1)
+         ExpressionList (children 1)
+          Function tupleElement (children 1)
+           ExpressionList (children 2)
+            Identifier tup
+            Literal UInt64_2
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias round_trip) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 3)
+           Identifier hrp
+           Identifier data
+           Function bech32Decode (alias tup) (children 1)
+            ExpressionList (children 1)
+             Function bech32Encode (children 1)
+              ExpressionList (children 3)
+               Identifier hrp
+               Function unhex (children 1)
+                ExpressionList (children 1)
+                 Identifier data
+               Identifier witver
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier bech32_test

@@ -1,0 +1,109 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 7)
+   ExpressionList (children 2)
+    Identifier s_name
+    Function count (alias numwait) (children 1)
+     ExpressionList (children 1)
+      Asterisk
+   TablesInSelectQuery (children 4)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier supplier
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier lineitem (alias l1)
+     TableJoin
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier orders
+     TableJoin
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier nation
+     TableJoin
+   Function and (children 1)
+    ExpressionList (children 8)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier s_suppkey
+       Identifier l1.l_suppkey
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier o_orderkey
+       Identifier l1.l_orderkey
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier o_orderstatus
+       Literal \'F\'
+     Function greater (children 1)
+      ExpressionList (children 2)
+       Identifier l1.l_receiptdate
+       Identifier l1.l_commitdate
+     Function exists (children 1)
+      ExpressionList (children 1)
+       Subquery (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 3)
+           ExpressionList (children 1)
+            Asterisk
+           TablesInSelectQuery (children 1)
+            TablesInSelectQueryElement (children 1)
+             TableExpression (children 1)
+              TableIdentifier lineitem (alias l2)
+           Function and (children 1)
+            ExpressionList (children 2)
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier l2.l_orderkey
+               Identifier l1.l_orderkey
+             Function notEquals (children 1)
+              ExpressionList (children 2)
+               Identifier l2.l_suppkey
+               Identifier l1.l_suppkey
+     Function not (children 1)
+      ExpressionList (children 1)
+       Function exists (children 1)
+        ExpressionList (children 1)
+         Subquery (children 1)
+          SelectWithUnionQuery (children 1)
+           ExpressionList (children 1)
+            SelectQuery (children 3)
+             ExpressionList (children 1)
+              Asterisk
+             TablesInSelectQuery (children 1)
+              TablesInSelectQueryElement (children 1)
+               TableExpression (children 1)
+                TableIdentifier lineitem (alias l3)
+             Function and (children 1)
+              ExpressionList (children 3)
+               Function equals (children 1)
+                ExpressionList (children 2)
+                 Identifier l3.l_orderkey
+                 Identifier l1.l_orderkey
+               Function notEquals (children 1)
+                ExpressionList (children 2)
+                 Identifier l3.l_suppkey
+                 Identifier l1.l_suppkey
+               Function greater (children 1)
+                ExpressionList (children 2)
+                 Identifier l3.l_receiptdate
+                 Identifier l3.l_commitdate
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier s_nationkey
+       Identifier n_nationkey
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier n_name
+       Literal \'SAUDI ARABIA\'
+   ExpressionList (children 1)
+    Identifier s_name
+   ExpressionList (children 2)
+    OrderByElement (children 1)
+     Identifier numwait
+    OrderByElement (children 1)
+     Identifier s_name
+   Literal UInt64_100
+   Set

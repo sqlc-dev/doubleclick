@@ -1,0 +1,36 @@
+CreateQuery t_resampled_timeseries_64 (children 3)
+ Identifier t_resampled_timeseries_64
+ Columns definition (children 1)
+  ExpressionList (children 4)
+   ColumnDeclaration step (children 1)
+    DataType UInt32
+   ColumnDeclaration metric_id (children 1)
+    DataType UInt64
+   ColumnDeclaration grid_timestamp (children 2)
+    DataType DateTime (children 1)
+     ExpressionList (children 1)
+      Literal \'UTC\'
+    Function CODEC (children 1)
+     ExpressionList (children 2)
+      Function DoubleDelta
+      Function ZSTD
+   ColumnDeclaration samples (children 1)
+    DataType Tuple (children 1)
+     ExpressionList (children 2)
+      DataType Array (children 1)
+       ExpressionList (children 1)
+        DataType DateTime64 (children 1)
+         ExpressionList (children 2)
+          Literal UInt64_3
+          Literal \'UTC\'
+      DataType Array (children 1)
+       ExpressionList (children 1)
+        DataType Float64
+ Storage definition (children 2)
+  Function AggregatingMergeTree (children 1)
+   ExpressionList
+  Function tuple (children 1)
+   ExpressionList (children 3)
+    Identifier step
+    Identifier metric_id
+    Identifier grid_timestamp

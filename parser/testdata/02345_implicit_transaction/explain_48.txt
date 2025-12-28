@@ -1,0 +1,34 @@
+SelectWithUnionQuery (children 2)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 3)
+    Literal \'implicit_False\'
+    Function count (alias all) (children 1)
+     ExpressionList
+    Function equals (alias is_empty) (children 1)
+     ExpressionList (children 2)
+      Identifier transaction_id
+      Literal Tuple_(UInt64_0, UInt64_0, \'00000000-0000-0000-0000-000000000000\')
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.query_log
+   Function and (children 1)
+    ExpressionList (children 3)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier current_database
+       Function currentDatabase (children 1)
+        ExpressionList
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier event_date
+       Function yesterday (children 1)
+        ExpressionList
+     Function like (children 1)
+      ExpressionList (children 2)
+       Identifier query
+       Literal \'-- Verify that the transaction_id column is NOT populated without transaction%\'
+   ExpressionList (children 1)
+    Identifier transaction_id
+ Identifier JSONEachRow

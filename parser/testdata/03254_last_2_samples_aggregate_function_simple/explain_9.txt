@@ -1,0 +1,84 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 4)
+    Function CAST (alias start_ts) (children 1)
+     ExpressionList (children 2)
+      Literal \'2024-12-12 12:00:15\'
+      Literal \'DateTime64(3, \\\'UTC\\\')\'
+    Function plus (alias end_ts) (children 1)
+     ExpressionList (children 2)
+      Identifier start_ts
+      Function toIntervalSecond (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_60
+    Literal UInt64_15 (alias step_seconds)
+    Literal UInt64_45 (alias window_seconds)
+   ExpressionList (children 3)
+    Identifier metric_id
+    Function timeSeriesInstantDeltaToGrid (children 2)
+     ExpressionList (children 2)
+      Identifier timestamps
+      Identifier values
+     ExpressionList (children 4)
+      Identifier start_ts
+      Identifier end_ts
+      Identifier step_seconds
+      Identifier window_seconds
+    Function timeSeriesInstantRateToGrid (children 2)
+     ExpressionList (children 2)
+      Identifier timestamps
+      Identifier values
+     ExpressionList (children 4)
+      Identifier start_ts
+      Identifier end_ts
+      Identifier step_seconds
+      Identifier window_seconds
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 3)
+          ExpressionList (children 3)
+           Identifier metric_id
+           Function tupleElement (alias timestamps) (children 1)
+            ExpressionList (children 2)
+             Function finalizeAggregation (children 1)
+              ExpressionList (children 1)
+               Identifier samples
+             Literal UInt64_1
+           Function tupleElement (alias values) (children 1)
+            ExpressionList (children 2)
+             Function finalizeAggregation (children 1)
+              ExpressionList (children 1)
+               Identifier samples
+             Literal UInt64_2
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier t_resampled_timeseries_15_sec
+          Function and (children 1)
+           ExpressionList (children 2)
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier metric_id
+              Literal UInt64_3
+            Function and (children 1)
+             ExpressionList (children 2)
+              Function greaterOrEquals (children 1)
+               ExpressionList (children 2)
+                Identifier grid_timestamp
+                Function minus (children 1)
+                 ExpressionList (children 2)
+                  Identifier start_ts
+                  Function toIntervalSecond (children 1)
+                   ExpressionList (children 1)
+                    Identifier window_seconds
+              Function lessOrEquals (children 1)
+               ExpressionList (children 2)
+                Identifier grid_timestamp
+                Identifier end_ts
+   ExpressionList (children 1)
+    Identifier metric_id

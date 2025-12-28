@@ -1,0 +1,55 @@
+CreateQuery trace_log (children 3)
+ Identifier trace_log
+ Columns definition (children 1)
+  ExpressionList (children 10)
+   ColumnDeclaration event_date (children 1)
+    DataType Date
+   ColumnDeclaration event_time (children 1)
+    DataType DateTime
+   ColumnDeclaration event_time_microseconds (children 1)
+    DataType DateTime64 (children 1)
+     ExpressionList (children 1)
+      Literal UInt64_6
+   ColumnDeclaration timestamp_ns (children 1)
+    DataType UInt64
+   ColumnDeclaration revision (children 1)
+    DataType UInt32
+   ColumnDeclaration trace_type (children 1)
+    DataType Enum8 (children 1)
+     ExpressionList (children 4)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'Real\'
+        Literal UInt64_0
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'CPU\'
+        Literal UInt64_1
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'Memory\'
+        Literal UInt64_2
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'MemorySample\'
+        Literal UInt64_3
+   ColumnDeclaration thread_id (children 1)
+    DataType UInt64
+   ColumnDeclaration query_id (children 1)
+    DataType String
+   ColumnDeclaration trace (children 1)
+    DataType Array (children 1)
+     ExpressionList (children 1)
+      DataType UInt64
+   ColumnDeclaration size (children 1)
+    DataType Int64
+ Storage definition (children 4)
+  Function MergeTree
+  Function toYYYYMM (children 1)
+   ExpressionList (children 1)
+    Identifier event_date
+  Function tuple (children 1)
+   ExpressionList (children 2)
+    Identifier event_date
+    Identifier event_time
+  Set

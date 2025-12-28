@@ -1,0 +1,40 @@
+CreateQuery mv (children 4)
+ Identifier mv
+ Columns definition (children 1)
+  ExpressionList (children 4)
+   ColumnDeclaration event_time (children 1)
+    DataType DateTime
+   ColumnDeclaration event_name (children 1)
+    DataType String
+   ColumnDeclaration user_id (children 1)
+    DataType String
+   ColumnDeclaration user_type (children 1)
+    DataType String
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 2)
+    ExpressionList (children 4)
+     Identifier e.event_time
+     Identifier e.event_name
+     Identifier e.user_id
+     Identifier u.user_type
+    TablesInSelectQuery (children 2)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier event (alias e)
+     TablesInSelectQueryElement (children 2)
+      TableExpression (children 1)
+       TableIdentifier user (alias u)
+      TableJoin (children 1)
+       Function equals (children 1)
+        ExpressionList (children 2)
+         Identifier u.user_id
+         Identifier e.user_id
+ ViewTargets (children 1)
+  Storage definition (children 2)
+   Function MergeTree (children 1)
+    ExpressionList
+   Function tuple (children 1)
+    ExpressionList (children 2)
+     Identifier event_time
+     Identifier event_name

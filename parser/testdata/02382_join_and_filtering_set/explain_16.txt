@@ -1,0 +1,61 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 1)
+    Function greater (children 1)
+     ExpressionList (children 2)
+      Function count (children 1)
+       ExpressionList
+      Literal UInt64_1
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 1)
+           Asterisk
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             Function viewExplain (children 1)
+              ExpressionList (children 3)
+               Literal \'EXPLAIN PIPELINE\'
+               Literal \'\'
+               Subquery (children 1)
+                SelectWithUnionQuery (children 1)
+                 ExpressionList (children 1)
+                  SelectQuery (children 2)
+                   ExpressionList (children 1)
+                    Asterisk
+                   TablesInSelectQuery (children 2)
+                    TablesInSelectQueryElement (children 1)
+                     TableExpression (children 1)
+                      Subquery (alias t1) (children 1)
+                       SelectWithUnionQuery (children 1)
+                        ExpressionList (children 1)
+                         SelectQuery (children 1)
+                          ExpressionList (children 1)
+                           Function materialize (alias key) (children 1)
+                            ExpressionList (children 1)
+                             Literal \'a\'
+                    TablesInSelectQueryElement (children 2)
+                     TableExpression (children 1)
+                      Subquery (alias t2) (children 1)
+                       SelectWithUnionQuery (children 1)
+                        ExpressionList (children 1)
+                         SelectQuery (children 1)
+                          ExpressionList (children 1)
+                           Function materialize (alias key) (children 1)
+                            ExpressionList (children 1)
+                             Literal \'a\'
+                     TableJoin (children 1)
+                      Function equals (children 1)
+                       ExpressionList (children 2)
+                        Identifier t1.key
+                        Identifier t2.key
+   Function ilike (children 1)
+    ExpressionList (children 2)
+     Identifier explain
+     Literal \'%FilterBySetOnTheFlyTransform%\'

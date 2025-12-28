@@ -1,0 +1,123 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 4)
+    Identifier supp_nation
+    Identifier cust_nation
+    Identifier l_year
+    Function sum (alias revenue) (children 1)
+     ExpressionList (children 1)
+      Identifier volume
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias shipping) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 3)
+          ExpressionList (children 4)
+           Identifier n1.n_name (alias supp_nation)
+           Identifier n2.n_name (alias cust_nation)
+           Function toYear (alias l_year) (children 1)
+            ExpressionList (children 1)
+             Identifier l_shipdate
+           Function multiply (alias volume) (children 1)
+            ExpressionList (children 2)
+             Identifier l_extendedprice
+             Function minus (children 1)
+              ExpressionList (children 2)
+               Literal UInt64_1
+               Identifier l_discount
+          TablesInSelectQuery (children 6)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier supplier
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier lineitem
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier orders
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier customer
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier nation (alias n1)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier nation (alias n2)
+            TableJoin
+          Function and (children 1)
+           ExpressionList (children 7)
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier s_suppkey
+              Identifier l_suppkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier o_orderkey
+              Identifier l_orderkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier c_custkey
+              Identifier o_custkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier s_nationkey
+              Identifier n1.n_nationkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier c_nationkey
+              Identifier n2.n_nationkey
+            Function or (children 1)
+             ExpressionList (children 2)
+              Function and (children 1)
+               ExpressionList (children 2)
+                Function equals (children 1)
+                 ExpressionList (children 2)
+                  Identifier n1.n_name
+                  Literal \'FRANCE\'
+                Function equals (children 1)
+                 ExpressionList (children 2)
+                  Identifier n2.n_name
+                  Literal \'GERMANY\'
+              Function and (children 1)
+               ExpressionList (children 2)
+                Function equals (children 1)
+                 ExpressionList (children 2)
+                  Identifier n1.n_name
+                  Literal \'GERMANY\'
+                Function equals (children 1)
+                 ExpressionList (children 2)
+                  Identifier n2.n_name
+                  Literal \'FRANCE\'
+            Function and (children 1)
+             ExpressionList (children 2)
+              Function greaterOrEquals (children 1)
+               ExpressionList (children 2)
+                Identifier l_shipdate
+                Function toDate (children 1)
+                 ExpressionList (children 1)
+                  Literal \'1995-01-01\'
+              Function lessOrEquals (children 1)
+               ExpressionList (children 2)
+                Identifier l_shipdate
+                Function toDate (children 1)
+                 ExpressionList (children 1)
+                  Literal \'1996-12-31\'
+   ExpressionList (children 3)
+    Identifier supp_nation
+    Identifier cust_nation
+    Identifier l_year
+   ExpressionList (children 3)
+    OrderByElement (children 1)
+     Identifier supp_nation
+    OrderByElement (children 1)
+     Identifier cust_nation
+    OrderByElement (children 1)
+     Identifier l_year

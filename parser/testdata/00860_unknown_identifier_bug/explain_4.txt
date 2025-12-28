@@ -1,0 +1,50 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 11)
+    Identifier A._appointment_id
+    Identifier A._id
+    Identifier A._status
+    Identifier A._set_by_id
+    Identifier A._company_id
+    Identifier A._client_id
+    Identifier A._type
+    Identifier A._at
+    Identifier A._vacancy_id
+    Identifier A._set_at
+    Identifier A._job_requisition_id
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier appointment_events (alias A)
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias B) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 4)
+          ExpressionList (children 2)
+           Identifier _appointment_id
+           Function MAX (alias max_set_at) (children 1)
+            ExpressionList (children 1)
+             Identifier _set_at
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier appointment_events
+          Function in (children 1)
+           ExpressionList (children 2)
+            Identifier _status
+            Literal Tuple_(\'Created\', \'Transferred\')
+          ExpressionList (children 1)
+           Identifier _appointment_id
+     TableJoin (children 1)
+      ExpressionList (children 1)
+       Identifier _appointment_id
+   Function equals (children 1)
+    ExpressionList (children 2)
+     Identifier A._set_at
+     Identifier B.max_set_at
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier ALL

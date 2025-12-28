@@ -1,0 +1,258 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 1)
+    Asterisk
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias c0) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 6)
+           Identifier m0.pt (alias pt)
+           Identifier m0.exposure_uv (alias exposure_uv)
+           Function round (alias exposure_uv_hb_last_value) (children 1)
+            ExpressionList (children 2)
+             Identifier m2.exposure_uv
+             Literal UInt64_4
+           Function if (alias exposure_uv_hb_diff_percent) (children 1)
+            ExpressionList (children 3)
+             Function or (children 1)
+              ExpressionList (children 2)
+               Function isNull (children 1)
+                ExpressionList (children 1)
+                 Identifier m2.exposure_uv
+               Function equals (children 1)
+                ExpressionList (children 2)
+                 Identifier m2.exposure_uv
+                 Literal UInt64_0
+             Literal NULL
+             Function round (children 1)
+              ExpressionList (children 2)
+               Function divide (children 1)
+                ExpressionList (children 2)
+                 Function multiply (children 1)
+                  ExpressionList (children 2)
+                   Function minus (children 1)
+                    ExpressionList (children 2)
+                     Identifier m0.exposure_uv
+                     Identifier m2.exposure_uv
+                   Literal Float64_1
+                 Identifier m2.exposure_uv
+               Literal UInt64_4
+           Function round (alias exposure_uv_tb_last_value) (children 1)
+            ExpressionList (children 2)
+             Identifier m1.exposure_uv
+             Literal UInt64_4
+           Function if (alias exposure_uv_tb_diff_percent) (children 1)
+            ExpressionList (children 3)
+             Function or (children 1)
+              ExpressionList (children 2)
+               Function isNull (children 1)
+                ExpressionList (children 1)
+                 Identifier m1.exposure_uv
+               Function equals (children 1)
+                ExpressionList (children 2)
+                 Identifier m1.exposure_uv
+                 Literal UInt64_0
+             Literal NULL
+             Function round (children 1)
+              ExpressionList (children 2)
+               Function divide (children 1)
+                ExpressionList (children 2)
+                 Function multiply (children 1)
+                  ExpressionList (children 2)
+                   Function minus (children 1)
+                    ExpressionList (children 2)
+                     Identifier m0.exposure_uv
+                     Identifier m1.exposure_uv
+                   Literal Float64_1
+                 Identifier m1.exposure_uv
+               Literal UInt64_4
+          TablesInSelectQuery (children 3)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             Subquery (alias m0) (children 1)
+              SelectWithUnionQuery (children 1)
+               ExpressionList (children 1)
+                SelectQuery (children 2)
+                 ExpressionList (children 2)
+                  Identifier m0.pt (alias pt)
+                  Identifier exposure_uv (alias exposure_uv)
+                 TablesInSelectQuery (children 1)
+                  TablesInSelectQueryElement (children 1)
+                   TableExpression (children 1)
+                    Subquery (alias m0) (children 1)
+                     SelectWithUnionQuery (children 1)
+                      ExpressionList (children 1)
+                       SelectQuery (children 3)
+                        ExpressionList (children 2)
+                         Identifier pt (alias pt)
+                         Function multiIf (alias exposure_uv) (children 1)
+                          ExpressionList (children 3)
+                           Function greater (children 1)
+                            ExpressionList (children 2)
+                             Function COUNT (children 1)
+                              ExpressionList (children 1)
+                               Identifier exposure_uv
+                             Literal UInt64_0
+                           Function AVG (children 1)
+                            ExpressionList (children 1)
+                             Identifier exposure_uv
+                           Literal UInt64_0
+                        TablesInSelectQuery (children 1)
+                         TablesInSelectQueryElement (children 1)
+                          TableExpression (children 1)
+                           Subquery (alias m) (children 1)
+                            SelectWithUnionQuery (children 1)
+                             ExpressionList (children 1)
+                              SelectQuery (children 3)
+                               ExpressionList (children 2)
+                                Identifier pt (alias pt)
+                                Function uniqHLL12Merge (alias exposure_uv) (children 1)
+                                 ExpressionList (children 1)
+                                  Identifier count_distinct_exposure_uv
+                               TablesInSelectQuery (children 1)
+                                TablesInSelectQueryElement (children 1)
+                                 TableExpression (children 1)
+                                  TableIdentifier test
+                               ExpressionList (children 1)
+                                Identifier pt
+                        ExpressionList (children 1)
+                         Identifier pt
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             Subquery (alias m1) (children 1)
+              SelectWithUnionQuery (children 1)
+               ExpressionList (children 1)
+                SelectQuery (children 2)
+                 ExpressionList (children 2)
+                  Identifier m0.pt (alias pt)
+                  Identifier exposure_uv (alias exposure_uv)
+                 TablesInSelectQuery (children 1)
+                  TablesInSelectQueryElement (children 1)
+                   TableExpression (children 1)
+                    Subquery (alias m0) (children 1)
+                     SelectWithUnionQuery (children 1)
+                      ExpressionList (children 1)
+                       SelectQuery (children 3)
+                        ExpressionList (children 2)
+                         Function formatDateTime (alias pt) (children 1)
+                          ExpressionList (children 2)
+                           Function addYears (children 1)
+                            ExpressionList (children 2)
+                             Function parseDateTimeBestEffort (children 1)
+                              ExpressionList (children 1)
+                               Identifier pt
+                             Literal UInt64_1
+                           Literal \'%Y%m%d\'
+                         Function multiIf (alias exposure_uv) (children 1)
+                          ExpressionList (children 3)
+                           Function greater (children 1)
+                            ExpressionList (children 2)
+                             Function COUNT (children 1)
+                              ExpressionList (children 1)
+                               Identifier exposure_uv
+                             Literal UInt64_0
+                           Function AVG (children 1)
+                            ExpressionList (children 1)
+                             Identifier exposure_uv
+                           Literal UInt64_0
+                        TablesInSelectQuery (children 1)
+                         TablesInSelectQueryElement (children 1)
+                          TableExpression (children 1)
+                           Subquery (alias m) (children 1)
+                            SelectWithUnionQuery (children 1)
+                             ExpressionList (children 1)
+                              SelectQuery (children 3)
+                               ExpressionList (children 2)
+                                Identifier pt (alias pt)
+                                Function uniqHLL12Merge (alias exposure_uv) (children 1)
+                                 ExpressionList (children 1)
+                                  Identifier count_distinct_exposure_uv
+                               TablesInSelectQuery (children 1)
+                                TablesInSelectQueryElement (children 1)
+                                 TableExpression (children 1)
+                                  TableIdentifier test
+                               ExpressionList (children 1)
+                                Identifier pt
+                        ExpressionList (children 1)
+                         Identifier pt
+            TableJoin (children 1)
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier m0.pt
+               Identifier m1.pt
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             Subquery (alias m2) (children 1)
+              SelectWithUnionQuery (children 1)
+               ExpressionList (children 1)
+                SelectQuery (children 2)
+                 ExpressionList (children 2)
+                  Identifier m0.pt (alias pt)
+                  Identifier exposure_uv (alias exposure_uv)
+                 TablesInSelectQuery (children 1)
+                  TablesInSelectQueryElement (children 1)
+                   TableExpression (children 1)
+                    Subquery (alias m0) (children 1)
+                     SelectWithUnionQuery (children 1)
+                      ExpressionList (children 1)
+                       SelectQuery (children 3)
+                        ExpressionList (children 2)
+                         Function formatDateTime (alias pt) (children 1)
+                          ExpressionList (children 2)
+                           Function addDays (children 1)
+                            ExpressionList (children 2)
+                             Function toDate (children 1)
+                              ExpressionList (children 1)
+                               Function parseDateTimeBestEffort (children 1)
+                                ExpressionList (children 1)
+                                 Identifier pt
+                             Literal UInt64_1
+                           Literal \'%Y%m%d\'
+                         Function multiIf (alias exposure_uv) (children 1)
+                          ExpressionList (children 3)
+                           Function greater (children 1)
+                            ExpressionList (children 2)
+                             Function COUNT (children 1)
+                              ExpressionList (children 1)
+                               Identifier exposure_uv
+                             Literal UInt64_0
+                           Function AVG (children 1)
+                            ExpressionList (children 1)
+                             Identifier exposure_uv
+                           Literal UInt64_0
+                        TablesInSelectQuery (children 1)
+                         TablesInSelectQueryElement (children 1)
+                          TableExpression (children 1)
+                           Subquery (alias m) (children 1)
+                            SelectWithUnionQuery (children 1)
+                             ExpressionList (children 1)
+                              SelectQuery (children 3)
+                               ExpressionList (children 2)
+                                Identifier pt (alias pt)
+                                Function uniqHLL12Merge (alias exposure_uv) (children 1)
+                                 ExpressionList (children 1)
+                                  Identifier count_distinct_exposure_uv
+                               TablesInSelectQuery (children 1)
+                                TablesInSelectQueryElement (children 1)
+                                 TableExpression (children 1)
+                                  TableIdentifier test
+                               ExpressionList (children 1)
+                                Identifier pt
+                        ExpressionList (children 1)
+                         Identifier pt
+            TableJoin (children 1)
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier m0.pt
+               Identifier m2.pt
+   ExpressionList (children 2)
+    OrderByElement (children 1)
+     Identifier pt
+    OrderByElement (children 1)
+     Identifier exposure_uv
+   Set

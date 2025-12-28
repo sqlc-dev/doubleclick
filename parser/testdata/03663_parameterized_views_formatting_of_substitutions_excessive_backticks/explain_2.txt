@@ -1,0 +1,48 @@
+CreateQuery audit_size_column (children 2)
+ Identifier audit_size_column
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 4)
+    ExpressionList (children 5)
+     Function formatReadableSize (alias formatted) (children 1)
+      ExpressionList (children 1)
+       Identifier size
+     Function sum (alias size) (children 1)
+      ExpressionList (children 1)
+       Identifier column_bytes_on_disk
+     Identifier column
+     Identifier table
+     Identifier database
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier system.parts_columns
+    Function and (children 1)
+     ExpressionList (children 4)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier active
+        Literal UInt64_1
+      Function or (children 1)
+       ExpressionList (children 2)
+        Function equals (children 1)
+         ExpressionList (children 2)
+          Identifier database
+          QueryParameter db:String
+        Function equals (children 1)
+         ExpressionList (children 2)
+          Identifier database
+          Function currentDatabase (children 1)
+           ExpressionList
+      Function match (children 1)
+       ExpressionList (children 2)
+        Identifier table
+        QueryParameter table:String
+      Function match (children 1)
+       ExpressionList (children 2)
+        Identifier column
+        QueryParameter column:String
+    ExpressionList (children 3)
+     Identifier database
+     Identifier table
+     Identifier column

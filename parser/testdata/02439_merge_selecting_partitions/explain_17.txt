@@ -1,0 +1,85 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 1)
+    Asterisk
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.zookeeper_log
+   Function and (children 1)
+    ExpressionList (children 6)
+     Function like (children 1)
+      ExpressionList (children 2)
+       Identifier path
+       Function concat (children 1)
+        ExpressionList (children 5)
+         Literal \'/test/02439/\'
+         Function getMacro (children 1)
+          ExpressionList (children 1)
+           Literal \'shard\'
+         Literal \'/\'
+         Function currentDatabase (children 1)
+          ExpressionList
+         Literal \'/block_numbers/%\'
+     Function in (children 1)
+      ExpressionList (children 2)
+       Identifier op_num
+       Literal Tuple_(\'List\', \'SimpleList\', \'FilteredList\')
+     Function notLike (children 1)
+      ExpressionList (children 2)
+       Identifier path
+       Literal \'%/block_numbers/1\'
+     Function notLike (children 1)
+      ExpressionList (children 2)
+       Identifier path
+       Literal \'%/block_numbers/123\'
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier event_time
+       Function minus (children 1)
+        ExpressionList (children 2)
+         Function now (children 1)
+          ExpressionList
+         Function toIntervalMinute (children 1)
+          ExpressionList (children 1)
+           Literal UInt64_1
+     Function or (children 1)
+      ExpressionList (children 3)
+       Function isNull (children 1)
+        ExpressionList (children 1)
+         Identifier query_id
+       Function equals (children 1)
+        ExpressionList (children 2)
+         Identifier query_id
+         Literal \'\'
+       Function in (children 1)
+        ExpressionList (children 2)
+         Identifier query_id
+         Subquery (children 1)
+          SelectWithUnionQuery (children 1)
+           ExpressionList (children 1)
+            SelectQuery (children 3)
+             ExpressionList (children 1)
+              Identifier query_id
+             TablesInSelectQuery (children 1)
+              TablesInSelectQueryElement (children 1)
+               TableExpression (children 1)
+                TableIdentifier system.query_log
+             Function and (children 1)
+              ExpressionList (children 2)
+               Function greaterOrEquals (children 1)
+                ExpressionList (children 2)
+                 Identifier event_time
+                 Function minus (children 1)
+                  ExpressionList (children 2)
+                   Function now (children 1)
+                    ExpressionList
+                   Function toIntervalMinute (children 1)
+                    ExpressionList (children 1)
+                     Literal UInt64_1
+               Function equals (children 1)
+                ExpressionList (children 2)
+                 Identifier current_database
+                 Function currentDatabase (children 1)
+                  ExpressionList

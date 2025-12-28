@@ -1,0 +1,41 @@
+CreateQuery t_1 (children 3)
+ Identifier t_1
+ Columns definition (children 2)
+  ExpressionList (children 5)
+   ColumnDeclaration order_0 (children 1)
+    DataType UInt64
+   ColumnDeclaration ordinary_1 (children 1)
+    DataType UInt32
+   ColumnDeclaration p_time (children 1)
+    DataType Date
+   ColumnDeclaration computed (children 1)
+    Function concat (children 1)
+     ExpressionList (children 2)
+      Literal \'computed_\'
+      Function CAST (children 1)
+       ExpressionList (children 2)
+        Identifier p_time
+        Literal \'String\'
+   ColumnDeclaration granule (children 1)
+    Function modulo (children 1)
+     ExpressionList (children 2)
+      Function CAST (children 1)
+       ExpressionList (children 2)
+        Function divide (children 1)
+         ExpressionList (children 2)
+          Identifier order_0
+          Literal UInt64_8192
+        Literal \'UInt64\'
+      Literal UInt64_3
+  ExpressionList (children 1)
+   Index (children 2)
+    Identifier granule
+    Function minmax (children 1)
+     ExpressionList
+ Storage definition (children 4)
+  Function MergeTree
+  Function toYYYYMM (children 1)
+   ExpressionList (children 1)
+    Identifier p_time
+  Identifier order_0
+  Set

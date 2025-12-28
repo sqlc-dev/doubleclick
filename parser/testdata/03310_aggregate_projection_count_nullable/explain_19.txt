@@ -1,0 +1,35 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 6)
+   ExpressionList (children 2)
+    Function formatDateTime (alias time) (children 1)
+     ExpressionList (children 2)
+      Function toStartOfInterval (children 1)
+       ExpressionList (children 2)
+        Identifier collectorReceiptTime
+        Function toIntervalHour (children 1)
+         ExpressionList (children 1)
+          Literal UInt64_1
+      Literal \'%Y-%m-%d %H\'
+    Function COUNT (alias count) (children 1)
+     ExpressionList
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier log
+   Function and (children 1)
+    ExpressionList (children 2)
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier collectorReceiptTime
+       Literal \'2025-01-01 00:00:00\'
+     Function lessOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier collectorReceiptTime
+       Literal \'2025-01-01 23:59:59\'
+   ExpressionList (children 1)
+    Identifier time
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier time
+   Set

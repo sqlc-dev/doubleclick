@@ -1,0 +1,93 @@
+CreateQuery opentelemetry_span_log_9997438610282160742 (children 3)
+ Identifier opentelemetry_span_log_9997438610282160742
+ Columns definition (children 1)
+  ExpressionList (children 16)
+   ColumnDeclaration pull_request_number (children 1)
+    DataType UInt32
+   ColumnDeclaration commit_sha (children 1)
+    DataType String
+   ColumnDeclaration check_start_time (children 1)
+    DataType DateTime
+   ColumnDeclaration check_name (children 1)
+    DataType LowCardinality (children 1)
+     ExpressionList (children 1)
+      DataType String
+   ColumnDeclaration instance_type (children 1)
+    DataType LowCardinality (children 1)
+     ExpressionList (children 1)
+      DataType String
+   ColumnDeclaration trace_id (children 1)
+    DataType UUID
+   ColumnDeclaration span_id (children 1)
+    DataType UInt64
+   ColumnDeclaration parent_span_id (children 1)
+    DataType UInt64
+   ColumnDeclaration operation_name (children 1)
+    DataType LowCardinality (children 1)
+     ExpressionList (children 1)
+      DataType String
+   ColumnDeclaration kind (children 1)
+    DataType Enum8 (children 1)
+     ExpressionList (children 5)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'INTERNAL\'
+        Literal UInt64_0
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'SERVER\'
+        Literal UInt64_1
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'CLIENT\'
+        Literal UInt64_2
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'PRODUCER\'
+        Literal UInt64_3
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Literal \'CONSUMER\'
+        Literal UInt64_4
+   ColumnDeclaration start_time_us (children 1)
+    DataType UInt64
+   ColumnDeclaration finish_time_us (children 1)
+    DataType UInt64
+   ColumnDeclaration finish_date (children 1)
+    DataType Date
+   ColumnDeclaration attribute (children 1)
+    DataType Map (children 1)
+     ExpressionList (children 2)
+      DataType LowCardinality (children 1)
+       ExpressionList (children 1)
+        DataType String
+      DataType String
+   ColumnDeclaration attribute.names (children 2)
+    DataType Array (children 1)
+     ExpressionList (children 1)
+      DataType LowCardinality (children 1)
+       ExpressionList (children 1)
+        DataType String
+    Function mapKeys (children 1)
+     ExpressionList (children 1)
+      Identifier attribute
+   ColumnDeclaration attribute.values (children 2)
+    DataType Array (children 1)
+     ExpressionList (children 1)
+      DataType String
+    Function mapValues (children 1)
+     ExpressionList (children 1)
+      Identifier attribute
+ Storage definition (children 4)
+  Function MergeTree (children 1)
+   ExpressionList
+  Function toYYYYMM (children 1)
+   ExpressionList (children 1)
+    Identifier finish_date
+  Function tuple (children 1)
+   ExpressionList (children 4)
+    Identifier check_name
+    Identifier finish_date
+    Identifier finish_time_us
+    Identifier trace_id
+  Set

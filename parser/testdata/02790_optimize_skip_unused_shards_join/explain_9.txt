@@ -1,0 +1,60 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 6)
+   ExpressionList (children 2)
+    Function sum (alias total) (children 1)
+     ExpressionList (children 1)
+      Function if (children 1)
+       ExpressionList (children 3)
+        Function notEquals (children 1)
+         ExpressionList (children 2)
+          Identifier inner_distributed.id
+          Literal UInt64_0
+        Literal UInt64_1
+        Literal UInt64_0
+    Identifier inner_distributed.date (alias date)
+   TablesInSelectQuery (children 2)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier outer_distributed (alias outer_distributed)
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias inner_distributed) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 3)
+          ExpressionList (children 3)
+           Identifier inner_distributed.outer_id (alias outer_id)
+           Identifier inner_distributed.id (alias id)
+           Identifier inner_distributed.date (alias date)
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier inner_distributed (alias inner_distributed)
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier inner_distributed.organization_id
+            Literal UInt64_15078
+     TableJoin (children 1)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier inner_distributed.outer_id
+        Identifier outer_distributed.id
+   Function and (children 1)
+    ExpressionList (children 2)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier outer_distributed.organization_id
+       Literal UInt64_15078
+     Function notEquals (children 1)
+      ExpressionList (children 2)
+       Identifier date
+       Function toDate (children 1)
+        ExpressionList (children 1)
+         Literal \'1970-01-01\'
+   ExpressionList (children 1)
+    Identifier date
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier date
+   Set

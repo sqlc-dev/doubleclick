@@ -1,0 +1,57 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 6)
+   ExpressionList (children 6)
+    Identifier TraficSourceID
+    Identifier SearchEngineID
+    Identifier AdvEngineID
+    Function if (alias Src) (children 1)
+     ExpressionList (children 3)
+      Function and (children 1)
+       ExpressionList (children 2)
+        Function equals (children 1)
+         ExpressionList (children 2)
+          Identifier SearchEngineID
+          Literal UInt64_0
+        Function equals (children 1)
+         ExpressionList (children 2)
+          Identifier AdvEngineID
+          Literal UInt64_0
+      Identifier Referer
+      Literal \'\'
+    Identifier URL (alias Dst)
+    Function count (alias PageViews) (children 1)
+     ExpressionList
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier test.hits_s3
+   Function and (children 1)
+    ExpressionList (children 4)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier CounterID
+       Literal UInt64_62
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier EventDate
+       Literal \'2013-07-01\'
+     Function lessOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier EventDate
+       Literal \'2013-07-31\'
+     Function not (children 1)
+      ExpressionList (children 1)
+       Identifier Refresh
+   ExpressionList (children 5)
+    Identifier TraficSourceID
+    Identifier SearchEngineID
+    Identifier AdvEngineID
+    Identifier Src
+    Identifier Dst
+   ExpressionList (children 2)
+    OrderByElement (children 1)
+     Identifier PageViews
+    OrderByElement (children 1)
+     Identifier TraficSourceID
+   Literal UInt64_1000

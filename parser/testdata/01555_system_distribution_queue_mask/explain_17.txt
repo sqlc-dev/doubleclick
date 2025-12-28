@@ -1,0 +1,44 @@
+SelectWithUnionQuery (children 2)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 4)
+    Function length (children 1)
+     ExpressionList (children 1)
+      Function splitByChar (children 1)
+       ExpressionList (children 2)
+        Literal \'*\'
+        Identifier data_path
+    Function replaceRegexpOne (children 1)
+     ExpressionList (children 3)
+      Identifier data_path
+      Literal \'^.*/([^/]*)/\'
+      Literal \'\\\\1\'
+    Function extract (children 1)
+     ExpressionList (children 2)
+      Identifier last_exception
+      Literal \'AUTHENTICATION_FAILED\'
+    Function less (children 1)
+     ExpressionList (children 2)
+      Function dateDiff (children 1)
+       ExpressionList (children 3)
+        Literal \'s\'
+        Identifier last_exception_time
+        Function now (children 1)
+         ExpressionList
+      Literal UInt64_3600
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.distribution_queue
+   Function and (children 1)
+    ExpressionList (children 2)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier database
+       Function currentDatabase (children 1)
+        ExpressionList
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier table
+       Literal \'dist_01555\'
+ Identifier CSV

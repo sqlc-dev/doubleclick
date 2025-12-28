@@ -1,0 +1,51 @@
+SelectWithUnionQuery (children 2)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 6)
+    Literal UInt64_1734955380 (alias start)
+    Literal UInt64_1734955680 (alias end)
+    Literal UInt64_15 (alias step)
+    Literal UInt64_300 (alias window)
+    Literal UInt64_60 (alias predict_offset)
+    Function range (alias grid) (children 1)
+     ExpressionList (children 3)
+      Identifier start
+      Function plus (children 1)
+       ExpressionList (children 2)
+        Identifier end
+        Literal UInt64_1
+      Identifier step
+   ExpressionList (children 2)
+    Function arrayZip (alias changes_5m) (children 1)
+     ExpressionList (children 2)
+      Identifier grid
+      Function timeSeriesChangesToGrid (children 2)
+       ExpressionList (children 2)
+        Function toUnixTimestamp (children 1)
+         ExpressionList (children 1)
+          Identifier timestamp
+        Identifier value
+       ExpressionList (children 4)
+        Identifier start
+        Identifier end
+        Identifier step
+        Identifier window
+    Function arrayZip (alias resets_5m) (children 1)
+     ExpressionList (children 2)
+      Identifier grid
+      Function timeSeriesResetsToGrid (children 2)
+       ExpressionList (children 2)
+        Function toUnixTimestamp (children 1)
+         ExpressionList (children 1)
+          Identifier timestamp
+        Identifier value
+       ExpressionList (children 4)
+        Identifier start
+        Identifier end
+        Identifier step
+        Identifier window
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier ts_raw_data
+ Identifier Vertical

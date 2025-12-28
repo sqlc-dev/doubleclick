@@ -1,0 +1,45 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 2)
+    Identifier group_id
+    Identifier open
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 5)
+          ExpressionList (children 3)
+           Function intDiv (alias group_id) (children 1)
+            ExpressionList (children 2)
+             Identifier open_time
+             Literal UInt64_10
+           Function toFloat64 (alias open) (children 1)
+            ExpressionList (children 1)
+             Function argMin (children 1)
+              ExpressionList (children 2)
+               Identifier open_price
+               Identifier open_time
+           Function toFloat64 (alias close) (children 1)
+            ExpressionList (children 1)
+             Function argMax (children 1)
+              ExpressionList (children 2)
+               Identifier close_price
+               Identifier open_time
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier foo
+          ExpressionList (children 1)
+           Identifier group_id
+          ExpressionList (children 1)
+           OrderByElement (children 2)
+            Identifier group_id
+            Literal UInt64_1
+          ExpressionList (children 2)
+           InterpolateElement (column open) (children 1)
+            Identifier open
+           InterpolateElement (column close) (children 1)
+            Identifier close

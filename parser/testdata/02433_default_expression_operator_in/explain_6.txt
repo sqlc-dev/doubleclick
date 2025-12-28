@@ -1,0 +1,35 @@
+CreateQuery dep (children 3)
+ Identifier dep
+ Columns definition (children 1)
+  ExpressionList (children 3)
+   ColumnDeclaration id (children 1)
+    DataType Int32
+   ColumnDeclaration country (children 1)
+    DataType LowCardinality (children 1)
+     ExpressionList (children 1)
+      DataType String
+   ColumnDeclaration purchase_location (children 2)
+    DataType UInt16
+    Function if (children 1)
+     ExpressionList (children 3)
+      Function in (children 1)
+       ExpressionList (children 2)
+        Identifier id
+        Function joinGet (children 1)
+         ExpressionList (children 3)
+          Function concat (children 1)
+           ExpressionList (children 2)
+            Function currentDatabase (children 1)
+             ExpressionList
+            Literal \'.id_join\'
+          Literal \'location\'
+          Literal \'CLICK\'
+      Literal UInt64_123
+      Literal UInt64_456
+ Storage definition (children 2)
+  Function ReplicatedMergeTree (children 1)
+   ExpressionList (children 2)
+    Literal \'/test/02433/{database}/dep\'
+    Literal \'1\'
+  Function tuple (children 1)
+   ExpressionList

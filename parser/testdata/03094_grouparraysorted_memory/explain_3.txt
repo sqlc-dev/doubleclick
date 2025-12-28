@@ -1,0 +1,29 @@
+CreateQuery 03094_grouparrysorted_mv (children 3)
+ Identifier 03094_grouparrysorted_mv
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 3)
+    ExpressionList (children 2)
+     Identifier ServiceName
+     Function groupArraySortedState (alias SlowSpans) (children 2)
+      ExpressionList (children 1)
+       Function CAST (children 1)
+        ExpressionList (children 2)
+         Function tuple (children 1)
+          ExpressionList (children 4)
+           Function negate (children 1)
+            ExpressionList (children 1)
+             Identifier Duration
+           Identifier Timestamp
+           Identifier TraceId
+           Identifier SpanId
+         Literal \'Tuple(NegativeDurationNs Int64, Timestamp DateTime64(9), TraceId String, SpanId String)\'
+      ExpressionList (children 1)
+       Literal UInt64_100
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier 03094_grouparrysorted_src
+    ExpressionList (children 1)
+     Identifier ServiceName
+ ViewTargets

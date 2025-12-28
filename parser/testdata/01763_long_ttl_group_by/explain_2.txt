@@ -1,0 +1,40 @@
+CreateQuery test_ttl_group_by01763 (children 3)
+ Identifier test_ttl_group_by01763
+ Columns definition (children 1)
+  ExpressionList (children 5)
+   ColumnDeclaration key (children 1)
+    DataType UInt32
+   ColumnDeclaration ts (children 1)
+    DataType DateTime
+   ColumnDeclaration value (children 1)
+    DataType UInt32
+   ColumnDeclaration min_value (children 2)
+    DataType UInt32
+    Identifier value
+   ColumnDeclaration max_value (children 2)
+    DataType UInt32
+    Identifier value
+ Storage definition (children 4)
+  Function MergeTree (children 1)
+   ExpressionList
+  Function toYYYYMM (children 1)
+   ExpressionList (children 1)
+    Identifier ts
+  Function tuple (children 1)
+   ExpressionList (children 3)
+    Identifier key
+    Function toStartOfInterval (children 1)
+     ExpressionList (children 2)
+      Identifier ts
+      Function toIntervalMinute (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_3
+    Identifier ts
+  ExpressionList (children 1)
+   TTLElement (children 1)
+    Function plus (children 1)
+     ExpressionList (children 2)
+      Identifier ts
+      Function toIntervalMinute (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_5

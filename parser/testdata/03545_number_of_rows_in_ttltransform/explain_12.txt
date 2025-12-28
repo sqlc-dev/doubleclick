@@ -1,0 +1,26 @@
+CreateQuery t (children 3)
+ Identifier t
+ Columns definition (children 1)
+  ExpressionList (children 3)
+   ColumnDeclaration timestamp (children 1)
+    DataType DateTime
+   ColumnDeclaration id (children 1)
+    DataType String
+   ColumnDeclaration value (children 1)
+    DataType String
+ Storage definition (children 3)
+  Function MergeTree
+  Function tuple (children 1)
+   ExpressionList (children 2)
+    Identifier id
+    Function toStartOfDay (children 1)
+     ExpressionList (children 1)
+      Identifier timestamp
+  ExpressionList (children 1)
+   TTLElement (children 1)
+    Function plus (children 1)
+     ExpressionList (children 2)
+      Identifier timestamp
+      Function toIntervalDay (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_1

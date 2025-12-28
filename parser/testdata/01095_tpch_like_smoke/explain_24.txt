@@ -1,0 +1,64 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 6)
+   ExpressionList (children 4)
+    Identifier l_orderkey
+    Function sum (alias revenue) (children 1)
+     ExpressionList (children 1)
+      Function multiply (children 1)
+       ExpressionList (children 2)
+        Identifier l_extendedprice
+        Function minus (children 1)
+         ExpressionList (children 2)
+          Literal UInt64_1
+          Identifier l_discount
+    Identifier o_orderdate
+    Identifier o_shippriority
+   TablesInSelectQuery (children 3)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier customer
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier orders
+     TableJoin
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      TableIdentifier lineitem
+     TableJoin
+   Function and (children 1)
+    ExpressionList (children 5)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier c_mktsegment
+       Literal \'BUILDING\'
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier c_custkey
+       Identifier o_custkey
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier l_orderkey
+       Identifier o_orderkey
+     Function less (children 1)
+      ExpressionList (children 2)
+       Identifier o_orderdate
+       Function toDate (children 1)
+        ExpressionList (children 1)
+         Literal \'1995-03-15\'
+     Function greater (children 1)
+      ExpressionList (children 2)
+       Identifier l_shipdate
+       Function toDate (children 1)
+        ExpressionList (children 1)
+         Literal \'1995-03-15\'
+   ExpressionList (children 3)
+    Identifier l_orderkey
+    Identifier o_orderdate
+    Identifier o_shippriority
+   ExpressionList (children 2)
+    OrderByElement (children 1)
+     Identifier revenue
+    OrderByElement (children 1)
+     Identifier o_orderdate
+   Literal UInt64_10

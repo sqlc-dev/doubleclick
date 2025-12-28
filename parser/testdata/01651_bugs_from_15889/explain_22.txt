@@ -1,0 +1,61 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 1)
+    Function tuple (children 1)
+     ExpressionList (children 2)
+      Subquery (alias time_with_microseconds) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 5)
+          ExpressionList (children 1)
+           Identifier query_start_time_microseconds
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier system.query_log
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier current_database
+            Function currentDatabase (children 1)
+             ExpressionList
+          ExpressionList (children 1)
+           OrderByElement (children 1)
+            Identifier query_start_time
+          Literal UInt64_1
+      Subquery (alias t) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 5)
+          ExpressionList (children 1)
+           Identifier query_start_time
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier system.query_log
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier current_database
+            Function currentDatabase (children 1)
+             ExpressionList
+          ExpressionList (children 1)
+           OrderByElement (children 1)
+            Identifier query_start_time
+          Literal UInt64_1
+   ExpressionList (children 1)
+    Function if (children 1)
+     ExpressionList (children 3)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Function dateDiff (children 1)
+         ExpressionList (children 3)
+          Literal \'second\'
+          Function toDateTime (children 1)
+           ExpressionList (children 1)
+            Identifier time_with_microseconds
+          Function toDateTime (children 1)
+           ExpressionList (children 1)
+            Identifier t
+        Literal Int64_-9223372036854775808
+      Literal \'ok\'
+      Literal \'\'

@@ -1,0 +1,93 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 5)
+    Function arrayMap (alias l_rounded) (children 1)
+     ExpressionList (children 2)
+      Function lambda (children 1)
+       ExpressionList (children 2)
+        Function tuple (children 1)
+         ExpressionList (children 1)
+          Identifier x
+        Function floor (children 1)
+         ExpressionList (children 2)
+          Identifier x
+          Literal UInt64_4
+      Function arrayElement (alias l) (children 1)
+       ExpressionList (children 2)
+        Identifier original_medians_array.medians_by_version
+        Literal UInt64_1
+    Function arrayMap (alias r_rounded) (children 1)
+     ExpressionList (children 2)
+      Function lambda (children 1)
+       ExpressionList (children 2)
+        Function tuple (children 1)
+         ExpressionList (children 1)
+          Identifier x
+        Function floor (children 1)
+         ExpressionList (children 2)
+          Identifier x
+          Literal UInt64_4
+      Function arrayElement (alias r) (children 1)
+       ExpressionList (children 2)
+        Identifier original_medians_array.medians_by_version
+        Literal UInt64_2
+    Function arrayMap (alias diff_percent) (children 1)
+     ExpressionList (children 3)
+      Function lambda (children 1)
+       ExpressionList (children 2)
+        Function tuple (children 1)
+         ExpressionList (children 2)
+          Identifier x
+          Identifier y
+        Function floor (children 1)
+         ExpressionList (children 2)
+          Function divide (children 1)
+           ExpressionList (children 2)
+            Function minus (children 1)
+             ExpressionList (children 2)
+              Identifier y
+              Identifier x
+            Identifier x
+          Literal UInt64_3
+      Identifier l
+      Identifier r
+    Identifier test
+    Identifier query
+   TablesInSelectQuery (children 4)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias rd) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 1)
+          ExpressionList (children 1)
+           Literal UInt64_1
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias original_medians_array) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 1)
+          ExpressionList (children 1)
+           Literal Array_[Array_[UInt64_1, UInt64_2], Array_[UInt64_3, UInt64_4]] (alias medians_by_version)
+     TableJoin
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias any_query) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 1)
+          ExpressionList (children 2)
+           Literal \'test\' (alias test)
+           Literal \'query\' (alias query)
+     TableJoin
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias check_single_query) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 1)
+          ExpressionList (children 1)
+           Literal UInt64_1 (alias A)
+     TableJoin

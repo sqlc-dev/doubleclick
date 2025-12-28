@@ -1,0 +1,41 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 3)
+   ExpressionList (children 7)
+    Literal UInt64_100 (alias begin)
+    Literal UInt64_200 (alias end)
+    Literal UInt64_10 (alias step_sec)
+    Literal UInt64_15 (alias staleness_sec)
+    Function CAST (alias begin_ts) (children 1)
+     ExpressionList (children 2)
+      Identifier begin
+      Literal \'DateTime(\\\'UTC\\\')\'
+    Function CAST (alias end_ts) (children 1)
+     ExpressionList (children 2)
+      Identifier end
+      Literal \'DateTime(\\\'UTC\\\')\'
+    Function range (alias grid) (children 1)
+     ExpressionList (children 3)
+      Identifier begin
+      Function plus (children 1)
+       ExpressionList (children 2)
+        Identifier end
+        Identifier step_sec
+      Identifier step_sec
+   ExpressionList (children 1)
+    Function arrayZip (alias b) (children 1)
+     ExpressionList (children 2)
+      Identifier grid
+      Function timeSeriesResampleToGridWithStaleness (children 2)
+       ExpressionList (children 2)
+        Identifier timestamp
+        Identifier value
+       ExpressionList (children 4)
+        Identifier begin_ts
+        Identifier end_ts
+        Identifier step_sec
+        Identifier staleness_sec
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier ts_data

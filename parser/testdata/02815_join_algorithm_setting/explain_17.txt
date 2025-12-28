@@ -1,0 +1,84 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 2)
+    Function countIf (children 1)
+     ExpressionList (children 1)
+      Function like (children 1)
+       ExpressionList (children 2)
+        Identifier explain
+        Literal \'%Algorithm: GraceHashJoin%\'
+    Function countIf (children 1)
+     ExpressionList (children 1)
+      Function like (children 1)
+       ExpressionList (children 2)
+        Identifier explain
+        Literal \'%Algorithm: HashJoin%\'
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 1)
+           Asterisk
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             Function viewExplain (children 1)
+              ExpressionList (children 3)
+               Literal \'EXPLAIN\'
+               Literal \'actions = 1\'
+               Subquery (children 1)
+                SelectWithUnionQuery (children 1)
+                 ExpressionList (children 1)
+                  SelectQuery (children 2)
+                   ExpressionList (children 1)
+                    Asterisk
+                   TablesInSelectQuery (children 2)
+                    TablesInSelectQueryElement (children 1)
+                     TableExpression (children 1)
+                      Subquery (alias t1) (children 1)
+                       SelectWithUnionQuery (children 1)
+                        ExpressionList (children 1)
+                         SelectQuery (children 2)
+                          ExpressionList (children 2)
+                           Identifier number (alias key)
+                           Function multiply (alias key2) (children 1)
+                            ExpressionList (children 2)
+                             Identifier number
+                             Literal UInt64_10
+                          TablesInSelectQuery (children 1)
+                           TablesInSelectQueryElement (children 1)
+                            TableExpression (children 1)
+                             Function numbers_mt (children 1)
+                              ExpressionList (children 1)
+                               Literal UInt64_10
+                    TablesInSelectQueryElement (children 2)
+                     TableExpression (children 1)
+                      Subquery (alias t2) (children 1)
+                       SelectWithUnionQuery (children 1)
+                        ExpressionList (children 1)
+                         SelectQuery (children 2)
+                          ExpressionList (children 2)
+                           Identifier k (alias key)
+                           Function plus (alias key2) (children 1)
+                            ExpressionList (children 2)
+                             Identifier k
+                             Literal UInt64_100
+                          TablesInSelectQuery (children 1)
+                           TablesInSelectQueryElement (children 1)
+                            TableExpression (children 1)
+                             TableIdentifier t2
+                     TableJoin (children 1)
+                      Function or (children 1)
+                       ExpressionList (children 2)
+                        Function equals (children 1)
+                         ExpressionList (children 2)
+                          Identifier t1.key
+                          Identifier t2.key
+                        Function equals (children 1)
+                         ExpressionList (children 2)
+                          Identifier t1.key2
+                          Identifier t2.key2

@@ -1,0 +1,33 @@
+CreateQuery mv (children 3)
+ Identifier mv
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 3)
+    ExpressionList (children 2)
+     Function toStartOfHour (alias hour) (children 1)
+      ExpressionList (children 1)
+       Identifier time
+     Function sum (alias sum_amount) (children 1)
+      ExpressionList (children 1)
+       Identifier number
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       TableIdentifier landing
+    ExpressionList (children 1)
+     Identifier hour
+ ViewTargets (children 1)
+  Storage definition (children 3)
+   Function ReplicatedSummingMergeTree (children 1)
+    ExpressionList (children 2)
+     Function concat (children 1)
+      ExpressionList (children 3)
+       Literal \'/clickhouse/\'
+       Function currentDatabase (children 1)
+        ExpressionList
+       Literal \'/mv/{shard}/\'
+     Literal \'{replica}\'
+   Function toYYYYMMDD (children 1)
+    ExpressionList (children 1)
+     Identifier hour
+   Identifier hour

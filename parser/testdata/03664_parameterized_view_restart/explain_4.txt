@@ -1,0 +1,182 @@
+CreateQuery view_order_attribution (children 3)
+ Identifier view_order_attribution
+ Columns definition (children 1)
+  ExpressionList (children 17)
+   ColumnDeclaration order_product_event_id (children 1)
+    DataType String
+   ColumnDeclaration order_id (children 1)
+    DataType String
+   ColumnDeclaration brand_id (children 1)
+    DataType String
+   ColumnDeclaration user_id (children 1)
+    DataType String
+   ColumnDeclaration sp_id (children 1)
+    DataType Nullable (children 1)
+     ExpressionList (children 1)
+      DataType String
+   ColumnDeclaration gmv (children 1)
+    DataType Float64
+   ColumnDeclaration gsv (children 1)
+    DataType Float64
+   ColumnDeclaration po_created_at (children 1)
+    DataType DateTime64 (children 1)
+     ExpressionList (children 2)
+      Literal UInt64_9
+      Literal \'UTC\'
+   ColumnDeclaration event_brand_id (children 1)
+    DataType Nullable (children 1)
+     ExpressionList (children 1)
+      DataType String
+   ColumnDeclaration campaign_id (children 1)
+    DataType UInt32
+   ColumnDeclaration event_bid_type (children 1)
+    DataType String
+   ColumnDeclaration event_bid_value (children 1)
+    DataType Nullable (children 1)
+     ExpressionList (children 1)
+      DataType Float64
+   ColumnDeclaration event_inventory_id (children 1)
+    DataType UInt32
+   ColumnDeclaration event_user_id (children 1)
+    DataType String
+   ColumnDeclaration ad_event_id (children 1)
+    DataType String
+   ColumnDeclaration event_type (children 1)
+    DataType String
+   ColumnDeclaration latest_ad_created_at (children 1)
+    DataType DateTime64 (children 1)
+     ExpressionList (children 2)
+      Literal UInt64_9
+      Literal \'UTC\'
+ SelectWithUnionQuery (children 1)
+  ExpressionList (children 1)
+   SelectQuery (children 3)
+    ExpressionList (children 17)
+     Identifier order_product_event_id
+     Identifier order_id
+     Identifier brand_id
+     Identifier user_id
+     Identifier sp_id
+     Identifier gmv
+     Identifier gsv
+     Identifier po_created_at
+     Function argMax (alias event_brand_id) (children 1)
+      ExpressionList (children 2)
+       Identifier event_brand_id
+       Identifier event_rank
+     Function argMax (alias campaign_id) (children 1)
+      ExpressionList (children 2)
+       Identifier campaign_id
+       Identifier event_rank
+     Function argMax (alias event_bid_type) (children 1)
+      ExpressionList (children 2)
+       Identifier event_bid_type
+       Identifier event_rank
+     Function argMax (alias event_bid_value) (children 1)
+      ExpressionList (children 2)
+       Identifier event_bid_value
+       Identifier event_rank
+     Function argMax (alias event_inventory_id) (children 1)
+      ExpressionList (children 2)
+       Identifier event_inventory_id
+       Identifier event_rank
+     Function argMax (alias event_user_id) (children 1)
+      ExpressionList (children 2)
+       Identifier event_user_id
+       Identifier event_rank
+     Function argMax (alias ad_event_id) (children 1)
+      ExpressionList (children 2)
+       Identifier ad_event_id
+       Identifier event_rank
+     Function argMax (alias event_type) (children 1)
+      ExpressionList (children 2)
+       Identifier event_type
+       Identifier event_rank
+     Function argMax (alias latest_ad_created_at) (children 1)
+      ExpressionList (children 2)
+       Identifier latest_ad_created_at
+       Identifier event_rank
+    TablesInSelectQuery (children 1)
+     TablesInSelectQueryElement (children 1)
+      TableExpression (children 1)
+       Subquery (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 4)
+           ExpressionList (children 18)
+            Identifier order_product_event_id
+            Identifier order_id
+            Identifier brand_id
+            Identifier user_id
+            Identifier sp_id
+            Identifier gmv
+            Identifier gsv
+            Identifier po_created_at
+            Identifier event_type
+            Function if (alias event_rank) (children 1)
+             ExpressionList (children 3)
+              Function equals (children 1)
+               ExpressionList (children 2)
+                Identifier event_type
+                Literal \'click\'
+              Literal UInt64_1
+              Literal UInt64_0
+            Function argMax (alias event_brand_id) (children 1)
+             ExpressionList (children 2)
+              Identifier event_brand_id
+              Identifier _version
+            Function argMax (alias campaign_id) (children 1)
+             ExpressionList (children 2)
+              Identifier campaign_id
+              Identifier _version
+            Function argMax (alias event_bid_type) (children 1)
+             ExpressionList (children 2)
+              Identifier event_bid_type
+              Identifier _version
+            Function argMax (alias event_bid_value) (children 1)
+             ExpressionList (children 2)
+              Identifier event_bid_value
+              Identifier _version
+            Function argMax (alias event_inventory_id) (children 1)
+             ExpressionList (children 2)
+              Identifier event_inventory_id
+              Identifier _version
+            Function argMax (alias event_user_id) (children 1)
+             ExpressionList (children 2)
+              Identifier event_user_id
+              Identifier _version
+            Function argMax (alias ad_event_id) (children 1)
+             ExpressionList (children 2)
+              Identifier ad_event_id
+              Identifier _version
+            Function argMax (alias latest_ad_created_at) (children 1)
+             ExpressionList (children 2)
+              Identifier latest_ad_created_at
+              Identifier _version
+           TablesInSelectQuery (children 1)
+            TablesInSelectQueryElement (children 1)
+             TableExpression (children 1)
+              TableIdentifier analytics.order_attribution
+           Function lessOrEquals (children 1)
+            ExpressionList (children 2)
+             Identifier attribution_window
+             QueryParameter attr_window:UInt32
+           ExpressionList (children 9)
+            Identifier order_product_event_id
+            Identifier order_id
+            Identifier brand_id
+            Identifier user_id
+            Identifier sp_id
+            Identifier gmv
+            Identifier gsv
+            Identifier po_created_at
+            Identifier event_type
+    ExpressionList (children 8)
+     Identifier order_product_event_id
+     Identifier order_id
+     Identifier brand_id
+     Identifier user_id
+     Identifier sp_id
+     Identifier gmv
+     Identifier gsv
+     Identifier po_created_at

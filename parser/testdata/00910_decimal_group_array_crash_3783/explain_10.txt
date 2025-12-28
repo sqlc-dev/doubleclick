@@ -1,0 +1,57 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 2)
+    Identifier time
+    Function groupArray (alias groupArr) (children 1)
+     ExpressionList (children 1)
+      Function tuple (children 1)
+       ExpressionList (children 2)
+        Identifier sensor_id
+        Identifier volume
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 5)
+          ExpressionList (children 3)
+           Function multiply (alias time) (children 1)
+            ExpressionList (children 2)
+             Function intDiv (children 1)
+              ExpressionList (children 2)
+               Function toUInt32 (children 1)
+                ExpressionList (children 1)
+                 Identifier received_at
+               Literal UInt64_900
+             Literal UInt64_900
+           Identifier sensor_id
+           Function avg (alias volume) (children 1)
+            ExpressionList (children 1)
+             Identifier value
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier sensor_value
+          Function and (children 1)
+           ExpressionList (children 2)
+            Function greaterOrEquals (children 1)
+             ExpressionList (children 2)
+              Identifier received_at
+              Literal \'2018-12-12 00:00:00\'
+            Function lessOrEquals (children 1)
+             ExpressionList (children 2)
+              Identifier received_at
+              Literal \'2018-12-30 00:00:00\'
+          ExpressionList (children 2)
+           Identifier time
+           Identifier sensor_id
+          ExpressionList (children 1)
+           OrderByElement (children 1)
+            Identifier time
+   ExpressionList (children 1)
+    Identifier time
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier time

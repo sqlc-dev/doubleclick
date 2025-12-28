@@ -1,0 +1,128 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 2)
+    Identifier o_year
+    Function divide (alias mkt_share) (children 1)
+     ExpressionList (children 2)
+      Function sum (children 1)
+       ExpressionList (children 1)
+        Function multiIf (children 1)
+         ExpressionList (children 3)
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier nation
+            Literal \'BRAZIL\'
+          Identifier volume
+          Literal UInt64_0
+      Function sum (children 1)
+       ExpressionList (children 1)
+        Identifier volume
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (alias all_nations) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 3)
+          ExpressionList (children 3)
+           Function toYear (alias o_year) (children 1)
+            ExpressionList (children 1)
+             Identifier o_orderdate
+           Function multiply (alias volume) (children 1)
+            ExpressionList (children 2)
+             Identifier l_extendedprice
+             Function minus (children 1)
+              ExpressionList (children 2)
+               Literal UInt64_1
+               Identifier l_discount
+           Identifier n2.n_name (alias nation)
+          TablesInSelectQuery (children 8)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier part
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier supplier
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier lineitem
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier orders
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier customer
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier nation (alias n1)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier nation (alias n2)
+            TableJoin
+           TablesInSelectQueryElement (children 2)
+            TableExpression (children 1)
+             TableIdentifier region
+            TableJoin
+          Function and (children 1)
+           ExpressionList (children 10)
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier p_partkey
+              Identifier l_partkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier s_suppkey
+              Identifier l_suppkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier l_orderkey
+              Identifier o_orderkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier o_custkey
+              Identifier c_custkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier c_nationkey
+              Identifier n1.n_nationkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier n1.n_regionkey
+              Identifier r_regionkey
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier r_name
+              Literal \'AMERICA\'
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier s_nationkey
+              Identifier n2.n_nationkey
+            Function and (children 1)
+             ExpressionList (children 2)
+              Function greaterOrEquals (children 1)
+               ExpressionList (children 2)
+                Identifier o_orderdate
+                Function toDate (children 1)
+                 ExpressionList (children 1)
+                  Literal \'1995-01-01\'
+              Function lessOrEquals (children 1)
+               ExpressionList (children 2)
+                Identifier o_orderdate
+                Function toDate (children 1)
+                 ExpressionList (children 1)
+                  Literal \'1996-12-31\'
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier p_type
+              Literal \'ECONOMY ANODIZED STEEL\'
+   ExpressionList (children 1)
+    Identifier o_year
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier o_year

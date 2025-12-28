@@ -1,0 +1,53 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 5)
+    Identifier id
+    Identifier animal_name
+    Identifier a.animal_key
+    Identifier color_name
+    Identifier color_key
+   TablesInSelectQuery (children 3)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier fact (alias a)
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias b) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 2)
+           Function toInt64 (alias animal_key) (children 1)
+            ExpressionList (children 1)
+             Identifier animal_key
+           Identifier animal_name
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier animals
+     TableJoin (children 1)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier a.animal_key
+        Identifier b.animal_key
+    TablesInSelectQueryElement (children 2)
+     TableExpression (children 1)
+      Subquery (alias c) (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 2)
+          ExpressionList (children 2)
+           Function toInt64 (alias color_key) (children 1)
+            ExpressionList (children 1)
+             Identifier color_key
+           Identifier color_name
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier colors
+     TableJoin (children 1)
+      Function equals (children 1)
+       ExpressionList (children 2)
+        Identifier a.color_key
+        Identifier c.color_key

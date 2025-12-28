@@ -1,0 +1,114 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 5)
+   ExpressionList (children 2)
+    Function minus (alias cutoff_time) (children 1)
+     ExpressionList (children 2)
+      Function now (children 1)
+       ExpressionList
+      Function toIntervalHour (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_1
+    WithElement (children 1)
+     Subquery (children 1)
+      SelectWithUnionQuery (children 1)
+       ExpressionList (children 1)
+        SelectQuery (children 3)
+         ExpressionList (children 1)
+          Identifier query_id
+         TablesInSelectQuery (children 1)
+          TablesInSelectQueryElement (children 1)
+           TableExpression (children 1)
+            TableIdentifier system.query_log
+         Function and (children 1)
+          ExpressionList (children 2)
+           Function equals (children 1)
+            ExpressionList (children 2)
+             Identifier current_database
+             Function currentDatabase (children 1)
+              ExpressionList
+           Function greaterOrEquals (children 1)
+            ExpressionList (children 2)
+             Identifier event_time
+             Identifier cutoff_time
+   ExpressionList (children 17)
+    Identifier type
+    Identifier has_watch
+    Identifier op_num
+    Identifier path
+    Identifier is_ephemeral
+    Identifier is_sequential
+    Identifier version
+    Identifier requests_size
+    Identifier request_idx
+    Identifier error
+    Identifier watch_type
+    Identifier watch_state
+    Identifier path_created
+    Identifier stat_version
+    Identifier stat_cversion
+    Identifier stat_dataLength
+    Identifier stat_numChildren
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      TableIdentifier system.zookeeper_log
+   Function and (children 1)
+    ExpressionList (children 2)
+     Function greaterOrEquals (children 1)
+      ExpressionList (children 2)
+       Identifier event_time
+       Identifier cutoff_time
+     Function in (children 1)
+      ExpressionList (children 2)
+       Function tuple (children 1)
+        ExpressionList (children 2)
+         Identifier session_id
+         Identifier xid
+       Subquery (children 1)
+        SelectWithUnionQuery (children 1)
+         ExpressionList (children 1)
+          SelectQuery (children 3)
+           ExpressionList (children 2)
+            Identifier session_id
+            Identifier xid
+           TablesInSelectQuery (children 1)
+            TablesInSelectQueryElement (children 1)
+             TableExpression (children 1)
+              TableIdentifier system.zookeeper_log
+           Function and (children 1)
+            ExpressionList (children 4)
+             Function greaterOrEquals (children 1)
+              ExpressionList (children 2)
+               Identifier event_time
+               Identifier cutoff_time
+             Function like (children 1)
+              ExpressionList (children 2)
+               Identifier path
+               Function concat (children 1)
+                ExpressionList (children 3)
+                 Literal \'/test/01158/\'
+                 Function currentDatabase (children 1)
+                  ExpressionList
+                 Literal \'/rmt/blocks/%\'
+             Function notIn (children 1)
+              ExpressionList (children 2)
+               Identifier op_num
+               Literal Tuple_(UInt64_1, UInt64_12, UInt64_500)
+             Function or (children 1)
+              ExpressionList (children 2)
+               Function equals (children 1)
+                ExpressionList (children 2)
+                 Identifier query_id
+                 Literal \'\'
+               Function in (children 1)
+                ExpressionList (children 2)
+                 Identifier query_id
+                 Identifier query_ids
+   ExpressionList (children 3)
+    OrderByElement (children 1)
+     Identifier xid
+    OrderByElement (children 1)
+     Identifier type
+    OrderByElement (children 1)
+     Identifier request_idx
