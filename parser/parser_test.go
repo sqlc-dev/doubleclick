@@ -19,6 +19,10 @@ import (
 // Use with: go test ./parser -check-format -v
 var checkFormat = flag.Bool("check-format", false, "Run skipped todo_format tests to see which ones now pass")
 
+// checkExplain runs skipped explain_todo tests to see which ones now pass.
+// Use with: go test ./parser -check-explain -v
+var checkExplain = flag.Bool("check-explain", false, "Run skipped explain_todo tests to see which ones now pass")
+
 // testMetadata holds optional metadata for a test case
 type testMetadata struct {
 	TodoFormat  bool            `json:"todo_format,omitempty"`  // true if format roundtrip test is pending
@@ -191,9 +195,10 @@ func TestParser(t *testing.T) {
 						}
 					}
 
-					// Skip statements marked in explain_todo
+					// Skip statements marked in explain_todo (unless -check-explain is set)
 					stmtKey := fmt.Sprintf("stmt%d", stmtIndex)
-					if metadata.ExplainTodo[stmtKey] {
+					isExplainTodo := metadata.ExplainTodo[stmtKey]
+					if isExplainTodo && !*checkExplain {
 						t.Skipf("TODO: explain_todo[%s] is true", stmtKey)
 						return
 					}
@@ -235,7 +240,25 @@ func TestParser(t *testing.T) {
 						actual := strings.TrimSpace(parser.Explain(stmts[0]))
 						// Use case-insensitive comparison since ClickHouse EXPLAIN AST has inconsistent casing
 						if !strings.EqualFold(actual, expected) {
-							t.Errorf("Explain output mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", stmt, expected, actual)
+							if isExplainTodo && *checkExplain {
+								t.Logf("EXPLAIN STILL FAILING:\nExpected:\n%s\n\nGot:\n%s", expected, actual)
+							} else {
+								t.Errorf("Explain output mismatch\nQuery: %s\nExpected:\n%s\n\nGot:\n%s", stmt, expected, actual)
+							}
+						} else if isExplainTodo && *checkExplain {
+							// Test passes now - remove from explain_todo
+							delete(metadata.ExplainTodo, stmtKey)
+							if len(metadata.ExplainTodo) == 0 {
+								metadata.ExplainTodo = nil
+							}
+							updatedBytes, err := json.Marshal(metadata)
+							if err != nil {
+								t.Errorf("Failed to marshal updated metadata: %v", err)
+							} else if err := os.WriteFile(metadataPath, append(updatedBytes, '\n'), 0644); err != nil {
+								t.Errorf("Failed to write updated metadata.json: %v", err)
+							} else {
+								t.Logf("EXPLAIN PASSES NOW - removed explain_todo[%s] from: %s", stmtKey, entry.Name())
+							}
 						}
 					}
 

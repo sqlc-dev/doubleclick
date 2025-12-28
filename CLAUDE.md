@@ -30,6 +30,16 @@ go test ./parser/... -check-format -v 2>&1 | grep "FORMAT PASSES NOW"
 
 Tests that output `FORMAT PASSES NOW` can have their `todo_format` flag removed from `metadata.json`.
 
+## Checking for Newly Passing Explain Tests
+
+After implementing parser/explain changes, run:
+
+```bash
+go test ./parser/... -check-explain -v 2>&1 | grep "EXPLAIN PASSES NOW"
+```
+
+Tests that output `EXPLAIN PASSES NOW` can have their statement removed from `explain_todo` in `metadata.json`.
+
 ## Test Structure
 
 Each test in `parser/testdata/` contains:
