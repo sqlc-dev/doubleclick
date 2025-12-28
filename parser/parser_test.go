@@ -141,7 +141,7 @@ func TestParser(t *testing.T) {
 				if idx := strings.Index(expected, "\nThe query succeeded but the server error"); idx != -1 {
 					expected = strings.TrimSpace(expected[:idx])
 				}
-				actual := strings.TrimSpace(parser.Explain(stmts[0]))
+				actual := strings.TrimSpace(parser.Explain(stmts[len(stmts)-1]))
 				// Use case-insensitive comparison since ClickHouse EXPLAIN AST has inconsistent casing
 				// (e.g., Float64_NaN vs Float64_nan, GREATEST vs greatest)
 				if !strings.EqualFold(actual, expected) {
