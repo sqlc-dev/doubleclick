@@ -595,6 +595,7 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 	if p.currentIs(token.SETTINGS) {
 		p.nextToken()
 		sel.Settings = p.parseSettingsList()
+		sel.SettingsAfterFormat = true
 	}
 
 	return sel

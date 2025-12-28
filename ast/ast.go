@@ -75,7 +75,8 @@ type SelectQuery struct {
 	LimitBy          []Expression          `json:"limit_by,omitempty"`
 	LimitByHasLimit  bool                  `json:"limit_by_has_limit,omitempty"` // true if LIMIT BY was followed by another LIMIT
 	Offset           Expression            `json:"offset,omitempty"`
-	Settings    []*SettingExpr        `json:"settings,omitempty"`
+	Settings           []*SettingExpr        `json:"settings,omitempty"`
+	SettingsAfterFormat bool                 `json:"settings_after_format,omitempty"` // true if SETTINGS came after FORMAT
 	IntoOutfile *IntoOutfileClause    `json:"into_outfile,omitempty"`
 	Format      *Identifier           `json:"format,omitempty"`
 }
