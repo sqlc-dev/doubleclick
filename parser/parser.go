@@ -2472,6 +2472,10 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					Expression: p.parseExpression(LOWEST),
 				}
 			}
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
+			cmd.Type = ast.AlterAddProjection
+			p.nextToken()
+			cmd.Projection = p.parseProjection()
 		}
 	case token.DROP:
 		p.nextToken()
@@ -2505,6 +2509,18 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			cmd.Type = ast.AlterDropPartition
 			p.nextToken()
 			cmd.Partition = p.parseExpression(LOWEST)
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
+			cmd.Type = ast.AlterDropProjection
+			p.nextToken()
+			if p.currentIs(token.IF) {
+				p.nextToken()
+				p.expect(token.EXISTS)
+				cmd.IfExists = true
+			}
+			if p.currentIs(token.IDENT) {
+				cmd.ProjectionName = p.current.Value
+				p.nextToken()
+			}
 		}
 	case token.IDENT:
 		// Handle CLEAR, MATERIALIZE
@@ -2525,6 +2541,13 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					cmd.ColumnName = p.current.Value
 					p.nextToken()
 				}
+			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
+				cmd.Type = ast.AlterClearProjection
+				p.nextToken()
+				if p.currentIs(token.IDENT) {
+					cmd.ProjectionName = p.current.Value
+					p.nextToken()
+				}
 			}
 		} else if upper == "MATERIALIZE" {
 			p.nextToken()
@@ -2533,6 +2556,13 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				p.nextToken()
 				if p.currentIs(token.IDENT) {
 					cmd.Index = p.current.Value
+					p.nextToken()
+				}
+			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
+				cmd.Type = ast.AlterMaterializeProjection
+				p.nextToken()
+				if p.currentIs(token.IDENT) {
+					cmd.ProjectionName = p.current.Value
 					p.nextToken()
 				}
 			}
@@ -3499,4 +3529,93 @@ func (p *Parser) parseExistsStatement() *ast.ExistsQuery {
 	}
 
 	return exists
+}
+
+// parseProjection parses a projection definition: name (SELECT ... [ORDER BY col] [GROUP BY ...])
+func (p *Parser) parseProjection() *ast.Projection {
+	proj := &ast.Projection{
+		Position: p.current.Pos,
+	}
+
+	// Parse projection name
+	if p.currentIs(token.IDENT) {
+		proj.Name = p.current.Value
+		p.nextToken()
+	}
+
+	// Parse (SELECT ...)
+	if !p.currentIs(token.LPAREN) {
+		return proj
+	}
+	p.nextToken() // skip (
+
+	proj.Select = &ast.ProjectionSelectQuery{
+		Position: p.current.Pos,
+	}
+
+	// Parse SELECT keyword (optional in projection)
+	if p.currentIs(token.SELECT) {
+		p.nextToken()
+	}
+
+	// Parse column list
+	for !p.currentIs(token.EOF) && !p.currentIs(token.RPAREN) {
+		// Check for GROUP BY or ORDER BY
+		if p.currentIs(token.GROUP) || p.currentIs(token.ORDER) {
+			break
+		}
+
+		col := p.parseExpression(LOWEST)
+		if col != nil {
+			proj.Select.Columns = append(proj.Select.Columns, col)
+		}
+
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+		} else {
+			break
+		}
+	}
+
+	// Parse GROUP BY
+	if p.currentIs(token.GROUP) {
+		p.nextToken() // GROUP
+		if p.currentIs(token.BY) {
+			p.nextToken() // BY
+		}
+		for !p.currentIs(token.EOF) && !p.currentIs(token.RPAREN) && !p.currentIs(token.ORDER) {
+			expr := p.parseExpression(LOWEST)
+			if expr != nil {
+				proj.Select.GroupBy = append(proj.Select.GroupBy, expr)
+			}
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
+		}
+	}
+
+	// Parse ORDER BY
+	if p.currentIs(token.ORDER) {
+		p.nextToken() // ORDER
+		if p.currentIs(token.BY) {
+			p.nextToken() // BY
+		}
+		// For projection ORDER BY, we just need the column name
+		if p.currentIs(token.IDENT) {
+			proj.Select.OrderBy = &ast.Identifier{
+				Position: p.current.Pos,
+				Parts:    []string{p.current.Value},
+			}
+			p.nextToken()
+		}
+	}
+
+	// Skip closing paren
+	if p.currentIs(token.RPAREN) {
+		p.nextToken()
+	}
+
+	return proj
 }
