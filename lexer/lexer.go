@@ -73,10 +73,31 @@ func (l *Lexer) peekChar() rune {
 }
 
 func (l *Lexer) skipWhitespace() {
-	// Skip whitespace and BOM (byte order mark U+FEFF)
-	for unicode.IsSpace(l.ch) || l.ch == '\uFEFF' {
+	// Skip whitespace, BOM, and other Unicode characters that ClickHouse treats as whitespace.
+	// See: https://github.com/ClickHouse/ClickHouse/blob/master/src/Parsers/Lexer.cpp
+	for unicode.IsSpace(l.ch) || isClickHouseWhitespace(l.ch) {
 		l.readChar()
 	}
+}
+
+// isClickHouseWhitespace returns true for characters ClickHouse treats as whitespace
+// but Go's unicode.IsSpace does not recognize.
+func isClickHouseWhitespace(ch rune) bool {
+	switch ch {
+	case '\uFEFF': // BOM (Byte Order Mark)
+		return true
+	case '\u180E': // MONGOLIAN VOWEL SEPARATOR
+		return true
+	case '\u200B': // ZERO WIDTH SPACE
+		return true
+	case '\u200C': // ZERO WIDTH NON-JOINER
+		return true
+	case '\u200D': // ZERO WIDTH JOINER
+		return true
+	case '\u2060': // WORD JOINER
+		return true
+	}
+	return false
 }
 
 // NextToken returns the next token from the input.
