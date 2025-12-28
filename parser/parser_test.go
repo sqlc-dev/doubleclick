@@ -25,12 +25,13 @@ var checkFormat = flag.Bool("check-format", false, "Run skipped todo_format test
 
 // testMetadata holds optional metadata for a test case
 type testMetadata struct {
-	Todo       bool   `json:"todo,omitempty"`
-	TodoFormat bool   `json:"todo_format,omitempty"` // true if format roundtrip test is pending
-	Source     string `json:"source,omitempty"`
-	Explain    *bool  `json:"explain,omitempty"`
-	Skip       bool   `json:"skip,omitempty"`
-	ParseError bool   `json:"parse_error,omitempty"` // true if query is intentionally invalid SQL
+	Todo        bool            `json:"todo,omitempty"`
+	TodoFormat  bool            `json:"todo_format,omitempty"`  // true if format roundtrip test is pending
+	ExplainTodo map[string]bool `json:"explain_todo,omitempty"` // map of stmtN -> true to skip specific statements
+	Source      string          `json:"source,omitempty"`
+	Explain     *bool           `json:"explain,omitempty"`
+	Skip        bool            `json:"skip,omitempty"`
+	ParseError  bool            `json:"parse_error,omitempty"` // true if query is intentionally invalid SQL
 }
 
 // splitStatements splits SQL content into individual statements.
@@ -119,6 +120,7 @@ func findCommentStart(line string) int {
 //   - explain: false to skip the test (e.g., when ClickHouse couldn't parse it)
 //   - skip: true to skip the test entirely (e.g., causes infinite loop)
 //   - parse_error: true if the query is intentionally invalid SQL (expected to fail parsing)
+//   - explain_todo: map of stmtN -> true to skip specific statements (e.g., {"stmt2": true, "stmt5": true})
 // - explain.txt: Expected EXPLAIN AST output for first statement
 // - explain_N.txt: Expected EXPLAIN AST output for Nth statement (N >= 2)
 func TestParser(t *testing.T) {
@@ -196,6 +198,13 @@ func TestParser(t *testing.T) {
 							t.Skipf("No explain_%d.txt file (run regenerate-explain to generate)", stmtIndex)
 							return
 						}
+					}
+
+					// Skip statements marked in explain_todo
+					stmtKey := fmt.Sprintf("stmt%d", stmtIndex)
+					if metadata.ExplainTodo[stmtKey] {
+						t.Skipf("TODO: explain_todo[%s] is true", stmtKey)
+						return
 					}
 
 					// Create context with 1 second timeout
