@@ -153,6 +153,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseDetach()
 	case token.ATTACH:
 		return p.parseAttach()
+	case token.CHECK:
+		return p.parseCheck()
 	default:
 		p.errors = append(p.errors, fmt.Errorf("unexpected token %s at line %d, column %d",
 			p.current.Token, p.current.Pos.Line, p.current.Pos.Column))
@@ -3634,6 +3636,37 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 	}
 
 	return attach
+}
+
+func (p *Parser) parseCheck() *ast.CheckQuery {
+	check := &ast.CheckQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip CHECK
+
+	// Skip optional TABLE keyword
+	if p.currentIs(token.TABLE) {
+		p.nextToken()
+	}
+
+	// Parse table name (can be qualified: database.table)
+	tableName := p.parseIdentifierName()
+	if p.currentIs(token.DOT) {
+		p.nextToken()
+		check.Database = tableName
+		check.Table = p.parseIdentifierName()
+	} else {
+		check.Table = tableName
+	}
+
+	// Parse optional SETTINGS
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken() // skip SETTINGS
+		check.Settings = p.parseSettingsList()
+	}
+
+	return check
 }
 
 func (p *Parser) parseArrayJoin() *ast.ArrayJoinClause {

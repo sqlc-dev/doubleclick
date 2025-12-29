@@ -122,7 +122,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	}
 	// Count children: name + columns + engine/storage
 	children := 1 // name identifier
-	if len(n.Columns) > 0 {
+	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Constraints) > 0 {
 		children++
 	}
 	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil {
@@ -141,12 +141,15 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, name, children)
 	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
-	if len(n.Columns) > 0 || len(n.Indexes) > 0 {
+	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Constraints) > 0 {
 		childrenCount := 0
 		if len(n.Columns) > 0 {
 			childrenCount++
 		}
 		if len(n.Indexes) > 0 {
+			childrenCount++
+		}
+		if len(n.Constraints) > 0 {
 			childrenCount++
 		}
 		// Check for PRIMARY KEY constraints in column declarations
@@ -172,6 +175,14 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				Index(sb, idx, depth+3)
 			}
 		}
+		// Output constraints wrapped in Constraint nodes
+		if len(n.Constraints) > 0 {
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Constraints))
+			for _, constraint := range n.Constraints {
+				fmt.Fprintf(sb, "%s   Constraint (children 1)\n", indent)
+				Node(sb, constraint.Expression, depth+4)
+			}
+		}
 		// Output PRIMARY KEY columns as Function tuple
 		if len(primaryKeyColumns) > 0 {
 			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
@@ -181,7 +192,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			}
 		}
 	}
-	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || len(n.Settings) > 0 {
+	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0 {
 		storageChildren := 0
 		if n.Engine != nil {
 			storageChildren++
@@ -213,6 +224,9 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 					storageChildren++
 				}
 			}
+		}
+		if n.TTL != nil {
+			storageChildren++
 		}
 		if len(n.Settings) > 0 {
 			storageChildren++
@@ -312,6 +326,11 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 					Node(sb, n.SampleBy, depth+2)
 				}
 			}
+		}
+		if n.TTL != nil {
+			fmt.Fprintf(sb, "%s  ExpressionList (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s   TTLElement (children 1)\n", indent)
+			Node(sb, n.TTL.Expression, depth+4)
 		}
 		if len(n.Settings) > 0 {
 			fmt.Fprintf(sb, "%s  Set\n", indent)
@@ -681,7 +700,8 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
 		ast.AlterReplacePartition, ast.AlterFreezePartition:
 		if cmd.Partition != nil {
-			Node(sb, cmd.Partition, depth+1)
+			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+			Node(sb, cmd.Partition, depth+2)
 		}
 	case ast.AlterFreeze:
 		// No children
@@ -690,17 +710,15 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 			Node(sb, cmd.Where, depth+1)
 		}
 	case ast.AlterUpdate:
+		if cmd.Where != nil {
+			Node(sb, cmd.Where, depth+1)
+		}
 		if len(cmd.Assignments) > 0 {
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(cmd.Assignments))
 			for _, assign := range cmd.Assignments {
-				fmt.Fprintf(sb, "%s  Function equals (children 1)\n", indent)
-				fmt.Fprintf(sb, "%s   ExpressionList (children 2)\n", indent)
-				fmt.Fprintf(sb, "%s    Identifier %s\n", indent, assign.Column)
-				Node(sb, assign.Value, depth+4)
+				fmt.Fprintf(sb, "%s  Assignment %s (children 1)\n", indent, assign.Column)
+				Node(sb, assign.Value, depth+3)
 			}
-		}
-		if cmd.Where != nil {
-			Node(sb, cmd.Where, depth+1)
 		}
 	case ast.AlterAddProjection:
 		if cmd.Projection != nil {
@@ -865,4 +883,27 @@ func explainTruncateQuery(sb *strings.Builder, n *ast.TruncateQuery, indent stri
 
 	fmt.Fprintf(sb, "%sTruncateQuery  %s (children %d)\n", indent, name, 1)
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+}
+
+func explainCheckQuery(sb *strings.Builder, n *ast.CheckQuery, indent string) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.CheckQuery\n", indent)
+		return
+	}
+
+	name := n.Table
+	if n.Database != "" {
+		name = n.Database + "." + n.Table
+	}
+
+	children := 1 // identifier
+	if len(n.Settings) > 0 {
+		children++
+	}
+
+	fmt.Fprintf(sb, "%sCheckQuery  %s (children %d)\n", indent, name, children)
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+	if len(n.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
 }
