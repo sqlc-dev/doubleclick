@@ -1,17 +1,45 @@
 CreateQuery post_state (children 3)
  Identifier post_state
- Columns definition (children 1)
+ Columns definition (children 2)
   ExpressionList (children 3)
    ColumnDeclaration ts (children 1)
     DataType DateTime
    ColumnDeclaration id (children 1)
     DataType Int64
-   ColumnDeclaration state (children 1)
+   ColumnDeclaration state (children 2)
     DataType Nullable (children 1)
      ExpressionList (children 1)
       DataType UInt8
- Storage definition (children 3)
+    Function plus (children 1)
+     ExpressionList (children 2)
+      Identifier ts
+      Function toIntervalMonth (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_1
+  ExpressionList (children 1)
+   Projection (children 1)
+    ProjectionSelectQuery (children 2)
+     ExpressionList (children 2)
+      Identifier id
+      Function argMax (alias state) (children 1)
+       ExpressionList (children 2)
+        Identifier state
+        Identifier ts
+     ExpressionList (children 1)
+      Identifier id
+ Storage definition (children 4)
   Function MergeTree (children 1)
    ExpressionList
   Identifier id
+  ExpressionList (children 1)
+   TTLElement (children 2)
+    Function plus (children 1)
+     ExpressionList (children 2)
+      Identifier ts
+      Function toIntervalSecond (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_0
+    Function isNull (children 1)
+     ExpressionList (children 1)
+      Identifier state
   Set

@@ -2,11 +2,16 @@ CreateQuery 03094_grouparrysorted_dest (children 3)
  Identifier 03094_grouparrysorted_dest
  Columns definition (children 1)
   ExpressionList (children 2)
-   ColumnDeclaration ServiceName (children 1)
+   ColumnDeclaration ServiceName (children 2)
     DataType LowCardinality (children 1)
      ExpressionList (children 1)
       DataType String
-   ColumnDeclaration SlowSpans (children 1)
+    Function CODEC (children 1)
+     ExpressionList (children 1)
+      Function ZSTD (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_1
+   ColumnDeclaration SlowSpans (children 2)
     DataType AggregateFunction (children 1)
      ExpressionList (children 2)
       Function groupArraySorted (children 1)
@@ -24,6 +29,11 @@ CreateQuery 03094_grouparrysorted_dest (children 3)
          DataType String
         NameTypePair SpanId (children 1)
          DataType String
+    Function CODEC (children 1)
+     ExpressionList (children 1)
+      Function ZSTD (children 1)
+       ExpressionList (children 1)
+        Literal UInt64_1
  Storage definition (children 2)
   Function AggregatingMergeTree (children 1)
    ExpressionList

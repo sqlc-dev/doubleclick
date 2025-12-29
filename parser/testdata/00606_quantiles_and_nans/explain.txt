@@ -1,0 +1,76 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 2)
+   ExpressionList (children 1)
+    Identifier eq
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 1)
+         SelectQuery (children 3)
+          ExpressionList (children 3)
+           Function range (alias arr) (children 1)
+            ExpressionList (children 1)
+             Function plus (children 1)
+              ExpressionList (children 2)
+               Literal UInt64_2
+               Function modulo (children 1)
+                ExpressionList (children 2)
+                 Identifier number
+                 Literal UInt64_10
+           Function arrayMap (alias arr_with_nan) (children 1)
+            ExpressionList (children 2)
+             Function lambda (children 1)
+              ExpressionList (children 2)
+               Function tuple (children 1)
+                ExpressionList (children 1)
+                 Identifier x
+               Function if (children 1)
+                ExpressionList (children 3)
+                 Function equals (children 1)
+                  ExpressionList (children 2)
+                   Identifier x
+                   Function intDiv (children 1)
+                    ExpressionList (children 2)
+                     Identifier number
+                     Literal UInt64_10
+                 Literal Float64_nan
+                 Identifier x
+             Identifier arr
+           Function arrayFilter (alias arr_filtered) (children 1)
+            ExpressionList (children 2)
+             Function lambda (children 1)
+              ExpressionList (children 2)
+               Function tuple (children 1)
+                ExpressionList (children 1)
+                 Identifier x
+               Function notEquals (children 1)
+                ExpressionList (children 2)
+                 Identifier x
+                 Function intDiv (children 1)
+                  ExpressionList (children 2)
+                   Identifier number
+                   Literal UInt64_10
+             Identifier arr
+          ExpressionList (children 4)
+           Identifier number
+           Function arrayReduce (alias q1) (children 1)
+            ExpressionList (children 2)
+             Literal \'quantileExact\'
+             Identifier arr_with_nan
+           Function arrayReduce (alias q2) (children 1)
+            ExpressionList (children 2)
+             Literal \'quantileExact\'
+             Identifier arr_filtered
+           Function equals (alias eq) (children 1)
+            ExpressionList (children 2)
+             Identifier q1
+             Identifier q2
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             Function numbers (children 1)
+              ExpressionList (children 1)
+               Literal UInt64_100

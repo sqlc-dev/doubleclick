@@ -1,0 +1,69 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 5)
+   ExpressionList (children 4)
+    Identifier metric_id
+    Identifier grid_timestamp
+    Function tuple (children 1)
+     ExpressionList (children 2)
+      Function tupleElement (alias timestamp) (children 1)
+       ExpressionList (children 2)
+        Function finalizeAggregation (children 1)
+         ExpressionList (children 1)
+          Identifier samples
+        Literal UInt64_1
+      Function tupleElement (alias value) (children 1)
+       ExpressionList (children 2)
+        Function finalizeAggregation (children 1)
+         ExpressionList (children 1)
+          Identifier samples
+        Literal UInt64_2
+    Function arrayMap (alias ts) (children 1)
+     ExpressionList (children 2)
+      Function lambda (children 1)
+       ExpressionList (children 2)
+        Function tuple (children 1)
+         ExpressionList (children 1)
+          Identifier x
+        Function plus (children 1)
+         ExpressionList (children 2)
+          Identifier grid_timestamp
+          Function toIntervalMillisecond (children 1)
+           ExpressionList (children 1)
+            Identifier x
+      Identifier timestamp
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Function clusterAllReplicas (children 1)
+       ExpressionList (children 3)
+        Literal \'test_shard_localhost\'
+        Function currentDatabase (children 1)
+         ExpressionList
+        Identifier t_resampled_timeseries_delta
+   Function and (children 1)
+    ExpressionList (children 3)
+     Function equals (children 1)
+      ExpressionList (children 2)
+       Identifier step
+       Literal UInt64_10
+     Function in (children 1)
+      ExpressionList (children 2)
+       Identifier metric_id
+       Literal Tuple_(UInt64_3, UInt64_7)
+     Function and (children 1)
+      ExpressionList (children 2)
+       Function greaterOrEquals (children 1)
+        ExpressionList (children 2)
+         Identifier grid_timestamp
+         Literal \'2024-12-12 12:00:00\'
+       Function lessOrEquals (children 1)
+        ExpressionList (children 2)
+         Identifier grid_timestamp
+         Literal \'2024-12-12 12:02:00\'
+   ExpressionList (children 2)
+    OrderByElement (children 1)
+     Identifier metric_id
+    OrderByElement (children 1)
+     Identifier grid_timestamp
+   Set

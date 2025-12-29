@@ -1,0 +1,83 @@
+SelectWithUnionQuery (children 1)
+ ExpressionList (children 1)
+  SelectQuery (children 4)
+   ExpressionList (children 1)
+    WithElement (children 1)
+     Subquery (children 1)
+      SelectWithUnionQuery (children 1)
+       ExpressionList (children 1)
+        SelectQuery (children 2)
+         ExpressionList (children 3)
+          Literal UInt64_42 (alias grade_name_id)
+          Literal UInt64_42 (alias today_flow_transaction_count)
+          Function CAST (alias status) (children 1)
+           ExpressionList (children 2)
+            Literal \'good\'
+            Literal \'Nullable(String)\'
+         TablesInSelectQuery (children 2)
+          TablesInSelectQueryElement (children 1)
+           TableExpression (children 1)
+            Subquery (alias trans_his) (children 1)
+             SelectWithUnionQuery (children 1)
+              ExpressionList (children 1)
+               SelectQuery (children 1)
+                ExpressionList (children 1)
+                 Literal UInt64_42 (alias dispenser_id)
+          TablesInSelectQueryElement (children 2)
+           TableExpression (children 1)
+            Subquery (alias gde) (children 1)
+             SelectWithUnionQuery (children 1)
+              ExpressionList (children 1)
+               SelectQuery (children 1)
+                ExpressionList (children 1)
+                 Literal UInt64_42 (alias dispenser_id)
+           TableJoin (children 1)
+            Function equals (children 1)
+             ExpressionList (children 2)
+              Identifier trans_his.dispenser_id
+              Identifier gde.dispenser_id
+   ExpressionList (children 1)
+    Identifier flag
+   TablesInSelectQuery (children 1)
+    TablesInSelectQueryElement (children 1)
+     TableExpression (children 1)
+      Subquery (children 1)
+       SelectWithUnionQuery (children 1)
+        ExpressionList (children 2)
+         SelectQuery (children 2)
+          ExpressionList (children 2)
+           Identifier transactions_data.grade_name_id (alias grade_name_id)
+           Function multiIf (alias flag) (children 1)
+            ExpressionList (children 3)
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier transactions_data.status
+               Literal \'low\'
+             Literal \'YELLOW\'
+             Literal NULL
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier transactions_data
+         SelectQuery (children 3)
+          ExpressionList (children 2)
+           Identifier grade_name_id
+           Function multiIf (alias flag) (children 1)
+            ExpressionList (children 3)
+             Function equals (children 1)
+              ExpressionList (children 2)
+               Identifier status
+               Literal \'good\'
+             Literal \'GREEN\'
+             Literal NULL
+          TablesInSelectQuery (children 1)
+           TablesInSelectQueryElement (children 1)
+            TableExpression (children 1)
+             TableIdentifier transactions_data
+          Function equals (children 1)
+           ExpressionList (children 2)
+            Identifier status
+            Literal \'good\'
+   ExpressionList (children 1)
+    OrderByElement (children 1)
+     Identifier grade_name_id
