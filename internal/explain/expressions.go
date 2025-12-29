@@ -7,10 +7,15 @@ import (
 	"github.com/sqlc-dev/doubleclick/ast"
 )
 
+// escapeAlias escapes backslashes in alias names for EXPLAIN output
+func escapeAlias(alias string) string {
+	return strings.ReplaceAll(alias, "\\", "\\\\")
+}
+
 func explainIdentifier(sb *strings.Builder, n *ast.Identifier, indent string) {
 	name := formatIdentifierName(n)
 	if n.Alias != "" {
-		fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, name, n.Alias)
+		fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, name, escapeAlias(n.Alias))
 	} else {
 		fmt.Fprintf(sb, "%sIdentifier %s\n", indent, name)
 	}
@@ -319,7 +324,7 @@ func explainUnaryExpr(sb *strings.Builder, n *ast.UnaryExpr, indent string, dept
 func explainSubquery(sb *strings.Builder, n *ast.Subquery, indent string, depth int) {
 	children := 1
 	if n.Alias != "" {
-		fmt.Fprintf(sb, "%sSubquery (alias %s) (children %d)\n", indent, n.Alias, children)
+		fmt.Fprintf(sb, "%sSubquery (alias %s) (children %d)\n", indent, escapeAlias(n.Alias), children)
 	} else {
 		fmt.Fprintf(sb, "%sSubquery (children %d)\n", indent, children)
 	}
@@ -349,7 +354,7 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 				}
 				if hasComplexExpr {
 					// Render as Function tuple with alias
-					fmt.Fprintf(sb, "%sFunction tuple (alias %s) (children %d)\n", indent, n.Alias, 1)
+					fmt.Fprintf(sb, "%sFunction tuple (alias %s) (children %d)\n", indent, escapeAlias(n.Alias), 1)
 					fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
 					for _, expr := range exprs {
 						Node(sb, expr, depth+2)
@@ -380,7 +385,7 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 				}
 				if needsFunctionFormat {
 					// Render as Function array with alias
-					fmt.Fprintf(sb, "%sFunction array (alias %s) (children %d)\n", indent, n.Alias, 1)
+					fmt.Fprintf(sb, "%sFunction array (alias %s) (children %d)\n", indent, escapeAlias(n.Alias), 1)
 					if len(exprs) > 0 {
 						fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
 					} else {
@@ -393,20 +398,20 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 				}
 			}
 		}
-		fmt.Fprintf(sb, "%sLiteral %s (alias %s)\n", indent, FormatLiteral(e), n.Alias)
+		fmt.Fprintf(sb, "%sLiteral %s (alias %s)\n", indent, FormatLiteral(e), escapeAlias(n.Alias))
 	case *ast.BinaryExpr:
 		// Binary expressions become functions with alias
 		fnName := OperatorToFunction(e.Op)
 		// For || (concat) operator, flatten chained concatenations
 		if e.Op == "||" {
 			operands := collectConcatOperands(e)
-			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Alias, 1)
+			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, escapeAlias(n.Alias), 1)
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(operands))
 			for _, op := range operands {
 				Node(sb, op, depth+2)
 			}
 		} else {
-			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Alias, 1)
+			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, escapeAlias(n.Alias), 1)
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
 			Node(sb, e.Left, depth+2)
 			Node(sb, e.Right, depth+2)
@@ -423,10 +428,10 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 					if inSubqueryContext {
 						switch val := lit.Value.(type) {
 						case int64:
-							fmt.Fprintf(sb, "%sLiteral Int64_%d (alias %s)\n", indent, -val, n.Alias)
+							fmt.Fprintf(sb, "%sLiteral Int64_%d (alias %s)\n", indent, -val, escapeAlias(n.Alias))
 							return
 						case uint64:
-							fmt.Fprintf(sb, "%sLiteral Int64_-%d (alias %s)\n", indent, val, n.Alias)
+							fmt.Fprintf(sb, "%sLiteral Int64_-%d (alias %s)\n", indent, val, escapeAlias(n.Alias))
 							return
 						}
 					}
@@ -434,14 +439,14 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 					// Always convert negated floats to literals (especially for -inf, -nan)
 					val := lit.Value.(float64)
 					s := FormatFloat(-val)
-					fmt.Fprintf(sb, "%sLiteral Float64_%s (alias %s)\n", indent, s, n.Alias)
+					fmt.Fprintf(sb, "%sLiteral Float64_%s (alias %s)\n", indent, s, escapeAlias(n.Alias))
 					return
 				}
 			}
 		}
 		// Unary expressions become functions with alias
 		fnName := UnaryOperatorToFunction(e.Op)
-		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Alias, 1)
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, escapeAlias(n.Alias), 1)
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 		Node(sb, e.Operand, depth+2)
 	case *ast.FunctionCall:
@@ -449,13 +454,13 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 		explainFunctionCallWithAlias(sb, e, n.Alias, indent, depth)
 	case *ast.Identifier:
 		// Identifiers with alias
-		fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, e.Name(), n.Alias)
+		fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, e.Name(), escapeAlias(n.Alias))
 	case *ast.IntervalExpr:
 		// Interval expressions with alias
 		explainIntervalExpr(sb, e, n.Alias, indent, depth)
 	case *ast.TernaryExpr:
 		// Ternary expressions become if functions with alias
-		fmt.Fprintf(sb, "%sFunction if (alias %s) (children %d)\n", indent, n.Alias, 1)
+		fmt.Fprintf(sb, "%sFunction if (alias %s) (children %d)\n", indent, escapeAlias(n.Alias), 1)
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 3)
 		Node(sb, e.Condition, depth+2)
 		Node(sb, e.Then, depth+2)
