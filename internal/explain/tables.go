@@ -78,9 +78,51 @@ func formatSampleRatio(sb *strings.Builder, expr ast.Expression) {
 		formatSampleRatioOperand(sb, binExpr.Left)
 		sb.WriteString(" / ")
 		formatSampleRatioOperand(sb, binExpr.Right)
+	} else if lit, ok := expr.(*ast.Literal); ok && lit.Type == ast.LiteralFloat {
+		// Convert float to fraction if it's a simple ratio
+		if v, ok := lit.Value.(float64); ok {
+			num, den := floatToFraction(v)
+			if den > 1 {
+				fmt.Fprintf(sb, "%d / %d", num, den)
+				return
+			}
+		}
+		formatSampleRatioOperand(sb, expr)
 	} else {
 		formatSampleRatioOperand(sb, expr)
 	}
+}
+
+// floatToFraction converts a float to a simple fraction (numerator, denominator).
+// Returns (num, 1) if no simple fraction representation is found.
+func floatToFraction(f float64) (int64, int64) {
+	// Handle common sample ratios
+	// Try denominators from 2 to 1000
+	for den := int64(2); den <= 1000; den++ {
+		num := int64(f * float64(den))
+		// Check if this gives us back the original value (within floating point tolerance)
+		if float64(num)/float64(den) == f {
+			// Find GCD to simplify the fraction
+			g := gcd(num, den)
+			return num / g, den / g
+		}
+	}
+	// No simple fraction found, return as integer if possible
+	if f == float64(int64(f)) {
+		return int64(f), 1
+	}
+	return 0, 1
+}
+
+// gcd calculates the greatest common divisor of two integers
+func gcd(a, b int64) int64 {
+	if a < 0 {
+		a = -a
+	}
+	for b != 0 {
+		a, b = b, a%b
+	}
+	return a
 }
 
 func formatSampleRatioOperand(sb *strings.Builder, expr ast.Expression) {

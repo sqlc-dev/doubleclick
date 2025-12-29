@@ -418,22 +418,20 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 		}
 	case *ast.UnaryExpr:
 		// Handle negated numeric literals - output as Literal instead of Function negate
-		// For integers, only do this in subquery context (ClickHouse behavior)
+		// For aliased expressions, ClickHouse always shows negated integers as Literal Int64_-N
 		// For floats (especially inf/nan), always do this
 		if e.Op == "-" {
 			if lit, ok := e.Operand.(*ast.Literal); ok {
 				switch lit.Type {
 				case ast.LiteralInteger:
-					// Only convert to literal in subquery context
-					if inSubqueryContext {
-						switch val := lit.Value.(type) {
-						case int64:
-							fmt.Fprintf(sb, "%sLiteral Int64_%d (alias %s)\n", indent, -val, escapeAlias(n.Alias))
-							return
-						case uint64:
-							fmt.Fprintf(sb, "%sLiteral Int64_-%d (alias %s)\n", indent, val, escapeAlias(n.Alias))
-							return
-						}
+					// Always convert to literal for aliased expressions
+					switch val := lit.Value.(type) {
+					case int64:
+						fmt.Fprintf(sb, "%sLiteral Int64_%d (alias %s)\n", indent, -val, escapeAlias(n.Alias))
+						return
+					case uint64:
+						fmt.Fprintf(sb, "%sLiteral Int64_-%d (alias %s)\n", indent, val, escapeAlias(n.Alias))
+						return
 					}
 				case ast.LiteralFloat:
 					// Always convert negated floats to literals (especially for -inf, -nan)
