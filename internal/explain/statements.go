@@ -482,6 +482,38 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 		return
 	}
 
+	// SHOW CREATE DICTIONARY has special output format
+	if n.ShowType == ast.ShowCreateDictionary && (n.Database != "" || n.From != "") {
+		if n.Database != "" && n.From != "" {
+			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery %s %s (children 2)\n", indent, n.Database, n.From)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+		} else if n.From != "" {
+			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery  %s (children 1)\n", indent, n.From)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+		} else if n.Database != "" {
+			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery  %s (children 1)\n", indent, n.Database)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		}
+		return
+	}
+
+	// SHOW CREATE VIEW has special output format
+	if n.ShowType == ast.ShowCreateView && (n.Database != "" || n.From != "") {
+		if n.Database != "" && n.From != "" {
+			fmt.Fprintf(sb, "%sShowCreateViewQuery %s %s (children 2)\n", indent, n.Database, n.From)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+		} else if n.From != "" {
+			fmt.Fprintf(sb, "%sShowCreateViewQuery  %s (children 1)\n", indent, n.From)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+		} else if n.Database != "" {
+			fmt.Fprintf(sb, "%sShowCreateViewQuery  %s (children 1)\n", indent, n.Database)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		}
+		return
+	}
+
 	// SHOW CREATE TABLE has special output format with database and table identifiers
 	if n.ShowType == ast.ShowCreate && (n.Database != "" || n.From != "") {
 		// Format: ShowCreateTableQuery database table (children 2)
@@ -550,12 +582,33 @@ func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent stri
 }
 
 func explainExistsTableQuery(sb *strings.Builder, n *ast.ExistsQuery, indent string) {
-	// EXISTS TABLE/DATABASE/DICTIONARY query
+	// Determine query type name based on ExistsType
+	queryType := "ExistsTableQuery"
+	switch n.ExistsType {
+	case ast.ExistsDictionary:
+		queryType = "ExistsDictionaryQuery"
+	case ast.ExistsDatabase:
+		queryType = "ExistsDatabaseQuery"
+	case ast.ExistsView:
+		queryType = "ExistsViewQuery"
+	}
+
+	// EXISTS DATABASE has only one child (the database name stored in Table)
+	if n.ExistsType == ast.ExistsDatabase {
+		name := n.Table
+		fmt.Fprintf(sb, "%s%s %s  (children %d)\n", indent, queryType, name, 1)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		return
+	}
+
+	// For TABLE/DICTIONARY/VIEW, show database and object name
 	name := n.Table
+	children := 1
 	if n.Database != "" {
 		name = n.Database + " " + n.Table
+		children = 2
 	}
-	fmt.Fprintf(sb, "%sExistsTableQuery %s (children %d)\n", indent, name, 2)
+	fmt.Fprintf(sb, "%s%s %s (children %d)\n", indent, queryType, name, children)
 	if n.Database != "" {
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 	}

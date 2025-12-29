@@ -155,6 +155,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseAttach()
 	case token.CHECK:
 		return p.parseCheck()
+	case token.GRANT:
+		return p.parseGrant()
+	case token.REVOKE:
+		return p.parseRevoke()
 	default:
 		p.errors = append(p.errors, fmt.Errorf("unexpected token %s at line %d, column %d",
 			p.current.Token, p.current.Pos.Line, p.current.Pos.Column))
@@ -3188,6 +3192,15 @@ func (p *Parser) parseShow() ast.Statement {
 		return &ast.ShowPrivilegesQuery{Position: pos}
 	}
 
+	// Handle SHOW GRANTS - it has its own statement type
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "GRANTS" {
+		// Skip all remaining tokens until end of statement
+		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+			p.nextToken()
+		}
+		return &ast.ShowGrantsQuery{Position: pos}
+	}
+
 	show := &ast.ShowQuery{
 		Position: pos,
 	}
@@ -3216,6 +3229,12 @@ func (p *Parser) parseShow() ast.Statement {
 				p.nextToken()
 			}
 			return &ast.ShowCreateQuotaQuery{Position: pos, Name: name}
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
+			show.ShowType = ast.ShowCreateDictionary
+			p.nextToken()
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "VIEW" {
+			show.ShowType = ast.ShowCreateView
+			p.nextToken()
 		} else {
 			show.ShowType = ast.ShowCreate
 			// Handle SHOW CREATE TABLE, etc.
@@ -3242,8 +3261,9 @@ func (p *Parser) parseShow() ast.Statement {
 		}
 	}
 
-	// Parse FROM clause (or table/database name for SHOW CREATE TABLE/DATABASE)
-	if p.currentIs(token.FROM) || ((show.ShowType == ast.ShowCreate || show.ShowType == ast.ShowCreateDB) && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword())) {
+	// Parse FROM clause (or table/database name for SHOW CREATE TABLE/DATABASE/DICTIONARY/VIEW)
+	showCreateTypes := show.ShowType == ast.ShowCreate || show.ShowType == ast.ShowCreateDB || show.ShowType == ast.ShowCreateDictionary || show.ShowType == ast.ShowCreateView
+	if p.currentIs(token.FROM) || (showCreateTypes && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword())) {
 		if p.currentIs(token.FROM) {
 			p.nextToken()
 		}
@@ -3921,25 +3941,36 @@ func (p *Parser) parseParenthesizedSelect() *ast.SelectWithUnionQuery {
 // parseExistsStatement handles EXISTS table_name syntax
 func (p *Parser) parseExistsStatement() *ast.ExistsQuery {
 	exists := &ast.ExistsQuery{
-		Position: p.current.Pos,
+		Position:   p.current.Pos,
+		ExistsType: ast.ExistsTable, // default to TABLE
 	}
 
 	p.nextToken() // skip EXISTS
 
-	// Skip optional TABLE keyword
+	// Check for DICTIONARY, DATABASE, VIEW, or TABLE keyword
 	if p.currentIs(token.TABLE) {
+		exists.ExistsType = ast.ExistsTable
+		p.nextToken()
+	} else if p.currentIs(token.DATABASE) {
+		exists.ExistsType = ast.ExistsDatabase
+		p.nextToken()
+	} else if p.currentIs(token.VIEW) {
+		exists.ExistsType = ast.ExistsView
+		p.nextToken()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
+		exists.ExistsType = ast.ExistsDictionary
 		p.nextToken()
 	}
 
-	// Parse table name (database.table or just table)
-	tableName := p.parseIdentifierName()
-	if tableName != "" {
+	// Parse table/database/dictionary/view name
+	name := p.parseIdentifierName()
+	if name != "" {
 		if p.currentIs(token.DOT) {
 			p.nextToken()
-			exists.Database = tableName
+			exists.Database = name
 			exists.Table = p.parseIdentifierName()
 		} else {
-			exists.Table = tableName
+			exists.Table = name
 		}
 	}
 
@@ -4033,4 +4064,34 @@ func (p *Parser) parseProjection() *ast.Projection {
 	}
 
 	return proj
+}
+
+// parseGrant handles GRANT statements
+func (p *Parser) parseGrant() *ast.GrantQuery {
+	grant := &ast.GrantQuery{
+		Position: p.current.Pos,
+		IsRevoke: false,
+	}
+
+	// Skip all tokens until end of statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return grant
+}
+
+// parseRevoke handles REVOKE statements
+func (p *Parser) parseRevoke() *ast.GrantQuery {
+	grant := &ast.GrantQuery{
+		Position: p.current.Pos,
+		IsRevoke: true,
+	}
+
+	// Skip all tokens until end of statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return grant
 }
