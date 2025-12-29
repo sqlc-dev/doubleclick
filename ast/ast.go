@@ -652,15 +652,17 @@ func (s *ShowQuery) statementNode()      {}
 type ShowType string
 
 const (
-	ShowTables        ShowType = "TABLES"
-	ShowDatabases     ShowType = "DATABASES"
-	ShowProcesses     ShowType = "PROCESSLIST"
-	ShowCreate        ShowType = "CREATE"
-	ShowCreateDB      ShowType = "CREATE_DATABASE"
-	ShowColumns       ShowType = "COLUMNS"
-	ShowDictionaries  ShowType = "DICTIONARIES"
-	ShowFunctions     ShowType = "FUNCTIONS"
-	ShowSettings      ShowType = "SETTINGS"
+	ShowTables           ShowType = "TABLES"
+	ShowDatabases        ShowType = "DATABASES"
+	ShowProcesses        ShowType = "PROCESSLIST"
+	ShowCreate           ShowType = "CREATE"
+	ShowCreateDB         ShowType = "CREATE_DATABASE"
+	ShowCreateDictionary ShowType = "CREATE_DICTIONARY"
+	ShowCreateView       ShowType = "CREATE_VIEW"
+	ShowColumns          ShowType = "COLUMNS"
+	ShowDictionaries     ShowType = "DICTIONARIES"
+	ShowFunctions        ShowType = "FUNCTIONS"
+	ShowSettings         ShowType = "SETTINGS"
 )
 
 // ExplainQuery represents an EXPLAIN statement.
@@ -770,16 +772,46 @@ func (e *ExchangeQuery) Pos() token.Position { return e.Position }
 func (e *ExchangeQuery) End() token.Position { return e.Position }
 func (e *ExchangeQuery) statementNode()      {}
 
+// ExistsType represents the type of EXISTS query.
+type ExistsType string
+
+const (
+	ExistsTable      ExistsType = "TABLE"
+	ExistsDictionary ExistsType = "DICTIONARY"
+	ExistsDatabase   ExistsType = "DATABASE"
+	ExistsView       ExistsType = "VIEW"
+)
+
 // ExistsQuery represents an EXISTS table_name statement (check if table exists).
 type ExistsQuery struct {
-	Position token.Position `json:"-"`
-	Database string         `json:"database,omitempty"`
-	Table    string         `json:"table"`
+	Position   token.Position `json:"-"`
+	ExistsType ExistsType     `json:"exists_type,omitempty"`
+	Database   string         `json:"database,omitempty"`
+	Table      string         `json:"table"`
 }
 
 func (e *ExistsQuery) Pos() token.Position { return e.Position }
 func (e *ExistsQuery) End() token.Position { return e.Position }
 func (e *ExistsQuery) statementNode()      {}
+
+// GrantQuery represents a GRANT or REVOKE statement.
+type GrantQuery struct {
+	Position token.Position `json:"-"`
+	IsRevoke bool           `json:"is_revoke,omitempty"`
+}
+
+func (g *GrantQuery) Pos() token.Position { return g.Position }
+func (g *GrantQuery) End() token.Position { return g.Position }
+func (g *GrantQuery) statementNode()      {}
+
+// ShowGrantsQuery represents a SHOW GRANTS statement.
+type ShowGrantsQuery struct {
+	Position token.Position `json:"-"`
+}
+
+func (s *ShowGrantsQuery) Pos() token.Position { return s.Position }
+func (s *ShowGrantsQuery) End() token.Position { return s.Position }
+func (s *ShowGrantsQuery) statementNode()      {}
 
 // ShowPrivilegesQuery represents a SHOW PRIVILEGES statement.
 type ShowPrivilegesQuery struct {
