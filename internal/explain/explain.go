@@ -152,6 +152,22 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	case *ast.Parameter:
 		explainParameter(sb, n, indent)
 
+	// Dictionary types
+	case *ast.DictionaryAttributeDeclaration:
+		explainDictionaryAttributeDeclaration(sb, n, indent, depth)
+	case *ast.DictionaryDefinition:
+		explainDictionaryDefinition(sb, n, indent, depth)
+	case *ast.DictionarySource:
+		explainDictionarySource(sb, n, indent, depth)
+	case *ast.KeyValuePair:
+		explainKeyValuePair(sb, n, indent, depth)
+	case *ast.DictionaryLifetime:
+		explainDictionaryLifetime(sb, n, indent, depth)
+	case *ast.DictionaryLayout:
+		explainDictionaryLayout(sb, n, indent, depth)
+	case *ast.DictionaryRange:
+		explainDictionaryRange(sb, n, indent, depth)
+
 	default:
 		// For unhandled types, just print the type name
 		fmt.Fprintf(sb, "%s%T\n", indent, node)
