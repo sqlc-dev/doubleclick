@@ -197,6 +197,9 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	if col.Default != nil || hasEphemeralDefault {
 		children++
 	}
+	if col.Codec != nil {
+		children++
+	}
 	fmt.Fprintf(sb, "%sColumnDeclaration %s (children %d)\n", indent, col.Name, children)
 	if col.Type != nil {
 		Node(sb, col.Type, depth+1)
@@ -206,6 +209,34 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	} else if hasEphemeralDefault {
 		// EPHEMERAL columns without explicit default value show defaultValueOfTypeName function
 		fmt.Fprintf(sb, "%s Function defaultValueOfTypeName\n", indent)
+	}
+	if col.Codec != nil {
+		explainCodecExpr(sb, col.Codec, indent+" ", depth+1)
+	}
+}
+
+// explainCodecExpr handles CODEC expressions in column declarations
+func explainCodecExpr(sb *strings.Builder, codec *ast.CodecExpr, indent string, depth int) {
+	// CODEC is rendered as a Function with one child (ExpressionList of codecs)
+	fmt.Fprintf(sb, "%sFunction CODEC (children 1)\n", indent)
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(codec.Codecs))
+	for _, c := range codec.Codecs {
+		explainCodecFunction(sb, c, indent+"  ", depth+2)
+	}
+}
+
+// explainCodecFunction handles individual codec functions (e.g., LZ4, ZSTD(10), Gorilla(1))
+func explainCodecFunction(sb *strings.Builder, fn *ast.FunctionCall, indent string, depth int) {
+	if len(fn.Arguments) == 0 {
+		// Codec without parameters: just the function name
+		fmt.Fprintf(sb, "%sFunction %s\n", indent, fn.Name)
+	} else {
+		// Codec with parameters: function with ExpressionList of arguments
+		fmt.Fprintf(sb, "%sFunction %s (children 1)\n", indent, fn.Name)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(fn.Arguments))
+		for _, arg := range fn.Arguments {
+			Node(sb, arg, depth+2)
+		}
 	}
 }
 
