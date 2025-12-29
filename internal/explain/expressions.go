@@ -586,12 +586,18 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 			Node(sb, e.Right, depth+2)
 		}
 	case *ast.Subquery:
-		if n.Name != "" {
-			fmt.Fprintf(sb, "%sSubquery (alias %s) (children %d)\n", indent, n.Name, 1)
+		// Check if this is "(subquery) AS alias" syntax vs "name AS (subquery)" syntax
+		if e.Alias != "" {
+			// "(subquery) AS alias" syntax: output Subquery with alias directly
+			fmt.Fprintf(sb, "%sSubquery (alias %s) (children 1)\n", indent, e.Alias)
+			Node(sb, e.Query, depth+1)
 		} else {
-			fmt.Fprintf(sb, "%sSubquery (children %d)\n", indent, 1)
+			// "name AS (subquery)" syntax: output WithElement wrapping the Subquery
+			// The alias/name is not shown in the EXPLAIN AST output
+			fmt.Fprintf(sb, "%sWithElement (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s Subquery (children 1)\n", indent)
+			Node(sb, e.Query, depth+2)
 		}
-		Node(sb, e.Query, depth+1)
 	case *ast.CastExpr:
 		explainCastExprWithAlias(sb, e, n.Name, indent, depth)
 	default:
