@@ -1,7 +1,9 @@
 package main
 
 import (
+	"archive/tar"
 	"bytes"
+	"compress/gzip"
 	"flag"
 	"fmt"
 	"io"
@@ -19,20 +21,18 @@ import (
 const (
 	// Required ClickHouse version for generating explain files
 	// Update this when regenerating all test expectations
-	requiredVersion = "25.8.1.3073"
-	requiredLTS     = "25.8.13.73-lts"
+	requiredVersion = "25.8.13.73"
+	requiredLTS     = "v25.8.13.73-lts"
 
-	// Download URL for the static binary
-	downloadURL = "https://github.com/ClickHouse/ClickHouse/releases/download/v25.8.1.3073-lts/clickhouse-linux-amd64"
+	// Download URL for the static binary package
+	downloadURL = "https://github.com/ClickHouse/ClickHouse/releases/download/v25.8.13.73-lts/clickhouse-common-static-25.8.13.73-amd64.tgz"
 )
 
 var (
-	clickhouseDir  = ".clickhouse"
-	clickhouseBin  = "clickhouse"
-	pidFile        = filepath.Join(clickhouseDir, "clickhouse.pid")
-	configFile     = filepath.Join(clickhouseDir, "config.xml")
-	serverLogFile  = filepath.Join(clickhouseDir, "logs", "server.log")
-	serverErrFile  = filepath.Join(clickhouseDir, "logs", "server.err.log")
+	clickhouseDir = ".clickhouse"
+	clickhouseBin = "./clickhouse"
+	pidFile       = ".clickhouse/clickhouse.pid"
+	configFile    = ".clickhouse/config.xml"
 )
 
 func main() {
@@ -64,7 +64,7 @@ func main() {
 	}
 
 	if *dryRun {
-		fmt.Println("Dry run mode - would process tests using clickhouse local")
+		fmt.Println("Dry run mode - would process tests using clickhouse client")
 	}
 
 	testdataDir := "parser/testdata"
@@ -115,6 +115,11 @@ func main() {
 
 // ensureClickHouse ensures ClickHouse is downloaded and running with the correct version
 func ensureClickHouse() error {
+	// Download if binary doesn't exist or has wrong version
+	if err := ensureBinary(); err != nil {
+		return fmt.Errorf("ensuring binary: %w", err)
+	}
+
 	// Check if already running with correct version
 	if version, err := getRunningVersion(); err == nil {
 		if version == requiredVersion {
@@ -125,11 +130,6 @@ func ensureClickHouse() error {
 		if err := stopClickHouse(); err != nil {
 			return fmt.Errorf("stopping existing ClickHouse: %w", err)
 		}
-	}
-
-	// Download if binary doesn't exist or has wrong version
-	if err := ensureBinary(); err != nil {
-		return fmt.Errorf("ensuring binary: %w", err)
 	}
 
 	// Start the server
@@ -220,9 +220,9 @@ func ensureBinary() error {
 		return fmt.Errorf("download failed with status %d", resp.StatusCode)
 	}
 
-	// Write to temporary file first
-	tmpFile := clickhouseBin + ".tmp"
-	out, err := os.Create(tmpFile)
+	// Download to temporary file
+	tmpTgz := clickhouseBin + ".tgz"
+	out, err := os.Create(tmpTgz)
 	if err != nil {
 		return fmt.Errorf("creating temp file: %w", err)
 	}
@@ -230,22 +230,18 @@ func ensureBinary() error {
 	written, err := io.Copy(out, resp.Body)
 	out.Close()
 	if err != nil {
-		os.Remove(tmpFile)
-		return fmt.Errorf("writing binary: %w", err)
+		os.Remove(tmpTgz)
+		return fmt.Errorf("writing archive: %w", err)
 	}
 
 	fmt.Printf("Downloaded %d bytes\n", written)
 
-	// Make executable and move to final location
-	if err := os.Chmod(tmpFile, 0755); err != nil {
-		os.Remove(tmpFile)
-		return fmt.Errorf("chmod: %w", err)
+	// Extract clickhouse binary from the tgz
+	if err := extractClickhouseBinary(tmpTgz); err != nil {
+		os.Remove(tmpTgz)
+		return fmt.Errorf("extracting binary: %w", err)
 	}
-
-	if err := os.Rename(tmpFile, clickhouseBin); err != nil {
-		os.Remove(tmpFile)
-		return fmt.Errorf("rename: %w", err)
-	}
+	os.Remove(tmpTgz)
 
 	// Verify version
 	version, err := getBinaryVersion()
@@ -259,6 +255,62 @@ func ensureBinary() error {
 
 	fmt.Printf("ClickHouse %s installed successfully\n", version)
 	return nil
+}
+
+// extractClickhouseBinary extracts the clickhouse binary from a tgz archive
+func extractClickhouseBinary(tgzPath string) error {
+	f, err := os.Open(tgzPath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	gzr, err := gzip.NewReader(f)
+	if err != nil {
+		return fmt.Errorf("gzip reader: %w", err)
+	}
+	defer gzr.Close()
+
+	tr := tar.NewReader(gzr)
+
+	// Look for the clickhouse binary in the archive
+	// It's at usr/bin/clickhouse
+	for {
+		header, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("reading tar: %w", err)
+		}
+
+		// Check if this is the clickhouse binary (at usr/bin/clickhouse)
+		if header.Typeflag == tar.TypeReg && strings.HasSuffix(header.Name, "/usr/bin/clickhouse") {
+			fmt.Printf("Extracting %s...\n", header.Name)
+
+			tmpBin := clickhouseBin + ".tmp"
+			outFile, err := os.OpenFile(tmpBin, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0755)
+			if err != nil {
+				return fmt.Errorf("creating output file: %w", err)
+			}
+
+			if _, err := io.Copy(outFile, tr); err != nil {
+				outFile.Close()
+				os.Remove(tmpBin)
+				return fmt.Errorf("extracting file: %w", err)
+			}
+			outFile.Close()
+
+			if err := os.Rename(tmpBin, clickhouseBin); err != nil {
+				os.Remove(tmpBin)
+				return fmt.Errorf("renaming binary: %w", err)
+			}
+
+			return nil
+		}
+	}
+
+	return fmt.Errorf("clickhouse binary not found in archive")
 }
 
 // getBinaryVersion returns the version of the clickhouse binary
@@ -295,29 +347,57 @@ func startClickHouse() error {
 
 	fmt.Println("Starting ClickHouse server...")
 
-	// Start the server as a daemon
-	cmd := exec.Command(clickhouseBin, "server",
-		"--config-file="+configFile,
-		"--daemon",
-		"--pid-file="+pidFile)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	// Start the server in background using nohup-style approach
+	cmd := exec.Command(clickhouseBin, "server", "--config-file="+configFile)
 
-	if err := cmd.Run(); err != nil {
+	// Redirect output to log files
+	logFile, err := os.OpenFile(filepath.Join(clickhouseDir, "logs", "clickhouse-server.log"),
+		os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return fmt.Errorf("opening log file: %w", err)
+	}
+	errLogFile, err := os.OpenFile(filepath.Join(clickhouseDir, "logs", "clickhouse-server.err.log"),
+		os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		logFile.Close()
+		return fmt.Errorf("opening error log file: %w", err)
+	}
+
+	cmd.Stdout = logFile
+	cmd.Stderr = errLogFile
+
+	if err := cmd.Start(); err != nil {
+		logFile.Close()
+		errLogFile.Close()
 		return fmt.Errorf("starting server: %w", err)
+	}
+
+	// Write PID file
+	if err := os.WriteFile(pidFile, []byte(fmt.Sprintf("%d\n", cmd.Process.Pid)), 0644); err != nil {
+		return fmt.Errorf("writing PID file: %w", err)
 	}
 
 	// Wait for server to be ready
 	fmt.Println("Waiting for server to be ready...")
-	for i := 0; i < 30; i++ {
+	for i := 0; i < 60; i++ {
 		time.Sleep(1 * time.Second)
-		if version, err := getRunningVersion(); err == nil {
+		// Try to connect to the server
+		testCmd := exec.Command(clickhouseBin, "client", "--query", "SELECT version()")
+		var stdout bytes.Buffer
+		testCmd.Stdout = &stdout
+		if err := testCmd.Run(); err == nil {
+			version := strings.TrimSpace(stdout.String())
 			if version != requiredVersion {
 				return fmt.Errorf("server started with version %s but expected %s", version, requiredVersion)
 			}
 			fmt.Printf("ClickHouse server %s is ready\n", version)
 			return nil
 		}
+	}
+
+	// Check logs for errors
+	if logData, err := os.ReadFile(filepath.Join(clickhouseDir, "logs", "clickhouse-server.err.log")); err == nil && len(logData) > 0 {
+		fmt.Fprintf(os.Stderr, "Server error log:\n%s\n", string(logData))
 	}
 
 	return fmt.Errorf("timeout waiting for server to start")
@@ -376,22 +456,21 @@ func writeConfig() error {
 <clickhouse>
     <logger>
         <level>information</level>
-        <log>%s/%s</log>
-        <errorlog>%s/%s</errorlog>
+        <log>%s/.clickhouse/logs/clickhouse-server.log</log>
+        <errorlog>%s/.clickhouse/logs/clickhouse-server.err.log</errorlog>
         <size>100M</size>
         <count>3</count>
     </logger>
 
     <http_port>8123</http_port>
     <tcp_port>9000</tcp_port>
-    <mysql_port>9004</mysql_port>
 
     <listen_host>127.0.0.1</listen_host>
 
-    <path>%s/%s/data/</path>
-    <tmp_path>%s/%s/tmp/</tmp_path>
-    <user_files_path>%s/%s/user_files/</user_files_path>
-    <format_schema_path>%s/%s/format_schemas/</format_schema_path>
+    <path>%s/.clickhouse/data/</path>
+    <tmp_path>%s/.clickhouse/tmp/</tmp_path>
+    <user_files_path>%s/.clickhouse/user_files/</user_files_path>
+    <format_schema_path>%s/.clickhouse/format_schemas/</format_schema_path>
 
     <mark_cache_size>5368709120</mark_cache_size>
 
@@ -428,14 +507,7 @@ func writeConfig() error {
         </default>
     </quotas>
 </clickhouse>
-`,
-		cwd, serverLogFile,
-		cwd, serverErrFile,
-		cwd, clickhouseDir,
-		cwd, clickhouseDir,
-		cwd, clickhouseDir,
-		cwd, clickhouseDir,
-	)
+`, cwd, cwd, cwd, cwd, cwd, cwd)
 
 	return os.WriteFile(configFile, []byte(config), 0644)
 }
@@ -565,10 +637,10 @@ func findCommentStart(line string) int {
 	return -1
 }
 
-// explainAST runs EXPLAIN AST on the statement using clickhouse local
+// explainAST runs EXPLAIN AST on the statement using clickhouse client
 func explainAST(stmt string) (string, error) {
 	query := fmt.Sprintf("EXPLAIN AST %s", stmt)
-	cmd := exec.Command(clickhouseBin, "local", "--query", query)
+	cmd := exec.Command(clickhouseBin, "client", "--query", query)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
