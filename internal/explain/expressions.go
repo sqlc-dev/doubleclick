@@ -264,6 +264,18 @@ func explainBinaryExpr(sb *strings.Builder, n *ast.BinaryExpr, indent string, de
 		return
 	}
 
+	// For OR and AND operators, flatten chained expressions
+	opLower := strings.ToLower(n.Op)
+	if opLower == "or" || opLower == "and" {
+		operands := collectBooleanOperands(n, opLower)
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(operands))
+		for _, op := range operands {
+			Node(sb, op, depth+2)
+		}
+		return
+	}
+
 	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
 	Node(sb, n.Left, depth+2)
@@ -284,6 +296,27 @@ func collectConcatOperands(n *ast.BinaryExpr) []ast.Expression {
 	// Recursively collect from right side if it's also a concat
 	if right, ok := n.Right.(*ast.BinaryExpr); ok && right.Op == "||" {
 		operands = append(operands, collectConcatOperands(right)...)
+	} else {
+		operands = append(operands, n.Right)
+	}
+
+	return operands
+}
+
+// collectBooleanOperands flattens chained OR/AND operations into a list of operands
+func collectBooleanOperands(n *ast.BinaryExpr, op string) []ast.Expression {
+	var operands []ast.Expression
+
+	// Recursively collect from left side if it's also the same operator
+	if left, ok := n.Left.(*ast.BinaryExpr); ok && strings.ToLower(left.Op) == op {
+		operands = append(operands, collectBooleanOperands(left, op)...)
+	} else {
+		operands = append(operands, n.Left)
+	}
+
+	// Recursively collect from right side if it's also the same operator
+	if right, ok := n.Right.(*ast.BinaryExpr); ok && strings.ToLower(right.Op) == op {
+		operands = append(operands, collectBooleanOperands(right, op)...)
 	} else {
 		operands = append(operands, n.Right)
 	}
@@ -405,6 +438,14 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 		// For || (concat) operator, flatten chained concatenations
 		if e.Op == "||" {
 			operands := collectConcatOperands(e)
+			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, escapeAlias(n.Alias), 1)
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(operands))
+			for _, op := range operands {
+				Node(sb, op, depth+2)
+			}
+		} else if opLower := strings.ToLower(e.Op); opLower == "or" || opLower == "and" {
+			// For OR and AND operators, flatten chained expressions
+			operands := collectBooleanOperands(e, opLower)
 			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, escapeAlias(n.Alias), 1)
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(operands))
 			for _, op := range operands {
@@ -576,6 +617,18 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 		// For || (concat) operator, flatten chained concatenations
 		if e.Op == "||" {
 			operands := collectConcatOperands(e)
+			if n.Name != "" {
+				fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Name, 1)
+			} else {
+				fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+			}
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(operands))
+			for _, op := range operands {
+				Node(sb, op, depth+2)
+			}
+		} else if opLower := strings.ToLower(e.Op); opLower == "or" || opLower == "and" {
+			// For OR and AND operators, flatten chained expressions
+			operands := collectBooleanOperands(e, opLower)
 			if n.Name != "" {
 				fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Name, 1)
 			} else {
