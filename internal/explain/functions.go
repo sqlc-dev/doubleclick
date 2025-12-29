@@ -77,21 +77,10 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 	}
 }
 
-// windowSpecHasContent returns true if the window spec has any content
-// (PartitionBy, OrderBy, or Frame with offset). Empty OVER () returns false.
+// windowSpecHasContent returns true if the window spec has any content.
+// ClickHouse EXPLAIN AST never includes WindowDefinition nodes for window
+// functions, even when OVER clause has PARTITION BY, ORDER BY, or frame specs.
 func windowSpecHasContent(w *ast.WindowSpec) bool {
-	if w == nil {
-		return false
-	}
-	if len(w.PartitionBy) > 0 {
-		return true
-	}
-	if len(w.OrderBy) > 0 {
-		return true
-	}
-	if w.Frame != nil && w.Frame.StartBound != nil && w.Frame.StartBound.Offset != nil {
-		return true
-	}
 	return false
 }
 
