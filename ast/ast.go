@@ -268,8 +268,10 @@ type CreateQuery struct {
 	CreateDatabase   bool                 `json:"create_database,omitempty"`
 	CreateFunction   bool                 `json:"create_function,omitempty"`
 	CreateUser       bool                 `json:"create_user,omitempty"`
-	CreateDictionary bool                 `json:"create_dictionary,omitempty"`
-	FunctionName     string               `json:"function_name,omitempty"`
+	CreateDictionary   bool                              `json:"create_dictionary,omitempty"`
+	DictionaryAttrs    []*DictionaryAttributeDeclaration `json:"dictionary_attrs,omitempty"`
+	DictionaryDef      *DictionaryDefinition             `json:"dictionary_def,omitempty"`
+	FunctionName       string                            `json:"function_name,omitempty"`
 	FunctionBody     Expression           `json:"function_body,omitempty"`
 	UserName         string               `json:"user_name,omitempty"`
 }
@@ -294,6 +296,85 @@ type ColumnDeclaration struct {
 
 func (c *ColumnDeclaration) Pos() token.Position { return c.Position }
 func (c *ColumnDeclaration) End() token.Position { return c.Position }
+
+// DictionaryAttributeDeclaration represents a dictionary attribute definition.
+type DictionaryAttributeDeclaration struct {
+	Position    token.Position `json:"-"`
+	Name        string         `json:"name"`
+	Type        *DataType      `json:"type"`
+	Default     Expression     `json:"default,omitempty"`
+	Expression  Expression     `json:"expression,omitempty"`   // EXPRESSION clause
+	Hierarchical bool          `json:"hierarchical,omitempty"` // HIERARCHICAL flag
+	Injective   bool           `json:"injective,omitempty"`    // INJECTIVE flag
+	IsObjectID  bool           `json:"is_object_id,omitempty"` // IS_OBJECT_ID flag
+}
+
+func (d *DictionaryAttributeDeclaration) Pos() token.Position { return d.Position }
+func (d *DictionaryAttributeDeclaration) End() token.Position { return d.Position }
+
+// DictionaryDefinition represents the definition part of a dictionary (PRIMARY KEY, SOURCE, LIFETIME, LAYOUT).
+type DictionaryDefinition struct {
+	Position   token.Position        `json:"-"`
+	PrimaryKey []Expression          `json:"primary_key,omitempty"`
+	Source     *DictionarySource     `json:"source,omitempty"`
+	Lifetime   *DictionaryLifetime   `json:"lifetime,omitempty"`
+	Layout     *DictionaryLayout     `json:"layout,omitempty"`
+	Range      *DictionaryRange      `json:"range,omitempty"`
+	Settings   []*SettingExpr        `json:"settings,omitempty"`
+}
+
+func (d *DictionaryDefinition) Pos() token.Position { return d.Position }
+func (d *DictionaryDefinition) End() token.Position { return d.Position }
+
+// DictionarySource represents the SOURCE clause of a dictionary.
+type DictionarySource struct {
+	Position token.Position   `json:"-"`
+	Type     string           `json:"type"`      // e.g., "CLICKHOUSE", "MYSQL", "FILE"
+	Args     []*KeyValuePair  `json:"args,omitempty"`
+}
+
+func (d *DictionarySource) Pos() token.Position { return d.Position }
+func (d *DictionarySource) End() token.Position { return d.Position }
+
+// KeyValuePair represents a key-value pair in dictionary source or other contexts.
+type KeyValuePair struct {
+	Position token.Position `json:"-"`
+	Key      string         `json:"key"`
+	Value    Expression     `json:"value"`
+}
+
+func (k *KeyValuePair) Pos() token.Position { return k.Position }
+func (k *KeyValuePair) End() token.Position { return k.Position }
+
+// DictionaryLifetime represents the LIFETIME clause of a dictionary.
+type DictionaryLifetime struct {
+	Position token.Position `json:"-"`
+	Min      Expression     `json:"min,omitempty"`
+	Max      Expression     `json:"max,omitempty"`
+}
+
+func (d *DictionaryLifetime) Pos() token.Position { return d.Position }
+func (d *DictionaryLifetime) End() token.Position { return d.Position }
+
+// DictionaryLayout represents the LAYOUT clause of a dictionary.
+type DictionaryLayout struct {
+	Position token.Position   `json:"-"`
+	Type     string           `json:"type"` // e.g., "FLAT", "HASHED", "COMPLEX_KEY_HASHED"
+	Args     []*KeyValuePair  `json:"args,omitempty"`
+}
+
+func (d *DictionaryLayout) Pos() token.Position { return d.Position }
+func (d *DictionaryLayout) End() token.Position { return d.Position }
+
+// DictionaryRange represents the RANGE clause of a dictionary.
+type DictionaryRange struct {
+	Position token.Position `json:"-"`
+	Min      Expression     `json:"min,omitempty"`
+	Max      Expression     `json:"max,omitempty"`
+}
+
+func (d *DictionaryRange) Pos() token.Position { return d.Position }
+func (d *DictionaryRange) End() token.Position { return d.Position }
 
 // DataType represents a data type.
 type DataType struct {

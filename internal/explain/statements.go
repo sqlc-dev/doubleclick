@@ -89,8 +89,27 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		return
 	}
 	if n.CreateDictionary {
-		fmt.Fprintf(sb, "%sCreateDictionaryQuery %s (children 1)\n", indent, n.Table)
+		// Dictionary: count children = identifier + attributes (if any) + definition (if any)
+		children := 1 // identifier
+		if len(n.DictionaryAttrs) > 0 {
+			children++
+		}
+		if n.DictionaryDef != nil {
+			children++
+		}
+		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, n.Table, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		// Dictionary attributes
+		if len(n.DictionaryAttrs) > 0 {
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.DictionaryAttrs))
+			for _, attr := range n.DictionaryAttrs {
+				explainDictionaryAttributeDeclaration(sb, attr, indent+"  ", depth+2)
+			}
+		}
+		// Dictionary definition
+		if n.DictionaryDef != nil {
+			explainDictionaryDefinition(sb, n.DictionaryDef, indent+" ", depth+1)
+		}
 		return
 	}
 

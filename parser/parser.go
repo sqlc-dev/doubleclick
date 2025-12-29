@@ -1298,7 +1298,7 @@ func (p *Parser) parseCreate() *ast.CreateQuery {
 		case "DICTIONARY":
 			create.CreateDictionary = true
 			p.nextToken()
-			p.parseCreateGeneric(create)
+			p.parseCreateDictionary(create)
 		case "NAMED":
 			// CREATE NAMED COLLECTION name AS key=value, ...
 			p.nextToken() // skip NAMED
@@ -1746,6 +1746,385 @@ func (p *Parser) parseCreateGeneric(create *ast.CreateQuery) {
 	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
 		p.nextToken()
 	}
+}
+
+func (p *Parser) parseCreateDictionary(create *ast.CreateQuery) {
+	// Handle IF NOT EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.NOT) {
+			p.nextToken()
+			if p.currentIs(token.EXISTS) {
+				create.IfNotExists = true
+				p.nextToken()
+			}
+		}
+	}
+
+	// Parse dictionary name (possibly database.name)
+	name := p.parseIdentifierName()
+	if p.currentIs(token.DOT) {
+		create.Database = name
+		p.nextToken()
+		name = p.parseIdentifierName()
+	}
+	create.Table = name
+
+	// Handle ON CLUSTER
+	if p.currentIs(token.ON) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CLUSTER" {
+			p.nextToken()
+			create.OnCluster = p.parseIdentifierName()
+		}
+	}
+
+	// Parse column definitions (attributes) if present
+	if p.currentIs(token.LPAREN) {
+		p.nextToken() // skip (
+		create.DictionaryAttrs = p.parseDictionaryAttributes()
+		if p.currentIs(token.RPAREN) {
+			p.nextToken() // skip )
+		}
+	}
+
+	// Initialize dictionary definition
+	dictDef := &ast.DictionaryDefinition{
+		Position: p.current.Pos,
+	}
+
+	// Parse PRIMARY KEY, SOURCE, LIFETIME, LAYOUT, RANGE, SETTINGS
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		// Handle PRIMARY as a keyword token
+		if p.currentIs(token.PRIMARY) {
+			p.nextToken() // skip PRIMARY
+			if p.currentIs(token.KEY) {
+				p.nextToken() // skip KEY
+				dictDef.PrimaryKey = p.parseDictionaryPrimaryKey()
+			}
+			continue
+		}
+		if p.currentIs(token.IDENT) {
+			upper := strings.ToUpper(p.current.Value)
+			switch upper {
+			case "PRIMARY":
+				p.nextToken() // skip PRIMARY
+				if p.currentIs(token.KEY) {
+					p.nextToken() // skip KEY
+					dictDef.PrimaryKey = p.parseDictionaryPrimaryKey()
+				}
+			case "SOURCE":
+				p.nextToken() // skip SOURCE
+				dictDef.Source = p.parseDictionarySource()
+			case "LIFETIME":
+				p.nextToken() // skip LIFETIME
+				dictDef.Lifetime = p.parseDictionaryLifetime()
+			case "LAYOUT":
+				p.nextToken() // skip LAYOUT
+				dictDef.Layout = p.parseDictionaryLayout()
+			case "RANGE":
+				p.nextToken() // skip RANGE
+				dictDef.Range = p.parseDictionaryRange()
+			case "SETTINGS":
+				p.nextToken() // skip SETTINGS
+				// Skip settings for now
+				for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.isDictionaryClauseKeyword() {
+					p.nextToken()
+				}
+			case "COMMENT":
+				p.nextToken() // skip COMMENT
+				if p.currentIs(token.STRING) {
+					create.Comment = p.current.Value
+					p.nextToken()
+				}
+			default:
+				p.nextToken()
+			}
+		} else {
+			p.nextToken()
+		}
+	}
+
+	// Only set dictionary definition if it has any content
+	if len(dictDef.PrimaryKey) > 0 || dictDef.Source != nil || dictDef.Lifetime != nil || dictDef.Layout != nil || dictDef.Range != nil {
+		create.DictionaryDef = dictDef
+	}
+}
+
+func (p *Parser) isDictionaryClauseKeyword() bool {
+	if !p.currentIs(token.IDENT) {
+		return false
+	}
+	upper := strings.ToUpper(p.current.Value)
+	switch upper {
+	case "PRIMARY", "SOURCE", "LIFETIME", "LAYOUT", "RANGE", "SETTINGS", "COMMENT":
+		return true
+	}
+	return false
+}
+
+func (p *Parser) parseDictionaryAttributes() []*ast.DictionaryAttributeDeclaration {
+	var attrs []*ast.DictionaryAttributeDeclaration
+
+	for !p.currentIs(token.EOF) && !p.currentIs(token.RPAREN) {
+		attr := p.parseDictionaryAttribute()
+		if attr != nil {
+			attrs = append(attrs, attr)
+		}
+
+		// Handle comma between attributes
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+		} else {
+			break
+		}
+	}
+
+	return attrs
+}
+
+func (p *Parser) parseDictionaryAttribute() *ast.DictionaryAttributeDeclaration {
+	attr := &ast.DictionaryAttributeDeclaration{
+		Position: p.current.Pos,
+	}
+
+	// Parse attribute name
+	attr.Name = p.parseIdentifierName()
+	if attr.Name == "" {
+		return nil
+	}
+
+	// Parse type
+	if !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) {
+		attr.Type = p.parseDataType()
+	}
+
+	// Parse optional clauses: DEFAULT, EXPRESSION, HIERARCHICAL, INJECTIVE, IS_OBJECT_ID
+	for !p.currentIs(token.EOF) && !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) {
+		if p.currentIs(token.DEFAULT) {
+			p.nextToken()
+			attr.Default = p.parseExpression(LOWEST)
+		} else if p.currentIs(token.IDENT) {
+			upper := strings.ToUpper(p.current.Value)
+			switch upper {
+			case "EXPRESSION":
+				p.nextToken()
+				attr.Expression = p.parseExpression(LOWEST)
+			case "HIERARCHICAL":
+				attr.Hierarchical = true
+				p.nextToken()
+			case "INJECTIVE":
+				attr.Injective = true
+				p.nextToken()
+			case "IS_OBJECT_ID":
+				attr.IsObjectID = true
+				p.nextToken()
+			default:
+				p.nextToken()
+			}
+		} else {
+			p.nextToken()
+		}
+	}
+
+	return attr
+}
+
+func (p *Parser) parseDictionaryPrimaryKey() []ast.Expression {
+	var keys []ast.Expression
+
+	// Can be single identifier or tuple (id1, id2)
+	if p.currentIs(token.LPAREN) {
+		p.nextToken() // skip (
+		for !p.currentIs(token.EOF) && !p.currentIs(token.RPAREN) {
+			expr := p.parseExpression(LOWEST)
+			if expr != nil {
+				keys = append(keys, expr)
+			}
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
+		}
+		if p.currentIs(token.RPAREN) {
+			p.nextToken() // skip )
+		}
+	} else {
+		// Single identifier
+		expr := p.parseExpression(LOWEST)
+		if expr != nil {
+			keys = append(keys, expr)
+		}
+	}
+
+	return keys
+}
+
+func (p *Parser) parseDictionarySource() *ast.DictionarySource {
+	source := &ast.DictionarySource{
+		Position: p.current.Pos,
+	}
+
+	if !p.currentIs(token.LPAREN) {
+		return source
+	}
+	p.nextToken() // skip (
+
+	// Parse source type (e.g., CLICKHOUSE, MYSQL, FILE)
+	if p.currentIs(token.IDENT) {
+		source.Type = strings.ToUpper(p.current.Value)
+		p.nextToken()
+	}
+
+	// Parse key-value arguments in parentheses
+	if p.currentIs(token.LPAREN) {
+		p.nextToken() // skip (
+		source.Args = p.parseKeyValuePairs()
+		if p.currentIs(token.RPAREN) {
+			p.nextToken() // skip )
+		}
+	}
+
+	if p.currentIs(token.RPAREN) {
+		p.nextToken() // skip )
+	}
+
+	return source
+}
+
+func (p *Parser) parseKeyValuePairs() []*ast.KeyValuePair {
+	var pairs []*ast.KeyValuePair
+
+	for !p.currentIs(token.EOF) && !p.currentIs(token.RPAREN) {
+		pair := &ast.KeyValuePair{
+			Position: p.current.Pos,
+		}
+
+		// Parse key (the key is not included in EXPLAIN output, just the value)
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			pair.Key = p.current.Value
+			p.nextToken()
+		}
+
+		// Parse value (can be various types - string, number, function call, identifier)
+		if !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) && !p.currentIs(token.IDENT) && !p.current.Token.IsKeyword() {
+			pair.Value = p.parseExpression(LOWEST)
+		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			// If next token is an identifier/keyword, treat it as start of next pair
+			// unless it's a function call (has LPAREN after)
+			if p.peekIs(token.LPAREN) {
+				pair.Value = p.parseExpression(LOWEST)
+			}
+			// Otherwise no value for this pair (key only)
+		}
+
+		pairs = append(pairs, pair)
+	}
+
+	return pairs
+}
+
+func (p *Parser) parseDictionaryLifetime() *ast.DictionaryLifetime {
+	lifetime := &ast.DictionaryLifetime{
+		Position: p.current.Pos,
+	}
+
+	if !p.currentIs(token.LPAREN) {
+		return lifetime
+	}
+	p.nextToken() // skip (
+
+	// Parse MIN and MAX or just a single value
+	for !p.currentIs(token.EOF) && !p.currentIs(token.RPAREN) {
+		if p.currentIs(token.IDENT) {
+			upper := strings.ToUpper(p.current.Value)
+			if upper == "MIN" {
+				p.nextToken()
+				lifetime.Min = p.parseExpression(LOWEST)
+			} else if upper == "MAX" {
+				p.nextToken()
+				lifetime.Max = p.parseExpression(LOWEST)
+			} else {
+				p.nextToken()
+			}
+		} else {
+			p.nextToken()
+		}
+	}
+
+	if p.currentIs(token.RPAREN) {
+		p.nextToken() // skip )
+	}
+
+	return lifetime
+}
+
+func (p *Parser) parseDictionaryLayout() *ast.DictionaryLayout {
+	layout := &ast.DictionaryLayout{
+		Position: p.current.Pos,
+	}
+
+	if !p.currentIs(token.LPAREN) {
+		return layout
+	}
+	p.nextToken() // skip (
+
+	// Parse layout type (e.g., FLAT, HASHED, COMPLEX_KEY_HASHED)
+	if p.currentIs(token.IDENT) {
+		layout.Type = strings.ToUpper(p.current.Value)
+		p.nextToken()
+	}
+
+	// Parse optional arguments in parentheses
+	if p.currentIs(token.LPAREN) {
+		p.nextToken() // skip (
+		layout.Args = p.parseKeyValuePairs()
+		if p.currentIs(token.RPAREN) {
+			p.nextToken() // skip )
+		}
+	}
+
+	if p.currentIs(token.RPAREN) {
+		p.nextToken() // skip )
+	}
+
+	return layout
+}
+
+func (p *Parser) parseDictionaryRange() *ast.DictionaryRange {
+	dictRange := &ast.DictionaryRange{
+		Position: p.current.Pos,
+	}
+
+	if !p.currentIs(token.LPAREN) {
+		return dictRange
+	}
+	p.nextToken() // skip (
+
+	// Parse MIN and MAX
+	for !p.currentIs(token.EOF) && !p.currentIs(token.RPAREN) {
+		if p.currentIs(token.IDENT) {
+			upper := strings.ToUpper(p.current.Value)
+			if upper == "MIN" {
+				p.nextToken()
+				dictRange.Min = p.parseExpression(LOWEST)
+			} else if upper == "MAX" {
+				p.nextToken()
+				dictRange.Max = p.parseExpression(LOWEST)
+			} else {
+				p.nextToken()
+			}
+		} else {
+			p.nextToken()
+		}
+	}
+
+	if p.currentIs(token.RPAREN) {
+		p.nextToken() // skip )
+	}
+
+	return dictRange
 }
 
 func (p *Parser) parseIndexDefinition() *ast.IndexDefinition {
