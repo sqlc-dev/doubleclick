@@ -713,6 +713,18 @@ func (o *OptimizeQuery) Pos() token.Position { return o.Position }
 func (o *OptimizeQuery) End() token.Position { return o.Position }
 func (o *OptimizeQuery) statementNode()      {}
 
+// CheckQuery represents a CHECK TABLE statement.
+type CheckQuery struct {
+	Position  token.Position `json:"-"`
+	Database  string         `json:"database,omitempty"`
+	Table     string         `json:"table"`
+	Settings  []*SettingExpr `json:"settings,omitempty"`
+}
+
+func (c *CheckQuery) Pos() token.Position { return c.Position }
+func (c *CheckQuery) End() token.Position { return c.Position }
+func (c *CheckQuery) statementNode()      {}
+
 // SystemQuery represents a SYSTEM statement.
 type SystemQuery struct {
 	Position token.Position `json:"-"`

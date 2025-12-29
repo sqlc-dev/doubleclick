@@ -143,6 +143,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainOptimizeQuery(sb, n, indent)
 	case *ast.TruncateQuery:
 		explainTruncateQuery(sb, n, indent)
+	case *ast.CheckQuery:
+		explainCheckQuery(sb, n, indent)
 
 	// Types
 	case *ast.DataType:
