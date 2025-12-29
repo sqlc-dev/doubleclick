@@ -42,9 +42,9 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 			break
 		}
 	}
-	// When FORMAT is present, SETTINGS is output at SelectWithUnionQuery level
+	// When SETTINGS comes AFTER FORMAT, it's output at SelectWithUnionQuery level
 	for _, sel := range n.Selects {
-		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil && len(sq.Settings) > 0 {
+		if sq, ok := sel.(*ast.SelectQuery); ok && sq.SettingsAfterFormat && len(sq.Settings) > 0 {
 			fmt.Fprintf(sb, "%s Set\n", indent)
 			break
 		}
@@ -122,9 +122,9 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 			Node(sb, expr, depth+2)
 		}
 	}
-	// SETTINGS - output at SelectQuery level only if there's no FORMAT
-	// When FORMAT is present, SETTINGS is at SelectWithUnionQuery level instead
-	if len(n.Settings) > 0 && n.Format == nil {
+	// SETTINGS is output at SelectQuery level only when NOT after FORMAT
+	// When SettingsAfterFormat is true, it's output at SelectWithUnionQuery level instead
+	if len(n.Settings) > 0 && !n.SettingsAfterFormat {
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
@@ -238,9 +238,9 @@ func countSelectUnionChildren(n *ast.SelectWithUnionQuery) int {
 			break
 		}
 	}
-	// When FORMAT is present, SETTINGS is counted at SelectWithUnionQuery level
+	// When SETTINGS comes AFTER FORMAT, it's counted at SelectWithUnionQuery level
 	for _, sel := range n.Selects {
-		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil && len(sq.Settings) > 0 {
+		if sq, ok := sel.(*ast.SelectQuery); ok && sq.SettingsAfterFormat && len(sq.Settings) > 0 {
 			count++
 			break
 		}
@@ -294,9 +294,8 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 	if n.Offset != nil {
 		count++
 	}
-	// SETTINGS is counted at SelectQuery level only if there's no FORMAT
-	// When FORMAT is present, SETTINGS is at SelectWithUnionQuery level instead
-	if len(n.Settings) > 0 && n.Format == nil {
+	// SETTINGS is counted at SelectQuery level only when NOT after FORMAT
+	if len(n.Settings) > 0 && !n.SettingsAfterFormat {
 		count++
 	}
 	return count
