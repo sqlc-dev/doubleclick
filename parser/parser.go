@@ -654,22 +654,25 @@ func (p *Parser) parseWithClause() []ast.Expression {
 			}
 		} else if p.currentIs(token.LPAREN) {
 			// Subquery: (SELECT ...) AS name
+			// In this syntax, the alias goes on the Subquery, not on WithElement
 			p.nextToken()
 			subquery := p.parseSelectWithUnion()
 			if !p.expect(token.RPAREN) {
 				return nil
 			}
-			elem.Query = &ast.Subquery{Query: subquery}
+			sq := &ast.Subquery{Query: subquery}
 
 			if !p.expect(token.AS) {
 				return nil
 			}
 
 			// Alias can be IDENT or certain keywords (VALUES, KEY, etc.)
+			// Set alias on the Subquery for "(subquery) AS name" syntax
 			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-				elem.Name = p.current.Value
+				sq.Alias = p.current.Value
 				p.nextToken()
 			}
+			elem.Query = sq
 		} else {
 			// Scalar WITH: expr AS name (ClickHouse style)
 			// Examples: WITH 1 AS x, WITH 'hello' AS s, WITH func() AS f
