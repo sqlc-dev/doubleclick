@@ -412,21 +412,26 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 			Node(sb, e.Right, depth+2)
 		}
 	case *ast.UnaryExpr:
-		// When inside a Subquery context, negated numeric literals should be output as Literal Int64_-N
-		// Otherwise, output as Function negate
-		if inSubqueryContext && e.Op == "-" {
+		// Handle negated numeric literals - output as Literal instead of Function negate
+		// For integers, only do this in subquery context (ClickHouse behavior)
+		// For floats (especially inf/nan), always do this
+		if e.Op == "-" {
 			if lit, ok := e.Operand.(*ast.Literal); ok {
 				switch lit.Type {
 				case ast.LiteralInteger:
-					switch val := lit.Value.(type) {
-					case int64:
-						fmt.Fprintf(sb, "%sLiteral Int64_%d (alias %s)\n", indent, -val, n.Alias)
-						return
-					case uint64:
-						fmt.Fprintf(sb, "%sLiteral Int64_-%d (alias %s)\n", indent, val, n.Alias)
-						return
+					// Only convert to literal in subquery context
+					if inSubqueryContext {
+						switch val := lit.Value.(type) {
+						case int64:
+							fmt.Fprintf(sb, "%sLiteral Int64_%d (alias %s)\n", indent, -val, n.Alias)
+							return
+						case uint64:
+							fmt.Fprintf(sb, "%sLiteral Int64_-%d (alias %s)\n", indent, val, n.Alias)
+							return
+						}
 					}
 				case ast.LiteralFloat:
+					// Always convert negated floats to literals (especially for -inf, -nan)
 					val := lit.Value.(float64)
 					s := FormatFloat(-val)
 					fmt.Fprintf(sb, "%sLiteral Float64_%s (alias %s)\n", indent, s, n.Alias)
