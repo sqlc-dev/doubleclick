@@ -16,12 +16,11 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 	if len(n.Parameters) > 0 {
 		children++ // parameters ExpressionList
 	}
-	// Only count WindowDefinition as a child for inline window specs (not named references)
-	// When it's just a reference like "OVER w", it's shown in the SELECT's WINDOW clause instead
-	// Inline specs include OVER () - empty window, and OVER (ORDER BY x) - window with spec
-	// Named refs have n.Over.Name set and no inline definition
-	hasInlineWindowSpec := n.Over != nil && n.Over.Name == ""
-	if hasInlineWindowSpec {
+	// Only count WindowDefinition as a child for inline window specs that have content
+	// Empty OVER () doesn't produce a WindowDefinition in ClickHouse EXPLAIN AST
+	// Named refs like "OVER w" are shown in the SELECT's WINDOW clause instead
+	hasNonEmptyWindowSpec := n.Over != nil && n.Over.Name == "" && windowSpecHasContent(n.Over)
+	if hasNonEmptyWindowSpec {
 		children++ // WindowDefinition for OVER clause
 	}
 	// Normalize function name
@@ -72,10 +71,28 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 	}
 	// Window definition (for window functions with inline OVER clause)
 	// WindowDefinition is a sibling to ExpressionList, so use the same indent
-	// Only output for inline specs, not named references like "OVER w"
-	if hasInlineWindowSpec {
+	// Only output for non-empty inline specs, not named references like "OVER w"
+	if hasNonEmptyWindowSpec {
 		explainWindowSpec(sb, n.Over, indent+" ", depth+1)
 	}
+}
+
+// windowSpecHasContent returns true if the window spec has any content
+// (PartitionBy, OrderBy, or Frame with offset). Empty OVER () returns false.
+func windowSpecHasContent(w *ast.WindowSpec) bool {
+	if w == nil {
+		return false
+	}
+	if len(w.PartitionBy) > 0 {
+		return true
+	}
+	if len(w.OrderBy) > 0 {
+		return true
+	}
+	if w.Frame != nil && w.Frame.StartBound != nil && w.Frame.StartBound.Offset != nil {
+		return true
+	}
+	return false
 }
 
 func explainLambda(sb *strings.Builder, n *ast.Lambda, indent string, depth int) {
