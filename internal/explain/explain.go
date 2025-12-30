@@ -160,6 +160,24 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		} else {
 			fmt.Fprintf(sb, "%sSHOW CREATE ROLE query\n", indent)
 		}
+	case *ast.CreateResourceQuery:
+		fmt.Fprintf(sb, "%sCreateResourceQuery %s (children 1)\n", indent, n.Name)
+		childIndent := indent + " "
+		explainIdentifier(sb, &ast.Identifier{Parts: []string{n.Name}}, childIndent)
+	case *ast.DropResourceQuery:
+		fmt.Fprintf(sb, "%sDropResourceQuery\n", indent)
+	case *ast.CreateWorkloadQuery:
+		childIndent := indent + " "
+		if n.Parent != "" {
+			fmt.Fprintf(sb, "%sCreateWorkloadQuery %s (children 2)\n", indent, n.Name)
+			explainIdentifier(sb, &ast.Identifier{Parts: []string{n.Name}}, childIndent)
+			explainIdentifier(sb, &ast.Identifier{Parts: []string{n.Parent}}, childIndent)
+		} else {
+			fmt.Fprintf(sb, "%sCreateWorkloadQuery %s (children 1)\n", indent, n.Name)
+			explainIdentifier(sb, &ast.Identifier{Parts: []string{n.Name}}, childIndent)
+		}
+	case *ast.DropWorkloadQuery:
+		fmt.Fprintf(sb, "%sDropWorkloadQuery\n", indent)
 	case *ast.ShowGrantsQuery:
 		fmt.Fprintf(sb, "%sShowGrantsQuery\n", indent)
 	case *ast.GrantQuery:

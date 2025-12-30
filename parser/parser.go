@@ -139,6 +139,14 @@ func (p *Parser) parseStatement() ast.Statement {
 		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "ROLE" {
 			return p.parseDropRole()
 		}
+		// Check for DROP RESOURCE
+		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "RESOURCE" {
+			return p.parseDropResource()
+		}
+		// Check for DROP WORKLOAD
+		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "WORKLOAD" {
+			return p.parseDropWorkload()
+		}
 		return p.parseDrop()
 	case token.ALTER:
 		// Check for ALTER USER
@@ -1377,7 +1385,13 @@ func (p *Parser) parseCreate() ast.Statement {
 		case "ROLE":
 			// CREATE ROLE
 			return p.parseCreateRole(pos)
-		case "RESOURCE", "WORKLOAD", "QUOTA":
+		case "RESOURCE":
+			// CREATE RESOURCE
+			return p.parseCreateResource(pos)
+		case "WORKLOAD":
+			// CREATE WORKLOAD
+			return p.parseCreateWorkload(pos)
+		case "QUOTA":
 			// Skip these statements - just consume tokens until semicolon
 			p.parseCreateGeneric(create)
 		default:
@@ -2301,6 +2315,103 @@ func (p *Parser) parseShowCreateRole(pos token.Position) *ast.ShowCreateRoleQuer
 	}
 
 	// Skip the rest of the statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseCreateResource(pos token.Position) *ast.CreateResourceQuery {
+	query := &ast.CreateResourceQuery{
+		Position: pos,
+	}
+
+	// Skip RESOURCE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "RESOURCE" {
+		p.nextToken()
+	}
+
+	// Get resource name
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		query.Name = p.current.Value
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (resource definition, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseDropResource() *ast.DropResourceQuery {
+	query := &ast.DropResourceQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip DROP
+
+	// Skip RESOURCE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "RESOURCE" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (IF EXISTS, name, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseCreateWorkload(pos token.Position) *ast.CreateWorkloadQuery {
+	query := &ast.CreateWorkloadQuery{
+		Position: pos,
+	}
+
+	// Skip WORKLOAD
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "WORKLOAD" {
+		p.nextToken()
+	}
+
+	// Get workload name
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		query.Name = p.current.Value
+		p.nextToken()
+	}
+
+	// Check for IN (parent workload)
+	if p.currentIs(token.IN) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			query.Parent = p.current.Value
+			p.nextToken()
+		}
+	}
+
+	// Skip the rest of the statement (SETTINGS, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseDropWorkload() *ast.DropWorkloadQuery {
+	query := &ast.DropWorkloadQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip DROP
+
+	// Skip WORKLOAD
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "WORKLOAD" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (IF EXISTS, name, etc.)
 	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
 		p.nextToken()
 	}

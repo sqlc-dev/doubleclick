@@ -960,6 +960,45 @@ func (s *ShowCreateRoleQuery) Pos() token.Position { return s.Position }
 func (s *ShowCreateRoleQuery) End() token.Position { return s.Position }
 func (s *ShowCreateRoleQuery) statementNode()      {}
 
+// CreateResourceQuery represents a CREATE RESOURCE statement.
+type CreateResourceQuery struct {
+	Position token.Position `json:"-"`
+	Name     string         `json:"name"`
+}
+
+func (c *CreateResourceQuery) Pos() token.Position { return c.Position }
+func (c *CreateResourceQuery) End() token.Position { return c.Position }
+func (c *CreateResourceQuery) statementNode()      {}
+
+// DropResourceQuery represents a DROP RESOURCE statement.
+type DropResourceQuery struct {
+	Position token.Position `json:"-"`
+}
+
+func (d *DropResourceQuery) Pos() token.Position { return d.Position }
+func (d *DropResourceQuery) End() token.Position { return d.Position }
+func (d *DropResourceQuery) statementNode()      {}
+
+// CreateWorkloadQuery represents a CREATE WORKLOAD statement.
+type CreateWorkloadQuery struct {
+	Position token.Position `json:"-"`
+	Name     string         `json:"name"`
+	Parent   string         `json:"parent,omitempty"` // Parent workload name (after IN)
+}
+
+func (c *CreateWorkloadQuery) Pos() token.Position { return c.Position }
+func (c *CreateWorkloadQuery) End() token.Position { return c.Position }
+func (c *CreateWorkloadQuery) statementNode()      {}
+
+// DropWorkloadQuery represents a DROP WORKLOAD statement.
+type DropWorkloadQuery struct {
+	Position token.Position `json:"-"`
+}
+
+func (d *DropWorkloadQuery) Pos() token.Position { return d.Position }
+func (d *DropWorkloadQuery) End() token.Position { return d.Position }
+func (d *DropWorkloadQuery) statementNode()      {}
+
 // CreateIndexQuery represents a CREATE INDEX statement.
 type CreateIndexQuery struct {
 	Position  token.Position `json:"-"`
