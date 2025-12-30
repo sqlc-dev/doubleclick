@@ -516,7 +516,31 @@ func explainSetQuery(sb *strings.Builder, indent string) {
 }
 
 func explainSystemQuery(sb *strings.Builder, n *ast.SystemQuery, indent string) {
-	fmt.Fprintf(sb, "%sSYSTEM query\n", indent)
+	// Some commands like FLUSH LOGS don't show the log name as a child
+	// For other commands, table/database names are shown as children
+	isFlushLogs := strings.HasPrefix(strings.ToUpper(n.Command), "FLUSH LOGS")
+
+	// Count children - database and table are children if present and not FLUSH LOGS
+	children := 0
+	if !isFlushLogs {
+		if n.Database != "" {
+			children++
+		}
+		if n.Table != "" {
+			children++
+		}
+	}
+	if children > 0 {
+		fmt.Fprintf(sb, "%sSYSTEM query (children %d)\n", indent, children)
+		if n.Database != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		}
+		if n.Table != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		}
+	} else {
+		fmt.Fprintf(sb, "%sSYSTEM query\n", indent)
+	}
 }
 
 func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string, depth int) {

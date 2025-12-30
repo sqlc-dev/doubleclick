@@ -4359,13 +4359,15 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 // isSystemCommandKeyword returns true if current token is a keyword that can be part of SYSTEM command
 func (p *Parser) isSystemCommandKeyword() bool {
 	switch p.current.Token {
-	case token.TTL, token.SYNC, token.DROP, token.FORMAT, token.FOR:
+	case token.TTL, token.SYNC, token.DROP, token.FORMAT, token.FOR, token.INDEX, token.INSERT,
+		token.PRIMARY, token.KEY:
 		return true
 	}
-	// Handle SCHEMA, CACHE as identifiers since they're not keyword tokens
+	// Handle SCHEMA, CACHE, QUEUE and other identifiers that are part of SYSTEM commands
 	if p.currentIs(token.IDENT) {
 		upper := strings.ToUpper(p.current.Value)
-		if upper == "SCHEMA" || upper == "CACHE" {
+		switch upper {
+		case "SCHEMA", "CACHE", "QUEUE":
 			return true
 		}
 	}
