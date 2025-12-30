@@ -20,6 +20,9 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 		children++
 	} else if n.Table != "" {
 		children++ // Table identifier
+		if n.Database != "" {
+			children++ // Database identifier (separate from table)
+		}
 	}
 	if len(n.Columns) > 0 {
 		children++ // Column list
@@ -45,11 +48,13 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 	if n.Function != nil {
 		Node(sb, n.Function, depth+1)
 	} else if n.Table != "" {
-		name := n.Table
 		if n.Database != "" {
-			name = n.Database + "." + n.Table
+			// Database-qualified: output separate identifiers
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		} else {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 		}
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 	}
 
 	// Column list
@@ -125,8 +130,13 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if n.CreateDatabase {
 		name = n.Database
 	}
+	// Check for database-qualified table/view name
+	hasDatabase := n.Database != "" && !n.CreateDatabase && (n.Table != "" || n.View != "")
 	// Count children: name + columns + engine/storage
 	children := 1 // name identifier
+	if hasDatabase {
+		children++ // additional identifier for database
+	}
 	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Constraints) > 0 {
 		children++
 	}
@@ -142,10 +152,16 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	// ClickHouse adds an extra space before (children N) for CREATE DATABASE
 	if n.CreateDatabase {
 		fmt.Fprintf(sb, "%sCreateQuery %s  (children %d)\n", indent, name, children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+	} else if hasDatabase {
+		// Database-qualified: CreateQuery db table (children N)
+		fmt.Fprintf(sb, "%sCreateQuery %s %s (children %d)\n", indent, n.Database, name, children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 	} else {
 		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, name, children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 	}
-	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Constraints) > 0 {
 		childrenCount := 0
 		if len(n.Columns) > 0 {
@@ -690,6 +706,15 @@ func explainParameter(sb *strings.Builder, n *ast.Parameter, indent string) {
 }
 
 func explainDetachQuery(sb *strings.Builder, n *ast.DetachQuery, indent string) {
+	// Check for database-qualified table name
+	if n.Database != "" && n.Table != "" {
+		// Database-qualified: DetachQuery db table (children 2)
+		fmt.Fprintf(sb, "%sDetachQuery %s %s (children 2)\n", indent, n.Database, n.Table)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		return
+	}
+	// Single name (table only or database only for DETACH DATABASE)
 	name := n.Table
 	if name == "" {
 		name = n.Database
@@ -703,6 +728,15 @@ func explainDetachQuery(sb *strings.Builder, n *ast.DetachQuery, indent string) 
 }
 
 func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string) {
+	// Check for database-qualified table name
+	if n.Database != "" && n.Table != "" {
+		// Database-qualified: AttachQuery db table (children 2)
+		fmt.Fprintf(sb, "%sAttachQuery %s %s (children 2)\n", indent, n.Database, n.Table)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		return
+	}
+	// Single name (table only or database only for ATTACH DATABASE)
 	name := n.Table
 	if name == "" {
 		name = n.Database
