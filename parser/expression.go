@@ -910,6 +910,13 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 	}
 
 	p.expect(token.RPAREN)
+
+	// Mark binary expressions as parenthesized so we can preserve explicit
+	// grouping in EXPLAIN output (e.g., "(a OR b) OR c" vs "a OR b OR c")
+	if binExpr, ok := first.(*ast.BinaryExpr); ok {
+		binExpr.Parenthesized = true
+	}
+
 	return first
 }
 
