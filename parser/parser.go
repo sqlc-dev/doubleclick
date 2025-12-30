@@ -3685,6 +3685,14 @@ func (p *Parser) parseExplain() *ast.ExplainQuery {
 			explain.ExplainType = ast.ExplainEstimate
 			explain.ExplicitType = true
 			p.nextToken()
+		case "QUERY":
+			// EXPLAIN QUERY TREE
+			p.nextToken()
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TREE" {
+				p.nextToken()
+			}
+			explain.ExplainType = ast.ExplainQueryTree
+			explain.ExplicitType = true
 		case "CURRENT":
 			// EXPLAIN CURRENT TRANSACTION
 			p.nextToken()
