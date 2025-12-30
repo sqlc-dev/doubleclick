@@ -1170,12 +1170,13 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 	if p.currentIs(token.LPAREN) {
 		p.nextToken()
 		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-			if p.currentIs(token.IDENT) {
+			pos := p.current.Pos
+			colName := p.parseIdentifierName()
+			if colName != "" {
 				ins.Columns = append(ins.Columns, &ast.Identifier{
-					Position: p.current.Pos,
-					Parts:    []string{p.current.Value},
+					Position: pos,
+					Parts:    []string{colName},
 				})
-				p.nextToken()
 			}
 			if p.currentIs(token.COMMA) {
 				p.nextToken()
