@@ -157,6 +157,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainNameTypePair(sb, n, indent, depth)
 	case *ast.Parameter:
 		explainParameter(sb, n, indent)
+	case *ast.IndexDefinition:
+		Index(sb, n, depth)
 
 	// Dictionary types
 	case *ast.DictionaryAttributeDeclaration:
