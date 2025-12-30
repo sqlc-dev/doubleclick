@@ -116,5 +116,12 @@ func main() {
 		}
 	}
 
+	// Calculate total pending statements across all tests
+	totalStatements := 0
+	for _, t := range todoTests {
+		totalStatements += t.explainTodoLen
+	}
+
 	fmt.Printf("\nRemaining explain_todo tests: %d\n", len(todoTests))
+	fmt.Printf("Total pending statements: %d\n", totalStatements)
 }
