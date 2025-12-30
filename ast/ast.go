@@ -702,6 +702,7 @@ const (
 	ExplainPlan               ExplainType = "PLAN"
 	ExplainPipeline           ExplainType = "PIPELINE"
 	ExplainEstimate           ExplainType = "ESTIMATE"
+	ExplainQueryTree          ExplainType = "QUERY TREE"
 	ExplainCurrentTransaction ExplainType = "CURRENT TRANSACTION"
 )
 
