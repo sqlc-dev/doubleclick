@@ -4551,6 +4551,14 @@ func (p *Parser) parseWindowDefinitions() []*ast.WindowDefinition {
 			}
 		}
 
+		// Parse frame specification (ROWS/RANGE/GROUPS)
+		if p.currentIs(token.IDENT) {
+			frameType := strings.ToUpper(p.current.Value)
+			if frameType == "ROWS" || frameType == "RANGE" || frameType == "GROUPS" {
+				spec.Frame = p.parseWindowFrame()
+			}
+		}
+
 		p.expect(token.RPAREN)
 		def.Spec = spec
 		defs = append(defs, def)
