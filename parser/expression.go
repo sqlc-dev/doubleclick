@@ -180,6 +180,11 @@ func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
 		if upper == "INTERSECT" {
 			return expr
 		}
+		// Don't consume window frame keywords as implicit aliases
+		switch upper {
+		case "ROWS", "RANGE", "GROUPS", "UNBOUNDED", "PRECEDING", "FOLLOWING", "CURRENT":
+			return expr
+		}
 		alias := p.current.Value
 		p.nextToken()
 
