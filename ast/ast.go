@@ -253,6 +253,7 @@ type CreateQuery struct {
 	Populate         bool                 `json:"populate,omitempty"` // POPULATE for materialized views
 	Columns          []*ColumnDeclaration `json:"columns,omitempty"`
 	Indexes          []*IndexDefinition   `json:"indexes,omitempty"`
+	Projections      []*Projection        `json:"projections,omitempty"`
 	Constraints      []*Constraint        `json:"constraints,omitempty"`
 	Engine           *EngineClause        `json:"engine,omitempty"`
 	OrderBy          []Expression         `json:"order_by,omitempty"`
@@ -542,7 +543,7 @@ type ProjectionSelectQuery struct {
 	Position token.Position   `json:"-"`
 	Columns  []Expression     `json:"columns"`
 	GroupBy  []Expression     `json:"group_by,omitempty"`
-	OrderBy  *Identifier      `json:"order_by,omitempty"` // Single column for ORDER BY
+	OrderBy  []Expression     `json:"order_by,omitempty"` // ORDER BY columns
 }
 
 // Assignment represents a column assignment in UPDATE.

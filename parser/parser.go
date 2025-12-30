@@ -1512,21 +1512,11 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 					create.Indexes = append(create.Indexes, idx)
 				}
 			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
-				// Skip PROJECTION definitions: PROJECTION name (SELECT ...)
+				// Parse PROJECTION definitions: PROJECTION name (SELECT ...)
 				p.nextToken() // skip PROJECTION
-				p.parseIdentifierName() // projection name
-				// Skip the (SELECT ...) part
-				if p.currentIs(token.LPAREN) {
-					depth := 1
-					p.nextToken()
-					for depth > 0 && !p.currentIs(token.EOF) {
-						if p.currentIs(token.LPAREN) {
-							depth++
-						} else if p.currentIs(token.RPAREN) {
-							depth--
-						}
-						p.nextToken()
-					}
+				proj := p.parseProjection()
+				if proj != nil {
+					create.Projections = append(create.Projections, proj)
 				}
 			} else if p.currentIs(token.CONSTRAINT) {
 				// Parse CONSTRAINT name CHECK (expression)
@@ -4961,13 +4951,22 @@ func (p *Parser) parseProjection() *ast.Projection {
 		if p.currentIs(token.BY) {
 			p.nextToken() // BY
 		}
-		// For projection ORDER BY, we just need the column name
-		if p.currentIs(token.IDENT) {
-			proj.Select.OrderBy = &ast.Identifier{
-				Position: p.current.Pos,
-				Parts:    []string{p.current.Value},
+		// Parse ORDER BY columns (comma-separated identifiers)
+		for !p.currentIs(token.EOF) && !p.currentIs(token.RPAREN) {
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				proj.Select.OrderBy = append(proj.Select.OrderBy, &ast.Identifier{
+					Position: p.current.Pos,
+					Parts:    []string{p.current.Value},
+				})
+				p.nextToken()
+			} else {
+				break
 			}
-			p.nextToken()
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
 		}
 	}
 

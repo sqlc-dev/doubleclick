@@ -137,7 +137,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if hasDatabase {
 		children++ // additional identifier for database
 	}
-	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Constraints) > 0 {
+	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Projections) > 0 || len(n.Constraints) > 0 {
 		children++
 	}
 	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil {
@@ -162,12 +162,15 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, name, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 	}
-	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Constraints) > 0 {
+	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Projections) > 0 || len(n.Constraints) > 0 {
 		childrenCount := 0
 		if len(n.Columns) > 0 {
 			childrenCount++
 		}
 		if len(n.Indexes) > 0 {
+			childrenCount++
+		}
+		if len(n.Projections) > 0 {
 			childrenCount++
 		}
 		if len(n.Constraints) > 0 {
@@ -194,6 +197,12 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Indexes))
 			for _, idx := range n.Indexes {
 				Index(sb, idx, depth+3)
+			}
+		}
+		if len(n.Projections) > 0 {
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Projections))
+			for _, proj := range n.Projections {
+				explainProjection(sb, proj, indent+"   ", depth+3)
 			}
 		}
 		// Output constraints wrapped in Constraint nodes
@@ -949,7 +958,7 @@ func explainProjectionSelectQuery(sb *strings.Builder, q *ast.ProjectionSelectQu
 	if len(q.Columns) > 0 {
 		children++
 	}
-	if q.OrderBy != nil {
+	if len(q.OrderBy) > 0 {
 		children++
 	}
 	if len(q.GroupBy) > 0 {
@@ -962,8 +971,18 @@ func explainProjectionSelectQuery(sb *strings.Builder, q *ast.ProjectionSelectQu
 			Node(sb, col, depth+2)
 		}
 	}
-	if q.OrderBy != nil {
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, q.OrderBy.Parts[len(q.OrderBy.Parts)-1])
+	if len(q.OrderBy) > 0 {
+		if len(q.OrderBy) == 1 {
+			// Single column: just output as Identifier
+			Node(sb, q.OrderBy[0], depth+1)
+		} else {
+			// Multiple columns: wrap in Function tuple
+			fmt.Fprintf(sb, "%s Function tuple (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(q.OrderBy))
+			for _, col := range q.OrderBy {
+				Node(sb, col, depth+3)
+			}
+		}
 	}
 	if len(q.GroupBy) > 0 {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(q.GroupBy))
