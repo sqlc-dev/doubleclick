@@ -291,6 +291,7 @@ type ColumnDeclaration struct {
 	Default       Expression     `json:"default,omitempty"`
 	DefaultKind   string         `json:"default_kind,omitempty"` // DEFAULT, MATERIALIZED, ALIAS, EPHEMERAL
 	Codec         *CodecExpr     `json:"codec,omitempty"`
+	Statistics    []*FunctionCall `json:"statistics,omitempty"` // STATISTICS clause
 	TTL           Expression     `json:"ttl,omitempty"`
 	PrimaryKey    bool           `json:"primary_key,omitempty"` // PRIMARY KEY constraint
 	Comment       string         `json:"comment,omitempty"`
@@ -522,6 +523,8 @@ type AlterCommand struct {
 	Assignments    []*Assignment        `json:"assignments,omitempty"` // For UPDATE
 	Projection     *Projection          `json:"projection,omitempty"`  // For ADD PROJECTION
 	ProjectionName string               `json:"projection_name,omitempty"` // For DROP/MATERIALIZE/CLEAR PROJECTION
+	StatisticsColumns []string          `json:"statistics_columns,omitempty"` // For ADD/DROP/CLEAR/MATERIALIZE STATISTICS
+	StatisticsTypes   []*FunctionCall   `json:"statistics_types,omitempty"`   // For ADD/MODIFY STATISTICS TYPE
 }
 
 // Projection represents a projection definition.
@@ -585,6 +588,11 @@ const (
 	AlterDropProjection     AlterCommandType = "DROP_PROJECTION"
 	AlterMaterializeProjection AlterCommandType = "MATERIALIZE_PROJECTION"
 	AlterClearProjection    AlterCommandType = "CLEAR_PROJECTION"
+	AlterAddStatistics      AlterCommandType = "ADD_STATISTICS"
+	AlterModifyStatistics   AlterCommandType = "MODIFY_STATISTICS"
+	AlterDropStatistics     AlterCommandType = "DROP_STATISTICS"
+	AlterClearStatistics    AlterCommandType = "CLEAR_STATISTICS"
+	AlterMaterializeStatistics AlterCommandType = "MATERIALIZE_STATISTICS"
 )
 
 // TruncateQuery represents a TRUNCATE statement.

@@ -234,6 +234,9 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	if col.Type != nil {
 		children++
 	}
+	if len(col.Statistics) > 0 {
+		children++
+	}
 	// EPHEMERAL columns without explicit default get defaultValueOfTypeName
 	hasEphemeralDefault := col.DefaultKind == "EPHEMERAL" && col.Default == nil
 	if col.Default != nil || hasEphemeralDefault {
@@ -245,6 +248,9 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	fmt.Fprintf(sb, "%sColumnDeclaration %s (children %d)\n", indent, col.Name, children)
 	if col.Type != nil {
 		Node(sb, col.Type, depth+1)
+	}
+	if len(col.Statistics) > 0 {
+		explainStatisticsExpr(sb, col.Statistics, indent+" ", depth+1)
 	}
 	if col.Default != nil {
 		Node(sb, col.Default, depth+1)
@@ -274,6 +280,31 @@ func explainCodecFunction(sb *strings.Builder, fn *ast.FunctionCall, indent stri
 		fmt.Fprintf(sb, "%sFunction %s\n", indent, fn.Name)
 	} else {
 		// Codec with parameters: function with ExpressionList of arguments
+		fmt.Fprintf(sb, "%sFunction %s (children 1)\n", indent, fn.Name)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(fn.Arguments))
+		for _, arg := range fn.Arguments {
+			Node(sb, arg, depth+2)
+		}
+	}
+}
+
+// explainStatisticsExpr handles STATISTICS expressions in column declarations
+func explainStatisticsExpr(sb *strings.Builder, stats []*ast.FunctionCall, indent string, depth int) {
+	// STATISTICS is rendered as a Function with one child (ExpressionList of statistics types)
+	fmt.Fprintf(sb, "%sFunction STATISTICS (children 1)\n", indent)
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(stats))
+	for _, s := range stats {
+		explainStatisticsFunction(sb, s, indent+"  ", depth+2)
+	}
+}
+
+// explainStatisticsFunction handles individual statistics functions (e.g., tdigest, uniq, countmin)
+func explainStatisticsFunction(sb *strings.Builder, fn *ast.FunctionCall, indent string, depth int) {
+	if len(fn.Arguments) == 0 {
+		// Statistics type without parameters: just the function name
+		fmt.Fprintf(sb, "%sFunction %s\n", indent, fn.Name)
+	} else {
+		// Statistics type with parameters: function with ExpressionList of arguments
 		fmt.Fprintf(sb, "%sFunction %s (children 1)\n", indent, fn.Name)
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(fn.Arguments))
 		for _, arg := range fn.Arguments {

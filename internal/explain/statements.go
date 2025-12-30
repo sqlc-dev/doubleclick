@@ -917,6 +917,10 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		if cmd.ProjectionName != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ProjectionName)
 		}
+	case ast.AlterAddStatistics, ast.AlterModifyStatistics:
+		explainStatisticsCommand(sb, cmd, indent, depth)
+	case ast.AlterDropStatistics, ast.AlterClearStatistics, ast.AlterMaterializeStatistics:
+		explainStatisticsCommand(sb, cmd, indent, depth)
 	default:
 		if cmd.Partition != nil {
 			Node(sb, cmd.Partition, depth+1)
@@ -960,6 +964,49 @@ func explainProjectionSelectQuery(sb *strings.Builder, q *ast.ProjectionSelectQu
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(q.GroupBy))
 		for _, expr := range q.GroupBy {
 			Node(sb, expr, depth+2)
+		}
+	}
+}
+
+func explainStatisticsCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent string, depth int) {
+	// Stat node has 1 child (columns only) or 2 children (columns + types)
+	statChildren := 0
+	if len(cmd.StatisticsColumns) > 0 {
+		statChildren++
+	}
+	if len(cmd.StatisticsTypes) > 0 {
+		statChildren++
+	}
+
+	fmt.Fprintf(sb, "%s Stat (children %d)\n", indent, statChildren)
+
+	// First: column names as ExpressionList of Identifiers
+	if len(cmd.StatisticsColumns) > 0 {
+		fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(cmd.StatisticsColumns))
+		for _, col := range cmd.StatisticsColumns {
+			fmt.Fprintf(sb, "%s   Identifier %s\n", indent, col)
+		}
+	}
+
+	// Second: statistics types as ExpressionList of Functions
+	if len(cmd.StatisticsTypes) > 0 {
+		fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(cmd.StatisticsTypes))
+		for _, t := range cmd.StatisticsTypes {
+			explainStatisticsTypeFunction(sb, t, indent+"   ", depth+3)
+		}
+	}
+}
+
+func explainStatisticsTypeFunction(sb *strings.Builder, fn *ast.FunctionCall, indent string, depth int) {
+	// Statistics type functions always have (children 1) even if no actual arguments
+	// because ClickHouse shows them with an empty ExpressionList
+	fmt.Fprintf(sb, "%sFunction %s (children 1)\n", indent, fn.Name)
+	if len(fn.Arguments) == 0 {
+		fmt.Fprintf(sb, "%s ExpressionList\n", indent)
+	} else {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(fn.Arguments))
+		for _, arg := range fn.Arguments {
+			Node(sb, arg, depth+1)
 		}
 	}
 }
@@ -1035,6 +1082,16 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 	case ast.AlterDropProjection, ast.AlterMaterializeProjection, ast.AlterClearProjection:
 		if cmd.ProjectionName != "" {
 			children++
+		}
+	case ast.AlterAddStatistics, ast.AlterModifyStatistics:
+		// Statistics commands with TYPE have one child (Stat node)
+		if len(cmd.StatisticsColumns) > 0 || len(cmd.StatisticsTypes) > 0 {
+			children = 1
+		}
+	case ast.AlterDropStatistics, ast.AlterClearStatistics, ast.AlterMaterializeStatistics:
+		// Statistics commands without TYPE have one child (Stat node with just columns)
+		if len(cmd.StatisticsColumns) > 0 {
+			children = 1
 		}
 	default:
 		if cmd.Partition != nil {

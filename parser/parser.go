@@ -2509,6 +2509,12 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 		col.Type = p.parseDataType()
 	}
 
+	// Parse STATISTICS clause (e.g., STATISTICS(tdigest, uniq))
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STATISTICS" {
+		p.nextToken()
+		col.Statistics = p.parseStatisticsExpr()
+	}
+
 	// Handle COLLATE clause (MySQL compatibility, e.g., varchar(255) COLLATE binary)
 	if p.currentIs(token.COLLATE) {
 		p.nextToken()
@@ -2757,6 +2763,100 @@ func (p *Parser) parseCodecExpr() *ast.CodecExpr {
 
 	p.expect(token.RPAREN)
 	return codec
+}
+
+func (p *Parser) parseStatisticsExpr() []*ast.FunctionCall {
+	var stats []*ast.FunctionCall
+
+	if !p.expect(token.LPAREN) {
+		return nil
+	}
+
+	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+		if p.currentIs(token.IDENT) {
+			name := p.current.Value
+			pos := p.current.Pos
+			p.nextToken()
+
+			fn := &ast.FunctionCall{
+				Position: pos,
+				Name:     name,
+			}
+
+			// Statistics types can have optional parameters: e.g., tdigest(100)
+			if p.currentIs(token.LPAREN) {
+				p.nextToken()
+				if !p.currentIs(token.RPAREN) {
+					fn.Arguments = p.parseExpressionList()
+				}
+				p.expect(token.RPAREN)
+			}
+
+			stats = append(stats, fn)
+		}
+
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+		} else {
+			break
+		}
+	}
+
+	p.expect(token.RPAREN)
+	return stats
+}
+
+// parseStatisticsColumnList parses comma-separated column names for ALTER STATISTICS commands
+func (p *Parser) parseStatisticsColumnList() []string {
+	var columns []string
+
+	for p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		columns = append(columns, p.current.Value)
+		p.nextToken()
+
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+		} else {
+			break
+		}
+	}
+
+	return columns
+}
+
+// parseStatisticsTypeList parses comma-separated statistics type names for ALTER STATISTICS TYPE clause
+func (p *Parser) parseStatisticsTypeList() []*ast.FunctionCall {
+	var types []*ast.FunctionCall
+
+	for p.currentIs(token.IDENT) {
+		name := p.current.Value
+		pos := p.current.Pos
+		p.nextToken()
+
+		fn := &ast.FunctionCall{
+			Position: pos,
+			Name:     name,
+		}
+
+		// Statistics types can have optional parameters
+		if p.currentIs(token.LPAREN) {
+			p.nextToken()
+			if !p.currentIs(token.RPAREN) {
+				fn.Arguments = p.parseExpressionList()
+			}
+			p.expect(token.RPAREN)
+		}
+
+		types = append(types, fn)
+
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+		} else {
+			break
+		}
+	}
+
+	return types
 }
 
 func (p *Parser) parseEngineClause() *ast.EngineClause {
@@ -3188,6 +3288,27 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			cmd.Type = ast.AlterAddProjection
 			p.nextToken()
 			cmd.Projection = p.parseProjection()
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STATISTICS" {
+			cmd.Type = ast.AlterAddStatistics
+			p.nextToken()
+			// Handle IF NOT EXISTS
+			if p.currentIs(token.IF) {
+				p.nextToken()
+				if p.currentIs(token.NOT) {
+					p.nextToken()
+					if p.currentIs(token.EXISTS) {
+						cmd.IfNotExists = true
+						p.nextToken()
+					}
+				}
+			}
+			// Parse column list (comma-separated identifiers)
+			cmd.StatisticsColumns = p.parseStatisticsColumnList()
+			// Parse TYPE clause
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TYPE" {
+				p.nextToken()
+				cmd.StatisticsTypes = p.parseStatisticsTypeList()
+			}
 		}
 	case token.DROP:
 		p.nextToken()
@@ -3233,6 +3354,15 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				cmd.ProjectionName = p.current.Value
 				p.nextToken()
 			}
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STATISTICS" {
+			cmd.Type = ast.AlterDropStatistics
+			p.nextToken()
+			if p.currentIs(token.IF) {
+				p.nextToken()
+				p.expect(token.EXISTS)
+				cmd.IfExists = true
+			}
+			cmd.StatisticsColumns = p.parseStatisticsColumnList()
 		}
 	case token.IDENT:
 		// Handle CLEAR, MATERIALIZE
@@ -3260,6 +3390,15 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					cmd.ProjectionName = p.current.Value
 					p.nextToken()
 				}
+			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STATISTICS" {
+				cmd.Type = ast.AlterClearStatistics
+				p.nextToken()
+				if p.currentIs(token.IF) {
+					p.nextToken()
+					p.expect(token.EXISTS)
+					cmd.IfExists = true
+				}
+				cmd.StatisticsColumns = p.parseStatisticsColumnList()
 			}
 		} else if upper == "MATERIALIZE" {
 			p.nextToken()
@@ -3277,6 +3416,15 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					cmd.ProjectionName = p.current.Value
 					p.nextToken()
 				}
+			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STATISTICS" {
+				cmd.Type = ast.AlterMaterializeStatistics
+				p.nextToken()
+				if p.currentIs(token.IF) {
+					p.nextToken()
+					p.expect(token.EXISTS)
+					cmd.IfExists = true
+				}
+				cmd.StatisticsColumns = p.parseStatisticsColumnList()
 			}
 		} else {
 			return nil
@@ -3299,6 +3447,16 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			cmd.Type = ast.AlterModifySetting
 			p.nextToken()
 			cmd.Settings = p.parseSettingsList()
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STATISTICS" {
+			cmd.Type = ast.AlterModifyStatistics
+			p.nextToken()
+			// Parse column list (comma-separated identifiers)
+			cmd.StatisticsColumns = p.parseStatisticsColumnList()
+			// Parse TYPE clause
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TYPE" {
+				p.nextToken()
+				cmd.StatisticsTypes = p.parseStatisticsTypeList()
+			}
 		}
 	case token.RENAME:
 		p.nextToken()
