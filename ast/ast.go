@@ -720,6 +720,7 @@ type CheckQuery struct {
 	Position  token.Position `json:"-"`
 	Database  string         `json:"database,omitempty"`
 	Table     string         `json:"table"`
+	Format    string         `json:"format,omitempty"`
 	Settings  []*SettingExpr `json:"settings,omitempty"`
 }
 

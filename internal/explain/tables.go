@@ -91,13 +91,45 @@ func formatSampleRatioOperand(sb *strings.Builder, expr ast.Expression) {
 		case uint64:
 			fmt.Fprintf(sb, "%d", v)
 		case float64:
-			fmt.Fprintf(sb, "%g", v)
+			// Convert decimal to fraction for EXPLAIN AST output
+			// ClickHouse shows 0.1 as "1 / 10", 0.01 as "1 / 100", etc.
+			if frac := floatToFraction(v); frac != "" {
+				sb.WriteString(frac)
+			} else {
+				fmt.Fprintf(sb, "%g", v)
+			}
 		default:
 			fmt.Fprintf(sb, "%v", v)
 		}
 	} else {
 		fmt.Fprintf(sb, "%v", expr)
 	}
+}
+
+// floatToFraction converts a float to a fraction string like "1 / 10"
+// Returns empty string if the float can't be reasonably converted to a simple fraction
+func floatToFraction(f float64) string {
+	if f <= 0 || f >= 1 {
+		return ""
+	}
+	// Try common denominators
+	denominators := []int64{2, 3, 4, 5, 8, 10, 16, 20, 25, 32, 50, 64, 100, 128, 1000, 10000, 100000, 1000000}
+	for _, denom := range denominators {
+		num := f * float64(denom)
+		// Check if num is close to an integer
+		rounded := int64(num + 0.5)
+		if rounded > 0 && abs(num-float64(rounded)) < 1e-9 {
+			return fmt.Sprintf("%d / %d", rounded, denom)
+		}
+	}
+	return ""
+}
+
+func abs(x float64) float64 {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
 
 // explainViewExplain handles EXPLAIN queries used as table sources, converting to viewExplain function

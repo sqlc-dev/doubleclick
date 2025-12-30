@@ -192,7 +192,12 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			}
 		}
 	}
-	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0 {
+	// For materialized views, output AsSelect before storage definition
+	if n.Materialized && n.AsSelect != nil {
+		Node(sb, n.AsSelect, depth+1)
+	}
+	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0
+	if hasStorage {
 		storageChildren := 0
 		if n.Engine != nil {
 			storageChildren++
@@ -231,80 +236,91 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		if len(n.Settings) > 0 {
 			storageChildren++
 		}
-		fmt.Fprintf(sb, "%s Storage definition (children %d)\n", indent, storageChildren)
+		// For materialized views, wrap storage definition in ViewTargets
+		// and use extra indentation for storage children
+		storageIndent := indent + " " // 1 space for regular storage (format strings add 1 more)
+		storageChildDepth := depth + 2
+		if n.Materialized {
+			fmt.Fprintf(sb, "%s ViewTargets (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s  Storage definition (children %d)\n", indent, storageChildren)
+			storageIndent = indent + "  " // 2 spaces for materialized (format strings add 1 more = 3 total)
+			storageChildDepth = depth + 3
+		} else {
+			fmt.Fprintf(sb, "%s Storage definition (children %d)\n", indent, storageChildren)
+		}
 		if n.Engine != nil {
 			if n.Engine.HasParentheses {
-				fmt.Fprintf(sb, "%s  Function %s (children %d)\n", indent, n.Engine.Name, 1)
+				fmt.Fprintf(sb, "%s Function %s (children %d)\n", storageIndent, n.Engine.Name, 1)
 				if len(n.Engine.Parameters) > 0 {
-					fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.Engine.Parameters))
+					fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(n.Engine.Parameters))
 					for _, param := range n.Engine.Parameters {
-						Node(sb, param, depth+4)
+						Node(sb, param, storageChildDepth+2)
 					}
 				} else {
-					fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+					fmt.Fprintf(sb, "%s  ExpressionList\n", storageIndent)
 				}
 			} else {
-				fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
+				fmt.Fprintf(sb, "%s Function %s\n", storageIndent, n.Engine.Name)
 			}
 		}
 		if n.PartitionBy != nil {
 			if ident, ok := n.PartitionBy.(*ast.Identifier); ok {
-				fmt.Fprintf(sb, "%s  Identifier %s\n", indent, ident.Name())
+				fmt.Fprintf(sb, "%s Identifier %s\n", storageIndent, ident.Name())
 			} else {
-				Node(sb, n.PartitionBy, depth+2)
+				Node(sb, n.PartitionBy, storageChildDepth)
 			}
 		}
 		if len(n.OrderBy) > 0 {
 			if len(n.OrderBy) == 1 {
 				if ident, ok := n.OrderBy[0].(*ast.Identifier); ok {
-					fmt.Fprintf(sb, "%s  Identifier %s\n", indent, ident.Name())
+					fmt.Fprintf(sb, "%s Identifier %s\n", storageIndent, ident.Name())
 				} else if lit, ok := n.OrderBy[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
 					// Handle tuple literal (including empty tuple from ORDER BY ())
 					exprs, _ := lit.Value.([]ast.Expression)
-					fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+					fmt.Fprintf(sb, "%s Function tuple (children %d)\n", storageIndent, 1)
 					if len(exprs) > 0 {
-						fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(exprs))
+						fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(exprs))
 						for _, e := range exprs {
-							Node(sb, e, depth+4)
+							Node(sb, e, storageChildDepth+2)
 						}
 					} else {
-						fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+						fmt.Fprintf(sb, "%s  ExpressionList\n", storageIndent)
 					}
 				} else {
-					Node(sb, n.OrderBy[0], depth+2)
+					Node(sb, n.OrderBy[0], storageChildDepth)
 				}
 			} else {
-				fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
-				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.OrderBy))
+				fmt.Fprintf(sb, "%s Function tuple (children %d)\n", storageIndent, 1)
+				fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(n.OrderBy))
 				for _, o := range n.OrderBy {
-					Node(sb, o, depth+4)
+					Node(sb, o, storageChildDepth+2)
 				}
 			}
 		}
 		if len(n.PrimaryKey) > 0 {
 			if len(n.PrimaryKey) == 1 {
 				if ident, ok := n.PrimaryKey[0].(*ast.Identifier); ok {
-					fmt.Fprintf(sb, "%s  Identifier %s\n", indent, ident.Name())
+					fmt.Fprintf(sb, "%s Identifier %s\n", storageIndent, ident.Name())
 				} else if lit, ok := n.PrimaryKey[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
 					// Handle tuple literal (including empty tuple from PRIMARY KEY ())
 					exprs, _ := lit.Value.([]ast.Expression)
-					fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+					fmt.Fprintf(sb, "%s Function tuple (children %d)\n", storageIndent, 1)
 					if len(exprs) > 0 {
-						fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(exprs))
+						fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(exprs))
 						for _, e := range exprs {
-							Node(sb, e, depth+4)
+							Node(sb, e, storageChildDepth+2)
 						}
 					} else {
-						fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+						fmt.Fprintf(sb, "%s  ExpressionList\n", storageIndent)
 					}
 				} else {
-					Node(sb, n.PrimaryKey[0], depth+2)
+					Node(sb, n.PrimaryKey[0], storageChildDepth)
 				}
 			} else {
-				fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
-				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.PrimaryKey))
+				fmt.Fprintf(sb, "%s Function tuple (children %d)\n", storageIndent, 1)
+				fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(n.PrimaryKey))
 				for _, p := range n.PrimaryKey {
-					Node(sb, p, depth+4)
+					Node(sb, p, storageChildDepth+2)
 				}
 			}
 		}
@@ -323,20 +339,21 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 					}
 				}
 				if showSampleBy {
-					Node(sb, n.SampleBy, depth+2)
+					Node(sb, n.SampleBy, storageChildDepth)
 				}
 			}
 		}
 		if n.TTL != nil {
-			fmt.Fprintf(sb, "%s  ExpressionList (children 1)\n", indent)
-			fmt.Fprintf(sb, "%s   TTLElement (children 1)\n", indent)
-			Node(sb, n.TTL.Expression, depth+4)
+			fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", storageIndent)
+			fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", storageIndent)
+			Node(sb, n.TTL.Expression, storageChildDepth+2)
 		}
 		if len(n.Settings) > 0 {
-			fmt.Fprintf(sb, "%s  Set\n", indent)
+			fmt.Fprintf(sb, "%s Set\n", storageIndent)
 		}
 	}
-	if n.AsSelect != nil {
+	// For non-materialized views, output AsSelect after storage
+	if n.AsSelect != nil && !n.Materialized {
 		// AS SELECT is output directly without Subquery wrapper
 		Node(sb, n.AsSelect, depth+1)
 	}
@@ -908,7 +925,7 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 	return children
 }
 
-func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent string) {
+func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent string, depth int) {
 	if n == nil {
 		fmt.Fprintf(sb, "%s*ast.OptimizeQuery\n", indent)
 		return
@@ -919,7 +936,16 @@ func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent stri
 		name += "_final"
 	}
 
-	fmt.Fprintf(sb, "%sOptimizeQuery  %s (children %d)\n", indent, name, 1)
+	children := 1 // identifier
+	if n.Partition != nil {
+		children++
+	}
+
+	fmt.Fprintf(sb, "%sOptimizeQuery  %s (children %d)\n", indent, name, children)
+	if n.Partition != nil {
+		fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+		Node(sb, n.Partition, depth+2)
+	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 }
 
@@ -950,12 +976,18 @@ func explainCheckQuery(sb *strings.Builder, n *ast.CheckQuery, indent string) {
 	}
 
 	children := 1 // identifier
+	if n.Format != "" {
+		children++
+	}
 	if len(n.Settings) > 0 {
 		children++
 	}
 
 	fmt.Fprintf(sb, "%sCheckQuery  %s (children %d)\n", indent, name, children)
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+	if n.Format != "" {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+	}
 	if len(n.Settings) > 0 {
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}

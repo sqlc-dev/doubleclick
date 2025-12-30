@@ -3754,6 +3754,12 @@ func (p *Parser) parseCheck() *ast.CheckQuery {
 		check.Table = tableName
 	}
 
+	// Parse optional FORMAT
+	if p.currentIs(token.FORMAT) {
+		p.nextToken() // skip FORMAT
+		check.Format = p.parseIdentifierName()
+	}
+
 	// Parse optional SETTINGS
 	if p.currentIs(token.SETTINGS) {
 		p.nextToken() // skip SETTINGS
