@@ -1137,11 +1137,15 @@ type ReplaceExpr struct {
 func (r *ReplaceExpr) Pos() token.Position { return r.Position }
 func (r *ReplaceExpr) End() token.Position { return r.Position }
 
-// ColumnsMatcher represents COLUMNS('pattern') expression.
+// ColumnsMatcher represents COLUMNS('pattern') or COLUMNS(col1, col2) expression.
+// When Pattern is set, it's a regex matcher (ColumnsRegexpMatcher in explain).
+// When Columns is set, it's a list matcher (ColumnsListMatcher in explain).
 type ColumnsMatcher struct {
-	Position token.Position `json:"-"`
-	Pattern  string         `json:"pattern"`
-	Except   []string       `json:"except,omitempty"`
+	Position  token.Position `json:"-"`
+	Pattern   string         `json:"pattern,omitempty"`
+	Columns   []Expression   `json:"columns,omitempty"` // For COLUMNS(id, name) syntax
+	Except    []string       `json:"except,omitempty"`
+	Qualifier string         `json:"qualifier,omitempty"` // For qualified matchers like table.COLUMNS(...)
 }
 
 func (c *ColumnsMatcher) Pos() token.Position { return c.Position }

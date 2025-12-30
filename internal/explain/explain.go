@@ -74,7 +74,7 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	case *ast.Asterisk:
 		explainAsterisk(sb, n, indent, depth)
 	case *ast.ColumnsMatcher:
-		fmt.Fprintf(sb, "%sColumnsRegexpMatcher\n", indent)
+		explainColumnsMatcher(sb, n, indent, depth)
 
 	// Functions
 	case *ast.FunctionCall:

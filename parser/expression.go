@@ -1868,10 +1868,24 @@ func (p *Parser) parseColumnsMatcher() ast.Expression {
 		return nil
 	}
 
-	// Parse the pattern (string)
+	// Parse the arguments - either a string pattern or a list of identifiers
 	if p.currentIs(token.STRING) {
+		// String pattern: COLUMNS('pattern')
 		matcher.Pattern = p.current.Value
 		p.nextToken()
+	} else {
+		// Column list: COLUMNS(col1, col2, ...)
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			col := p.parseExpression(LOWEST)
+			if col != nil {
+				matcher.Columns = append(matcher.Columns, col)
+			}
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
+		}
 	}
 
 	p.expect(token.RPAREN)
