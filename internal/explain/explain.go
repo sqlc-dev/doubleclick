@@ -144,7 +144,7 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	case *ast.AlterQuery:
 		explainAlterQuery(sb, n, indent, depth)
 	case *ast.OptimizeQuery:
-		explainOptimizeQuery(sb, n, indent)
+		explainOptimizeQuery(sb, n, indent, depth)
 	case *ast.TruncateQuery:
 		explainTruncateQuery(sb, n, indent)
 	case *ast.CheckQuery:
