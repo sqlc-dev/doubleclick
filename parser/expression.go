@@ -1897,22 +1897,60 @@ func (p *Parser) parseKeywordAsFunction() ast.Expression {
 		return nil
 	}
 
-	var args []ast.Expression
+	fn := &ast.FunctionCall{
+		Position: pos,
+		Name:     name,
+	}
+
+	// Handle DISTINCT
+	if p.currentIs(token.DISTINCT) {
+		fn.Distinct = true
+		p.nextToken()
+	}
+
 	// Handle view() and similar functions that take a subquery as argument
 	if name == "view" && (p.currentIs(token.SELECT) || p.currentIs(token.WITH)) {
 		subquery := p.parseSelectWithUnion()
-		args = []ast.Expression{&ast.Subquery{Position: pos, Query: subquery}}
+		fn.Arguments = []ast.Expression{&ast.Subquery{Position: pos, Query: subquery}}
 	} else if !p.currentIs(token.RPAREN) {
-		args = p.parseExpressionList()
+		fn.Arguments = p.parseExpressionList()
 	}
 
 	p.expect(token.RPAREN)
 
-	return &ast.FunctionCall{
-		Position:  pos,
-		Name:      name,
-		Arguments: args,
+	// Handle IGNORE NULLS / RESPECT NULLS (window function modifiers)
+	for p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		if upper == "IGNORE" || upper == "RESPECT" {
+			p.nextToken()
+			if p.currentIs(token.NULLS) {
+				p.nextToken()
+			}
+		} else {
+			break
+		}
 	}
+
+	// Handle FILTER clause for aggregate functions: func() FILTER(WHERE condition)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "FILTER" {
+		p.nextToken() // skip FILTER
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			if p.currentIs(token.WHERE) {
+				p.nextToken() // skip WHERE
+				p.parseExpression(LOWEST)
+			}
+			p.expect(token.RPAREN)
+		}
+	}
+
+	// Handle OVER clause for window functions
+	if p.currentIs(token.OVER) {
+		p.nextToken()
+		fn.Over = p.parseWindowSpec()
+	}
+
+	return fn
 }
 
 func (p *Parser) parseKeywordAsIdentifier() ast.Expression {
