@@ -1489,12 +1489,59 @@ func (p *Parser) parseIsExpression(left ast.Expression) ast.Expression {
 }
 
 func (p *Parser) parseArrayAccess(left ast.Expression) ast.Expression {
-	expr := &ast.ArrayAccess{
-		Position: p.current.Pos,
-		Array:    left,
+	pos := p.current.Pos
+	p.nextToken() // skip [
+
+	// Check for empty brackets [] - this is JSON array path notation
+	// json.arr[].field becomes Identifier json.arr.:`Array(JSON)`.field
+	if p.currentIs(token.RBRACKET) {
+		p.nextToken() // skip ]
+
+		if ident, ok := left.(*ast.Identifier); ok {
+			// Append the JSON array type notation to the identifier
+			ident.Parts = append(ident.Parts, ":`Array(JSON)`")
+
+			// Continue parsing any dot accesses that follow
+			for p.currentIs(token.DOT) {
+				p.nextToken() // skip .
+
+				if p.currentIs(token.CARET) {
+					// Handle JSON path parent access: x.^c0
+					p.nextToken() // skip ^
+					if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+						ident.Parts = append(ident.Parts, "^"+p.current.Value)
+						p.nextToken()
+					} else {
+						break
+					}
+				} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					ident.Parts = append(ident.Parts, p.current.Value)
+					p.nextToken()
+
+					// Check for nested empty array access (e.g., arr[].nested[].field)
+					if p.currentIs(token.LBRACKET) {
+						return p.parseArrayAccess(ident)
+					}
+				} else {
+					break
+				}
+			}
+			return ident
+		}
+
+		// Not an identifier, fall through to create ArrayAccess with nil index
+		return &ast.ArrayAccess{
+			Position: pos,
+			Array:    left,
+			Index:    nil,
+		}
 	}
 
-	p.nextToken() // skip [
+	// Regular array access with index expression
+	expr := &ast.ArrayAccess{
+		Position: pos,
+		Array:    left,
+	}
 	expr.Index = p.parseExpression(LOWEST)
 	p.expect(token.RBRACKET)
 
