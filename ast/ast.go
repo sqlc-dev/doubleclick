@@ -832,6 +832,18 @@ func (s *ShowCreateQuotaQuery) Pos() token.Position { return s.Position }
 func (s *ShowCreateQuotaQuery) End() token.Position { return s.Position }
 func (s *ShowCreateQuotaQuery) statementNode()      {}
 
+// CreateIndexQuery represents a CREATE INDEX statement.
+type CreateIndexQuery struct {
+	Position  token.Position `json:"-"`
+	IndexName string         `json:"index_name"`
+	Table     string         `json:"table"`
+	Columns   []Expression   `json:"columns,omitempty"`
+}
+
+func (c *CreateIndexQuery) Pos() token.Position { return c.Position }
+func (c *CreateIndexQuery) End() token.Position { return c.Position }
+func (c *CreateIndexQuery) statementNode()      {}
+
 // -----------------------------------------------------------------------------
 // Expressions
 
