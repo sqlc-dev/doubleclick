@@ -475,6 +475,15 @@ func (p *Parser) parseIdentifierOrFunction() ast.Expression {
 			} else {
 				break
 			}
+		} else if p.currentIs(token.COLON) {
+			// JSON subcolumn type accessor: json.field.:`TypeName` or json.field.:TypeName
+			p.nextToken() // skip :
+			typePart := ":"
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() || p.currentIs(token.STRING) {
+				typePart += "`" + p.current.Value + "`"
+				p.nextToken()
+			}
+			parts = append(parts, typePart)
 		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 			// Keywords can be used as column/field names (e.g., l_t.key, t.index)
 			parts = append(parts, p.current.Value)
