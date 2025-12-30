@@ -829,7 +829,12 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 
 func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent string, depth int) {
 	children := countAlterCommandChildren(cmd)
-	fmt.Fprintf(sb, "%sAlterCommand %s (children %d)\n", indent, cmd.Type, children)
+	// CLEAR_STATISTICS is normalized to DROP_STATISTICS in EXPLAIN AST output
+	cmdType := cmd.Type
+	if cmdType == ast.AlterClearStatistics {
+		cmdType = ast.AlterDropStatistics
+	}
+	fmt.Fprintf(sb, "%sAlterCommand %s (children %d)\n", indent, cmdType, children)
 
 	switch cmd.Type {
 	case ast.AlterAddColumn:
