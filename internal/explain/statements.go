@@ -572,15 +572,36 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 	// SHOW CREATE DICTIONARY has special output format
 	if n.ShowType == ast.ShowCreateDictionary && (n.Database != "" || n.From != "") {
 		if n.Database != "" && n.From != "" {
-			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery %s %s (children 2)\n", indent, n.Database, n.From)
+			children := 2
+			if n.HasSettings {
+				children++
+			}
+			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery %s %s (children %d)\n", indent, n.Database, n.From, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		} else if n.From != "" {
-			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery  %s (children 1)\n", indent, n.From)
+			children := 1
+			if n.HasSettings {
+				children++
+			}
+			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery  %s (children %d)\n", indent, n.From, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		} else if n.Database != "" {
-			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery  %s (children 1)\n", indent, n.Database)
+			children := 1
+			if n.HasSettings {
+				children++
+			}
+			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery  %s (children %d)\n", indent, n.Database, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		}
 		return
 	}
@@ -588,15 +609,36 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 	// SHOW CREATE VIEW has special output format
 	if n.ShowType == ast.ShowCreateView && (n.Database != "" || n.From != "") {
 		if n.Database != "" && n.From != "" {
-			fmt.Fprintf(sb, "%sShowCreateViewQuery %s %s (children 2)\n", indent, n.Database, n.From)
+			children := 2
+			if n.HasSettings {
+				children++
+			}
+			fmt.Fprintf(sb, "%sShowCreateViewQuery %s %s (children %d)\n", indent, n.Database, n.From, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		} else if n.From != "" {
-			fmt.Fprintf(sb, "%sShowCreateViewQuery  %s (children 1)\n", indent, n.From)
+			children := 1
+			if n.HasSettings {
+				children++
+			}
+			fmt.Fprintf(sb, "%sShowCreateViewQuery  %s (children %d)\n", indent, n.From, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		} else if n.Database != "" {
-			fmt.Fprintf(sb, "%sShowCreateViewQuery  %s (children 1)\n", indent, n.Database)
+			children := 1
+			if n.HasSettings {
+				children++
+			}
+			fmt.Fprintf(sb, "%sShowCreateViewQuery  %s (children %d)\n", indent, n.Database, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		}
 		return
 	}
@@ -608,7 +650,10 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 		if n.Database != "" && n.From != "" {
 			children := 2
 			if n.Format != "" {
-				children = 3
+				children++
+			}
+			if n.HasSettings {
+				children++
 			}
 			fmt.Fprintf(sb, "%sShowCreateTableQuery %s %s (children %d)\n", indent, n.Database, n.From, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
@@ -616,25 +661,40 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 			if n.Format != "" {
 				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
 			}
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		} else if n.From != "" {
 			children := 1
 			if n.Format != "" {
-				children = 2
+				children++
+			}
+			if n.HasSettings {
+				children++
 			}
 			fmt.Fprintf(sb, "%sShowCreateTableQuery  %s (children %d)\n", indent, name, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 			if n.Format != "" {
 				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
 			}
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		} else if n.Database != "" {
 			children := 1
 			if n.Format != "" {
-				children = 2
+				children++
+			}
+			if n.HasSettings {
+				children++
 			}
 			fmt.Fprintf(sb, "%sShowCreateTableQuery  %s (children %d)\n", indent, n.Database, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 			if n.Format != "" {
 				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+			}
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
 			}
 		} else {
 			fmt.Fprintf(sb, "%sShow%s\n", indent, showType)

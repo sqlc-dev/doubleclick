@@ -658,14 +658,15 @@ func (d *DescribeQuery) statementNode()      {}
 
 // ShowQuery represents a SHOW statement.
 type ShowQuery struct {
-	Position  token.Position `json:"-"`
-	ShowType  ShowType       `json:"show_type"`
-	Database  string         `json:"database,omitempty"`
-	From      string         `json:"from,omitempty"`
-	Like      string         `json:"like,omitempty"`
-	Where     Expression     `json:"where,omitempty"`
-	Limit     Expression     `json:"limit,omitempty"`
-	Format    string         `json:"format,omitempty"`
+	Position    token.Position `json:"-"`
+	ShowType    ShowType       `json:"show_type"`
+	Database    string         `json:"database,omitempty"`
+	From        string         `json:"from,omitempty"`
+	Like        string         `json:"like,omitempty"`
+	Where       Expression     `json:"where,omitempty"`
+	Limit       Expression     `json:"limit,omitempty"`
+	Format      string         `json:"format,omitempty"`
+	HasSettings bool           `json:"has_settings,omitempty"` // Whether SETTINGS clause was specified
 }
 
 func (s *ShowQuery) Pos() token.Position { return s.Position }

@@ -4071,7 +4071,7 @@ func (p *Parser) parseShow() ast.Statement {
 		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
 			show.ShowType = ast.ShowCreateDictionary
 			p.nextToken()
-		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "VIEW" {
+		} else if p.currentIs(token.VIEW) {
 			show.ShowType = ast.ShowCreateView
 			p.nextToken()
 		} else if p.currentIs(token.USER) {
@@ -4166,6 +4166,16 @@ func (p *Parser) parseShow() ast.Statement {
 		p.nextToken()
 		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 			show.Format = p.current.Value
+			p.nextToken()
+		}
+	}
+
+	// Parse SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		show.HasSettings = true
+		// Skip SETTINGS and all settings key-value pairs
+		p.nextToken()
+		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) {
 			p.nextToken()
 		}
 	}
