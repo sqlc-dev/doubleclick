@@ -264,6 +264,11 @@ func explainBinaryExpr(sb *strings.Builder, n *ast.BinaryExpr, indent string, de
 		return
 	}
 
+	// Note: OR and AND chains are NOT flattened because we cannot distinguish
+	// implicit left-associativity from explicit parenthesization in the AST.
+	// For example: "a OR b OR c" and "(a OR b) OR c" produce identical parse trees
+	// but ClickHouse EXPLAIN outputs different structures for them.
+
 	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
 	Node(sb, n.Left, depth+2)
