@@ -3253,9 +3253,12 @@ func (p *Parser) parseDescribe() *ast.DescribeQuery {
 		p.nextToken()
 	}
 
-	// Parse table name or table function
-	// Table functions look like: format(CSV, '...'), url('...'), s3Cluster(...)
-	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+	// Check for subquery: DESCRIBE (SELECT ...)
+	if p.currentIs(token.LPAREN) {
+		desc.TableExpr = p.parseTableExpression()
+	} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		// Parse table name or table function
+		// Table functions look like: format(CSV, '...'), url('...'), s3Cluster(...)
 		pos := p.current.Pos
 		tableName := p.current.Value
 		p.nextToken()
