@@ -84,8 +84,13 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		}
 		return
 	}
-	if n.CreateUser {
-		fmt.Fprintf(sb, "%sCreateUserQuery\n", indent)
+	if n.CreateUser || n.AlterUser {
+		if n.HasAuthenticationData {
+			fmt.Fprintf(sb, "%sCreateUserQuery (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s AuthenticationData\n", indent)
+		} else {
+			fmt.Fprintf(sb, "%sCreateUserQuery\n", indent)
+		}
 		return
 	}
 	if n.CreateDictionary {
@@ -548,6 +553,12 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 		} else {
 			fmt.Fprintf(sb, "%sShow%s\n", indent, showType)
 		}
+		return
+	}
+
+	// SHOW CREATE USER has special output format
+	if n.ShowType == ast.ShowCreateUser {
+		fmt.Fprintf(sb, "%sSHOW CREATE USER query\n", indent)
 		return
 	}
 
