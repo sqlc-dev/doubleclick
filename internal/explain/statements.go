@@ -925,7 +925,7 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		}
 	case ast.AlterAddProjection:
 		if cmd.Projection != nil {
-			explainProjection(sb, cmd.Projection, indent, depth+1)
+			explainProjection(sb, cmd.Projection, indent+" ", depth+1)
 		}
 	case ast.AlterDropProjection, ast.AlterMaterializeProjection, ast.AlterClearProjection:
 		if cmd.ProjectionName != "" {
@@ -947,9 +947,9 @@ func explainProjection(sb *strings.Builder, p *ast.Projection, indent string, de
 	if p.Select != nil {
 		children++
 	}
-	fmt.Fprintf(sb, "%s Projection (children %d)\n", indent, children)
+	fmt.Fprintf(sb, "%sProjection (children %d)\n", indent, children)
 	if p.Select != nil {
-		explainProjectionSelectQuery(sb, p.Select, indent+"  ", depth+1)
+		explainProjectionSelectQuery(sb, p.Select, indent+" ", depth+1)
 	}
 }
 
