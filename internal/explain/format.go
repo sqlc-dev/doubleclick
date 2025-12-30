@@ -218,6 +218,10 @@ func FormatDataType(dt *ast.DataType) string {
 	}
 	var params []string
 	for _, p := range dt.Parameters {
+		// Unwrap ObjectTypeArgument if present (used for JSON/OBJECT types)
+		if ota, ok := p.(*ast.ObjectTypeArgument); ok {
+			p = ota.Expr
+		}
 		if lit, ok := p.(*ast.Literal); ok {
 			if lit.Type == ast.LiteralString {
 				// String parameters in type need extra escaping: 'val' -> \\\'val\\\'
