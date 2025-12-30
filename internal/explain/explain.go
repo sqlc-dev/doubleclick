@@ -127,6 +127,20 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		fmt.Fprintf(sb, "%sShowPrivilegesQuery\n", indent)
 	case *ast.ShowCreateQuotaQuery:
 		fmt.Fprintf(sb, "%sSHOW CREATE QUOTA query\n", indent)
+	case *ast.CreateSettingsProfileQuery:
+		fmt.Fprintf(sb, "%sCreateSettingsProfileQuery\n", indent)
+	case *ast.AlterSettingsProfileQuery:
+		// ALTER SETTINGS PROFILE uses CreateSettingsProfileQuery in ClickHouse's explain
+		fmt.Fprintf(sb, "%sCreateSettingsProfileQuery\n", indent)
+	case *ast.DropSettingsProfileQuery:
+		fmt.Fprintf(sb, "%sDROP SETTINGS PROFILE query\n", indent)
+	case *ast.ShowCreateSettingsProfileQuery:
+		// Use PROFILES (plural) when multiple profiles are specified
+		if len(n.Names) > 1 {
+			fmt.Fprintf(sb, "%sSHOW CREATE SETTINGS PROFILES query\n", indent)
+		} else {
+			fmt.Fprintf(sb, "%sSHOW CREATE SETTINGS PROFILE query\n", indent)
+		}
 	case *ast.ShowGrantsQuery:
 		fmt.Fprintf(sb, "%sShowGrantsQuery\n", indent)
 	case *ast.GrantQuery:

@@ -848,6 +848,47 @@ func (s *ShowCreateQuotaQuery) Pos() token.Position { return s.Position }
 func (s *ShowCreateQuotaQuery) End() token.Position { return s.Position }
 func (s *ShowCreateQuotaQuery) statementNode()      {}
 
+// CreateSettingsProfileQuery represents a CREATE SETTINGS PROFILE statement.
+type CreateSettingsProfileQuery struct {
+	Position token.Position `json:"-"`
+	Names    []string       `json:"names,omitempty"`
+}
+
+func (c *CreateSettingsProfileQuery) Pos() token.Position { return c.Position }
+func (c *CreateSettingsProfileQuery) End() token.Position { return c.Position }
+func (c *CreateSettingsProfileQuery) statementNode()      {}
+
+// AlterSettingsProfileQuery represents an ALTER SETTINGS PROFILE statement.
+type AlterSettingsProfileQuery struct {
+	Position token.Position `json:"-"`
+	Names    []string       `json:"names,omitempty"`
+}
+
+func (a *AlterSettingsProfileQuery) Pos() token.Position { return a.Position }
+func (a *AlterSettingsProfileQuery) End() token.Position { return a.Position }
+func (a *AlterSettingsProfileQuery) statementNode()      {}
+
+// DropSettingsProfileQuery represents a DROP SETTINGS PROFILE statement.
+type DropSettingsProfileQuery struct {
+	Position token.Position `json:"-"`
+	Names    []string       `json:"names,omitempty"`
+	IfExists bool           `json:"if_exists,omitempty"`
+}
+
+func (d *DropSettingsProfileQuery) Pos() token.Position { return d.Position }
+func (d *DropSettingsProfileQuery) End() token.Position { return d.Position }
+func (d *DropSettingsProfileQuery) statementNode()      {}
+
+// ShowCreateSettingsProfileQuery represents a SHOW CREATE SETTINGS PROFILE statement.
+type ShowCreateSettingsProfileQuery struct {
+	Position token.Position `json:"-"`
+	Names    []string       `json:"names,omitempty"`
+}
+
+func (s *ShowCreateSettingsProfileQuery) Pos() token.Position { return s.Position }
+func (s *ShowCreateSettingsProfileQuery) End() token.Position { return s.Position }
+func (s *ShowCreateSettingsProfileQuery) statementNode()      {}
+
 // CreateIndexQuery represents a CREATE INDEX statement.
 type CreateIndexQuery struct {
 	Position  token.Position `json:"-"`

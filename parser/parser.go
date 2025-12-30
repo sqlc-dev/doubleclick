@@ -123,11 +123,27 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.CREATE:
 		return p.parseCreate()
 	case token.DROP:
+		// Check for DROP SETTINGS PROFILE
+		if p.peekIs(token.SETTINGS) {
+			return p.parseDropSettingsProfile()
+		}
+		// Check for DROP PROFILE
+		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "PROFILE" {
+			return p.parseDropSettingsProfile()
+		}
 		return p.parseDrop()
 	case token.ALTER:
 		// Check for ALTER USER
 		if p.peekIs(token.USER) {
 			return p.parseAlterUser()
+		}
+		// Check for ALTER SETTINGS PROFILE
+		if p.peekIs(token.SETTINGS) {
+			return p.parseAlterSettingsProfile()
+		}
+		// Check for ALTER PROFILE
+		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "PROFILE" {
+			return p.parseAlterSettingsProfile()
 		}
 		return p.parseAlter()
 	case token.TRUNCATE:
@@ -1314,6 +1330,9 @@ func (p *Parser) parseCreate() ast.Statement {
 		create.CreateUser = true
 		p.nextToken()
 		p.parseCreateUser(create)
+	case token.SETTINGS:
+		// CREATE SETTINGS PROFILE
+		return p.parseCreateSettingsProfile(pos)
 	case token.IDENT:
 		// Handle CREATE DICTIONARY, CREATE RESOURCE, CREATE WORKLOAD, CREATE NAMED COLLECTION, etc.
 		identUpper := strings.ToUpper(p.current.Value)
@@ -1330,7 +1349,10 @@ func (p *Parser) parseCreate() ast.Statement {
 				p.nextToken()
 			}
 			p.parseCreateGeneric(create)
-		case "RESOURCE", "WORKLOAD", "POLICY", "ROLE", "QUOTA", "PROFILE":
+		case "PROFILE":
+			// CREATE PROFILE (without SETTINGS keyword)
+			return p.parseCreateSettingsProfile(pos)
+		case "RESOURCE", "WORKLOAD", "POLICY", "ROLE", "QUOTA":
 			// Skip these statements - just consume tokens until semicolon
 			p.parseCreateGeneric(create)
 		default:
@@ -1864,6 +1886,182 @@ func (p *Parser) parseCreateGeneric(create *ast.CreateQuery) {
 	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
 		p.nextToken()
 	}
+}
+
+func (p *Parser) parseCreateSettingsProfile(pos token.Position) *ast.CreateSettingsProfileQuery {
+	query := &ast.CreateSettingsProfileQuery{
+		Position: pos,
+	}
+
+	// Skip SETTINGS if present (CREATE SETTINGS PROFILE vs CREATE PROFILE)
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+	}
+
+	// Skip PROFILE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROFILE" {
+		p.nextToken()
+	}
+
+	// Handle IF NOT EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.NOT) {
+			p.nextToken()
+		}
+		if p.currentIs(token.EXISTS) {
+			p.nextToken()
+		}
+	}
+
+	// Parse profile names (can be multiple: s1, s2, s3)
+	for {
+		name := p.parseIdentifierName()
+		if name != "" {
+			query.Names = append(query.Names, name)
+		}
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+			continue
+		}
+		break
+	}
+
+	// Skip the rest of the statement (SETTINGS, TO, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseDropSettingsProfile() *ast.DropSettingsProfileQuery {
+	query := &ast.DropSettingsProfileQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip DROP
+
+	// Skip SETTINGS if present (DROP SETTINGS PROFILE vs DROP PROFILE)
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+	}
+
+	// Skip PROFILE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROFILE" {
+		p.nextToken()
+	}
+
+	// Handle IF EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.EXISTS) {
+			query.IfExists = true
+			p.nextToken()
+		}
+	}
+
+	// Parse profile names (can be multiple: s1, s2, s3)
+	for {
+		name := p.parseIdentifierName()
+		if name != "" {
+			query.Names = append(query.Names, name)
+		}
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+			continue
+		}
+		break
+	}
+
+	// Skip the rest of the statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseAlterSettingsProfile() *ast.AlterSettingsProfileQuery {
+	query := &ast.AlterSettingsProfileQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip ALTER
+
+	// Skip SETTINGS if present (ALTER SETTINGS PROFILE vs ALTER PROFILE)
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+	}
+
+	// Skip PROFILE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROFILE" {
+		p.nextToken()
+	}
+
+	// Handle IF EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.EXISTS) {
+			p.nextToken()
+		}
+	}
+
+	// Parse profile names (can be multiple: s1, s2, s3)
+	for {
+		name := p.parseIdentifierName()
+		if name != "" {
+			query.Names = append(query.Names, name)
+		}
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+			continue
+		}
+		break
+	}
+
+	// Skip the rest of the statement (SETTINGS, RENAME TO, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseShowCreateSettingsProfile(pos token.Position) *ast.ShowCreateSettingsProfileQuery {
+	query := &ast.ShowCreateSettingsProfileQuery{
+		Position: pos,
+	}
+
+	// Skip SETTINGS if present (SHOW CREATE SETTINGS PROFILE vs SHOW CREATE PROFILE)
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+	}
+
+	// Skip PROFILE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROFILE" {
+		p.nextToken()
+	}
+
+	// Parse profile names (can be multiple: s1, s2, s3)
+	for {
+		name := p.parseIdentifierName()
+		if name != "" {
+			query.Names = append(query.Names, name)
+		}
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+			continue
+		}
+		break
+	}
+
+	// Skip the rest of the statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
 }
 
 func (p *Parser) parseCreateDictionary(create *ast.CreateQuery) {
@@ -3358,6 +3556,9 @@ func (p *Parser) parseShow() ast.Statement {
 				p.nextToken()
 			}
 			return &ast.ShowCreateQuotaQuery{Position: pos, Name: name}
+		} else if p.currentIs(token.SETTINGS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROFILE") {
+			// SHOW CREATE SETTINGS PROFILE or SHOW CREATE PROFILE
+			return p.parseShowCreateSettingsProfile(pos)
 		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
 			show.ShowType = ast.ShowCreateDictionary
 			p.nextToken()
