@@ -264,10 +264,17 @@ func explainBinaryExpr(sb *strings.Builder, n *ast.BinaryExpr, indent string, de
 		return
 	}
 
-	// Note: OR and AND chains are NOT flattened because we cannot distinguish
-	// implicit left-associativity from explicit parenthesization in the AST.
-	// For example: "a OR b OR c" and "(a OR b) OR c" produce identical parse trees
-	// but ClickHouse EXPLAIN outputs different structures for them.
+	// For OR and AND operators, flatten left-associative chains
+	// but preserve explicit parenthesization like "(a OR b) OR c"
+	if n.Op == "OR" || n.Op == "AND" {
+		operands := collectLogicalOperands(n)
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(operands))
+		for _, op := range operands {
+			Node(sb, op, depth+2)
+		}
+		return
+	}
 
 	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
@@ -292,6 +299,26 @@ func collectConcatOperands(n *ast.BinaryExpr) []ast.Expression {
 	} else {
 		operands = append(operands, n.Right)
 	}
+
+	return operands
+}
+
+// collectLogicalOperands flattens chained OR/AND operations into a list of operands,
+// but respects explicit parenthesization. For example:
+// - "a OR b OR c" → [a, b, c] (flattened)
+// - "(a OR b) OR c" → [(a OR b), c] (preserved due to explicit parens)
+func collectLogicalOperands(n *ast.BinaryExpr) []ast.Expression {
+	var operands []ast.Expression
+
+	// Recursively collect from left side if it's the same operator AND not parenthesized
+	if left, ok := n.Left.(*ast.BinaryExpr); ok && left.Op == n.Op && !left.Parenthesized {
+		operands = append(operands, collectLogicalOperands(left)...)
+	} else {
+		operands = append(operands, n.Left)
+	}
+
+	// Don't flatten right side - explicit parentheses would be on the left in left-associative parsing
+	operands = append(operands, n.Right)
 
 	return operands
 }
@@ -410,6 +437,14 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 		// For || (concat) operator, flatten chained concatenations
 		if e.Op == "||" {
 			operands := collectConcatOperands(e)
+			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, escapeAlias(n.Alias), 1)
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(operands))
+			for _, op := range operands {
+				Node(sb, op, depth+2)
+			}
+		} else if e.Op == "OR" || e.Op == "AND" {
+			// For OR and AND operators, flatten but respect explicit parenthesization
+			operands := collectLogicalOperands(e)
 			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, escapeAlias(n.Alias), 1)
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(operands))
 			for _, op := range operands {
@@ -578,6 +613,18 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 		// For || (concat) operator, flatten chained concatenations
 		if e.Op == "||" {
 			operands := collectConcatOperands(e)
+			if n.Name != "" {
+				fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Name, 1)
+			} else {
+				fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+			}
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(operands))
+			for _, op := range operands {
+				Node(sb, op, depth+2)
+			}
+		} else if e.Op == "OR" || e.Op == "AND" {
+			// For OR and AND operators, flatten but respect explicit parenthesization
+			operands := collectLogicalOperands(e)
 			if n.Name != "" {
 				fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Name, 1)
 			} else {

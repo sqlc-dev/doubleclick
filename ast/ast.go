@@ -1037,10 +1037,11 @@ const (
 
 // BinaryExpr represents a binary expression.
 type BinaryExpr struct {
-	Position token.Position `json:"-"`
-	Left     Expression     `json:"left"`
-	Op       string         `json:"op"`
-	Right    Expression     `json:"right"`
+	Position      token.Position `json:"-"`
+	Left          Expression     `json:"left"`
+	Op            string         `json:"op"`
+	Right         Expression     `json:"right"`
+	Parenthesized bool           `json:"parenthesized,omitempty"` // True if wrapped in explicit parentheses
 }
 
 func (b *BinaryExpr) Pos() token.Position { return b.Position }
