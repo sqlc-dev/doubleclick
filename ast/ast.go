@@ -930,6 +930,36 @@ func (s *ShowCreateRowPolicyQuery) Pos() token.Position { return s.Position }
 func (s *ShowCreateRowPolicyQuery) End() token.Position { return s.Position }
 func (s *ShowCreateRowPolicyQuery) statementNode()      {}
 
+// CreateRoleQuery represents a CREATE ROLE or ALTER ROLE statement.
+type CreateRoleQuery struct {
+	Position token.Position `json:"-"`
+	IsAlter  bool           `json:"is_alter,omitempty"`
+}
+
+func (c *CreateRoleQuery) Pos() token.Position { return c.Position }
+func (c *CreateRoleQuery) End() token.Position { return c.Position }
+func (c *CreateRoleQuery) statementNode()      {}
+
+// DropRoleQuery represents a DROP ROLE statement.
+type DropRoleQuery struct {
+	Position token.Position `json:"-"`
+	IfExists bool           `json:"if_exists,omitempty"`
+}
+
+func (d *DropRoleQuery) Pos() token.Position { return d.Position }
+func (d *DropRoleQuery) End() token.Position { return d.Position }
+func (d *DropRoleQuery) statementNode()      {}
+
+// ShowCreateRoleQuery represents a SHOW CREATE ROLE statement.
+type ShowCreateRoleQuery struct {
+	Position  token.Position `json:"-"`
+	RoleCount int            `json:"role_count,omitempty"` // Number of roles specified
+}
+
+func (s *ShowCreateRoleQuery) Pos() token.Position { return s.Position }
+func (s *ShowCreateRoleQuery) End() token.Position { return s.Position }
+func (s *ShowCreateRoleQuery) statementNode()      {}
+
 // CreateIndexQuery represents a CREATE INDEX statement.
 type CreateIndexQuery struct {
 	Position  token.Position `json:"-"`

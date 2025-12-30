@@ -149,6 +149,17 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		fmt.Fprintf(sb, "%sDROP ROW POLICY query\n", indent)
 	case *ast.ShowCreateRowPolicyQuery:
 		fmt.Fprintf(sb, "%sSHOW CREATE ROW POLICY query\n", indent)
+	case *ast.CreateRoleQuery:
+		fmt.Fprintf(sb, "%sCreateRoleQuery\n", indent)
+	case *ast.DropRoleQuery:
+		fmt.Fprintf(sb, "%sDROP ROLE query\n", indent)
+	case *ast.ShowCreateRoleQuery:
+		// Use ROLES (plural) when multiple roles are specified
+		if n.RoleCount > 1 {
+			fmt.Fprintf(sb, "%sSHOW CREATE ROLES query\n", indent)
+		} else {
+			fmt.Fprintf(sb, "%sSHOW CREATE ROLE query\n", indent)
+		}
 	case *ast.ShowGrantsQuery:
 		fmt.Fprintf(sb, "%sShowGrantsQuery\n", indent)
 	case *ast.GrantQuery:

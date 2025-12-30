@@ -135,6 +135,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		if p.peek.Token == token.IDENT && (strings.ToUpper(p.peek.Value) == "ROW" || strings.ToUpper(p.peek.Value) == "POLICY") {
 			return p.parseDropRowPolicy()
 		}
+		// Check for DROP ROLE
+		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "ROLE" {
+			return p.parseDropRole()
+		}
 		return p.parseDrop()
 	case token.ALTER:
 		// Check for ALTER USER
@@ -152,6 +156,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		// Check for ALTER ROW POLICY or ALTER POLICY
 		if p.peek.Token == token.IDENT && (strings.ToUpper(p.peek.Value) == "ROW" || strings.ToUpper(p.peek.Value) == "POLICY") {
 			return p.parseAlterRowPolicy()
+		}
+		// Check for ALTER ROLE
+		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "ROLE" {
+			return p.parseAlterRole()
 		}
 		return p.parseAlter()
 	case token.TRUNCATE:
@@ -1366,7 +1374,10 @@ func (p *Parser) parseCreate() ast.Statement {
 		case "POLICY":
 			// CREATE POLICY (without ROW keyword)
 			return p.parseCreateRowPolicy(pos)
-		case "RESOURCE", "WORKLOAD", "ROLE", "QUOTA":
+		case "ROLE":
+			// CREATE ROLE
+			return p.parseCreateRole(pos)
+		case "RESOURCE", "WORKLOAD", "QUOTA":
 			// Skip these statements - just consume tokens until semicolon
 			p.parseCreateGeneric(create)
 		default:
@@ -2177,6 +2188,119 @@ func (p *Parser) parseShowCreateRowPolicy(pos token.Position) *ast.ShowCreateRow
 	}
 
 	// Skip the rest of the statement (policy names, ON table, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseCreateRole(pos token.Position) *ast.CreateRoleQuery {
+	query := &ast.CreateRoleQuery{
+		Position: pos,
+	}
+
+	// Skip ROLE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROLE" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (role names, SETTINGS, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseDropRole() *ast.DropRoleQuery {
+	query := &ast.DropRoleQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip DROP
+
+	// Skip ROLE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROLE" {
+		p.nextToken()
+	}
+
+	// Handle IF EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.EXISTS) {
+			query.IfExists = true
+			p.nextToken()
+		}
+	}
+
+	// Skip the rest of the statement (role names, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseAlterRole() *ast.CreateRoleQuery {
+	query := &ast.CreateRoleQuery{
+		Position: p.current.Pos,
+		IsAlter:  true,
+	}
+
+	p.nextToken() // skip ALTER
+
+	// Skip ROLE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROLE" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (role names, SETTINGS, RENAME TO, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseShowCreateRole(pos token.Position) *ast.ShowCreateRoleQuery {
+	query := &ast.ShowCreateRoleQuery{
+		Position:  pos,
+		RoleCount: 1, // Default to 1 role
+	}
+
+	// Skip ROLE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROLE" {
+		p.nextToken()
+	}
+
+	// Count role names (separated by commas)
+	// Skip first role name
+	for p.currentIs(token.IDENT) || p.currentIs(token.STRING) || p.current.Token.IsKeyword() {
+		p.nextToken()
+		// Handle role@host syntax
+		if p.currentIs(token.IDENT) && strings.HasPrefix(p.current.Value, "@") {
+			p.nextToken()
+		}
+		break
+	}
+
+	// Count additional roles
+	for p.currentIs(token.COMMA) {
+		query.RoleCount++
+		p.nextToken()
+		// Skip role name
+		for p.currentIs(token.IDENT) || p.currentIs(token.STRING) || p.current.Token.IsKeyword() {
+			p.nextToken()
+			// Handle role@host syntax
+			if p.currentIs(token.IDENT) && strings.HasPrefix(p.current.Value, "@") {
+				p.nextToken()
+			}
+			break
+		}
+	}
+
+	// Skip the rest of the statement
 	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
 		p.nextToken()
 	}
@@ -3840,6 +3964,9 @@ func (p *Parser) parseShow() ast.Statement {
 		} else if p.currentIs(token.IDENT) && (strings.ToUpper(p.current.Value) == "ROW" || strings.ToUpper(p.current.Value) == "POLICY") {
 			// SHOW CREATE ROW POLICY or SHOW CREATE POLICY
 			return p.parseShowCreateRowPolicy(pos)
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROLE" {
+			// SHOW CREATE ROLE
+			return p.parseShowCreateRole(pos)
 		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
 			show.ShowType = ast.ShowCreateDictionary
 			p.nextToken()
