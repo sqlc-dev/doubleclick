@@ -140,8 +140,13 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Projections) > 0 || len(n.Constraints) > 0 {
 		children++
 	}
-	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil {
+	hasStorageChild := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0
+	if hasStorageChild {
 		children++
+	}
+	// For materialized views with TO clause but no storage, count ViewTargets as a child
+	if n.Materialized && n.To != "" && !hasStorageChild {
+		children++ // ViewTargets
 	}
 	if n.AsSelect != nil {
 		children++
@@ -381,6 +386,10 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		if len(n.Settings) > 0 {
 			fmt.Fprintf(sb, "%s Set\n", storageIndent)
 		}
+	} else if n.Materialized && n.To != "" {
+		// For materialized views with TO clause but no storage definition,
+		// output just ViewTargets without children
+		fmt.Fprintf(sb, "%s ViewTargets\n", indent)
 	}
 	// For non-materialized views, output AsSelect after storage
 	if n.AsSelect != nil && !n.Materialized {
