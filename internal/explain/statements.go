@@ -577,8 +577,19 @@ func explainUseQuery(sb *strings.Builder, n *ast.UseQuery, indent string) {
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 }
 
-func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent string) {
-	if n.TableFunction != nil {
+func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent string, depth int) {
+	if n.TableExpr != nil {
+		// DESCRIBE on a subquery - TableExpr contains a TableExpression with a Subquery
+		children := 1
+		if len(n.Settings) > 0 {
+			children++
+		}
+		fmt.Fprintf(sb, "%sDescribeQuery (children %d)\n", indent, children)
+		Node(sb, n.TableExpr, depth+1)
+		if len(n.Settings) > 0 {
+			fmt.Fprintf(sb, "%s Set\n", indent)
+		}
+	} else if n.TableFunction != nil {
 		// DESCRIBE on a table function - wrap in TableExpression
 		children := 1
 		if len(n.Settings) > 0 {
