@@ -268,6 +268,8 @@ type CreateQuery struct {
 	CreateDatabase   bool                 `json:"create_database,omitempty"`
 	CreateFunction   bool                 `json:"create_function,omitempty"`
 	CreateUser       bool                 `json:"create_user,omitempty"`
+	AlterUser        bool                 `json:"alter_user,omitempty"`
+	HasAuthenticationData bool            `json:"has_authentication_data,omitempty"`
 	CreateDictionary   bool                              `json:"create_dictionary,omitempty"`
 	DictionaryAttrs    []*DictionaryAttributeDeclaration `json:"dictionary_attrs,omitempty"`
 	DictionaryDef      *DictionaryDefinition             `json:"dictionary_def,omitempty"`
@@ -659,6 +661,7 @@ const (
 	ShowCreateDB         ShowType = "CREATE_DATABASE"
 	ShowCreateDictionary ShowType = "CREATE_DICTIONARY"
 	ShowCreateView       ShowType = "CREATE_VIEW"
+	ShowCreateUser       ShowType = "CREATE_USER"
 	ShowColumns          ShowType = "COLUMNS"
 	ShowDictionaries     ShowType = "DICTIONARIES"
 	ShowFunctions        ShowType = "FUNCTIONS"

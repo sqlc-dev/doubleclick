@@ -125,6 +125,10 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.DROP:
 		return p.parseDrop()
 	case token.ALTER:
+		// Check for ALTER USER
+		if p.peekIs(token.USER) {
+			return p.parseAlterUser()
+		}
 		return p.parseAlter()
 	case token.TRUNCATE:
 		return p.parseTruncate()
@@ -1809,10 +1813,44 @@ func (p *Parser) parseCreateUser(create *ast.CreateQuery) {
 	// Parse user name
 	create.UserName = p.parseIdentifierName()
 
+	// Look for authentication data (NOT IDENTIFIED or IDENTIFIED)
+	// Scan through tokens looking for these keywords
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		// Check for NOT IDENTIFIED
+		if p.currentIs(token.NOT) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "IDENTIFIED" {
+				create.HasAuthenticationData = true
+			}
+			continue
+		}
+		// Check for IDENTIFIED (without NOT)
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "IDENTIFIED" {
+			create.HasAuthenticationData = true
+		}
+		p.nextToken()
+	}
+}
+
+func (p *Parser) parseAlterUser() *ast.CreateQuery {
+	create := &ast.CreateQuery{
+		Position:  p.current.Pos,
+		CreateUser: true,
+		AlterUser:  true,
+	}
+
+	p.nextToken() // skip ALTER
+	p.nextToken() // skip USER
+
+	// Parse user name
+	create.UserName = p.parseIdentifierName()
+
 	// Skip the rest of the user definition (complex syntax)
 	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
 		p.nextToken()
 	}
+
+	return create
 }
 
 func (p *Parser) parseCreateGeneric(create *ast.CreateQuery) {
@@ -3309,6 +3347,13 @@ func (p *Parser) parseShow() ast.Statement {
 		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "VIEW" {
 			show.ShowType = ast.ShowCreateView
 			p.nextToken()
+		} else if p.currentIs(token.USER) {
+			show.ShowType = ast.ShowCreateUser
+			p.nextToken()
+			// Skip user name and host pattern - they don't affect explain output
+			for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+				p.nextToken()
+			}
 		} else {
 			show.ShowType = ast.ShowCreate
 			// Handle SHOW CREATE TABLE, etc.
