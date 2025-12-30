@@ -462,6 +462,37 @@ func explainRenameQuery(sb *strings.Builder, n *ast.RenameQuery, indent string, 
 	}
 }
 
+func explainExchangeQuery(sb *strings.Builder, n *ast.ExchangeQuery, indent string) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.ExchangeQuery\n", indent)
+		return
+	}
+	// Count identifiers: 2 per table (db + table if qualified, or just table)
+	// EXCHANGE TABLES outputs as "Rename" in ClickHouse
+	children := 0
+	if n.Database1 != "" {
+		children += 2 // db1 + table1
+	} else {
+		children += 1 // just table1
+	}
+	if n.Database2 != "" {
+		children += 2 // db2 + table2
+	} else {
+		children += 1 // just table2
+	}
+	fmt.Fprintf(sb, "%sRename (children %d)\n", indent, children)
+	// First table
+	if n.Database1 != "" {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database1)
+	}
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table1)
+	// Second table
+	if n.Database2 != "" {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database2)
+	}
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table2)
+}
+
 func explainSetQuery(sb *strings.Builder, indent string) {
 	fmt.Fprintf(sb, "%sSet\n", indent)
 }
@@ -554,18 +585,39 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 
 	// SHOW CREATE TABLE has special output format with database and table identifiers
 	if n.ShowType == ast.ShowCreate && (n.Database != "" || n.From != "") {
-		// Format: ShowCreateTableQuery database table (children 2)
+		// Format: ShowCreateTableQuery database table (children 2) or with FORMAT
 		name := n.From
 		if n.Database != "" && n.From != "" {
-			fmt.Fprintf(sb, "%sShowCreateTableQuery %s %s (children 2)\n", indent, n.Database, n.From)
+			children := 2
+			if n.Format != "" {
+				children = 3
+			}
+			fmt.Fprintf(sb, "%sShowCreateTableQuery %s %s (children %d)\n", indent, n.Database, n.From, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+			if n.Format != "" {
+				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+			}
 		} else if n.From != "" {
-			fmt.Fprintf(sb, "%sShowCreateTableQuery  %s (children 1)\n", indent, name)
+			children := 1
+			if n.Format != "" {
+				children = 2
+			}
+			fmt.Fprintf(sb, "%sShowCreateTableQuery  %s (children %d)\n", indent, name, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+			if n.Format != "" {
+				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+			}
 		} else if n.Database != "" {
-			fmt.Fprintf(sb, "%sShowCreateTableQuery  %s (children 1)\n", indent, n.Database)
+			children := 1
+			if n.Format != "" {
+				children = 2
+			}
+			fmt.Fprintf(sb, "%sShowCreateTableQuery  %s (children %d)\n", indent, n.Database, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+			if n.Format != "" {
+				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+			}
 		} else {
 			fmt.Fprintf(sb, "%sShow%s\n", indent, showType)
 		}
@@ -714,17 +766,20 @@ func explainDetachQuery(sb *strings.Builder, n *ast.DetachQuery, indent string) 
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 		return
 	}
-	// Single name (table only or database only for DETACH DATABASE)
-	name := n.Table
-	if name == "" {
-		name = n.Database
+	// DETACH DATABASE db: Database set, Table empty -> "DetachQuery db  (children 1)"
+	if n.Database != "" && n.Table == "" {
+		fmt.Fprintf(sb, "%sDetachQuery %s  (children 1)\n", indent, n.Database)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		return
 	}
-	if name != "" {
-		fmt.Fprintf(sb, "%sDetachQuery  %s (children 1)\n", indent, name)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
-	} else {
-		fmt.Fprintf(sb, "%sDetachQuery\n", indent)
+	// DETACH TABLE table: Database empty, Table set -> "DetachQuery  table (children 1)"
+	if n.Table != "" {
+		fmt.Fprintf(sb, "%sDetachQuery  %s (children 1)\n", indent, n.Table)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		return
 	}
+	// No name
+	fmt.Fprintf(sb, "%sDetachQuery\n", indent)
 }
 
 func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string) {
@@ -736,17 +791,20 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string) 
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 		return
 	}
-	// Single name (table only or database only for ATTACH DATABASE)
-	name := n.Table
-	if name == "" {
-		name = n.Database
+	// ATTACH DATABASE db: Database set, Table empty -> "AttachQuery db  (children 1)"
+	if n.Database != "" && n.Table == "" {
+		fmt.Fprintf(sb, "%sAttachQuery %s  (children 1)\n", indent, n.Database)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		return
 	}
-	if name != "" {
-		fmt.Fprintf(sb, "%sAttachQuery %s (children 1)\n", indent, name)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
-	} else {
-		fmt.Fprintf(sb, "%sAttachQuery\n", indent)
+	// ATTACH TABLE table: Database empty, Table set -> "AttachQuery table (children 1)" (single space)
+	if n.Table != "" {
+		fmt.Fprintf(sb, "%sAttachQuery %s (children 1)\n", indent, n.Table)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		return
 	}
+	// No name
+	fmt.Fprintf(sb, "%sAttachQuery\n", indent)
 }
 
 func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, depth int) {

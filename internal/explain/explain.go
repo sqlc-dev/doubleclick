@@ -115,6 +115,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainDropQuery(sb, n, indent, depth)
 	case *ast.RenameQuery:
 		explainRenameQuery(sb, n, indent, depth)
+	case *ast.ExchangeQuery:
+		explainExchangeQuery(sb, n, indent)
 	case *ast.SetQuery:
 		explainSetQuery(sb, indent)
 	case *ast.SystemQuery:

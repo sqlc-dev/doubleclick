@@ -656,6 +656,7 @@ type ShowQuery struct {
 	Like      string         `json:"like,omitempty"`
 	Where     Expression     `json:"where,omitempty"`
 	Limit     Expression     `json:"limit,omitempty"`
+	Format    string         `json:"format,omitempty"`
 }
 
 func (s *ShowQuery) Pos() token.Position { return s.Position }
@@ -780,7 +781,9 @@ func (r *RenameQuery) statementNode()      {}
 // ExchangeQuery represents an EXCHANGE TABLES statement.
 type ExchangeQuery struct {
 	Position  token.Position `json:"-"`
+	Database1 string         `json:"database1,omitempty"`
 	Table1    string         `json:"table1"`
+	Database2 string         `json:"database2,omitempty"`
 	Table2    string         `json:"table2"`
 	OnCluster string         `json:"on_cluster,omitempty"`
 }

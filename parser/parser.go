@@ -3652,6 +3652,15 @@ func (p *Parser) parseShow() ast.Statement {
 		show.Limit = p.parseExpression(LOWEST)
 	}
 
+	// Parse FORMAT clause
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			show.Format = p.current.Value
+			p.nextToken()
+		}
+	}
+
 	return show
 }
 
@@ -3931,15 +3940,29 @@ func (p *Parser) parseExchange() *ast.ExchangeQuery {
 		return nil
 	}
 
-	// Parse first table name (can start with a number in ClickHouse)
-	exchange.Table1 = p.parseIdentifierName()
+	// Parse first table name (can be database.table)
+	name1 := p.parseIdentifierName()
+	if p.currentIs(token.DOT) {
+		p.nextToken()
+		exchange.Database1 = name1
+		exchange.Table1 = p.parseIdentifierName()
+	} else {
+		exchange.Table1 = name1
+	}
 
 	if !p.expect(token.AND) {
 		return nil
 	}
 
-	// Parse second table name (can start with a number in ClickHouse)
-	exchange.Table2 = p.parseIdentifierName()
+	// Parse second table name (can be database.table)
+	name2 := p.parseIdentifierName()
+	if p.currentIs(token.DOT) {
+		p.nextToken()
+		exchange.Database2 = name2
+		exchange.Table2 = p.parseIdentifierName()
+	} else {
+		exchange.Table2 = name2
+	}
 
 	// Handle ON CLUSTER
 	if p.currentIs(token.ON) {
@@ -3960,19 +3983,25 @@ func (p *Parser) parseDetach() *ast.DetachQuery {
 
 	p.nextToken() // skip DETACH
 
-	// Skip optional TABLE keyword
-	if p.currentIs(token.TABLE) {
+	// Check for DATABASE keyword - if present, store in Database field
+	isDatabase := false
+	if p.currentIs(token.DATABASE) {
+		isDatabase = true
+		p.nextToken()
+	} else if p.currentIs(token.TABLE) {
 		p.nextToken()
 	}
 
-	// Parse table name (can be qualified: database.table)
-	tableName := p.parseIdentifierName()
-	if p.currentIs(token.DOT) {
+	// Parse name (can be qualified: database.table for TABLE, not for DATABASE)
+	name := p.parseIdentifierName()
+	if p.currentIs(token.DOT) && !isDatabase {
 		p.nextToken()
-		detach.Database = tableName
+		detach.Database = name
 		detach.Table = p.parseIdentifierName()
+	} else if isDatabase {
+		detach.Database = name
 	} else {
-		detach.Table = tableName
+		detach.Table = name
 	}
 
 	return detach
@@ -3985,19 +4014,25 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 
 	p.nextToken() // skip ATTACH
 
-	// Skip optional TABLE keyword
-	if p.currentIs(token.TABLE) {
+	// Check for DATABASE keyword - if present, store in Database field
+	isDatabase := false
+	if p.currentIs(token.DATABASE) {
+		isDatabase = true
+		p.nextToken()
+	} else if p.currentIs(token.TABLE) {
 		p.nextToken()
 	}
 
-	// Parse table name (can be qualified: database.table)
-	tableName := p.parseIdentifierName()
-	if p.currentIs(token.DOT) {
+	// Parse name (can be qualified: database.table for TABLE, not for DATABASE)
+	name := p.parseIdentifierName()
+	if p.currentIs(token.DOT) && !isDatabase {
 		p.nextToken()
-		attach.Database = tableName
+		attach.Database = name
 		attach.Table = p.parseIdentifierName()
+	} else if isDatabase {
+		attach.Database = name
 	} else {
-		attach.Table = tableName
+		attach.Table = name
 	}
 
 	return attach
