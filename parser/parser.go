@@ -131,6 +131,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "PROFILE" {
 			return p.parseDropSettingsProfile()
 		}
+		// Check for DROP ROW POLICY or DROP POLICY
+		if p.peek.Token == token.IDENT && (strings.ToUpper(p.peek.Value) == "ROW" || strings.ToUpper(p.peek.Value) == "POLICY") {
+			return p.parseDropRowPolicy()
+		}
 		return p.parseDrop()
 	case token.ALTER:
 		// Check for ALTER USER
@@ -144,6 +148,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		// Check for ALTER PROFILE
 		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "PROFILE" {
 			return p.parseAlterSettingsProfile()
+		}
+		// Check for ALTER ROW POLICY or ALTER POLICY
+		if p.peek.Token == token.IDENT && (strings.ToUpper(p.peek.Value) == "ROW" || strings.ToUpper(p.peek.Value) == "POLICY") {
+			return p.parseAlterRowPolicy()
 		}
 		return p.parseAlter()
 	case token.TRUNCATE:
@@ -1352,7 +1360,13 @@ func (p *Parser) parseCreate() ast.Statement {
 		case "PROFILE":
 			// CREATE PROFILE (without SETTINGS keyword)
 			return p.parseCreateSettingsProfile(pos)
-		case "RESOURCE", "WORKLOAD", "POLICY", "ROLE", "QUOTA":
+		case "ROW":
+			// CREATE ROW POLICY
+			return p.parseCreateRowPolicy(pos)
+		case "POLICY":
+			// CREATE POLICY (without ROW keyword)
+			return p.parseCreateRowPolicy(pos)
+		case "RESOURCE", "WORKLOAD", "ROLE", "QUOTA":
 			// Skip these statements - just consume tokens until semicolon
 			p.parseCreateGeneric(create)
 		default:
@@ -2057,6 +2071,112 @@ func (p *Parser) parseShowCreateSettingsProfile(pos token.Position) *ast.ShowCre
 	}
 
 	// Skip the rest of the statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseCreateRowPolicy(pos token.Position) *ast.CreateRowPolicyQuery {
+	query := &ast.CreateRowPolicyQuery{
+		Position: pos,
+	}
+
+	// Skip ROW if present (CREATE ROW POLICY vs CREATE POLICY)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROW" {
+		p.nextToken()
+	}
+
+	// Skip POLICY
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "POLICY" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (policy names, ON table, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseDropRowPolicy() *ast.DropRowPolicyQuery {
+	query := &ast.DropRowPolicyQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip DROP
+
+	// Skip ROW if present (DROP ROW POLICY vs DROP POLICY)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROW" {
+		p.nextToken()
+	}
+
+	// Skip POLICY
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "POLICY" {
+		p.nextToken()
+	}
+
+	// Handle IF EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.EXISTS) {
+			query.IfExists = true
+			p.nextToken()
+		}
+	}
+
+	// Skip the rest of the statement (policy names, ON table, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseAlterRowPolicy() *ast.CreateRowPolicyQuery {
+	query := &ast.CreateRowPolicyQuery{
+		Position: p.current.Pos,
+		IsAlter:  true,
+	}
+
+	p.nextToken() // skip ALTER
+
+	// Skip ROW if present (ALTER ROW POLICY vs ALTER POLICY)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROW" {
+		p.nextToken()
+	}
+
+	// Skip POLICY
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "POLICY" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (policy names, ON table, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseShowCreateRowPolicy(pos token.Position) *ast.ShowCreateRowPolicyQuery {
+	query := &ast.ShowCreateRowPolicyQuery{
+		Position: pos,
+	}
+
+	// Skip ROW if present (SHOW CREATE ROW POLICY vs SHOW CREATE POLICY)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROW" {
+		p.nextToken()
+	}
+
+	// Skip POLICY
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "POLICY" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (policy names, ON table, etc.)
 	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
 		p.nextToken()
 	}
@@ -3717,6 +3837,9 @@ func (p *Parser) parseShow() ast.Statement {
 		} else if p.currentIs(token.SETTINGS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROFILE") {
 			// SHOW CREATE SETTINGS PROFILE or SHOW CREATE PROFILE
 			return p.parseShowCreateSettingsProfile(pos)
+		} else if p.currentIs(token.IDENT) && (strings.ToUpper(p.current.Value) == "ROW" || strings.ToUpper(p.current.Value) == "POLICY") {
+			// SHOW CREATE ROW POLICY or SHOW CREATE POLICY
+			return p.parseShowCreateRowPolicy(pos)
 		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
 			show.ShowType = ast.ShowCreateDictionary
 			p.nextToken()

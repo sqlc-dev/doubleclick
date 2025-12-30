@@ -901,6 +901,35 @@ func (s *ShowCreateSettingsProfileQuery) Pos() token.Position { return s.Positio
 func (s *ShowCreateSettingsProfileQuery) End() token.Position { return s.Position }
 func (s *ShowCreateSettingsProfileQuery) statementNode()      {}
 
+// CreateRowPolicyQuery represents a CREATE ROW POLICY or ALTER ROW POLICY statement.
+type CreateRowPolicyQuery struct {
+	Position token.Position `json:"-"`
+	IsAlter  bool           `json:"is_alter,omitempty"`
+}
+
+func (c *CreateRowPolicyQuery) Pos() token.Position { return c.Position }
+func (c *CreateRowPolicyQuery) End() token.Position { return c.Position }
+func (c *CreateRowPolicyQuery) statementNode()      {}
+
+// DropRowPolicyQuery represents a DROP ROW POLICY statement.
+type DropRowPolicyQuery struct {
+	Position token.Position `json:"-"`
+	IfExists bool           `json:"if_exists,omitempty"`
+}
+
+func (d *DropRowPolicyQuery) Pos() token.Position { return d.Position }
+func (d *DropRowPolicyQuery) End() token.Position { return d.Position }
+func (d *DropRowPolicyQuery) statementNode()      {}
+
+// ShowCreateRowPolicyQuery represents a SHOW CREATE ROW POLICY statement.
+type ShowCreateRowPolicyQuery struct {
+	Position token.Position `json:"-"`
+}
+
+func (s *ShowCreateRowPolicyQuery) Pos() token.Position { return s.Position }
+func (s *ShowCreateRowPolicyQuery) End() token.Position { return s.Position }
+func (s *ShowCreateRowPolicyQuery) statementNode()      {}
+
 // CreateIndexQuery represents a CREATE INDEX statement.
 type CreateIndexQuery struct {
 	Position  token.Position `json:"-"`

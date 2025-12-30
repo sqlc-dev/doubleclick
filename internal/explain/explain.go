@@ -143,6 +143,12 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		} else {
 			fmt.Fprintf(sb, "%sSHOW CREATE SETTINGS PROFILE query\n", indent)
 		}
+	case *ast.CreateRowPolicyQuery:
+		fmt.Fprintf(sb, "%sCREATE ROW POLICY or ALTER ROW POLICY query\n", indent)
+	case *ast.DropRowPolicyQuery:
+		fmt.Fprintf(sb, "%sDROP ROW POLICY query\n", indent)
+	case *ast.ShowCreateRowPolicyQuery:
+		fmt.Fprintf(sb, "%sSHOW CREATE ROW POLICY query\n", indent)
 	case *ast.ShowGrantsQuery:
 		fmt.Fprintf(sb, "%sShowGrantsQuery\n", indent)
 	case *ast.GrantQuery:
