@@ -303,8 +303,12 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 	case token.COLUMNS:
 		return p.parseColumnsMatcher()
 	case token.ARRAY:
-		// array(1,2,3) constructor
-		return p.parseArrayConstructor()
+		// array(1,2,3) constructor or array as identifier (column name)
+		if p.peekIs(token.LPAREN) {
+			return p.parseArrayConstructor()
+		}
+		// array used as identifier (column/variable name)
+		return p.parseKeywordAsIdentifier()
 	case token.IF:
 		// IF function
 		return p.parseIfFunction()
