@@ -354,10 +354,34 @@ func UnaryOperatorToFunction(op string) string {
 func formatExprAsString(expr ast.Expression) string {
 	switch e := expr.(type) {
 	case *ast.Literal:
+		// Handle explicitly negative literals (like -0 in -0::Int16)
+		prefix := ""
+		if e.Negative {
+			prefix = "-"
+		}
 		switch e.Type {
 		case ast.LiteralInteger:
+			// For explicitly negative literals, show the absolute value with prefix
+			if e.Negative {
+				switch v := e.Value.(type) {
+				case int64:
+					if v <= 0 {
+						return fmt.Sprintf("-%d", -v)
+					}
+				case uint64:
+					return fmt.Sprintf("-%d", v)
+				}
+			}
 			return fmt.Sprintf("%d", e.Value)
 		case ast.LiteralFloat:
+			if e.Negative {
+				switch v := e.Value.(type) {
+				case float64:
+					if v <= 0 {
+						return fmt.Sprintf("%s%v", prefix, -v)
+					}
+				}
+			}
 			return fmt.Sprintf("%v", e.Value)
 		case ast.LiteralString:
 			return e.Value.(string)

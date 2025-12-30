@@ -1059,6 +1059,7 @@ type Literal struct {
 	Position token.Position `json:"-"`
 	Type     LiteralType    `json:"type"`
 	Value    interface{}    `json:"value"`
+	Negative bool           `json:"negative,omitempty"` // True if literal was explicitly negative (for -0)
 }
 
 func (l *Literal) Pos() token.Position { return l.Position }

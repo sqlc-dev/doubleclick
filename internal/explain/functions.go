@@ -143,6 +143,9 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 				exprStr := formatExprAsString(lit)
 				fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, exprStr)
 			}
+		} else if negatedLit := extractNegatedLiteral(n.Expr); negatedLit != "" {
+			// Handle negated literal like -0::Int16 -> CAST('-0', 'Int16')
+			fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, negatedLit)
 		} else {
 			// Complex expression - use normal AST node
 			Node(sb, n.Expr, depth+2)
@@ -331,6 +334,27 @@ func exprToLiteral(expr ast.Expression) *ast.Literal {
 		}
 	}
 	return nil
+}
+
+// extractNegatedLiteral checks if expr is a negated literal (like -0, -12)
+// and returns its string representation (like "-0", "-12") for :: cast expressions.
+// Returns empty string if not a negated literal.
+func extractNegatedLiteral(expr ast.Expression) string {
+	unary, ok := expr.(*ast.UnaryExpr)
+	if !ok || unary.Op != "-" {
+		return ""
+	}
+	lit, ok := unary.Operand.(*ast.Literal)
+	if !ok {
+		return ""
+	}
+	switch lit.Type {
+	case ast.LiteralInteger:
+		return "-" + formatExprAsString(lit)
+	case ast.LiteralFloat:
+		return "-" + formatExprAsString(lit)
+	}
+	return ""
 }
 
 func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int) {

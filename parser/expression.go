@@ -835,11 +835,50 @@ func (p *Parser) parseSpecialNumber() ast.Expression {
 }
 
 func (p *Parser) parseUnaryMinus() ast.Expression {
+	pos := p.current.Pos
+	p.nextToken() // skip minus
+
+	// For negative number literals followed by ::, keep them together as a signed literal
+	// This matches ClickHouse's behavior where -0::Int16 becomes CAST('-0', 'Int16')
+	if p.currentIs(token.NUMBER) && p.peekIs(token.COLONCOLON) {
+		// Parse the number and create a "signed" literal
+		// We'll store the negative sign in the raw value
+		numVal := "-" + p.current.Value
+		lit := &ast.Literal{
+			Position: pos,
+			Type:     ast.LiteralInteger,
+			Negative: true, // Mark as explicitly negative for proper formatting
+		}
+		// Check if it's a float
+		if strings.Contains(numVal, ".") || strings.ContainsAny(numVal, "eE") {
+			f, _ := strconv.ParseFloat(numVal, 64)
+			lit.Type = ast.LiteralFloat
+			lit.Value = f
+		} else {
+			i, _ := strconv.ParseInt(numVal, 10, 64)
+			lit.Value = i
+		}
+		p.nextToken() // move past number
+		// Apply postfix operators like :: using the expression parsing loop
+		left := ast.Expression(lit)
+		for !p.currentIs(token.EOF) && LOWEST < p.precedenceForCurrent() {
+			startPos := p.current.Pos
+			left = p.parseInfixExpression(left)
+			if left == nil {
+				return nil
+			}
+			if p.current.Pos == startPos {
+				break
+			}
+		}
+		return left
+	}
+
+	// Standard unary minus handling
 	expr := &ast.UnaryExpr{
-		Position: p.current.Pos,
+		Position: pos,
 		Op:       "-",
 	}
-	p.nextToken()
 	expr.Operand = p.parseExpression(UNARY)
 	return expr
 }
