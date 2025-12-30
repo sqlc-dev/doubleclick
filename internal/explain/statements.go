@@ -415,6 +415,36 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 		return
 	}
 
+	// DROP ROLE
+	if n.Role != "" {
+		fmt.Fprintf(sb, "%sDROP ROLE query\n", indent)
+		return
+	}
+
+	// DROP QUOTA
+	if n.Quota != "" {
+		fmt.Fprintf(sb, "%sDROP QUOTA query\n", indent)
+		return
+	}
+
+	// DROP POLICY
+	if n.Policy != "" {
+		fmt.Fprintf(sb, "%sDROP POLICY query\n", indent)
+		return
+	}
+
+	// DROP ROW POLICY
+	if n.RowPolicy != "" {
+		fmt.Fprintf(sb, "%sDROP ROW POLICY query\n", indent)
+		return
+	}
+
+	// DROP SETTINGS PROFILE
+	if n.SettingsProfile != "" {
+		fmt.Fprintf(sb, "%sDROP SETTINGS PROFILE query\n", indent)
+		return
+	}
+
 	// Handle multiple tables: DROP TABLE t1, t2, t3
 	if len(n.Tables) > 1 {
 		fmt.Fprintf(sb, "%sDropQuery   (children %d)\n", indent, 1)

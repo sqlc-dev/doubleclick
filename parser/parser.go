@@ -3268,6 +3268,7 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROFILE" {
 			p.nextToken()
 		}
+		drop.SettingsProfile = "_pending_"
 	default:
 		// Handle multi-word DROP types: ROW POLICY, NAMED COLLECTION, DICTIONARY
 		if p.currentIs(token.IDENT) {
@@ -3276,8 +3277,26 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 			case "DICTIONARY":
 				dropDictionary = true
 				p.nextToken()
-			case "ROW", "NAMED", "POLICY", "QUOTA", "ROLE":
-				// Skip the DROP type tokens
+			case "ROW":
+				// DROP ROW POLICY
+				p.nextToken() // skip ROW
+				if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "POLICY" {
+					p.nextToken() // skip POLICY
+				}
+				// Mark as row policy drop - name will be set later
+				drop.RowPolicy = "_pending_"
+			case "POLICY":
+				// DROP POLICY
+				p.nextToken()
+				drop.Policy = "_pending_"
+			case "QUOTA":
+				p.nextToken()
+				drop.Quota = "_pending_"
+			case "ROLE":
+				p.nextToken()
+				drop.Role = "_pending_"
+			case "NAMED":
+				// DROP NAMED COLLECTION - skip tokens
 				for p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 					if p.currentIs(token.IF) {
 						break // Hit IF EXISTS
@@ -3326,6 +3345,16 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 			}
 		} else if dropFunction {
 			drop.Function = tableName
+		} else if drop.Role == "_pending_" {
+			drop.Role = tableName
+		} else if drop.Quota == "_pending_" {
+			drop.Quota = tableName
+		} else if drop.Policy == "_pending_" {
+			drop.Policy = tableName
+		} else if drop.RowPolicy == "_pending_" {
+			drop.RowPolicy = tableName
+		} else if drop.SettingsProfile == "_pending_" {
+			drop.SettingsProfile = tableName
 		} else if dropDictionary {
 			drop.Dictionary = tableName
 			// Also set Table/Tables for backward compatibility with AST JSON

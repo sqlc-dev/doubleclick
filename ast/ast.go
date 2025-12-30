@@ -468,19 +468,24 @@ func (t *TTLClause) End() token.Position { return t.Position }
 
 // DropQuery represents a DROP statement.
 type DropQuery struct {
-	Position     token.Position     `json:"-"`
-	IfExists     bool               `json:"if_exists,omitempty"`
-	Database     string             `json:"database,omitempty"`
-	Table        string             `json:"table,omitempty"`
-	Tables       []*TableIdentifier `json:"tables,omitempty"` // For DROP TABLE t1, t2, t3
-	View         string             `json:"view,omitempty"`
-	User         string             `json:"user,omitempty"`
-	Function     string             `json:"function,omitempty"`   // For DROP FUNCTION
-	Dictionary   string             `json:"-"` // For DROP DICTIONARY (format only, not in AST JSON)
-	Temporary    bool               `json:"temporary,omitempty"`
-	OnCluster    string             `json:"on_cluster,omitempty"`
-	DropDatabase bool               `json:"drop_database,omitempty"`
-	Sync         bool               `json:"sync,omitempty"`
+	Position        token.Position     `json:"-"`
+	IfExists        bool               `json:"if_exists,omitempty"`
+	Database        string             `json:"database,omitempty"`
+	Table           string             `json:"table,omitempty"`
+	Tables          []*TableIdentifier `json:"tables,omitempty"` // For DROP TABLE t1, t2, t3
+	View            string             `json:"view,omitempty"`
+	User            string             `json:"user,omitempty"`
+	Function        string             `json:"function,omitempty"` // For DROP FUNCTION
+	Dictionary      string             `json:"-"`                  // For DROP DICTIONARY (format only, not in AST JSON)
+	Role            string             `json:"role,omitempty"`     // For DROP ROLE
+	Quota           string             `json:"quota,omitempty"`    // For DROP QUOTA
+	Policy          string             `json:"policy,omitempty"`   // For DROP POLICY
+	RowPolicy       string             `json:"row_policy,omitempty"` // For DROP ROW POLICY
+	SettingsProfile string             `json:"settings_profile,omitempty"` // For DROP SETTINGS PROFILE
+	Temporary       bool               `json:"temporary,omitempty"`
+	OnCluster       string             `json:"on_cluster,omitempty"`
+	DropDatabase    bool               `json:"drop_database,omitempty"`
+	Sync            bool               `json:"sync,omitempty"`
 }
 
 func (d *DropQuery) Pos() token.Position { return d.Position }
