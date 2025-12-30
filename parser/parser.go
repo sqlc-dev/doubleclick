@@ -1247,12 +1247,25 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 	return ins
 }
 
-func (p *Parser) parseCreate() *ast.CreateQuery {
-	create := &ast.CreateQuery{
-		Position: p.current.Pos,
+func (p *Parser) parseCreate() ast.Statement {
+	pos := p.current.Pos
+	p.nextToken() // skip CREATE
+
+	// Handle CREATE [UNIQUE] INDEX
+	if p.currentIs(token.INDEX) {
+		return p.parseCreateIndex(pos)
+	}
+	// Handle CREATE UNIQUE INDEX
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "UNIQUE" {
+		p.nextToken() // skip UNIQUE
+		if p.currentIs(token.INDEX) {
+			return p.parseCreateIndex(pos)
+		}
 	}
 
-	p.nextToken() // skip CREATE
+	create := &ast.CreateQuery{
+		Position: pos,
+	}
 
 	// Handle OR REPLACE
 	if p.currentIs(token.OR) {
@@ -1326,6 +1339,67 @@ func (p *Parser) parseCreate() *ast.CreateQuery {
 	}
 
 	return create
+}
+
+func (p *Parser) parseCreateIndex(pos token.Position) *ast.CreateIndexQuery {
+	p.nextToken() // skip INDEX
+
+	query := &ast.CreateIndexQuery{
+		Position: pos,
+	}
+
+	// Parse index name
+	query.IndexName = p.parseIdentifierName()
+
+	// Skip IF NOT EXISTS if present
+	if p.currentIs(token.IF) {
+		p.nextToken() // IF
+		if p.currentIs(token.NOT) {
+			p.nextToken() // NOT
+		}
+		if p.currentIs(token.EXISTS) {
+			p.nextToken() // EXISTS
+		}
+	}
+
+	// Expect ON
+	if p.currentIs(token.ON) {
+		p.nextToken()
+	}
+
+	// Parse table name
+	query.Table = p.parseIdentifierName()
+	if p.currentIs(token.DOT) {
+		p.nextToken()
+		query.Table = p.parseIdentifierName()
+	}
+
+	// Parse column list in parentheses
+	if p.currentIs(token.LPAREN) {
+		p.nextToken() // skip (
+
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			col := p.parseExpression(0)
+			query.Columns = append(query.Columns, col)
+
+			// Skip ASC/DESC modifiers
+			if p.currentIs(token.ASC) || p.currentIs(token.DESC) {
+				p.nextToken()
+			}
+
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
+		}
+
+		if p.currentIs(token.RPAREN) {
+			p.nextToken() // skip )
+		}
+	}
+
+	return query
 }
 
 func (p *Parser) parseCreateTable(create *ast.CreateQuery) {

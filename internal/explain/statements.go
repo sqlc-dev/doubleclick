@@ -960,3 +960,38 @@ func explainCheckQuery(sb *strings.Builder, n *ast.CheckQuery, indent string) {
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
+
+func explainCreateIndexQuery(sb *strings.Builder, n *ast.CreateIndexQuery, indent string, depth int) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.CreateIndexQuery\n", indent)
+		return
+	}
+
+	// CreateIndexQuery with two spaces before table name, always 3 children
+	fmt.Fprintf(sb, "%sCreateIndexQuery  %s (children %d)\n", indent, n.Table, 3)
+
+	// Child 1: Index name
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.IndexName)
+
+	// Child 2: Index wrapper with columns
+	fmt.Fprintf(sb, "%s Index (children 1)\n", indent)
+
+	// For single column, output as Identifier
+	// For multiple columns or if there are any special cases, output as Function tuple
+	if len(n.Columns) == 1 {
+		if ident, ok := n.Columns[0].(*ast.Identifier); ok {
+			fmt.Fprintf(sb, "%s  Identifier %s\n", indent, ident.Name())
+		} else {
+			// Non-identifier expression - wrap in tuple
+			fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+		}
+	} else {
+		// Multiple columns or empty - always Function tuple with ExpressionList
+		fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
+		fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+	}
+
+	// Child 3: Table name
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+}
