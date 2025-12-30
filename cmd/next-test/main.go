@@ -79,10 +79,10 @@ func main() {
 		return
 	}
 
-	// Sort by explain_todo count (fewest first), then by query size
+	// Sort by explain_todo count (most first), then by query size
 	sort.Slice(todoTests, func(i, j int) bool {
 		if todoTests[i].explainTodoLen != todoTests[j].explainTodoLen {
-			return todoTests[i].explainTodoLen < todoTests[j].explainTodoLen
+			return todoTests[i].explainTodoLen > todoTests[j].explainTodoLen
 		}
 		return todoTests[i].querySize < todoTests[j].querySize
 	})

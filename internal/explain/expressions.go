@@ -503,12 +503,8 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 		Node(sb, e.Then, depth+2)
 		Node(sb, e.Else, depth+2)
 	case *ast.CastExpr:
-		// CAST expressions - show alias only for CAST(x AS Type) syntax, not CAST(x, 'Type')
-		if e.UsedASSyntax {
-			explainCastExprWithAlias(sb, e, n.Alias, indent, depth)
-		} else {
-			explainCastExpr(sb, e, indent, depth)
-		}
+		// CAST expressions always show the alias from the AliasedExpr wrapper
+		explainCastExprWithAlias(sb, e, n.Alias, indent, depth)
 	case *ast.ArrayAccess:
 		// Array access - show alias only when array is not a literal
 		// ClickHouse hides alias when array access is on a literal
