@@ -153,23 +153,7 @@ func explainDictionaryLayout(sb *strings.Builder, n *ast.DictionaryLayout, inden
 }
 
 // explainDictionaryRange outputs a dictionary RANGE clause.
+// Note: ClickHouse's EXPLAIN does not output children for Dictionary range.
 func explainDictionaryRange(sb *strings.Builder, n *ast.DictionaryRange, indent string, depth int) {
-	children := 0
-	if n.Min != nil {
-		children++
-	}
-	if n.Max != nil {
-		children++
-	}
-	if children > 0 {
-		fmt.Fprintf(sb, "%sDictionary range (children %d)\n", indent, children)
-		if n.Min != nil {
-			Node(sb, n.Min, depth+1)
-		}
-		if n.Max != nil {
-			Node(sb, n.Max, depth+1)
-		}
-	} else {
-		fmt.Fprintf(sb, "%sDictionary range\n", indent)
-	}
+	fmt.Fprintf(sb, "%sDictionary range\n", indent)
 }
