@@ -390,6 +390,17 @@ func (d *DataType) Pos() token.Position { return d.Position }
 func (d *DataType) End() token.Position { return d.Position }
 func (d *DataType) expressionNode()     {}
 
+// ObjectTypeArgument wraps an expression that is an argument to JSON/OBJECT types.
+// This matches ClickHouse's ASTObjectTypeArgument node structure.
+type ObjectTypeArgument struct {
+	Position token.Position `json:"-"`
+	Expr     Expression     `json:"expr"`
+}
+
+func (o *ObjectTypeArgument) Pos() token.Position { return o.Position }
+func (o *ObjectTypeArgument) End() token.Position { return o.Position }
+func (o *ObjectTypeArgument) expressionNode()     {}
+
 // NameTypePair represents a named type pair, used in Nested types.
 type NameTypePair struct {
 	Position token.Position `json:"-"`

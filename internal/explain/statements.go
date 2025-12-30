@@ -671,6 +671,11 @@ func explainDataType(sb *strings.Builder, n *ast.DataType, indent string, depth 
 	}
 }
 
+func explainObjectTypeArgument(sb *strings.Builder, n *ast.ObjectTypeArgument, indent string, depth int) {
+	fmt.Fprintf(sb, "%sASTObjectTypeArgument (children %d)\n", indent, 1)
+	Node(sb, n.Expr, depth+1)
+}
+
 func explainNameTypePair(sb *strings.Builder, n *ast.NameTypePair, indent string, depth int) {
 	fmt.Fprintf(sb, "%sNameTypePair %s (children %d)\n", indent, n.Name, 1)
 	Node(sb, n.Type, depth+1)

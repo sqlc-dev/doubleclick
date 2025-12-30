@@ -2413,7 +2413,9 @@ func (p *Parser) parseDataType() *ast.DataType {
 
 		// Determine if this type uses named parameters (Nested, Tuple, JSON)
 		upperName := strings.ToUpper(dt.Name)
-		usesNamedParams := upperName == "NESTED" || upperName == "TUPLE" || upperName == "JSON"
+		usesNamedParams := upperName == "NESTED" || upperName == "TUPLE" || upperName == "JSON" || upperName == "OBJECT"
+		// JSON and OBJECT types wrap their parameters in ObjectTypeArgument
+		isObjectType := upperName == "JSON" || upperName == "OBJECT"
 
 		// Parse type parameters, but stop on keywords that can't be part of type params
 		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) && !p.currentIs(token.COLLATE) {
@@ -2422,10 +2424,11 @@ func (p *Parser) parseDataType() *ast.DataType {
 			isNamedParam := false
 			if usesNamedParams && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) {
 				// Check if current is NOT a type name and peek IS a type name or LPAREN follows for complex types
-				if !p.isDataTypeName(p.current.Value) {
+				// But NOT if peek is '=' which indicates an expression like max_dynamic_paths=8
+				if !p.isDataTypeName(p.current.Value) && !p.peekIs(token.EQ) {
 					// Current is a name (not a type), next should be a type
 					isNamedParam = true
-				} else if p.peekIs(token.IDENT) || p.peekIs(token.LPAREN) {
+				} else if !p.peekIs(token.EQ) && (p.peekIs(token.IDENT) || p.peekIs(token.LPAREN)) {
 					// Current looks like a type name but is followed by another identifier
 					// This happens with things like "a Tuple(...)" where "a" looks like it could be a type
 					// Check if peek is a known type name
@@ -2441,6 +2444,7 @@ func (p *Parser) parseDataType() *ast.DataType {
 				}
 			}
 
+			var param ast.Expression
 			if isNamedParam {
 				// Parse as name + type pair
 				pos := p.current.Pos
@@ -2449,19 +2453,29 @@ func (p *Parser) parseDataType() *ast.DataType {
 				// Parse the type for this parameter
 				paramType := p.parseDataType()
 				if paramType != nil {
-					ntp := &ast.NameTypePair{
+					param = &ast.NameTypePair{
 						Position: pos,
 						Name:     paramName,
 						Type:     paramType,
 					}
-					dt.Parameters = append(dt.Parameters, ntp)
 				}
 			} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.isDataTypeName(p.current.Value) {
 				// It's a type name, parse as data type
-				dt.Parameters = append(dt.Parameters, p.parseDataType())
+				param = p.parseDataType()
 			} else {
 				// Parse as expression (for things like Decimal(10, 2))
-				dt.Parameters = append(dt.Parameters, p.parseExpression(LOWEST))
+				param = p.parseExpression(LOWEST)
+			}
+
+			// Wrap in ObjectTypeArgument for JSON/OBJECT types
+			if param != nil {
+				if isObjectType {
+					param = &ast.ObjectTypeArgument{
+						Position: param.Pos(),
+						Expr:     param,
+					}
+				}
+				dt.Parameters = append(dt.Parameters, param)
 			}
 
 			if p.currentIs(token.COMMA) {
