@@ -193,6 +193,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		if p.peekIs(token.TRANSACTION) {
 			return p.parseTransactionControl()
 		}
+		// Check for SET DEFAULT ROLE
+		if p.peekIs(token.DEFAULT) {
+			return p.parseSetRole()
+		}
 		return p.parseSet()
 	case token.OPTIMIZE:
 		return p.parseOptimize()
@@ -1550,8 +1554,8 @@ func (p *Parser) parseCreate() ast.Statement {
 			// CREATE WORKLOAD
 			return p.parseCreateWorkload(pos)
 		case "QUOTA":
-			// Skip these statements - just consume tokens until semicolon
-			p.parseCreateGeneric(create)
+			// CREATE QUOTA
+			return p.parseCreateQuota(pos)
 		default:
 			p.errors = append(p.errors, fmt.Errorf("expected TABLE, DATABASE, VIEW, FUNCTION, USER after CREATE"))
 			return nil
@@ -2358,9 +2362,18 @@ func (p *Parser) parseShowCreateSettingsProfile(pos token.Position) *ast.ShowCre
 		break
 	}
 
-	// Skip the rest of the statement
-	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+	// Skip tokens until FORMAT or end of statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) {
 		p.nextToken()
+	}
+
+	// Parse FORMAT clause if present
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			query.Format = p.current.Value
+			p.nextToken()
+		}
 	}
 
 	return query
@@ -2464,9 +2477,18 @@ func (p *Parser) parseShowCreateRowPolicy(pos token.Position) *ast.ShowCreateRow
 		p.nextToken()
 	}
 
-	// Skip the rest of the statement (policy names, ON table, etc.)
-	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+	// Skip tokens until FORMAT or end of statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) {
 		p.nextToken()
+	}
+
+	// Parse FORMAT clause if present
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			query.Format = p.current.Value
+			p.nextToken()
+		}
 	}
 
 	return query
@@ -2540,6 +2562,30 @@ func (p *Parser) parseAlterRole() *ast.CreateRoleQuery {
 	return query
 }
 
+func (p *Parser) parseCreateQuota(pos token.Position) *ast.CreateQuotaQuery {
+	query := &ast.CreateQuotaQuery{
+		Position: pos,
+	}
+
+	// Skip QUOTA keyword
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "QUOTA" {
+		p.nextToken()
+	}
+
+	// Parse quota name
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		query.Name = p.current.Value
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
 func (p *Parser) parseShowCreateRole(pos token.Position) *ast.ShowCreateRoleQuery {
 	query := &ast.ShowCreateRoleQuery{
 		Position:  pos,
@@ -2577,9 +2623,18 @@ func (p *Parser) parseShowCreateRole(pos token.Position) *ast.ShowCreateRoleQuer
 		}
 	}
 
-	// Skip the rest of the statement
-	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+	// Skip tokens until FORMAT or end of statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) {
 		p.nextToken()
+	}
+
+	// Parse FORMAT clause if present
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			query.Format = p.current.Value
+			p.nextToken()
+		}
 	}
 
 	return query
@@ -4169,7 +4224,20 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		if p.currentIs(token.COLUMN) {
 			cmd.Type = ast.AlterModifyColumn
 			p.nextToken()
-			cmd.Column = p.parseColumnDeclaration()
+			// Handle MODIFY COLUMN name REMOVE ... (e.g., REMOVE COMMENT)
+			// Check if the next token after column name is REMOVE
+			if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "REMOVE" {
+				// Just parse column name without type
+				colName := p.current.Value
+				p.nextToken() // skip column name
+				cmd.Column = &ast.ColumnDeclaration{Name: colName}
+				// Skip REMOVE COMMENT etc.
+				for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.COMMA) {
+					p.nextToken()
+				}
+			} else {
+				cmd.Column = p.parseColumnDeclaration()
+			}
 		} else if p.currentIs(token.TTL) {
 			cmd.Type = ast.AlterModifyTTL
 			p.nextToken()
@@ -4451,11 +4519,20 @@ func (p *Parser) parseShow() ast.Statement {
 
 	// Handle SHOW GRANTS - it has its own statement type
 	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "GRANTS" {
-		// Skip all remaining tokens until end of statement
-		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		query := &ast.ShowGrantsQuery{Position: pos}
+		// Skip tokens until FORMAT or end of statement
+		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) {
 			p.nextToken()
 		}
-		return &ast.ShowGrantsQuery{Position: pos}
+		// Parse FORMAT clause if present
+		if p.currentIs(token.FORMAT) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				query.Format = p.current.Value
+				p.nextToken()
+			}
+		}
+		return query
 	}
 
 	show := &ast.ShowQuery{
@@ -4480,12 +4557,20 @@ func (p *Parser) parseShow() ast.Statement {
 		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "QUOTA" {
 			// SHOW CREATE QUOTA <name>
 			p.nextToken()
-			name := ""
+			query := &ast.ShowCreateQuotaQuery{Position: pos}
 			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-				name = p.current.Value
+				query.Name = p.current.Value
 				p.nextToken()
 			}
-			return &ast.ShowCreateQuotaQuery{Position: pos, Name: name}
+			// Parse FORMAT clause if present
+			if p.currentIs(token.FORMAT) {
+				p.nextToken()
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					query.Format = p.current.Value
+					p.nextToken()
+				}
+			}
+			return query
 		} else if p.currentIs(token.SETTINGS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROFILE") {
 			// SHOW CREATE SETTINGS PROFILE or SHOW CREATE PROFILE
 			return p.parseShowCreateSettingsProfile(pos)
@@ -4504,9 +4589,17 @@ func (p *Parser) parseShow() ast.Statement {
 		} else if p.currentIs(token.USER) {
 			show.ShowType = ast.ShowCreateUser
 			p.nextToken()
-			// Skip user name and host pattern - they don't affect explain output
-			for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+			// Skip user name and host pattern until FORMAT or end
+			for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) {
 				p.nextToken()
+			}
+			// Parse FORMAT clause if present
+			if p.currentIs(token.FORMAT) {
+				p.nextToken()
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					show.Format = p.current.Value
+					p.nextToken()
+				}
 			}
 		} else {
 			show.ShowType = ast.ShowCreate
@@ -4706,6 +4799,19 @@ func (p *Parser) parseSet() *ast.SetQuery {
 	set.Settings = p.parseSettingsList()
 
 	return set
+}
+
+func (p *Parser) parseSetRole() *ast.SetRoleQuery {
+	query := &ast.SetRoleQuery{
+		Position: p.current.Pos,
+	}
+
+	// Skip SET DEFAULT ROLE ... TO ...
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
 }
 
 func (p *Parser) parseOptimize() *ast.OptimizeQuery {

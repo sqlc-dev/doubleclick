@@ -693,18 +693,24 @@ func (s *ShowQuery) statementNode()      {}
 type ShowType string
 
 const (
-	ShowTables           ShowType = "TABLES"
-	ShowDatabases        ShowType = "DATABASES"
-	ShowProcesses        ShowType = "PROCESSLIST"
-	ShowCreate           ShowType = "CREATE"
-	ShowCreateDB         ShowType = "CREATE_DATABASE"
-	ShowCreateDictionary ShowType = "CREATE_DICTIONARY"
-	ShowCreateView       ShowType = "CREATE_VIEW"
-	ShowCreateUser       ShowType = "CREATE_USER"
-	ShowColumns          ShowType = "COLUMNS"
-	ShowDictionaries     ShowType = "DICTIONARIES"
-	ShowFunctions        ShowType = "FUNCTIONS"
-	ShowSettings         ShowType = "SETTINGS"
+	ShowTables                  ShowType = "TABLES"
+	ShowDatabases               ShowType = "DATABASES"
+	ShowProcesses               ShowType = "PROCESSLIST"
+	ShowCreate                  ShowType = "CREATE"
+	ShowCreateDB                ShowType = "CREATE_DATABASE"
+	ShowCreateDictionary        ShowType = "CREATE_DICTIONARY"
+	ShowCreateView              ShowType = "CREATE_VIEW"
+	ShowCreateUser              ShowType = "CREATE_USER"
+	ShowCreateRole              ShowType = "CREATE_ROLE"
+	ShowCreatePolicy            ShowType = "CREATE_POLICY"
+	ShowCreateRowPolicy         ShowType = "CREATE_ROW_POLICY"
+	ShowCreateQuota             ShowType = "CREATE_QUOTA"
+	ShowCreateSettingsProfile   ShowType = "CREATE_SETTINGS_PROFILE"
+	ShowColumns                 ShowType = "COLUMNS"
+	ShowDictionaries            ShowType = "DICTIONARIES"
+	ShowFunctions               ShowType = "FUNCTIONS"
+	ShowSettings                ShowType = "SETTINGS"
+	ShowGrants                  ShowType = "GRANTS"
 )
 
 // ExplainQuery represents an EXPLAIN statement.
@@ -866,6 +872,7 @@ func (g *GrantQuery) statementNode()      {}
 // ShowGrantsQuery represents a SHOW GRANTS statement.
 type ShowGrantsQuery struct {
 	Position token.Position `json:"-"`
+	Format   string         `json:"format,omitempty"`
 }
 
 func (s *ShowGrantsQuery) Pos() token.Position { return s.Position }
@@ -885,11 +892,22 @@ func (s *ShowPrivilegesQuery) statementNode()      {}
 type ShowCreateQuotaQuery struct {
 	Position token.Position `json:"-"`
 	Name     string         `json:"name,omitempty"`
+	Format   string         `json:"format,omitempty"`
 }
 
 func (s *ShowCreateQuotaQuery) Pos() token.Position { return s.Position }
 func (s *ShowCreateQuotaQuery) End() token.Position { return s.Position }
 func (s *ShowCreateQuotaQuery) statementNode()      {}
+
+// CreateQuotaQuery represents a CREATE QUOTA statement.
+type CreateQuotaQuery struct {
+	Position token.Position `json:"-"`
+	Name     string         `json:"name,omitempty"`
+}
+
+func (c *CreateQuotaQuery) Pos() token.Position { return c.Position }
+func (c *CreateQuotaQuery) End() token.Position { return c.Position }
+func (c *CreateQuotaQuery) statementNode()      {}
 
 // CreateSettingsProfileQuery represents a CREATE SETTINGS PROFILE statement.
 type CreateSettingsProfileQuery struct {
@@ -926,6 +944,7 @@ func (d *DropSettingsProfileQuery) statementNode()      {}
 type ShowCreateSettingsProfileQuery struct {
 	Position token.Position `json:"-"`
 	Names    []string       `json:"names,omitempty"`
+	Format   string         `json:"format,omitempty"`
 }
 
 func (s *ShowCreateSettingsProfileQuery) Pos() token.Position { return s.Position }
@@ -955,6 +974,7 @@ func (d *DropRowPolicyQuery) statementNode()      {}
 // ShowCreateRowPolicyQuery represents a SHOW CREATE ROW POLICY statement.
 type ShowCreateRowPolicyQuery struct {
 	Position token.Position `json:"-"`
+	Format   string         `json:"format,omitempty"`
 }
 
 func (s *ShowCreateRowPolicyQuery) Pos() token.Position { return s.Position }
@@ -985,11 +1005,21 @@ func (d *DropRoleQuery) statementNode()      {}
 type ShowCreateRoleQuery struct {
 	Position  token.Position `json:"-"`
 	RoleCount int            `json:"role_count,omitempty"` // Number of roles specified
+	Format    string         `json:"format,omitempty"`
 }
 
 func (s *ShowCreateRoleQuery) Pos() token.Position { return s.Position }
 func (s *ShowCreateRoleQuery) End() token.Position { return s.Position }
 func (s *ShowCreateRoleQuery) statementNode()      {}
+
+// SetRoleQuery represents a SET DEFAULT ROLE statement.
+type SetRoleQuery struct {
+	Position token.Position `json:"-"`
+}
+
+func (s *SetRoleQuery) Pos() token.Position { return s.Position }
+func (s *SetRoleQuery) End() token.Position { return s.Position }
+func (s *SetRoleQuery) statementNode()      {}
 
 // CreateResourceQuery represents a CREATE RESOURCE statement.
 type CreateResourceQuery struct {
