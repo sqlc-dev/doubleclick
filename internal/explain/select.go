@@ -194,10 +194,9 @@ func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent st
 	hasFromOrTo := n.FillFrom != nil || n.FillTo != nil
 	hasComplexFillExpr := hasFromOrTo && (isComplexExpr(n.FillFrom) || isComplexExpr(n.FillTo))
 
-	// Use FillModifier when:
-	// 1. Only STEP is present (no FROM/TO), or
-	// 2. FROM/TO contain complex expressions (not simple literals)
-	useFillModifier := n.WithFill && ((n.FillStep != nil && !hasFromOrTo) || hasComplexFillExpr)
+	// Use FillModifier when FROM/TO contain complex expressions (not simple literals)
+	// When only STEP is present, output it directly as a child (no FillModifier)
+	useFillModifier := n.WithFill && hasComplexFillExpr
 
 	if useFillModifier {
 		// Use FillModifier wrapper
