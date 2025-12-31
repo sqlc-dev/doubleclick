@@ -793,13 +793,10 @@ func (p *Parser) parseTablesInSelect() *ast.TablesInSelectQuery {
 }
 
 func (p *Parser) isJoinKeyword() bool {
-	// LEFT ARRAY JOIN is handled by parseArrayJoin, not as a regular join
-	if p.currentIs(token.LEFT) && p.peekIs(token.ARRAY) {
-		return false
-	}
 	switch p.current.Token {
 	case token.JOIN, token.INNER, token.LEFT, token.RIGHT, token.FULL, token.CROSS,
-		token.GLOBAL, token.ANY, token.ALL, token.ASOF, token.SEMI, token.ANTI, token.PASTE:
+		token.GLOBAL, token.ANY, token.ALL, token.ASOF, token.SEMI, token.ANTI, token.PASTE,
+		token.ARRAY:
 		return true
 	case token.COMMA:
 		return true
@@ -834,6 +831,12 @@ func (p *Parser) parseTableElementWithJoin() *ast.TablesInSelectQueryElement {
 				}
 			}
 		}
+		return elem
+	}
+
+	// Handle ARRAY JOIN or LEFT ARRAY JOIN
+	if p.currentIs(token.ARRAY) || (p.currentIs(token.LEFT) && p.peekIs(token.ARRAY)) {
+		elem.ArrayJoin = p.parseArrayJoin()
 		return elem
 	}
 

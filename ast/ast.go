@@ -126,9 +126,10 @@ func (t *TablesInSelectQuery) End() token.Position { return t.Position }
 
 // TablesInSelectQueryElement represents a single table element in a SELECT.
 type TablesInSelectQueryElement struct {
-	Position token.Position   `json:"-"`
-	Table    *TableExpression `json:"table"`
-	Join     *TableJoin       `json:"join,omitempty"`
+	Position  token.Position    `json:"-"`
+	Table     *TableExpression  `json:"table,omitempty"`
+	Join      *TableJoin        `json:"join,omitempty"`
+	ArrayJoin *ArrayJoinClause  `json:"array_join,omitempty"` // For ARRAY JOIN as table element
 }
 
 func (t *TablesInSelectQueryElement) Pos() token.Position { return t.Position }

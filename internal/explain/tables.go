@@ -15,9 +15,22 @@ func explainTablesInSelectQuery(sb *strings.Builder, n *ast.TablesInSelectQuery,
 }
 
 func explainTablesInSelectQueryElement(sb *strings.Builder, n *ast.TablesInSelectQueryElement, indent string, depth int) {
-	children := 1 // table
+	// If this element contains an ArrayJoin (not a table), handle it separately
+	if n.ArrayJoin != nil {
+		fmt.Fprintf(sb, "%sTablesInSelectQueryElement (children 1)\n", indent)
+		explainArrayJoinClause(sb, n.ArrayJoin, indent+" ", depth+1)
+		return
+	}
+
+	children := 0
+	if n.Table != nil {
+		children++
+	}
 	if n.Join != nil {
 		children++
+	}
+	if children == 0 {
+		children = 1 // Fallback
 	}
 	fmt.Fprintf(sb, "%sTablesInSelectQueryElement (children %d)\n", indent, children)
 	if n.Table != nil {
