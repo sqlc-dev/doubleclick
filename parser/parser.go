@@ -3618,7 +3618,7 @@ func (p *Parser) isDataTypeName(name string) bool {
 	types := []string{
 		"INT", "INT8", "INT16", "INT32", "INT64", "INT128", "INT256",
 		"UINT8", "UINT16", "UINT32", "UINT64", "UINT128", "UINT256",
-		"FLOAT32", "FLOAT64", "FLOAT",
+		"FLOAT32", "FLOAT64", "FLOAT", "BFLOAT16",
 		"DECIMAL", "DECIMAL32", "DECIMAL64", "DECIMAL128", "DECIMAL256",
 		"STRING", "FIXEDSTRING",
 		"UUID", "DATE", "DATE32", "DATETIME", "DATETIME64",
