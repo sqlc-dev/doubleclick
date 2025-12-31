@@ -499,6 +499,19 @@ func (d *DropQuery) Pos() token.Position { return d.Position }
 func (d *DropQuery) End() token.Position { return d.Position }
 func (d *DropQuery) statementNode()      {}
 
+// UndropQuery represents an UNDROP TABLE statement.
+type UndropQuery struct {
+	Position  token.Position `json:"-"`
+	Database  string         `json:"database,omitempty"`
+	Table     string         `json:"table"`
+	OnCluster string         `json:"on_cluster,omitempty"`
+	UUID      string         `json:"uuid,omitempty"`
+}
+
+func (u *UndropQuery) Pos() token.Position { return u.Position }
+func (u *UndropQuery) End() token.Position { return u.Position }
+func (u *UndropQuery) statementNode()      {}
+
 // AlterQuery represents an ALTER statement.
 type AlterQuery struct {
 	Position  token.Position  `json:"-"`

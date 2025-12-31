@@ -505,6 +505,21 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 	}
 }
 
+func explainUndropQuery(sb *strings.Builder, n *ast.UndropQuery, indent string, depth int) {
+	name := n.Table
+	// Check if we have a database-qualified name (for UNDROP TABLE db.table)
+	hasDatabase := n.Database != ""
+	if hasDatabase {
+		// Database-qualified: UndropQuery db table (children 2)
+		fmt.Fprintf(sb, "%sUndropQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), 2)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(n.Database))
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+	} else {
+		fmt.Fprintf(sb, "%sUndropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), 1)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+	}
+}
+
 func explainRenameQuery(sb *strings.Builder, n *ast.RenameQuery, indent string, depth int) {
 	if n == nil {
 		fmt.Fprintf(sb, "%s*ast.RenameQuery\n", indent)

@@ -180,6 +180,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseAlter()
 	case token.TRUNCATE:
 		return p.parseTruncate()
+	case token.UNDROP:
+		return p.parseUndrop()
 	case token.USE:
 		return p.parseUse()
 	case token.DESCRIBE, token.DESC:
@@ -4444,6 +4446,50 @@ func (p *Parser) parseTruncate() *ast.TruncateQuery {
 	}
 
 	return trunc
+}
+
+func (p *Parser) parseUndrop() *ast.UndropQuery {
+	undrop := &ast.UndropQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip UNDROP
+
+	if p.currentIs(token.TABLE) {
+		p.nextToken()
+	}
+
+	// Parse table name (can start with a number in ClickHouse)
+	tableName := p.parseIdentifierName()
+	if tableName != "" {
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			undrop.Database = tableName
+			undrop.Table = p.parseIdentifierName()
+		} else {
+			undrop.Table = tableName
+		}
+	}
+
+	// Handle ON CLUSTER
+	if p.currentIs(token.ON) {
+		p.nextToken()
+		if p.currentIs(token.CLUSTER) {
+			p.nextToken()
+			undrop.OnCluster = p.parseIdentifierName()
+		}
+	}
+
+	// Handle UUID
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "UUID" {
+		p.nextToken()
+		if p.currentIs(token.STRING) {
+			undrop.UUID = p.current.Value
+			p.nextToken()
+		}
+	}
+
+	return undrop
 }
 
 func (p *Parser) parseUse() *ast.UseQuery {
