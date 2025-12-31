@@ -463,6 +463,11 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 						needsFunctionFormat = true
 						break
 					}
+					// Check for function calls - use Function array
+					if _, ok := expr.(*ast.FunctionCall); ok {
+						needsFunctionFormat = true
+						break
+					}
 				}
 				if needsFunctionFormat {
 					// Render as Function array with alias
