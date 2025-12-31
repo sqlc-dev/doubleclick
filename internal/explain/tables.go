@@ -133,22 +133,30 @@ func abs(x float64) float64 {
 }
 
 // explainViewExplain handles EXPLAIN queries used as table sources, converting to viewExplain function
+// ClickHouse internally transforms EXPLAIN to SELECT * FROM viewExplain(...)
 func explainViewExplain(sb *strings.Builder, n *ast.ExplainQuery, alias string, indent string, depth int) {
-	// When EXPLAIN is used as a table source, it becomes viewExplain function
-	// Arguments: 'EXPLAIN', 'options', subquery
-	fmt.Fprintf(sb, "%sFunction viewExplain (children %d)\n", indent, 1)
-	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 3)
+	// When EXPLAIN is used as a table source, it becomes wrapped in SELECT * FROM viewExplain(...)
+	// Structure: Subquery -> SelectWithUnionQuery -> ExpressionList -> SelectQuery -> Asterisk, TablesInSelectQuery -> viewExplain
+	fmt.Fprintf(sb, "%sSubquery (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s SelectWithUnionQuery (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s   SelectQuery (children %d)\n", indent, 2)
+	fmt.Fprintf(sb, "%s    ExpressionList (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s     Asterisk\n", indent)
+	fmt.Fprintf(sb, "%s    TablesInSelectQuery (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s     TablesInSelectQueryElement (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s      TableExpression (children %d)\n", indent, 1)
+	// Now output the viewExplain function
+	fmt.Fprintf(sb, "%s       Function viewExplain (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s        ExpressionList (children %d)\n", indent, 3)
 	// First argument: 'EXPLAIN' literal
-	fmt.Fprintf(sb, "%s  Literal \\'EXPLAIN\\'\n", indent)
-	// Second argument: options string (empty for now since we don't track detailed options)
-	options := string(n.ExplainType)
-	if options == "PLAN" {
-		options = ""
-	}
-	fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, options)
+	fmt.Fprintf(sb, "%s         Literal \\'EXPLAIN\\'\n", indent)
+	// Second argument: options string (e.g., "actions = 1")
+	options := n.OptionsString
+	fmt.Fprintf(sb, "%s         Literal \\'%s\\'\n", indent, options)
 	// Third argument: the subquery being explained
-	fmt.Fprintf(sb, "%s  Subquery (children %d)\n", indent, 1)
-	Node(sb, n.Statement, depth+3)
+	fmt.Fprintf(sb, "%s         Subquery (children %d)\n", indent, 1)
+	Node(sb, n.Statement, depth+10)
 }
 
 func explainTableIdentifierWithAlias(sb *strings.Builder, n *ast.TableIdentifier, alias string, indent string) {

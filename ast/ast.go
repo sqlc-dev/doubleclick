@@ -700,11 +700,12 @@ const (
 
 // ExplainQuery represents an EXPLAIN statement.
 type ExplainQuery struct {
-	Position     token.Position `json:"-"`
-	ExplainType  ExplainType    `json:"explain_type"`
-	Statement    Statement      `json:"statement"`
-	HasSettings  bool           `json:"has_settings,omitempty"`
-	ExplicitType bool           `json:"explicit_type,omitempty"` // true if type was explicitly specified
+	Position       token.Position `json:"-"`
+	ExplainType    ExplainType    `json:"explain_type"`
+	Statement      Statement      `json:"statement"`
+	HasSettings    bool           `json:"has_settings,omitempty"`
+	ExplicitType   bool           `json:"explicit_type,omitempty"` // true if type was explicitly specified
+	OptionsString  string         `json:"options_string,omitempty"` // Formatted options like "actions = 1"
 }
 
 func (e *ExplainQuery) Pos() token.Position { return e.Position }

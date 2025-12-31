@@ -4312,16 +4312,26 @@ func (p *Parser) parseExplain() *ast.ExplainQuery {
 	// Parse EXPLAIN options (e.g., header = 1, optimize = 0)
 	// These come before the actual statement
 	// Options can be identifiers or keywords like OPTIMIZE followed by =
+	var optionParts []string
 	for p.peekIs(token.EQ) && !p.currentIs(token.SELECT) && !p.currentIs(token.WITH) {
 		// This is an option (name = value)
 		explain.HasSettings = true
+		optionName := p.current.Value
 		p.nextToken() // skip option name
 		p.nextToken() // skip =
-		p.parseExpression(LOWEST) // skip value
+		// Get the value
+		optionValue := p.current.Value
+		if p.currentIs(token.NUMBER) || p.currentIs(token.STRING) || p.currentIs(token.IDENT) {
+			optionParts = append(optionParts, optionName+" = "+optionValue)
+		}
+		p.parseExpression(LOWEST) // skip value expression (may consume more tokens)
 		// Skip comma if present
 		if p.currentIs(token.COMMA) {
 			p.nextToken()
 		}
+	}
+	if len(optionParts) > 0 {
+		explain.OptionsString = strings.Join(optionParts, ", ")
 	}
 
 	// Parse the statement being explained
