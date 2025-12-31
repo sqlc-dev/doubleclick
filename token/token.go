@@ -63,6 +63,7 @@ const (
 	ASC
 	ASOF
 	ATTACH
+	BEGIN
 	BETWEEN
 	BOTH
 	BY
@@ -73,6 +74,7 @@ const (
 	COLLATE
 	COLUMN
 	COLUMNS
+	COMMIT
 	CONSTRAINT
 	CREATE
 	CROSS
@@ -159,6 +161,7 @@ const (
 	REPLACE
 	REVOKE
 	RIGHT
+	ROLLBACK
 	ROLLUP
 	SAMPLE
 	SELECT
@@ -167,6 +170,7 @@ const (
 	SETS
 	SETTINGS
 	SHOW
+	SNAPSHOT
 	STEP
 	SUBSTRING
 	SYNC
@@ -180,6 +184,7 @@ const (
 	TOP
 	TOTALS
 	TRAILING
+	TRANSACTION
 	TRIM
 	TRUE
 	TRUNCATE
@@ -252,6 +257,7 @@ var tokens = [...]string{
 	ASC:          "ASC",
 	ASOF:         "ASOF",
 	ATTACH:       "ATTACH",
+	BEGIN:        "BEGIN",
 	BETWEEN:      "BETWEEN",
 	BOTH:         "BOTH",
 	BY:           "BY",
@@ -262,6 +268,7 @@ var tokens = [...]string{
 	COLLATE:      "COLLATE",
 	COLUMN:       "COLUMN",
 	COLUMNS:      "COLUMNS",
+	COMMIT:       "COMMIT",
 	CONSTRAINT:   "CONSTRAINT",
 	CREATE:       "CREATE",
 	CROSS:        "CROSS",
@@ -348,6 +355,7 @@ var tokens = [...]string{
 	REPLACE:      "REPLACE",
 	REVOKE:       "REVOKE",
 	RIGHT:        "RIGHT",
+	ROLLBACK:     "ROLLBACK",
 	ROLLUP:       "ROLLUP",
 	SAMPLE:       "SAMPLE",
 	SELECT:       "SELECT",
@@ -356,6 +364,7 @@ var tokens = [...]string{
 	SETS:         "SETS",
 	SETTINGS:     "SETTINGS",
 	SHOW:         "SHOW",
+	SNAPSHOT:     "SNAPSHOT",
 	STEP:         "STEP",
 	SUBSTRING:    "SUBSTRING",
 	SYNC:         "SYNC",
@@ -369,6 +378,7 @@ var tokens = [...]string{
 	TOP:          "TOP",
 	TOTALS:       "TOTALS",
 	TRAILING:     "TRAILING",
+	TRANSACTION:  "TRANSACTION",
 	TRIM:         "TRIM",
 	TRUE:         "TRUE",
 	TRUNCATE:     "TRUNCATE",

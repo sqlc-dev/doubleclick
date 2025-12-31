@@ -181,6 +181,10 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.EXPLAIN:
 		return p.parseExplain()
 	case token.SET:
+		// Check for SET TRANSACTION SNAPSHOT
+		if p.peekIs(token.TRANSACTION) {
+			return p.parseTransactionControl()
+		}
 		return p.parseSet()
 	case token.OPTIMIZE:
 		return p.parseOptimize()
@@ -203,6 +207,12 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseGrant()
 	case token.REVOKE:
 		return p.parseRevoke()
+	case token.BEGIN:
+		return p.parseTransactionControl()
+	case token.COMMIT:
+		return p.parseTransactionControl()
+	case token.ROLLBACK:
+		return p.parseTransactionControl()
 	default:
 		p.errors = append(p.errors, fmt.Errorf("unexpected token %s at line %d, column %d",
 			p.current.Token, p.current.Pos.Line, p.current.Pos.Column))
@@ -5048,4 +5058,47 @@ func (p *Parser) parseRevoke() *ast.GrantQuery {
 	}
 
 	return grant
+}
+
+// parseTransactionControl handles BEGIN, COMMIT, ROLLBACK, and SET TRANSACTION SNAPSHOT statements
+func (p *Parser) parseTransactionControl() *ast.TransactionControlQuery {
+	query := &ast.TransactionControlQuery{
+		Position: p.current.Pos,
+	}
+
+	switch p.current.Token {
+	case token.BEGIN:
+		query.Action = "BEGIN"
+		p.nextToken() // skip BEGIN
+		// Skip optional TRANSACTION keyword
+		if p.currentIs(token.TRANSACTION) {
+			p.nextToken()
+		}
+	case token.COMMIT:
+		query.Action = "COMMIT"
+		p.nextToken() // skip COMMIT
+	case token.ROLLBACK:
+		query.Action = "ROLLBACK"
+		p.nextToken() // skip ROLLBACK
+	case token.SET:
+		p.nextToken() // skip SET
+		if p.currentIs(token.TRANSACTION) {
+			p.nextToken() // skip TRANSACTION
+			if p.currentIs(token.SNAPSHOT) {
+				p.nextToken() // skip SNAPSHOT
+				query.Action = "SET_SNAPSHOT"
+				// Parse snapshot number
+				if p.currentIs(token.NUMBER) {
+					// Parse the number value
+					val, err := strconv.ParseInt(p.current.Value, 10, 64)
+					if err == nil {
+						query.Snapshot = val
+					}
+					p.nextToken()
+				}
+			}
+		}
+	}
+
+	return query
 }

@@ -772,6 +772,17 @@ func (s *SystemQuery) Pos() token.Position { return s.Position }
 func (s *SystemQuery) End() token.Position { return s.Position }
 func (s *SystemQuery) statementNode()      {}
 
+// TransactionControlQuery represents a transaction control statement (BEGIN, COMMIT, ROLLBACK, SET TRANSACTION SNAPSHOT).
+type TransactionControlQuery struct {
+	Position token.Position `json:"-"`
+	Action   string         `json:"action"` // "BEGIN", "COMMIT", "ROLLBACK", "SET_SNAPSHOT"
+	Snapshot int64          `json:"snapshot,omitempty"`
+}
+
+func (t *TransactionControlQuery) Pos() token.Position { return t.Position }
+func (t *TransactionControlQuery) End() token.Position { return t.Position }
+func (t *TransactionControlQuery) statementNode()      {}
+
 // RenamePair represents a single rename pair in RENAME TABLE.
 type RenamePair struct {
 	FromDatabase string `json:"from_database,omitempty"`

@@ -121,6 +121,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainSetQuery(sb, indent)
 	case *ast.SystemQuery:
 		explainSystemQuery(sb, n, indent)
+	case *ast.TransactionControlQuery:
+		fmt.Fprintf(sb, "%sASTTransactionControl\n", indent)
 	case *ast.ExplainQuery:
 		explainExplainQuery(sb, n, indent, depth)
 	case *ast.ShowQuery:
