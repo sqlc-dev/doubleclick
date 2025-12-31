@@ -1857,6 +1857,15 @@ func (p *Parser) parseArrayAccess(left ast.Expression) ast.Expression {
 					} else {
 						break
 					}
+				} else if p.currentIs(token.COLON) {
+					// JSON subcolumn type accessor: json.field.:`TypeName`
+					p.nextToken() // skip :
+					typePart := ":"
+					if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() || p.currentIs(token.STRING) {
+						typePart += "`" + p.current.Value + "`"
+						p.nextToken()
+					}
+					ident.Parts = append(ident.Parts, typePart)
 				} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 					ident.Parts = append(ident.Parts, p.current.Value)
 					p.nextToken()

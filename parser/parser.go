@@ -5343,14 +5343,11 @@ func (p *Parser) parseProjection() *ast.Projection {
 		if p.currentIs(token.BY) {
 			p.nextToken() // BY
 		}
-		// Parse ORDER BY columns (comma-separated identifiers)
+		// Parse ORDER BY columns (comma-separated expressions)
 		for !p.currentIs(token.EOF) && !p.currentIs(token.RPAREN) {
-			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-				proj.Select.OrderBy = append(proj.Select.OrderBy, &ast.Identifier{
-					Position: p.current.Pos,
-					Parts:    []string{p.current.Value},
-				})
-				p.nextToken()
+			expr := p.parseExpression(LOWEST)
+			if expr != nil {
+				proj.Select.OrderBy = append(proj.Select.OrderBy, expr)
 			} else {
 				break
 			}
