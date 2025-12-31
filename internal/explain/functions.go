@@ -98,9 +98,14 @@ func explainLambdaWithAlias(sb *strings.Builder, n *ast.Lambda, alias string, in
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
 	// Parameters as tuple
 	fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
-	fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.Parameters))
-	for _, p := range n.Parameters {
-		fmt.Fprintf(sb, "%s    Identifier %s\n", indent, p)
+	// When there are no parameters, ClickHouse omits the (children N) part
+	if len(n.Parameters) > 0 {
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.Parameters))
+		for _, p := range n.Parameters {
+			fmt.Fprintf(sb, "%s    Identifier %s\n", indent, p)
+		}
+	} else {
+		fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
 	}
 	// Body
 	Node(sb, n.Body, depth+2)
