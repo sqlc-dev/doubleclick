@@ -3860,6 +3860,28 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				}
 			}
 		}
+	case token.COMMENT:
+		p.nextToken()
+		if p.currentIs(token.COLUMN) {
+			cmd.Type = ast.AlterCommentColumn
+			p.nextToken()
+			// Handle IF EXISTS
+			if p.currentIs(token.IF) {
+				p.nextToken()
+				p.expect(token.EXISTS)
+				cmd.IfExists = true
+			}
+			// Parse column name
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				cmd.ColumnName = p.current.Value
+				p.nextToken()
+			}
+			// Parse comment string
+			if p.currentIs(token.STRING) {
+				cmd.Comment = p.current.Value
+				p.nextToken()
+			}
+		}
 	case token.DETACH:
 		p.nextToken()
 		if p.currentIs(token.PARTITION) {

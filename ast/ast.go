@@ -531,6 +531,7 @@ type AlterCommand struct {
 	ProjectionName string               `json:"projection_name,omitempty"` // For DROP/MATERIALIZE/CLEAR PROJECTION
 	StatisticsColumns []string          `json:"statistics_columns,omitempty"` // For ADD/DROP/CLEAR/MATERIALIZE STATISTICS
 	StatisticsTypes   []*FunctionCall   `json:"statistics_types,omitempty"`   // For ADD/MODIFY STATISTICS TYPE
+	Comment           string            `json:"comment,omitempty"`            // For COMMENT COLUMN
 }
 
 // Projection represents a projection definition.

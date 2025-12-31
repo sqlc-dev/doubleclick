@@ -955,18 +955,22 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 		return
 	}
 
-	name := n.Table
+	children := 2 // ExpressionList + Identifier for table
 	if n.Database != "" {
-		name = n.Database + "." + n.Table
+		children = 3 // ExpressionList + Identifier for database + Identifier for table
+		fmt.Fprintf(sb, "%sAlterQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
+	} else {
+		fmt.Fprintf(sb, "%sAlterQuery  %s (children %d)\n", indent, n.Table, children)
 	}
 
-	children := 2
-	fmt.Fprintf(sb, "%sAlterQuery  %s (children %d)\n", indent, name, children)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Commands))
 	for _, cmd := range n.Commands {
 		explainAlterCommand(sb, cmd, indent+"  ", depth+2)
 	}
-	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+	if n.Database != "" {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+	}
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 }
 
 func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent string, depth int) {
@@ -1014,6 +1018,9 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	case ast.AlterCommentColumn:
 		if cmd.ColumnName != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ColumnName)
+		}
+		if cmd.Comment != "" {
+			fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, escapeStringLiteral(cmd.Comment))
 		}
 	case ast.AlterAddIndex, ast.AlterDropIndex, ast.AlterClearIndex, ast.AlterMaterializeIndex:
 		if cmd.Index != "" {
@@ -1178,8 +1185,15 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 		if cmd.AfterColumn != "" {
 			children++
 		}
-	case ast.AlterDropColumn, ast.AlterCommentColumn:
+	case ast.AlterDropColumn:
 		if cmd.ColumnName != "" {
+			children++
+		}
+	case ast.AlterCommentColumn:
+		if cmd.ColumnName != "" {
+			children++
+		}
+		if cmd.Comment != "" {
 			children++
 		}
 	case ast.AlterRenameColumn:
