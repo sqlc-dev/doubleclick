@@ -1973,6 +1973,9 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		create.Engine = p.parseEngineClause()
 	}
 
+	// Parse table options (ORDER BY, PRIMARY KEY, etc.) for materialized views
+	p.parseTableOptions(create)
+
 	// Parse POPULATE (for materialized views)
 	if p.currentIs(token.POPULATE) {
 		create.Populate = true
