@@ -277,6 +277,7 @@ func formatBinaryExprForType(expr *ast.BinaryExpr) string {
 func NormalizeFunctionName(name string) string {
 	// ClickHouse normalizes certain function names in EXPLAIN AST
 	normalized := map[string]string{
+		"trim":       "trimBoth",
 		"ltrim":      "trimLeft",
 		"rtrim":      "trimRight",
 		"lcase":      "lower",
