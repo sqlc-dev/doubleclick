@@ -659,22 +659,28 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 
 	// Determine if the IN list should be combined into a single tuple literal
 	// This happens when we have multiple literals of compatible types:
-	// - All numeric literals/expressions (integers/floats, including unary minus)
-	// - All string literals
+	// - All numeric literals/expressions (integers/floats, including unary minus) + NULLs
+	// - All string literals + NULLs
 	// - All tuple literals that contain only primitive literals (recursively)
 	canBeTupleLiteral := false
 	if n.Query == nil && len(n.List) > 1 {
-		allNumeric := true
-		allStrings := true
+		allNumericOrNull := true
+		allStringsOrNull := true
 		allTuples := true
 		allTuplesArePrimitive := true
+		hasNonNull := false // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
+				if lit.Type == ast.LiteralNull {
+					// NULL is compatible with both numeric and string lists
+					continue
+				}
+				hasNonNull = true
 				if lit.Type != ast.LiteralInteger && lit.Type != ast.LiteralFloat {
-					allNumeric = false
+					allNumericOrNull = false
 				}
 				if lit.Type != ast.LiteralString {
-					allStrings = false
+					allStringsOrNull = false
 				}
 				if lit.Type != ast.LiteralTuple {
 					allTuples = false
@@ -686,17 +692,18 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				}
 			} else if isNumericExpr(item) {
 				// Unary minus of numeric is still numeric
-				allStrings = false
+				hasNonNull = true
+				allStringsOrNull = false
 				allTuples = false
 			} else {
-				allNumeric = false
-				allStrings = false
+				allNumericOrNull = false
+				allStringsOrNull = false
 				allTuples = false
 				break
 			}
 		}
 		// For tuples, only combine if all contain primitive literals
-		canBeTupleLiteral = allNumeric || allStrings || (allTuples && allTuplesArePrimitive)
+		canBeTupleLiteral = hasNonNull && (allNumericOrNull || allStringsOrNull || (allTuples && allTuplesArePrimitive))
 	}
 
 	// Count arguments: expr + list items or subquery
@@ -814,17 +821,23 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 	const maxStringTupleSizeWithAlias = 10
 	canBeTupleLiteral := false
 	if n.Query == nil && len(n.List) > 1 {
-		allNumeric := true
-		allStrings := true
+		allNumericOrNull := true
+		allStringsOrNull := true
 		allTuples := true
 		allTuplesArePrimitive := true
+		hasNonNull := false // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
+				if lit.Type == ast.LiteralNull {
+					// NULL is compatible with both numeric and string lists
+					continue
+				}
+				hasNonNull = true
 				if lit.Type != ast.LiteralInteger && lit.Type != ast.LiteralFloat {
-					allNumeric = false
+					allNumericOrNull = false
 				}
 				if lit.Type != ast.LiteralString {
-					allStrings = false
+					allStringsOrNull = false
 				}
 				if lit.Type != ast.LiteralTuple {
 					allTuples = false
@@ -834,16 +847,17 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 					}
 				}
 			} else if isNumericExpr(item) {
-				allStrings = false
+				hasNonNull = true
+				allStringsOrNull = false
 				allTuples = false
 			} else {
-				allNumeric = false
-				allStrings = false
+				allNumericOrNull = false
+				allStringsOrNull = false
 				allTuples = false
 				break
 			}
 		}
-		canBeTupleLiteral = allNumeric || (allStrings && len(n.List) <= maxStringTupleSizeWithAlias) || (allTuples && allTuplesArePrimitive)
+		canBeTupleLiteral = hasNonNull && (allNumericOrNull || (allStringsOrNull && len(n.List) <= maxStringTupleSizeWithAlias) || (allTuples && allTuplesArePrimitive))
 	}
 
 	// Count arguments
