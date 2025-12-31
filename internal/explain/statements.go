@@ -137,11 +137,16 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if hasDatabase {
 		children++ // additional identifier for database
 	}
-	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Constraints) > 0 {
+	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Projections) > 0 || len(n.Constraints) > 0 {
 		children++
 	}
-	if n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil {
+	hasStorageChild := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0
+	if hasStorageChild {
 		children++
+	}
+	// For materialized views with TO clause but no storage, count ViewTargets as a child
+	if n.Materialized && n.To != "" && !hasStorageChild {
+		children++ // ViewTargets
 	}
 	if n.AsSelect != nil {
 		children++
@@ -162,12 +167,15 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, name, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 	}
-	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Constraints) > 0 {
+	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Projections) > 0 || len(n.Constraints) > 0 {
 		childrenCount := 0
 		if len(n.Columns) > 0 {
 			childrenCount++
 		}
 		if len(n.Indexes) > 0 {
+			childrenCount++
+		}
+		if len(n.Projections) > 0 {
 			childrenCount++
 		}
 		if len(n.Constraints) > 0 {
@@ -194,6 +202,12 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Indexes))
 			for _, idx := range n.Indexes {
 				Index(sb, idx, depth+3)
+			}
+		}
+		if len(n.Projections) > 0 {
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Projections))
+			for _, proj := range n.Projections {
+				explainProjection(sb, proj, indent+"   ", depth+3)
 			}
 		}
 		// Output constraints wrapped in Constraint nodes
@@ -372,6 +386,10 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		if len(n.Settings) > 0 {
 			fmt.Fprintf(sb, "%s Set\n", storageIndent)
 		}
+	} else if n.Materialized && n.To != "" {
+		// For materialized views with TO clause but no storage definition,
+		// output just ViewTargets without children
+		fmt.Fprintf(sb, "%s ViewTargets\n", indent)
 	}
 	// For non-materialized views, output AsSelect after storage
 	if n.AsSelect != nil && !n.Materialized {
@@ -394,6 +412,36 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 	// DROP FUNCTION has a special output format
 	if n.Function != "" {
 		fmt.Fprintf(sb, "%sDropFunctionQuery\n", indent)
+		return
+	}
+
+	// DROP ROLE
+	if n.Role != "" {
+		fmt.Fprintf(sb, "%sDROP ROLE query\n", indent)
+		return
+	}
+
+	// DROP QUOTA
+	if n.Quota != "" {
+		fmt.Fprintf(sb, "%sDROP QUOTA query\n", indent)
+		return
+	}
+
+	// DROP POLICY
+	if n.Policy != "" {
+		fmt.Fprintf(sb, "%sDROP POLICY query\n", indent)
+		return
+	}
+
+	// DROP ROW POLICY
+	if n.RowPolicy != "" {
+		fmt.Fprintf(sb, "%sDROP ROW POLICY query\n", indent)
+		return
+	}
+
+	// DROP SETTINGS PROFILE
+	if n.SettingsProfile != "" {
+		fmt.Fprintf(sb, "%sDROP SETTINGS PROFILE query\n", indent)
 		return
 	}
 
@@ -498,7 +546,31 @@ func explainSetQuery(sb *strings.Builder, indent string) {
 }
 
 func explainSystemQuery(sb *strings.Builder, n *ast.SystemQuery, indent string) {
-	fmt.Fprintf(sb, "%sSYSTEM query\n", indent)
+	// Some commands like FLUSH LOGS don't show the log name as a child
+	// For other commands, table/database names are shown as children
+	isFlushLogs := strings.HasPrefix(strings.ToUpper(n.Command), "FLUSH LOGS")
+
+	// Count children - database and table are children if present and not FLUSH LOGS
+	children := 0
+	if !isFlushLogs {
+		if n.Database != "" {
+			children++
+		}
+		if n.Table != "" {
+			children++
+		}
+	}
+	if children > 0 {
+		fmt.Fprintf(sb, "%sSYSTEM query (children %d)\n", indent, children)
+		if n.Database != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		}
+		if n.Table != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		}
+	} else {
+		fmt.Fprintf(sb, "%sSYSTEM query\n", indent)
+	}
 }
 
 func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string, depth int) {
@@ -554,15 +626,36 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 	// SHOW CREATE DICTIONARY has special output format
 	if n.ShowType == ast.ShowCreateDictionary && (n.Database != "" || n.From != "") {
 		if n.Database != "" && n.From != "" {
-			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery %s %s (children 2)\n", indent, n.Database, n.From)
+			children := 2
+			if n.HasSettings {
+				children++
+			}
+			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery %s %s (children %d)\n", indent, n.Database, n.From, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		} else if n.From != "" {
-			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery  %s (children 1)\n", indent, n.From)
+			children := 1
+			if n.HasSettings {
+				children++
+			}
+			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery  %s (children %d)\n", indent, n.From, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		} else if n.Database != "" {
-			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery  %s (children 1)\n", indent, n.Database)
+			children := 1
+			if n.HasSettings {
+				children++
+			}
+			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery  %s (children %d)\n", indent, n.Database, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		}
 		return
 	}
@@ -570,15 +663,36 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 	// SHOW CREATE VIEW has special output format
 	if n.ShowType == ast.ShowCreateView && (n.Database != "" || n.From != "") {
 		if n.Database != "" && n.From != "" {
-			fmt.Fprintf(sb, "%sShowCreateViewQuery %s %s (children 2)\n", indent, n.Database, n.From)
+			children := 2
+			if n.HasSettings {
+				children++
+			}
+			fmt.Fprintf(sb, "%sShowCreateViewQuery %s %s (children %d)\n", indent, n.Database, n.From, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		} else if n.From != "" {
-			fmt.Fprintf(sb, "%sShowCreateViewQuery  %s (children 1)\n", indent, n.From)
+			children := 1
+			if n.HasSettings {
+				children++
+			}
+			fmt.Fprintf(sb, "%sShowCreateViewQuery  %s (children %d)\n", indent, n.From, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		} else if n.Database != "" {
-			fmt.Fprintf(sb, "%sShowCreateViewQuery  %s (children 1)\n", indent, n.Database)
+			children := 1
+			if n.HasSettings {
+				children++
+			}
+			fmt.Fprintf(sb, "%sShowCreateViewQuery  %s (children %d)\n", indent, n.Database, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		}
 		return
 	}
@@ -590,7 +704,10 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 		if n.Database != "" && n.From != "" {
 			children := 2
 			if n.Format != "" {
-				children = 3
+				children++
+			}
+			if n.HasSettings {
+				children++
 			}
 			fmt.Fprintf(sb, "%sShowCreateTableQuery %s %s (children %d)\n", indent, n.Database, n.From, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
@@ -598,25 +715,40 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 			if n.Format != "" {
 				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
 			}
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		} else if n.From != "" {
 			children := 1
 			if n.Format != "" {
-				children = 2
+				children++
+			}
+			if n.HasSettings {
+				children++
 			}
 			fmt.Fprintf(sb, "%sShowCreateTableQuery  %s (children %d)\n", indent, name, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 			if n.Format != "" {
 				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
 			}
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
 		} else if n.Database != "" {
 			children := 1
 			if n.Format != "" {
-				children = 2
+				children++
+			}
+			if n.HasSettings {
+				children++
 			}
 			fmt.Fprintf(sb, "%sShowCreateTableQuery  %s (children %d)\n", indent, n.Database, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 			if n.Format != "" {
 				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+			}
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
 			}
 		} else {
 			fmt.Fprintf(sb, "%sShow%s\n", indent, showType)
@@ -916,7 +1048,7 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		}
 	case ast.AlterAddProjection:
 		if cmd.Projection != nil {
-			explainProjection(sb, cmd.Projection, indent, depth+1)
+			explainProjection(sb, cmd.Projection, indent+" ", depth+1)
 		}
 	case ast.AlterDropProjection, ast.AlterMaterializeProjection, ast.AlterClearProjection:
 		if cmd.ProjectionName != "" {
@@ -938,9 +1070,9 @@ func explainProjection(sb *strings.Builder, p *ast.Projection, indent string, de
 	if p.Select != nil {
 		children++
 	}
-	fmt.Fprintf(sb, "%s Projection (children %d)\n", indent, children)
+	fmt.Fprintf(sb, "%sProjection (children %d)\n", indent, children)
 	if p.Select != nil {
-		explainProjectionSelectQuery(sb, p.Select, indent+"  ", depth+1)
+		explainProjectionSelectQuery(sb, p.Select, indent+" ", depth+1)
 	}
 }
 
@@ -949,7 +1081,7 @@ func explainProjectionSelectQuery(sb *strings.Builder, q *ast.ProjectionSelectQu
 	if len(q.Columns) > 0 {
 		children++
 	}
-	if q.OrderBy != nil {
+	if len(q.OrderBy) > 0 {
 		children++
 	}
 	if len(q.GroupBy) > 0 {
@@ -962,8 +1094,18 @@ func explainProjectionSelectQuery(sb *strings.Builder, q *ast.ProjectionSelectQu
 			Node(sb, col, depth+2)
 		}
 	}
-	if q.OrderBy != nil {
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, q.OrderBy.Parts[len(q.OrderBy.Parts)-1])
+	if len(q.OrderBy) > 0 {
+		if len(q.OrderBy) == 1 {
+			// Single column: just output as Identifier
+			Node(sb, q.OrderBy[0], depth+1)
+		} else {
+			// Multiple columns: wrap in Function tuple
+			fmt.Fprintf(sb, "%s Function tuple (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(q.OrderBy))
+			for _, col := range q.OrderBy {
+				Node(sb, col, depth+3)
+			}
+		}
 	}
 	if len(q.GroupBy) > 0 {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(q.GroupBy))

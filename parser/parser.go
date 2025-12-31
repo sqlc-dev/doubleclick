@@ -131,6 +131,22 @@ func (p *Parser) parseStatement() ast.Statement {
 		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "PROFILE" {
 			return p.parseDropSettingsProfile()
 		}
+		// Check for DROP ROW POLICY or DROP POLICY
+		if p.peek.Token == token.IDENT && (strings.ToUpper(p.peek.Value) == "ROW" || strings.ToUpper(p.peek.Value) == "POLICY") {
+			return p.parseDropRowPolicy()
+		}
+		// Check for DROP ROLE
+		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "ROLE" {
+			return p.parseDropRole()
+		}
+		// Check for DROP RESOURCE
+		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "RESOURCE" {
+			return p.parseDropResource()
+		}
+		// Check for DROP WORKLOAD
+		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "WORKLOAD" {
+			return p.parseDropWorkload()
+		}
 		return p.parseDrop()
 	case token.ALTER:
 		// Check for ALTER USER
@@ -144,6 +160,14 @@ func (p *Parser) parseStatement() ast.Statement {
 		// Check for ALTER PROFILE
 		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "PROFILE" {
 			return p.parseAlterSettingsProfile()
+		}
+		// Check for ALTER ROW POLICY or ALTER POLICY
+		if p.peek.Token == token.IDENT && (strings.ToUpper(p.peek.Value) == "ROW" || strings.ToUpper(p.peek.Value) == "POLICY") {
+			return p.parseAlterRowPolicy()
+		}
+		// Check for ALTER ROLE
+		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "ROLE" {
+			return p.parseAlterRole()
 		}
 		return p.parseAlter()
 	case token.TRUNCATE:
@@ -1146,12 +1170,13 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 	if p.currentIs(token.LPAREN) {
 		p.nextToken()
 		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-			if p.currentIs(token.IDENT) {
+			pos := p.current.Pos
+			colName := p.parseIdentifierName()
+			if colName != "" {
 				ins.Columns = append(ins.Columns, &ast.Identifier{
-					Position: p.current.Pos,
-					Parts:    []string{p.current.Value},
+					Position: pos,
+					Parts:    []string{colName},
 				})
-				p.nextToken()
 			}
 			if p.currentIs(token.COMMA) {
 				p.nextToken()
@@ -1352,7 +1377,22 @@ func (p *Parser) parseCreate() ast.Statement {
 		case "PROFILE":
 			// CREATE PROFILE (without SETTINGS keyword)
 			return p.parseCreateSettingsProfile(pos)
-		case "RESOURCE", "WORKLOAD", "POLICY", "ROLE", "QUOTA":
+		case "ROW":
+			// CREATE ROW POLICY
+			return p.parseCreateRowPolicy(pos)
+		case "POLICY":
+			// CREATE POLICY (without ROW keyword)
+			return p.parseCreateRowPolicy(pos)
+		case "ROLE":
+			// CREATE ROLE
+			return p.parseCreateRole(pos)
+		case "RESOURCE":
+			// CREATE RESOURCE
+			return p.parseCreateResource(pos)
+		case "WORKLOAD":
+			// CREATE WORKLOAD
+			return p.parseCreateWorkload(pos)
+		case "QUOTA":
 			// Skip these statements - just consume tokens until semicolon
 			p.parseCreateGeneric(create)
 		default:
@@ -1473,21 +1513,11 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 					create.Indexes = append(create.Indexes, idx)
 				}
 			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
-				// Skip PROJECTION definitions: PROJECTION name (SELECT ...)
+				// Parse PROJECTION definitions: PROJECTION name (SELECT ...)
 				p.nextToken() // skip PROJECTION
-				p.parseIdentifierName() // projection name
-				// Skip the (SELECT ...) part
-				if p.currentIs(token.LPAREN) {
-					depth := 1
-					p.nextToken()
-					for depth > 0 && !p.currentIs(token.EOF) {
-						if p.currentIs(token.LPAREN) {
-							depth++
-						} else if p.currentIs(token.RPAREN) {
-							depth--
-						}
-						p.nextToken()
-					}
+				proj := p.parseProjection()
+				if proj != nil {
+					create.Projections = append(create.Projections, proj)
 				}
 			} else if p.currentIs(token.CONSTRAINT) {
 				// Parse CONSTRAINT name CHECK (expression)
@@ -2057,6 +2087,322 @@ func (p *Parser) parseShowCreateSettingsProfile(pos token.Position) *ast.ShowCre
 	}
 
 	// Skip the rest of the statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseCreateRowPolicy(pos token.Position) *ast.CreateRowPolicyQuery {
+	query := &ast.CreateRowPolicyQuery{
+		Position: pos,
+	}
+
+	// Skip ROW if present (CREATE ROW POLICY vs CREATE POLICY)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROW" {
+		p.nextToken()
+	}
+
+	// Skip POLICY
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "POLICY" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (policy names, ON table, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseDropRowPolicy() *ast.DropRowPolicyQuery {
+	query := &ast.DropRowPolicyQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip DROP
+
+	// Skip ROW if present (DROP ROW POLICY vs DROP POLICY)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROW" {
+		p.nextToken()
+	}
+
+	// Skip POLICY
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "POLICY" {
+		p.nextToken()
+	}
+
+	// Handle IF EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.EXISTS) {
+			query.IfExists = true
+			p.nextToken()
+		}
+	}
+
+	// Skip the rest of the statement (policy names, ON table, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseAlterRowPolicy() *ast.CreateRowPolicyQuery {
+	query := &ast.CreateRowPolicyQuery{
+		Position: p.current.Pos,
+		IsAlter:  true,
+	}
+
+	p.nextToken() // skip ALTER
+
+	// Skip ROW if present (ALTER ROW POLICY vs ALTER POLICY)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROW" {
+		p.nextToken()
+	}
+
+	// Skip POLICY
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "POLICY" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (policy names, ON table, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseShowCreateRowPolicy(pos token.Position) *ast.ShowCreateRowPolicyQuery {
+	query := &ast.ShowCreateRowPolicyQuery{
+		Position: pos,
+	}
+
+	// Skip ROW if present (SHOW CREATE ROW POLICY vs SHOW CREATE POLICY)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROW" {
+		p.nextToken()
+	}
+
+	// Skip POLICY
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "POLICY" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (policy names, ON table, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseCreateRole(pos token.Position) *ast.CreateRoleQuery {
+	query := &ast.CreateRoleQuery{
+		Position: pos,
+	}
+
+	// Skip ROLE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROLE" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (role names, SETTINGS, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseDropRole() *ast.DropRoleQuery {
+	query := &ast.DropRoleQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip DROP
+
+	// Skip ROLE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROLE" {
+		p.nextToken()
+	}
+
+	// Handle IF EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.EXISTS) {
+			query.IfExists = true
+			p.nextToken()
+		}
+	}
+
+	// Skip the rest of the statement (role names, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseAlterRole() *ast.CreateRoleQuery {
+	query := &ast.CreateRoleQuery{
+		Position: p.current.Pos,
+		IsAlter:  true,
+	}
+
+	p.nextToken() // skip ALTER
+
+	// Skip ROLE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROLE" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (role names, SETTINGS, RENAME TO, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseShowCreateRole(pos token.Position) *ast.ShowCreateRoleQuery {
+	query := &ast.ShowCreateRoleQuery{
+		Position:  pos,
+		RoleCount: 1, // Default to 1 role
+	}
+
+	// Skip ROLE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROLE" {
+		p.nextToken()
+	}
+
+	// Count role names (separated by commas)
+	// Skip first role name
+	for p.currentIs(token.IDENT) || p.currentIs(token.STRING) || p.current.Token.IsKeyword() {
+		p.nextToken()
+		// Handle role@host syntax
+		if p.currentIs(token.IDENT) && strings.HasPrefix(p.current.Value, "@") {
+			p.nextToken()
+		}
+		break
+	}
+
+	// Count additional roles
+	for p.currentIs(token.COMMA) {
+		query.RoleCount++
+		p.nextToken()
+		// Skip role name
+		for p.currentIs(token.IDENT) || p.currentIs(token.STRING) || p.current.Token.IsKeyword() {
+			p.nextToken()
+			// Handle role@host syntax
+			if p.currentIs(token.IDENT) && strings.HasPrefix(p.current.Value, "@") {
+				p.nextToken()
+			}
+			break
+		}
+	}
+
+	// Skip the rest of the statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseCreateResource(pos token.Position) *ast.CreateResourceQuery {
+	query := &ast.CreateResourceQuery{
+		Position: pos,
+	}
+
+	// Skip RESOURCE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "RESOURCE" {
+		p.nextToken()
+	}
+
+	// Get resource name
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		query.Name = p.current.Value
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (resource definition, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseDropResource() *ast.DropResourceQuery {
+	query := &ast.DropResourceQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip DROP
+
+	// Skip RESOURCE
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "RESOURCE" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (IF EXISTS, name, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseCreateWorkload(pos token.Position) *ast.CreateWorkloadQuery {
+	query := &ast.CreateWorkloadQuery{
+		Position: pos,
+	}
+
+	// Skip WORKLOAD
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "WORKLOAD" {
+		p.nextToken()
+	}
+
+	// Get workload name
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		query.Name = p.current.Value
+		p.nextToken()
+	}
+
+	// Check for IN (parent workload)
+	if p.currentIs(token.IN) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			query.Parent = p.current.Value
+			p.nextToken()
+		}
+	}
+
+	// Skip the rest of the statement (SETTINGS, etc.)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseDropWorkload() *ast.DropWorkloadQuery {
+	query := &ast.DropWorkloadQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip DROP
+
+	// Skip WORKLOAD
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "WORKLOAD" {
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (IF EXISTS, name, etc.)
 	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
 		p.nextToken()
 	}
@@ -2922,6 +3268,7 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROFILE" {
 			p.nextToken()
 		}
+		drop.SettingsProfile = "_pending_"
 	default:
 		// Handle multi-word DROP types: ROW POLICY, NAMED COLLECTION, DICTIONARY
 		if p.currentIs(token.IDENT) {
@@ -2930,8 +3277,26 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 			case "DICTIONARY":
 				dropDictionary = true
 				p.nextToken()
-			case "ROW", "NAMED", "POLICY", "QUOTA", "ROLE":
-				// Skip the DROP type tokens
+			case "ROW":
+				// DROP ROW POLICY
+				p.nextToken() // skip ROW
+				if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "POLICY" {
+					p.nextToken() // skip POLICY
+				}
+				// Mark as row policy drop - name will be set later
+				drop.RowPolicy = "_pending_"
+			case "POLICY":
+				// DROP POLICY
+				p.nextToken()
+				drop.Policy = "_pending_"
+			case "QUOTA":
+				p.nextToken()
+				drop.Quota = "_pending_"
+			case "ROLE":
+				p.nextToken()
+				drop.Role = "_pending_"
+			case "NAMED":
+				// DROP NAMED COLLECTION - skip tokens
 				for p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 					if p.currentIs(token.IF) {
 						break // Hit IF EXISTS
@@ -2980,6 +3345,16 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 			}
 		} else if dropFunction {
 			drop.Function = tableName
+		} else if drop.Role == "_pending_" {
+			drop.Role = tableName
+		} else if drop.Quota == "_pending_" {
+			drop.Quota = tableName
+		} else if drop.Policy == "_pending_" {
+			drop.Policy = tableName
+		} else if drop.RowPolicy == "_pending_" {
+			drop.RowPolicy = tableName
+		} else if drop.SettingsProfile == "_pending_" {
+			drop.SettingsProfile = tableName
 		} else if dropDictionary {
 			drop.Dictionary = tableName
 			// Also set Table/Tables for backward compatibility with AST JSON
@@ -3717,10 +4092,16 @@ func (p *Parser) parseShow() ast.Statement {
 		} else if p.currentIs(token.SETTINGS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROFILE") {
 			// SHOW CREATE SETTINGS PROFILE or SHOW CREATE PROFILE
 			return p.parseShowCreateSettingsProfile(pos)
+		} else if p.currentIs(token.IDENT) && (strings.ToUpper(p.current.Value) == "ROW" || strings.ToUpper(p.current.Value) == "POLICY") {
+			// SHOW CREATE ROW POLICY or SHOW CREATE POLICY
+			return p.parseShowCreateRowPolicy(pos)
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROLE" {
+			// SHOW CREATE ROLE
+			return p.parseShowCreateRole(pos)
 		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
 			show.ShowType = ast.ShowCreateDictionary
 			p.nextToken()
-		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "VIEW" {
+		} else if p.currentIs(token.VIEW) {
 			show.ShowType = ast.ShowCreateView
 			p.nextToken()
 		} else if p.currentIs(token.USER) {
@@ -3815,6 +4196,16 @@ func (p *Parser) parseShow() ast.Statement {
 		p.nextToken()
 		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 			show.Format = p.current.Value
+			p.nextToken()
+		}
+	}
+
+	// Parse SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		show.HasSettings = true
+		// Skip SETTINGS and all settings key-value pairs
+		p.nextToken()
+		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) {
 			p.nextToken()
 		}
 	}
@@ -3998,13 +4389,15 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 // isSystemCommandKeyword returns true if current token is a keyword that can be part of SYSTEM command
 func (p *Parser) isSystemCommandKeyword() bool {
 	switch p.current.Token {
-	case token.TTL, token.SYNC, token.DROP, token.FORMAT, token.FOR:
+	case token.TTL, token.SYNC, token.DROP, token.FORMAT, token.FOR, token.INDEX, token.INSERT,
+		token.PRIMARY, token.KEY:
 		return true
 	}
-	// Handle SCHEMA, CACHE as identifiers since they're not keyword tokens
+	// Handle SCHEMA, CACHE, QUEUE and other identifiers that are part of SYSTEM commands
 	if p.currentIs(token.IDENT) {
 		upper := strings.ToUpper(p.current.Value)
-		if upper == "SCHEMA" || upper == "CACHE" {
+		switch upper {
+		case "SCHEMA", "CACHE", "QUEUE":
 			return true
 		}
 	}
@@ -4301,6 +4694,14 @@ func (p *Parser) parseWindowDefinitions() []*ast.WindowDefinition {
 			}
 		}
 
+		// Parse frame specification (ROWS/RANGE/GROUPS)
+		if p.currentIs(token.IDENT) {
+			frameType := strings.ToUpper(p.current.Value)
+			if frameType == "ROWS" || frameType == "RANGE" || frameType == "GROUPS" {
+				spec.Frame = p.parseWindowFrame()
+			}
+		}
+
 		p.expect(token.RPAREN)
 		def.Spec = spec
 		defs = append(defs, def)
@@ -4592,13 +4993,22 @@ func (p *Parser) parseProjection() *ast.Projection {
 		if p.currentIs(token.BY) {
 			p.nextToken() // BY
 		}
-		// For projection ORDER BY, we just need the column name
-		if p.currentIs(token.IDENT) {
-			proj.Select.OrderBy = &ast.Identifier{
-				Position: p.current.Pos,
-				Parts:    []string{p.current.Value},
+		// Parse ORDER BY columns (comma-separated identifiers)
+		for !p.currentIs(token.EOF) && !p.currentIs(token.RPAREN) {
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				proj.Select.OrderBy = append(proj.Select.OrderBy, &ast.Identifier{
+					Position: p.current.Pos,
+					Parts:    []string{p.current.Value},
+				})
+				p.nextToken()
+			} else {
+				break
 			}
-			p.nextToken()
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
 		}
 	}
 

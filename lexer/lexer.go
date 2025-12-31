@@ -630,9 +630,10 @@ func (l *Lexer) readNumber() Item {
 		l.readChar()
 		if l.ch == 'x' || l.ch == 'X' {
 			// Hex literal (may include P notation for floats: 0x1p4, 0x1.2p-3)
+			// Also allows underscores as digit separators: 0xbad_cafe
 			sb.WriteRune(l.ch)
 			l.readChar()
-			for isHexDigit(l.ch) {
+			for isHexDigit(l.ch) || l.ch == '_' {
 				sb.WriteRune(l.ch)
 				l.readChar()
 			}
@@ -834,7 +835,8 @@ func (l *Lexer) readNumberOrIdent() Item {
 	if val == "0" && (l.ch == 'x' || l.ch == 'X') {
 		sb.WriteRune(l.ch)
 		l.readChar()
-		for isHexDigit(l.ch) {
+		// Also allow underscores as digit separators: 0xbad_cafe
+		for isHexDigit(l.ch) || l.ch == '_' {
 			sb.WriteRune(l.ch)
 			l.readChar()
 		}

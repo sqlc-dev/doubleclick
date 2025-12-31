@@ -74,7 +74,7 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	case *ast.Asterisk:
 		explainAsterisk(sb, n, indent, depth)
 	case *ast.ColumnsMatcher:
-		fmt.Fprintf(sb, "%sColumnsRegexpMatcher\n", indent)
+		explainColumnsMatcher(sb, n, indent, depth)
 
 	// Functions
 	case *ast.FunctionCall:
@@ -143,6 +143,41 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		} else {
 			fmt.Fprintf(sb, "%sSHOW CREATE SETTINGS PROFILE query\n", indent)
 		}
+	case *ast.CreateRowPolicyQuery:
+		fmt.Fprintf(sb, "%sCREATE ROW POLICY or ALTER ROW POLICY query\n", indent)
+	case *ast.DropRowPolicyQuery:
+		fmt.Fprintf(sb, "%sDROP ROW POLICY query\n", indent)
+	case *ast.ShowCreateRowPolicyQuery:
+		fmt.Fprintf(sb, "%sSHOW CREATE ROW POLICY query\n", indent)
+	case *ast.CreateRoleQuery:
+		fmt.Fprintf(sb, "%sCreateRoleQuery\n", indent)
+	case *ast.DropRoleQuery:
+		fmt.Fprintf(sb, "%sDROP ROLE query\n", indent)
+	case *ast.ShowCreateRoleQuery:
+		// Use ROLES (plural) when multiple roles are specified
+		if n.RoleCount > 1 {
+			fmt.Fprintf(sb, "%sSHOW CREATE ROLES query\n", indent)
+		} else {
+			fmt.Fprintf(sb, "%sSHOW CREATE ROLE query\n", indent)
+		}
+	case *ast.CreateResourceQuery:
+		fmt.Fprintf(sb, "%sCreateResourceQuery %s (children 1)\n", indent, n.Name)
+		childIndent := indent + " "
+		explainIdentifier(sb, &ast.Identifier{Parts: []string{n.Name}}, childIndent)
+	case *ast.DropResourceQuery:
+		fmt.Fprintf(sb, "%sDropResourceQuery\n", indent)
+	case *ast.CreateWorkloadQuery:
+		childIndent := indent + " "
+		if n.Parent != "" {
+			fmt.Fprintf(sb, "%sCreateWorkloadQuery %s (children 2)\n", indent, n.Name)
+			explainIdentifier(sb, &ast.Identifier{Parts: []string{n.Name}}, childIndent)
+			explainIdentifier(sb, &ast.Identifier{Parts: []string{n.Parent}}, childIndent)
+		} else {
+			fmt.Fprintf(sb, "%sCreateWorkloadQuery %s (children 1)\n", indent, n.Name)
+			explainIdentifier(sb, &ast.Identifier{Parts: []string{n.Name}}, childIndent)
+		}
+	case *ast.DropWorkloadQuery:
+		fmt.Fprintf(sb, "%sDropWorkloadQuery\n", indent)
 	case *ast.ShowGrantsQuery:
 		fmt.Fprintf(sb, "%sShowGrantsQuery\n", indent)
 	case *ast.GrantQuery:

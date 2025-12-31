@@ -180,6 +180,11 @@ func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
 		if upper == "INTERSECT" {
 			return expr
 		}
+		// Don't consume window frame keywords as implicit aliases
+		switch upper {
+		case "ROWS", "RANGE", "GROUPS", "UNBOUNDED", "PRECEDING", "FOLLOWING", "CURRENT":
+			return expr
+		}
 		alias := p.current.Value
 		p.nextToken()
 
@@ -298,8 +303,12 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 	case token.COLUMNS:
 		return p.parseColumnsMatcher()
 	case token.ARRAY:
-		// array(1,2,3) constructor
-		return p.parseArrayConstructor()
+		// array(1,2,3) constructor or array as identifier (column name)
+		if p.peekIs(token.LPAREN) {
+			return p.parseArrayConstructor()
+		}
+		// array used as identifier (column/variable name)
+		return p.parseKeywordAsIdentifier()
 	case token.IF:
 		// IF function
 		return p.parseIfFunction()
@@ -470,6 +479,15 @@ func (p *Parser) parseIdentifierOrFunction() ast.Expression {
 			} else {
 				break
 			}
+		} else if p.currentIs(token.COLON) {
+			// JSON subcolumn type accessor: json.field.:`TypeName` or json.field.:TypeName
+			p.nextToken() // skip :
+			typePart := ":"
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() || p.currentIs(token.STRING) {
+				typePart += "`" + p.current.Value + "`"
+				p.nextToken()
+			}
+			parts = append(parts, typePart)
 		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 			// Keywords can be used as column/field names (e.g., l_t.key, t.index)
 			parts = append(parts, p.current.Value)
@@ -817,11 +835,50 @@ func (p *Parser) parseSpecialNumber() ast.Expression {
 }
 
 func (p *Parser) parseUnaryMinus() ast.Expression {
+	pos := p.current.Pos
+	p.nextToken() // skip minus
+
+	// For negative number literals followed by ::, keep them together as a signed literal
+	// This matches ClickHouse's behavior where -0::Int16 becomes CAST('-0', 'Int16')
+	if p.currentIs(token.NUMBER) && p.peekIs(token.COLONCOLON) {
+		// Parse the number and create a "signed" literal
+		// We'll store the negative sign in the raw value
+		numVal := "-" + p.current.Value
+		lit := &ast.Literal{
+			Position: pos,
+			Type:     ast.LiteralInteger,
+			Negative: true, // Mark as explicitly negative for proper formatting
+		}
+		// Check if it's a float
+		if strings.Contains(numVal, ".") || strings.ContainsAny(numVal, "eE") {
+			f, _ := strconv.ParseFloat(numVal, 64)
+			lit.Type = ast.LiteralFloat
+			lit.Value = f
+		} else {
+			i, _ := strconv.ParseInt(numVal, 10, 64)
+			lit.Value = i
+		}
+		p.nextToken() // move past number
+		// Apply postfix operators like :: using the expression parsing loop
+		left := ast.Expression(lit)
+		for !p.currentIs(token.EOF) && LOWEST < p.precedenceForCurrent() {
+			startPos := p.current.Pos
+			left = p.parseInfixExpression(left)
+			if left == nil {
+				return nil
+			}
+			if p.current.Pos == startPos {
+				break
+			}
+		}
+		return left
+	}
+
+	// Standard unary minus handling
 	expr := &ast.UnaryExpr{
-		Position: p.current.Pos,
+		Position: pos,
 		Op:       "-",
 	}
-	p.nextToken()
 	expr.Operand = p.parseExpression(UNARY)
 	return expr
 }
@@ -1811,10 +1868,24 @@ func (p *Parser) parseColumnsMatcher() ast.Expression {
 		return nil
 	}
 
-	// Parse the pattern (string)
+	// Parse the arguments - either a string pattern or a list of identifiers
 	if p.currentIs(token.STRING) {
+		// String pattern: COLUMNS('pattern')
 		matcher.Pattern = p.current.Value
 		p.nextToken()
+	} else {
+		// Column list: COLUMNS(col1, col2, ...)
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			col := p.parseExpression(LOWEST)
+			if col != nil {
+				matcher.Columns = append(matcher.Columns, col)
+			}
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
+		}
 	}
 
 	p.expect(token.RPAREN)
@@ -1892,22 +1963,60 @@ func (p *Parser) parseKeywordAsFunction() ast.Expression {
 		return nil
 	}
 
-	var args []ast.Expression
+	fn := &ast.FunctionCall{
+		Position: pos,
+		Name:     name,
+	}
+
+	// Handle DISTINCT
+	if p.currentIs(token.DISTINCT) {
+		fn.Distinct = true
+		p.nextToken()
+	}
+
 	// Handle view() and similar functions that take a subquery as argument
 	if name == "view" && (p.currentIs(token.SELECT) || p.currentIs(token.WITH)) {
 		subquery := p.parseSelectWithUnion()
-		args = []ast.Expression{&ast.Subquery{Position: pos, Query: subquery}}
+		fn.Arguments = []ast.Expression{&ast.Subquery{Position: pos, Query: subquery}}
 	} else if !p.currentIs(token.RPAREN) {
-		args = p.parseExpressionList()
+		fn.Arguments = p.parseExpressionList()
 	}
 
 	p.expect(token.RPAREN)
 
-	return &ast.FunctionCall{
-		Position:  pos,
-		Name:      name,
-		Arguments: args,
+	// Handle IGNORE NULLS / RESPECT NULLS (window function modifiers)
+	for p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		if upper == "IGNORE" || upper == "RESPECT" {
+			p.nextToken()
+			if p.currentIs(token.NULLS) {
+				p.nextToken()
+			}
+		} else {
+			break
+		}
 	}
+
+	// Handle FILTER clause for aggregate functions: func() FILTER(WHERE condition)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "FILTER" {
+		p.nextToken() // skip FILTER
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			if p.currentIs(token.WHERE) {
+				p.nextToken() // skip WHERE
+				p.parseExpression(LOWEST)
+			}
+			p.expect(token.RPAREN)
+		}
+	}
+
+	// Handle OVER clause for window functions
+	if p.currentIs(token.OVER) {
+		p.nextToken()
+		fn.Over = p.parseWindowSpec()
+	}
+
+	return fn
 }
 
 func (p *Parser) parseKeywordAsIdentifier() ast.Expression {

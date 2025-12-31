@@ -585,6 +585,41 @@ func explainColumnsTransformers(sb *strings.Builder, n *ast.Asterisk, indent str
 	}
 }
 
+func explainColumnsMatcher(sb *strings.Builder, n *ast.ColumnsMatcher, indent string, depth int) {
+	// Determine the matcher type based on whether it's a pattern or a list
+	if len(n.Columns) > 0 {
+		// ColumnsListMatcher for COLUMNS(col1, col2, ...)
+		typeName := "ColumnsListMatcher"
+		if n.Qualifier != "" {
+			typeName = "QualifiedColumnsListMatcher"
+		}
+		if n.Qualifier != "" {
+			// QualifiedColumnsListMatcher has qualifier as a child
+			fmt.Fprintf(sb, "%s%s (children %d)\n", indent, typeName, 2)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Qualifier)
+		} else {
+			fmt.Fprintf(sb, "%s%s (children %d)\n", indent, typeName, 1)
+		}
+		// Output the columns as ExpressionList
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Columns))
+		for _, col := range n.Columns {
+			Node(sb, col, depth+2)
+		}
+	} else {
+		// ColumnsRegexpMatcher for COLUMNS('pattern')
+		typeName := "ColumnsRegexpMatcher"
+		if n.Qualifier != "" {
+			typeName = "QualifiedColumnsRegexpMatcher"
+		}
+		if n.Qualifier != "" {
+			fmt.Fprintf(sb, "%s%s (children %d)\n", indent, typeName, 1)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Qualifier)
+		} else {
+			fmt.Fprintf(sb, "%s%s\n", indent, typeName)
+		}
+	}
+}
+
 func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, depth int) {
 	// For WITH elements, we need to show the underlying expression with the name as alias
 	// When name is empty, don't show the alias part

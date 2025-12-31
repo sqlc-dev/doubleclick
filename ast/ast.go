@@ -253,6 +253,7 @@ type CreateQuery struct {
 	Populate         bool                 `json:"populate,omitempty"` // POPULATE for materialized views
 	Columns          []*ColumnDeclaration `json:"columns,omitempty"`
 	Indexes          []*IndexDefinition   `json:"indexes,omitempty"`
+	Projections      []*Projection        `json:"projections,omitempty"`
 	Constraints      []*Constraint        `json:"constraints,omitempty"`
 	Engine           *EngineClause        `json:"engine,omitempty"`
 	OrderBy          []Expression         `json:"order_by,omitempty"`
@@ -467,19 +468,24 @@ func (t *TTLClause) End() token.Position { return t.Position }
 
 // DropQuery represents a DROP statement.
 type DropQuery struct {
-	Position     token.Position     `json:"-"`
-	IfExists     bool               `json:"if_exists,omitempty"`
-	Database     string             `json:"database,omitempty"`
-	Table        string             `json:"table,omitempty"`
-	Tables       []*TableIdentifier `json:"tables,omitempty"` // For DROP TABLE t1, t2, t3
-	View         string             `json:"view,omitempty"`
-	User         string             `json:"user,omitempty"`
-	Function     string             `json:"function,omitempty"`   // For DROP FUNCTION
-	Dictionary   string             `json:"-"` // For DROP DICTIONARY (format only, not in AST JSON)
-	Temporary    bool               `json:"temporary,omitempty"`
-	OnCluster    string             `json:"on_cluster,omitempty"`
-	DropDatabase bool               `json:"drop_database,omitempty"`
-	Sync         bool               `json:"sync,omitempty"`
+	Position        token.Position     `json:"-"`
+	IfExists        bool               `json:"if_exists,omitempty"`
+	Database        string             `json:"database,omitempty"`
+	Table           string             `json:"table,omitempty"`
+	Tables          []*TableIdentifier `json:"tables,omitempty"` // For DROP TABLE t1, t2, t3
+	View            string             `json:"view,omitempty"`
+	User            string             `json:"user,omitempty"`
+	Function        string             `json:"function,omitempty"` // For DROP FUNCTION
+	Dictionary      string             `json:"-"`                  // For DROP DICTIONARY (format only, not in AST JSON)
+	Role            string             `json:"role,omitempty"`     // For DROP ROLE
+	Quota           string             `json:"quota,omitempty"`    // For DROP QUOTA
+	Policy          string             `json:"policy,omitempty"`   // For DROP POLICY
+	RowPolicy       string             `json:"row_policy,omitempty"` // For DROP ROW POLICY
+	SettingsProfile string             `json:"settings_profile,omitempty"` // For DROP SETTINGS PROFILE
+	Temporary       bool               `json:"temporary,omitempty"`
+	OnCluster       string             `json:"on_cluster,omitempty"`
+	DropDatabase    bool               `json:"drop_database,omitempty"`
+	Sync            bool               `json:"sync,omitempty"`
 }
 
 func (d *DropQuery) Pos() token.Position { return d.Position }
@@ -542,7 +548,7 @@ type ProjectionSelectQuery struct {
 	Position token.Position   `json:"-"`
 	Columns  []Expression     `json:"columns"`
 	GroupBy  []Expression     `json:"group_by,omitempty"`
-	OrderBy  *Identifier      `json:"order_by,omitempty"` // Single column for ORDER BY
+	OrderBy  []Expression     `json:"order_by,omitempty"` // ORDER BY columns
 }
 
 // Assignment represents a column assignment in UPDATE.
@@ -657,14 +663,15 @@ func (d *DescribeQuery) statementNode()      {}
 
 // ShowQuery represents a SHOW statement.
 type ShowQuery struct {
-	Position  token.Position `json:"-"`
-	ShowType  ShowType       `json:"show_type"`
-	Database  string         `json:"database,omitempty"`
-	From      string         `json:"from,omitempty"`
-	Like      string         `json:"like,omitempty"`
-	Where     Expression     `json:"where,omitempty"`
-	Limit     Expression     `json:"limit,omitempty"`
-	Format    string         `json:"format,omitempty"`
+	Position    token.Position `json:"-"`
+	ShowType    ShowType       `json:"show_type"`
+	Database    string         `json:"database,omitempty"`
+	From        string         `json:"from,omitempty"`
+	Like        string         `json:"like,omitempty"`
+	Where       Expression     `json:"where,omitempty"`
+	Limit       Expression     `json:"limit,omitempty"`
+	Format      string         `json:"format,omitempty"`
+	HasSettings bool           `json:"has_settings,omitempty"` // Whether SETTINGS clause was specified
 }
 
 func (s *ShowQuery) Pos() token.Position { return s.Position }
@@ -901,6 +908,104 @@ func (s *ShowCreateSettingsProfileQuery) Pos() token.Position { return s.Positio
 func (s *ShowCreateSettingsProfileQuery) End() token.Position { return s.Position }
 func (s *ShowCreateSettingsProfileQuery) statementNode()      {}
 
+// CreateRowPolicyQuery represents a CREATE ROW POLICY or ALTER ROW POLICY statement.
+type CreateRowPolicyQuery struct {
+	Position token.Position `json:"-"`
+	IsAlter  bool           `json:"is_alter,omitempty"`
+}
+
+func (c *CreateRowPolicyQuery) Pos() token.Position { return c.Position }
+func (c *CreateRowPolicyQuery) End() token.Position { return c.Position }
+func (c *CreateRowPolicyQuery) statementNode()      {}
+
+// DropRowPolicyQuery represents a DROP ROW POLICY statement.
+type DropRowPolicyQuery struct {
+	Position token.Position `json:"-"`
+	IfExists bool           `json:"if_exists,omitempty"`
+}
+
+func (d *DropRowPolicyQuery) Pos() token.Position { return d.Position }
+func (d *DropRowPolicyQuery) End() token.Position { return d.Position }
+func (d *DropRowPolicyQuery) statementNode()      {}
+
+// ShowCreateRowPolicyQuery represents a SHOW CREATE ROW POLICY statement.
+type ShowCreateRowPolicyQuery struct {
+	Position token.Position `json:"-"`
+}
+
+func (s *ShowCreateRowPolicyQuery) Pos() token.Position { return s.Position }
+func (s *ShowCreateRowPolicyQuery) End() token.Position { return s.Position }
+func (s *ShowCreateRowPolicyQuery) statementNode()      {}
+
+// CreateRoleQuery represents a CREATE ROLE or ALTER ROLE statement.
+type CreateRoleQuery struct {
+	Position token.Position `json:"-"`
+	IsAlter  bool           `json:"is_alter,omitempty"`
+}
+
+func (c *CreateRoleQuery) Pos() token.Position { return c.Position }
+func (c *CreateRoleQuery) End() token.Position { return c.Position }
+func (c *CreateRoleQuery) statementNode()      {}
+
+// DropRoleQuery represents a DROP ROLE statement.
+type DropRoleQuery struct {
+	Position token.Position `json:"-"`
+	IfExists bool           `json:"if_exists,omitempty"`
+}
+
+func (d *DropRoleQuery) Pos() token.Position { return d.Position }
+func (d *DropRoleQuery) End() token.Position { return d.Position }
+func (d *DropRoleQuery) statementNode()      {}
+
+// ShowCreateRoleQuery represents a SHOW CREATE ROLE statement.
+type ShowCreateRoleQuery struct {
+	Position  token.Position `json:"-"`
+	RoleCount int            `json:"role_count,omitempty"` // Number of roles specified
+}
+
+func (s *ShowCreateRoleQuery) Pos() token.Position { return s.Position }
+func (s *ShowCreateRoleQuery) End() token.Position { return s.Position }
+func (s *ShowCreateRoleQuery) statementNode()      {}
+
+// CreateResourceQuery represents a CREATE RESOURCE statement.
+type CreateResourceQuery struct {
+	Position token.Position `json:"-"`
+	Name     string         `json:"name"`
+}
+
+func (c *CreateResourceQuery) Pos() token.Position { return c.Position }
+func (c *CreateResourceQuery) End() token.Position { return c.Position }
+func (c *CreateResourceQuery) statementNode()      {}
+
+// DropResourceQuery represents a DROP RESOURCE statement.
+type DropResourceQuery struct {
+	Position token.Position `json:"-"`
+}
+
+func (d *DropResourceQuery) Pos() token.Position { return d.Position }
+func (d *DropResourceQuery) End() token.Position { return d.Position }
+func (d *DropResourceQuery) statementNode()      {}
+
+// CreateWorkloadQuery represents a CREATE WORKLOAD statement.
+type CreateWorkloadQuery struct {
+	Position token.Position `json:"-"`
+	Name     string         `json:"name"`
+	Parent   string         `json:"parent,omitempty"` // Parent workload name (after IN)
+}
+
+func (c *CreateWorkloadQuery) Pos() token.Position { return c.Position }
+func (c *CreateWorkloadQuery) End() token.Position { return c.Position }
+func (c *CreateWorkloadQuery) statementNode()      {}
+
+// DropWorkloadQuery represents a DROP WORKLOAD statement.
+type DropWorkloadQuery struct {
+	Position token.Position `json:"-"`
+}
+
+func (d *DropWorkloadQuery) Pos() token.Position { return d.Position }
+func (d *DropWorkloadQuery) End() token.Position { return d.Position }
+func (d *DropWorkloadQuery) statementNode()      {}
+
 // CreateIndexQuery represents a CREATE INDEX statement.
 type CreateIndexQuery struct {
 	Position  token.Position `json:"-"`
@@ -959,6 +1064,7 @@ type Literal struct {
 	Position token.Position `json:"-"`
 	Type     LiteralType    `json:"type"`
 	Value    interface{}    `json:"value"`
+	Negative bool           `json:"negative,omitempty"` // True if literal was explicitly negative (for -0)
 }
 
 func (l *Literal) Pos() token.Position { return l.Position }
@@ -1036,11 +1142,15 @@ type ReplaceExpr struct {
 func (r *ReplaceExpr) Pos() token.Position { return r.Position }
 func (r *ReplaceExpr) End() token.Position { return r.Position }
 
-// ColumnsMatcher represents COLUMNS('pattern') expression.
+// ColumnsMatcher represents COLUMNS('pattern') or COLUMNS(col1, col2) expression.
+// When Pattern is set, it's a regex matcher (ColumnsRegexpMatcher in explain).
+// When Columns is set, it's a list matcher (ColumnsListMatcher in explain).
 type ColumnsMatcher struct {
-	Position token.Position `json:"-"`
-	Pattern  string         `json:"pattern"`
-	Except   []string       `json:"except,omitempty"`
+	Position  token.Position `json:"-"`
+	Pattern   string         `json:"pattern,omitempty"`
+	Columns   []Expression   `json:"columns,omitempty"` // For COLUMNS(id, name) syntax
+	Except    []string       `json:"except,omitempty"`
+	Qualifier string         `json:"qualifier,omitempty"` // For qualified matchers like table.COLUMNS(...)
 }
 
 func (c *ColumnsMatcher) Pos() token.Position { return c.Position }
