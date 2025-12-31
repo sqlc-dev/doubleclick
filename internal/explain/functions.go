@@ -1311,8 +1311,16 @@ func parseIntervalString(s string) (value string, unit string) {
 }
 
 func explainExistsExpr(sb *strings.Builder, n *ast.ExistsExpr, indent string, depth int) {
+	explainExistsExprWithAlias(sb, n, "", indent, depth)
+}
+
+func explainExistsExprWithAlias(sb *strings.Builder, n *ast.ExistsExpr, alias string, indent string, depth int) {
 	// EXISTS is represented as Function exists
-	fmt.Fprintf(sb, "%sFunction exists (children %d)\n", indent, 1)
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction exists (alias %s) (children %d)\n", indent, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction exists (children %d)\n", indent, 1)
+	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 	fmt.Fprintf(sb, "%s  Subquery (children %d)\n", indent, 1)
 	Node(sb, n.Query, depth+3)
