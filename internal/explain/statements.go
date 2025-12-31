@@ -99,15 +99,25 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		return
 	}
 	if n.CreateDictionary {
-		// Dictionary: count children = identifier + attributes (if any) + definition (if any)
-		children := 1 // identifier
+		// Dictionary: count children = database identifier (if any) + table identifier + attributes (if any) + definition (if any)
+		children := 1 // table identifier
+		hasDatabase := n.Database != ""
+		if hasDatabase {
+			children++ // database identifier
+		}
 		if len(n.DictionaryAttrs) > 0 {
 			children++
 		}
 		if n.DictionaryDef != nil {
 			children++
 		}
-		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, n.Table, children)
+		// Format: "CreateQuery [database] [table] (children N)"
+		if hasDatabase {
+			fmt.Fprintf(sb, "%sCreateQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		} else {
+			fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, n.Table, children)
+		}
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 		// Dictionary attributes
 		if len(n.DictionaryAttrs) > 0 {
