@@ -3319,9 +3319,20 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 	}
 
 	// Parse column name (can be identifier or keyword like KEY)
+	// Also handles nested column names like n.y
 	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		col.Name = p.current.Value
 		p.nextToken()
+		// Handle nested column names (e.g., n.y for nested columns)
+		for p.currentIs(token.DOT) {
+			p.nextToken() // skip .
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				col.Name += "." + p.current.Value
+				p.nextToken()
+			} else {
+				break
+			}
+		}
 	} else {
 		return nil
 	}
