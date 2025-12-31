@@ -24,7 +24,7 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 			children++ // Database identifier (separate from table)
 		}
 	}
-	if len(n.Columns) > 0 {
+	if len(n.Columns) > 0 || n.AllColumns {
 		children++ // Column list
 	}
 	if n.Select != nil {
@@ -58,7 +58,10 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 	}
 
 	// Column list
-	if len(n.Columns) > 0 {
+	if n.AllColumns {
+		fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", indent)
+		fmt.Fprintf(sb, "%s  Asterisk\n", indent)
+	} else if len(n.Columns) > 0 {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Columns))
 		for _, col := range n.Columns {
 			fmt.Fprintf(sb, "%s  Identifier %s\n", indent, col.Parts[len(col.Parts)-1])
@@ -92,22 +95,42 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if n.CreateUser || n.AlterUser {
 		if n.HasAuthenticationData {
 			fmt.Fprintf(sb, "%sCreateUserQuery (children 1)\n", indent)
-			fmt.Fprintf(sb, "%s AuthenticationData\n", indent)
+			// AuthenticationData has children if there are auth values
+			if len(n.AuthenticationValues) > 0 {
+				fmt.Fprintf(sb, "%s AuthenticationData (children %d)\n", indent, len(n.AuthenticationValues))
+				for _, val := range n.AuthenticationValues {
+					// Escape the value - strings need \' escaping
+					escaped := escapeStringLiteral(val)
+					fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, escaped)
+				}
+			} else {
+				fmt.Fprintf(sb, "%s AuthenticationData\n", indent)
+			}
 		} else {
 			fmt.Fprintf(sb, "%sCreateUserQuery\n", indent)
 		}
 		return
 	}
 	if n.CreateDictionary {
-		// Dictionary: count children = identifier + attributes (if any) + definition (if any)
-		children := 1 // identifier
+		// Dictionary: count children = database identifier (if any) + table identifier + attributes (if any) + definition (if any)
+		children := 1 // table identifier
+		hasDatabase := n.Database != ""
+		if hasDatabase {
+			children++ // database identifier
+		}
 		if len(n.DictionaryAttrs) > 0 {
 			children++
 		}
 		if n.DictionaryDef != nil {
 			children++
 		}
-		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, n.Table, children)
+		// Format: "CreateQuery [database] [table] (children N)"
+		if hasDatabase {
+			fmt.Fprintf(sb, "%sCreateQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		} else {
+			fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, n.Table, children)
+		}
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 		// Dictionary attributes
 		if len(n.DictionaryAttrs) > 0 {
@@ -945,26 +968,34 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 		return
 	}
 
-	name := n.Table
+	children := 2 // ExpressionList + Identifier for table
 	if n.Database != "" {
-		name = n.Database + "." + n.Table
+		children = 3 // ExpressionList + Identifier for database + Identifier for table
+		fmt.Fprintf(sb, "%sAlterQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
+	} else {
+		fmt.Fprintf(sb, "%sAlterQuery  %s (children %d)\n", indent, n.Table, children)
 	}
 
-	children := 2
-	fmt.Fprintf(sb, "%sAlterQuery  %s (children %d)\n", indent, name, children)
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Commands))
 	for _, cmd := range n.Commands {
 		explainAlterCommand(sb, cmd, indent+"  ", depth+2)
 	}
-	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+	if n.Database != "" {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+	}
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 }
 
 func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent string, depth int) {
 	children := countAlterCommandChildren(cmd)
-	// CLEAR_STATISTICS is normalized to DROP_STATISTICS in EXPLAIN AST output
+	// Normalize command types to match ClickHouse EXPLAIN AST output
 	cmdType := cmd.Type
 	if cmdType == ast.AlterClearStatistics {
 		cmdType = ast.AlterDropStatistics
+	}
+	// DETACH_PARTITION is shown as DROP_PARTITION in EXPLAIN AST
+	if cmdType == ast.AlterDetachPartition {
+		cmdType = ast.AlterDropPartition
 	}
 	fmt.Fprintf(sb, "%sAlterCommand %s (children %d)\n", indent, cmdType, children)
 
@@ -1005,6 +1036,9 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		if cmd.ColumnName != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ColumnName)
 		}
+		if cmd.Comment != "" {
+			fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, escapeStringLiteral(cmd.Comment))
+		}
 	case ast.AlterAddIndex, ast.AlterDropIndex, ast.AlterClearIndex, ast.AlterMaterializeIndex:
 		if cmd.Index != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
@@ -1026,8 +1060,13 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
 		ast.AlterReplacePartition, ast.AlterFreezePartition:
 		if cmd.Partition != nil {
-			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
-			Node(sb, cmd.Partition, depth+2)
+			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
+			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
+				fmt.Fprintf(sb, "%s Partition_ID \n", indent)
+			} else {
+				fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+				Node(sb, cmd.Partition, depth+2)
+			}
 		}
 	case ast.AlterFreeze:
 		// No children
@@ -1168,8 +1207,15 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 		if cmd.AfterColumn != "" {
 			children++
 		}
-	case ast.AlterDropColumn, ast.AlterCommentColumn:
+	case ast.AlterDropColumn:
 		if cmd.ColumnName != "" {
+			children++
+		}
+	case ast.AlterCommentColumn:
+		if cmd.ColumnName != "" {
+			children++
+		}
+		if cmd.Comment != "" {
 			children++
 		}
 	case ast.AlterRenameColumn:
@@ -1207,7 +1253,10 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
 		ast.AlterReplacePartition, ast.AlterFreezePartition:
 		if cmd.Partition != nil {
-			children++
+			// PARTITION ALL doesn't count as a child (shown as Partition_ID empty)
+			if ident, ok := cmd.Partition.(*ast.Identifier); !ok || strings.ToUpper(ident.Name()) != "ALL" {
+				children++
+			}
 		}
 	case ast.AlterFreeze:
 		// No children
@@ -1257,6 +1306,9 @@ func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent stri
 	name := n.Table
 	if n.Final {
 		name += "_final"
+	}
+	if n.Cleanup {
+		name += "_cleanup"
 	}
 
 	children := 1 // identifier

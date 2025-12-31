@@ -49,7 +49,7 @@ func (p *Parser) precedence(tok token.Token) int {
 		return MUL_PREC
 	case token.LPAREN, token.LBRACKET:
 		return CALL
-	case token.EXCEPT, token.REPLACE:
+	case token.EXCEPT, token.REPLACE, token.APPLY:
 		return CALL // For asterisk modifiers
 	case token.COLONCOLON:
 		return CALL // Cast operator
@@ -418,6 +418,12 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 			return p.parseAsteriskReplace(asterisk)
 		}
 		return left
+	case token.APPLY:
+		// Handle * APPLY (func) or * APPLY func
+		if asterisk, ok := left.(*ast.Asterisk); ok {
+			return p.parseAsteriskApply(asterisk)
+		}
+		return left
 	case token.NUMBER:
 		// Handle tuple access like t.1 where .1 is lexed as a number
 		if strings.HasPrefix(p.current.Value, ".") {
@@ -506,6 +512,11 @@ func (p *Parser) parseIdentifierOrFunction() ast.Expression {
 
 	// Check for function call after qualified name
 	if p.currentIs(token.LPAREN) {
+		// Special case: qualified COLUMNS matcher (e.g., test_table.COLUMNS(id))
+		if len(parts) >= 2 && strings.ToUpper(parts[len(parts)-1]) == "COLUMNS" {
+			qualifier := strings.Join(parts[:len(parts)-1], ".")
+			return p.parseQualifiedColumnsMatcher(qualifier, pos)
+		}
 		return p.parseFunctionCall(strings.Join(parts, "."), pos)
 	}
 
@@ -745,6 +756,7 @@ func (p *Parser) parseNumber() ast.Expression {
 		} else {
 			lit.Type = ast.LiteralFloat
 			lit.Value = f
+			lit.Source = value // Preserve original source text (e.g., "0.0" vs "0")
 		}
 	} else if isHexFloat {
 		// Parse hex float (Go doesn't support this directly, approximate)
@@ -854,6 +866,7 @@ func (p *Parser) parseUnaryMinus() ast.Expression {
 			f, _ := strconv.ParseFloat(numVal, 64)
 			lit.Type = ast.LiteralFloat
 			lit.Value = f
+			lit.Source = numVal // Preserve original source text
 		} else {
 			i, _ := strconv.ParseInt(numVal, 10, 64)
 			lit.Value = i
@@ -1065,19 +1078,162 @@ func (p *Parser) parseCast() ast.Expression {
 	expr.Expr = p.parseExpression(ALIAS_PREC)
 
 	// Handle both CAST(x AS Type) and CAST(x, 'Type') or CAST(x, expr) syntax
+	// Also handle CAST(x AS alias AS Type) and CAST(x alias AS Type) where alias is for the expression
+	// And CAST(x AS alias, 'Type') and CAST(x alias, 'Type') for comma-style with aliased expression
 	if p.currentIs(token.AS) {
-		p.nextToken()
+		p.nextToken() // skip AS
+
+		// Check what comes after the identifier
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			if p.peekIs(token.AS) {
+				// "AS alias AS Type" pattern
+				alias := p.current.Value
+				p.nextToken() // skip alias
+				p.nextToken() // skip AS
+				expr.Expr = p.wrapWithAlias(expr.Expr, alias)
+				expr.Type = p.parseDataType()
+				expr.UsedASSyntax = true
+			} else if p.peekIs(token.COMMA) {
+				// "AS alias, 'Type'" pattern - comma-style with aliased expression
+				alias := p.current.Value
+				p.nextToken() // skip alias
+				p.nextToken() // skip comma
+				expr.Expr = p.wrapWithAlias(expr.Expr, alias)
+				// Parse type (which may also have an alias)
+				if p.currentIs(token.STRING) {
+					typeStr := p.current.Value
+					typePos := p.current.Pos
+					p.nextToken()
+					// Check for alias on the type string
+					if p.currentIs(token.AS) {
+						p.nextToken()
+						if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+							typeAlias := p.current.Value
+							p.nextToken()
+							expr.TypeExpr = &ast.AliasedExpr{
+								Position: typePos,
+								Expr:     &ast.Literal{Position: typePos, Type: ast.LiteralString, Value: typeStr},
+								Alias:    typeAlias,
+							}
+						} else {
+							expr.Type = &ast.DataType{Position: typePos, Name: typeStr}
+						}
+					} else if p.currentIs(token.IDENT) && !p.peekIs(token.LPAREN) && !p.peekIs(token.COMMA) {
+						// Implicit alias: cast('1234' AS lhs, 'UInt32' rhs)
+						typeAlias := p.current.Value
+						p.nextToken()
+						expr.TypeExpr = &ast.AliasedExpr{
+							Position: typePos,
+							Expr:     &ast.Literal{Position: typePos, Type: ast.LiteralString, Value: typeStr},
+							Alias:    typeAlias,
+						}
+					} else {
+						expr.Type = &ast.DataType{Position: typePos, Name: typeStr}
+					}
+				} else {
+					expr.TypeExpr = p.parseExpression(LOWEST)
+				}
+			} else {
+				// Just "AS Type"
+				expr.Type = p.parseDataType()
+				expr.UsedASSyntax = true
+			}
+		} else {
+			// Just "AS Type"
+			expr.Type = p.parseDataType()
+			expr.UsedASSyntax = true
+		}
+	} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peekIs(token.AS) {
+		// Handle "expr alias AS Type" pattern (alias without AS keyword)
+		alias := p.current.Value
+		p.nextToken() // skip alias
+		p.nextToken() // skip AS
+		expr.Expr = p.wrapWithAlias(expr.Expr, alias)
 		expr.Type = p.parseDataType()
 		expr.UsedASSyntax = true
+	} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peekIs(token.COMMA) {
+		// Handle "expr alias, 'Type'" pattern (alias without AS keyword, comma-style)
+		alias := p.current.Value
+		p.nextToken() // skip alias
+		p.nextToken() // skip comma
+		expr.Expr = p.wrapWithAlias(expr.Expr, alias)
+		// Parse type (which may also have an alias)
+		if p.currentIs(token.STRING) {
+			typeStr := p.current.Value
+			typePos := p.current.Pos
+			p.nextToken()
+			// Check for alias on the type string
+			if p.currentIs(token.AS) {
+				p.nextToken()
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					typeAlias := p.current.Value
+					p.nextToken()
+					expr.TypeExpr = &ast.AliasedExpr{
+						Position: typePos,
+						Expr:     &ast.Literal{Position: typePos, Type: ast.LiteralString, Value: typeStr},
+						Alias:    typeAlias,
+					}
+				} else {
+					expr.Type = &ast.DataType{Position: typePos, Name: typeStr}
+				}
+			} else if p.currentIs(token.IDENT) && !p.peekIs(token.LPAREN) && !p.peekIs(token.COMMA) {
+				// Implicit alias: cast('1234' lhs, 'UInt32' rhs)
+				typeAlias := p.current.Value
+				p.nextToken()
+				expr.TypeExpr = &ast.AliasedExpr{
+					Position: typePos,
+					Expr:     &ast.Literal{Position: typePos, Type: ast.LiteralString, Value: typeStr},
+					Alias:    typeAlias,
+				}
+			} else {
+				expr.Type = &ast.DataType{Position: typePos, Name: typeStr}
+			}
+		} else {
+			expr.TypeExpr = p.parseExpression(LOWEST)
+		}
 	} else if p.currentIs(token.COMMA) {
 		p.nextToken()
 		// Type can be given as a string literal or an expression (e.g., if(cond, 'Type1', 'Type2'))
+		// It can also have an alias like: cast('1234', 'UInt32' AS rhs)
 		if p.currentIs(token.STRING) {
-			expr.Type = &ast.DataType{
-				Position: p.current.Pos,
-				Name:     p.current.Value,
-			}
+			typeStr := p.current.Value
+			typePos := p.current.Pos
 			p.nextToken()
+			// Check for alias on the type string
+			if p.currentIs(token.AS) {
+				p.nextToken()
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					alias := p.current.Value
+					p.nextToken()
+					// Store as aliased literal in TypeExpr
+					expr.TypeExpr = &ast.AliasedExpr{
+						Position: typePos,
+						Expr: &ast.Literal{
+							Position: typePos,
+							Type:     ast.LiteralString,
+							Value:    typeStr,
+						},
+						Alias: alias,
+					}
+				} else {
+					expr.Type = &ast.DataType{Position: typePos, Name: typeStr}
+				}
+			} else if p.currentIs(token.IDENT) && !p.peekIs(token.LPAREN) && !p.peekIs(token.COMMA) {
+				// Implicit alias (no AS keyword): cast('1234', 'UInt32' rhs)
+				alias := p.current.Value
+				p.nextToken()
+				expr.TypeExpr = &ast.AliasedExpr{
+					Position: typePos,
+					Expr: &ast.Literal{
+						Position: typePos,
+						Type:     ast.LiteralString,
+						Value:    typeStr,
+					},
+					Alias: alias,
+				}
+			} else {
+				expr.Type = &ast.DataType{Position: typePos, Name: typeStr}
+			}
 		} else {
 			// Parse as expression for dynamic type casting
 			expr.TypeExpr = p.parseExpression(LOWEST)
@@ -1087,6 +1243,29 @@ func (p *Parser) parseCast() ast.Expression {
 	p.expect(token.RPAREN)
 
 	return expr
+}
+
+// wrapWithAlias wraps an expression with an alias, handling different expression types appropriately
+// If the expression already has an alias (e.g., AliasedExpr), the new alias replaces/overrides it
+func (p *Parser) wrapWithAlias(expr ast.Expression, alias string) ast.Expression {
+	switch e := expr.(type) {
+	case *ast.Identifier:
+		e.Alias = alias
+		return e
+	case *ast.FunctionCall:
+		e.Alias = alias
+		return e
+	case *ast.AliasedExpr:
+		// Replace the alias instead of double-wrapping
+		e.Alias = alias
+		return e
+	default:
+		return &ast.AliasedExpr{
+			Position: expr.Pos(),
+			Expr:     expr,
+			Alias:    alias,
+		}
+	}
 }
 
 func (p *Parser) parseExtract() ast.Expression {
@@ -1234,24 +1413,101 @@ func (p *Parser) parseSubstring() ast.Expression {
 		return nil
 	}
 
-	args := []ast.Expression{p.parseExpression(LOWEST)}
+	// Parse first argument (source string) - may have alias before FROM
+	// Use ALIAS_PREC to not consume AS
+	firstArg := p.parseExpression(ALIAS_PREC)
 
-	// Handle FROM
-	if p.currentIs(token.FROM) {
+	// Check for alias on first argument (AS alias or just alias before FROM)
+	if p.currentIs(token.AS) {
 		p.nextToken()
-		args = append(args, p.parseExpression(LOWEST))
-	} else if p.currentIs(token.COMMA) {
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			alias := p.current.Value
+			p.nextToken()
+			firstArg = p.wrapWithAlias(firstArg, alias)
+		}
+	} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && (p.peekIs(token.FROM) || p.peekIs(token.COMMA)) {
+		// Implicit alias before FROM or COMMA
+		alias := p.current.Value
 		p.nextToken()
-		args = append(args, p.parseExpression(LOWEST))
+		firstArg = p.wrapWithAlias(firstArg, alias)
 	}
 
-	// Handle FOR
-	if p.currentIs(token.FOR) {
+	args := []ast.Expression{firstArg}
+
+	// Handle FROM or COMMA for second argument
+	if p.currentIs(token.FROM) {
 		p.nextToken()
-		args = append(args, p.parseExpression(LOWEST))
+		// Parse start position - may have alias before FOR or )
+		startArg := p.parseExpression(ALIAS_PREC)
+		// Check for alias
+		if p.currentIs(token.AS) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				alias := p.current.Value
+				p.nextToken()
+				startArg = p.wrapWithAlias(startArg, alias)
+			}
+		} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && (p.peekIs(token.FOR) || p.peekIs(token.RPAREN)) {
+			alias := p.current.Value
+			p.nextToken()
+			startArg = p.wrapWithAlias(startArg, alias)
+		}
+		args = append(args, startArg)
 	} else if p.currentIs(token.COMMA) {
 		p.nextToken()
-		args = append(args, p.parseExpression(LOWEST))
+		// Parse second argument with possible alias
+		startArg := p.parseExpression(ALIAS_PREC)
+		if p.currentIs(token.AS) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				alias := p.current.Value
+				p.nextToken()
+				startArg = p.wrapWithAlias(startArg, alias)
+			}
+		} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && (p.peekIs(token.COMMA) || p.peekIs(token.RPAREN)) {
+			alias := p.current.Value
+			p.nextToken()
+			startArg = p.wrapWithAlias(startArg, alias)
+		}
+		args = append(args, startArg)
+	}
+
+	// Handle FOR or COMMA for third argument
+	if p.currentIs(token.FOR) {
+		p.nextToken()
+		// Parse length - may have alias before )
+		lenArg := p.parseExpression(ALIAS_PREC)
+		// Check for alias
+		if p.currentIs(token.AS) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				alias := p.current.Value
+				p.nextToken()
+				lenArg = p.wrapWithAlias(lenArg, alias)
+			}
+		} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peekIs(token.RPAREN) {
+			alias := p.current.Value
+			p.nextToken()
+			lenArg = p.wrapWithAlias(lenArg, alias)
+		}
+		args = append(args, lenArg)
+	} else if p.currentIs(token.COMMA) {
+		p.nextToken()
+		// Parse third argument with possible alias
+		lenArg := p.parseExpression(ALIAS_PREC)
+		if p.currentIs(token.AS) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				alias := p.current.Value
+				p.nextToken()
+				lenArg = p.wrapWithAlias(lenArg, alias)
+			}
+		} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peekIs(token.RPAREN) {
+			alias := p.current.Value
+			p.nextToken()
+			lenArg = p.wrapWithAlias(lenArg, alias)
+		}
+		args = append(args, lenArg)
 	}
 
 	p.expect(token.RPAREN)
@@ -1287,15 +1543,43 @@ func (p *Parser) parseTrim() ast.Expression {
 	}
 
 	// Parse characters to trim (if specified)
+	// Use ALIAS_PREC to not consume AS as alias
 	if !p.currentIs(token.FROM) && !p.currentIs(token.RPAREN) {
-		trimChars = p.parseExpression(LOWEST)
+		trimChars = p.parseExpression(ALIAS_PREC)
+		// Check for alias on trimChars
+		if p.currentIs(token.AS) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				alias := p.current.Value
+				p.nextToken()
+				trimChars = p.wrapWithAlias(trimChars, alias)
+			}
+		} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peekIs(token.FROM) {
+			alias := p.current.Value
+			p.nextToken()
+			trimChars = p.wrapWithAlias(trimChars, alias)
+		}
 	}
 
 	// FROM clause
 	var expr ast.Expression
 	if p.currentIs(token.FROM) {
 		p.nextToken()
-		expr = p.parseExpression(LOWEST)
+		// Parse expression with possible alias
+		expr = p.parseExpression(ALIAS_PREC)
+		// Check for alias
+		if p.currentIs(token.AS) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				alias := p.current.Value
+				p.nextToken()
+				expr = p.wrapWithAlias(expr, alias)
+			}
+		} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peekIs(token.RPAREN) {
+			alias := p.current.Value
+			p.nextToken()
+			expr = p.wrapWithAlias(expr, alias)
+		}
 	} else {
 		expr = trimChars
 		trimChars = nil
@@ -1310,6 +1594,8 @@ func (p *Parser) parseTrim() ast.Expression {
 		fnName = "trimLeft"
 	case "TRAILING":
 		fnName = "trimRight"
+	case "BOTH":
+		fnName = "trimBoth"
 	}
 
 	args := []ast.Expression{expr}
@@ -1910,6 +2196,58 @@ func (p *Parser) parseColumnsMatcher() ast.Expression {
 	return matcher
 }
 
+// parseQualifiedColumnsMatcher parses qualified COLUMNS matchers like test_table.COLUMNS(id)
+// The qualifier is passed in and we're already positioned at LPAREN
+func (p *Parser) parseQualifiedColumnsMatcher(qualifier string, pos token.Position) ast.Expression {
+	matcher := &ast.ColumnsMatcher{
+		Position:  pos,
+		Qualifier: qualifier,
+	}
+
+	p.nextToken() // skip LPAREN
+
+	// Parse the arguments - either a string pattern or a list of identifiers
+	if p.currentIs(token.STRING) {
+		// String pattern: COLUMNS('pattern')
+		matcher.Pattern = p.current.Value
+		p.nextToken()
+	} else {
+		// Column list: COLUMNS(col1, col2, ...)
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			col := p.parseExpression(LOWEST)
+			if col != nil {
+				matcher.Columns = append(matcher.Columns, col)
+			}
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
+		}
+	}
+
+	p.expect(token.RPAREN)
+
+	// Handle EXCEPT
+	if p.currentIs(token.EXCEPT) {
+		p.nextToken()
+		if p.expect(token.LPAREN) {
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				if p.currentIs(token.IDENT) {
+					matcher.Except = append(matcher.Except, p.current.Value)
+					p.nextToken()
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				}
+			}
+			p.expect(token.RPAREN)
+		}
+	}
+
+	return matcher
+}
+
 func (p *Parser) parseArrayConstructor() ast.Expression {
 	pos := p.current.Pos
 	p.nextToken() // skip ARRAY
@@ -2106,6 +2444,28 @@ func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 		} else if !hasParens {
 			break
 		}
+	}
+
+	if hasParens {
+		p.expect(token.RPAREN)
+	}
+
+	return asterisk
+}
+
+func (p *Parser) parseAsteriskApply(asterisk *ast.Asterisk) ast.Expression {
+	p.nextToken() // skip APPLY
+
+	// APPLY can have optional parentheses: * APPLY(func) or * APPLY func
+	hasParens := p.currentIs(token.LPAREN)
+	if hasParens {
+		p.nextToken() // skip (
+	}
+
+	// Parse function name (can be IDENT or keyword like sum, avg, etc.)
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		asterisk.Apply = append(asterisk.Apply, p.current.Value)
+		p.nextToken()
 	}
 
 	if hasParens {

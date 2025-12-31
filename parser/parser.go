@@ -37,7 +37,7 @@ func (p *Parser) nextToken() {
 	for {
 		p.peek = p.lexer.NextToken()
 		// Skip whitespace and comments
-		if p.peek.Token == token.WHITESPACE || p.peek.Token == token.COMMENT {
+		if p.peek.Token == token.WHITESPACE || p.peek.Token == token.LINE_COMMENT {
 			continue
 		}
 		break
@@ -87,6 +87,14 @@ func (p *Parser) ParseStatements(ctx context.Context) ([]ast.Statement, error) {
 		case <-ctx.Done():
 			return statements, ctx.Err()
 		default:
+		}
+
+		// Skip leading semicolons (empty statements)
+		for p.currentIs(token.SEMICOLON) {
+			p.nextToken()
+		}
+		if p.currentIs(token.EOF) {
+			break
 		}
 
 		stmt := p.parseStatement()
@@ -181,6 +189,10 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.EXPLAIN:
 		return p.parseExplain()
 	case token.SET:
+		// Check for SET TRANSACTION SNAPSHOT
+		if p.peekIs(token.TRANSACTION) {
+			return p.parseTransactionControl()
+		}
 		return p.parseSet()
 	case token.OPTIMIZE:
 		return p.parseOptimize()
@@ -203,6 +215,12 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseGrant()
 	case token.REVOKE:
 		return p.parseRevoke()
+	case token.BEGIN:
+		return p.parseTransactionControl()
+	case token.COMMIT:
+		return p.parseTransactionControl()
+	case token.ROLLBACK:
+		return p.parseTransactionControl()
 	default:
 		p.errors = append(p.errors, fmt.Errorf("unexpected token %s at line %d, column %d",
 			p.current.Token, p.current.Pos.Line, p.current.Pos.Column))
@@ -304,8 +322,7 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 	}
 
 	// Parse UNION/INTERSECT ALL/EXCEPT ALL clauses
-	for p.currentIs(token.UNION) || p.currentIs(token.EXCEPT) ||
-		(p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "INTERSECT") {
+	for p.currentIs(token.UNION) || p.currentIs(token.EXCEPT) || p.currentIs(token.INTERSECT) {
 		var setOp string
 		if p.currentIs(token.UNION) {
 			setOp = "UNION"
@@ -356,8 +373,7 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 // Only INTERSECT ALL and EXCEPT ALL are flattened (no wrapper).
 // INTERSECT DISTINCT, INTERSECT, EXCEPT DISTINCT, and EXCEPT all use the wrapper.
 func (p *Parser) isIntersectExceptWithWrapper() bool {
-	if !p.currentIs(token.EXCEPT) &&
-		!(p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "INTERSECT") {
+	if !p.currentIs(token.EXCEPT) && !p.currentIs(token.INTERSECT) {
 		return false
 	}
 	// INTERSECT ALL and EXCEPT ALL are flattened (no wrapper)
@@ -530,6 +546,8 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			// After LIMIT BY, there can be another LIMIT for overall output
 			if p.currentIs(token.LIMIT) {
 				p.nextToken()
+				// Save the LIMIT BY limit value (e.g., LIMIT 1 BY x -> LimitByLimit=1)
+				sel.LimitByLimit = sel.Limit
 				sel.Limit = p.parseExpression(LOWEST)
 				sel.LimitByHasLimit = true
 			}
@@ -549,6 +567,20 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		// Skip optional ROWS keyword
 		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROWS" {
 			p.nextToken()
+		}
+		// LIMIT n OFFSET m BY expr syntax - handle BY after OFFSET
+		if p.currentIs(token.BY) && sel.Limit != nil && len(sel.LimitBy) == 0 {
+			p.nextToken()
+			// Parse LIMIT BY expressions
+			for !p.isEndOfExpression() {
+				expr := p.parseExpression(LOWEST)
+				sel.LimitBy = append(sel.LimitBy, expr)
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
 		}
 	}
 
@@ -777,13 +809,10 @@ func (p *Parser) parseTablesInSelect() *ast.TablesInSelectQuery {
 }
 
 func (p *Parser) isJoinKeyword() bool {
-	// LEFT ARRAY JOIN is handled by parseArrayJoin, not as a regular join
-	if p.currentIs(token.LEFT) && p.peekIs(token.ARRAY) {
-		return false
-	}
 	switch p.current.Token {
 	case token.JOIN, token.INNER, token.LEFT, token.RIGHT, token.FULL, token.CROSS,
-		token.GLOBAL, token.ANY, token.ALL, token.ASOF, token.SEMI, token.ANTI, token.PASTE:
+		token.GLOBAL, token.ANY, token.ALL, token.ASOF, token.SEMI, token.ANTI, token.PASTE,
+		token.ARRAY:
 		return true
 	case token.COMMA:
 		return true
@@ -818,6 +847,12 @@ func (p *Parser) parseTableElementWithJoin() *ast.TablesInSelectQueryElement {
 				}
 			}
 		}
+		return elem
+	}
+
+	// Handle ARRAY JOIN or LEFT ARRAY JOIN
+	if p.currentIs(token.ARRAY) || (p.currentIs(token.LEFT) && p.peekIs(token.ARRAY)) {
+		elem.ArrayJoin = p.parseArrayJoin()
 		return elem
 	}
 
@@ -1169,19 +1204,25 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 	// Parse column list
 	if p.currentIs(token.LPAREN) {
 		p.nextToken()
-		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-			pos := p.current.Pos
-			colName := p.parseIdentifierName()
-			if colName != "" {
-				ins.Columns = append(ins.Columns, &ast.Identifier{
-					Position: pos,
-					Parts:    []string{colName},
-				})
-			}
-			if p.currentIs(token.COMMA) {
-				p.nextToken()
-			} else {
-				break
+		// Check for (*) meaning all columns
+		if p.currentIs(token.ASTERISK) {
+			ins.AllColumns = true
+			p.nextToken()
+		} else {
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				pos := p.current.Pos
+				colName := p.parseIdentifierName()
+				if colName != "" {
+					ins.Columns = append(ins.Columns, &ast.Identifier{
+						Position: pos,
+						Parts:    []string{colName},
+					})
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
 			}
 		}
 		p.expect(token.RPAREN)
@@ -1873,12 +1914,53 @@ func (p *Parser) parseCreateUser(create *ast.CreateQuery) {
 			p.nextToken()
 			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "IDENTIFIED" {
 				create.HasAuthenticationData = true
+				p.nextToken()
 			}
 			continue
 		}
 		// Check for IDENTIFIED (without NOT)
 		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "IDENTIFIED" {
 			create.HasAuthenticationData = true
+			p.nextToken()
+			// Parse authentication method and value
+			// Forms: IDENTIFIED BY 'password'
+			//        IDENTIFIED WITH method BY 'password'
+			//        IDENTIFIED WITH method BY 'password', method BY 'password', ...
+			for {
+				// Skip WITH if present (auth method follows)
+				if p.currentIs(token.WITH) {
+					p.nextToken()
+				}
+				// Skip auth method name (plaintext_password, sha256_password, etc.)
+				// Stop at BY (token), comma, or next section keywords
+				for p.currentIs(token.IDENT) {
+					ident := strings.ToUpper(p.current.Value)
+					// Stop at HOST, SETTINGS, DEFAULT, GRANTEES - don't consume these
+					if ident == "HOST" || ident == "SETTINGS" || ident == "DEFAULT" || ident == "GRANTEES" {
+						break
+					}
+					p.nextToken()
+					// Handle REALM/SERVER string values (for kerberos/ldap)
+					if p.currentIs(token.STRING) && (ident == "REALM" || ident == "SERVER") {
+						p.nextToken()
+					}
+				}
+				// Check for BY 'value' (BY is a keyword token, not IDENT)
+				if p.currentIs(token.BY) {
+					p.nextToken()
+					if p.currentIs(token.STRING) {
+						create.AuthenticationValues = append(create.AuthenticationValues, p.current.Value)
+						p.nextToken()
+					}
+				}
+				// Check for comma (multiple auth methods)
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+					continue
+				}
+				break
+			}
+			continue
 		}
 		p.nextToken()
 	}
@@ -1886,7 +1968,7 @@ func (p *Parser) parseCreateUser(create *ast.CreateQuery) {
 
 func (p *Parser) parseAlterUser() *ast.CreateQuery {
 	create := &ast.CreateQuery{
-		Position:  p.current.Pos,
+		Position:   p.current.Pos,
 		CreateUser: true,
 		AlterUser:  true,
 	}
@@ -1897,8 +1979,55 @@ func (p *Parser) parseAlterUser() *ast.CreateQuery {
 	// Parse user name
 	create.UserName = p.parseIdentifierName()
 
-	// Skip the rest of the user definition (complex syntax)
+	// Scan for authentication data (NOT IDENTIFIED or IDENTIFIED)
 	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		// Check for NOT IDENTIFIED
+		if p.currentIs(token.NOT) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "IDENTIFIED" {
+				create.HasAuthenticationData = true
+				p.nextToken()
+			}
+			continue
+		}
+		// Check for IDENTIFIED (without NOT)
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "IDENTIFIED" {
+			create.HasAuthenticationData = true
+			p.nextToken()
+			// Parse authentication method and value
+			for {
+				// Skip WITH if present
+				if p.currentIs(token.WITH) {
+					p.nextToken()
+				}
+				// Skip auth method name
+				for p.currentIs(token.IDENT) {
+					ident := strings.ToUpper(p.current.Value)
+					if ident == "HOST" || ident == "SETTINGS" || ident == "DEFAULT" || ident == "GRANTEES" {
+						break
+					}
+					p.nextToken()
+					if p.currentIs(token.STRING) && (ident == "REALM" || ident == "SERVER") {
+						p.nextToken()
+					}
+				}
+				// Check for BY 'value'
+				if p.currentIs(token.BY) {
+					p.nextToken()
+					if p.currentIs(token.STRING) {
+						create.AuthenticationValues = append(create.AuthenticationValues, p.current.Value)
+						p.nextToken()
+					}
+				}
+				// Check for comma (multiple auth methods)
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+					continue
+				}
+				break
+			}
+			continue
+		}
 		p.nextToken()
 	}
 
@@ -3850,6 +3979,28 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				}
 			}
 		}
+	case token.COMMENT:
+		p.nextToken()
+		if p.currentIs(token.COLUMN) {
+			cmd.Type = ast.AlterCommentColumn
+			p.nextToken()
+			// Handle IF EXISTS
+			if p.currentIs(token.IF) {
+				p.nextToken()
+				p.expect(token.EXISTS)
+				cmd.IfExists = true
+			}
+			// Parse column name
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				cmd.ColumnName = p.current.Value
+				p.nextToken()
+			}
+			// Parse comment string
+			if p.currentIs(token.STRING) {
+				cmd.Comment = p.current.Value
+				p.nextToken()
+			}
+		}
 	case token.DETACH:
 		p.nextToken()
 		if p.currentIs(token.PARTITION) {
@@ -4268,16 +4419,26 @@ func (p *Parser) parseExplain() *ast.ExplainQuery {
 	// Parse EXPLAIN options (e.g., header = 1, optimize = 0)
 	// These come before the actual statement
 	// Options can be identifiers or keywords like OPTIMIZE followed by =
+	var optionParts []string
 	for p.peekIs(token.EQ) && !p.currentIs(token.SELECT) && !p.currentIs(token.WITH) {
 		// This is an option (name = value)
 		explain.HasSettings = true
+		optionName := p.current.Value
 		p.nextToken() // skip option name
 		p.nextToken() // skip =
-		p.parseExpression(LOWEST) // skip value
+		// Get the value
+		optionValue := p.current.Value
+		if p.currentIs(token.NUMBER) || p.currentIs(token.STRING) || p.currentIs(token.IDENT) {
+			optionParts = append(optionParts, optionName+" = "+optionValue)
+		}
+		p.parseExpression(LOWEST) // skip value expression (may consume more tokens)
 		// Skip comma if present
 		if p.currentIs(token.COMMA) {
 			p.nextToken()
 		}
+	}
+	if len(optionParts) > 0 {
+		explain.OptionsString = strings.Join(optionParts, ", ")
 	}
 
 	// Parse the statement being explained
@@ -4342,6 +4503,12 @@ func (p *Parser) parseOptimize() *ast.OptimizeQuery {
 		p.nextToken()
 	}
 
+	// Handle CLEANUP
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CLEANUP" {
+		opt.Cleanup = true
+		p.nextToken()
+	}
+
 	// Handle DEDUPLICATE
 	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DEDUPLICATE" {
 		opt.Dedupe = true
@@ -4359,8 +4526,34 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 	p.nextToken() // skip SYSTEM
 
 	// Read the command - can include identifiers and keywords (like TTL, SYNC, etc.)
+	// Stop when we see:
+	// 1. An IDENT followed by DOT (qualified table name like sqllt.table)
+	// 2. A plain IDENT (not a command keyword) followed by end-of-statement (SEMICOLON, EOF, FORMAT),
+	//    UNLESS the previous part was FAILPOINT (failpoint names are part of the command)
 	var parts []string
 	for p.currentIs(token.IDENT) || p.isSystemCommandKeyword() {
+		// Check if this IDENT is followed by DOT - if so, it's a table name, not part of the command
+		if p.currentIs(token.IDENT) && p.peekIs(token.DOT) {
+			break
+		}
+		// Check if this is a plain IDENT (not a command keyword) followed by end-of-statement
+		// This indicates it's likely a table name, not part of the command
+		// Exception: after FAILPOINT, the identifier is the failpoint name (part of command)
+		if p.currentIs(token.IDENT) && !p.isSystemCommandKeyword() {
+			if p.peekIs(token.SEMICOLON) || p.peekIs(token.EOF) || p.peekIs(token.FORMAT) {
+				// Check if previous part was FAILPOINT or FOR - these are followed by identifiers that are part of command
+				if len(parts) > 0 {
+					lastPart := strings.ToUpper(parts[len(parts)-1])
+					if lastPart == "FAILPOINT" || lastPart == "FOR" {
+						// This is a failpoint name or format name, consume it as part of command
+						parts = append(parts, p.current.Value)
+						p.nextToken()
+						continue
+					}
+				}
+				break
+			}
+		}
 		parts = append(parts, p.current.Value)
 		p.nextToken()
 	}
@@ -4386,18 +4579,34 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 	return sys
 }
 
-// isSystemCommandKeyword returns true if current token is a keyword that can be part of SYSTEM command
+// isSystemCommandKeyword returns true if current token is a keyword/identifier that is part of SYSTEM command
+// and should NOT be treated as a table name
 func (p *Parser) isSystemCommandKeyword() bool {
 	switch p.current.Token {
 	case token.TTL, token.SYNC, token.DROP, token.FORMAT, token.FOR, token.INDEX, token.INSERT,
 		token.PRIMARY, token.KEY:
 		return true
 	}
-	// Handle SCHEMA, CACHE, QUEUE and other identifiers that are part of SYSTEM commands
+	// Handle identifiers that are part of SYSTEM commands (not table names)
 	if p.currentIs(token.IDENT) {
 		upper := strings.ToUpper(p.current.Value)
 		switch upper {
-		case "SCHEMA", "CACHE", "QUEUE":
+		case "SCHEMA", "CACHE", "QUEUE",
+			// FAILPOINT names are part of the command, not table names
+			"FAILPOINT",
+			// These are common parts of SYSTEM commands that end with identifiers
+			"ENABLE", "DISABLE", "FLUSH", "RELOAD", "RESTART", "STOP", "START",
+			// Parts of STOP/START commands
+			"LISTEN", "LISTENING", "MOVES", "MERGES", "TTL", "SENDS", "FETCHES", "PULLING",
+			"REPLICATED", "DISTRIBUTED", "CLEANUP",
+			// RELOAD targets
+			"DICTIONARIES", "DICTIONARY", "MODELS", "MODEL", "FUNCTIONS", "FUNCTION",
+			"EMBEDDED", "CONFIG", "SYMBOLS", "ASYNCHRONOUS", "METRICS",
+			// FLUSH/DROP targets
+			"LOGS", "ASYNC", "UNCOMPRESSED", "COMPILED", "MARK", "QUERY", "MMAP",
+			"DNS", "FILESYSTEM", "S3",
+			// Other command parts
+			"MUTATIONS", "REPLICATION", "QUEUES", "DDL", "REPLICAS", "REPLICA":
 			return true
 		}
 	}
@@ -5048,4 +5257,47 @@ func (p *Parser) parseRevoke() *ast.GrantQuery {
 	}
 
 	return grant
+}
+
+// parseTransactionControl handles BEGIN, COMMIT, ROLLBACK, and SET TRANSACTION SNAPSHOT statements
+func (p *Parser) parseTransactionControl() *ast.TransactionControlQuery {
+	query := &ast.TransactionControlQuery{
+		Position: p.current.Pos,
+	}
+
+	switch p.current.Token {
+	case token.BEGIN:
+		query.Action = "BEGIN"
+		p.nextToken() // skip BEGIN
+		// Skip optional TRANSACTION keyword
+		if p.currentIs(token.TRANSACTION) {
+			p.nextToken()
+		}
+	case token.COMMIT:
+		query.Action = "COMMIT"
+		p.nextToken() // skip COMMIT
+	case token.ROLLBACK:
+		query.Action = "ROLLBACK"
+		p.nextToken() // skip ROLLBACK
+	case token.SET:
+		p.nextToken() // skip SET
+		if p.currentIs(token.TRANSACTION) {
+			p.nextToken() // skip TRANSACTION
+			if p.currentIs(token.SNAPSHOT) {
+				p.nextToken() // skip SNAPSHOT
+				query.Action = "SET_SNAPSHOT"
+				// Parse snapshot number
+				if p.currentIs(token.NUMBER) {
+					// Parse the number value
+					val, err := strconv.ParseInt(p.current.Value, 10, 64)
+					if err == nil {
+						query.Snapshot = val
+					}
+					p.nextToken()
+				}
+			}
+		}
+	}
+
+	return query
 }

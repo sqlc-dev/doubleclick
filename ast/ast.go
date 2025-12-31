@@ -73,6 +73,7 @@ type SelectQuery struct {
 	OrderBy     []*OrderByElement     `json:"order_by,omitempty"`
 	Limit            Expression            `json:"limit,omitempty"`
 	LimitBy          []Expression          `json:"limit_by,omitempty"`
+	LimitByLimit     Expression            `json:"limit_by_limit,omitempty"`     // LIMIT value before BY (e.g., LIMIT 1 BY x LIMIT 3)
 	LimitByHasLimit  bool                  `json:"limit_by_has_limit,omitempty"` // true if LIMIT BY was followed by another LIMIT
 	Offset           Expression            `json:"offset,omitempty"`
 	Settings           []*SettingExpr        `json:"settings,omitempty"`
@@ -126,9 +127,10 @@ func (t *TablesInSelectQuery) End() token.Position { return t.Position }
 
 // TablesInSelectQueryElement represents a single table element in a SELECT.
 type TablesInSelectQueryElement struct {
-	Position token.Position   `json:"-"`
-	Table    *TableExpression `json:"table"`
-	Join     *TableJoin       `json:"join,omitempty"`
+	Position  token.Position    `json:"-"`
+	Table     *TableExpression  `json:"table,omitempty"`
+	Join      *TableJoin        `json:"join,omitempty"`
+	ArrayJoin *ArrayJoinClause  `json:"array_join,omitempty"` // For ARRAY JOIN as table element
 }
 
 func (t *TablesInSelectQueryElement) Pos() token.Position { return t.Position }
@@ -225,6 +227,7 @@ type InsertQuery struct {
 	Table       string           `json:"table,omitempty"`
 	Function    *FunctionCall    `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
 	Columns     []*Identifier    `json:"columns,omitempty"`
+	AllColumns  bool             `json:"all_columns,omitempty"` // For (*) syntax meaning all columns
 	PartitionBy Expression       `json:"partition_by,omitempty"` // For PARTITION BY clause
 	Infile      string           `json:"infile,omitempty"`       // For FROM INFILE clause
 	Compression string           `json:"compression,omitempty"`  // For COMPRESSION clause
@@ -271,6 +274,7 @@ type CreateQuery struct {
 	CreateUser       bool                 `json:"create_user,omitempty"`
 	AlterUser        bool                 `json:"alter_user,omitempty"`
 	HasAuthenticationData bool            `json:"has_authentication_data,omitempty"`
+	AuthenticationValues []string         `json:"authentication_values,omitempty"` // Password/hash values from IDENTIFIED BY
 	CreateDictionary   bool                              `json:"create_dictionary,omitempty"`
 	DictionaryAttrs    []*DictionaryAttributeDeclaration `json:"dictionary_attrs,omitempty"`
 	DictionaryDef      *DictionaryDefinition             `json:"dictionary_def,omitempty"`
@@ -531,6 +535,7 @@ type AlterCommand struct {
 	ProjectionName string               `json:"projection_name,omitempty"` // For DROP/MATERIALIZE/CLEAR PROJECTION
 	StatisticsColumns []string          `json:"statistics_columns,omitempty"` // For ADD/DROP/CLEAR/MATERIALIZE STATISTICS
 	StatisticsTypes   []*FunctionCall   `json:"statistics_types,omitempty"`   // For ADD/MODIFY STATISTICS TYPE
+	Comment           string            `json:"comment,omitempty"`            // For COMMENT COLUMN
 }
 
 // Projection represents a projection definition.
@@ -698,11 +703,12 @@ const (
 
 // ExplainQuery represents an EXPLAIN statement.
 type ExplainQuery struct {
-	Position     token.Position `json:"-"`
-	ExplainType  ExplainType    `json:"explain_type"`
-	Statement    Statement      `json:"statement"`
-	HasSettings  bool           `json:"has_settings,omitempty"`
-	ExplicitType bool           `json:"explicit_type,omitempty"` // true if type was explicitly specified
+	Position       token.Position `json:"-"`
+	ExplainType    ExplainType    `json:"explain_type"`
+	Statement      Statement      `json:"statement"`
+	HasSettings    bool           `json:"has_settings,omitempty"`
+	ExplicitType   bool           `json:"explicit_type,omitempty"` // true if type was explicitly specified
+	OptionsString  string         `json:"options_string,omitempty"` // Formatted options like "actions = 1"
 }
 
 func (e *ExplainQuery) Pos() token.Position { return e.Position }
@@ -739,6 +745,7 @@ type OptimizeQuery struct {
 	Table     string         `json:"table"`
 	Partition Expression     `json:"partition,omitempty"`
 	Final     bool           `json:"final,omitempty"`
+	Cleanup   bool           `json:"cleanup,omitempty"`
 	Dedupe    bool           `json:"dedupe,omitempty"`
 	OnCluster string         `json:"on_cluster,omitempty"`
 }
@@ -771,6 +778,17 @@ type SystemQuery struct {
 func (s *SystemQuery) Pos() token.Position { return s.Position }
 func (s *SystemQuery) End() token.Position { return s.Position }
 func (s *SystemQuery) statementNode()      {}
+
+// TransactionControlQuery represents a transaction control statement (BEGIN, COMMIT, ROLLBACK, SET TRANSACTION SNAPSHOT).
+type TransactionControlQuery struct {
+	Position token.Position `json:"-"`
+	Action   string         `json:"action"` // "BEGIN", "COMMIT", "ROLLBACK", "SET_SNAPSHOT"
+	Snapshot int64          `json:"snapshot,omitempty"`
+}
+
+func (t *TransactionControlQuery) Pos() token.Position { return t.Position }
+func (t *TransactionControlQuery) End() token.Position { return t.Position }
+func (t *TransactionControlQuery) statementNode()      {}
 
 // RenamePair represents a single rename pair in RENAME TABLE.
 type RenamePair struct {
@@ -1064,6 +1082,7 @@ type Literal struct {
 	Position token.Position `json:"-"`
 	Type     LiteralType    `json:"type"`
 	Value    interface{}    `json:"value"`
+	Source   string         `json:"source,omitempty"`   // Original source text (for preserving 0.0 vs 0)
 	Negative bool           `json:"negative,omitempty"` // True if literal was explicitly negative (for -0)
 }
 
@@ -1126,6 +1145,7 @@ type Asterisk struct {
 	Table    string          `json:"table,omitempty"`   // for table.*
 	Except   []string        `json:"except,omitempty"`  // for * EXCEPT (col1, col2)
 	Replace  []*ReplaceExpr  `json:"replace,omitempty"` // for * REPLACE (expr AS col)
+	Apply    []string        `json:"apply,omitempty"`   // for * APPLY (func1) APPLY(func2)
 }
 
 func (a *Asterisk) Pos() token.Position { return a.Position }

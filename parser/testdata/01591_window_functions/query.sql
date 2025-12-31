@@ -381,7 +381,6 @@ window w as (partition by p order by number
     rows between unbounded preceding and unbounded following)
 order by number
 settings max_block_size = 3;
-;
 
 -- careful with auto-application of Null combinator
 select lagInFrame(toNullable(1)) over ();

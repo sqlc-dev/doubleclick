@@ -306,7 +306,7 @@ func (l *Lexer) readLineComment() Item {
 	}
 	// Strip trailing semicolon from comment - it's a statement terminator, not part of comment
 	text := strings.TrimRight(sb.String(), ";")
-	return Item{Token: token.COMMENT, Value: text, Pos: pos}
+	return Item{Token: token.LINE_COMMENT, Value: text, Pos: pos}
 }
 
 func (l *Lexer) readHashComment() Item {
@@ -322,7 +322,7 @@ func (l *Lexer) readHashComment() Item {
 	}
 	// Strip trailing semicolon from comment - it's a statement terminator, not part of comment
 	text := strings.TrimRight(sb.String(), ";")
-	return Item{Token: token.COMMENT, Value: text, Pos: pos}
+	return Item{Token: token.LINE_COMMENT, Value: text, Pos: pos}
 }
 
 // readUnicodeMinusComment reads from a unicode minus (U+2212) to the end of line or semicolon.
@@ -338,7 +338,7 @@ func (l *Lexer) readUnicodeMinusComment() Item {
 		sb.WriteRune(l.ch)
 		l.readChar()
 	}
-	return Item{Token: token.COMMENT, Value: sb.String(), Pos: pos}
+	return Item{Token: token.LINE_COMMENT, Value: sb.String(), Pos: pos}
 }
 
 func (l *Lexer) readBlockComment() Item {
@@ -371,7 +371,7 @@ func (l *Lexer) readBlockComment() Item {
 			l.readChar()
 		}
 	}
-	return Item{Token: token.COMMENT, Value: sb.String(), Pos: pos}
+	return Item{Token: token.LINE_COMMENT, Value: sb.String(), Pos: pos}
 }
 
 func (l *Lexer) readString(quote rune) Item {

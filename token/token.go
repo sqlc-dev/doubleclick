@@ -9,7 +9,7 @@ const (
 	ILLEGAL Token = iota
 	EOF
 	WHITESPACE
-	COMMENT
+	LINE_COMMENT // SQL comments like -- and /* */
 
 	// Literals
 	IDENT   // identifiers
@@ -57,11 +57,13 @@ const (
 	AND
 	ANTI
 	ANY
+	APPLY
 	ARRAY
 	AS
 	ASC
 	ASOF
 	ATTACH
+	BEGIN
 	BETWEEN
 	BOTH
 	BY
@@ -72,6 +74,8 @@ const (
 	COLLATE
 	COLUMN
 	COLUMNS
+	COMMENT
+	COMMIT
 	CONSTRAINT
 	CREATE
 	CROSS
@@ -118,6 +122,7 @@ const (
 	INF
 	INNER
 	INSERT
+	INTERSECT
 	INTERVAL
 	INTO
 	IS
@@ -158,6 +163,7 @@ const (
 	REPLACE
 	REVOKE
 	RIGHT
+	ROLLBACK
 	ROLLUP
 	SAMPLE
 	SELECT
@@ -166,6 +172,7 @@ const (
 	SETS
 	SETTINGS
 	SHOW
+	SNAPSHOT
 	STEP
 	SUBSTRING
 	SYNC
@@ -179,6 +186,7 @@ const (
 	TOP
 	TOTALS
 	TRAILING
+	TRANSACTION
 	TRIM
 	TRUE
 	TRUNCATE
@@ -202,7 +210,7 @@ var tokens = [...]string{
 	ILLEGAL:    "ILLEGAL",
 	EOF:        "EOF",
 	WHITESPACE: "WHITESPACE",
-	COMMENT:    "COMMENT",
+	LINE_COMMENT: "LINE_COMMENT",
 
 	IDENT:  "IDENT",
 	NUMBER: "NUMBER",
@@ -245,11 +253,13 @@ var tokens = [...]string{
 	AND:          "AND",
 	ANTI:         "ANTI",
 	ANY:          "ANY",
+	APPLY:        "APPLY",
 	ARRAY:        "ARRAY",
 	AS:           "AS",
 	ASC:          "ASC",
 	ASOF:         "ASOF",
 	ATTACH:       "ATTACH",
+	BEGIN:        "BEGIN",
 	BETWEEN:      "BETWEEN",
 	BOTH:         "BOTH",
 	BY:           "BY",
@@ -260,6 +270,8 @@ var tokens = [...]string{
 	COLLATE:      "COLLATE",
 	COLUMN:       "COLUMN",
 	COLUMNS:      "COLUMNS",
+	COMMENT:      "COMMENT",
+	COMMIT:       "COMMIT",
 	CONSTRAINT:   "CONSTRAINT",
 	CREATE:       "CREATE",
 	CROSS:        "CROSS",
@@ -306,6 +318,7 @@ var tokens = [...]string{
 	INF:          "INF",
 	INNER:        "INNER",
 	INSERT:       "INSERT",
+	INTERSECT:    "INTERSECT",
 	INTERVAL:     "INTERVAL",
 	INTO:         "INTO",
 	IS:           "IS",
@@ -346,6 +359,7 @@ var tokens = [...]string{
 	REPLACE:      "REPLACE",
 	REVOKE:       "REVOKE",
 	RIGHT:        "RIGHT",
+	ROLLBACK:     "ROLLBACK",
 	ROLLUP:       "ROLLUP",
 	SAMPLE:       "SAMPLE",
 	SELECT:       "SELECT",
@@ -354,6 +368,7 @@ var tokens = [...]string{
 	SETS:         "SETS",
 	SETTINGS:     "SETTINGS",
 	SHOW:         "SHOW",
+	SNAPSHOT:     "SNAPSHOT",
 	STEP:         "STEP",
 	SUBSTRING:    "SUBSTRING",
 	SYNC:         "SYNC",
@@ -367,6 +382,7 @@ var tokens = [...]string{
 	TOP:          "TOP",
 	TOTALS:       "TOTALS",
 	TRAILING:     "TRAILING",
+	TRANSACTION:  "TRANSACTION",
 	TRIM:         "TRIM",
 	TRUE:         "TRUE",
 	TRUNCATE:     "TRUNCATE",

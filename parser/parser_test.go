@@ -58,7 +58,8 @@ func splitStatements(content string) []string {
 		// Check if statement is complete (ends with ;)
 		if strings.HasSuffix(trimmed, ";") {
 			stmt := strings.TrimSpace(current.String())
-			if stmt != "" {
+			// Skip empty statements (just semicolons or empty)
+			if stmt != "" && stmt != ";" {
 				statements = append(statements, stmt)
 			}
 			current.Reset()
