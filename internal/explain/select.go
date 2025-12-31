@@ -96,8 +96,8 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 	if n.Where != nil {
 		Node(sb, n.Where, depth+1)
 	}
-	// GROUP BY
-	if len(n.GroupBy) > 0 {
+	// GROUP BY (skip for GROUP BY ALL which doesn't output an expression list)
+	if len(n.GroupBy) > 0 && !n.GroupByAll {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.GroupBy))
 		for _, g := range n.GroupBy {
 			if n.GroupingSets {
@@ -327,7 +327,7 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 	if n.Where != nil {
 		count++
 	}
-	if len(n.GroupBy) > 0 {
+	if len(n.GroupBy) > 0 && !n.GroupByAll {
 		count++
 	}
 	if n.Having != nil {

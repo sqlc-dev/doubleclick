@@ -179,16 +179,16 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	}
 	// ClickHouse adds an extra space before (children N) for CREATE DATABASE
 	if n.CreateDatabase {
-		fmt.Fprintf(sb, "%sCreateQuery %s  (children %d)\n", indent, name, children)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+		fmt.Fprintf(sb, "%sCreateQuery %s  (children %d)\n", indent, EscapeIdentifier(name), children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 	} else if hasDatabase {
 		// Database-qualified: CreateQuery db table (children N)
-		fmt.Fprintf(sb, "%sCreateQuery %s %s (children %d)\n", indent, n.Database, name, children)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+		fmt.Fprintf(sb, "%sCreateQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(n.Database))
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 	} else {
-		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, name, children)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, EscapeIdentifier(name), children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 	}
 	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Projections) > 0 || len(n.Constraints) > 0 {
 		childrenCount := 0
@@ -492,16 +492,31 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 	hasDatabase := n.Database != "" && !n.DropDatabase
 	if hasDatabase {
 		// Database-qualified: DropQuery db table (children 2)
-		fmt.Fprintf(sb, "%sDropQuery %s %s (children %d)\n", indent, n.Database, name, 2)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+		fmt.Fprintf(sb, "%sDropQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), 2)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(n.Database))
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 	} else if n.DropDatabase {
 		// DROP DATABASE uses different spacing
-		fmt.Fprintf(sb, "%sDropQuery %s  (children %d)\n", indent, name, 1)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+		fmt.Fprintf(sb, "%sDropQuery %s  (children %d)\n", indent, EscapeIdentifier(name), 1)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 	} else {
-		fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, name, 1)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+		fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), 1)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+	}
+}
+
+func explainUndropQuery(sb *strings.Builder, n *ast.UndropQuery, indent string, depth int) {
+	name := n.Table
+	// Check if we have a database-qualified name (for UNDROP TABLE db.table)
+	hasDatabase := n.Database != ""
+	if hasDatabase {
+		// Database-qualified: UndropQuery db table (children 2)
+		fmt.Fprintf(sb, "%sUndropQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), 2)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(n.Database))
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+	} else {
+		fmt.Fprintf(sb, "%sUndropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), 1)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 	}
 }
 
@@ -672,32 +687,50 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 	if n.ShowType == ast.ShowCreateDictionary && (n.Database != "" || n.From != "") {
 		if n.Database != "" && n.From != "" {
 			children := 2
+			if n.Format != "" {
+				children++
+			}
 			if n.HasSettings {
 				children++
 			}
 			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery %s %s (children %d)\n", indent, n.Database, n.From, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+			if n.Format != "" {
+				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+			}
 			if n.HasSettings {
 				fmt.Fprintf(sb, "%s Set\n", indent)
 			}
 		} else if n.From != "" {
 			children := 1
+			if n.Format != "" {
+				children++
+			}
 			if n.HasSettings {
 				children++
 			}
 			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery  %s (children %d)\n", indent, n.From, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+			if n.Format != "" {
+				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+			}
 			if n.HasSettings {
 				fmt.Fprintf(sb, "%s Set\n", indent)
 			}
 		} else if n.Database != "" {
 			children := 1
+			if n.Format != "" {
+				children++
+			}
 			if n.HasSettings {
 				children++
 			}
 			fmt.Fprintf(sb, "%sShowCreateDictionaryQuery  %s (children %d)\n", indent, n.Database, children)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+			if n.Format != "" {
+				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+			}
 			if n.HasSettings {
 				fmt.Fprintf(sb, "%s Set\n", indent)
 			}
@@ -803,14 +836,41 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 
 	// SHOW CREATE USER has special output format
 	if n.ShowType == ast.ShowCreateUser {
-		fmt.Fprintf(sb, "%sSHOW CREATE USER query\n", indent)
+		if n.Format != "" {
+			fmt.Fprintf(sb, "%sSHOW CREATE USER query (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		} else {
+			fmt.Fprintf(sb, "%sSHOW CREATE USER query\n", indent)
+		}
 		return
 	}
 
-	// SHOW TABLES FROM database - include database as child
-	if n.ShowType == ast.ShowTables && n.From != "" {
-		fmt.Fprintf(sb, "%sShowTables (children 1)\n", indent)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+	// SHOW TABLES/DATABASES/DICTIONARIES - include FROM and FORMAT as children
+	if n.ShowType == ast.ShowTables || n.ShowType == ast.ShowDatabases || n.ShowType == ast.ShowDictionaries {
+		children := 0
+		if n.From != "" {
+			children++
+		}
+		if n.Format != "" {
+			children++
+		}
+		if n.HasSettings {
+			children++
+		}
+		if children > 0 {
+			fmt.Fprintf(sb, "%sShowTables (children %d)\n", indent, children)
+			if n.From != "" {
+				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.From)
+			}
+			if n.Format != "" {
+				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+			}
+			if n.HasSettings {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+			}
+		} else {
+			fmt.Fprintf(sb, "%sShowTables\n", indent)
+		}
 		return
 	}
 
@@ -826,23 +886,35 @@ func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent stri
 	if n.TableExpr != nil {
 		// DESCRIBE on a subquery - TableExpr contains a TableExpression with a Subquery
 		children := 1
+		if n.Format != "" {
+			children++
+		}
 		if len(n.Settings) > 0 {
 			children++
 		}
 		fmt.Fprintf(sb, "%sDescribeQuery (children %d)\n", indent, children)
 		Node(sb, n.TableExpr, depth+1)
+		if n.Format != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
 		if len(n.Settings) > 0 {
 			fmt.Fprintf(sb, "%s Set\n", indent)
 		}
 	} else if n.TableFunction != nil {
 		// DESCRIBE on a table function - wrap in TableExpression
 		children := 1
+		if n.Format != "" {
+			children++
+		}
 		if len(n.Settings) > 0 {
 			children++
 		}
 		fmt.Fprintf(sb, "%sDescribeQuery (children %d)\n", indent, children)
 		fmt.Fprintf(sb, "%s TableExpression (children 1)\n", indent)
 		explainFunctionCall(sb, n.TableFunction, indent+"  ", 2)
+		if n.Format != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
 		if len(n.Settings) > 0 {
 			fmt.Fprintf(sb, "%s Set\n", indent)
 		}
@@ -853,12 +925,18 @@ func explainDescribeQuery(sb *strings.Builder, n *ast.DescribeQuery, indent stri
 			name = n.Database + "." + n.Table
 		}
 		children := 1
+		if n.Format != "" {
+			children++
+		}
 		if len(n.Settings) > 0 {
 			children++
 		}
 		fmt.Fprintf(sb, "%sDescribeQuery (children %d)\n", indent, children)
 		fmt.Fprintf(sb, "%s TableExpression (children 1)\n", indent)
 		fmt.Fprintf(sb, "%s  TableIdentifier %s\n", indent, name)
+		if n.Format != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
 		if len(n.Settings) > 0 {
 			fmt.Fprintf(sb, "%s Set\n", indent)
 		}
@@ -1027,6 +1105,14 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	if cmdType == ast.AlterDetachPartition {
 		cmdType = ast.AlterDropPartition
 	}
+	// CLEAR_COLUMN is shown as DROP_COLUMN in EXPLAIN AST
+	if cmdType == ast.AlterClearColumn {
+		cmdType = ast.AlterDropColumn
+	}
+	// DELETE_WHERE is shown as DELETE in EXPLAIN AST
+	if cmdType == ast.AlterDeleteWhere {
+		cmdType = "DELETE"
+	}
 	fmt.Fprintf(sb, "%sAlterCommand %s (children %d)\n", indent, cmdType, children)
 
 	switch cmd.Type {
@@ -1091,7 +1177,7 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	case ast.AlterModifySetting:
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
-		ast.AlterReplacePartition, ast.AlterFreezePartition:
+		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition:
 		if cmd.Partition != nil {
 			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
 			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
@@ -1284,12 +1370,9 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 	case ast.AlterModifySetting:
 		children = 1
 	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
-		ast.AlterReplacePartition, ast.AlterFreezePartition:
+		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition:
 		if cmd.Partition != nil {
-			// PARTITION ALL doesn't count as a child (shown as Partition_ID empty)
-			if ident, ok := cmd.Partition.(*ast.Identifier); !ok || strings.ToUpper(ident.Name()) != "ALL" {
-				children++
-			}
+			children++
 		}
 	case ast.AlterFreeze:
 		// No children
@@ -1363,13 +1446,15 @@ func explainTruncateQuery(sb *strings.Builder, n *ast.TruncateQuery, indent stri
 		return
 	}
 
-	name := n.Table
 	if n.Database != "" {
-		name = n.Database + "." + n.Table
+		// Database-qualified: TruncateQuery db table (children 2)
+		fmt.Fprintf(sb, "%sTruncateQuery %s %s (children 2)\n", indent, n.Database, n.Table)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+	} else {
+		fmt.Fprintf(sb, "%sTruncateQuery  %s (children 1)\n", indent, n.Table)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 	}
-
-	fmt.Fprintf(sb, "%sTruncateQuery  %s (children %d)\n", indent, name, 1)
-	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
 }
 
 func explainCheckQuery(sb *strings.Builder, n *ast.CheckQuery, indent string) {
@@ -1378,26 +1463,40 @@ func explainCheckQuery(sb *strings.Builder, n *ast.CheckQuery, indent string) {
 		return
 	}
 
-	name := n.Table
 	if n.Database != "" {
-		name = n.Database + "." + n.Table
-	}
-
-	children := 1 // identifier
-	if n.Format != "" {
-		children++
-	}
-	if len(n.Settings) > 0 {
-		children++
-	}
-
-	fmt.Fprintf(sb, "%sCheckQuery  %s (children %d)\n", indent, name, children)
-	fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
-	if n.Format != "" {
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
-	}
-	if len(n.Settings) > 0 {
-		fmt.Fprintf(sb, "%s Set\n", indent)
+		// Database-qualified: CheckQuery db table (children N)
+		children := 2 // database + table identifiers
+		if n.Format != "" {
+			children++
+		}
+		if len(n.Settings) > 0 {
+			children++
+		}
+		fmt.Fprintf(sb, "%sCheckQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		if n.Format != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
+		if len(n.Settings) > 0 {
+			fmt.Fprintf(sb, "%s Set\n", indent)
+		}
+	} else {
+		children := 1 // table identifier
+		if n.Format != "" {
+			children++
+		}
+		if len(n.Settings) > 0 {
+			children++
+		}
+		fmt.Fprintf(sb, "%sCheckQuery  %s (children %d)\n", indent, n.Table, children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		if n.Format != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
+		if len(n.Settings) > 0 {
+			fmt.Fprintf(sb, "%s Set\n", indent)
+		}
 	}
 }
 

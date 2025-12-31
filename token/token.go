@@ -191,6 +191,7 @@ const (
 	TRUE
 	TRUNCATE
 	TTL
+	UNDROP
 	UNION
 	UPDATE
 	USE
@@ -387,6 +388,7 @@ var tokens = [...]string{
 	TRUE:         "TRUE",
 	TRUNCATE:     "TRUNCATE",
 	TTL:          "TTL",
+	UNDROP:       "UNDROP",
 	UNION:        "UNION",
 	UPDATE:       "UPDATE",
 	USE:          "USE",

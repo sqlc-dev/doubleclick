@@ -37,6 +37,12 @@ func FormatFloat(val float64) string {
 	return strconv.FormatFloat(val, 'f', -1, 64)
 }
 
+// EscapeIdentifier escapes single quotes in identifiers for EXPLAIN AST output
+// ClickHouse escapes ' as \' in identifier names
+func EscapeIdentifier(s string) string {
+	return strings.ReplaceAll(s, "'", "\\'")
+}
+
 // escapeStringLiteral escapes special characters in a string for EXPLAIN AST output
 // Uses double-escaping as ClickHouse EXPLAIN AST displays strings
 // Iterates over bytes to preserve raw bytes (including invalid UTF-8)
@@ -237,6 +243,19 @@ func FormatDataType(dt *ast.DataType) string {
 		} else if binExpr, ok := p.(*ast.BinaryExpr); ok {
 			// Binary expression (e.g., 'hello' = 1 for Enum types)
 			params = append(params, formatBinaryExprForType(binExpr))
+		} else if fn, ok := p.(*ast.FunctionCall); ok {
+			// Function call (e.g., SKIP for JSON types)
+			if fn.Name == "SKIP" && len(fn.Arguments) > 0 {
+				if ident, ok := fn.Arguments[0].(*ast.Identifier); ok {
+					params = append(params, "SKIP "+ident.Name())
+				}
+			} else if fn.Name == "SKIP REGEXP" && len(fn.Arguments) > 0 {
+				if lit, ok := fn.Arguments[0].(*ast.Literal); ok {
+					params = append(params, fmt.Sprintf("SKIP REGEXP \\\\\\'%s\\\\\\'", lit.Value))
+				}
+			} else {
+				params = append(params, fmt.Sprintf("%v", p))
+			}
 		} else {
 			params = append(params, fmt.Sprintf("%v", p))
 		}
@@ -294,6 +313,10 @@ func NormalizeFunctionName(name string) string {
 		"greatest":   "greatest",
 		"least":      "least",
 		"concat_ws":  "concat",
+		"position":   "position",
+		// SQL standard ANY/ALL subquery operators
+		"anymatch":   "in",
+		"allmatch":   "notIn",
 	}
 	if n, ok := normalized[strings.ToLower(name)]; ok {
 		return n

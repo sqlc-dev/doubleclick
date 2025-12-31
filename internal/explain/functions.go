@@ -7,11 +7,31 @@ import (
 	"github.com/sqlc-dev/doubleclick/ast"
 )
 
+// normalizeIntervalUnit converts interval units to title-cased singular form
+// e.g., "years" -> "Year", "MONTH" -> "Month", "days" -> "Day"
+func normalizeIntervalUnit(unit string) string {
+	if len(unit) == 0 {
+		return ""
+	}
+	u := strings.ToLower(unit)
+	// Remove trailing 's' for plural forms
+	if strings.HasSuffix(u, "s") && len(u) > 1 {
+		u = u[:len(u)-1]
+	}
+	// Title-case
+	return strings.ToUpper(u[:1]) + u[1:]
+}
+
 func explainFunctionCall(sb *strings.Builder, n *ast.FunctionCall, indent string, depth int) {
 	explainFunctionCallWithAlias(sb, n, n.Alias, indent, depth)
 }
 
 func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int) {
+	// Handle special function transformations that ClickHouse does internally
+	if handled := handleSpecialFunction(sb, n, alias, indent, depth); handled {
+		return
+	}
+
 	children := 1 // arguments ExpressionList
 	if len(n.Parameters) > 0 {
 		children++ // parameters ExpressionList
@@ -84,6 +104,172 @@ func windowSpecHasContent(w *ast.WindowSpec) bool {
 	return false
 }
 
+// handleSpecialFunction handles special function transformations that ClickHouse does internally.
+// Returns true if the function was handled, false otherwise.
+func handleSpecialFunction(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int) bool {
+	fnName := strings.ToUpper(n.Name)
+
+	// POSITION('ll' IN 'Hello') -> position('Hello', 'll')
+	if fnName == "POSITION" && len(n.Arguments) == 1 {
+		if inExpr, ok := n.Arguments[0].(*ast.InExpr); ok {
+			// Transform: POSITION(needle IN haystack) -> position(haystack, needle)
+			explainPositionWithIn(sb, inExpr.Expr, inExpr.List[0], alias, indent, depth)
+			return true
+		}
+	}
+
+	// DATE_ADD/DATEADD/TIMESTAMP_ADD/TIMESTAMPADD
+	if fnName == "DATE_ADD" || fnName == "DATEADD" || fnName == "TIMESTAMP_ADD" || fnName == "TIMESTAMPADD" {
+		return handleDateAddSub(sb, n, alias, indent, depth, "plus")
+	}
+
+	// DATE_SUB/DATESUB/TIMESTAMP_SUB/TIMESTAMPSUB
+	if fnName == "DATE_SUB" || fnName == "DATESUB" || fnName == "TIMESTAMP_SUB" || fnName == "TIMESTAMPSUB" {
+		return handleDateAddSub(sb, n, alias, indent, depth, "minus")
+	}
+
+	// DATE_DIFF/DATEDIFF
+	if fnName == "DATE_DIFF" || fnName == "DATEDIFF" {
+		return handleDateDiff(sb, n, alias, indent, depth)
+	}
+
+	return false
+}
+
+// explainPositionWithIn outputs POSITION(needle IN haystack) as position(haystack, needle)
+func explainPositionWithIn(sb *strings.Builder, needle, haystack ast.Expression, alias string, indent string, depth int) {
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction position (alias %s) (children %d)\n", indent, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction position (children %d)\n", indent, 1)
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+	// Arguments are swapped: haystack first, then needle
+	Node(sb, haystack, depth+2)
+	Node(sb, needle, depth+2)
+}
+
+// handleDateAddSub handles DATE_ADD/DATE_SUB and variants
+// opFunc is "plus" for ADD or "minus" for SUB
+func handleDateAddSub(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int, opFunc string) bool {
+	if len(n.Arguments) == 3 {
+		// DATE_ADD(unit, n, date) -> plus/minus(date, toIntervalUnit(n))
+		unitArg := n.Arguments[0]
+		valueArg := n.Arguments[1]
+		dateArg := n.Arguments[2]
+
+		// Extract unit from identifier
+		unitName := ""
+		if ident, ok := unitArg.(*ast.Identifier); ok {
+			unitName = ident.Name()
+		}
+
+		if unitName != "" {
+			explainDateAddSubResult(sb, opFunc, dateArg, valueArg, unitName, alias, indent, depth)
+			return true
+		}
+	} else if len(n.Arguments) == 2 {
+		// DATE_ADD(interval, date) -> plus(interval, date)
+		// DATE_SUB(date, interval) -> minus(date, interval)
+		intervalArg := n.Arguments[0]
+		dateArg := n.Arguments[1]
+
+		// Check which argument is the interval
+		if _, ok := intervalArg.(*ast.IntervalExpr); ok {
+			// Interval first: plus(interval, date)
+			explainDateAddSubWithInterval(sb, opFunc, intervalArg, dateArg, alias, indent, depth)
+			return true
+		}
+		// Check if first arg is already a toInterval function (from parser)
+		if fc, ok := intervalArg.(*ast.FunctionCall); ok && strings.HasPrefix(strings.ToLower(fc.Name), "tointerval") {
+			// Interval first: plus(interval, date)
+			explainDateAddSubWithInterval(sb, opFunc, intervalArg, dateArg, alias, indent, depth)
+			return true
+		}
+
+		// DATE_SUB(date, interval) -> minus(date, interval)
+		if _, ok := dateArg.(*ast.IntervalExpr); ok {
+			explainDateAddSubWithInterval(sb, opFunc, intervalArg, dateArg, alias, indent, depth)
+			return true
+		}
+		if fc, ok := dateArg.(*ast.FunctionCall); ok && strings.HasPrefix(strings.ToLower(fc.Name), "tointerval") {
+			explainDateAddSubWithInterval(sb, opFunc, intervalArg, dateArg, alias, indent, depth)
+			return true
+		}
+	}
+
+	return false
+}
+
+// explainDateAddSubResult outputs the transformed DATE_ADD/SUB with unit syntax
+func explainDateAddSubResult(sb *strings.Builder, opFunc string, dateArg, valueArg ast.Expression, unit string, alias string, indent string, depth int) {
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, opFunc, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, opFunc, 1)
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+
+	// First arg: date
+	Node(sb, dateArg, depth+2)
+
+	// Second arg: toIntervalUnit(value)
+	unitNorm := normalizeIntervalUnit(unit)
+	fmt.Fprintf(sb, "%s  Function toInterval%s (children %d)\n", indent, unitNorm, 1)
+	fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
+	Node(sb, valueArg, depth+4)
+}
+
+// explainDateAddSubWithInterval outputs the transformed DATE_ADD/SUB with INTERVAL syntax
+func explainDateAddSubWithInterval(sb *strings.Builder, opFunc string, arg1, arg2 ast.Expression, alias string, indent string, depth int) {
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, opFunc, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, opFunc, 1)
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+	Node(sb, arg1, depth+2)
+	Node(sb, arg2, depth+2)
+}
+
+// handleDateDiff handles DATE_DIFF/DATEDIFF
+// DATE_DIFF(unit, date1, date2) -> dateDiff('unit', date1, date2)
+func handleDateDiff(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int) bool {
+	if len(n.Arguments) != 3 {
+		return false
+	}
+
+	unitArg := n.Arguments[0]
+	date1Arg := n.Arguments[1]
+	date2Arg := n.Arguments[2]
+
+	// Extract unit from identifier
+	unitName := ""
+	if ident, ok := unitArg.(*ast.Identifier); ok {
+		unitName = ident.Name()
+	}
+
+	if unitName == "" {
+		return false
+	}
+
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction dateDiff (alias %s) (children %d)\n", indent, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction dateDiff (children %d)\n", indent, 1)
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 3)
+
+	// First arg: unit as lowercase string literal
+	fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, strings.ToLower(unitName))
+
+	// Second and third args: dates
+	Node(sb, date1Arg, depth+2)
+	Node(sb, date2Arg, depth+2)
+
+	return true
+}
+
 func explainLambda(sb *strings.Builder, n *ast.Lambda, indent string, depth int) {
 	explainLambdaWithAlias(sb, n, "", indent, depth)
 }
@@ -116,19 +302,18 @@ func explainCastExpr(sb *strings.Builder, n *ast.CastExpr, indent string, depth 
 }
 
 func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string, indent string, depth int) {
-	// For :: operator syntax, ClickHouse hides alias only when expression is
-	// an array/tuple with complex content that gets formatted as string
-	hideAlias := false
+	// For :: operator syntax with arrays/tuples, determine formatting based on content
 	useArrayFormat := false
 	if n.OperatorSyntax {
 		if lit, ok := n.Expr.(*ast.Literal); ok {
 			if lit.Type == ast.LiteralArray || lit.Type == ast.LiteralTuple {
 				// Determine format based on both content and target type
 				useArrayFormat = shouldUseArrayFormat(lit, n.Type)
-				hideAlias = !useArrayFormat
 			}
 		}
 	}
+	// Alias is always shown for :: cast syntax with arrays/tuples
+	hideAlias := false
 
 	// CAST is represented as Function CAST with expr and type as arguments
 	if alias != "" && !hideAlias {
@@ -151,6 +336,9 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 					exprStr := formatExprAsString(lit)
 					fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, exprStr)
 				}
+			} else if lit.Type == ast.LiteralNull {
+				// NULL stays as Literal NULL, not formatted as a string
+				fmt.Fprintf(sb, "%s  Literal NULL\n", indent)
 			} else {
 				// Simple literal - format as string
 				exprStr := formatExprAsString(lit)
@@ -183,31 +371,97 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 
 // shouldUseArrayFormat determines whether to use Array_[...] format or string format
 // for array/tuple literals in :: cast expressions.
-// This depends on both the literal content and the target type.
+// ClickHouse uses different formats depending on element types:
+// - Boolean arrays: Array_[Bool_0, Bool_1] format
+// - Numeric arrays: '[1, 2, 3]' string format
 func shouldUseArrayFormat(lit *ast.Literal, targetType *ast.DataType) bool {
 	// First check if the literal contains only primitive literals (not expressions)
 	if !containsOnlyLiterals(lit) {
 		return false
 	}
 
-	// For arrays of strings, check the target type to determine format
+	// Check if array contains boolean elements - these use Array_ format
+	if containsBooleanElements(lit) {
+		return true
+	}
+
+	// Check if array contains NULL elements - these use Array_ format
+	if containsNullElements(lit) {
+		return true
+	}
+
+	// For arrays of strings, always use string format in :: casts
+	// This applies to all target types including Array(String)
 	if lit.Type == ast.LiteralArray && hasStringElements(lit) {
-		// Only use Array_ format when casting to Array(String) specifically
-		// For other types like Array(JSON), Array(LowCardinality(String)), etc., use string format
-		if targetType != nil && strings.ToLower(targetType.Name) == "array" && len(targetType.Parameters) > 0 {
-			if innerType, ok := targetType.Parameters[0].(*ast.DataType); ok {
-				// Only use Array_ format if inner type is exactly "String" with no parameters
-				if strings.ToLower(innerType.Name) == "string" && len(innerType.Parameters) == 0 {
-					return true
-				}
-			}
-		}
-		// For any other type (JSON, LowCardinality, etc.), use string format
 		return false
 	}
 
-	// For non-string primitives, always use Array_ format
-	return true
+	// For numeric primitives, use string format in :: casts
+	return false
+}
+
+// containsNullElements checks if a literal array/tuple contains NULL elements
+func containsNullElements(lit *ast.Literal) bool {
+	var exprs []ast.Expression
+	switch lit.Type {
+	case ast.LiteralArray, ast.LiteralTuple:
+		var ok bool
+		exprs, ok = lit.Value.([]ast.Expression)
+		if !ok {
+			return false
+		}
+	default:
+		return false
+	}
+
+	for _, e := range exprs {
+		innerLit, ok := e.(*ast.Literal)
+		if !ok {
+			continue
+		}
+		if innerLit.Type == ast.LiteralNull {
+			return true
+		}
+		// Check nested arrays/tuples
+		if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
+			if containsNullElements(innerLit) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// containsBooleanElements checks if a literal array/tuple contains boolean elements
+func containsBooleanElements(lit *ast.Literal) bool {
+	var exprs []ast.Expression
+	switch lit.Type {
+	case ast.LiteralArray, ast.LiteralTuple:
+		var ok bool
+		exprs, ok = lit.Value.([]ast.Expression)
+		if !ok {
+			return false
+		}
+	default:
+		return false
+	}
+
+	for _, e := range exprs {
+		innerLit, ok := e.(*ast.Literal)
+		if !ok {
+			continue
+		}
+		if innerLit.Type == ast.LiteralBoolean {
+			return true
+		}
+		// Check nested arrays/tuples
+		if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
+			if containsBooleanElements(innerLit) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // containsOnlyLiterals checks if a literal array/tuple contains only literal values (no expressions)
@@ -423,22 +677,28 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 
 	// Determine if the IN list should be combined into a single tuple literal
 	// This happens when we have multiple literals of compatible types:
-	// - All numeric literals/expressions (integers/floats, including unary minus)
-	// - All string literals
+	// - All numeric literals/expressions (integers/floats, including unary minus) + NULLs
+	// - All string literals + NULLs
 	// - All tuple literals that contain only primitive literals (recursively)
 	canBeTupleLiteral := false
 	if n.Query == nil && len(n.List) > 1 {
-		allNumeric := true
-		allStrings := true
+		allNumericOrNull := true
+		allStringsOrNull := true
 		allTuples := true
 		allTuplesArePrimitive := true
+		hasNonNull := false // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
+				if lit.Type == ast.LiteralNull {
+					// NULL is compatible with both numeric and string lists
+					continue
+				}
+				hasNonNull = true
 				if lit.Type != ast.LiteralInteger && lit.Type != ast.LiteralFloat {
-					allNumeric = false
+					allNumericOrNull = false
 				}
 				if lit.Type != ast.LiteralString {
-					allStrings = false
+					allStringsOrNull = false
 				}
 				if lit.Type != ast.LiteralTuple {
 					allTuples = false
@@ -450,17 +710,18 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				}
 			} else if isNumericExpr(item) {
 				// Unary minus of numeric is still numeric
-				allStrings = false
+				hasNonNull = true
+				allStringsOrNull = false
 				allTuples = false
 			} else {
-				allNumeric = false
-				allStrings = false
+				allNumericOrNull = false
+				allStringsOrNull = false
 				allTuples = false
 				break
 			}
 		}
 		// For tuples, only combine if all contain primitive literals
-		canBeTupleLiteral = allNumeric || allStrings || (allTuples && allTuplesArePrimitive)
+		canBeTupleLiteral = hasNonNull && (allNumericOrNull || allStringsOrNull || (allTuples && allTuplesArePrimitive))
 	}
 
 	// Count arguments: expr + list items or subquery
@@ -578,17 +839,23 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 	const maxStringTupleSizeWithAlias = 10
 	canBeTupleLiteral := false
 	if n.Query == nil && len(n.List) > 1 {
-		allNumeric := true
-		allStrings := true
+		allNumericOrNull := true
+		allStringsOrNull := true
 		allTuples := true
 		allTuplesArePrimitive := true
+		hasNonNull := false // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
+				if lit.Type == ast.LiteralNull {
+					// NULL is compatible with both numeric and string lists
+					continue
+				}
+				hasNonNull = true
 				if lit.Type != ast.LiteralInteger && lit.Type != ast.LiteralFloat {
-					allNumeric = false
+					allNumericOrNull = false
 				}
 				if lit.Type != ast.LiteralString {
-					allStrings = false
+					allStringsOrNull = false
 				}
 				if lit.Type != ast.LiteralTuple {
 					allTuples = false
@@ -598,16 +865,17 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 					}
 				}
 			} else if isNumericExpr(item) {
-				allStrings = false
+				hasNonNull = true
+				allStringsOrNull = false
 				allTuples = false
 			} else {
-				allNumeric = false
-				allStrings = false
+				allNumericOrNull = false
+				allStringsOrNull = false
 				allTuples = false
 				break
 			}
 		}
-		canBeTupleLiteral = allNumeric || (allStrings && len(n.List) <= maxStringTupleSizeWithAlias) || (allTuples && allTuplesArePrimitive)
+		canBeTupleLiteral = hasNonNull && (allNumericOrNull || (allStringsOrNull && len(n.List) <= maxStringTupleSizeWithAlias) || (allTuples && allTuplesArePrimitive))
 	}
 
 	// Count arguments
@@ -857,19 +1125,50 @@ func explainCaseExprWithAlias(sb *strings.Builder, n *ast.CaseExpr, alias string
 
 func explainIntervalExpr(sb *strings.Builder, n *ast.IntervalExpr, alias string, indent string, depth int) {
 	// INTERVAL is represented as Function toInterval<Unit>
-	// Unit needs to be title-cased (e.g., YEAR -> Year)
+	// Unit needs to be title-cased and singular (e.g., YEAR -> Year, YEARS -> Year)
 	unit := n.Unit
-	if len(unit) > 0 {
-		unit = strings.ToUpper(unit[:1]) + strings.ToLower(unit[1:])
+	value := n.Value
+
+	// Handle string literals like INTERVAL '2 years' - extract value and unit
+	if unit == "" {
+		if lit, ok := n.Value.(*ast.Literal); ok && lit.Type == ast.LiteralString {
+			if strVal, ok := lit.Value.(string); ok {
+				val, u := parseIntervalString(strVal)
+				if u != "" {
+					unit = u
+					// Create a numeric literal for the value
+					value = &ast.Literal{
+						Type:  ast.LiteralInteger,
+						Value: val,
+					}
+				}
+			}
+		}
 	}
-	fnName := "toInterval" + unit
+
+	unitNorm := normalizeIntervalUnit(unit)
+	fnName := "toInterval" + unitNorm
 	if alias != "" {
 		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, 1)
 	} else {
 		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
-	Node(sb, n.Value, depth+2)
+	Node(sb, value, depth+2)
+}
+
+// parseIntervalString parses a string like "2 years" into value and unit
+func parseIntervalString(s string) (value string, unit string) {
+	// Trim surrounding quotes if present
+	s = strings.Trim(s, "'\"")
+	s = strings.TrimSpace(s)
+
+	// Find the split between number and unit
+	parts := strings.Fields(s)
+	if len(parts) >= 2 {
+		return parts[0], parts[1]
+	}
+	return s, ""
 }
 
 func explainExistsExpr(sb *strings.Builder, n *ast.ExistsExpr, indent string, depth int) {

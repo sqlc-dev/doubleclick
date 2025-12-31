@@ -180,6 +180,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseAlter()
 	case token.TRUNCATE:
 		return p.parseTruncate()
+	case token.UNDROP:
+		return p.parseUndrop()
 	case token.USE:
 		return p.parseUse()
 	case token.DESCRIBE, token.DESC:
@@ -192,6 +194,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		// Check for SET TRANSACTION SNAPSHOT
 		if p.peekIs(token.TRANSACTION) {
 			return p.parseTransactionControl()
+		}
+		// Check for SET DEFAULT ROLE
+		if p.peekIs(token.DEFAULT) {
+			return p.parseSetRole()
 		}
 		return p.parseSet()
 	case token.OPTIMIZE:
@@ -550,6 +556,10 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			sel.GroupBy = p.parseExpressionList()
 			p.expect(token.RPAREN)
 			sel.WithCube = true
+		} else if p.currentIs(token.ALL) {
+			// GROUP BY ALL - special ClickHouse syntax
+			sel.GroupByAll = true
+			sel.GroupBy = p.parseExpressionList() // Still parse it, but mark as GroupByAll
 		} else {
 			sel.GroupBy = p.parseExpressionList()
 		}
@@ -1116,14 +1126,15 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 		}
 	}
 
-	// Handle alias (keywords like LEFT, RIGHT can be used as aliases after AS)
+	// Handle alias (keywords like LEFT, RIGHT, FIRST can be used as aliases after AS,
+	// or without AS if they're not clause keywords)
 	if p.currentIs(token.AS) {
 		p.nextToken()
 		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 			expr.Alias = p.current.Value
 			p.nextToken()
 		}
-	} else if p.currentIs(token.IDENT) && !p.isKeywordForClause() {
+	} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && !p.isKeywordForClause() {
 		expr.Alias = p.current.Value
 		p.nextToken()
 	}
@@ -1137,7 +1148,12 @@ func (p *Parser) isKeywordForClause() bool {
 		token.OFFSET, token.UNION, token.EXCEPT, token.SETTINGS, token.FORMAT,
 		token.PREWHERE, token.JOIN, token.LEFT, token.RIGHT, token.INNER,
 		token.FULL, token.CROSS, token.PASTE, token.ON, token.USING, token.GLOBAL,
-		token.ANY, token.ALL, token.SEMI, token.ANTI, token.ASOF:
+		token.ANY, token.ALL, token.SEMI, token.ANTI, token.ASOF, token.ARRAY,
+		token.WINDOW, token.WITH, token.INTERSECT, token.SELECT:
+		return true
+	}
+	// Handle TOTALS as a clause keyword when used in "WITH TOTALS"
+	if p.current.Token == token.IDENT && strings.ToUpper(p.current.Value) == "TOTALS" {
 		return true
 	}
 	return false
@@ -1540,8 +1556,8 @@ func (p *Parser) parseCreate() ast.Statement {
 			// CREATE WORKLOAD
 			return p.parseCreateWorkload(pos)
 		case "QUOTA":
-			// Skip these statements - just consume tokens until semicolon
-			p.parseCreateGeneric(create)
+			// CREATE QUOTA
+			return p.parseCreateQuota(pos)
 		default:
 			p.errors = append(p.errors, fmt.Errorf("expected TABLE, DATABASE, VIEW, FUNCTION, USER after CREATE"))
 			return nil
@@ -1961,7 +1977,14 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 			return
 		}
 		p.nextToken()
-		create.To = p.parseIdentifierName()
+		toName := p.parseIdentifierName()
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			create.ToDatabase = toName
+			create.To = p.parseIdentifierName()
+		} else {
+			create.To = toName
+		}
 	}
 
 	// Parse ENGINE (for materialized views)
@@ -2348,9 +2371,18 @@ func (p *Parser) parseShowCreateSettingsProfile(pos token.Position) *ast.ShowCre
 		break
 	}
 
-	// Skip the rest of the statement
-	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+	// Skip tokens until FORMAT or end of statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) {
 		p.nextToken()
+	}
+
+	// Parse FORMAT clause if present
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			query.Format = p.current.Value
+			p.nextToken()
+		}
 	}
 
 	return query
@@ -2454,9 +2486,18 @@ func (p *Parser) parseShowCreateRowPolicy(pos token.Position) *ast.ShowCreateRow
 		p.nextToken()
 	}
 
-	// Skip the rest of the statement (policy names, ON table, etc.)
-	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+	// Skip tokens until FORMAT or end of statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) {
 		p.nextToken()
+	}
+
+	// Parse FORMAT clause if present
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			query.Format = p.current.Value
+			p.nextToken()
+		}
 	}
 
 	return query
@@ -2530,6 +2571,30 @@ func (p *Parser) parseAlterRole() *ast.CreateRoleQuery {
 	return query
 }
 
+func (p *Parser) parseCreateQuota(pos token.Position) *ast.CreateQuotaQuery {
+	query := &ast.CreateQuotaQuery{
+		Position: pos,
+	}
+
+	// Skip QUOTA keyword
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "QUOTA" {
+		p.nextToken()
+	}
+
+	// Parse quota name
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		query.Name = p.current.Value
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
 func (p *Parser) parseShowCreateRole(pos token.Position) *ast.ShowCreateRoleQuery {
 	query := &ast.ShowCreateRoleQuery{
 		Position:  pos,
@@ -2567,9 +2632,18 @@ func (p *Parser) parseShowCreateRole(pos token.Position) *ast.ShowCreateRoleQuer
 		}
 	}
 
-	// Skip the rest of the statement
-	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+	// Skip tokens until FORMAT or end of statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) {
 		p.nextToken()
+	}
+
+	// Parse FORMAT clause if present
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			query.Format = p.current.Value
+			p.nextToken()
+		}
 	}
 
 	return query
@@ -3220,6 +3294,29 @@ func (p *Parser) parseDataType() *ast.DataType {
 	}
 	p.nextToken()
 
+	// For MySQL-compatible INT types, handle display width and UNSIGNED/SIGNED
+	upperName := strings.ToUpper(dt.Name)
+	isMySQLIntType := upperName == "INT" || upperName == "TINYINT" || upperName == "SMALLINT" ||
+		upperName == "MEDIUMINT" || upperName == "BIGINT"
+
+	if isMySQLIntType && p.currentIs(token.LPAREN) {
+		// Skip the display width parameter (e.g., INT(11))
+		p.nextToken() // skip (
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			p.nextToken()
+		}
+		p.expect(token.RPAREN)
+	}
+
+	// Handle UNSIGNED/SIGNED modifiers for MySQL INT types
+	if isMySQLIntType && p.currentIs(token.IDENT) {
+		modifier := strings.ToUpper(p.current.Value)
+		if modifier == "UNSIGNED" || modifier == "SIGNED" {
+			dt.Name = dt.Name + " " + p.current.Value
+			p.nextToken()
+		}
+	}
+
 	// Parse type parameters
 	if p.currentIs(token.LPAREN) {
 		dt.HasParentheses = true
@@ -3233,6 +3330,64 @@ func (p *Parser) parseDataType() *ast.DataType {
 
 		// Parse type parameters, but stop on keywords that can't be part of type params
 		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) && !p.currentIs(token.COLLATE) {
+			var param ast.Expression
+
+			// Special handling for SKIP in JSON/OBJECT types: SKIP path or SKIP REGEXP 'pattern'
+			if isObjectType && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && strings.ToUpper(p.current.Value) == "SKIP" {
+				pos := p.current.Pos
+				p.nextToken() // consume SKIP
+
+				// Check for SKIP REGEXP 'pattern'
+				if p.currentIs(token.REGEXP) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "REGEXP") {
+					p.nextToken() // consume REGEXP
+					// Parse the pattern string
+					if p.currentIs(token.STRING) {
+						pattern := p.current.Value
+						p.nextToken()
+						param = &ast.FunctionCall{
+							Position:  pos,
+							Name:      "SKIP REGEXP",
+							Arguments: []ast.Expression{&ast.Literal{Position: pos, Value: pattern, Type: ast.LiteralString}},
+						}
+					}
+				} else {
+					// Parse dotted path: a, a.b, a.b.c, etc.
+					var pathParts []string
+					for {
+						if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+							pathParts = append(pathParts, p.current.Value)
+							p.nextToken()
+						}
+						if p.currentIs(token.DOT) {
+							p.nextToken() // consume dot
+						} else {
+							break
+						}
+					}
+					if len(pathParts) > 0 {
+						param = &ast.FunctionCall{
+							Position:  pos,
+							Name:      "SKIP",
+							Arguments: []ast.Expression{&ast.Identifier{Position: pos, Parts: pathParts}},
+						}
+					}
+				}
+				// Wrap in ObjectTypeArgument
+				if param != nil {
+					param = &ast.ObjectTypeArgument{
+						Position: param.Pos(),
+						Expr:     param,
+					}
+					dt.Parameters = append(dt.Parameters, param)
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+				continue
+			}
+
 			// Check if this is a named parameter: identifier followed by a type name
 			// e.g., "a UInt32" where "a" is the name and "UInt32" is the type
 			isNamedParam := false
@@ -3258,7 +3413,6 @@ func (p *Parser) parseDataType() *ast.DataType {
 				}
 			}
 
-			var param ast.Expression
 			if isNamedParam {
 				// Parse as name + type pair
 				pos := p.current.Pos
@@ -4079,7 +4233,20 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		if p.currentIs(token.COLUMN) {
 			cmd.Type = ast.AlterModifyColumn
 			p.nextToken()
-			cmd.Column = p.parseColumnDeclaration()
+			// Handle MODIFY COLUMN name REMOVE ... (e.g., REMOVE COMMENT)
+			// Check if the next token after column name is REMOVE
+			if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "REMOVE" {
+				// Just parse column name without type
+				colName := p.current.Value
+				p.nextToken() // skip column name
+				cmd.Column = &ast.ColumnDeclaration{Name: colName}
+				// Skip REMOVE COMMENT etc.
+				for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.COMMA) {
+					p.nextToken()
+				}
+			} else {
+				cmd.Column = p.parseColumnDeclaration()
+			}
 		} else if p.currentIs(token.TTL) {
 			cmd.Type = ast.AlterModifyTTL
 			p.nextToken()
@@ -4179,6 +4346,21 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				}
 			}
 		}
+	case token.FETCH:
+		p.nextToken()
+		if p.currentIs(token.PARTITION) {
+			cmd.Type = ast.AlterFetchPartition
+			p.nextToken()
+			cmd.Partition = p.parseExpression(LOWEST)
+			// FROM path
+			if p.currentIs(token.FROM) {
+				p.nextToken()
+				if p.currentIs(token.STRING) {
+					cmd.FromPath = p.current.Value
+					p.nextToken()
+				}
+			}
+		}
 	case token.DELETE:
 		// DELETE WHERE condition - mutation to delete rows
 		cmd.Type = ast.AlterDeleteWhere
@@ -4266,6 +4448,50 @@ func (p *Parser) parseTruncate() *ast.TruncateQuery {
 	return trunc
 }
 
+func (p *Parser) parseUndrop() *ast.UndropQuery {
+	undrop := &ast.UndropQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip UNDROP
+
+	if p.currentIs(token.TABLE) {
+		p.nextToken()
+	}
+
+	// Parse table name (can start with a number in ClickHouse)
+	tableName := p.parseIdentifierName()
+	if tableName != "" {
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			undrop.Database = tableName
+			undrop.Table = p.parseIdentifierName()
+		} else {
+			undrop.Table = tableName
+		}
+	}
+
+	// Handle ON CLUSTER
+	if p.currentIs(token.ON) {
+		p.nextToken()
+		if p.currentIs(token.CLUSTER) {
+			p.nextToken()
+			undrop.OnCluster = p.parseIdentifierName()
+		}
+	}
+
+	// Handle UUID
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "UUID" {
+		p.nextToken()
+		if p.currentIs(token.STRING) {
+			undrop.UUID = p.current.Value
+			p.nextToken()
+		}
+	}
+
+	return undrop
+}
+
 func (p *Parser) parseUse() *ast.UseQuery {
 	use := &ast.UseQuery{
 		Position: p.current.Pos,
@@ -4346,11 +4572,20 @@ func (p *Parser) parseShow() ast.Statement {
 
 	// Handle SHOW GRANTS - it has its own statement type
 	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "GRANTS" {
-		// Skip all remaining tokens until end of statement
-		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		query := &ast.ShowGrantsQuery{Position: pos}
+		// Skip tokens until FORMAT or end of statement
+		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) {
 			p.nextToken()
 		}
-		return &ast.ShowGrantsQuery{Position: pos}
+		// Parse FORMAT clause if present
+		if p.currentIs(token.FORMAT) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				query.Format = p.current.Value
+				p.nextToken()
+			}
+		}
+		return query
 	}
 
 	show := &ast.ShowQuery{
@@ -4367,6 +4602,10 @@ func (p *Parser) parseShow() ast.Statement {
 	case token.COLUMNS:
 		show.ShowType = ast.ShowColumns
 		p.nextToken()
+	case token.INDEX:
+		// SHOW INDEX FROM table - treat as ShowColumns (ClickHouse maps to ShowColumns)
+		show.ShowType = ast.ShowColumns
+		p.nextToken()
 	case token.CREATE:
 		p.nextToken()
 		if p.currentIs(token.DATABASE) {
@@ -4375,12 +4614,20 @@ func (p *Parser) parseShow() ast.Statement {
 		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "QUOTA" {
 			// SHOW CREATE QUOTA <name>
 			p.nextToken()
-			name := ""
+			query := &ast.ShowCreateQuotaQuery{Position: pos}
 			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-				name = p.current.Value
+				query.Name = p.current.Value
 				p.nextToken()
 			}
-			return &ast.ShowCreateQuotaQuery{Position: pos, Name: name}
+			// Parse FORMAT clause if present
+			if p.currentIs(token.FORMAT) {
+				p.nextToken()
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					query.Format = p.current.Value
+					p.nextToken()
+				}
+			}
+			return query
 		} else if p.currentIs(token.SETTINGS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROFILE") {
 			// SHOW CREATE SETTINGS PROFILE or SHOW CREATE PROFILE
 			return p.parseShowCreateSettingsProfile(pos)
@@ -4399,13 +4646,24 @@ func (p *Parser) parseShow() ast.Statement {
 		} else if p.currentIs(token.USER) {
 			show.ShowType = ast.ShowCreateUser
 			p.nextToken()
-			// Skip user name and host pattern - they don't affect explain output
-			for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+			// Skip user name and host pattern until FORMAT or end
+			for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) {
 				p.nextToken()
+			}
+			// Parse FORMAT clause if present
+			if p.currentIs(token.FORMAT) {
+				p.nextToken()
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					show.Format = p.current.Value
+					p.nextToken()
+				}
 			}
 		} else {
 			show.ShowType = ast.ShowCreate
-			// Handle SHOW CREATE TABLE, etc.
+			// Handle SHOW CREATE TABLE, SHOW CREATE TEMPORARY TABLE, etc.
+			if p.currentIs(token.TEMPORARY) {
+				p.nextToken()
+			}
 			if p.currentIs(token.TABLE) {
 				p.nextToken()
 			}
@@ -4424,10 +4682,24 @@ func (p *Parser) parseShow() ast.Statement {
 				show.ShowType = ast.ShowDictionaries
 			case "FUNCTIONS":
 				show.ShowType = ast.ShowFunctions
+			case "INDEXES", "INDICES", "KEYS":
+				// SHOW INDEXES/INDICES/KEYS FROM table - treat as ShowColumns
+				show.ShowType = ast.ShowColumns
+			case "EXTENDED":
+				// SHOW EXTENDED INDEX FROM table - treat as ShowColumns
+				p.nextToken()
+				if p.currentIs(token.INDEX) {
+					p.nextToken()
+				}
+				show.ShowType = ast.ShowColumns
+				// Don't consume another token, fall through to FROM parsing
+				goto parseFrom
 			}
 			p.nextToken()
 		}
 	}
+
+parseFrom:
 
 	// Parse FROM clause (or table/database name for SHOW CREATE TABLE/DATABASE/DICTIONARY/VIEW)
 	showCreateTypes := show.ShowType == ast.ShowCreate || show.ShowType == ast.ShowCreateDB || show.ShowType == ast.ShowCreateDictionary || show.ShowType == ast.ShowCreateView
@@ -4449,6 +4721,15 @@ func (p *Parser) parseShow() ast.Statement {
 			} else {
 				show.From = name
 			}
+		}
+	}
+
+	// Handle SHOW INDEX FROM table FROM database syntax (second FROM for database)
+	if p.currentIs(token.FROM) && show.ShowType == ast.ShowColumns {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			show.Database = p.current.Value
+			p.nextToken()
 		}
 	}
 
@@ -4598,6 +4879,19 @@ func (p *Parser) parseSet() *ast.SetQuery {
 	set.Settings = p.parseSettingsList()
 
 	return set
+}
+
+func (p *Parser) parseSetRole() *ast.SetRoleQuery {
+	query := &ast.SetRoleQuery{
+		Position: p.current.Pos,
+	}
+
+	// Skip SET DEFAULT ROLE ... TO ...
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
 }
 
 func (p *Parser) parseOptimize() *ast.OptimizeQuery {
@@ -5343,14 +5637,11 @@ func (p *Parser) parseProjection() *ast.Projection {
 		if p.currentIs(token.BY) {
 			p.nextToken() // BY
 		}
-		// Parse ORDER BY columns (comma-separated identifiers)
+		// Parse ORDER BY columns (comma-separated expressions)
 		for !p.currentIs(token.EOF) && !p.currentIs(token.RPAREN) {
-			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-				proj.Select.OrderBy = append(proj.Select.OrderBy, &ast.Identifier{
-					Position: p.current.Pos,
-					Parts:    []string{p.current.Value},
-				})
-				p.nextToken()
+			expr := p.parseExpression(LOWEST)
+			if expr != nil {
+				proj.Select.OrderBy = append(proj.Select.OrderBy, expr)
 			} else {
 				break
 			}

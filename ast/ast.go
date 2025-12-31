@@ -64,6 +64,7 @@ type SelectQuery struct {
 	PreWhere    Expression            `json:"prewhere,omitempty"`
 	Where       Expression            `json:"where,omitempty"`
 	GroupBy     []Expression          `json:"group_by,omitempty"`
+	GroupByAll  bool                  `json:"group_by_all,omitempty"` // true if GROUP BY ALL was used
 	GroupingSets bool                 `json:"grouping_sets,omitempty"` // true if GROUP BY uses GROUPING SETS
 	WithRollup  bool                  `json:"with_rollup,omitempty"`
 	WithCube    bool                  `json:"with_cube,omitempty"`
@@ -253,8 +254,9 @@ type CreateQuery struct {
 	Table            string               `json:"table,omitempty"`
 	View             string               `json:"view,omitempty"`
 	Materialized     bool                 `json:"materialized,omitempty"`
-	To               string               `json:"to,omitempty"`       // Target table for materialized views
-	Populate         bool                 `json:"populate,omitempty"` // POPULATE for materialized views
+	ToDatabase       string               `json:"to_database,omitempty"` // Target database for materialized views
+	To               string               `json:"to,omitempty"`          // Target table for materialized views
+	Populate         bool                 `json:"populate,omitempty"`    // POPULATE for materialized views
 	Columns          []*ColumnDeclaration `json:"columns,omitempty"`
 	Indexes          []*IndexDefinition   `json:"indexes,omitempty"`
 	Projections      []*Projection        `json:"projections,omitempty"`
@@ -497,6 +499,19 @@ func (d *DropQuery) Pos() token.Position { return d.Position }
 func (d *DropQuery) End() token.Position { return d.Position }
 func (d *DropQuery) statementNode()      {}
 
+// UndropQuery represents an UNDROP TABLE statement.
+type UndropQuery struct {
+	Position  token.Position `json:"-"`
+	Database  string         `json:"database,omitempty"`
+	Table     string         `json:"table"`
+	OnCluster string         `json:"on_cluster,omitempty"`
+	UUID      string         `json:"uuid,omitempty"`
+}
+
+func (u *UndropQuery) Pos() token.Position { return u.Position }
+func (u *UndropQuery) End() token.Position { return u.Position }
+func (u *UndropQuery) statementNode()      {}
+
 // AlterQuery represents an ALTER statement.
 type AlterQuery struct {
 	Position  token.Position  `json:"-"`
@@ -529,6 +544,7 @@ type AlterCommand struct {
 	ConstraintName string               `json:"constraint_name,omitempty"`
 	Partition      Expression           `json:"partition,omitempty"`
 	FromTable      string               `json:"from_table,omitempty"`
+	FromPath       string               `json:"from_path,omitempty"` // For FETCH PARTITION FROM
 	TTL            *TTLClause           `json:"ttl,omitempty"`
 	Settings       []*SettingExpr       `json:"settings,omitempty"`
 	Where          Expression           `json:"where,omitempty"`       // For DELETE WHERE
@@ -593,6 +609,8 @@ const (
 	AlterDetachPartition    AlterCommandType = "DETACH_PARTITION"
 	AlterAttachPartition    AlterCommandType = "ATTACH_PARTITION"
 	AlterReplacePartition   AlterCommandType = "REPLACE_PARTITION"
+	AlterFetchPartition     AlterCommandType = "FETCH_PARTITION"
+	AlterMovePartition      AlterCommandType = "MOVE_PARTITION"
 	AlterFreezePartition    AlterCommandType = "FREEZE_PARTITION"
 	AlterFreeze             AlterCommandType = "FREEZE"
 	AlterDeleteWhere        AlterCommandType = "DELETE_WHERE"
@@ -689,18 +707,24 @@ func (s *ShowQuery) statementNode()      {}
 type ShowType string
 
 const (
-	ShowTables           ShowType = "TABLES"
-	ShowDatabases        ShowType = "DATABASES"
-	ShowProcesses        ShowType = "PROCESSLIST"
-	ShowCreate           ShowType = "CREATE"
-	ShowCreateDB         ShowType = "CREATE_DATABASE"
-	ShowCreateDictionary ShowType = "CREATE_DICTIONARY"
-	ShowCreateView       ShowType = "CREATE_VIEW"
-	ShowCreateUser       ShowType = "CREATE_USER"
-	ShowColumns          ShowType = "COLUMNS"
-	ShowDictionaries     ShowType = "DICTIONARIES"
-	ShowFunctions        ShowType = "FUNCTIONS"
-	ShowSettings         ShowType = "SETTINGS"
+	ShowTables                  ShowType = "TABLES"
+	ShowDatabases               ShowType = "DATABASES"
+	ShowProcesses               ShowType = "PROCESSLIST"
+	ShowCreate                  ShowType = "CREATE"
+	ShowCreateDB                ShowType = "CREATE_DATABASE"
+	ShowCreateDictionary        ShowType = "CREATE_DICTIONARY"
+	ShowCreateView              ShowType = "CREATE_VIEW"
+	ShowCreateUser              ShowType = "CREATE_USER"
+	ShowCreateRole              ShowType = "CREATE_ROLE"
+	ShowCreatePolicy            ShowType = "CREATE_POLICY"
+	ShowCreateRowPolicy         ShowType = "CREATE_ROW_POLICY"
+	ShowCreateQuota             ShowType = "CREATE_QUOTA"
+	ShowCreateSettingsProfile   ShowType = "CREATE_SETTINGS_PROFILE"
+	ShowColumns                 ShowType = "COLUMNS"
+	ShowDictionaries            ShowType = "DICTIONARIES"
+	ShowFunctions               ShowType = "FUNCTIONS"
+	ShowSettings                ShowType = "SETTINGS"
+	ShowGrants                  ShowType = "GRANTS"
 )
 
 // ExplainQuery represents an EXPLAIN statement.
@@ -862,6 +886,7 @@ func (g *GrantQuery) statementNode()      {}
 // ShowGrantsQuery represents a SHOW GRANTS statement.
 type ShowGrantsQuery struct {
 	Position token.Position `json:"-"`
+	Format   string         `json:"format,omitempty"`
 }
 
 func (s *ShowGrantsQuery) Pos() token.Position { return s.Position }
@@ -881,11 +906,22 @@ func (s *ShowPrivilegesQuery) statementNode()      {}
 type ShowCreateQuotaQuery struct {
 	Position token.Position `json:"-"`
 	Name     string         `json:"name,omitempty"`
+	Format   string         `json:"format,omitempty"`
 }
 
 func (s *ShowCreateQuotaQuery) Pos() token.Position { return s.Position }
 func (s *ShowCreateQuotaQuery) End() token.Position { return s.Position }
 func (s *ShowCreateQuotaQuery) statementNode()      {}
+
+// CreateQuotaQuery represents a CREATE QUOTA statement.
+type CreateQuotaQuery struct {
+	Position token.Position `json:"-"`
+	Name     string         `json:"name,omitempty"`
+}
+
+func (c *CreateQuotaQuery) Pos() token.Position { return c.Position }
+func (c *CreateQuotaQuery) End() token.Position { return c.Position }
+func (c *CreateQuotaQuery) statementNode()      {}
 
 // CreateSettingsProfileQuery represents a CREATE SETTINGS PROFILE statement.
 type CreateSettingsProfileQuery struct {
@@ -922,6 +958,7 @@ func (d *DropSettingsProfileQuery) statementNode()      {}
 type ShowCreateSettingsProfileQuery struct {
 	Position token.Position `json:"-"`
 	Names    []string       `json:"names,omitempty"`
+	Format   string         `json:"format,omitempty"`
 }
 
 func (s *ShowCreateSettingsProfileQuery) Pos() token.Position { return s.Position }
@@ -951,6 +988,7 @@ func (d *DropRowPolicyQuery) statementNode()      {}
 // ShowCreateRowPolicyQuery represents a SHOW CREATE ROW POLICY statement.
 type ShowCreateRowPolicyQuery struct {
 	Position token.Position `json:"-"`
+	Format   string         `json:"format,omitempty"`
 }
 
 func (s *ShowCreateRowPolicyQuery) Pos() token.Position { return s.Position }
@@ -981,11 +1019,21 @@ func (d *DropRoleQuery) statementNode()      {}
 type ShowCreateRoleQuery struct {
 	Position  token.Position `json:"-"`
 	RoleCount int            `json:"role_count,omitempty"` // Number of roles specified
+	Format    string         `json:"format,omitempty"`
 }
 
 func (s *ShowCreateRoleQuery) Pos() token.Position { return s.Position }
 func (s *ShowCreateRoleQuery) End() token.Position { return s.Position }
 func (s *ShowCreateRoleQuery) statementNode()      {}
+
+// SetRoleQuery represents a SET DEFAULT ROLE statement.
+type SetRoleQuery struct {
+	Position token.Position `json:"-"`
+}
+
+func (s *SetRoleQuery) Pos() token.Position { return s.Position }
+func (s *SetRoleQuery) End() token.Position { return s.Position }
+func (s *SetRoleQuery) statementNode()      {}
 
 // CreateResourceQuery represents a CREATE RESOURCE statement.
 type CreateResourceQuery struct {
@@ -1143,11 +1191,12 @@ const (
 
 // Asterisk represents a *.
 type Asterisk struct {
-	Position token.Position  `json:"-"`
-	Table    string          `json:"table,omitempty"`   // for table.*
-	Except   []string        `json:"except,omitempty"`  // for * EXCEPT (col1, col2)
-	Replace  []*ReplaceExpr  `json:"replace,omitempty"` // for * REPLACE (expr AS col)
-	Apply    []string        `json:"apply,omitempty"`   // for * APPLY (func1) APPLY(func2)
+	Position     token.Position       `json:"-"`
+	Table        string               `json:"table,omitempty"`        // for table.*
+	Except       []string             `json:"except,omitempty"`       // for * EXCEPT (col1, col2) - deprecated, use Transformers
+	Replace      []*ReplaceExpr       `json:"replace,omitempty"`      // for * REPLACE (expr AS col) - deprecated, use Transformers
+	Apply        []string             `json:"apply,omitempty"`        // for * APPLY (func1) APPLY(func2) - deprecated, use Transformers
+	Transformers []*ColumnTransformer `json:"transformers,omitempty"` // ordered list of transformers
 }
 
 func (a *Asterisk) Pos() token.Position { return a.Position }
@@ -1164,15 +1213,28 @@ type ReplaceExpr struct {
 func (r *ReplaceExpr) Pos() token.Position { return r.Position }
 func (r *ReplaceExpr) End() token.Position { return r.Position }
 
+// ColumnTransformer represents a single transformer (APPLY, EXCEPT, or REPLACE) in order.
+type ColumnTransformer struct {
+	Position    token.Position `json:"-"`
+	Type        string         `json:"type"`                   // "apply", "except", "replace"
+	Apply       string         `json:"apply,omitempty"`        // function name for APPLY
+	ApplyLambda Expression     `json:"apply_lambda,omitempty"` // lambda expression for APPLY x -> expr
+	Except      []string       `json:"except,omitempty"`       // column names for EXCEPT
+	Replaces    []*ReplaceExpr `json:"replaces,omitempty"`     // replacement expressions for REPLACE
+}
+
 // ColumnsMatcher represents COLUMNS('pattern') or COLUMNS(col1, col2) expression.
 // When Pattern is set, it's a regex matcher (ColumnsRegexpMatcher in explain).
 // When Columns is set, it's a list matcher (ColumnsListMatcher in explain).
 type ColumnsMatcher struct {
-	Position  token.Position `json:"-"`
-	Pattern   string         `json:"pattern,omitempty"`
-	Columns   []Expression   `json:"columns,omitempty"` // For COLUMNS(id, name) syntax
-	Except    []string       `json:"except,omitempty"`
-	Qualifier string         `json:"qualifier,omitempty"` // For qualified matchers like table.COLUMNS(...)
+	Position     token.Position       `json:"-"`
+	Pattern      string               `json:"pattern,omitempty"`
+	Columns      []Expression         `json:"columns,omitempty"`      // For COLUMNS(id, name) syntax
+	Except       []string             `json:"except,omitempty"`       // for EXCEPT (col1, col2) - deprecated, use Transformers
+	Replace      []*ReplaceExpr       `json:"replace,omitempty"`      // for REPLACE (expr AS col) - deprecated, use Transformers
+	Apply        []string             `json:"apply,omitempty"`        // for APPLY (func1) APPLY(func2) - deprecated, use Transformers
+	Qualifier    string               `json:"qualifier,omitempty"`    // For qualified matchers like table.COLUMNS(...)
+	Transformers []*ColumnTransformer `json:"transformers,omitempty"` // ordered list of transformers
 }
 
 func (c *ColumnsMatcher) Pos() token.Position { return c.Position }
@@ -1392,9 +1454,10 @@ func (t *TupleAccess) expressionNode()     {}
 
 // Lambda represents a lambda expression.
 type Lambda struct {
-	Position   token.Position `json:"-"`
-	Parameters []string       `json:"parameters"`
-	Body       Expression     `json:"body"`
+	Position      token.Position `json:"-"`
+	Parameters    []string       `json:"parameters"`
+	Body          Expression     `json:"body"`
+	Parenthesized bool           `json:"-"` // True if wrapped in explicit parentheses
 }
 
 func (l *Lambda) Pos() token.Position { return l.Position }

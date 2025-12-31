@@ -113,12 +113,16 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainCreateQuery(sb, n, indent, depth)
 	case *ast.DropQuery:
 		explainDropQuery(sb, n, indent, depth)
+	case *ast.UndropQuery:
+		explainUndropQuery(sb, n, indent, depth)
 	case *ast.RenameQuery:
 		explainRenameQuery(sb, n, indent, depth)
 	case *ast.ExchangeQuery:
 		explainExchangeQuery(sb, n, indent)
 	case *ast.SetQuery:
 		explainSetQuery(sb, indent)
+	case *ast.SetRoleQuery:
+		fmt.Fprintf(sb, "%sSetRoleQuery\n", indent)
 	case *ast.SystemQuery:
 		explainSystemQuery(sb, n, indent)
 	case *ast.TransactionControlQuery:
@@ -130,7 +134,14 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	case *ast.ShowPrivilegesQuery:
 		fmt.Fprintf(sb, "%sShowPrivilegesQuery\n", indent)
 	case *ast.ShowCreateQuotaQuery:
-		fmt.Fprintf(sb, "%sSHOW CREATE QUOTA query\n", indent)
+		if n.Format != "" {
+			fmt.Fprintf(sb, "%sSHOW CREATE QUOTA query (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		} else {
+			fmt.Fprintf(sb, "%sSHOW CREATE QUOTA query\n", indent)
+		}
+	case *ast.CreateQuotaQuery:
+		fmt.Fprintf(sb, "%sCreateQuotaQuery\n", indent)
 	case *ast.CreateSettingsProfileQuery:
 		fmt.Fprintf(sb, "%sCreateSettingsProfileQuery\n", indent)
 	case *ast.AlterSettingsProfileQuery:
@@ -140,27 +151,43 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		fmt.Fprintf(sb, "%sDROP SETTINGS PROFILE query\n", indent)
 	case *ast.ShowCreateSettingsProfileQuery:
 		// Use PROFILES (plural) when multiple profiles are specified
+		queryName := "SHOW CREATE SETTINGS PROFILE query"
 		if len(n.Names) > 1 {
-			fmt.Fprintf(sb, "%sSHOW CREATE SETTINGS PROFILES query\n", indent)
+			queryName = "SHOW CREATE SETTINGS PROFILES query"
+		}
+		if n.Format != "" {
+			fmt.Fprintf(sb, "%s%s (children 1)\n", indent, queryName)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
 		} else {
-			fmt.Fprintf(sb, "%sSHOW CREATE SETTINGS PROFILE query\n", indent)
+			fmt.Fprintf(sb, "%s%s\n", indent, queryName)
 		}
 	case *ast.CreateRowPolicyQuery:
 		fmt.Fprintf(sb, "%sCREATE ROW POLICY or ALTER ROW POLICY query\n", indent)
 	case *ast.DropRowPolicyQuery:
 		fmt.Fprintf(sb, "%sDROP ROW POLICY query\n", indent)
 	case *ast.ShowCreateRowPolicyQuery:
-		fmt.Fprintf(sb, "%sSHOW CREATE ROW POLICY query\n", indent)
+		// ClickHouse uses "ROW POLICIES" (plural) when FORMAT is present
+		if n.Format != "" {
+			fmt.Fprintf(sb, "%sSHOW CREATE ROW POLICIES query (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		} else {
+			fmt.Fprintf(sb, "%sSHOW CREATE ROW POLICY query\n", indent)
+		}
 	case *ast.CreateRoleQuery:
 		fmt.Fprintf(sb, "%sCreateRoleQuery\n", indent)
 	case *ast.DropRoleQuery:
 		fmt.Fprintf(sb, "%sDROP ROLE query\n", indent)
 	case *ast.ShowCreateRoleQuery:
 		// Use ROLES (plural) when multiple roles are specified
+		queryName := "SHOW CREATE ROLE query"
 		if n.RoleCount > 1 {
-			fmt.Fprintf(sb, "%sSHOW CREATE ROLES query\n", indent)
+			queryName = "SHOW CREATE ROLES query"
+		}
+		if n.Format != "" {
+			fmt.Fprintf(sb, "%s%s (children 1)\n", indent, queryName)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
 		} else {
-			fmt.Fprintf(sb, "%sSHOW CREATE ROLE query\n", indent)
+			fmt.Fprintf(sb, "%s%s\n", indent, queryName)
 		}
 	case *ast.CreateResourceQuery:
 		fmt.Fprintf(sb, "%sCreateResourceQuery %s (children 1)\n", indent, n.Name)
@@ -181,7 +208,12 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	case *ast.DropWorkloadQuery:
 		fmt.Fprintf(sb, "%sDropWorkloadQuery\n", indent)
 	case *ast.ShowGrantsQuery:
-		fmt.Fprintf(sb, "%sShowGrantsQuery\n", indent)
+		if n.Format != "" {
+			fmt.Fprintf(sb, "%sShowGrantsQuery (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		} else {
+			fmt.Fprintf(sb, "%sShowGrantsQuery\n", indent)
+		}
 	case *ast.GrantQuery:
 		fmt.Fprintf(sb, "%sGrantQuery\n", indent)
 	case *ast.UseQuery:
@@ -285,7 +317,11 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	if col.Codec != nil {
 		children++
 	}
-	fmt.Fprintf(sb, "%sColumnDeclaration %s (children %d)\n", indent, col.Name, children)
+	if children > 0 {
+		fmt.Fprintf(sb, "%sColumnDeclaration %s (children %d)\n", indent, col.Name, children)
+	} else {
+		fmt.Fprintf(sb, "%sColumnDeclaration %s\n", indent, col.Name)
+	}
 	if col.Type != nil {
 		Node(sb, col.Type, depth+1)
 	}

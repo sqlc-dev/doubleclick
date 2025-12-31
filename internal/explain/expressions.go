@@ -585,7 +585,7 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 
 func explainAsterisk(sb *strings.Builder, n *ast.Asterisk, indent string, depth int) {
 	// Check if there are any column transformers (EXCEPT, REPLACE, APPLY)
-	hasTransformers := len(n.Except) > 0 || len(n.Replace) > 0 || len(n.Apply) > 0
+	hasTransformers := len(n.Transformers) > 0 || len(n.Except) > 0 || len(n.Replace) > 0 || len(n.Apply) > 0
 
 	if n.Table != "" {
 		if hasTransformers {
@@ -607,6 +607,16 @@ func explainAsterisk(sb *strings.Builder, n *ast.Asterisk, indent string, depth 
 }
 
 func explainColumnsTransformers(sb *strings.Builder, n *ast.Asterisk, indent string, depth int) {
+	// Use Transformers if available (preserves order), otherwise fall back to legacy arrays
+	if len(n.Transformers) > 0 {
+		fmt.Fprintf(sb, "%sColumnsTransformerList (children %d)\n", indent, len(n.Transformers))
+		for _, t := range n.Transformers {
+			explainSingleTransformer(sb, t, indent, depth)
+		}
+		return
+	}
+
+	// Legacy: use separate arrays (doesn't preserve order)
 	transformerCount := 0
 	if len(n.Except) > 0 {
 		transformerCount++
@@ -647,7 +657,34 @@ func explainColumnsTransformers(sb *strings.Builder, n *ast.Asterisk, indent str
 	}
 }
 
+func explainSingleTransformer(sb *strings.Builder, t *ast.ColumnTransformer, indent string, depth int) {
+	switch t.Type {
+	case "apply":
+		fmt.Fprintf(sb, "%s ColumnsApplyTransformer\n", indent)
+	case "except":
+		fmt.Fprintf(sb, "%s ColumnsExceptTransformer (children %d)\n", indent, len(t.Except))
+		for _, col := range t.Except {
+			fmt.Fprintf(sb, "%s  Identifier %s\n", indent, col)
+		}
+	case "replace":
+		fmt.Fprintf(sb, "%s ColumnsReplaceTransformer (children %d)\n", indent, len(t.Replaces))
+		for _, replace := range t.Replaces {
+			children := 0
+			if replace.Expr != nil {
+				children = 1
+			}
+			fmt.Fprintf(sb, "%s  ColumnsReplaceTransformer::Replacement (children %d)\n", indent, children)
+			if replace.Expr != nil {
+				Node(sb, replace.Expr, depth+3)
+			}
+		}
+	}
+}
+
 func explainColumnsMatcher(sb *strings.Builder, n *ast.ColumnsMatcher, indent string, depth int) {
+	// Check if there are any column transformers (EXCEPT, REPLACE, APPLY)
+	hasTransformers := len(n.Transformers) > 0 || len(n.Except) > 0 || len(n.Replace) > 0 || len(n.Apply) > 0
+
 	// Determine the matcher type based on whether it's a pattern or a list
 	if len(n.Columns) > 0 {
 		// ColumnsListMatcher for COLUMNS(col1, col2, ...)
@@ -655,17 +692,24 @@ func explainColumnsMatcher(sb *strings.Builder, n *ast.ColumnsMatcher, indent st
 		if n.Qualifier != "" {
 			typeName = "QualifiedColumnsListMatcher"
 		}
+		childCount := 1 // ExpressionList of columns
 		if n.Qualifier != "" {
-			// QualifiedColumnsListMatcher has qualifier as a child
-			fmt.Fprintf(sb, "%s%s (children %d)\n", indent, typeName, 2)
+			childCount++
+		}
+		if hasTransformers {
+			childCount++ // for ColumnsTransformerList
+		}
+		fmt.Fprintf(sb, "%s%s (children %d)\n", indent, typeName, childCount)
+		if n.Qualifier != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Qualifier)
-		} else {
-			fmt.Fprintf(sb, "%s%s (children %d)\n", indent, typeName, 1)
 		}
 		// Output the columns as ExpressionList
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Columns))
 		for _, col := range n.Columns {
 			Node(sb, col, depth+2)
+		}
+		if hasTransformers {
+			explainColumnsMatcherTransformers(sb, n, indent+" ", depth+1)
 		}
 	} else {
 		// ColumnsRegexpMatcher for COLUMNS('pattern')
@@ -674,11 +718,74 @@ func explainColumnsMatcher(sb *strings.Builder, n *ast.ColumnsMatcher, indent st
 			typeName = "QualifiedColumnsRegexpMatcher"
 		}
 		if n.Qualifier != "" {
-			fmt.Fprintf(sb, "%s%s (children %d)\n", indent, typeName, 1)
+			childCount := 1 // Identifier
+			if hasTransformers {
+				childCount++
+			}
+			fmt.Fprintf(sb, "%s%s (children %d)\n", indent, typeName, childCount)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Qualifier)
+			if hasTransformers {
+				explainColumnsMatcherTransformers(sb, n, indent+" ", depth+1)
+			}
 		} else {
-			fmt.Fprintf(sb, "%s%s\n", indent, typeName)
+			if hasTransformers {
+				fmt.Fprintf(sb, "%s%s (children %d)\n", indent, typeName, 1)
+				explainColumnsMatcherTransformers(sb, n, indent+" ", depth+1)
+			} else {
+				fmt.Fprintf(sb, "%s%s\n", indent, typeName)
+			}
 		}
+	}
+}
+
+func explainColumnsMatcherTransformers(sb *strings.Builder, n *ast.ColumnsMatcher, indent string, depth int) {
+	// Use Transformers if available (preserves order), otherwise fall back to legacy arrays
+	if len(n.Transformers) > 0 {
+		fmt.Fprintf(sb, "%sColumnsTransformerList (children %d)\n", indent, len(n.Transformers))
+		for _, t := range n.Transformers {
+			explainSingleTransformer(sb, t, indent, depth)
+		}
+		return
+	}
+
+	// Legacy: use separate arrays (doesn't preserve order)
+	transformerCount := 0
+	if len(n.Except) > 0 {
+		transformerCount++
+	}
+	if len(n.Replace) > 0 {
+		transformerCount++
+	}
+	// Each APPLY adds one transformer
+	transformerCount += len(n.Apply)
+
+	fmt.Fprintf(sb, "%sColumnsTransformerList (children %d)\n", indent, transformerCount)
+
+	if len(n.Except) > 0 {
+		fmt.Fprintf(sb, "%s ColumnsExceptTransformer (children %d)\n", indent, len(n.Except))
+		for _, col := range n.Except {
+			fmt.Fprintf(sb, "%s  Identifier %s\n", indent, col)
+		}
+	}
+
+	if len(n.Replace) > 0 {
+		fmt.Fprintf(sb, "%s ColumnsReplaceTransformer (children %d)\n", indent, len(n.Replace))
+		for _, replace := range n.Replace {
+			children := 0
+			if replace.Expr != nil {
+				children = 1
+			}
+			fmt.Fprintf(sb, "%s  ColumnsReplaceTransformer::Replacement (children %d)\n", indent, children)
+			if replace.Expr != nil {
+				// Output the expression without alias - the replacement name is implied
+				Node(sb, replace.Expr, depth+3)
+			}
+		}
+	}
+
+	// Each APPLY function gets its own ColumnsApplyTransformer
+	for range n.Apply {
+		fmt.Fprintf(sb, "%s ColumnsApplyTransformer\n", indent)
 	}
 }
 

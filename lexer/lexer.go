@@ -80,6 +80,55 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
+// isIdentifierAfterDot checks if what follows the DOT looks like an identifier pattern.
+// This handles cases like db.03711_table where 03711_table should be treated as an identifier.
+// We look ahead to see if we have: digits followed by underscore followed by letter/digit
+func (l *Lexer) isIdentifierAfterDot() bool {
+	// We're currently at '.', peek ahead to check the pattern
+	// Save current reader position by peeking
+	bytes, _ := l.reader.Peek(32) // peek enough to see the pattern, ignore EOF error
+	if len(bytes) == 0 {
+		return false
+	}
+
+	idx := 0
+	// Skip initial digits
+	for idx < len(bytes) && bytes[idx] >= '0' && bytes[idx] <= '9' {
+		idx++
+	}
+	// If no digits found, it's not our pattern
+	if idx == 0 {
+		return false
+	}
+	// Check for underscore followed by letter/digit (identifier pattern)
+	if idx < len(bytes) && bytes[idx] == '_' {
+		idx++
+		if idx < len(bytes) && isIdentContinueByte(bytes[idx]) {
+			return true
+		}
+	}
+	// Also check for letter directly after digits (like 1abc)
+	if idx < len(bytes) {
+		ch, _ := utf8.DecodeRune(bytes[idx:])
+		// Check it's a letter but not exponent (e/E followed by digit/+/-)
+		if unicode.IsLetter(ch) {
+			if (ch == 'e' || ch == 'E') && idx+1 < len(bytes) {
+				next := bytes[idx+1]
+				if next >= '0' && next <= '9' || next == '+' || next == '-' {
+					return false // This is a scientific notation number
+				}
+			}
+			return true
+		}
+	}
+	return false
+}
+
+// isIdentContinueByte checks if a byte is a valid identifier continuation character
+func isIdentContinueByte(b byte) bool {
+	return (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || (b >= '0' && b <= '9') || b == '_'
+}
+
 // isClickHouseWhitespace returns true for characters ClickHouse treats as whitespace
 // but Go's unicode.IsSpace does not recognize.
 func isClickHouseWhitespace(ch rune) bool {
@@ -226,6 +275,12 @@ func (l *Lexer) NextToken() Item {
 		return Item{Token: token.COMMA, Value: ",", Pos: pos}
 	case '.':
 		if unicode.IsDigit(l.peekChar()) {
+			// Before treating .digits as a number, check if it's part of an identifier pattern
+			// For example, db.03711_table should be DOT + IDENT, not DOT + NUMBER + IDENT
+			if l.isIdentifierAfterDot() {
+				l.readChar()
+				return Item{Token: token.DOT, Value: ".", Pos: pos}
+			}
 			return l.readNumber()
 		}
 		l.readChar()
