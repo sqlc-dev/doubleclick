@@ -5658,9 +5658,9 @@ func (p *Parser) parseParenthesizedSelect() *ast.SelectWithUnionQuery {
 	pos := p.current.Pos
 	p.nextToken() // skip (
 
-	// Check if this is actually a SELECT statement
-	if !p.currentIs(token.SELECT) && !p.currentIs(token.WITH) {
-		// Not a SELECT, just skip until we find closing paren
+	// Check if this is actually a SELECT statement or nested parentheses
+	if !p.currentIs(token.SELECT) && !p.currentIs(token.WITH) && !p.currentIs(token.LPAREN) {
+		// Not a SELECT and not nested parens, just skip until we find closing paren
 		depth := 1
 		for depth > 0 && !p.currentIs(token.EOF) {
 			if p.currentIs(token.LPAREN) {
