@@ -3842,6 +3842,12 @@ func (p *Parser) parseAlter() *ast.AlterQuery {
 		p.nextToken()
 	}
 
+	// Parse SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		alter.Settings = p.parseSettingsList()
+	}
+
 	return alter
 }
 

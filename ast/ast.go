@@ -504,6 +504,7 @@ type AlterQuery struct {
 	Table     string          `json:"table"`
 	Commands  []*AlterCommand `json:"commands"`
 	OnCluster string          `json:"on_cluster,omitempty"`
+	Settings  []*SettingExpr  `json:"settings,omitempty"`
 }
 
 func (a *AlterQuery) Pos() token.Position { return a.Position }

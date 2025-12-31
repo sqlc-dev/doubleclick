@@ -993,6 +993,11 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 	children := 2 // ExpressionList + Identifier for table
 	if n.Database != "" {
 		children = 3 // ExpressionList + Identifier for database + Identifier for table
+	}
+	if len(n.Settings) > 0 {
+		children++ // Add Set child for SETTINGS
+	}
+	if n.Database != "" {
 		fmt.Fprintf(sb, "%sAlterQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
 	} else {
 		fmt.Fprintf(sb, "%sAlterQuery  %s (children %d)\n", indent, n.Table, children)
@@ -1006,6 +1011,9 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+	if len(n.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
 }
 
 func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent string, depth int) {
