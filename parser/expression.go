@@ -158,6 +158,58 @@ func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 		}
 	}
 
+	// Post-process: merge consecutive identifiers followed by a lambda into a multi-param lambda
+	// Pattern: [Ident("acc"), Lambda(["x"], body)] -> [Lambda(["acc", "x"], body)]
+	exprs = mergeMultiParamLambdas(exprs)
+
+	return exprs
+}
+
+// mergeMultiParamLambdas looks for pattern [Ident, Ident, ..., Lambda] at the START
+// of the expression list and merges them into a single multi-param lambda.
+// This handles ClickHouse's syntax: acc,x -> body (multi-param lambda without parentheses)
+// This ONLY applies at position 0 - identifiers in the middle are regular arguments.
+func mergeMultiParamLambdas(exprs []ast.Expression) []ast.Expression {
+	if len(exprs) < 2 {
+		return exprs
+	}
+
+	// Only check at position 0 - the pattern must start at the beginning
+	if ident, ok := exprs[0].(*ast.Identifier); ok && len(ident.Parts) == 1 {
+		// Count consecutive simple identifiers at the start
+		j := 0
+		var params []string
+		for j < len(exprs) {
+			if id, ok := exprs[j].(*ast.Identifier); ok && len(id.Parts) == 1 {
+				params = append(params, id.Name())
+				j++
+			} else {
+				break
+			}
+		}
+		// Check if the next expression is a lambda and we have at least one identifier
+		if j < len(exprs) && len(params) >= 1 {
+			if lambda, ok := exprs[j].(*ast.Lambda); ok {
+				// Don't merge if lambda was explicitly parenthesized
+				// e.g., f(a, (x -> y)) should NOT merge 'a' into the lambda
+				if lambda.Parenthesized {
+					return exprs
+				}
+				// Merge the identifiers into the lambda's parameters
+				newParams := make([]string, 0, len(params)+len(lambda.Parameters))
+				newParams = append(newParams, params...)
+				newParams = append(newParams, lambda.Parameters...)
+				lambda.Parameters = newParams
+				// Return lambda followed by remaining expressions
+				result := make([]ast.Expression, 0, len(exprs)-j)
+				result = append(result, lambda)
+				result = append(result, exprs[j+1:]...)
+				return result
+			}
+		}
+	}
+
+	// No merge needed
 	return exprs
 }
 
@@ -1017,6 +1069,13 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 	// grouping in EXPLAIN output (e.g., "(a OR b) OR c" vs "a OR b OR c")
 	if binExpr, ok := first.(*ast.BinaryExpr); ok {
 		binExpr.Parenthesized = true
+	}
+
+	// Mark lambda expressions as parenthesized so we don't merge them
+	// with preceding identifiers in multi-param lambda detection
+	// e.g., f(a, (x -> y)) should NOT merge 'a' into the lambda
+	if lambda, ok := first.(*ast.Lambda); ok {
+		lambda.Parenthesized = true
 	}
 
 	return first

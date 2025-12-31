@@ -1440,9 +1440,10 @@ func (t *TupleAccess) expressionNode()     {}
 
 // Lambda represents a lambda expression.
 type Lambda struct {
-	Position   token.Position `json:"-"`
-	Parameters []string       `json:"parameters"`
-	Body       Expression     `json:"body"`
+	Position      token.Position `json:"-"`
+	Parameters    []string       `json:"parameters"`
+	Body          Expression     `json:"body"`
+	Parenthesized bool           `json:"-"` // True if wrapped in explicit parentheses
 }
 
 func (l *Lambda) Pos() token.Position { return l.Position }
