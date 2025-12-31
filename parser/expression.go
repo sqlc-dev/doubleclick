@@ -440,6 +440,29 @@ func (p *Parser) parseIdentifierOrFunction() ast.Expression {
 	name := p.current.Value
 	p.nextToken()
 
+	// Check for typed literals: DATE '...', TIMESTAMP '...', TIME '...'
+	// These are converted to toDate(), toDateTime(), toTime() function calls
+	upperName := strings.ToUpper(name)
+	if p.currentIs(token.STRING) && (upperName == "DATE" || upperName == "TIMESTAMP" || upperName == "TIME") {
+		fnName := "toDate"
+		if upperName == "TIMESTAMP" {
+			fnName = "toDateTime"
+		} else if upperName == "TIME" {
+			fnName = "toTime"
+		}
+		strLit := &ast.Literal{
+			Position: p.current.Pos,
+			Type:     "String",
+			Value:    p.current.Value,
+		}
+		p.nextToken()
+		return &ast.FunctionCall{
+			Position:  pos,
+			Name:      fnName,
+			Arguments: []ast.Expression{strLit},
+		}
+	}
+
 	// Check for MySQL-style @@variable syntax (system variables)
 	// Convert to globalVariable('varname') function call with alias @@varname
 	if strings.HasPrefix(name, "@@") {
