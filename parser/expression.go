@@ -843,10 +843,16 @@ func (p *Parser) parseNumber() ast.Expression {
 			lit.Source = value // Preserve original source text (e.g., "0.0" vs "0")
 		}
 	} else if isHexFloat {
-		// Parse hex float (Go doesn't support this directly, approximate)
-		// For now, store as string - ClickHouse will interpret it
-		lit.Type = ast.LiteralString
-		lit.Value = value
+		// Parse hex float (Go 1.13+ supports this via ParseFloat)
+		f, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			lit.Type = ast.LiteralString
+			lit.Value = value
+		} else {
+			lit.Type = ast.LiteralFloat
+			lit.Value = f
+			lit.Source = value // Preserve original source text
+		}
 	} else {
 		// Determine the base for parsing
 		// - 0x/0X: hex (base 16)
