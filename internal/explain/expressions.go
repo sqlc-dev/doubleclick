@@ -402,10 +402,23 @@ func explainUnaryExpr(sb *strings.Builder, n *ast.UnaryExpr, indent string, dept
 				// Convert positive integer to negative
 				switch val := lit.Value.(type) {
 				case int64:
-					fmt.Fprintf(sb, "%sLiteral Int64_%d\n", indent, -val)
+					negVal := -val
+					// ClickHouse normalizes -0 to UInt64_0
+					if negVal == 0 {
+						fmt.Fprintf(sb, "%sLiteral UInt64_0\n", indent)
+					} else if negVal > 0 {
+						fmt.Fprintf(sb, "%sLiteral UInt64_%d\n", indent, negVal)
+					} else {
+						fmt.Fprintf(sb, "%sLiteral Int64_%d\n", indent, negVal)
+					}
 					return
 				case uint64:
-					fmt.Fprintf(sb, "%sLiteral Int64_-%d\n", indent, val)
+					// ClickHouse normalizes -0 to UInt64_0
+					if val == 0 {
+						fmt.Fprintf(sb, "%sLiteral UInt64_0\n", indent)
+					} else {
+						fmt.Fprintf(sb, "%sLiteral Int64_-%d\n", indent, val)
+					}
 					return
 				}
 			case ast.LiteralFloat:
