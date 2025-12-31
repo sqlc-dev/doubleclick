@@ -85,8 +85,16 @@ func windowSpecHasContent(w *ast.WindowSpec) bool {
 }
 
 func explainLambda(sb *strings.Builder, n *ast.Lambda, indent string, depth int) {
+	explainLambdaWithAlias(sb, n, "", indent, depth)
+}
+
+func explainLambdaWithAlias(sb *strings.Builder, n *ast.Lambda, alias string, indent string, depth int) {
 	// Lambda is represented as Function lambda with tuple of params and body
-	fmt.Fprintf(sb, "%sFunction lambda (children %d)\n", indent, 1)
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction lambda (alias %s) (children %d)\n", indent, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction lambda (children %d)\n", indent, 1)
+	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
 	// Parameters as tuple
 	fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)

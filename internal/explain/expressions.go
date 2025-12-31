@@ -645,6 +645,8 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 		}
 	case *ast.FunctionCall:
 		explainFunctionCallWithAlias(sb, e, n.Name, indent, depth)
+	case *ast.Lambda:
+		explainLambdaWithAlias(sb, e, n.Name, indent, depth)
 	case *ast.BinaryExpr:
 		// Binary expressions become functions
 		fnName := OperatorToFunction(e.Op)
