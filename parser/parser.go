@@ -1116,14 +1116,15 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 		}
 	}
 
-	// Handle alias (keywords like LEFT, RIGHT can be used as aliases after AS)
+	// Handle alias (keywords like LEFT, RIGHT, FIRST can be used as aliases after AS,
+	// or without AS if they're not clause keywords)
 	if p.currentIs(token.AS) {
 		p.nextToken()
 		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 			expr.Alias = p.current.Value
 			p.nextToken()
 		}
-	} else if p.currentIs(token.IDENT) && !p.isKeywordForClause() {
+	} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && !p.isKeywordForClause() {
 		expr.Alias = p.current.Value
 		p.nextToken()
 	}
@@ -1137,7 +1138,12 @@ func (p *Parser) isKeywordForClause() bool {
 		token.OFFSET, token.UNION, token.EXCEPT, token.SETTINGS, token.FORMAT,
 		token.PREWHERE, token.JOIN, token.LEFT, token.RIGHT, token.INNER,
 		token.FULL, token.CROSS, token.PASTE, token.ON, token.USING, token.GLOBAL,
-		token.ANY, token.ALL, token.SEMI, token.ANTI, token.ASOF:
+		token.ANY, token.ALL, token.SEMI, token.ANTI, token.ASOF, token.ARRAY,
+		token.WINDOW, token.WITH, token.INTERSECT, token.SELECT:
+		return true
+	}
+	// Handle TOTALS as a clause keyword when used in "WITH TOTALS"
+	if p.current.Token == token.IDENT && strings.ToUpper(p.current.Value) == "TOTALS" {
 		return true
 	}
 	return false
