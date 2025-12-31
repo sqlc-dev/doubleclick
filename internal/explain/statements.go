@@ -282,24 +282,9 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		if len(n.PrimaryKey) > 0 {
 			storageChildren++
 		}
-		// SAMPLE BY is only shown in EXPLAIN AST when it's a function (not a simple identifier)
-		// and when it's different from ORDER BY
+		// SAMPLE BY is always shown in EXPLAIN AST when present
 		if n.SampleBy != nil {
-			if _, isIdent := n.SampleBy.(*ast.Identifier); !isIdent {
-				// Check if SAMPLE BY equals ORDER BY - if so, don't show it
-				showSampleBy := true
-				if len(n.OrderBy) == 1 {
-					var orderBySb, sampleBySb strings.Builder
-					Node(&orderBySb, n.OrderBy[0], 0)
-					Node(&sampleBySb, n.SampleBy, 0)
-					if orderBySb.String() == sampleBySb.String() {
-						showSampleBy = false
-					}
-				}
-				if showSampleBy {
-					storageChildren++
-				}
-			}
+			storageChildren++
 		}
 		if n.TTL != nil {
 			storageChildren++
@@ -395,24 +380,9 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				}
 			}
 		}
-		// SAMPLE BY is only shown in EXPLAIN AST when it's a function (not a simple identifier)
-		// and when it's different from ORDER BY
+		// SAMPLE BY is always shown in EXPLAIN AST when present
 		if n.SampleBy != nil {
-			if _, isIdent := n.SampleBy.(*ast.Identifier); !isIdent {
-				// Check if SAMPLE BY equals ORDER BY - if so, don't show it
-				showSampleBy := true
-				if len(n.OrderBy) == 1 {
-					var orderBySb, sampleBySb strings.Builder
-					Node(&orderBySb, n.OrderBy[0], 0)
-					Node(&sampleBySb, n.SampleBy, 0)
-					if orderBySb.String() == sampleBySb.String() {
-						showSampleBy = false
-					}
-				}
-				if showSampleBy {
-					Node(sb, n.SampleBy, storageChildDepth)
-				}
-			}
+			Node(sb, n.SampleBy, storageChildDepth)
 		}
 		if n.TTL != nil {
 			fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", storageIndent)
