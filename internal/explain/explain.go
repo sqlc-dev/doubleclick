@@ -279,6 +279,9 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	if col.Default != nil || hasEphemeralDefault {
 		children++
 	}
+	if col.TTL != nil {
+		children++
+	}
 	if col.Codec != nil {
 		children++
 	}
@@ -294,6 +297,9 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	} else if hasEphemeralDefault {
 		// EPHEMERAL columns without explicit default value show defaultValueOfTypeName function
 		fmt.Fprintf(sb, "%s Function defaultValueOfTypeName\n", indent)
+	}
+	if col.TTL != nil {
+		Node(sb, col.TTL, depth+1)
 	}
 	if col.Codec != nil {
 		explainCodecExpr(sb, col.Codec, indent+" ", depth+1)
