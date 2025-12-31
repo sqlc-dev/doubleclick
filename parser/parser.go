@@ -4549,6 +4549,10 @@ func (p *Parser) parseShow() ast.Statement {
 	case token.COLUMNS:
 		show.ShowType = ast.ShowColumns
 		p.nextToken()
+	case token.INDEX:
+		// SHOW INDEX FROM table - treat as ShowColumns (ClickHouse maps to ShowColumns)
+		show.ShowType = ast.ShowColumns
+		p.nextToken()
 	case token.CREATE:
 		p.nextToken()
 		if p.currentIs(token.DATABASE) {
@@ -4625,10 +4629,24 @@ func (p *Parser) parseShow() ast.Statement {
 				show.ShowType = ast.ShowDictionaries
 			case "FUNCTIONS":
 				show.ShowType = ast.ShowFunctions
+			case "INDEXES", "INDICES", "KEYS":
+				// SHOW INDEXES/INDICES/KEYS FROM table - treat as ShowColumns
+				show.ShowType = ast.ShowColumns
+			case "EXTENDED":
+				// SHOW EXTENDED INDEX FROM table - treat as ShowColumns
+				p.nextToken()
+				if p.currentIs(token.INDEX) {
+					p.nextToken()
+				}
+				show.ShowType = ast.ShowColumns
+				// Don't consume another token, fall through to FROM parsing
+				goto parseFrom
 			}
 			p.nextToken()
 		}
 	}
+
+parseFrom:
 
 	// Parse FROM clause (or table/database name for SHOW CREATE TABLE/DATABASE/DICTIONARY/VIEW)
 	showCreateTypes := show.ShowType == ast.ShowCreate || show.ShowType == ast.ShowCreateDB || show.ShowType == ast.ShowCreateDictionary || show.ShowType == ast.ShowCreateView
@@ -4650,6 +4668,15 @@ func (p *Parser) parseShow() ast.Statement {
 			} else {
 				show.From = name
 			}
+		}
+	}
+
+	// Handle SHOW INDEX FROM table FROM database syntax (second FROM for database)
+	if p.currentIs(token.FROM) && show.ShowType == ast.ShowColumns {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			show.Database = p.current.Value
+			p.nextToken()
 		}
 	}
 

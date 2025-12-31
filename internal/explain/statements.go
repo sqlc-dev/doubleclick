@@ -179,16 +179,16 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	}
 	// ClickHouse adds an extra space before (children N) for CREATE DATABASE
 	if n.CreateDatabase {
-		fmt.Fprintf(sb, "%sCreateQuery %s  (children %d)\n", indent, name, children)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+		fmt.Fprintf(sb, "%sCreateQuery %s  (children %d)\n", indent, EscapeIdentifier(name), children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 	} else if hasDatabase {
 		// Database-qualified: CreateQuery db table (children N)
-		fmt.Fprintf(sb, "%sCreateQuery %s %s (children %d)\n", indent, n.Database, name, children)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+		fmt.Fprintf(sb, "%sCreateQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(n.Database))
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 	} else {
-		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, name, children)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+		fmt.Fprintf(sb, "%sCreateQuery %s (children %d)\n", indent, EscapeIdentifier(name), children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 	}
 	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Projections) > 0 || len(n.Constraints) > 0 {
 		childrenCount := 0
@@ -492,16 +492,16 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 	hasDatabase := n.Database != "" && !n.DropDatabase
 	if hasDatabase {
 		// Database-qualified: DropQuery db table (children 2)
-		fmt.Fprintf(sb, "%sDropQuery %s %s (children %d)\n", indent, n.Database, name, 2)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+		fmt.Fprintf(sb, "%sDropQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), 2)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(n.Database))
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 	} else if n.DropDatabase {
 		// DROP DATABASE uses different spacing
-		fmt.Fprintf(sb, "%sDropQuery %s  (children %d)\n", indent, name, 1)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+		fmt.Fprintf(sb, "%sDropQuery %s  (children %d)\n", indent, EscapeIdentifier(name), 1)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 	} else {
-		fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, name, 1)
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, name)
+		fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), 1)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 	}
 }
 

@@ -37,6 +37,12 @@ func FormatFloat(val float64) string {
 	return strconv.FormatFloat(val, 'f', -1, 64)
 }
 
+// EscapeIdentifier escapes single quotes in identifiers for EXPLAIN AST output
+// ClickHouse escapes ' as \' in identifier names
+func EscapeIdentifier(s string) string {
+	return strings.ReplaceAll(s, "'", "\\'")
+}
+
 // escapeStringLiteral escapes special characters in a string for EXPLAIN AST output
 // Uses double-escaping as ClickHouse EXPLAIN AST displays strings
 // Iterates over bytes to preserve raw bytes (including invalid UTF-8)
