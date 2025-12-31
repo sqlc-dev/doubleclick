@@ -102,8 +102,23 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 		for _, g := range n.GroupBy {
 			if n.GroupingSets {
 				// Each grouping set is wrapped in an ExpressionList
-				fmt.Fprintf(sb, "%s  ExpressionList (children 1)\n", indent)
-				Node(sb, g, depth+3)
+				// but we need to unwrap tuples and output elements directly
+				if lit, ok := g.(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+					if elements, ok := lit.Value.([]ast.Expression); ok {
+						fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(elements))
+						for _, elem := range elements {
+							Node(sb, elem, depth+3)
+						}
+					} else {
+						// Fallback for unexpected tuple value type
+						fmt.Fprintf(sb, "%s  ExpressionList (children 1)\n", indent)
+						Node(sb, g, depth+3)
+					}
+				} else {
+					// Single expression grouping set
+					fmt.Fprintf(sb, "%s  ExpressionList (children 1)\n", indent)
+					Node(sb, g, depth+3)
+				}
 			} else {
 				Node(sb, g, depth+2)
 			}
