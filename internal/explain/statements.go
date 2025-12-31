@@ -988,10 +988,14 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 
 func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent string, depth int) {
 	children := countAlterCommandChildren(cmd)
-	// CLEAR_STATISTICS is normalized to DROP_STATISTICS in EXPLAIN AST output
+	// Normalize command types to match ClickHouse EXPLAIN AST output
 	cmdType := cmd.Type
 	if cmdType == ast.AlterClearStatistics {
 		cmdType = ast.AlterDropStatistics
+	}
+	// DETACH_PARTITION is shown as DROP_PARTITION in EXPLAIN AST
+	if cmdType == ast.AlterDetachPartition {
+		cmdType = ast.AlterDropPartition
 	}
 	fmt.Fprintf(sb, "%sAlterCommand %s (children %d)\n", indent, cmdType, children)
 
@@ -1056,8 +1060,13 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
 		ast.AlterReplacePartition, ast.AlterFreezePartition:
 		if cmd.Partition != nil {
-			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
-			Node(sb, cmd.Partition, depth+2)
+			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
+			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
+				fmt.Fprintf(sb, "%s Partition_ID \n", indent)
+			} else {
+				fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+				Node(sb, cmd.Partition, depth+2)
+			}
 		}
 	case ast.AlterFreeze:
 		// No children
@@ -1244,7 +1253,10 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
 		ast.AlterReplacePartition, ast.AlterFreezePartition:
 		if cmd.Partition != nil {
-			children++
+			// PARTITION ALL doesn't count as a child (shown as Partition_ID empty)
+			if ident, ok := cmd.Partition.(*ast.Identifier); !ok || strings.ToUpper(ident.Name()) != "ALL" {
+				children++
+			}
 		}
 	case ast.AlterFreeze:
 		// No children
