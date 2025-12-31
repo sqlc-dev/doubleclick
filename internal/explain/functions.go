@@ -12,6 +12,11 @@ func explainFunctionCall(sb *strings.Builder, n *ast.FunctionCall, indent string
 }
 
 func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int) {
+	// Handle special function transformations that ClickHouse does internally
+	if handled := handleSpecialFunction(sb, n, alias, indent, depth); handled {
+		return
+	}
+
 	children := 1 // arguments ExpressionList
 	if len(n.Parameters) > 0 {
 		children++ // parameters ExpressionList
@@ -82,6 +87,172 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 // functions, even when OVER clause has PARTITION BY, ORDER BY, or frame specs.
 func windowSpecHasContent(w *ast.WindowSpec) bool {
 	return false
+}
+
+// handleSpecialFunction handles special function transformations that ClickHouse does internally.
+// Returns true if the function was handled, false otherwise.
+func handleSpecialFunction(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int) bool {
+	fnName := strings.ToUpper(n.Name)
+
+	// POSITION('ll' IN 'Hello') -> position('Hello', 'll')
+	if fnName == "POSITION" && len(n.Arguments) == 1 {
+		if inExpr, ok := n.Arguments[0].(*ast.InExpr); ok {
+			// Transform: POSITION(needle IN haystack) -> position(haystack, needle)
+			explainPositionWithIn(sb, inExpr.Expr, inExpr.List[0], alias, indent, depth)
+			return true
+		}
+	}
+
+	// DATE_ADD/DATEADD/TIMESTAMP_ADD/TIMESTAMPADD
+	if fnName == "DATE_ADD" || fnName == "DATEADD" || fnName == "TIMESTAMP_ADD" || fnName == "TIMESTAMPADD" {
+		return handleDateAddSub(sb, n, alias, indent, depth, "plus")
+	}
+
+	// DATE_SUB/DATESUB/TIMESTAMP_SUB/TIMESTAMPSUB
+	if fnName == "DATE_SUB" || fnName == "DATESUB" || fnName == "TIMESTAMP_SUB" || fnName == "TIMESTAMPSUB" {
+		return handleDateAddSub(sb, n, alias, indent, depth, "minus")
+	}
+
+	// DATE_DIFF/DATEDIFF
+	if fnName == "DATE_DIFF" || fnName == "DATEDIFF" {
+		return handleDateDiff(sb, n, alias, indent, depth)
+	}
+
+	return false
+}
+
+// explainPositionWithIn outputs POSITION(needle IN haystack) as position(haystack, needle)
+func explainPositionWithIn(sb *strings.Builder, needle, haystack ast.Expression, alias string, indent string, depth int) {
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction position (alias %s) (children %d)\n", indent, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction position (children %d)\n", indent, 1)
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+	// Arguments are swapped: haystack first, then needle
+	Node(sb, haystack, depth+2)
+	Node(sb, needle, depth+2)
+}
+
+// handleDateAddSub handles DATE_ADD/DATE_SUB and variants
+// opFunc is "plus" for ADD or "minus" for SUB
+func handleDateAddSub(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int, opFunc string) bool {
+	if len(n.Arguments) == 3 {
+		// DATE_ADD(unit, n, date) -> plus/minus(date, toIntervalUnit(n))
+		unitArg := n.Arguments[0]
+		valueArg := n.Arguments[1]
+		dateArg := n.Arguments[2]
+
+		// Extract unit from identifier
+		unitName := ""
+		if ident, ok := unitArg.(*ast.Identifier); ok {
+			unitName = ident.Name()
+		}
+
+		if unitName != "" {
+			explainDateAddSubResult(sb, opFunc, dateArg, valueArg, unitName, alias, indent, depth)
+			return true
+		}
+	} else if len(n.Arguments) == 2 {
+		// DATE_ADD(interval, date) -> plus(interval, date)
+		// DATE_SUB(date, interval) -> minus(date, interval)
+		intervalArg := n.Arguments[0]
+		dateArg := n.Arguments[1]
+
+		// Check which argument is the interval
+		if _, ok := intervalArg.(*ast.IntervalExpr); ok {
+			// Interval first: plus(interval, date)
+			explainDateAddSubWithInterval(sb, opFunc, intervalArg, dateArg, alias, indent, depth)
+			return true
+		}
+		// Check if first arg is already a toInterval function (from parser)
+		if fc, ok := intervalArg.(*ast.FunctionCall); ok && strings.HasPrefix(strings.ToLower(fc.Name), "tointerval") {
+			// Interval first: plus(interval, date)
+			explainDateAddSubWithInterval(sb, opFunc, intervalArg, dateArg, alias, indent, depth)
+			return true
+		}
+
+		// DATE_SUB(date, interval) -> minus(date, interval)
+		if _, ok := dateArg.(*ast.IntervalExpr); ok {
+			explainDateAddSubWithInterval(sb, opFunc, intervalArg, dateArg, alias, indent, depth)
+			return true
+		}
+		if fc, ok := dateArg.(*ast.FunctionCall); ok && strings.HasPrefix(strings.ToLower(fc.Name), "tointerval") {
+			explainDateAddSubWithInterval(sb, opFunc, intervalArg, dateArg, alias, indent, depth)
+			return true
+		}
+	}
+
+	return false
+}
+
+// explainDateAddSubResult outputs the transformed DATE_ADD/SUB with unit syntax
+func explainDateAddSubResult(sb *strings.Builder, opFunc string, dateArg, valueArg ast.Expression, unit string, alias string, indent string, depth int) {
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, opFunc, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, opFunc, 1)
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+
+	// First arg: date
+	Node(sb, dateArg, depth+2)
+
+	// Second arg: toIntervalUnit(value)
+	unitTitled := strings.ToUpper(unit[:1]) + strings.ToLower(unit[1:])
+	fmt.Fprintf(sb, "%s  Function toInterval%s (children %d)\n", indent, unitTitled, 1)
+	fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
+	Node(sb, valueArg, depth+4)
+}
+
+// explainDateAddSubWithInterval outputs the transformed DATE_ADD/SUB with INTERVAL syntax
+func explainDateAddSubWithInterval(sb *strings.Builder, opFunc string, arg1, arg2 ast.Expression, alias string, indent string, depth int) {
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, opFunc, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, opFunc, 1)
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+	Node(sb, arg1, depth+2)
+	Node(sb, arg2, depth+2)
+}
+
+// handleDateDiff handles DATE_DIFF/DATEDIFF
+// DATE_DIFF(unit, date1, date2) -> dateDiff('unit', date1, date2)
+func handleDateDiff(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int) bool {
+	if len(n.Arguments) != 3 {
+		return false
+	}
+
+	unitArg := n.Arguments[0]
+	date1Arg := n.Arguments[1]
+	date2Arg := n.Arguments[2]
+
+	// Extract unit from identifier
+	unitName := ""
+	if ident, ok := unitArg.(*ast.Identifier); ok {
+		unitName = ident.Name()
+	}
+
+	if unitName == "" {
+		return false
+	}
+
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction dateDiff (alias %s) (children %d)\n", indent, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction dateDiff (children %d)\n", indent, 1)
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 3)
+
+	// First arg: unit as lowercase string literal
+	fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, strings.ToLower(unitName))
+
+	// Second and third args: dates
+	Node(sb, date1Arg, depth+2)
+	Node(sb, date2Arg, depth+2)
+
+	return true
 }
 
 func explainLambda(sb *strings.Builder, n *ast.Lambda, indent string, depth int) {

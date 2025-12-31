@@ -307,6 +307,7 @@ func NormalizeFunctionName(name string) string {
 		"greatest":   "greatest",
 		"least":      "least",
 		"concat_ws":  "concat",
+		"position":   "position",
 		// SQL standard ANY/ALL subquery operators
 		"anymatch":   "in",
 		"allmatch":   "notIn",
