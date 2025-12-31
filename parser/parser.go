@@ -550,6 +550,10 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			sel.GroupBy = p.parseExpressionList()
 			p.expect(token.RPAREN)
 			sel.WithCube = true
+		} else if p.currentIs(token.ALL) {
+			// GROUP BY ALL - special ClickHouse syntax
+			sel.GroupByAll = true
+			sel.GroupBy = p.parseExpressionList() // Still parse it, but mark as GroupByAll
 		} else {
 			sel.GroupBy = p.parseExpressionList()
 		}

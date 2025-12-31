@@ -64,6 +64,7 @@ type SelectQuery struct {
 	PreWhere    Expression            `json:"prewhere,omitempty"`
 	Where       Expression            `json:"where,omitempty"`
 	GroupBy     []Expression          `json:"group_by,omitempty"`
+	GroupByAll  bool                  `json:"group_by_all,omitempty"` // true if GROUP BY ALL was used
 	GroupingSets bool                 `json:"grouping_sets,omitempty"` // true if GROUP BY uses GROUPING SETS
 	WithRollup  bool                  `json:"with_rollup,omitempty"`
 	WithCube    bool                  `json:"with_cube,omitempty"`
