@@ -9,7 +9,7 @@ const (
 	ILLEGAL Token = iota
 	EOF
 	WHITESPACE
-	COMMENT
+	LINE_COMMENT // SQL comments like -- and /* */
 
 	// Literals
 	IDENT   // identifiers
@@ -74,6 +74,7 @@ const (
 	COLLATE
 	COLUMN
 	COLUMNS
+	COMMENT
 	COMMIT
 	CONSTRAINT
 	CREATE
@@ -208,7 +209,7 @@ var tokens = [...]string{
 	ILLEGAL:    "ILLEGAL",
 	EOF:        "EOF",
 	WHITESPACE: "WHITESPACE",
-	COMMENT:    "COMMENT",
+	LINE_COMMENT: "LINE_COMMENT",
 
 	IDENT:  "IDENT",
 	NUMBER: "NUMBER",
@@ -268,6 +269,7 @@ var tokens = [...]string{
 	COLLATE:      "COLLATE",
 	COLUMN:       "COLUMN",
 	COLUMNS:      "COLUMNS",
+	COMMENT:      "COMMENT",
 	COMMIT:       "COMMIT",
 	CONSTRAINT:   "CONSTRAINT",
 	CREATE:       "CREATE",

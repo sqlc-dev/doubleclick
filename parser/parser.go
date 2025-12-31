@@ -37,7 +37,7 @@ func (p *Parser) nextToken() {
 	for {
 		p.peek = p.lexer.NextToken()
 		// Skip whitespace and comments
-		if p.peek.Token == token.WHITESPACE || p.peek.Token == token.COMMENT {
+		if p.peek.Token == token.WHITESPACE || p.peek.Token == token.LINE_COMMENT {
 			continue
 		}
 		break
