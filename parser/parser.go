@@ -4179,6 +4179,21 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				}
 			}
 		}
+	case token.FETCH:
+		p.nextToken()
+		if p.currentIs(token.PARTITION) {
+			cmd.Type = ast.AlterFetchPartition
+			p.nextToken()
+			cmd.Partition = p.parseExpression(LOWEST)
+			// FROM path
+			if p.currentIs(token.FROM) {
+				p.nextToken()
+				if p.currentIs(token.STRING) {
+					cmd.FromPath = p.current.Value
+					p.nextToken()
+				}
+			}
+		}
 	case token.DELETE:
 		// DELETE WHERE condition - mutation to delete rows
 		cmd.Type = ast.AlterDeleteWhere

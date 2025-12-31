@@ -529,6 +529,7 @@ type AlterCommand struct {
 	ConstraintName string               `json:"constraint_name,omitempty"`
 	Partition      Expression           `json:"partition,omitempty"`
 	FromTable      string               `json:"from_table,omitempty"`
+	FromPath       string               `json:"from_path,omitempty"` // For FETCH PARTITION FROM
 	TTL            *TTLClause           `json:"ttl,omitempty"`
 	Settings       []*SettingExpr       `json:"settings,omitempty"`
 	Where          Expression           `json:"where,omitempty"`       // For DELETE WHERE
@@ -593,6 +594,8 @@ const (
 	AlterDetachPartition    AlterCommandType = "DETACH_PARTITION"
 	AlterAttachPartition    AlterCommandType = "ATTACH_PARTITION"
 	AlterReplacePartition   AlterCommandType = "REPLACE_PARTITION"
+	AlterFetchPartition     AlterCommandType = "FETCH_PARTITION"
+	AlterMovePartition      AlterCommandType = "MOVE_PARTITION"
 	AlterFreezePartition    AlterCommandType = "FREEZE_PARTITION"
 	AlterFreeze             AlterCommandType = "FREEZE"
 	AlterDeleteWhere        AlterCommandType = "DELETE_WHERE"
