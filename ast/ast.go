@@ -72,7 +72,8 @@ type SelectQuery struct {
 	Having      Expression            `json:"having,omitempty"`
 	Qualify     Expression            `json:"qualify,omitempty"`
 	Window      []*WindowDefinition   `json:"window,omitempty"`
-	OrderBy     []*OrderByElement     `json:"order_by,omitempty"`
+	OrderBy      []*OrderByElement      `json:"order_by,omitempty"`
+	Interpolate  []*InterpolateElement  `json:"interpolate,omitempty"`
 	Limit            Expression            `json:"limit,omitempty"`
 	LimitBy          []Expression          `json:"limit_by,omitempty"`
 	LimitByLimit     Expression            `json:"limit_by_limit,omitempty"`     // LIMIT value before BY (e.g., LIMIT 1 BY x LIMIT 3)
@@ -211,6 +212,17 @@ type OrderByElement struct {
 
 func (o *OrderByElement) Pos() token.Position { return o.Position }
 func (o *OrderByElement) End() token.Position { return o.Position }
+
+// InterpolateElement represents a single column interpolation in INTERPOLATE clause.
+// Example: INTERPOLATE (value AS value + 1)
+type InterpolateElement struct {
+	Position token.Position `json:"-"`
+	Column   string         `json:"column"`
+	Value    Expression     `json:"value,omitempty"` // nil if just column name
+}
+
+func (i *InterpolateElement) Pos() token.Position { return i.Position }
+func (i *InterpolateElement) End() token.Position { return i.Position }
 
 // SettingExpr represents a setting expression.
 type SettingExpr struct {

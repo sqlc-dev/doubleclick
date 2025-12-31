@@ -735,6 +735,12 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		sel.OrderBy = p.parseOrderByList()
 	}
 
+	// Parse INTERPOLATE clause (comes after ORDER BY ... WITH FILL)
+	if p.currentIs(token.INTERPOLATE) {
+		p.nextToken()
+		sel.Interpolate = p.parseInterpolateList()
+	}
+
 	// Parse LIMIT clause
 	if p.currentIs(token.LIMIT) {
 		p.nextToken()
@@ -1362,6 +1368,54 @@ func (p *Parser) parseOrderByList() []*ast.OrderByElement {
 		if !p.currentIs(token.COMMA) {
 			break
 		}
+		p.nextToken()
+	}
+
+	return elements
+}
+
+// parseInterpolateList parses INTERPOLATE (col1 AS expr1, col2, col3 AS expr3)
+func (p *Parser) parseInterpolateList() []*ast.InterpolateElement {
+	var elements []*ast.InterpolateElement
+
+	// Expect opening parenthesis
+	if !p.currentIs(token.LPAREN) {
+		return elements
+	}
+	p.nextToken()
+
+	for {
+		if p.currentIs(token.RPAREN) {
+			break
+		}
+
+		// Column name
+		if !p.currentIs(token.IDENT) && !p.current.Token.IsKeyword() {
+			break
+		}
+
+		elem := &ast.InterpolateElement{
+			Position: p.current.Pos,
+			Column:   p.current.Value,
+		}
+		p.nextToken()
+
+		// Optional AS expression
+		if p.currentIs(token.AS) {
+			p.nextToken()
+			elem.Value = p.parseExpression(LOWEST)
+		}
+
+		elements = append(elements, elem)
+
+		if !p.currentIs(token.COMMA) {
+			break
+		}
+		p.nextToken()
+	}
+
+	// Expect closing parenthesis
+	if p.currentIs(token.RPAREN) {
 		p.nextToken()
 	}
 

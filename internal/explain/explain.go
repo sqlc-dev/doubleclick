@@ -61,6 +61,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	// Expressions
 	case *ast.OrderByElement:
 		explainOrderByElement(sb, n, indent, depth)
+	case *ast.InterpolateElement:
+		explainInterpolateElement(sb, n, indent, depth)
 	case *ast.Identifier:
 		explainIdentifier(sb, n, indent)
 	case *ast.Literal:

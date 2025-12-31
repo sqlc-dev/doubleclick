@@ -149,6 +149,13 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 			Node(sb, o, depth+2)
 		}
 	}
+	// INTERPOLATE
+	if len(n.Interpolate) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Interpolate))
+		for _, i := range n.Interpolate {
+			Node(sb, i, depth+2)
+		}
+	}
 	// OFFSET (ClickHouse outputs offset before limit in EXPLAIN AST)
 	if n.Offset != nil {
 		Node(sb, n.Offset, depth+1)
@@ -259,6 +266,22 @@ func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent st
 	}
 }
 
+// explainInterpolateElement explains an INTERPOLATE element.
+// Format: InterpolateElement (column colname) (children N)
+func explainInterpolateElement(sb *strings.Builder, n *ast.InterpolateElement, indent string, depth int) {
+	children := 0
+	if n.Value != nil {
+		children = 1
+	}
+
+	if children > 0 {
+		fmt.Fprintf(sb, "%sInterpolateElement (column %s) (children %d)\n", indent, n.Column, children)
+		Node(sb, n.Value, depth+1)
+	} else {
+		fmt.Fprintf(sb, "%sInterpolateElement (column %s)\n", indent, n.Column)
+	}
+}
+
 // isComplexExpr checks if an expression is complex (not a simple literal)
 func isComplexExpr(expr ast.Expression) bool {
 	if expr == nil {
@@ -346,6 +369,9 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 		count++
 	}
 	if len(n.OrderBy) > 0 {
+		count++
+	}
+	if len(n.Interpolate) > 0 {
 		count++
 	}
 	if n.LimitByLimit != nil {
