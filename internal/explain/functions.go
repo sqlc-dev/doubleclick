@@ -322,6 +322,46 @@ func containsOnlyPrimitiveLiterals(lit *ast.Literal) bool {
 	return true
 }
 
+// containsOnlyPrimitiveLiteralsWithUnary is like containsOnlyPrimitiveLiterals but also handles
+// unary negation of numeric literals (e.g., -0., -123)
+func containsOnlyPrimitiveLiteralsWithUnary(lit *ast.Literal) bool {
+	if lit.Type != ast.LiteralTuple {
+		// Non-tuple literals are primitive
+		return true
+	}
+	exprs, ok := lit.Value.([]ast.Expression)
+	if !ok {
+		return false
+	}
+	for _, e := range exprs {
+		// Direct literal
+		if innerLit, ok := e.(*ast.Literal); ok {
+			// Recursively check nested tuples
+			if innerLit.Type == ast.LiteralTuple {
+				if !containsOnlyPrimitiveLiteralsWithUnary(innerLit) {
+					return false
+				}
+			}
+			// Arrays inside tuples make it complex
+			if innerLit.Type == ast.LiteralArray {
+				return false
+			}
+			continue
+		}
+		// Unary negation of numeric literal is also primitive
+		if unary, ok := e.(*ast.UnaryExpr); ok && unary.Op == "-" {
+			if innerLit, ok := unary.Operand.(*ast.Literal); ok {
+				if innerLit.Type == ast.LiteralInteger || innerLit.Type == ast.LiteralFloat {
+					continue
+				}
+			}
+		}
+		// Non-literal expression in tuple
+		return false
+	}
+	return true
+}
+
 // exprToLiteral converts a numeric expression to a literal (handles unary minus)
 func exprToLiteral(expr ast.Expression) *ast.Literal {
 	if lit, ok := expr.(*ast.Literal); ok {

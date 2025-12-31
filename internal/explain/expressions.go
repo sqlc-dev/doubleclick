@@ -65,8 +65,16 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			for _, e := range exprs {
 				// Simple literals (numbers, strings, etc.) are OK
 				if lit, isLit := e.(*ast.Literal); isLit {
-					// Nested tuples/arrays are complex
-					if lit.Type == ast.LiteralTuple || lit.Type == ast.LiteralArray {
+					// Nested tuples that contain only primitive literals are OK
+					if lit.Type == ast.LiteralTuple {
+						if !containsOnlyPrimitiveLiteralsWithUnary(lit) {
+							hasComplexExpr = true
+							break
+						}
+						continue
+					}
+					// Arrays are always complex in tuple context
+					if lit.Type == ast.LiteralArray {
 						hasComplexExpr = true
 						break
 					}
