@@ -254,8 +254,9 @@ type CreateQuery struct {
 	Table            string               `json:"table,omitempty"`
 	View             string               `json:"view,omitempty"`
 	Materialized     bool                 `json:"materialized,omitempty"`
-	To               string               `json:"to,omitempty"`       // Target table for materialized views
-	Populate         bool                 `json:"populate,omitempty"` // POPULATE for materialized views
+	ToDatabase       string               `json:"to_database,omitempty"` // Target database for materialized views
+	To               string               `json:"to,omitempty"`          // Target table for materialized views
+	Populate         bool                 `json:"populate,omitempty"`    // POPULATE for materialized views
 	Columns          []*ColumnDeclaration `json:"columns,omitempty"`
 	Indexes          []*IndexDefinition   `json:"indexes,omitempty"`
 	Projections      []*Projection        `json:"projections,omitempty"`

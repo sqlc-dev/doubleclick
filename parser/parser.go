@@ -1975,7 +1975,14 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 			return
 		}
 		p.nextToken()
-		create.To = p.parseIdentifierName()
+		toName := p.parseIdentifierName()
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			create.ToDatabase = toName
+			create.To = p.parseIdentifierName()
+		} else {
+			create.To = toName
+		}
 	}
 
 	// Parse ENGINE (for materialized views)
