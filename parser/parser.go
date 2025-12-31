@@ -4419,12 +4419,33 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 	p.nextToken() // skip SYSTEM
 
 	// Read the command - can include identifiers and keywords (like TTL, SYNC, etc.)
-	// Stop when we see an IDENT followed by DOT (qualified table name like sqllt.table)
+	// Stop when we see:
+	// 1. An IDENT followed by DOT (qualified table name like sqllt.table)
+	// 2. A plain IDENT (not a command keyword) followed by end-of-statement (SEMICOLON, EOF, FORMAT),
+	//    UNLESS the previous part was FAILPOINT (failpoint names are part of the command)
 	var parts []string
 	for p.currentIs(token.IDENT) || p.isSystemCommandKeyword() {
 		// Check if this IDENT is followed by DOT - if so, it's a table name, not part of the command
 		if p.currentIs(token.IDENT) && p.peekIs(token.DOT) {
 			break
+		}
+		// Check if this is a plain IDENT (not a command keyword) followed by end-of-statement
+		// This indicates it's likely a table name, not part of the command
+		// Exception: after FAILPOINT, the identifier is the failpoint name (part of command)
+		if p.currentIs(token.IDENT) && !p.isSystemCommandKeyword() {
+			if p.peekIs(token.SEMICOLON) || p.peekIs(token.EOF) || p.peekIs(token.FORMAT) {
+				// Check if previous part was FAILPOINT or FOR - these are followed by identifiers that are part of command
+				if len(parts) > 0 {
+					lastPart := strings.ToUpper(parts[len(parts)-1])
+					if lastPart == "FAILPOINT" || lastPart == "FOR" {
+						// This is a failpoint name or format name, consume it as part of command
+						parts = append(parts, p.current.Value)
+						p.nextToken()
+						continue
+					}
+				}
+				break
+			}
 		}
 		parts = append(parts, p.current.Value)
 		p.nextToken()
@@ -4451,18 +4472,34 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 	return sys
 }
 
-// isSystemCommandKeyword returns true if current token is a keyword that can be part of SYSTEM command
+// isSystemCommandKeyword returns true if current token is a keyword/identifier that is part of SYSTEM command
+// and should NOT be treated as a table name
 func (p *Parser) isSystemCommandKeyword() bool {
 	switch p.current.Token {
 	case token.TTL, token.SYNC, token.DROP, token.FORMAT, token.FOR, token.INDEX, token.INSERT,
 		token.PRIMARY, token.KEY:
 		return true
 	}
-	// Handle SCHEMA, CACHE, QUEUE and other identifiers that are part of SYSTEM commands
+	// Handle identifiers that are part of SYSTEM commands (not table names)
 	if p.currentIs(token.IDENT) {
 		upper := strings.ToUpper(p.current.Value)
 		switch upper {
-		case "SCHEMA", "CACHE", "QUEUE":
+		case "SCHEMA", "CACHE", "QUEUE",
+			// FAILPOINT names are part of the command, not table names
+			"FAILPOINT",
+			// These are common parts of SYSTEM commands that end with identifiers
+			"ENABLE", "DISABLE", "FLUSH", "RELOAD", "RESTART", "STOP", "START",
+			// Parts of STOP/START commands
+			"LISTEN", "LISTENING", "MOVES", "MERGES", "TTL", "SENDS", "FETCHES", "PULLING",
+			"REPLICATED", "DISTRIBUTED", "CLEANUP",
+			// RELOAD targets
+			"DICTIONARIES", "DICTIONARY", "MODELS", "MODEL", "FUNCTIONS", "FUNCTION",
+			"EMBEDDED", "CONFIG", "SYMBOLS", "ASYNCHRONOUS", "METRICS",
+			// FLUSH/DROP targets
+			"LOGS", "ASYNC", "UNCOMPRESSED", "COMPILED", "MARK", "QUERY", "MMAP",
+			"DNS", "FILESYSTEM", "S3",
+			// Other command parts
+			"MUTATIONS", "REPLICATION", "QUEUES", "DDL", "REPLICAS", "REPLICA":
 			return true
 		}
 	}
