@@ -1686,6 +1686,52 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 	}
 
 	// Parse table options in flexible order (PARTITION BY, ORDER BY, PRIMARY KEY, etc.)
+	p.parseTableOptions(create)
+
+	// Parse AS SELECT or AS (subquery) or AS table_function() or AS database.table
+	if p.currentIs(token.AS) {
+		p.nextToken()
+		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) || p.currentIs(token.LPAREN) {
+			// AS SELECT... or AS (SELECT...) INTERSECT ...
+			create.AsSelect = p.parseSelectWithUnion()
+		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			// AS table_function(...) or AS database.table
+			name := p.parseIdentifierName()
+			if p.currentIs(token.DOT) {
+				// AS database.table - skip the table name
+				p.nextToken()
+				p.parseIdentifierName()
+			} else if p.currentIs(token.LPAREN) {
+				// AS function(...) - parse as a function call
+				fn := &ast.FunctionCall{Name: name}
+				p.nextToken() // skip (
+				if !p.currentIs(token.RPAREN) {
+					fn.Arguments = p.parseExpressionList()
+				}
+				if p.currentIs(token.RPAREN) {
+					p.nextToken()
+				}
+				create.AsTableFunction = fn
+			}
+			_ = name // Use name for future AS table support
+		}
+	}
+
+	// Parse ENGINE after AS (for CREATE TABLE x AS y ENGINE=z syntax)
+	if create.Engine == nil && p.currentIs(token.ENGINE) {
+		p.nextToken()
+		if p.currentIs(token.EQ) {
+			p.nextToken()
+		}
+		create.Engine = p.parseEngineClause()
+	}
+
+	// Parse table options after AS ... ENGINE (PARTITION BY, ORDER BY, etc.)
+	p.parseTableOptions(create)
+}
+
+// parseTableOptions parses table options: PARTITION BY, ORDER BY, PRIMARY KEY, SAMPLE BY, TTL, SETTINGS
+func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 	for {
 		switch {
 		case p.currentIs(token.PARTITION):
@@ -1793,47 +1839,8 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 			p.nextToken()
 			create.Settings = p.parseSettingsList()
 		default:
-			goto done_table_options
+			return
 		}
-	}
-done_table_options:
-
-	// Parse AS SELECT or AS (subquery) or AS table_function() or AS database.table
-	if p.currentIs(token.AS) {
-		p.nextToken()
-		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) || p.currentIs(token.LPAREN) {
-			// AS SELECT... or AS (SELECT...) INTERSECT ...
-			create.AsSelect = p.parseSelectWithUnion()
-		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-			// AS table_function(...) or AS database.table
-			name := p.parseIdentifierName()
-			if p.currentIs(token.DOT) {
-				// AS database.table - skip the table name
-				p.nextToken()
-				p.parseIdentifierName()
-			} else if p.currentIs(token.LPAREN) {
-				// AS function(...) - parse as a function call
-				fn := &ast.FunctionCall{Name: name}
-				p.nextToken() // skip (
-				if !p.currentIs(token.RPAREN) {
-					fn.Arguments = p.parseExpressionList()
-				}
-				if p.currentIs(token.RPAREN) {
-					p.nextToken()
-				}
-				create.AsTableFunction = fn
-			}
-			_ = name // Use name for future AS table support
-		}
-	}
-
-	// Parse ENGINE after AS (for CREATE TABLE x AS y ENGINE=z syntax)
-	if create.Engine == nil && p.currentIs(token.ENGINE) {
-		p.nextToken()
-		if p.currentIs(token.EQ) {
-			p.nextToken()
-		}
-		create.Engine = p.parseEngineClause()
 	}
 }
 
