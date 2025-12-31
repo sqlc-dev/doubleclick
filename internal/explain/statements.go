@@ -24,7 +24,7 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 			children++ // Database identifier (separate from table)
 		}
 	}
-	if len(n.Columns) > 0 {
+	if len(n.Columns) > 0 || n.AllColumns {
 		children++ // Column list
 	}
 	if n.Select != nil {
@@ -58,7 +58,10 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 	}
 
 	// Column list
-	if len(n.Columns) > 0 {
+	if n.AllColumns {
+		fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", indent)
+		fmt.Fprintf(sb, "%s  Asterisk\n", indent)
+	} else if len(n.Columns) > 0 {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Columns))
 		for _, col := range n.Columns {
 			fmt.Fprintf(sb, "%s  Identifier %s\n", indent, col.Parts[len(col.Parts)-1])
@@ -1281,6 +1284,9 @@ func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent stri
 	name := n.Table
 	if n.Final {
 		name += "_final"
+	}
+	if n.Cleanup {
+		name += "_cleanup"
 	}
 
 	children := 1 // identifier

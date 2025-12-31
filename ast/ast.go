@@ -225,6 +225,7 @@ type InsertQuery struct {
 	Table       string           `json:"table,omitempty"`
 	Function    *FunctionCall    `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
 	Columns     []*Identifier    `json:"columns,omitempty"`
+	AllColumns  bool             `json:"all_columns,omitempty"` // For (*) syntax meaning all columns
 	PartitionBy Expression       `json:"partition_by,omitempty"` // For PARTITION BY clause
 	Infile      string           `json:"infile,omitempty"`       // For FROM INFILE clause
 	Compression string           `json:"compression,omitempty"`  // For COMPRESSION clause
@@ -740,6 +741,7 @@ type OptimizeQuery struct {
 	Table     string         `json:"table"`
 	Partition Expression     `json:"partition,omitempty"`
 	Final     bool           `json:"final,omitempty"`
+	Cleanup   bool           `json:"cleanup,omitempty"`
 	Dedupe    bool           `json:"dedupe,omitempty"`
 	OnCluster string         `json:"on_cluster,omitempty"`
 }

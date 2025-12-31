@@ -1179,19 +1179,25 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 	// Parse column list
 	if p.currentIs(token.LPAREN) {
 		p.nextToken()
-		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-			pos := p.current.Pos
-			colName := p.parseIdentifierName()
-			if colName != "" {
-				ins.Columns = append(ins.Columns, &ast.Identifier{
-					Position: pos,
-					Parts:    []string{colName},
-				})
-			}
-			if p.currentIs(token.COMMA) {
-				p.nextToken()
-			} else {
-				break
+		// Check for (*) meaning all columns
+		if p.currentIs(token.ASTERISK) {
+			ins.AllColumns = true
+			p.nextToken()
+		} else {
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				pos := p.current.Pos
+				colName := p.parseIdentifierName()
+				if colName != "" {
+					ins.Columns = append(ins.Columns, &ast.Identifier{
+						Position: pos,
+						Parts:    []string{colName},
+					})
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
 			}
 		}
 		p.expect(token.RPAREN)
@@ -4371,6 +4377,12 @@ func (p *Parser) parseOptimize() *ast.OptimizeQuery {
 	// Handle FINAL
 	if p.currentIs(token.FINAL) {
 		opt.Final = true
+		p.nextToken()
+	}
+
+	// Handle CLEANUP
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CLEANUP" {
+		opt.Cleanup = true
 		p.nextToken()
 	}
 
