@@ -4419,8 +4419,13 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 	p.nextToken() // skip SYSTEM
 
 	// Read the command - can include identifiers and keywords (like TTL, SYNC, etc.)
+	// Stop when we see an IDENT followed by DOT (qualified table name like sqllt.table)
 	var parts []string
 	for p.currentIs(token.IDENT) || p.isSystemCommandKeyword() {
+		// Check if this IDENT is followed by DOT - if so, it's a table name, not part of the command
+		if p.currentIs(token.IDENT) && p.peekIs(token.DOT) {
+			break
+		}
 		parts = append(parts, p.current.Value)
 		p.nextToken()
 	}
