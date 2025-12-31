@@ -149,8 +149,13 @@ func explainViewExplain(sb *strings.Builder, n *ast.ExplainQuery, alias string, 
 	// Now output the viewExplain function
 	fmt.Fprintf(sb, "%s       Function viewExplain (children %d)\n", indent, 1)
 	fmt.Fprintf(sb, "%s        ExpressionList (children %d)\n", indent, 3)
-	// First argument: 'EXPLAIN' literal
-	fmt.Fprintf(sb, "%s         Literal \\'EXPLAIN\\'\n", indent)
+	// First argument: 'EXPLAIN' or 'EXPLAIN SYNTAX' etc.
+	// PLAN is the default and never shown; only show non-default types like SYNTAX
+	explainTypeStr := "EXPLAIN"
+	if n.ExplicitType && n.ExplainType != "" && n.ExplainType != ast.ExplainAST && n.ExplainType != ast.ExplainPlan {
+		explainTypeStr = "EXPLAIN " + string(n.ExplainType)
+	}
+	fmt.Fprintf(sb, "%s         Literal \\'%s\\'\n", indent, explainTypeStr)
 	// Second argument: options string (e.g., "actions = 1")
 	options := n.OptionsString
 	fmt.Fprintf(sb, "%s         Literal \\'%s\\'\n", indent, options)
