@@ -177,6 +177,11 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if n.AsTableFunction != nil {
 		children++
 	}
+	// Count Format as a child if present
+	hasFormat := n.Format != ""
+	if hasFormat {
+		children++
+	}
 	// ClickHouse adds an extra space before (children N) for CREATE DATABASE
 	if n.CreateDatabase {
 		fmt.Fprintf(sb, "%sCreateQuery %s  (children %d)\n", indent, EscapeIdentifier(name), children)
@@ -252,7 +257,15 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	}
 	// For materialized views, output AsSelect before storage definition
 	if n.Materialized && n.AsSelect != nil {
+		// Set context flag to prevent Format from being output at SelectWithUnionQuery level
+		// (it will be output at CreateQuery level instead)
+		if hasFormat {
+			inCreateQueryContext = true
+		}
 		Node(sb, n.AsSelect, depth+1)
+		if hasFormat {
+			inCreateQueryContext = false
+		}
 	}
 	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0
 	if hasStorage {
@@ -416,12 +429,24 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	}
 	// For non-materialized views, output AsSelect after storage
 	if n.AsSelect != nil && !n.Materialized {
+		// Set context flag to prevent Format from being output at SelectWithUnionQuery level
+		// (it will be output at CreateQuery level instead)
+		if hasFormat {
+			inCreateQueryContext = true
+		}
 		// AS SELECT is output directly without Subquery wrapper
 		Node(sb, n.AsSelect, depth+1)
+		if hasFormat {
+			inCreateQueryContext = false
+		}
 	}
 	if n.AsTableFunction != nil {
 		// AS table_function(...) is output directly
 		Node(sb, n.AsTableFunction, depth+1)
+	}
+	// Output FORMAT clause if present
+	if hasFormat {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
 	}
 }
 
@@ -490,18 +515,41 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 	}
 	// Check if we have a database-qualified name (for DROP TABLE db.table)
 	hasDatabase := n.Database != "" && !n.DropDatabase
+	hasFormat := n.Format != ""
+
 	if hasDatabase {
-		// Database-qualified: DropQuery db table (children 2)
-		fmt.Fprintf(sb, "%sDropQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), 2)
+		// Database-qualified: DropQuery db table (children 2 or 3)
+		children := 2
+		if hasFormat {
+			children = 3
+		}
+		fmt.Fprintf(sb, "%sDropQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(n.Database))
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+		if hasFormat {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
 	} else if n.DropDatabase {
 		// DROP DATABASE uses different spacing
-		fmt.Fprintf(sb, "%sDropQuery %s  (children %d)\n", indent, EscapeIdentifier(name), 1)
+		children := 1
+		if hasFormat {
+			children = 2
+		}
+		fmt.Fprintf(sb, "%sDropQuery %s  (children %d)\n", indent, EscapeIdentifier(name), children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+		if hasFormat {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
 	} else {
-		fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), 1)
+		children := 1
+		if hasFormat {
+			children = 2
+		}
+		fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+		if hasFormat {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
 	}
 }
 
@@ -1075,6 +1123,10 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 	if len(n.Settings) > 0 {
 		children++ // Add Set child for SETTINGS
 	}
+	hasFormat := n.Format != ""
+	if hasFormat {
+		children++ // Add Identifier for FORMAT
+	}
 	if n.Database != "" {
 		fmt.Fprintf(sb, "%sAlterQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
 	} else {
@@ -1091,6 +1143,9 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 	if len(n.Settings) > 0 {
 		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
+	if hasFormat {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
 	}
 }
 

@@ -54,10 +54,13 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 		}
 	}
 	// FORMAT clause - check if any SelectQuery has Format set
-	for _, sel := range n.Selects {
-		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
-			Node(sb, sq.Format, depth+1)
-			break
+	// Skip this when inside CreateQuery context, as Format is output at CreateQuery level
+	if !inCreateQueryContext {
+		for _, sel := range n.Selects {
+			if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
+				Node(sb, sq.Format, depth+1)
+				break
+			}
 		}
 	}
 	// When SETTINGS comes AFTER FORMAT, it's output at SelectWithUnionQuery level
@@ -289,10 +292,13 @@ func countSelectUnionChildren(n *ast.SelectWithUnionQuery) int {
 		}
 	}
 	// Check if any SelectQuery has Format set
-	for _, sel := range n.Selects {
-		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
-			count++
-			break
+	// Skip this when inside CreateQuery context, as Format is output at CreateQuery level
+	if !inCreateQueryContext {
+		for _, sel := range n.Selects {
+			if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
+				count++
+				break
+			}
 		}
 	}
 	// When SETTINGS comes AFTER FORMAT, it's counted at SelectWithUnionQuery level

@@ -284,6 +284,7 @@ type CreateQuery struct {
 	FunctionName       string                            `json:"function_name,omitempty"`
 	FunctionBody     Expression           `json:"function_body,omitempty"`
 	UserName         string               `json:"user_name,omitempty"`
+	Format           string               `json:"format,omitempty"` // For FORMAT clause
 }
 
 func (c *CreateQuery) Pos() token.Position { return c.Position }
@@ -493,6 +494,7 @@ type DropQuery struct {
 	OnCluster       string             `json:"on_cluster,omitempty"`
 	DropDatabase    bool               `json:"drop_database,omitempty"`
 	Sync            bool               `json:"sync,omitempty"`
+	Format          string             `json:"format,omitempty"` // For FORMAT clause
 }
 
 func (d *DropQuery) Pos() token.Position { return d.Position }
@@ -520,6 +522,7 @@ type AlterQuery struct {
 	Commands  []*AlterCommand `json:"commands"`
 	OnCluster string          `json:"on_cluster,omitempty"`
 	Settings  []*SettingExpr  `json:"settings,omitempty"`
+	Format    string          `json:"format,omitempty"` // For FORMAT clause
 }
 
 func (a *AlterQuery) Pos() token.Position { return a.Position }

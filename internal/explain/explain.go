@@ -12,6 +12,10 @@ import (
 // This affects how negated literals with aliases are formatted
 var inSubqueryContext bool
 
+// inCreateQueryContext is a package-level flag to track when we're inside a CreateQuery
+// This affects whether FORMAT is output at SelectWithUnionQuery level (it shouldn't be, as CreateQuery outputs it)
+var inCreateQueryContext bool
+
 // Explain returns the EXPLAIN AST output for a statement, matching ClickHouse's format.
 func Explain(stmt ast.Statement) string {
 	var sb strings.Builder

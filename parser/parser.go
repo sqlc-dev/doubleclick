@@ -1567,6 +1567,19 @@ func (p *Parser) parseCreate() ast.Statement {
 		return nil
 	}
 
+	// Handle FORMAT clause (for things like CREATE TABLE ... FORMAT Null)
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		// Store format name (Null, etc.)
+		if p.currentIs(token.NULL) {
+			create.Format = "Null"
+			p.nextToken()
+		} else if p.currentIs(token.IDENT) {
+			create.Format = p.current.Value
+			p.nextToken()
+		}
+	}
+
 	return create
 }
 
@@ -2010,6 +2023,17 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		p.nextToken()
 		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) || p.currentIs(token.LPAREN) {
 			create.AsSelect = p.parseSelectWithUnion()
+			// Extract FORMAT from inner SelectQuery and move it to CreateQuery
+			// For CREATE VIEW/MATERIALIZED VIEW, FORMAT should be at CreateQuery level
+			if swu, ok := create.AsSelect.(*ast.SelectWithUnionQuery); ok && swu != nil {
+				for _, sel := range swu.Selects {
+					if sq, ok := sel.(*ast.SelectQuery); ok && sq != nil && sq.Format != nil {
+						create.Format = sq.Format.Name()
+						sq.Format = nil
+						break
+					}
+				}
+			}
 		}
 	}
 }
@@ -3917,8 +3941,12 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 	// Handle FORMAT clause (for things like DROP TABLE ... FORMAT Null)
 	if p.currentIs(token.FORMAT) {
 		p.nextToken()
-		// Skip format name (Null, etc.)
-		if p.currentIs(token.NULL) || p.currentIs(token.IDENT) {
+		// Store format name (Null, etc.)
+		if p.currentIs(token.NULL) {
+			drop.Format = "Null"
+			p.nextToken()
+		} else if p.currentIs(token.IDENT) {
+			drop.Format = p.current.Value
 			p.nextToken()
 		}
 	}
@@ -4000,6 +4028,18 @@ func (p *Parser) parseAlter() *ast.AlterQuery {
 	if p.currentIs(token.SETTINGS) {
 		p.nextToken()
 		alter.Settings = p.parseSettingsList()
+	}
+
+	// Parse FORMAT clause
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		if p.currentIs(token.NULL) {
+			alter.Format = "Null"
+			p.nextToken()
+		} else if p.currentIs(token.IDENT) {
+			alter.Format = p.current.Value
+			p.nextToken()
+		}
 	}
 
 	return alter
