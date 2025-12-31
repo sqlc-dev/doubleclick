@@ -1004,6 +1004,27 @@ func (p *Parser) parseTableElementWithJoin() *ast.TablesInSelectQueryElement {
 		join.Type = ast.JoinInner
 	}
 
+	// Parse strictness after type if not already parsed (e.g., RIGHT ANTI JOIN)
+	if join.Strictness == "" {
+		switch p.current.Token {
+		case token.ANY:
+			join.Strictness = ast.JoinStrictAny
+			p.nextToken()
+		case token.ALL:
+			join.Strictness = ast.JoinStrictAll
+			p.nextToken()
+		case token.ASOF:
+			join.Strictness = ast.JoinStrictAsof
+			p.nextToken()
+		case token.SEMI:
+			join.Strictness = ast.JoinStrictSemi
+			p.nextToken()
+		case token.ANTI:
+			join.Strictness = ast.JoinStrictAnti
+			p.nextToken()
+		}
+	}
+
 	if !p.expect(token.JOIN) {
 		return nil
 	}
