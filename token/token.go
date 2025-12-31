@@ -122,6 +122,7 @@ const (
 	INF
 	INNER
 	INSERT
+	INTERSECT
 	INTERVAL
 	INTO
 	IS
@@ -317,6 +318,7 @@ var tokens = [...]string{
 	INF:          "INF",
 	INNER:        "INNER",
 	INSERT:       "INSERT",
+	INTERSECT:    "INTERSECT",
 	INTERVAL:     "INTERVAL",
 	INTO:         "INTO",
 	IS:           "IS",

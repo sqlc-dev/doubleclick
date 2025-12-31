@@ -9,8 +9,26 @@ import (
 
 func explainSelectIntersectExceptQuery(sb *strings.Builder, n *ast.SelectIntersectExceptQuery, indent string, depth int) {
 	fmt.Fprintf(sb, "%sSelectIntersectExceptQuery (children %d)\n", indent, len(n.Selects))
-	for _, sel := range n.Selects {
-		Node(sb, sel, depth+1)
+
+	// ClickHouse wraps first operand in SelectWithUnionQuery when EXCEPT is present
+	hasExcept := false
+	for _, op := range n.Operators {
+		if op == "EXCEPT" {
+			hasExcept = true
+			break
+		}
+	}
+
+	childIndent := strings.Repeat(" ", depth+1)
+	for i, sel := range n.Selects {
+		if hasExcept && i == 0 {
+			// Wrap first operand in SelectWithUnionQuery -> ExpressionList format
+			fmt.Fprintf(sb, "%sSelectWithUnionQuery (children 1)\n", childIndent)
+			fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", childIndent)
+			Node(sb, sel, depth+3)
+		} else {
+			Node(sb, sel, depth+1)
+		}
 	}
 }
 

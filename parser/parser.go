@@ -314,8 +314,7 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 	}
 
 	// Parse UNION/INTERSECT ALL/EXCEPT ALL clauses
-	for p.currentIs(token.UNION) || p.currentIs(token.EXCEPT) ||
-		(p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "INTERSECT") {
+	for p.currentIs(token.UNION) || p.currentIs(token.EXCEPT) || p.currentIs(token.INTERSECT) {
 		var setOp string
 		if p.currentIs(token.UNION) {
 			setOp = "UNION"
@@ -366,8 +365,7 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 // Only INTERSECT ALL and EXCEPT ALL are flattened (no wrapper).
 // INTERSECT DISTINCT, INTERSECT, EXCEPT DISTINCT, and EXCEPT all use the wrapper.
 func (p *Parser) isIntersectExceptWithWrapper() bool {
-	if !p.currentIs(token.EXCEPT) &&
-		!(p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "INTERSECT") {
+	if !p.currentIs(token.EXCEPT) && !p.currentIs(token.INTERSECT) {
 		return false
 	}
 	// INTERSECT ALL and EXCEPT ALL are flattened (no wrapper)
