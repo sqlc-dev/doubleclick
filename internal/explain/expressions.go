@@ -436,7 +436,12 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 				if needsFunctionFormat {
 					// Render as Function tuple with alias
 					fmt.Fprintf(sb, "%sFunction tuple (alias %s) (children %d)\n", indent, escapeAlias(n.Alias), 1)
-					fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
+					// For empty ExpressionList, don't include children count
+					if len(exprs) > 0 {
+						fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
+					} else {
+						fmt.Fprintf(sb, "%s ExpressionList\n", indent)
+					}
 					for _, expr := range exprs {
 						Node(sb, expr, depth+2)
 					}
