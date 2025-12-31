@@ -489,6 +489,9 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 	case *ast.FunctionCall:
 		// Function calls already handle aliases
 		explainFunctionCallWithAlias(sb, e, n.Alias, indent, depth)
+	case *ast.Lambda:
+		// Lambda expressions with alias
+		explainLambdaWithAlias(sb, e, n.Alias, indent, depth)
 	case *ast.Identifier:
 		// Identifiers with alias
 		fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, e.Name(), escapeAlias(n.Alias))
