@@ -4495,6 +4495,14 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				p.nextToken()
 				cmd.StatisticsTypes = p.parseStatisticsTypeList()
 			}
+		} else if p.currentIs(token.COMMENT) {
+			// MODIFY COMMENT 'comment string'
+			cmd.Type = ast.AlterModifyComment
+			p.nextToken()
+			if p.currentIs(token.STRING) {
+				cmd.Comment = p.current.Value
+				p.nextToken()
+			}
 		}
 	case token.RENAME:
 		p.nextToken()

@@ -653,6 +653,7 @@ const (
 	AlterDropStatistics     AlterCommandType = "DROP_STATISTICS"
 	AlterClearStatistics    AlterCommandType = "CLEAR_STATISTICS"
 	AlterMaterializeStatistics AlterCommandType = "MATERIALIZE_STATISTICS"
+	AlterModifyComment         AlterCommandType = "MODIFY_COMMENT"
 )
 
 // TruncateQuery represents a TRUNCATE statement.

@@ -1210,6 +1210,10 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		if cmd.Comment != "" {
 			fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, escapeStringLiteral(cmd.Comment))
 		}
+	case ast.AlterModifyComment:
+		if cmd.Comment != "" {
+			fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, escapeStringLiteral(cmd.Comment))
+		}
 	case ast.AlterAddIndex, ast.AlterDropIndex, ast.AlterClearIndex, ast.AlterMaterializeIndex:
 		if cmd.Index != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
@@ -1389,6 +1393,10 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 		if cmd.ColumnName != "" {
 			children++
 		}
+		if cmd.Comment != "" {
+			children++
+		}
+	case ast.AlterModifyComment:
 		if cmd.Comment != "" {
 			children++
 		}
