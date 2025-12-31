@@ -512,6 +512,11 @@ func (p *Parser) parseIdentifierOrFunction() ast.Expression {
 
 	// Check for function call after qualified name
 	if p.currentIs(token.LPAREN) {
+		// Special case: qualified COLUMNS matcher (e.g., test_table.COLUMNS(id))
+		if len(parts) >= 2 && strings.ToUpper(parts[len(parts)-1]) == "COLUMNS" {
+			qualifier := strings.Join(parts[:len(parts)-1], ".")
+			return p.parseQualifiedColumnsMatcher(qualifier, pos)
+		}
 		return p.parseFunctionCall(strings.Join(parts, "."), pos)
 	}
 
@@ -2148,6 +2153,58 @@ func (p *Parser) parseColumnsMatcher() ast.Expression {
 	if !p.expect(token.LPAREN) {
 		return nil
 	}
+
+	// Parse the arguments - either a string pattern or a list of identifiers
+	if p.currentIs(token.STRING) {
+		// String pattern: COLUMNS('pattern')
+		matcher.Pattern = p.current.Value
+		p.nextToken()
+	} else {
+		// Column list: COLUMNS(col1, col2, ...)
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			col := p.parseExpression(LOWEST)
+			if col != nil {
+				matcher.Columns = append(matcher.Columns, col)
+			}
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
+		}
+	}
+
+	p.expect(token.RPAREN)
+
+	// Handle EXCEPT
+	if p.currentIs(token.EXCEPT) {
+		p.nextToken()
+		if p.expect(token.LPAREN) {
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				if p.currentIs(token.IDENT) {
+					matcher.Except = append(matcher.Except, p.current.Value)
+					p.nextToken()
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				}
+			}
+			p.expect(token.RPAREN)
+		}
+	}
+
+	return matcher
+}
+
+// parseQualifiedColumnsMatcher parses qualified COLUMNS matchers like test_table.COLUMNS(id)
+// The qualifier is passed in and we're already positioned at LPAREN
+func (p *Parser) parseQualifiedColumnsMatcher(qualifier string, pos token.Position) ast.Expression {
+	matcher := &ast.ColumnsMatcher{
+		Position:  pos,
+		Qualifier: qualifier,
+	}
+
+	p.nextToken() // skip LPAREN
 
 	// Parse the arguments - either a string pattern or a list of identifiers
 	if p.currentIs(token.STRING) {
