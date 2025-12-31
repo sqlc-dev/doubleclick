@@ -882,10 +882,23 @@ func explainExistsExpr(sb *strings.Builder, n *ast.ExistsExpr, indent string, de
 }
 
 func explainExtractExpr(sb *strings.Builder, n *ast.ExtractExpr, indent string, depth int) {
+	explainExtractExprWithAlias(sb, n, n.Alias, indent, depth)
+}
+
+func explainExtractExprWithAlias(sb *strings.Builder, n *ast.ExtractExpr, alias string, indent string, depth int) {
 	// EXTRACT is represented as Function toYear, toMonth, etc.
 	// ClickHouse uses specific function names for date/time extraction
 	fnName := extractFieldToFunction(n.Field)
-	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	// Use alias from parameter, or fall back to expression's alias
+	effectiveAlias := alias
+	if effectiveAlias == "" {
+		effectiveAlias = n.Alias
+	}
+	if effectiveAlias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, effectiveAlias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 	Node(sb, n.From, depth+2)
 }
@@ -897,7 +910,7 @@ func extractFieldToFunction(field string) string {
 		return "toDayOfMonth"
 	case "MONTH":
 		return "toMonth"
-	case "YEAR":
+	case "YEAR", "YYYY":
 		return "toYear"
 	case "SECOND":
 		return "toSecond"

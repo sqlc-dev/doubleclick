@@ -1282,7 +1282,7 @@ func (p *Parser) parseExtract() ast.Expression {
 		field := strings.ToUpper(p.current.Value)
 		// Check if it's a known date/time field
 		dateTimeFields := map[string]bool{
-			"YEAR": true, "QUARTER": true, "MONTH": true, "WEEK": true,
+			"YEAR": true, "YYYY": true, "QUARTER": true, "MONTH": true, "WEEK": true,
 			"DAY": true, "DAYOFWEEK": true, "DAYOFYEAR": true,
 			"HOUR": true, "MINUTE": true, "SECOND": true,
 			"TIMEZONE_HOUR": true, "TIMEZONE_MINUTE": true,
