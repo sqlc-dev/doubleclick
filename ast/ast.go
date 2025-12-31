@@ -272,6 +272,7 @@ type CreateQuery struct {
 	CreateUser       bool                 `json:"create_user,omitempty"`
 	AlterUser        bool                 `json:"alter_user,omitempty"`
 	HasAuthenticationData bool            `json:"has_authentication_data,omitempty"`
+	AuthenticationValues []string         `json:"authentication_values,omitempty"` // Password/hash values from IDENTIFIED BY
 	CreateDictionary   bool                              `json:"create_dictionary,omitempty"`
 	DictionaryAttrs    []*DictionaryAttributeDeclaration `json:"dictionary_attrs,omitempty"`
 	DictionaryDef      *DictionaryDefinition             `json:"dictionary_def,omitempty"`

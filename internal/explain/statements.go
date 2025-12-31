@@ -95,7 +95,17 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if n.CreateUser || n.AlterUser {
 		if n.HasAuthenticationData {
 			fmt.Fprintf(sb, "%sCreateUserQuery (children 1)\n", indent)
-			fmt.Fprintf(sb, "%s AuthenticationData\n", indent)
+			// AuthenticationData has children if there are auth values
+			if len(n.AuthenticationValues) > 0 {
+				fmt.Fprintf(sb, "%s AuthenticationData (children %d)\n", indent, len(n.AuthenticationValues))
+				for _, val := range n.AuthenticationValues {
+					// Escape the value - strings need \' escaping
+					escaped := escapeStringLiteral(val)
+					fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, escaped)
+				}
+			} else {
+				fmt.Fprintf(sb, "%s AuthenticationData\n", indent)
+			}
 		} else {
 			fmt.Fprintf(sb, "%sCreateUserQuery\n", indent)
 		}

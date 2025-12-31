@@ -1895,12 +1895,53 @@ func (p *Parser) parseCreateUser(create *ast.CreateQuery) {
 			p.nextToken()
 			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "IDENTIFIED" {
 				create.HasAuthenticationData = true
+				p.nextToken()
 			}
 			continue
 		}
 		// Check for IDENTIFIED (without NOT)
 		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "IDENTIFIED" {
 			create.HasAuthenticationData = true
+			p.nextToken()
+			// Parse authentication method and value
+			// Forms: IDENTIFIED BY 'password'
+			//        IDENTIFIED WITH method BY 'password'
+			//        IDENTIFIED WITH method BY 'password', method BY 'password', ...
+			for {
+				// Skip WITH if present (auth method follows)
+				if p.currentIs(token.WITH) {
+					p.nextToken()
+				}
+				// Skip auth method name (plaintext_password, sha256_password, etc.)
+				// Stop at BY (token), comma, or next section keywords
+				for p.currentIs(token.IDENT) {
+					ident := strings.ToUpper(p.current.Value)
+					// Stop at HOST, SETTINGS, DEFAULT, GRANTEES - don't consume these
+					if ident == "HOST" || ident == "SETTINGS" || ident == "DEFAULT" || ident == "GRANTEES" {
+						break
+					}
+					p.nextToken()
+					// Handle REALM/SERVER string values (for kerberos/ldap)
+					if p.currentIs(token.STRING) && (ident == "REALM" || ident == "SERVER") {
+						p.nextToken()
+					}
+				}
+				// Check for BY 'value' (BY is a keyword token, not IDENT)
+				if p.currentIs(token.BY) {
+					p.nextToken()
+					if p.currentIs(token.STRING) {
+						create.AuthenticationValues = append(create.AuthenticationValues, p.current.Value)
+						p.nextToken()
+					}
+				}
+				// Check for comma (multiple auth methods)
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+					continue
+				}
+				break
+			}
+			continue
 		}
 		p.nextToken()
 	}
@@ -1908,7 +1949,7 @@ func (p *Parser) parseCreateUser(create *ast.CreateQuery) {
 
 func (p *Parser) parseAlterUser() *ast.CreateQuery {
 	create := &ast.CreateQuery{
-		Position:  p.current.Pos,
+		Position:   p.current.Pos,
 		CreateUser: true,
 		AlterUser:  true,
 	}
@@ -1919,8 +1960,55 @@ func (p *Parser) parseAlterUser() *ast.CreateQuery {
 	// Parse user name
 	create.UserName = p.parseIdentifierName()
 
-	// Skip the rest of the user definition (complex syntax)
+	// Scan for authentication data (NOT IDENTIFIED or IDENTIFIED)
 	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		// Check for NOT IDENTIFIED
+		if p.currentIs(token.NOT) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "IDENTIFIED" {
+				create.HasAuthenticationData = true
+				p.nextToken()
+			}
+			continue
+		}
+		// Check for IDENTIFIED (without NOT)
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "IDENTIFIED" {
+			create.HasAuthenticationData = true
+			p.nextToken()
+			// Parse authentication method and value
+			for {
+				// Skip WITH if present
+				if p.currentIs(token.WITH) {
+					p.nextToken()
+				}
+				// Skip auth method name
+				for p.currentIs(token.IDENT) {
+					ident := strings.ToUpper(p.current.Value)
+					if ident == "HOST" || ident == "SETTINGS" || ident == "DEFAULT" || ident == "GRANTEES" {
+						break
+					}
+					p.nextToken()
+					if p.currentIs(token.STRING) && (ident == "REALM" || ident == "SERVER") {
+						p.nextToken()
+					}
+				}
+				// Check for BY 'value'
+				if p.currentIs(token.BY) {
+					p.nextToken()
+					if p.currentIs(token.STRING) {
+						create.AuthenticationValues = append(create.AuthenticationValues, p.current.Value)
+						p.nextToken()
+					}
+				}
+				// Check for comma (multiple auth methods)
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+					continue
+				}
+				break
+			}
+			continue
+		}
 		p.nextToken()
 	}
 
