@@ -89,6 +89,14 @@ func (p *Parser) ParseStatements(ctx context.Context) ([]ast.Statement, error) {
 		default:
 		}
 
+		// Skip leading semicolons (empty statements)
+		for p.currentIs(token.SEMICOLON) {
+			p.nextToken()
+		}
+		if p.currentIs(token.EOF) {
+			break
+		}
+
 		stmt := p.parseStatement()
 		if stmt != nil {
 			statements = append(statements, stmt)
