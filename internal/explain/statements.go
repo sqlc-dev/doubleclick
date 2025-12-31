@@ -1053,7 +1053,10 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		}
 	case ast.AlterModifyTTL:
 		if cmd.TTL != nil && cmd.TTL.Expression != nil {
-			Node(sb, cmd.TTL.Expression, depth+1)
+			// TTL is wrapped in ExpressionList and TTLElement
+			fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", indent)
+			Node(sb, cmd.TTL.Expression, depth+3)
 		}
 	case ast.AlterModifySetting:
 		fmt.Fprintf(sb, "%s Set\n", indent)
