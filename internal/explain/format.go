@@ -374,6 +374,10 @@ func formatExprAsString(expr ast.Expression) string {
 			}
 			return fmt.Sprintf("%d", e.Value)
 		case ast.LiteralFloat:
+			// Use Source field if available to preserve original representation (e.g., "0.0")
+			if e.Source != "" {
+				return e.Source
+			}
 			if e.Negative {
 				switch v := e.Value.(type) {
 				case float64:

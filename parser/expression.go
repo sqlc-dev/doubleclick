@@ -751,6 +751,7 @@ func (p *Parser) parseNumber() ast.Expression {
 		} else {
 			lit.Type = ast.LiteralFloat
 			lit.Value = f
+			lit.Source = value // Preserve original source text (e.g., "0.0" vs "0")
 		}
 	} else if isHexFloat {
 		// Parse hex float (Go doesn't support this directly, approximate)
@@ -860,6 +861,7 @@ func (p *Parser) parseUnaryMinus() ast.Expression {
 			f, _ := strconv.ParseFloat(numVal, 64)
 			lit.Type = ast.LiteralFloat
 			lit.Value = f
+			lit.Source = numVal // Preserve original source text
 		} else {
 			i, _ := strconv.ParseInt(numVal, 10, 64)
 			lit.Value = i

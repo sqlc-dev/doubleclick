@@ -1079,6 +1079,7 @@ type Literal struct {
 	Position token.Position `json:"-"`
 	Type     LiteralType    `json:"type"`
 	Value    interface{}    `json:"value"`
+	Source   string         `json:"source,omitempty"`   // Original source text (for preserving 0.0 vs 0)
 	Negative bool           `json:"negative,omitempty"` // True if literal was explicitly negative (for -0)
 }
 
