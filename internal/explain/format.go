@@ -237,6 +237,19 @@ func FormatDataType(dt *ast.DataType) string {
 		} else if binExpr, ok := p.(*ast.BinaryExpr); ok {
 			// Binary expression (e.g., 'hello' = 1 for Enum types)
 			params = append(params, formatBinaryExprForType(binExpr))
+		} else if fn, ok := p.(*ast.FunctionCall); ok {
+			// Function call (e.g., SKIP for JSON types)
+			if fn.Name == "SKIP" && len(fn.Arguments) > 0 {
+				if ident, ok := fn.Arguments[0].(*ast.Identifier); ok {
+					params = append(params, "SKIP "+ident.Name())
+				}
+			} else if fn.Name == "SKIP REGEXP" && len(fn.Arguments) > 0 {
+				if lit, ok := fn.Arguments[0].(*ast.Literal); ok {
+					params = append(params, fmt.Sprintf("SKIP REGEXP \\\\\\'%s\\\\\\'", lit.Value))
+				}
+			} else {
+				params = append(params, fmt.Sprintf("%v", p))
+			}
 		} else {
 			params = append(params, fmt.Sprintf("%v", p))
 		}

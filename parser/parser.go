@@ -3266,6 +3266,64 @@ func (p *Parser) parseDataType() *ast.DataType {
 
 		// Parse type parameters, but stop on keywords that can't be part of type params
 		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) && !p.currentIs(token.COLLATE) {
+			var param ast.Expression
+
+			// Special handling for SKIP in JSON/OBJECT types: SKIP path or SKIP REGEXP 'pattern'
+			if isObjectType && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && strings.ToUpper(p.current.Value) == "SKIP" {
+				pos := p.current.Pos
+				p.nextToken() // consume SKIP
+
+				// Check for SKIP REGEXP 'pattern'
+				if p.currentIs(token.REGEXP) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "REGEXP") {
+					p.nextToken() // consume REGEXP
+					// Parse the pattern string
+					if p.currentIs(token.STRING) {
+						pattern := p.current.Value
+						p.nextToken()
+						param = &ast.FunctionCall{
+							Position:  pos,
+							Name:      "SKIP REGEXP",
+							Arguments: []ast.Expression{&ast.Literal{Position: pos, Value: pattern, Type: ast.LiteralString}},
+						}
+					}
+				} else {
+					// Parse dotted path: a, a.b, a.b.c, etc.
+					var pathParts []string
+					for {
+						if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+							pathParts = append(pathParts, p.current.Value)
+							p.nextToken()
+						}
+						if p.currentIs(token.DOT) {
+							p.nextToken() // consume dot
+						} else {
+							break
+						}
+					}
+					if len(pathParts) > 0 {
+						param = &ast.FunctionCall{
+							Position:  pos,
+							Name:      "SKIP",
+							Arguments: []ast.Expression{&ast.Identifier{Position: pos, Parts: pathParts}},
+						}
+					}
+				}
+				// Wrap in ObjectTypeArgument
+				if param != nil {
+					param = &ast.ObjectTypeArgument{
+						Position: param.Pos(),
+						Expr:     param,
+					}
+					dt.Parameters = append(dt.Parameters, param)
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+				continue
+			}
+
 			// Check if this is a named parameter: identifier followed by a type name
 			// e.g., "a UInt32" where "a" is the name and "UInt32" is the type
 			isNamedParam := false
@@ -3291,7 +3349,6 @@ func (p *Parser) parseDataType() *ast.DataType {
 				}
 			}
 
-			var param ast.Expression
 			if isNamedParam {
 				// Parse as name + type pair
 				pos := p.current.Pos
