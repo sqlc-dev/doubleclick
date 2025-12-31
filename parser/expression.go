@@ -1444,6 +1444,16 @@ func (p *Parser) parseInterval() ast.Expression {
 	// Use ALIAS_PREC to prevent consuming the unit as an alias
 	expr.Value = p.parseExpression(ALIAS_PREC)
 
+	// Handle INTERVAL '2' AS n minute - where AS n is alias on the value
+	if p.currentIs(token.AS) {
+		p.nextToken() // skip AS
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			alias := p.current.Value
+			p.nextToken()
+			expr.Value = p.wrapWithAlias(expr.Value, alias)
+		}
+	}
+
 	// Parse unit (interval units are identifiers like DAY, MONTH, etc.)
 	if p.currentIs(token.IDENT) {
 		expr.Unit = strings.ToUpper(p.current.Value)
