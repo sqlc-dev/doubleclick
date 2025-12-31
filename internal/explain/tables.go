@@ -2,6 +2,7 @@ package explain
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/sqlc-dev/doubleclick/ast"
@@ -44,7 +45,10 @@ func explainTablesInSelectQueryElement(sb *strings.Builder, n *ast.TablesInSelec
 func explainTableExpression(sb *strings.Builder, n *ast.TableExpression, indent string, depth int) {
 	children := 1 // table
 	if n.Sample != nil {
-		children++
+		children++ // for sample ratio
+		if n.Sample.Offset != nil {
+			children++ // for sample offset
+		}
 	}
 	fmt.Fprintf(sb, "%sTableExpression (children %d)\n", indent, children)
 	// If there's a subquery with an alias, pass the alias to the subquery output
@@ -83,6 +87,14 @@ func explainSampleClause(sb *strings.Builder, n *ast.SampleClause, indent string
 	sb.WriteString("SampleRatio ")
 	formatSampleRatio(sb, n.Ratio)
 	sb.WriteString("\n")
+
+	// Output OFFSET as a second SampleRatio line if present
+	if n.Offset != nil {
+		sb.WriteString(indent)
+		sb.WriteString("SampleRatio ")
+		formatSampleRatio(sb, n.Offset)
+		sb.WriteString("\n")
+	}
 }
 
 func formatSampleRatio(sb *strings.Builder, expr ast.Expression) {
@@ -106,6 +118,13 @@ func formatSampleRatioOperand(sb *strings.Builder, expr ast.Expression) {
 		case float64:
 			// Convert decimal to fraction for EXPLAIN AST output
 			// ClickHouse shows 0.1 as "1 / 10", 0.01 as "1 / 100", etc.
+			// Use Source field if available to preserve precision (0.4 vs 0.40)
+			if lit.Source != "" {
+				if frac := sourceToFraction(lit.Source); frac != "" {
+					sb.WriteString(frac)
+					return
+				}
+			}
 			if frac := floatToFraction(v); frac != "" {
 				sb.WriteString(frac)
 			} else {
@@ -117,6 +136,87 @@ func formatSampleRatioOperand(sb *strings.Builder, expr ast.Expression) {
 	} else {
 		fmt.Fprintf(sb, "%v", expr)
 	}
+}
+
+// sourceToFraction converts a source string representation to a fraction
+// This preserves the original precision (e.g., "0.4" -> "4 / 10", "0.40" -> "40 / 100")
+func sourceToFraction(source string) string {
+	source = strings.TrimSpace(source)
+
+	// Handle scientific notation like "2e-2" -> "2 / 100"
+	if strings.ContainsAny(source, "eE") {
+		return scientificToFraction(source)
+	}
+
+	// Handle decimal notation like "0.4" or "0.40"
+	if strings.Contains(source, ".") {
+		return decimalToFraction(source)
+	}
+
+	return ""
+}
+
+// scientificToFraction handles scientific notation like "2e-2" -> "2 / 100"
+func scientificToFraction(source string) string {
+	// Parse scientific notation: coefficient * 10^exponent
+	// Split by 'e' or 'E'
+	lower := strings.ToLower(source)
+	parts := strings.Split(lower, "e")
+	if len(parts) != 2 {
+		return ""
+	}
+
+	coef, err := strconv.ParseFloat(parts[0], 64)
+	if err != nil {
+		return ""
+	}
+
+	exp, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return ""
+	}
+
+	// For negative exponents, convert to fraction
+	// 2e-2 = 2 * 10^-2 = 2 / 100
+	if exp < 0 {
+		denom := int64(1)
+		for i := 0; i < -exp; i++ {
+			denom *= 10
+		}
+		num := int64(coef)
+		if coef == float64(num) {
+			return fmt.Sprintf("%d / %d", num, denom)
+		}
+	}
+	return ""
+}
+
+// decimalToFraction converts a decimal string to a fraction preserving precision
+// "0.4" -> "4 / 10", "0.40" -> "40 / 100"
+func decimalToFraction(source string) string {
+	parts := strings.Split(source, ".")
+	if len(parts) != 2 {
+		return ""
+	}
+
+	decimalPart := parts[1]
+	// Count decimal places (including trailing zeros)
+	decimalPlaces := len(decimalPart)
+
+	// Calculate denominator based on decimal places
+	denom := int64(1)
+	for i := 0; i < decimalPlaces; i++ {
+		denom *= 10
+	}
+
+	// Parse the decimal part as an integer (numerator)
+	// Handle leading zeros correctly: "0.05" -> "5 / 100"
+	num, err := strconv.ParseInt(decimalPart, 10, 64)
+	if err != nil {
+		return ""
+	}
+
+	return fmt.Sprintf("%d / %d", num, denom)
 }
 
 // floatToFraction converts a float to a fraction string like "1 / 10"
