@@ -235,6 +235,31 @@ func containsNonLiteralExpressions(exprs []ast.Expression) bool {
 	return false
 }
 
+// containsNonLiteralInNested checks if an array or tuple literal contains
+// non-literal elements at any nesting level (identifiers, function calls, etc.)
+func containsNonLiteralInNested(lit *ast.Literal) bool {
+	if lit.Type != ast.LiteralArray && lit.Type != ast.LiteralTuple {
+		return false
+	}
+	exprs, ok := lit.Value.([]ast.Expression)
+	if !ok {
+		return false
+	}
+	for _, e := range exprs {
+		// Check if this element is a non-literal (identifier, function call, etc.)
+		if _, isLit := e.(*ast.Literal); !isLit {
+			return true
+		}
+		// Recursively check nested arrays/tuples
+		if innerLit, ok := e.(*ast.Literal); ok {
+			if containsNonLiteralInNested(innerLit) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // containsTuples checks if a slice of expressions contains any tuple literals
 func containsTuples(exprs []ast.Expression) bool {
 	for _, e := range exprs {
@@ -431,6 +456,13 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 					if _, isLit := expr.(*ast.Literal); !isLit {
 						needsFunctionFormat = true
 						break
+					}
+					// Also check if nested arrays/tuples contain non-literal elements
+					if lit, ok := expr.(*ast.Literal); ok {
+						if containsNonLiteralInNested(lit) {
+							needsFunctionFormat = true
+							break
+						}
 					}
 				}
 				if needsFunctionFormat {
