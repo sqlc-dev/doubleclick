@@ -287,19 +287,18 @@ func explainCastExpr(sb *strings.Builder, n *ast.CastExpr, indent string, depth 
 }
 
 func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string, indent string, depth int) {
-	// For :: operator syntax, ClickHouse hides alias only when expression is
-	// an array/tuple with complex content that gets formatted as string
-	hideAlias := false
+	// For :: operator syntax with arrays/tuples, determine formatting based on content
 	useArrayFormat := false
 	if n.OperatorSyntax {
 		if lit, ok := n.Expr.(*ast.Literal); ok {
 			if lit.Type == ast.LiteralArray || lit.Type == ast.LiteralTuple {
 				// Determine format based on both content and target type
 				useArrayFormat = shouldUseArrayFormat(lit, n.Type)
-				hideAlias = !useArrayFormat
 			}
 		}
 	}
+	// Alias is always shown for :: cast syntax with arrays/tuples
+	hideAlias := false
 
 	// CAST is represented as Function CAST with expr and type as arguments
 	if alias != "" && !hideAlias {
@@ -354,31 +353,97 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 
 // shouldUseArrayFormat determines whether to use Array_[...] format or string format
 // for array/tuple literals in :: cast expressions.
-// This depends on both the literal content and the target type.
+// ClickHouse uses different formats depending on element types:
+// - Boolean arrays: Array_[Bool_0, Bool_1] format
+// - Numeric arrays: '[1, 2, 3]' string format
 func shouldUseArrayFormat(lit *ast.Literal, targetType *ast.DataType) bool {
 	// First check if the literal contains only primitive literals (not expressions)
 	if !containsOnlyLiterals(lit) {
 		return false
 	}
 
-	// For arrays of strings, check the target type to determine format
+	// Check if array contains boolean elements - these use Array_ format
+	if containsBooleanElements(lit) {
+		return true
+	}
+
+	// Check if array contains NULL elements - these use Array_ format
+	if containsNullElements(lit) {
+		return true
+	}
+
+	// For arrays of strings, always use string format in :: casts
+	// This applies to all target types including Array(String)
 	if lit.Type == ast.LiteralArray && hasStringElements(lit) {
-		// Only use Array_ format when casting to Array(String) specifically
-		// For other types like Array(JSON), Array(LowCardinality(String)), etc., use string format
-		if targetType != nil && strings.ToLower(targetType.Name) == "array" && len(targetType.Parameters) > 0 {
-			if innerType, ok := targetType.Parameters[0].(*ast.DataType); ok {
-				// Only use Array_ format if inner type is exactly "String" with no parameters
-				if strings.ToLower(innerType.Name) == "string" && len(innerType.Parameters) == 0 {
-					return true
-				}
-			}
-		}
-		// For any other type (JSON, LowCardinality, etc.), use string format
 		return false
 	}
 
-	// For non-string primitives, always use Array_ format
-	return true
+	// For numeric primitives, use string format in :: casts
+	return false
+}
+
+// containsNullElements checks if a literal array/tuple contains NULL elements
+func containsNullElements(lit *ast.Literal) bool {
+	var exprs []ast.Expression
+	switch lit.Type {
+	case ast.LiteralArray, ast.LiteralTuple:
+		var ok bool
+		exprs, ok = lit.Value.([]ast.Expression)
+		if !ok {
+			return false
+		}
+	default:
+		return false
+	}
+
+	for _, e := range exprs {
+		innerLit, ok := e.(*ast.Literal)
+		if !ok {
+			continue
+		}
+		if innerLit.Type == ast.LiteralNull {
+			return true
+		}
+		// Check nested arrays/tuples
+		if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
+			if containsNullElements(innerLit) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// containsBooleanElements checks if a literal array/tuple contains boolean elements
+func containsBooleanElements(lit *ast.Literal) bool {
+	var exprs []ast.Expression
+	switch lit.Type {
+	case ast.LiteralArray, ast.LiteralTuple:
+		var ok bool
+		exprs, ok = lit.Value.([]ast.Expression)
+		if !ok {
+			return false
+		}
+	default:
+		return false
+	}
+
+	for _, e := range exprs {
+		innerLit, ok := e.(*ast.Literal)
+		if !ok {
+			continue
+		}
+		if innerLit.Type == ast.LiteralBoolean {
+			return true
+		}
+		// Check nested arrays/tuples
+		if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
+			if containsBooleanElements(innerLit) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // containsOnlyLiterals checks if a literal array/tuple contains only literal values (no expressions)
