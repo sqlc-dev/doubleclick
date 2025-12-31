@@ -74,6 +74,36 @@ func escapeStringLiteral(s string) string {
 	return sb.String()
 }
 
+// escapeStringForTypeParam escapes special characters for use in type parameters
+// Uses extra escaping because type strings are embedded inside another string literal
+func escapeStringForTypeParam(s string) string {
+	var sb strings.Builder
+	for i := 0; i < len(s); i++ {
+		b := s[i]
+		switch b {
+		case '\\':
+			sb.WriteString("\\\\\\\\\\\\\\\\") // backslash becomes 8 backslashes
+		case '\'':
+			sb.WriteString("\\\\\\\\\\'") // single quote becomes 5 backslashes + quote
+		case '\n':
+			sb.WriteString("\\\\\\\\n") // newline becomes \\\\n
+		case '\t':
+			sb.WriteString("\\\\\\\\t") // tab becomes \\\\t
+		case '\r':
+			sb.WriteString("\\\\\\\\r") // carriage return becomes \\\\r
+		case '\x00':
+			sb.WriteString("\\\\\\\\0") // null becomes \\\\0
+		case '\b':
+			sb.WriteString("\\\\\\\\b") // backspace becomes \\\\b
+		case '\f':
+			sb.WriteString("\\\\\\\\f") // form feed becomes \\\\f
+		default:
+			sb.WriteByte(b)
+		}
+	}
+	return sb.String()
+}
+
 // FormatLiteral formats a literal value for EXPLAIN AST output
 func FormatLiteral(lit *ast.Literal) string {
 	switch lit.Type {
@@ -270,7 +300,9 @@ func formatBinaryExprForType(expr *ast.BinaryExpr) string {
 	// Format left side
 	if lit, ok := expr.Left.(*ast.Literal); ok {
 		if lit.Type == ast.LiteralString {
-			left = fmt.Sprintf("\\\\\\'%s\\\\\\'", lit.Value)
+			// Use extra escaping for type parameters since they're embedded in another string literal
+			escaped := escapeStringForTypeParam(fmt.Sprintf("%v", lit.Value))
+			left = fmt.Sprintf("\\\\\\'%s\\\\\\'", escaped)
 		} else {
 			left = fmt.Sprintf("%v", lit.Value)
 		}
@@ -285,11 +317,22 @@ func formatBinaryExprForType(expr *ast.BinaryExpr) string {
 		right = fmt.Sprintf("%v", lit.Value)
 	} else if ident, ok := expr.Right.(*ast.Identifier); ok {
 		right = ident.Name()
+	} else if unary, ok := expr.Right.(*ast.UnaryExpr); ok {
+		// Handle unary expressions like -100
+		right = formatUnaryExprForType(unary)
 	} else {
 		right = fmt.Sprintf("%v", expr.Right)
 	}
 
 	return left + " " + expr.Op + " " + right
+}
+
+// formatUnaryExprForType formats a unary expression for use in type parameters (e.g., -100)
+func formatUnaryExprForType(expr *ast.UnaryExpr) string {
+	if lit, ok := expr.Operand.(*ast.Literal); ok {
+		return expr.Op + fmt.Sprintf("%v", lit.Value)
+	}
+	return expr.Op + fmt.Sprintf("%v", expr.Operand)
 }
 
 // NormalizeFunctionName normalizes function names to match ClickHouse's EXPLAIN AST output
