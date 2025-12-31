@@ -181,6 +181,10 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 	if len(n.Settings) > 0 && !n.SettingsAfterFormat {
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
+	// TOP clause is output at the end
+	if n.Top != nil {
+		Node(sb, n.Top, depth+1)
+	}
 }
 
 func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent string, depth int) {
@@ -353,6 +357,10 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 	}
 	// SETTINGS is counted at SelectQuery level only when NOT after FORMAT
 	if len(n.Settings) > 0 && !n.SettingsAfterFormat {
+		count++
+	}
+	// TOP clause
+	if n.Top != nil {
 		count++
 	}
 	return count

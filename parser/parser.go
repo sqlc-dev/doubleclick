@@ -492,7 +492,8 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 	// Handle TOP
 	if p.currentIs(token.TOP) {
 		p.nextToken()
-		sel.Top = p.parseExpression(LOWEST)
+		// Use MUL_PREC to stop at * (which would be parsed as column selector, not multiplication)
+		sel.Top = p.parseExpression(MUL_PREC)
 	}
 
 	// Parse column list
