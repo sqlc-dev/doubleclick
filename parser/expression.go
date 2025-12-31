@@ -49,7 +49,7 @@ func (p *Parser) precedence(tok token.Token) int {
 		return MUL_PREC
 	case token.LPAREN, token.LBRACKET:
 		return CALL
-	case token.EXCEPT, token.REPLACE:
+	case token.EXCEPT, token.REPLACE, token.APPLY:
 		return CALL // For asterisk modifiers
 	case token.COLONCOLON:
 		return CALL // Cast operator
@@ -416,6 +416,12 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 		// Handle * REPLACE (expr AS col)
 		if asterisk, ok := left.(*ast.Asterisk); ok {
 			return p.parseAsteriskReplace(asterisk)
+		}
+		return left
+	case token.APPLY:
+		// Handle * APPLY (func) or * APPLY func
+		if asterisk, ok := left.(*ast.Asterisk); ok {
+			return p.parseAsteriskApply(asterisk)
 		}
 		return left
 	case token.NUMBER:
@@ -2379,6 +2385,28 @@ func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 		} else if !hasParens {
 			break
 		}
+	}
+
+	if hasParens {
+		p.expect(token.RPAREN)
+	}
+
+	return asterisk
+}
+
+func (p *Parser) parseAsteriskApply(asterisk *ast.Asterisk) ast.Expression {
+	p.nextToken() // skip APPLY
+
+	// APPLY can have optional parentheses: * APPLY(func) or * APPLY func
+	hasParens := p.currentIs(token.LPAREN)
+	if hasParens {
+		p.nextToken() // skip (
+	}
+
+	// Parse function name (can be IDENT or keyword like sum, avg, etc.)
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		asterisk.Apply = append(asterisk.Apply, p.current.Value)
+		p.nextToken()
 	}
 
 	if hasParens {

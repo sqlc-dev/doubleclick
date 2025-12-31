@@ -529,8 +529,8 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 }
 
 func explainAsterisk(sb *strings.Builder, n *ast.Asterisk, indent string, depth int) {
-	// Check if there are any column transformers (EXCEPT, REPLACE)
-	hasTransformers := len(n.Except) > 0 || len(n.Replace) > 0
+	// Check if there are any column transformers (EXCEPT, REPLACE, APPLY)
+	hasTransformers := len(n.Except) > 0 || len(n.Replace) > 0 || len(n.Apply) > 0
 
 	if n.Table != "" {
 		if hasTransformers {
@@ -559,6 +559,8 @@ func explainColumnsTransformers(sb *strings.Builder, n *ast.Asterisk, indent str
 	if len(n.Replace) > 0 {
 		transformerCount++
 	}
+	// Each APPLY adds one transformer
+	transformerCount += len(n.Apply)
 
 	fmt.Fprintf(sb, "%sColumnsTransformerList (children %d)\n", indent, transformerCount)
 
@@ -582,6 +584,11 @@ func explainColumnsTransformers(sb *strings.Builder, n *ast.Asterisk, indent str
 				Node(sb, replace.Expr, depth+3)
 			}
 		}
+	}
+
+	// Each APPLY function gets its own ColumnsApplyTransformer
+	for range n.Apply {
+		fmt.Fprintf(sb, "%s ColumnsApplyTransformer\n", indent)
 	}
 }
 

@@ -57,6 +57,7 @@ const (
 	AND
 	ANTI
 	ANY
+	APPLY
 	ARRAY
 	AS
 	ASC
@@ -245,6 +246,7 @@ var tokens = [...]string{
 	AND:          "AND",
 	ANTI:         "ANTI",
 	ANY:          "ANY",
+	APPLY:        "APPLY",
 	ARRAY:        "ARRAY",
 	AS:           "AS",
 	ASC:          "ASC",

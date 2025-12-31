@@ -1126,6 +1126,7 @@ type Asterisk struct {
 	Table    string          `json:"table,omitempty"`   // for table.*
 	Except   []string        `json:"except,omitempty"`  // for * EXCEPT (col1, col2)
 	Replace  []*ReplaceExpr  `json:"replace,omitempty"` // for * REPLACE (expr AS col)
+	Apply    []string        `json:"apply,omitempty"`   // for * APPLY (func1) APPLY(func2)
 }
 
 func (a *Asterisk) Pos() token.Position { return a.Position }
