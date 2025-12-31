@@ -114,11 +114,9 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			// This happens when:
 			// 1. Contains non-literal, non-negation expressions OR
 			// 2. Contains tuples OR
-			// 3. Contains nested arrays that all have exactly 1 element (homogeneous single-element arrays) OR
-			// 4. Contains nested arrays with non-literal expressions OR
-			// 5. Contains nested arrays that are empty or contain tuples/non-literals
+			// 3. Contains nested arrays with non-literal expressions OR
+			// 4. Contains nested arrays that are empty or contain tuples/non-literals
 			shouldUseFunctionArray := false
-			allAreSingleElementArrays := true
 			hasNestedArrays := false
 			nestedArraysNeedFunctionFormat := false
 
@@ -126,24 +124,18 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 				if lit, ok := e.(*ast.Literal); ok {
 					if lit.Type == ast.LiteralArray {
 						hasNestedArrays = true
-						// Check if this inner array has exactly 1 element
+						// Check if inner array needs Function array format:
+						// - Contains non-literal expressions OR
+						// - Contains tuples OR
+						// - Is empty OR
+						// - Contains empty arrays
 						if innerExprs, ok := lit.Value.([]ast.Expression); ok {
-							if len(innerExprs) != 1 {
-								allAreSingleElementArrays = false
-							}
-							// Check if inner array needs Function array format:
-							// - Contains non-literal expressions OR
-							// - Contains tuples OR
-							// - Is empty OR
-							// - Contains empty arrays
 							if containsNonLiteralExpressions(innerExprs) ||
 								len(innerExprs) == 0 ||
 								containsTuples(innerExprs) ||
 								containsEmptyArrays(innerExprs) {
 								nestedArraysNeedFunctionFormat = true
 							}
-						} else {
-							allAreSingleElementArrays = false
 						}
 					} else if lit.Type == ast.LiteralTuple {
 						// Tuples are complex
@@ -155,9 +147,17 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			}
 
 			// Use Function array when:
-			// - nested arrays that are ALL single-element
-			// - nested arrays that need Function format (contain non-literals, tuples, or empty arrays)
-			if hasNestedArrays && (allAreSingleElementArrays || nestedArraysNeedFunctionFormat) {
+			// - nested arrays that need Function format (contain non-literals, tuples, or empty arrays at any depth)
+			// Note: nested arrays that are ALL single-element should still be Literal format
+			if hasNestedArrays && nestedArraysNeedFunctionFormat {
+				shouldUseFunctionArray = true
+			}
+			// Also check for empty arrays at any depth within nested arrays
+			if hasNestedArrays && containsEmptyArraysRecursive(exprs) {
+				shouldUseFunctionArray = true
+			}
+			// Also check for tuples at any depth within nested arrays
+			if hasNestedArrays && containsTuplesRecursive(exprs) {
 				shouldUseFunctionArray = true
 			}
 
@@ -243,6 +243,43 @@ func containsEmptyArrays(exprs []ast.Expression) bool {
 		if lit, ok := e.(*ast.Literal); ok && lit.Type == ast.LiteralArray {
 			if innerExprs, ok := lit.Value.([]ast.Expression); ok && len(innerExprs) == 0 {
 				return true
+			}
+		}
+	}
+	return false
+}
+
+// containsEmptyArraysRecursive checks if any nested array at any depth is empty
+func containsEmptyArraysRecursive(exprs []ast.Expression) bool {
+	for _, e := range exprs {
+		if lit, ok := e.(*ast.Literal); ok && lit.Type == ast.LiteralArray {
+			if innerExprs, ok := lit.Value.([]ast.Expression); ok {
+				if len(innerExprs) == 0 {
+					return true
+				}
+				// Recursively check nested arrays
+				if containsEmptyArraysRecursive(innerExprs) {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+// containsTuplesRecursive checks if any nested array contains tuples at any depth
+func containsTuplesRecursive(exprs []ast.Expression) bool {
+	for _, e := range exprs {
+		if lit, ok := e.(*ast.Literal); ok {
+			if lit.Type == ast.LiteralTuple {
+				return true
+			}
+			if lit.Type == ast.LiteralArray {
+				if innerExprs, ok := lit.Value.([]ast.Expression); ok {
+					if containsTuplesRecursive(innerExprs) {
+						return true
+					}
+				}
 			}
 		}
 	}
