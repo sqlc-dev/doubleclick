@@ -1927,6 +1927,23 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		}
 	}
 
+	// Parse column definitions (e.g., CREATE VIEW v (x UInt64) AS SELECT ...)
+	if p.currentIs(token.LPAREN) {
+		p.nextToken()
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			col := p.parseColumnDeclaration()
+			if col != nil {
+				create.Columns = append(create.Columns, col)
+			}
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
+		}
+		p.expect(token.RPAREN)
+	}
+
 	// Handle ON CLUSTER
 	if p.currentIs(token.ON) {
 		p.nextToken()
