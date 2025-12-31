@@ -100,7 +100,28 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 	if len(n.GroupBy) > 0 {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.GroupBy))
 		for _, g := range n.GroupBy {
-			Node(sb, g, depth+2)
+			if n.GroupingSets {
+				// Each grouping set is wrapped in an ExpressionList
+				// but we need to unwrap tuples and output elements directly
+				if lit, ok := g.(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+					if elements, ok := lit.Value.([]ast.Expression); ok {
+						fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(elements))
+						for _, elem := range elements {
+							Node(sb, elem, depth+3)
+						}
+					} else {
+						// Fallback for unexpected tuple value type
+						fmt.Fprintf(sb, "%s  ExpressionList (children 1)\n", indent)
+						Node(sb, g, depth+3)
+					}
+				} else {
+					// Single expression grouping set
+					fmt.Fprintf(sb, "%s  ExpressionList (children 1)\n", indent)
+					Node(sb, g, depth+3)
+				}
+			} else {
+				Node(sb, g, depth+2)
+			}
 		}
 	}
 	// HAVING
@@ -160,6 +181,10 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 	if len(n.Settings) > 0 && !n.SettingsAfterFormat {
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
+	// TOP clause is output at the end
+	if n.Top != nil {
+		Node(sb, n.Top, depth+1)
+	}
 }
 
 func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent string, depth int) {
@@ -169,10 +194,9 @@ func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent st
 	hasFromOrTo := n.FillFrom != nil || n.FillTo != nil
 	hasComplexFillExpr := hasFromOrTo && (isComplexExpr(n.FillFrom) || isComplexExpr(n.FillTo))
 
-	// Use FillModifier when:
-	// 1. Only STEP is present (no FROM/TO), or
-	// 2. FROM/TO contain complex expressions (not simple literals)
-	useFillModifier := n.WithFill && ((n.FillStep != nil && !hasFromOrTo) || hasComplexFillExpr)
+	// Use FillModifier when FROM/TO contain complex expressions (not simple literals)
+	// When only STEP is present, output it directly as a child (no FillModifier)
+	useFillModifier := n.WithFill && hasComplexFillExpr
 
 	if useFillModifier {
 		// Use FillModifier wrapper
@@ -332,6 +356,10 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 	}
 	// SETTINGS is counted at SelectQuery level only when NOT after FORMAT
 	if len(n.Settings) > 0 && !n.SettingsAfterFormat {
+		count++
+	}
+	// TOP clause
+	if n.Top != nil {
 		count++
 	}
 	return count

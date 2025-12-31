@@ -260,17 +260,14 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 	// Check if this is INTERSECT/EXCEPT that needs SelectIntersectExceptQuery wrapper
 	// Only INTERSECT ALL and EXCEPT ALL are treated like UNION ALL (flattened into ExpressionList)
 	if p.isIntersectExceptWithWrapper() {
-		intersectExcept := &ast.SelectIntersectExceptQuery{
-			Position: p.current.Pos,
-		}
-		// Add first item
-		if firstWasParenthesized {
-			intersectExcept.Selects = append(intersectExcept.Selects, firstItem)
-		} else {
-			intersectExcept.Selects = append(intersectExcept.Selects, firstItem)
-		}
+		// Collect all operands and operators first, then apply precedence
+		// INTERSECT has higher precedence than EXCEPT
 
-		// Parse INTERSECT/EXCEPT clauses (those that need wrapper)
+		// Start with first operand (statements list) and operators list
+		stmts := []ast.Statement{firstItem}
+		var ops []string
+
+		// Parse all INTERSECT/EXCEPT clauses and collect them
 		for p.isIntersectExceptWithWrapper() {
 			// Record the operator type
 			var op string
@@ -286,9 +283,10 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 				op += " DISTINCT"
 				p.nextToken()
 			}
-			intersectExcept.Operators = append(intersectExcept.Operators, op)
+			ops = append(ops, op)
 
 			// Parse the next select
+			var nextStmt ast.Statement
 			if p.currentIs(token.LPAREN) {
 				p.nextToken() // skip (
 				nested := p.parseSelectWithUnion()
@@ -296,17 +294,21 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 					break
 				}
 				p.expect(token.RPAREN)
-				intersectExcept.Selects = append(intersectExcept.Selects, nested)
+				nextStmt = nested
 			} else {
 				sel := p.parseSelect()
 				if sel == nil {
 					break
 				}
-				intersectExcept.Selects = append(intersectExcept.Selects, sel)
+				nextStmt = sel
 			}
+			stmts = append(stmts, nextStmt)
 		}
 
-		query.Selects = append(query.Selects, intersectExcept)
+		// Now apply precedence: INTERSECT binds tighter than EXCEPT
+		result := buildIntersectExceptTree(stmts, ops)
+
+		query.Selects = append(query.Selects, result)
 		return query
 	}
 
@@ -382,6 +384,87 @@ func (p *Parser) isIntersectExceptWithWrapper() bool {
 	return nextTok != token.ALL
 }
 
+// isIntersectOp checks if the operator is an INTERSECT variant (not EXCEPT)
+func isIntersectOp(op string) bool {
+	return op == "INTERSECT" || op == "INTERSECT DISTINCT"
+}
+
+// buildIntersectExceptTree builds the AST tree respecting operator precedence.
+// INTERSECT has higher precedence than EXCEPT, so:
+// "a EXCEPT b INTERSECT c" becomes "a EXCEPT (b INTERSECT c)"
+// "a INTERSECT b EXCEPT c" becomes "(a INTERSECT b) EXCEPT c"
+//
+// EXCEPT is left-associative and creates binary trees:
+// "a EXCEPT b EXCEPT c" becomes "((a) EXCEPT b) EXCEPT c"
+//
+// stmts has n elements, ops has n-1 elements where ops[i] is the operator between stmts[i] and stmts[i+1]
+func buildIntersectExceptTree(stmts []ast.Statement, ops []string) ast.Statement {
+	if len(stmts) == 1 {
+		return stmts[0]
+	}
+
+	// First pass: group consecutive INTERSECT operations (higher precedence)
+	// Result will be a list of statements/groups connected by EXCEPT operators
+	var groups []ast.Statement
+	var exceptOps []string
+
+	i := 0
+	for i < len(stmts) {
+		// Start a new group with stmts[i]
+		groupStmts := []ast.Statement{stmts[i]}
+		var groupOps []string
+
+		// Collect consecutive INTERSECTs - look at the operator AFTER the current statement
+		for i < len(ops) && isIntersectOp(ops[i]) {
+			groupOps = append(groupOps, ops[i])
+			i++
+			groupStmts = append(groupStmts, stmts[i])
+		}
+
+		// Create the group
+		var groupStmt ast.Statement
+		if len(groupStmts) == 1 {
+			// Single statement, no grouping needed
+			groupStmt = groupStmts[0]
+		} else {
+			// Multiple statements connected by INTERSECT
+			groupStmt = &ast.SelectIntersectExceptQuery{
+				Selects:   groupStmts,
+				Operators: groupOps,
+			}
+		}
+		groups = append(groups, groupStmt)
+
+		// Check if there's an EXCEPT connecting to the next group
+		if i < len(ops) && !isIntersectOp(ops[i]) {
+			exceptOps = append(exceptOps, ops[i])
+			i++ // Move past the EXCEPT operator to start next group
+		} else if i < len(stmts)-1 {
+			// No more operators but still have stmts - shouldn't happen with valid input
+			i++
+		} else {
+			// We've processed all statements
+			break
+		}
+	}
+
+	// Now all groups are connected by EXCEPT - build the final tree
+	if len(groups) == 1 {
+		return groups[0]
+	}
+
+	// Build left-associative binary tree for EXCEPT operations
+	// "a EXCEPT b EXCEPT c" becomes "((a) EXCEPT b) EXCEPT c"
+	result := groups[0]
+	for j := 0; j < len(exceptOps); j++ {
+		result = &ast.SelectIntersectExceptQuery{
+			Selects:   []ast.Statement{result, groups[j+1]},
+			Operators: []string{exceptOps[j]},
+		}
+	}
+	return result
+}
+
 func (p *Parser) parseSelect() *ast.SelectQuery {
 	sel := &ast.SelectQuery{
 		Position: p.current.Pos,
@@ -409,7 +492,8 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 	// Handle TOP
 	if p.currentIs(token.TOP) {
 		p.nextToken()
-		sel.Top = p.parseExpression(LOWEST)
+		// Use MUL_PREC to stop at * (which would be parsed as column selector, not multiplication)
+		sel.Top = p.parseExpression(MUL_PREC)
 	}
 
 	// Parse column list
@@ -451,6 +535,7 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			p.nextToken() // skip GROUPING
 			p.nextToken() // skip SETS
 			sel.GroupBy = p.parseGroupingSets()
+			sel.GroupingSets = true
 		} else if p.currentIs(token.ROLLUP) && p.peekIs(token.LPAREN) {
 			// ROLLUP(a, b, c)
 			p.nextToken() // skip ROLLUP
@@ -734,8 +819,8 @@ func (p *Parser) parseWithClause() []ast.Expression {
 				elem.Name = name
 				elem.Query = &ast.Identifier{Position: pos, Parts: []string{name}}
 			}
-		} else if p.currentIs(token.LPAREN) {
-			// Subquery: (SELECT ...) AS name
+		} else if p.currentIs(token.LPAREN) && (p.peekIs(token.SELECT) || p.peekIs(token.WITH)) {
+			// Subquery: (SELECT ...) AS name or (WITH ... SELECT ...) AS name
 			// In this syntax, the alias goes on the Subquery, not on WithElement
 			p.nextToken()
 			subquery := p.parseSelectWithUnion()
@@ -917,6 +1002,27 @@ func (p *Parser) parseTableElementWithJoin() *ast.TablesInSelectQueryElement {
 		p.nextToken()
 	default:
 		join.Type = ast.JoinInner
+	}
+
+	// Parse strictness after type if not already parsed (e.g., RIGHT ANTI JOIN)
+	if join.Strictness == "" {
+		switch p.current.Token {
+		case token.ANY:
+			join.Strictness = ast.JoinStrictAny
+			p.nextToken()
+		case token.ALL:
+			join.Strictness = ast.JoinStrictAll
+			p.nextToken()
+		case token.ASOF:
+			join.Strictness = ast.JoinStrictAsof
+			p.nextToken()
+		case token.SEMI:
+			join.Strictness = ast.JoinStrictSemi
+			p.nextToken()
+		case token.ANTI:
+			join.Strictness = ast.JoinStrictAnti
+			p.nextToken()
+		}
 	}
 
 	if !p.expect(token.JOIN) {
@@ -1603,6 +1709,52 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 	}
 
 	// Parse table options in flexible order (PARTITION BY, ORDER BY, PRIMARY KEY, etc.)
+	p.parseTableOptions(create)
+
+	// Parse AS SELECT or AS (subquery) or AS table_function() or AS database.table
+	if p.currentIs(token.AS) {
+		p.nextToken()
+		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) || p.currentIs(token.LPAREN) {
+			// AS SELECT... or AS (SELECT...) INTERSECT ...
+			create.AsSelect = p.parseSelectWithUnion()
+		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			// AS table_function(...) or AS database.table
+			name := p.parseIdentifierName()
+			if p.currentIs(token.DOT) {
+				// AS database.table - skip the table name
+				p.nextToken()
+				p.parseIdentifierName()
+			} else if p.currentIs(token.LPAREN) {
+				// AS function(...) - parse as a function call
+				fn := &ast.FunctionCall{Name: name}
+				p.nextToken() // skip (
+				if !p.currentIs(token.RPAREN) {
+					fn.Arguments = p.parseExpressionList()
+				}
+				if p.currentIs(token.RPAREN) {
+					p.nextToken()
+				}
+				create.AsTableFunction = fn
+			}
+			_ = name // Use name for future AS table support
+		}
+	}
+
+	// Parse ENGINE after AS (for CREATE TABLE x AS y ENGINE=z syntax)
+	if create.Engine == nil && p.currentIs(token.ENGINE) {
+		p.nextToken()
+		if p.currentIs(token.EQ) {
+			p.nextToken()
+		}
+		create.Engine = p.parseEngineClause()
+	}
+
+	// Parse table options after AS ... ENGINE (PARTITION BY, ORDER BY, etc.)
+	p.parseTableOptions(create)
+}
+
+// parseTableOptions parses table options: PARTITION BY, ORDER BY, PRIMARY KEY, SAMPLE BY, TTL, SETTINGS
+func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 	for {
 		switch {
 		case p.currentIs(token.PARTITION):
@@ -1710,47 +1862,8 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 			p.nextToken()
 			create.Settings = p.parseSettingsList()
 		default:
-			goto done_table_options
+			return
 		}
-	}
-done_table_options:
-
-	// Parse AS SELECT or AS (subquery) or AS table_function() or AS database.table
-	if p.currentIs(token.AS) {
-		p.nextToken()
-		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) || p.currentIs(token.LPAREN) {
-			// AS SELECT... or AS (SELECT...) INTERSECT ...
-			create.AsSelect = p.parseSelectWithUnion()
-		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-			// AS table_function(...) or AS database.table
-			name := p.parseIdentifierName()
-			if p.currentIs(token.DOT) {
-				// AS database.table - skip the table name
-				p.nextToken()
-				p.parseIdentifierName()
-			} else if p.currentIs(token.LPAREN) {
-				// AS function(...) - parse as a function call
-				fn := &ast.FunctionCall{Name: name}
-				p.nextToken() // skip (
-				if !p.currentIs(token.RPAREN) {
-					fn.Arguments = p.parseExpressionList()
-				}
-				if p.currentIs(token.RPAREN) {
-					p.nextToken()
-				}
-				create.AsTableFunction = fn
-			}
-			_ = name // Use name for future AS table support
-		}
-	}
-
-	// Parse ENGINE after AS (for CREATE TABLE x AS y ENGINE=z syntax)
-	if create.Engine == nil && p.currentIs(token.ENGINE) {
-		p.nextToken()
-		if p.currentIs(token.EQ) {
-			p.nextToken()
-		}
-		create.Engine = p.parseEngineClause()
 	}
 }
 
@@ -1814,6 +1927,23 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		}
 	}
 
+	// Parse column definitions (e.g., CREATE VIEW v (x UInt64) AS SELECT ...)
+	if p.currentIs(token.LPAREN) {
+		p.nextToken()
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			col := p.parseColumnDeclaration()
+			if col != nil {
+				create.Columns = append(create.Columns, col)
+			}
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
+		}
+		p.expect(token.RPAREN)
+	}
+
 	// Handle ON CLUSTER
 	if p.currentIs(token.ON) {
 		p.nextToken()
@@ -1842,6 +1972,9 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		}
 		create.Engine = p.parseEngineClause()
 	}
+
+	// Parse table options (ORDER BY, PRIMARY KEY, etc.) for materialized views
+	p.parseTableOptions(create)
 
 	// Parse POPULATE (for materialized views)
 	if p.currentIs(token.POPULATE) {
@@ -2975,10 +3108,12 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 		return nil
 	}
 
-	// Check if next token is DEFAULT/MATERIALIZED/ALIAS (type omitted)
-	// These keywords indicate the type is omitted and we go straight to default expression
-	if p.currentIs(token.DEFAULT) || p.currentIs(token.MATERIALIZED) || p.currentIs(token.ALIAS) {
-		// Type is omitted, skip to default parsing below
+	// Check if next token indicates type is omitted
+	// DEFAULT/MATERIALIZED/ALIAS indicate we go straight to default expression
+	// CODEC indicates we go straight to codec specification (no type)
+	isCodec := p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CODEC"
+	if p.currentIs(token.DEFAULT) || p.currentIs(token.MATERIALIZED) || p.currentIs(token.ALIAS) || isCodec {
+		// Type is omitted, skip to parsing below
 	} else {
 		// Parse data type
 		col.Type = p.parseDataType()
@@ -3705,6 +3840,12 @@ func (p *Parser) parseAlter() *ast.AlterQuery {
 			break
 		}
 		p.nextToken()
+	}
+
+	// Parse SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		alter.Settings = p.parseSettingsList()
 	}
 
 	return alter

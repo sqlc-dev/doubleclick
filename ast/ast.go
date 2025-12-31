@@ -64,6 +64,7 @@ type SelectQuery struct {
 	PreWhere    Expression            `json:"prewhere,omitempty"`
 	Where       Expression            `json:"where,omitempty"`
 	GroupBy     []Expression          `json:"group_by,omitempty"`
+	GroupingSets bool                 `json:"grouping_sets,omitempty"` // true if GROUP BY uses GROUPING SETS
 	WithRollup  bool                  `json:"with_rollup,omitempty"`
 	WithCube    bool                  `json:"with_cube,omitempty"`
 	WithTotals  bool                  `json:"with_totals,omitempty"`
@@ -503,6 +504,7 @@ type AlterQuery struct {
 	Table     string          `json:"table"`
 	Commands  []*AlterCommand `json:"commands"`
 	OnCluster string          `json:"on_cluster,omitempty"`
+	Settings  []*SettingExpr  `json:"settings,omitempty"`
 }
 
 func (a *AlterQuery) Pos() token.Position { return a.Position }

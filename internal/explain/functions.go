@@ -85,14 +85,27 @@ func windowSpecHasContent(w *ast.WindowSpec) bool {
 }
 
 func explainLambda(sb *strings.Builder, n *ast.Lambda, indent string, depth int) {
+	explainLambdaWithAlias(sb, n, "", indent, depth)
+}
+
+func explainLambdaWithAlias(sb *strings.Builder, n *ast.Lambda, alias string, indent string, depth int) {
 	// Lambda is represented as Function lambda with tuple of params and body
-	fmt.Fprintf(sb, "%sFunction lambda (children %d)\n", indent, 1)
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction lambda (alias %s) (children %d)\n", indent, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction lambda (children %d)\n", indent, 1)
+	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
 	// Parameters as tuple
 	fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
-	fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.Parameters))
-	for _, p := range n.Parameters {
-		fmt.Fprintf(sb, "%s    Identifier %s\n", indent, p)
+	// When there are no parameters, ClickHouse omits the (children N) part
+	if len(n.Parameters) > 0 {
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.Parameters))
+		for _, p := range n.Parameters {
+			fmt.Fprintf(sb, "%s    Identifier %s\n", indent, p)
+		}
+	} else {
+		fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
 	}
 	// Body
 	Node(sb, n.Body, depth+2)
@@ -314,6 +327,46 @@ func containsOnlyPrimitiveLiterals(lit *ast.Literal) bool {
 	return true
 }
 
+// containsOnlyPrimitiveLiteralsWithUnary is like containsOnlyPrimitiveLiterals but also handles
+// unary negation of numeric literals (e.g., -0., -123)
+func containsOnlyPrimitiveLiteralsWithUnary(lit *ast.Literal) bool {
+	if lit.Type != ast.LiteralTuple {
+		// Non-tuple literals are primitive
+		return true
+	}
+	exprs, ok := lit.Value.([]ast.Expression)
+	if !ok {
+		return false
+	}
+	for _, e := range exprs {
+		// Direct literal
+		if innerLit, ok := e.(*ast.Literal); ok {
+			// Recursively check nested tuples
+			if innerLit.Type == ast.LiteralTuple {
+				if !containsOnlyPrimitiveLiteralsWithUnary(innerLit) {
+					return false
+				}
+			}
+			// Arrays inside tuples make it complex
+			if innerLit.Type == ast.LiteralArray {
+				return false
+			}
+			continue
+		}
+		// Unary negation of numeric literal is also primitive
+		if unary, ok := e.(*ast.UnaryExpr); ok && unary.Op == "-" {
+			if innerLit, ok := unary.Operand.(*ast.Literal); ok {
+				if innerLit.Type == ast.LiteralInteger || innerLit.Type == ast.LiteralFloat {
+					continue
+				}
+			}
+		}
+		// Non-literal expression in tuple
+		return false
+	}
+	return true
+}
+
 // exprToLiteral converts a numeric expression to a literal (handles unary minus)
 func exprToLiteral(expr ast.Expression) *ast.Literal {
 	if lit, ok := expr.(*ast.Literal); ok {
@@ -371,12 +424,9 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 	// Determine if the IN list should be combined into a single tuple literal
 	// This happens when we have multiple literals of compatible types:
 	// - All numeric literals/expressions (integers/floats, including unary minus)
-	// - All string literals (only for small lists, max 10 items)
+	// - All string literals
 	// - All tuple literals that contain only primitive literals (recursively)
 	canBeTupleLiteral := false
-	// Only combine strings into tuple for small lists (up to 10 items)
-	// Large string lists are kept as separate children in ClickHouse EXPLAIN AST
-	const maxStringTupleSize = 10
 	if n.Query == nil && len(n.List) > 1 {
 		allNumeric := true
 		allStrings := true
@@ -409,9 +459,8 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				break
 			}
 		}
-		// For strings, only combine if list is small enough
 		// For tuples, only combine if all contain primitive literals
-		canBeTupleLiteral = allNumeric || (allStrings && len(n.List) <= maxStringTupleSize) || (allTuples && allTuplesArePrimitive)
+		canBeTupleLiteral = allNumeric || allStrings || (allTuples && allTuplesArePrimitive)
 	}
 
 	// Count arguments: expr + list items or subquery
@@ -431,21 +480,8 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				argCount += len(n.List)
 			}
 		} else {
-			// Check if all items are string literals (large list case - no wrapper)
-			allStringLiterals := true
-			for _, item := range n.List {
-				if lit, ok := item.(*ast.Literal); !ok || lit.Type != ast.LiteralString {
-					allStringLiterals = false
-					break
-				}
-			}
-			if allStringLiterals {
-				// Large string list - separate children
-				argCount += len(n.List)
-			} else {
-				// Non-string items get wrapped in a single Function tuple
-				argCount++
-			}
+			// Non-string items get wrapped in a single Function tuple
+			argCount++
 		}
 	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, argCount)
@@ -492,26 +528,11 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				explainTupleInInList(sb, item.(*ast.Literal), indent+"   ", depth+4)
 			}
 		} else {
-			// Check if all items are string literals (large list case)
-			allStringLiterals := true
+			// Wrap non-literal/non-tuple list items in Function tuple
+			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.List))
 			for _, item := range n.List {
-				if lit, ok := item.(*ast.Literal); !ok || lit.Type != ast.LiteralString {
-					allStringLiterals = false
-					break
-				}
-			}
-			if allStringLiterals {
-				// Large string list - output as separate children (no tuple wrapper)
-				for _, item := range n.List {
-					Node(sb, item, depth+2)
-				}
-			} else {
-				// Wrap non-literal/non-tuple list items in Function tuple
-				fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
-				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.List))
-				for _, item := range n.List {
-					Node(sb, item, depth+4)
-				}
+				Node(sb, item, depth+4)
 			}
 		}
 	}
@@ -657,26 +678,11 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 				explainTupleInInList(sb, item.(*ast.Literal), indent+"   ", depth+4)
 			}
 		} else {
-			// Check if all items are string literals (large list case)
-			allStringLiterals := true
+			// Wrap non-literal/non-tuple list items in Function tuple
+			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.List))
 			for _, item := range n.List {
-				if lit, ok := item.(*ast.Literal); !ok || lit.Type != ast.LiteralString {
-					allStringLiterals = false
-					break
-				}
-			}
-			if allStringLiterals {
-				// Large string list - output as separate children (no tuple wrapper)
-				for _, item := range n.List {
-					Node(sb, item, depth+2)
-				}
-			} else {
-				// Wrap non-literal/non-tuple list items in Function tuple
-				fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
-				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.List))
-				for _, item := range n.List {
-					Node(sb, item, depth+4)
-				}
+				Node(sb, item, depth+4)
 			}
 		}
 	}
@@ -828,10 +834,8 @@ func explainCaseExprWithAlias(sb *strings.Builder, n *ast.CaseExpr, alias string
 		}
 	} else {
 		// CASE WHEN ... form
-		argCount := len(n.Whens) * 2
-		if n.Else != nil {
-			argCount++
-		}
+		// CASE without ELSE implicitly has NULL as the else value
+		argCount := len(n.Whens)*2 + 1 // Always add 1 for ELSE (explicit or implicit NULL)
 		if alias != "" {
 			fmt.Fprintf(sb, "%sFunction multiIf (alias %s) (children %d)\n", indent, alias, 1)
 		} else {
@@ -844,6 +848,9 @@ func explainCaseExprWithAlias(sb *strings.Builder, n *ast.CaseExpr, alias string
 		}
 		if n.Else != nil {
 			Node(sb, n.Else, depth+2)
+		} else {
+			// Implicit NULL when no ELSE clause
+			fmt.Fprintf(sb, "%s  Literal NULL\n", indent)
 		}
 	}
 }
@@ -874,10 +881,23 @@ func explainExistsExpr(sb *strings.Builder, n *ast.ExistsExpr, indent string, de
 }
 
 func explainExtractExpr(sb *strings.Builder, n *ast.ExtractExpr, indent string, depth int) {
+	explainExtractExprWithAlias(sb, n, n.Alias, indent, depth)
+}
+
+func explainExtractExprWithAlias(sb *strings.Builder, n *ast.ExtractExpr, alias string, indent string, depth int) {
 	// EXTRACT is represented as Function toYear, toMonth, etc.
 	// ClickHouse uses specific function names for date/time extraction
 	fnName := extractFieldToFunction(n.Field)
-	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	// Use alias from parameter, or fall back to expression's alias
+	effectiveAlias := alias
+	if effectiveAlias == "" {
+		effectiveAlias = n.Alias
+	}
+	if effectiveAlias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, effectiveAlias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 	Node(sb, n.From, depth+2)
 }
@@ -889,7 +909,7 @@ func extractFieldToFunction(field string) string {
 		return "toDayOfMonth"
 	case "MONTH":
 		return "toMonth"
-	case "YEAR":
+	case "YEAR", "YYYY":
 		return "toYear"
 	case "SECOND":
 		return "toSecond"

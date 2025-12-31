@@ -65,8 +65,16 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			for _, e := range exprs {
 				// Simple literals (numbers, strings, etc.) are OK
 				if lit, isLit := e.(*ast.Literal); isLit {
-					// Nested tuples/arrays are complex
-					if lit.Type == ast.LiteralTuple || lit.Type == ast.LiteralArray {
+					// Nested tuples that contain only primitive literals are OK
+					if lit.Type == ast.LiteralTuple {
+						if !containsOnlyPrimitiveLiteralsWithUnary(lit) {
+							hasComplexExpr = true
+							break
+						}
+						continue
+					}
+					// Arrays are always complex in tuple context
+					if lit.Type == ast.LiteralArray {
 						hasComplexExpr = true
 						break
 					}
@@ -114,11 +122,9 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			// This happens when:
 			// 1. Contains non-literal, non-negation expressions OR
 			// 2. Contains tuples OR
-			// 3. Contains nested arrays that all have exactly 1 element (homogeneous single-element arrays) OR
-			// 4. Contains nested arrays with non-literal expressions OR
-			// 5. Contains nested arrays that are empty or contain tuples/non-literals
+			// 3. Contains nested arrays with non-literal expressions OR
+			// 4. Contains nested arrays that are empty or contain tuples/non-literals
 			shouldUseFunctionArray := false
-			allAreSingleElementArrays := true
 			hasNestedArrays := false
 			nestedArraysNeedFunctionFormat := false
 
@@ -126,24 +132,18 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 				if lit, ok := e.(*ast.Literal); ok {
 					if lit.Type == ast.LiteralArray {
 						hasNestedArrays = true
-						// Check if this inner array has exactly 1 element
+						// Check if inner array needs Function array format:
+						// - Contains non-literal expressions OR
+						// - Contains tuples OR
+						// - Is empty OR
+						// - Contains empty arrays
 						if innerExprs, ok := lit.Value.([]ast.Expression); ok {
-							if len(innerExprs) != 1 {
-								allAreSingleElementArrays = false
-							}
-							// Check if inner array needs Function array format:
-							// - Contains non-literal expressions OR
-							// - Contains tuples OR
-							// - Is empty OR
-							// - Contains empty arrays
 							if containsNonLiteralExpressions(innerExprs) ||
 								len(innerExprs) == 0 ||
 								containsTuples(innerExprs) ||
 								containsEmptyArrays(innerExprs) {
 								nestedArraysNeedFunctionFormat = true
 							}
-						} else {
-							allAreSingleElementArrays = false
 						}
 					} else if lit.Type == ast.LiteralTuple {
 						// Tuples are complex
@@ -155,9 +155,17 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			}
 
 			// Use Function array when:
-			// - nested arrays that are ALL single-element
-			// - nested arrays that need Function format (contain non-literals, tuples, or empty arrays)
-			if hasNestedArrays && (allAreSingleElementArrays || nestedArraysNeedFunctionFormat) {
+			// - nested arrays that need Function format (contain non-literals, tuples, or empty arrays at any depth)
+			// Note: nested arrays that are ALL single-element should still be Literal format
+			if hasNestedArrays && nestedArraysNeedFunctionFormat {
+				shouldUseFunctionArray = true
+			}
+			// Also check for empty arrays at any depth within nested arrays
+			if hasNestedArrays && containsEmptyArraysRecursive(exprs) {
+				shouldUseFunctionArray = true
+			}
+			// Also check for tuples at any depth within nested arrays
+			if hasNestedArrays && containsTuplesRecursive(exprs) {
 				shouldUseFunctionArray = true
 			}
 
@@ -243,6 +251,43 @@ func containsEmptyArrays(exprs []ast.Expression) bool {
 		if lit, ok := e.(*ast.Literal); ok && lit.Type == ast.LiteralArray {
 			if innerExprs, ok := lit.Value.([]ast.Expression); ok && len(innerExprs) == 0 {
 				return true
+			}
+		}
+	}
+	return false
+}
+
+// containsEmptyArraysRecursive checks if any nested array at any depth is empty
+func containsEmptyArraysRecursive(exprs []ast.Expression) bool {
+	for _, e := range exprs {
+		if lit, ok := e.(*ast.Literal); ok && lit.Type == ast.LiteralArray {
+			if innerExprs, ok := lit.Value.([]ast.Expression); ok {
+				if len(innerExprs) == 0 {
+					return true
+				}
+				// Recursively check nested arrays
+				if containsEmptyArraysRecursive(innerExprs) {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+// containsTuplesRecursive checks if any nested array contains tuples at any depth
+func containsTuplesRecursive(exprs []ast.Expression) bool {
+	for _, e := range exprs {
+		if lit, ok := e.(*ast.Literal); ok {
+			if lit.Type == ast.LiteralTuple {
+				return true
+			}
+			if lit.Type == ast.LiteralArray {
+				if innerExprs, ok := lit.Value.([]ast.Expression); ok {
+					if containsTuplesRecursive(innerExprs) {
+						return true
+					}
+				}
 			}
 		}
 	}
@@ -377,14 +422,18 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 		// Check if this is a tuple with complex expressions that should be rendered as Function tuple
 		if e.Type == ast.LiteralTuple {
 			if exprs, ok := e.Value.([]ast.Expression); ok {
-				hasComplexExpr := false
+				needsFunctionFormat := false
+				// Empty tuples always use Function tuple format
+				if len(exprs) == 0 {
+					needsFunctionFormat = true
+				}
 				for _, expr := range exprs {
 					if _, isLit := expr.(*ast.Literal); !isLit {
-						hasComplexExpr = true
+						needsFunctionFormat = true
 						break
 					}
 				}
-				if hasComplexExpr {
+				if needsFunctionFormat {
 					// Render as Function tuple with alias
 					fmt.Fprintf(sb, "%sFunction tuple (alias %s) (children %d)\n", indent, escapeAlias(n.Alias), 1)
 					fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
@@ -489,6 +538,12 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 	case *ast.FunctionCall:
 		// Function calls already handle aliases
 		explainFunctionCallWithAlias(sb, e, n.Alias, indent, depth)
+	case *ast.Lambda:
+		// Lambda expressions with alias
+		explainLambdaWithAlias(sb, e, n.Alias, indent, depth)
+	case *ast.ExtractExpr:
+		// EXTRACT expressions with alias
+		explainExtractExprWithAlias(sb, e, n.Alias, indent, depth)
 	case *ast.Identifier:
 		// Identifiers with alias
 		fmt.Fprintf(sb, "%sIdentifier %s (alias %s)\n", indent, e.Name(), escapeAlias(n.Alias))
@@ -632,6 +687,18 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 	// When name is empty, don't show the alias part
 	switch e := n.Query.(type) {
 	case *ast.Literal:
+		// Empty tuples should be rendered as Function tuple, not Literal
+		if e.Type == ast.LiteralTuple {
+			if exprs, ok := e.Value.([]ast.Expression); ok && len(exprs) == 0 {
+				if n.Name != "" {
+					fmt.Fprintf(sb, "%sFunction tuple (alias %s) (children %d)\n", indent, n.Name, 1)
+				} else {
+					fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
+				}
+				fmt.Fprintf(sb, "%s ExpressionList\n", indent)
+				return
+			}
+		}
 		if n.Name != "" {
 			fmt.Fprintf(sb, "%sLiteral %s (alias %s)\n", indent, FormatLiteral(e), n.Name)
 		} else {
@@ -645,6 +712,8 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 		}
 	case *ast.FunctionCall:
 		explainFunctionCallWithAlias(sb, e, n.Name, indent, depth)
+	case *ast.Lambda:
+		explainLambdaWithAlias(sb, e, n.Name, indent, depth)
 	case *ast.BinaryExpr:
 		// Binary expressions become functions
 		fnName := OperatorToFunction(e.Op)

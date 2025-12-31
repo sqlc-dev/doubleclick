@@ -613,11 +613,30 @@ func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string
 		}
 		return
 	}
-	// Count children: settings (if present) + statement
+
+	// Check if inner statement has FORMAT clause - this should be output as child of Explain
+	var format *ast.Identifier
+	if swu, ok := n.Statement.(*ast.SelectWithUnionQuery); ok {
+		for _, sel := range swu.Selects {
+			if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
+				format = sq.Format
+				// Temporarily nil out the format so it's not output by SelectWithUnionQuery
+				sq.Format = nil
+				defer func() { sq.Format = format }()
+				break
+			}
+		}
+	}
+
+	// Count children: settings (if present) + statement + format (if present)
 	children := 1
 	if n.HasSettings {
 		children++
 	}
+	if format != nil {
+		children++
+	}
+
 	// At top level (depth 0), ClickHouse outputs "Explain EXPLAIN <TYPE>"
 	// Nested in subqueries, it outputs "Explain <TYPE>"
 	if depth == 0 {
@@ -629,6 +648,9 @@ func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 	Node(sb, n.Statement, depth+1)
+	if format != nil {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, format.Parts[len(format.Parts)-1])
+	}
 }
 
 func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
@@ -971,6 +993,11 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 	children := 2 // ExpressionList + Identifier for table
 	if n.Database != "" {
 		children = 3 // ExpressionList + Identifier for database + Identifier for table
+	}
+	if len(n.Settings) > 0 {
+		children++ // Add Set child for SETTINGS
+	}
+	if n.Database != "" {
 		fmt.Fprintf(sb, "%sAlterQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
 	} else {
 		fmt.Fprintf(sb, "%sAlterQuery  %s (children %d)\n", indent, n.Table, children)
@@ -984,6 +1011,9 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+	if len(n.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
 }
 
 func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent string, depth int) {
@@ -1053,7 +1083,10 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		}
 	case ast.AlterModifyTTL:
 		if cmd.TTL != nil && cmd.TTL.Expression != nil {
-			Node(sb, cmd.TTL.Expression, depth+1)
+			// TTL is wrapped in ExpressionList and TTLElement
+			fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", indent)
+			Node(sb, cmd.TTL.Expression, depth+3)
 		}
 	case ast.AlterModifySetting:
 		fmt.Fprintf(sb, "%s Set\n", indent)
