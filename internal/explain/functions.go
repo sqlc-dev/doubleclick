@@ -7,6 +7,21 @@ import (
 	"github.com/sqlc-dev/doubleclick/ast"
 )
 
+// normalizeIntervalUnit converts interval units to title-cased singular form
+// e.g., "years" -> "Year", "MONTH" -> "Month", "days" -> "Day"
+func normalizeIntervalUnit(unit string) string {
+	if len(unit) == 0 {
+		return ""
+	}
+	u := strings.ToLower(unit)
+	// Remove trailing 's' for plural forms
+	if strings.HasSuffix(u, "s") && len(u) > 1 {
+		u = u[:len(u)-1]
+	}
+	// Title-case
+	return strings.ToUpper(u[:1]) + u[1:]
+}
+
 func explainFunctionCall(sb *strings.Builder, n *ast.FunctionCall, indent string, depth int) {
 	explainFunctionCallWithAlias(sb, n, n.Alias, indent, depth)
 }
@@ -199,8 +214,8 @@ func explainDateAddSubResult(sb *strings.Builder, opFunc string, dateArg, valueA
 	Node(sb, dateArg, depth+2)
 
 	// Second arg: toIntervalUnit(value)
-	unitTitled := strings.ToUpper(unit[:1]) + strings.ToLower(unit[1:])
-	fmt.Fprintf(sb, "%s  Function toInterval%s (children %d)\n", indent, unitTitled, 1)
+	unitNorm := normalizeIntervalUnit(unit)
+	fmt.Fprintf(sb, "%s  Function toInterval%s (children %d)\n", indent, unitNorm, 1)
 	fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
 	Node(sb, valueArg, depth+4)
 }
@@ -1107,19 +1122,50 @@ func explainCaseExprWithAlias(sb *strings.Builder, n *ast.CaseExpr, alias string
 
 func explainIntervalExpr(sb *strings.Builder, n *ast.IntervalExpr, alias string, indent string, depth int) {
 	// INTERVAL is represented as Function toInterval<Unit>
-	// Unit needs to be title-cased (e.g., YEAR -> Year)
+	// Unit needs to be title-cased and singular (e.g., YEAR -> Year, YEARS -> Year)
 	unit := n.Unit
-	if len(unit) > 0 {
-		unit = strings.ToUpper(unit[:1]) + strings.ToLower(unit[1:])
+	value := n.Value
+
+	// Handle string literals like INTERVAL '2 years' - extract value and unit
+	if unit == "" {
+		if lit, ok := n.Value.(*ast.Literal); ok && lit.Type == ast.LiteralString {
+			if strVal, ok := lit.Value.(string); ok {
+				val, u := parseIntervalString(strVal)
+				if u != "" {
+					unit = u
+					// Create a numeric literal for the value
+					value = &ast.Literal{
+						Type:  ast.LiteralInteger,
+						Value: val,
+					}
+				}
+			}
+		}
 	}
-	fnName := "toInterval" + unit
+
+	unitNorm := normalizeIntervalUnit(unit)
+	fnName := "toInterval" + unitNorm
 	if alias != "" {
 		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, 1)
 	} else {
 		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
-	Node(sb, n.Value, depth+2)
+	Node(sb, value, depth+2)
+}
+
+// parseIntervalString parses a string like "2 years" into value and unit
+func parseIntervalString(s string) (value string, unit string) {
+	// Trim surrounding quotes if present
+	s = strings.Trim(s, "'\"")
+	s = strings.TrimSpace(s)
+
+	// Find the split between number and unit
+	parts := strings.Fields(s)
+	if len(parts) >= 2 {
+		return parts[0], parts[1]
+	}
+	return s, ""
 }
 
 func explainExistsExpr(sb *strings.Builder, n *ast.ExistsExpr, indent string, depth int) {
