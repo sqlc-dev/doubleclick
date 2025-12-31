@@ -514,6 +514,20 @@ func (u *UndropQuery) Pos() token.Position { return u.Position }
 func (u *UndropQuery) End() token.Position { return u.Position }
 func (u *UndropQuery) statementNode()      {}
 
+// UpdateQuery represents a standalone UPDATE statement.
+// In ClickHouse, UPDATE is syntactic sugar for ALTER TABLE ... UPDATE
+type UpdateQuery struct {
+	Position    token.Position `json:"-"`
+	Database    string         `json:"database,omitempty"`
+	Table       string         `json:"table"`
+	Assignments []*Assignment  `json:"assignments"`
+	Where       Expression     `json:"where,omitempty"`
+}
+
+func (u *UpdateQuery) Pos() token.Position { return u.Position }
+func (u *UpdateQuery) End() token.Position { return u.Position }
+func (u *UpdateQuery) statementNode()      {}
+
 // AlterQuery represents an ALTER statement.
 type AlterQuery struct {
 	Position  token.Position  `json:"-"`

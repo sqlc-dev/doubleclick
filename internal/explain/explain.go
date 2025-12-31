@@ -240,6 +240,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainCheckQuery(sb, n, indent)
 	case *ast.CreateIndexQuery:
 		explainCreateIndexQuery(sb, n, indent, depth)
+	case *ast.UpdateQuery:
+		explainUpdateQuery(sb, n, indent, depth)
 
 	// Types
 	case *ast.DataType:
@@ -266,6 +268,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainDictionaryLayout(sb, n, indent, depth)
 	case *ast.DictionaryRange:
 		explainDictionaryRange(sb, n, indent, depth)
+	case *ast.Assignment:
+		explainAssignment(sb, n, indent, depth)
 
 	default:
 		// For unhandled types, just print the type name

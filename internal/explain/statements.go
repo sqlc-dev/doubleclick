@@ -1589,3 +1589,45 @@ func explainCreateIndexQuery(sb *strings.Builder, n *ast.CreateIndexQuery, inden
 	// Child 3: Table name
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 }
+
+func explainAssignment(sb *strings.Builder, n *ast.Assignment, indent string, depth int) {
+	if n == nil {
+		return
+	}
+	// Assignment col_name (children 1)
+	fmt.Fprintf(sb, "%sAssignment %s (children 1)\n", indent, n.Column)
+	if n.Value != nil {
+		Node(sb, n.Value, depth+1)
+	}
+}
+
+func explainUpdateQuery(sb *strings.Builder, n *ast.UpdateQuery, indent string, depth int) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.UpdateQuery\n", indent)
+		return
+	}
+
+	// Count children: always 3 (identifier, where condition, assignments)
+	children := 3
+
+	// UpdateQuery with two spaces before table name
+	if n.Database != "" {
+		fmt.Fprintf(sb, "%sUpdateQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
+	} else {
+		fmt.Fprintf(sb, "%sUpdateQuery  %s (children %d)\n", indent, n.Table, children)
+	}
+
+	// Child 1: Table identifier
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+
+	// Child 2: WHERE condition
+	if n.Where != nil {
+		Node(sb, n.Where, depth+1)
+	}
+
+	// Child 3: Assignments wrapped in ExpressionList
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Assignments))
+	for _, assign := range n.Assignments {
+		Node(sb, assign, depth+2)
+	}
+}

@@ -200,6 +200,8 @@ func (p *Parser) parseStatement() ast.Statement {
 			return p.parseSetRole()
 		}
 		return p.parseSet()
+	case token.UPDATE:
+		return p.parseUpdate()
 	case token.OPTIMIZE:
 		return p.parseOptimize()
 	case token.SYSTEM:
@@ -4661,6 +4663,61 @@ func (p *Parser) parseUndrop() *ast.UndropQuery {
 	}
 
 	return undrop
+}
+
+func (p *Parser) parseUpdate() *ast.UpdateQuery {
+	update := &ast.UpdateQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip UPDATE
+
+	// Parse table name (can be database.table)
+	tableName := p.parseIdentifierName()
+	if tableName != "" {
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			update.Database = tableName
+			update.Table = p.parseIdentifierName()
+		} else {
+			update.Table = tableName
+		}
+	}
+
+	// Expect SET keyword
+	if !p.currentIs(token.SET) {
+		return update
+	}
+	p.nextToken() // skip SET
+
+	// Parse assignments: col = expr, col = expr, ...
+	for {
+		if !p.currentIs(token.IDENT) && !p.current.Token.IsKeyword() {
+			break
+		}
+		assign := &ast.Assignment{
+			Position: p.current.Pos,
+			Column:   p.current.Value,
+		}
+		p.nextToken() // skip column name
+		if p.currentIs(token.EQ) {
+			p.nextToken() // skip =
+			assign.Value = p.parseExpression(LOWEST)
+		}
+		update.Assignments = append(update.Assignments, assign)
+		if !p.currentIs(token.COMMA) {
+			break
+		}
+		p.nextToken() // skip comma
+	}
+
+	// Parse WHERE clause
+	if p.currentIs(token.WHERE) {
+		p.nextToken() // skip WHERE
+		update.Where = p.parseExpression(LOWEST)
+	}
+
+	return update
 }
 
 func (p *Parser) parseUse() *ast.UseQuery {
