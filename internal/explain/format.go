@@ -351,6 +351,8 @@ func OperatorToFunction(op string) string {
 		return "lessOrEquals"
 	case ">=":
 		return "greaterOrEquals"
+	case "<=>":
+		return "isNotDistinctFrom"
 	case "AND":
 		return "and"
 	case "OR":
