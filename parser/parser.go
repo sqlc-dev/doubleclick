@@ -819,8 +819,8 @@ func (p *Parser) parseWithClause() []ast.Expression {
 				elem.Name = name
 				elem.Query = &ast.Identifier{Position: pos, Parts: []string{name}}
 			}
-		} else if p.currentIs(token.LPAREN) {
-			// Subquery: (SELECT ...) AS name
+		} else if p.currentIs(token.LPAREN) && (p.peekIs(token.SELECT) || p.peekIs(token.WITH)) {
+			// Subquery: (SELECT ...) AS name or (WITH ... SELECT ...) AS name
 			// In this syntax, the alias goes on the Subquery, not on WithElement
 			p.nextToken()
 			subquery := p.parseSelectWithUnion()

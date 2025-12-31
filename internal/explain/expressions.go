@@ -422,14 +422,18 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 		// Check if this is a tuple with complex expressions that should be rendered as Function tuple
 		if e.Type == ast.LiteralTuple {
 			if exprs, ok := e.Value.([]ast.Expression); ok {
-				hasComplexExpr := false
+				needsFunctionFormat := false
+				// Empty tuples always use Function tuple format
+				if len(exprs) == 0 {
+					needsFunctionFormat = true
+				}
 				for _, expr := range exprs {
 					if _, isLit := expr.(*ast.Literal); !isLit {
-						hasComplexExpr = true
+						needsFunctionFormat = true
 						break
 					}
 				}
-				if hasComplexExpr {
+				if needsFunctionFormat {
 					// Render as Function tuple with alias
 					fmt.Fprintf(sb, "%sFunction tuple (alias %s) (children %d)\n", indent, escapeAlias(n.Alias), 1)
 					fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
@@ -683,6 +687,18 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 	// When name is empty, don't show the alias part
 	switch e := n.Query.(type) {
 	case *ast.Literal:
+		// Empty tuples should be rendered as Function tuple, not Literal
+		if e.Type == ast.LiteralTuple {
+			if exprs, ok := e.Value.([]ast.Expression); ok && len(exprs) == 0 {
+				if n.Name != "" {
+					fmt.Fprintf(sb, "%sFunction tuple (alias %s) (children %d)\n", indent, n.Name, 1)
+				} else {
+					fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
+				}
+				fmt.Fprintf(sb, "%s ExpressionList\n", indent)
+				return
+			}
+		}
 		if n.Name != "" {
 			fmt.Fprintf(sb, "%sLiteral %s (alias %s)\n", indent, FormatLiteral(e), n.Name)
 		} else {
