@@ -613,11 +613,30 @@ func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string
 		}
 		return
 	}
-	// Count children: settings (if present) + statement
+
+	// Check if inner statement has FORMAT clause - this should be output as child of Explain
+	var format *ast.Identifier
+	if swu, ok := n.Statement.(*ast.SelectWithUnionQuery); ok {
+		for _, sel := range swu.Selects {
+			if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
+				format = sq.Format
+				// Temporarily nil out the format so it's not output by SelectWithUnionQuery
+				sq.Format = nil
+				defer func() { sq.Format = format }()
+				break
+			}
+		}
+	}
+
+	// Count children: settings (if present) + statement + format (if present)
 	children := 1
 	if n.HasSettings {
 		children++
 	}
+	if format != nil {
+		children++
+	}
+
 	// At top level (depth 0), ClickHouse outputs "Explain EXPLAIN <TYPE>"
 	// Nested in subqueries, it outputs "Explain <TYPE>"
 	if depth == 0 {
@@ -629,6 +648,9 @@ func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 	Node(sb, n.Statement, depth+1)
+	if format != nil {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, format.Parts[len(format.Parts)-1])
+	}
 }
 
 func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
