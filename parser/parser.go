@@ -3226,6 +3226,29 @@ func (p *Parser) parseDataType() *ast.DataType {
 	}
 	p.nextToken()
 
+	// For MySQL-compatible INT types, handle display width and UNSIGNED/SIGNED
+	upperName := strings.ToUpper(dt.Name)
+	isMySQLIntType := upperName == "INT" || upperName == "TINYINT" || upperName == "SMALLINT" ||
+		upperName == "MEDIUMINT" || upperName == "BIGINT"
+
+	if isMySQLIntType && p.currentIs(token.LPAREN) {
+		// Skip the display width parameter (e.g., INT(11))
+		p.nextToken() // skip (
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			p.nextToken()
+		}
+		p.expect(token.RPAREN)
+	}
+
+	// Handle UNSIGNED/SIGNED modifiers for MySQL INT types
+	if isMySQLIntType && p.currentIs(token.IDENT) {
+		modifier := strings.ToUpper(p.current.Value)
+		if modifier == "UNSIGNED" || modifier == "SIGNED" {
+			dt.Name = dt.Name + " " + p.current.Value
+			p.nextToken()
+		}
+	}
+
 	// Parse type parameters
 	if p.currentIs(token.LPAREN) {
 		dt.HasParentheses = true
@@ -4426,7 +4449,10 @@ func (p *Parser) parseShow() ast.Statement {
 			}
 		} else {
 			show.ShowType = ast.ShowCreate
-			// Handle SHOW CREATE TABLE, etc.
+			// Handle SHOW CREATE TABLE, SHOW CREATE TEMPORARY TABLE, etc.
+			if p.currentIs(token.TEMPORARY) {
+				p.nextToken()
+			}
 			if p.currentIs(token.TABLE) {
 				p.nextToken()
 			}
