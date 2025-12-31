@@ -1215,11 +1215,12 @@ func (r *ReplaceExpr) End() token.Position { return r.Position }
 
 // ColumnTransformer represents a single transformer (APPLY, EXCEPT, or REPLACE) in order.
 type ColumnTransformer struct {
-	Position token.Position `json:"-"`
-	Type     string         `json:"type"`              // "apply", "except", "replace"
-	Apply    string         `json:"apply,omitempty"`   // function name for APPLY
-	Except   []string       `json:"except,omitempty"`  // column names for EXCEPT
-	Replaces []*ReplaceExpr `json:"replaces,omitempty"` // replacement expressions for REPLACE
+	Position    token.Position `json:"-"`
+	Type        string         `json:"type"`                   // "apply", "except", "replace"
+	Apply       string         `json:"apply,omitempty"`        // function name for APPLY
+	ApplyLambda Expression     `json:"apply_lambda,omitempty"` // lambda expression for APPLY x -> expr
+	Except      []string       `json:"except,omitempty"`       // column names for EXCEPT
+	Replaces    []*ReplaceExpr `json:"replaces,omitempty"`     // replacement expressions for REPLACE
 }
 
 // ColumnsMatcher represents COLUMNS('pattern') or COLUMNS(col1, col2) expression.

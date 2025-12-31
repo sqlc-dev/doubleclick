@@ -2557,8 +2557,17 @@ func (p *Parser) parseAsteriskApply(asterisk *ast.Asterisk) ast.Expression {
 		p.nextToken() // skip (
 	}
 
-	// Parse function name (can be IDENT or keyword like sum, avg, etc.)
-	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+	// Check for lambda expression: x -> expr
+	if p.currentIs(token.IDENT) && p.peekIs(token.ARROW) {
+		// Parse lambda expression
+		lambda := p.parseExpression(LOWEST)
+		asterisk.Transformers = append(asterisk.Transformers, &ast.ColumnTransformer{
+			Position:     pos,
+			Type:         "apply",
+			ApplyLambda:  lambda,
+		})
+	} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		// Parse function name (can be IDENT or keyword like sum, avg, etc.)
 		funcName := p.current.Value
 		asterisk.Apply = append(asterisk.Apply, funcName)
 		asterisk.Transformers = append(asterisk.Transformers, &ast.ColumnTransformer{
@@ -2586,8 +2595,17 @@ func (p *Parser) parseColumnsApply(matcher *ast.ColumnsMatcher) ast.Expression {
 		p.nextToken() // skip (
 	}
 
-	// Parse function name (can be IDENT or keyword like sum, avg, etc.)
-	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+	// Check for lambda expression: x -> expr
+	if p.currentIs(token.IDENT) && p.peekIs(token.ARROW) {
+		// Parse lambda expression
+		lambda := p.parseExpression(LOWEST)
+		matcher.Transformers = append(matcher.Transformers, &ast.ColumnTransformer{
+			Position:    pos,
+			Type:        "apply",
+			ApplyLambda: lambda,
+		})
+	} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		// Parse function name (can be IDENT or keyword like sum, avg, etc.)
 		funcName := p.current.Value
 		matcher.Apply = append(matcher.Apply, funcName)
 		matcher.Transformers = append(matcher.Transformers, &ast.ColumnTransformer{
