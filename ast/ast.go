@@ -1147,11 +1147,12 @@ const (
 
 // Asterisk represents a *.
 type Asterisk struct {
-	Position token.Position  `json:"-"`
-	Table    string          `json:"table,omitempty"`   // for table.*
-	Except   []string        `json:"except,omitempty"`  // for * EXCEPT (col1, col2)
-	Replace  []*ReplaceExpr  `json:"replace,omitempty"` // for * REPLACE (expr AS col)
-	Apply    []string        `json:"apply,omitempty"`   // for * APPLY (func1) APPLY(func2)
+	Position     token.Position       `json:"-"`
+	Table        string               `json:"table,omitempty"`        // for table.*
+	Except       []string             `json:"except,omitempty"`       // for * EXCEPT (col1, col2) - deprecated, use Transformers
+	Replace      []*ReplaceExpr       `json:"replace,omitempty"`      // for * REPLACE (expr AS col) - deprecated, use Transformers
+	Apply        []string             `json:"apply,omitempty"`        // for * APPLY (func1) APPLY(func2) - deprecated, use Transformers
+	Transformers []*ColumnTransformer `json:"transformers,omitempty"` // ordered list of transformers
 }
 
 func (a *Asterisk) Pos() token.Position { return a.Position }
@@ -1168,15 +1169,27 @@ type ReplaceExpr struct {
 func (r *ReplaceExpr) Pos() token.Position { return r.Position }
 func (r *ReplaceExpr) End() token.Position { return r.Position }
 
+// ColumnTransformer represents a single transformer (APPLY, EXCEPT, or REPLACE) in order.
+type ColumnTransformer struct {
+	Position token.Position `json:"-"`
+	Type     string         `json:"type"`              // "apply", "except", "replace"
+	Apply    string         `json:"apply,omitempty"`   // function name for APPLY
+	Except   []string       `json:"except,omitempty"`  // column names for EXCEPT
+	Replaces []*ReplaceExpr `json:"replaces,omitempty"` // replacement expressions for REPLACE
+}
+
 // ColumnsMatcher represents COLUMNS('pattern') or COLUMNS(col1, col2) expression.
 // When Pattern is set, it's a regex matcher (ColumnsRegexpMatcher in explain).
 // When Columns is set, it's a list matcher (ColumnsListMatcher in explain).
 type ColumnsMatcher struct {
-	Position  token.Position `json:"-"`
-	Pattern   string         `json:"pattern,omitempty"`
-	Columns   []Expression   `json:"columns,omitempty"` // For COLUMNS(id, name) syntax
-	Except    []string       `json:"except,omitempty"`
-	Qualifier string         `json:"qualifier,omitempty"` // For qualified matchers like table.COLUMNS(...)
+	Position     token.Position       `json:"-"`
+	Pattern      string               `json:"pattern,omitempty"`
+	Columns      []Expression         `json:"columns,omitempty"`      // For COLUMNS(id, name) syntax
+	Except       []string             `json:"except,omitempty"`       // for EXCEPT (col1, col2) - deprecated, use Transformers
+	Replace      []*ReplaceExpr       `json:"replace,omitempty"`      // for REPLACE (expr AS col) - deprecated, use Transformers
+	Apply        []string             `json:"apply,omitempty"`        // for APPLY (func1) APPLY(func2) - deprecated, use Transformers
+	Qualifier    string               `json:"qualifier,omitempty"`    // For qualified matchers like table.COLUMNS(...)
+	Transformers []*ColumnTransformer `json:"transformers,omitempty"` // ordered list of transformers
 }
 
 func (c *ColumnsMatcher) Pos() token.Position { return c.Position }

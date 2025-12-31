@@ -407,21 +407,30 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	case token.ARROW:
 		return p.parseLambda(left)
 	case token.EXCEPT:
-		// Handle * EXCEPT (col1, col2)
+		// Handle * EXCEPT (col1, col2) or COLUMNS(...) EXCEPT (col1, col2)
 		if asterisk, ok := left.(*ast.Asterisk); ok {
 			return p.parseAsteriskExcept(asterisk)
 		}
+		if matcher, ok := left.(*ast.ColumnsMatcher); ok {
+			return p.parseColumnsExcept(matcher)
+		}
 		return left
 	case token.REPLACE:
-		// Handle * REPLACE (expr AS col)
+		// Handle * REPLACE (expr AS col) or COLUMNS(...) REPLACE (expr AS col)
 		if asterisk, ok := left.(*ast.Asterisk); ok {
 			return p.parseAsteriskReplace(asterisk)
 		}
+		if matcher, ok := left.(*ast.ColumnsMatcher); ok {
+			return p.parseColumnsReplace(matcher)
+		}
 		return left
 	case token.APPLY:
-		// Handle * APPLY (func) or * APPLY func
+		// Handle * APPLY (func) or COLUMNS(...) APPLY(func)
 		if asterisk, ok := left.(*ast.Asterisk); ok {
 			return p.parseAsteriskApply(asterisk)
+		}
+		if matcher, ok := left.(*ast.ColumnsMatcher); ok {
+			return p.parseColumnsApply(matcher)
 		}
 		return left
 	case token.NUMBER:
@@ -2208,22 +2217,8 @@ func (p *Parser) parseColumnsMatcher() ast.Expression {
 
 	p.expect(token.RPAREN)
 
-	// Handle EXCEPT
-	if p.currentIs(token.EXCEPT) {
-		p.nextToken()
-		if p.expect(token.LPAREN) {
-			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-				if p.currentIs(token.IDENT) {
-					matcher.Except = append(matcher.Except, p.current.Value)
-					p.nextToken()
-				}
-				if p.currentIs(token.COMMA) {
-					p.nextToken()
-				}
-			}
-			p.expect(token.RPAREN)
-		}
-	}
+	// EXCEPT, REPLACE, and APPLY are now handled via infix parsing
+	// to preserve transformer ordering
 
 	return matcher
 }
@@ -2260,22 +2255,8 @@ func (p *Parser) parseQualifiedColumnsMatcher(qualifier string, pos token.Positi
 
 	p.expect(token.RPAREN)
 
-	// Handle EXCEPT
-	if p.currentIs(token.EXCEPT) {
-		p.nextToken()
-		if p.expect(token.LPAREN) {
-			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-				if p.currentIs(token.IDENT) {
-					matcher.Except = append(matcher.Except, p.current.Value)
-					p.nextToken()
-				}
-				if p.currentIs(token.COMMA) {
-					p.nextToken()
-				}
-			}
-			p.expect(token.RPAREN)
-		}
-	}
+	// EXCEPT, REPLACE, and APPLY are now handled via infix parsing
+	// to preserve transformer ordering
 
 	return matcher
 }
@@ -2401,6 +2382,7 @@ func (p *Parser) parseKeywordAsIdentifier() ast.Expression {
 }
 
 func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
+	pos := p.current.Pos
 	p.nextToken() // skip EXCEPT
 
 	// EXCEPT can have optional parentheses: * EXCEPT (col1, col2) or * EXCEPT col
@@ -2409,9 +2391,11 @@ func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
 		p.nextToken() // skip (
 	}
 
+	var exceptCols []string
 	// Parse column names (can be IDENT or keywords)
 	for {
 		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			exceptCols = append(exceptCols, p.current.Value)
 			asterisk.Except = append(asterisk.Except, p.current.Value)
 			p.nextToken()
 		}
@@ -2423,6 +2407,14 @@ func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
 		}
 	}
 
+	if len(exceptCols) > 0 {
+		asterisk.Transformers = append(asterisk.Transformers, &ast.ColumnTransformer{
+			Position: pos,
+			Type:     "except",
+			Except:   exceptCols,
+		})
+	}
+
 	if hasParens {
 		p.expect(token.RPAREN)
 	}
@@ -2431,6 +2423,7 @@ func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
 }
 
 func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
+	pos := p.current.Pos
 	p.nextToken() // skip REPLACE
 
 	// REPLACE can have optional parentheses: REPLACE (expr AS col) or REPLACE expr AS col
@@ -2439,6 +2432,7 @@ func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 		p.nextToken()
 	}
 
+	var replaces []*ast.ReplaceExpr
 	for {
 		// Stop conditions based on context
 		if hasParens && p.currentIs(token.RPAREN) {
@@ -2466,6 +2460,7 @@ func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 		}
 
 		asterisk.Replace = append(asterisk.Replace, replace)
+		replaces = append(replaces, replace)
 
 		if p.currentIs(token.COMMA) {
 			p.nextToken()
@@ -2478,6 +2473,14 @@ func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 		}
 	}
 
+	if len(replaces) > 0 {
+		asterisk.Transformers = append(asterisk.Transformers, &ast.ColumnTransformer{
+			Position: pos,
+			Type:     "replace",
+			Replaces: replaces,
+		})
+	}
+
 	if hasParens {
 		p.expect(token.RPAREN)
 	}
@@ -2486,6 +2489,7 @@ func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 }
 
 func (p *Parser) parseAsteriskApply(asterisk *ast.Asterisk) ast.Expression {
+	pos := p.current.Pos
 	p.nextToken() // skip APPLY
 
 	// APPLY can have optional parentheses: * APPLY(func) or * APPLY func
@@ -2496,7 +2500,13 @@ func (p *Parser) parseAsteriskApply(asterisk *ast.Asterisk) ast.Expression {
 
 	// Parse function name (can be IDENT or keyword like sum, avg, etc.)
 	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-		asterisk.Apply = append(asterisk.Apply, p.current.Value)
+		funcName := p.current.Value
+		asterisk.Apply = append(asterisk.Apply, funcName)
+		asterisk.Transformers = append(asterisk.Transformers, &ast.ColumnTransformer{
+			Position: pos,
+			Type:     "apply",
+			Apply:    funcName,
+		})
 		p.nextToken()
 	}
 
@@ -2505,4 +2515,146 @@ func (p *Parser) parseAsteriskApply(asterisk *ast.Asterisk) ast.Expression {
 	}
 
 	return asterisk
+}
+
+func (p *Parser) parseColumnsApply(matcher *ast.ColumnsMatcher) ast.Expression {
+	pos := p.current.Pos
+	p.nextToken() // skip APPLY
+
+	// APPLY can have optional parentheses: COLUMNS(...) APPLY(func) or COLUMNS(...) APPLY func
+	hasParens := p.currentIs(token.LPAREN)
+	if hasParens {
+		p.nextToken() // skip (
+	}
+
+	// Parse function name (can be IDENT or keyword like sum, avg, etc.)
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		funcName := p.current.Value
+		matcher.Apply = append(matcher.Apply, funcName)
+		matcher.Transformers = append(matcher.Transformers, &ast.ColumnTransformer{
+			Position: pos,
+			Type:     "apply",
+			Apply:    funcName,
+		})
+		p.nextToken()
+	}
+
+	if hasParens {
+		p.expect(token.RPAREN)
+	}
+
+	return matcher
+}
+
+func (p *Parser) parseColumnsExcept(matcher *ast.ColumnsMatcher) ast.Expression {
+	pos := p.current.Pos
+	p.nextToken() // skip EXCEPT
+
+	// EXCEPT can have optional parentheses: COLUMNS(...) EXCEPT (col1, col2) or COLUMNS(...) EXCEPT col
+	hasParens := p.currentIs(token.LPAREN)
+	if hasParens {
+		p.nextToken() // skip (
+	}
+
+	var exceptCols []string
+	// Parse column names (can be IDENT or keywords)
+	for {
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			exceptCols = append(exceptCols, p.current.Value)
+			matcher.Except = append(matcher.Except, p.current.Value)
+			p.nextToken()
+		}
+
+		if hasParens && p.currentIs(token.COMMA) {
+			p.nextToken()
+		} else {
+			break
+		}
+	}
+
+	if len(exceptCols) > 0 {
+		matcher.Transformers = append(matcher.Transformers, &ast.ColumnTransformer{
+			Position: pos,
+			Type:     "except",
+			Except:   exceptCols,
+		})
+	}
+
+	if hasParens {
+		p.expect(token.RPAREN)
+	}
+
+	return matcher
+}
+
+func (p *Parser) parseColumnsReplace(matcher *ast.ColumnsMatcher) ast.Expression {
+	pos := p.current.Pos
+	p.nextToken() // skip REPLACE
+
+	// Check for STRICT modifier
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STRICT" {
+		p.nextToken()
+	}
+
+	// REPLACE can have optional parentheses: REPLACE (expr AS col) or REPLACE expr AS col
+	hasParens := p.currentIs(token.LPAREN)
+	if hasParens {
+		p.nextToken()
+	}
+
+	var replaces []*ast.ReplaceExpr
+	for {
+		// Stop conditions based on context
+		if hasParens && p.currentIs(token.RPAREN) {
+			break
+		}
+		if !hasParens && (p.currentIs(token.FROM) || p.currentIs(token.WHERE) || p.currentIs(token.EOF) ||
+			p.currentIs(token.GROUP) || p.currentIs(token.ORDER) || p.currentIs(token.HAVING) ||
+			p.currentIs(token.LIMIT) || p.currentIs(token.SETTINGS) || p.currentIs(token.FORMAT) ||
+			p.currentIs(token.UNION) || p.currentIs(token.EXCEPT) || p.currentIs(token.COMMA) ||
+			p.currentIs(token.APPLY)) {
+			break
+		}
+
+		replace := &ast.ReplaceExpr{
+			Position: p.current.Pos,
+		}
+
+		replace.Expr = p.parseExpression(ALIAS_PREC)
+
+		if p.currentIs(token.AS) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) {
+				replace.Name = p.current.Value
+				p.nextToken()
+			}
+		}
+
+		matcher.Replace = append(matcher.Replace, replace)
+		replaces = append(replaces, replace)
+
+		if p.currentIs(token.COMMA) {
+			p.nextToken()
+			// If no parens and we see comma, might be end of select column
+			if !hasParens {
+				break
+			}
+		} else if !hasParens {
+			break
+		}
+	}
+
+	if len(replaces) > 0 {
+		matcher.Transformers = append(matcher.Transformers, &ast.ColumnTransformer{
+			Position: pos,
+			Type:     "replace",
+			Replaces: replaces,
+		})
+	}
+
+	if hasParens {
+		p.expect(token.RPAREN)
+	}
+
+	return matcher
 }
