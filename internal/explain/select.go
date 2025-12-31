@@ -129,16 +129,31 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 	if n.Offset != nil {
 		Node(sb, n.Offset, depth+1)
 	}
-	// LIMIT
-	if n.Limit != nil {
-		Node(sb, n.Limit, depth+1)
-	}
-	// LIMIT BY - only output when there's no ORDER BY and no second LIMIT (matches ClickHouse behavior)
-	if len(n.LimitBy) > 0 && len(n.OrderBy) == 0 && !n.LimitByHasLimit {
+	// LIMIT BY handling
+	if n.LimitByLimit != nil {
+		// Case: LIMIT n BY x LIMIT m -> output LimitByLimit, LimitBy, Limit
+		Node(sb, n.LimitByLimit, depth+1)
+		if len(n.LimitBy) > 0 {
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.LimitBy))
+			for _, expr := range n.LimitBy {
+				Node(sb, expr, depth+2)
+			}
+		}
+		if n.Limit != nil {
+			Node(sb, n.Limit, depth+1)
+		}
+	} else if len(n.LimitBy) > 0 {
+		// Case: LIMIT n BY x (no second LIMIT) -> output Limit, then LimitBy
+		if n.Limit != nil {
+			Node(sb, n.Limit, depth+1)
+		}
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.LimitBy))
 		for _, expr := range n.LimitBy {
 			Node(sb, expr, depth+2)
 		}
+	} else if n.Limit != nil {
+		// Case: plain LIMIT n (no BY)
+		Node(sb, n.Limit, depth+1)
 	}
 	// SETTINGS is output at SelectQuery level only when NOT after FORMAT
 	// When SettingsAfterFormat is true, it's output at SelectWithUnionQuery level instead
@@ -303,10 +318,13 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 	if len(n.OrderBy) > 0 {
 		count++
 	}
+	if n.LimitByLimit != nil {
+		count++ // LIMIT n in "LIMIT n BY x LIMIT m"
+	}
 	if n.Limit != nil {
 		count++
 	}
-	if len(n.LimitBy) > 0 && len(n.OrderBy) == 0 && !n.LimitByHasLimit {
+	if len(n.LimitBy) > 0 {
 		count++
 	}
 	if n.Offset != nil {

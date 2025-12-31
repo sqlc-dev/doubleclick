@@ -73,6 +73,7 @@ type SelectQuery struct {
 	OrderBy     []*OrderByElement     `json:"order_by,omitempty"`
 	Limit            Expression            `json:"limit,omitempty"`
 	LimitBy          []Expression          `json:"limit_by,omitempty"`
+	LimitByLimit     Expression            `json:"limit_by_limit,omitempty"`     // LIMIT value before BY (e.g., LIMIT 1 BY x LIMIT 3)
 	LimitByHasLimit  bool                  `json:"limit_by_has_limit,omitempty"` // true if LIMIT BY was followed by another LIMIT
 	Offset           Expression            `json:"offset,omitempty"`
 	Settings           []*SettingExpr        `json:"settings,omitempty"`

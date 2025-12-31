@@ -546,6 +546,8 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			// After LIMIT BY, there can be another LIMIT for overall output
 			if p.currentIs(token.LIMIT) {
 				p.nextToken()
+				// Save the LIMIT BY limit value (e.g., LIMIT 1 BY x -> LimitByLimit=1)
+				sel.LimitByLimit = sel.Limit
 				sel.Limit = p.parseExpression(LOWEST)
 				sel.LimitByHasLimit = true
 			}
@@ -565,6 +567,20 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		// Skip optional ROWS keyword
 		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROWS" {
 			p.nextToken()
+		}
+		// LIMIT n OFFSET m BY expr syntax - handle BY after OFFSET
+		if p.currentIs(token.BY) && sel.Limit != nil && len(sel.LimitBy) == 0 {
+			p.nextToken()
+			// Parse LIMIT BY expressions
+			for !p.isEndOfExpression() {
+				expr := p.parseExpression(LOWEST)
+				sel.LimitBy = append(sel.LimitBy, expr)
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
 		}
 	}
 
