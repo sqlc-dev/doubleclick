@@ -294,6 +294,9 @@ func NormalizeFunctionName(name string) string {
 		"greatest":   "greatest",
 		"least":      "least",
 		"concat_ws":  "concat",
+		// SQL standard ANY/ALL subquery operators
+		"anymatch":   "in",
+		"allmatch":   "notIn",
 	}
 	if n, ok := normalized[strings.ToLower(name)]; ok {
 		return n
