@@ -286,8 +286,11 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 			}
 			p.nextToken() // skip INTERSECT/EXCEPT
 
-			// Handle DISTINCT if present (ALL case is handled in the loop condition)
-			if p.currentIs(token.DISTINCT) {
+			// Handle ALL or DISTINCT if present
+			if p.currentIs(token.ALL) {
+				op += " ALL"
+				p.nextToken()
+			} else if p.currentIs(token.DISTINCT) {
 				op += " DISTINCT"
 				p.nextToken()
 			}
@@ -403,8 +406,11 @@ func (p *Parser) parseIntersectExceptWithFirstOperand(unionQuery *ast.SelectWith
 		}
 		p.nextToken() // skip INTERSECT/EXCEPT
 
-		// Handle DISTINCT if present
-		if p.currentIs(token.DISTINCT) {
+		// Handle ALL or DISTINCT if present
+		if p.currentIs(token.ALL) {
+			op += " ALL"
+			p.nextToken()
+		} else if p.currentIs(token.DISTINCT) {
 			op += " DISTINCT"
 			p.nextToken()
 		}
@@ -500,21 +506,14 @@ func (p *Parser) parseSelectWithUnionOnly() ast.Statement {
 
 // isIntersectExceptWithWrapper checks if the current token is INTERSECT or EXCEPT
 // that should use a SelectIntersectExceptQuery wrapper.
-// Only INTERSECT ALL and EXCEPT ALL are flattened (no wrapper).
-// INTERSECT DISTINCT, INTERSECT, EXCEPT DISTINCT, and EXCEPT all use the wrapper.
+// All INTERSECT and EXCEPT variants (including ALL and DISTINCT) use the wrapper.
 func (p *Parser) isIntersectExceptWithWrapper() bool {
-	if !p.currentIs(token.EXCEPT) && !p.currentIs(token.INTERSECT) {
-		return false
-	}
-	// INTERSECT ALL and EXCEPT ALL are flattened (no wrapper)
-	// All other cases (DISTINCT or no modifier) use the wrapper
-	nextTok := p.peek.Token
-	return nextTok != token.ALL
+	return p.currentIs(token.EXCEPT) || p.currentIs(token.INTERSECT)
 }
 
 // isIntersectOp checks if the operator is an INTERSECT variant (not EXCEPT)
 func isIntersectOp(op string) bool {
-	return op == "INTERSECT" || op == "INTERSECT DISTINCT"
+	return strings.HasPrefix(op, "INTERSECT")
 }
 
 // buildIntersectExceptTree builds the AST tree respecting operator precedence.

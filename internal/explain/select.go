@@ -13,7 +13,7 @@ func explainSelectIntersectExceptQuery(sb *strings.Builder, n *ast.SelectInterse
 	// ClickHouse wraps first operand in SelectWithUnionQuery when EXCEPT is present
 	hasExcept := false
 	for _, op := range n.Operators {
-		if op == "EXCEPT" {
+		if strings.HasPrefix(op, "EXCEPT") {
 			hasExcept = true
 			break
 		}
