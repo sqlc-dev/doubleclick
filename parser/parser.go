@@ -260,17 +260,14 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 	// Check if this is INTERSECT/EXCEPT that needs SelectIntersectExceptQuery wrapper
 	// Only INTERSECT ALL and EXCEPT ALL are treated like UNION ALL (flattened into ExpressionList)
 	if p.isIntersectExceptWithWrapper() {
-		intersectExcept := &ast.SelectIntersectExceptQuery{
-			Position: p.current.Pos,
-		}
-		// Add first item
-		if firstWasParenthesized {
-			intersectExcept.Selects = append(intersectExcept.Selects, firstItem)
-		} else {
-			intersectExcept.Selects = append(intersectExcept.Selects, firstItem)
-		}
+		// Collect all operands and operators first, then apply precedence
+		// INTERSECT has higher precedence than EXCEPT
 
-		// Parse INTERSECT/EXCEPT clauses (those that need wrapper)
+		// Start with first operand (statements list) and operators list
+		stmts := []ast.Statement{firstItem}
+		var ops []string
+
+		// Parse all INTERSECT/EXCEPT clauses and collect them
 		for p.isIntersectExceptWithWrapper() {
 			// Record the operator type
 			var op string
@@ -286,9 +283,10 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 				op += " DISTINCT"
 				p.nextToken()
 			}
-			intersectExcept.Operators = append(intersectExcept.Operators, op)
+			ops = append(ops, op)
 
 			// Parse the next select
+			var nextStmt ast.Statement
 			if p.currentIs(token.LPAREN) {
 				p.nextToken() // skip (
 				nested := p.parseSelectWithUnion()
@@ -296,17 +294,21 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 					break
 				}
 				p.expect(token.RPAREN)
-				intersectExcept.Selects = append(intersectExcept.Selects, nested)
+				nextStmt = nested
 			} else {
 				sel := p.parseSelect()
 				if sel == nil {
 					break
 				}
-				intersectExcept.Selects = append(intersectExcept.Selects, sel)
+				nextStmt = sel
 			}
+			stmts = append(stmts, nextStmt)
 		}
 
-		query.Selects = append(query.Selects, intersectExcept)
+		// Now apply precedence: INTERSECT binds tighter than EXCEPT
+		result := buildIntersectExceptTree(stmts, ops)
+
+		query.Selects = append(query.Selects, result)
 		return query
 	}
 
@@ -380,6 +382,87 @@ func (p *Parser) isIntersectExceptWithWrapper() bool {
 	// All other cases (DISTINCT or no modifier) use the wrapper
 	nextTok := p.peek.Token
 	return nextTok != token.ALL
+}
+
+// isIntersectOp checks if the operator is an INTERSECT variant (not EXCEPT)
+func isIntersectOp(op string) bool {
+	return op == "INTERSECT" || op == "INTERSECT DISTINCT"
+}
+
+// buildIntersectExceptTree builds the AST tree respecting operator precedence.
+// INTERSECT has higher precedence than EXCEPT, so:
+// "a EXCEPT b INTERSECT c" becomes "a EXCEPT (b INTERSECT c)"
+// "a INTERSECT b EXCEPT c" becomes "(a INTERSECT b) EXCEPT c"
+//
+// EXCEPT is left-associative and creates binary trees:
+// "a EXCEPT b EXCEPT c" becomes "((a) EXCEPT b) EXCEPT c"
+//
+// stmts has n elements, ops has n-1 elements where ops[i] is the operator between stmts[i] and stmts[i+1]
+func buildIntersectExceptTree(stmts []ast.Statement, ops []string) ast.Statement {
+	if len(stmts) == 1 {
+		return stmts[0]
+	}
+
+	// First pass: group consecutive INTERSECT operations (higher precedence)
+	// Result will be a list of statements/groups connected by EXCEPT operators
+	var groups []ast.Statement
+	var exceptOps []string
+
+	i := 0
+	for i < len(stmts) {
+		// Start a new group with stmts[i]
+		groupStmts := []ast.Statement{stmts[i]}
+		var groupOps []string
+
+		// Collect consecutive INTERSECTs - look at the operator AFTER the current statement
+		for i < len(ops) && isIntersectOp(ops[i]) {
+			groupOps = append(groupOps, ops[i])
+			i++
+			groupStmts = append(groupStmts, stmts[i])
+		}
+
+		// Create the group
+		var groupStmt ast.Statement
+		if len(groupStmts) == 1 {
+			// Single statement, no grouping needed
+			groupStmt = groupStmts[0]
+		} else {
+			// Multiple statements connected by INTERSECT
+			groupStmt = &ast.SelectIntersectExceptQuery{
+				Selects:   groupStmts,
+				Operators: groupOps,
+			}
+		}
+		groups = append(groups, groupStmt)
+
+		// Check if there's an EXCEPT connecting to the next group
+		if i < len(ops) && !isIntersectOp(ops[i]) {
+			exceptOps = append(exceptOps, ops[i])
+			i++ // Move past the EXCEPT operator to start next group
+		} else if i < len(stmts)-1 {
+			// No more operators but still have stmts - shouldn't happen with valid input
+			i++
+		} else {
+			// We've processed all statements
+			break
+		}
+	}
+
+	// Now all groups are connected by EXCEPT - build the final tree
+	if len(groups) == 1 {
+		return groups[0]
+	}
+
+	// Build left-associative binary tree for EXCEPT operations
+	// "a EXCEPT b EXCEPT c" becomes "((a) EXCEPT b) EXCEPT c"
+	result := groups[0]
+	for j := 0; j < len(exceptOps); j++ {
+		result = &ast.SelectIntersectExceptQuery{
+			Selects:   []ast.Statement{result, groups[j+1]},
+			Operators: []string{exceptOps[j]},
+		}
+	}
+	return result
 }
 
 func (p *Parser) parseSelect() *ast.SelectQuery {
