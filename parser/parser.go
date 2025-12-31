@@ -3065,10 +3065,12 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 		return nil
 	}
 
-	// Check if next token is DEFAULT/MATERIALIZED/ALIAS (type omitted)
-	// These keywords indicate the type is omitted and we go straight to default expression
-	if p.currentIs(token.DEFAULT) || p.currentIs(token.MATERIALIZED) || p.currentIs(token.ALIAS) {
-		// Type is omitted, skip to default parsing below
+	// Check if next token indicates type is omitted
+	// DEFAULT/MATERIALIZED/ALIAS indicate we go straight to default expression
+	// CODEC indicates we go straight to codec specification (no type)
+	isCodec := p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CODEC"
+	if p.currentIs(token.DEFAULT) || p.currentIs(token.MATERIALIZED) || p.currentIs(token.ALIAS) || isCodec {
+		// Type is omitted, skip to parsing below
 	} else {
 		// Parse data type
 		col.Type = p.parseDataType()
