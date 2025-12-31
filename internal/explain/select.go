@@ -100,7 +100,13 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 	if len(n.GroupBy) > 0 {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.GroupBy))
 		for _, g := range n.GroupBy {
-			Node(sb, g, depth+2)
+			if n.GroupingSets {
+				// Each grouping set is wrapped in an ExpressionList
+				fmt.Fprintf(sb, "%s  ExpressionList (children 1)\n", indent)
+				Node(sb, g, depth+3)
+			} else {
+				Node(sb, g, depth+2)
+			}
 		}
 	}
 	// HAVING

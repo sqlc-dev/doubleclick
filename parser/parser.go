@@ -534,6 +534,7 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			p.nextToken() // skip GROUPING
 			p.nextToken() // skip SETS
 			sel.GroupBy = p.parseGroupingSets()
+			sel.GroupingSets = true
 		} else if p.currentIs(token.ROLLUP) && p.peekIs(token.LPAREN) {
 			// ROLLUP(a, b, c)
 			p.nextToken() // skip ROLLUP
