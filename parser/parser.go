@@ -2044,11 +2044,19 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 					create.Projections = append(create.Projections, proj)
 				}
 			} else if p.currentIs(token.CONSTRAINT) {
-				// Parse CONSTRAINT name CHECK (expression)
+				// Parse CONSTRAINT name CHECK/ASSUME (expression)
 				p.nextToken() // skip CONSTRAINT
 				constraintName := p.parseIdentifierName() // constraint name
 				if p.currentIs(token.CHECK) {
 					p.nextToken() // skip CHECK
+					constraint := &ast.Constraint{
+						Position:   p.current.Pos,
+						Name:       constraintName,
+						Expression: p.parseExpression(LOWEST),
+					}
+					create.Constraints = append(create.Constraints, constraint)
+				} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ASSUME" {
+					p.nextToken() // skip ASSUME
 					constraint := &ast.Constraint{
 						Position:   p.current.Pos,
 						Name:       constraintName,
