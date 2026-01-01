@@ -2513,6 +2513,11 @@ func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
 	pos := p.current.Pos
 	p.nextToken() // skip EXCEPT
 
+	// Check for STRICT modifier
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STRICT" {
+		p.nextToken()
+	}
+
 	// EXCEPT can have optional parentheses: * EXCEPT (col1, col2) or * EXCEPT col
 	hasParens := p.currentIs(token.LPAREN)
 	if hasParens {
@@ -2553,6 +2558,11 @@ func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
 func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 	pos := p.current.Pos
 	p.nextToken() // skip REPLACE
+
+	// Check for STRICT modifier
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STRICT" {
+		p.nextToken()
+	}
 
 	// REPLACE can have optional parentheses: REPLACE (expr AS col) or REPLACE expr AS col
 	hasParens := p.currentIs(token.LPAREN)
@@ -2695,6 +2705,11 @@ func (p *Parser) parseColumnsApply(matcher *ast.ColumnsMatcher) ast.Expression {
 func (p *Parser) parseColumnsExcept(matcher *ast.ColumnsMatcher) ast.Expression {
 	pos := p.current.Pos
 	p.nextToken() // skip EXCEPT
+
+	// Check for STRICT modifier
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STRICT" {
+		p.nextToken()
+	}
 
 	// EXCEPT can have optional parentheses: COLUMNS(...) EXCEPT (col1, col2) or COLUMNS(...) EXCEPT col
 	hasParens := p.currentIs(token.LPAREN)
