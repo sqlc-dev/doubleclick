@@ -530,6 +530,33 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 						needsFunctionFormat = true
 						break
 					}
+					// Check for CAST expressions - use Function array
+					if _, ok := expr.(*ast.CastExpr); ok {
+						needsFunctionFormat = true
+						break
+					}
+					// Check for binary expressions - use Function array
+					if _, ok := expr.(*ast.BinaryExpr); ok {
+						needsFunctionFormat = true
+						break
+					}
+					// Check for other non-literal expressions (skip arrays/tuples which are handled separately)
+					if lit, ok := expr.(*ast.Literal); !ok {
+						// Not a literal - check if it's a unary negation of a number (which is OK)
+						if unary, ok := expr.(*ast.UnaryExpr); ok && unary.Op == "-" {
+							if innerLit, ok := unary.Operand.(*ast.Literal); ok {
+								if innerLit.Type == ast.LiteralInteger || innerLit.Type == ast.LiteralFloat {
+									continue // Negated number is OK
+								}
+							}
+						}
+						needsFunctionFormat = true
+						break
+					} else if lit.Type != ast.LiteralArray && lit.Type != ast.LiteralTuple {
+						// Simple literal (not array/tuple) - OK
+						continue
+					}
+					// Arrays and tuples are handled by the earlier checks for nested arrays
 				}
 				// Also check for empty arrays at any depth within nested arrays
 				if hasNestedArrays && containsEmptyArraysRecursive(exprs) {
