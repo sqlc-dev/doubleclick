@@ -1132,13 +1132,10 @@ func (p *Parser) parseTableElementWithJoin() *ast.TablesInSelectQueryElement {
 	if p.currentIs(token.COMMA) {
 		p.nextToken()
 		elem.Table = p.parseTableExpression()
-		// ClickHouse adds an empty TableJoin node for comma joins, but only
-		// when the table is NOT a subquery (subqueries don't get TableJoin nodes)
+		// ClickHouse adds an empty TableJoin node for comma joins
 		if elem.Table != nil {
-			if _, isSubquery := elem.Table.Table.(*ast.Subquery); !isSubquery {
-				elem.Join = &ast.TableJoin{
-					Position: elem.Position,
-				}
+			elem.Join = &ast.TableJoin{
+				Position: elem.Position,
 			}
 		}
 		return elem
