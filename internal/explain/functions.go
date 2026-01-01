@@ -138,6 +138,22 @@ func handleSpecialFunction(sb *strings.Builder, n *ast.FunctionCall, alias strin
 		return handleDateDiff(sb, n, alias, indent, depth)
 	}
 
+	// TRIM functions with empty string as trim characters - simplify to just the string
+	// Only for SQL standard syntax: trim(LEADING '' FROM 'foo') -> just 'foo'
+	// Direct function calls like trimLeft('foo', '') are NOT simplified
+	if n.SQLStandard && (fnName == "TRIM" || fnName == "LTRIM" || fnName == "RTRIM" ||
+		fnName == "TRIMLEFT" || fnName == "TRIMRIGHT" || fnName == "TRIMBOTH") {
+		if len(n.Arguments) == 2 {
+			if lit, ok := n.Arguments[1].(*ast.Literal); ok {
+				if lit.Type == ast.LiteralString && lit.Value == "" {
+					// Trim with empty string is a no-op, just output the original string
+					Node(sb, n.Arguments[0], depth)
+					return true
+				}
+			}
+		}
+	}
+
 	return false
 }
 
@@ -480,8 +496,11 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 			if lit.Type == ast.LiteralArray || lit.Type == ast.LiteralTuple {
 				if useArrayFormat {
 					fmt.Fprintf(sb, "%s  Literal %s\n", indent, FormatLiteral(lit))
+				} else if containsCastExpressions(lit) {
+					// Array contains CastExpr elements - output as Function array with children
+					Node(sb, n.Expr, depth+2)
 				} else {
-					// Complex content - format as string
+					// Simple literals (including negative numbers) - format as string
 					exprStr := formatExprAsString(lit)
 					fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, exprStr)
 				}
@@ -489,8 +508,11 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 				// NULL stays as Literal NULL, not formatted as a string
 				fmt.Fprintf(sb, "%s  Literal NULL\n", indent)
 			} else {
-				// Simple literal - format as string
+				// Simple literal - format as string (escape special chars for string literals)
 				exprStr := formatExprAsString(lit)
+				if lit.Type == ast.LiteralString {
+					exprStr = escapeStringLiteral(exprStr)
+				}
 				fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, exprStr)
 			}
 		} else if negatedLit := extractNegatedLiteral(n.Expr); negatedLit != "" {
@@ -607,6 +629,37 @@ func containsBooleanElements(lit *ast.Literal) bool {
 		if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
 			if containsBooleanElements(innerLit) {
 				return true
+			}
+		}
+	}
+	return false
+}
+
+// containsCastExpressions checks if a literal array/tuple contains CastExpr elements at any level
+func containsCastExpressions(lit *ast.Literal) bool {
+	var exprs []ast.Expression
+	switch lit.Type {
+	case ast.LiteralArray, ast.LiteralTuple:
+		var ok bool
+		exprs, ok = lit.Value.([]ast.Expression)
+		if !ok {
+			return false
+		}
+	default:
+		return false
+	}
+
+	for _, e := range exprs {
+		// Check if this element is a CastExpr
+		if _, ok := e.(*ast.CastExpr); ok {
+			return true
+		}
+		// Check nested arrays/tuples
+		if innerLit, ok := e.(*ast.Literal); ok {
+			if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
+				if containsCastExpressions(innerLit) {
+					return true
+				}
 			}
 		}
 	}
@@ -828,18 +881,20 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 	// This happens when we have multiple literals of compatible types:
 	// - All numeric literals/expressions (integers/floats, including unary minus) + NULLs
 	// - All string literals + NULLs
+	// - All boolean literals + NULLs
 	// - All tuple literals that contain only primitive literals (recursively)
 	canBeTupleLiteral := false
 	if n.Query == nil && len(n.List) > 1 {
 		allNumericOrNull := true
 		allStringsOrNull := true
+		allBooleansOrNull := true
 		allTuples := true
 		allTuplesArePrimitive := true
 		hasNonNull := false // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
 				if lit.Type == ast.LiteralNull {
-					// NULL is compatible with both numeric and string lists
+					// NULL is compatible with all literal type lists
 					continue
 				}
 				hasNonNull = true
@@ -848,6 +903,9 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				}
 				if lit.Type != ast.LiteralString {
 					allStringsOrNull = false
+				}
+				if lit.Type != ast.LiteralBoolean {
+					allBooleansOrNull = false
 				}
 				if lit.Type != ast.LiteralTuple {
 					allTuples = false
@@ -861,16 +919,18 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				// Unary minus of numeric is still numeric
 				hasNonNull = true
 				allStringsOrNull = false
+				allBooleansOrNull = false
 				allTuples = false
 			} else {
 				allNumericOrNull = false
 				allStringsOrNull = false
+				allBooleansOrNull = false
 				allTuples = false
 				break
 			}
 		}
 		// For tuples, only combine if all contain primitive literals
-		canBeTupleLiteral = hasNonNull && (allNumericOrNull || allStringsOrNull || (allTuples && allTuplesArePrimitive))
+		canBeTupleLiteral = hasNonNull && (allNumericOrNull || allStringsOrNull || allBooleansOrNull || (allTuples && allTuplesArePrimitive))
 	}
 
 	// Count arguments: expr + list items or subquery
@@ -990,13 +1050,14 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 	if n.Query == nil && len(n.List) > 1 {
 		allNumericOrNull := true
 		allStringsOrNull := true
+		allBooleansOrNull := true
 		allTuples := true
 		allTuplesArePrimitive := true
 		hasNonNull := false // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
 				if lit.Type == ast.LiteralNull {
-					// NULL is compatible with both numeric and string lists
+					// NULL is compatible with all literal type lists
 					continue
 				}
 				hasNonNull = true
@@ -1005,6 +1066,9 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 				}
 				if lit.Type != ast.LiteralString {
 					allStringsOrNull = false
+				}
+				if lit.Type != ast.LiteralBoolean {
+					allBooleansOrNull = false
 				}
 				if lit.Type != ast.LiteralTuple {
 					allTuples = false
@@ -1016,15 +1080,17 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 			} else if isNumericExpr(item) {
 				hasNonNull = true
 				allStringsOrNull = false
+				allBooleansOrNull = false
 				allTuples = false
 			} else {
 				allNumericOrNull = false
 				allStringsOrNull = false
+				allBooleansOrNull = false
 				allTuples = false
 				break
 			}
 		}
-		canBeTupleLiteral = hasNonNull && (allNumericOrNull || (allStringsOrNull && len(n.List) <= maxStringTupleSizeWithAlias) || (allTuples && allTuplesArePrimitive))
+		canBeTupleLiteral = hasNonNull && (allNumericOrNull || (allStringsOrNull && len(n.List) <= maxStringTupleSizeWithAlias) || allBooleansOrNull || (allTuples && allTuplesArePrimitive))
 	}
 
 	// Count arguments

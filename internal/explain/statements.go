@@ -260,8 +260,18 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		}
 		// Output inline PRIMARY KEY (from column list)
 		if len(n.ColumnsPrimaryKey) > 0 {
-			for _, pk := range n.ColumnsPrimaryKey {
-				Node(sb, pk, depth+2)
+			if len(n.ColumnsPrimaryKey) > 1 {
+				// Multiple columns: wrap in Function tuple
+				fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
+				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.ColumnsPrimaryKey))
+				for _, pk := range n.ColumnsPrimaryKey {
+					Node(sb, pk, depth+4)
+				}
+			} else {
+				// Single column: output directly
+				for _, pk := range n.ColumnsPrimaryKey {
+					Node(sb, pk, depth+2)
+				}
 			}
 		}
 	}
@@ -561,24 +571,30 @@ func explainRenameQuery(sb *strings.Builder, n *ast.RenameQuery, indent string, 
 		fmt.Fprintf(sb, "%s*ast.RenameQuery\n", indent)
 		return
 	}
-	// Count identifiers: 4 per pair (from_db, from_table, to_db, to_table)
-	children := len(n.Pairs) * 4
+	// Count identifiers: 2 per pair if no database, 4 per pair if databases specified
+	children := 0
+	for _, pair := range n.Pairs {
+		if pair.FromDatabase != "" {
+			children++
+		}
+		children++ // from table
+		if pair.ToDatabase != "" {
+			children++
+		}
+		children++ // to table
+	}
 	fmt.Fprintf(sb, "%sRename (children %d)\n", indent, children)
 	for _, pair := range n.Pairs {
-		// From database
-		fromDB := pair.FromDatabase
-		if fromDB == "" {
-			fromDB = "default"
+		// From database (only if specified)
+		if pair.FromDatabase != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, pair.FromDatabase)
 		}
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, fromDB)
 		// From table
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, pair.FromTable)
-		// To database
-		toDB := pair.ToDatabase
-		if toDB == "" {
-			toDB = "default"
+		// To database (only if specified)
+		if pair.ToDatabase != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, pair.ToDatabase)
 		}
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, toDB)
 		// To table
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, pair.ToTable)
 	}
@@ -633,6 +649,10 @@ func explainSystemQuery(sb *strings.Builder, n *ast.SystemQuery, indent string) 
 		if n.Table != "" {
 			children++
 		}
+		// For commands that need duplicate output, double the count
+		if n.DuplicateTableOutput && children > 0 {
+			children *= 2
+		}
 	}
 	if children > 0 {
 		fmt.Fprintf(sb, "%sSYSTEM query (children %d)\n", indent, children)
@@ -641,6 +661,15 @@ func explainSystemQuery(sb *strings.Builder, n *ast.SystemQuery, indent string) 
 		}
 		if n.Table != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		}
+		// Output again for duplicate commands
+		if n.DuplicateTableOutput {
+			if n.Database != "" {
+				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+			}
+			if n.Table != "" {
+				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+			}
 		}
 	} else {
 		fmt.Fprintf(sb, "%sSYSTEM query\n", indent)
@@ -1000,7 +1029,7 @@ func explainExistsTableQuery(sb *strings.Builder, n *ast.ExistsQuery, indent str
 	}
 
 	// For TABLE/DICTIONARY/VIEW, show database and object name
-	name := n.Table
+	name := " " + n.Table // Prefix with space for alignment (where database would be)
 	children := 1
 	if n.Database != "" {
 		name = n.Database + " " + n.Table
@@ -1051,7 +1080,11 @@ func explainNameTypePair(sb *strings.Builder, n *ast.NameTypePair, indent string
 
 func explainParameter(sb *strings.Builder, n *ast.Parameter, indent string) {
 	if n.Name != "" {
-		fmt.Fprintf(sb, "%sQueryParameter %s\n", indent, n.Name)
+		if n.Type != nil {
+			fmt.Fprintf(sb, "%sQueryParameter %s:%s\n", indent, n.Name, FormatDataType(n.Type))
+		} else {
+			fmt.Fprintf(sb, "%sQueryParameter %s\n", indent, n.Name)
+		}
 	} else {
 		fmt.Fprintf(sb, "%sQueryParameter\n", indent)
 	}
@@ -1082,29 +1115,98 @@ func explainDetachQuery(sb *strings.Builder, n *ast.DetachQuery, indent string) 
 	fmt.Fprintf(sb, "%sDetachQuery\n", indent)
 }
 
-func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string) {
-	// Check for database-qualified table name
+func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, depth int) {
+	// Count children: identifier + columns definition (if any) + storage definition (if any)
+	children := 1 // table/database identifier
 	if n.Database != "" && n.Table != "" {
-		// Database-qualified: AttachQuery db table (children 2)
-		fmt.Fprintf(sb, "%sAttachQuery %s %s (children 2)\n", indent, n.Database, n.Table)
+		children++ // extra identifier for database
+	}
+	hasColumns := len(n.Columns) > 0 || len(n.ColumnsPrimaryKey) > 0
+	if hasColumns {
+		children++
+	}
+	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0
+	if hasStorage {
+		children++
+	}
+
+	// Output header
+	if n.Database != "" && n.Table != "" {
+		fmt.Fprintf(sb, "%sAttachQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
-		return
-	}
-	// ATTACH DATABASE db: Database set, Table empty -> "AttachQuery db  (children 1)"
-	if n.Database != "" && n.Table == "" {
-		fmt.Fprintf(sb, "%sAttachQuery %s  (children 1)\n", indent, n.Database)
+	} else if n.Database != "" && n.Table == "" {
+		fmt.Fprintf(sb, "%sAttachQuery %s  (children %d)\n", indent, n.Database, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
-		return
-	}
-	// ATTACH TABLE table: Database empty, Table set -> "AttachQuery table (children 1)" (single space)
-	if n.Table != "" {
-		fmt.Fprintf(sb, "%sAttachQuery %s (children 1)\n", indent, n.Table)
+	} else if n.Table != "" {
+		fmt.Fprintf(sb, "%sAttachQuery %s (children %d)\n", indent, n.Table, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+	} else {
+		fmt.Fprintf(sb, "%sAttachQuery\n", indent)
 		return
 	}
-	// No name
-	fmt.Fprintf(sb, "%sAttachQuery\n", indent)
+
+	// Output columns definition
+	if hasColumns {
+		columnsChildren := 0
+		if len(n.Columns) > 0 {
+			columnsChildren++
+		}
+		if len(n.ColumnsPrimaryKey) > 0 {
+			columnsChildren++
+		}
+		fmt.Fprintf(sb, "%s Columns definition (children %d)\n", indent, columnsChildren)
+		if len(n.Columns) > 0 {
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Columns))
+			for _, col := range n.Columns {
+				Column(sb, col, depth+3)
+			}
+		}
+		// Output inline PRIMARY KEY (from column list)
+		if len(n.ColumnsPrimaryKey) > 0 {
+			if len(n.ColumnsPrimaryKey) > 1 {
+				// Multiple columns: wrap in Function tuple
+				fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
+				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.ColumnsPrimaryKey))
+				for _, pk := range n.ColumnsPrimaryKey {
+					Node(sb, pk, depth+4)
+				}
+			} else {
+				// Single column: output directly
+				for _, pk := range n.ColumnsPrimaryKey {
+					Node(sb, pk, depth+2)
+				}
+			}
+		}
+	}
+
+	// Output storage definition
+	if hasStorage {
+		storageChildren := 0
+		if n.Engine != nil {
+			storageChildren++
+		}
+		if len(n.OrderBy) > 0 {
+			storageChildren++
+		}
+		if len(n.PrimaryKey) > 0 {
+			storageChildren++
+		}
+		fmt.Fprintf(sb, "%s Storage definition (children %d)\n", indent, storageChildren)
+		if n.Engine != nil {
+			fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
+		}
+		if len(n.OrderBy) > 0 {
+			for _, expr := range n.OrderBy {
+				Node(sb, expr, depth+2)
+			}
+		}
+		if len(n.PrimaryKey) > 0 {
+			for _, expr := range n.PrimaryKey {
+				Node(sb, expr, depth+2)
+			}
+		}
+	}
 }
 
 func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, depth int) {
@@ -1138,11 +1240,11 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
-	if len(n.Settings) > 0 {
-		fmt.Fprintf(sb, "%s Set\n", indent)
-	}
 	if hasFormat {
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+	}
+	if len(n.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
 
@@ -1165,7 +1267,11 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	if cmdType == ast.AlterDeleteWhere {
 		cmdType = "DELETE"
 	}
-	fmt.Fprintf(sb, "%sAlterCommand %s (children %d)\n", indent, cmdType, children)
+	if children > 0 {
+		fmt.Fprintf(sb, "%sAlterCommand %s (children %d)\n", indent, cmdType, children)
+	} else {
+		fmt.Fprintf(sb, "%sAlterCommand %s\n", indent, cmdType)
+	}
 
 	switch cmd.Type {
 	case ast.AlterAddColumn:
@@ -1239,6 +1345,15 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
 			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
 				fmt.Fprintf(sb, "%s Partition_ID \n", indent)
+			} else if cmd.PartitionIsID {
+				// PARTITION ID 'value' is shown as Partition_ID Literal_'value' (children 1)
+				if lit, ok := cmd.Partition.(*ast.Literal); ok {
+					fmt.Fprintf(sb, "%s Partition_ID Literal_\\'%s\\' (children 1)\n", indent, lit.Value)
+					Node(sb, cmd.Partition, depth+2)
+				} else {
+					fmt.Fprintf(sb, "%s Partition_ID (children 1)\n", indent)
+					Node(sb, cmd.Partition, depth+2)
+				}
 			} else {
 				fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
 				Node(sb, cmd.Partition, depth+2)
@@ -1273,6 +1388,20 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		explainStatisticsCommand(sb, cmd, indent, depth)
 	case ast.AlterDropStatistics, ast.AlterClearStatistics, ast.AlterMaterializeStatistics:
 		explainStatisticsCommand(sb, cmd, indent, depth)
+	case ast.AlterModifyOrderBy:
+		// When there are multiple expressions, wrap them in a tuple function
+		if len(cmd.OrderByExpr) > 1 {
+			fmt.Fprintf(sb, "%s Function tuple (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(cmd.OrderByExpr))
+			for _, expr := range cmd.OrderByExpr {
+				Node(sb, expr, depth+3)
+			}
+		} else {
+			// Single expression - output directly
+			for _, expr := range cmd.OrderByExpr {
+				Node(sb, expr, depth+1)
+			}
+		}
 	default:
 		if cmd.Partition != nil {
 			Node(sb, cmd.Partition, depth+1)
@@ -1466,6 +1595,11 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 		if len(cmd.StatisticsColumns) > 0 {
 			children = 1
 		}
+	case ast.AlterModifyOrderBy:
+		// MODIFY ORDER BY: multiple expressions wrapped in tuple (1 child), single expression (1 child)
+		if len(cmd.OrderByExpr) > 0 {
+			children = 1
+		}
 	default:
 		if cmd.Partition != nil {
 			children++
@@ -1489,14 +1623,25 @@ func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent stri
 	}
 
 	children := 1 // identifier
+	if n.Database != "" {
+		children++ // extra identifier for database
+	}
 	if n.Partition != nil {
 		children++
 	}
 
-	fmt.Fprintf(sb, "%sOptimizeQuery  %s (children %d)\n", indent, name, children)
+	if n.Database != "" {
+		// Database-qualified: OptimizeQuery db table (children N)
+		fmt.Fprintf(sb, "%sOptimizeQuery %s %s (children %d)\n", indent, n.Database, name, children)
+	} else {
+		fmt.Fprintf(sb, "%sOptimizeQuery  %s (children %d)\n", indent, name, children)
+	}
 	if n.Partition != nil {
 		fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
 		Node(sb, n.Partition, depth+2)
+	}
+	if n.Database != "" {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 }
@@ -1665,5 +1810,41 @@ func explainUpdateQuery(sb *strings.Builder, n *ast.UpdateQuery, indent string, 
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Assignments))
 	for _, assign := range n.Assignments {
 		Node(sb, assign, depth+2)
+	}
+}
+
+func explainParallelWithQuery(sb *strings.Builder, n *ast.ParallelWithQuery, indent string, depth int) {
+	if n == nil || len(n.Statements) == 0 {
+		fmt.Fprintf(sb, "%sParallelWithQuery\n", indent)
+		return
+	}
+
+	// Build the name from the first statement
+	name := getParallelWithName(n.Statements[0])
+	count := len(n.Statements)
+
+	fmt.Fprintf(sb, "%sParallelWithQuery %d %s (children %d)\n", indent, count, name, count)
+
+	for _, stmt := range n.Statements {
+		Node(sb, stmt, depth+1)
+	}
+}
+
+func getParallelWithName(stmt ast.Statement) string {
+	switch s := stmt.(type) {
+	case *ast.DropQuery:
+		tableName := ""
+		if len(s.Tables) > 0 {
+			if s.Tables[0].Table != "" {
+				tableName = s.Tables[0].Table
+			}
+		}
+		return "DropQuery__" + tableName
+	case *ast.CreateQuery:
+		return "CreateQuery_" + s.Table
+	case *ast.InsertQuery:
+		return "InsertQuery__"
+	default:
+		return "Statement"
 	}
 }

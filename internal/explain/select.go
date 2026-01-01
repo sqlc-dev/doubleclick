@@ -341,90 +341,66 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 	if n.Top != nil {
 		Node(sb, n.Top, depth+1)
 	}
+	// DISTINCT ON columns
+	if len(n.DistinctOn) > 0 {
+		fmt.Fprintf(sb, "%s Literal UInt64_1\n", indent)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.DistinctOn))
+		for _, col := range n.DistinctOn {
+			Node(sb, col, depth+2)
+		}
+	}
 }
 
 func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent string, depth int) {
-	// ClickHouse uses different formats for WITH FILL:
-	// - When FROM/TO are simple literals: direct children on OrderByElement
-	// - When FROM/TO are complex expressions or only STEP present: uses FillModifier wrapper
-	hasFromOrTo := n.FillFrom != nil || n.FillTo != nil
-	hasComplexFillExpr := hasFromOrTo && (isComplexExpr(n.FillFrom) || isComplexExpr(n.FillTo))
-
-	// Use FillModifier when FROM/TO contain complex expressions (not simple literals)
-	// When only STEP is present, output it directly as a child (no FillModifier)
-	useFillModifier := n.WithFill && hasComplexFillExpr
-
-	if useFillModifier {
-		// Use FillModifier wrapper
-		fillChildren := 0
-		if n.FillFrom != nil {
-			fillChildren++
-		}
-		if n.FillTo != nil {
-			fillChildren++
-		}
-		if n.FillStep != nil {
-			fillChildren++
-		}
-		children := 2 // expression + FillModifier
-		fmt.Fprintf(sb, "%sOrderByElement (children %d)\n", indent, children)
-		Node(sb, n.Expression, depth+1)
-		fmt.Fprintf(sb, "%s FillModifier (children %d)\n", indent, fillChildren)
-		if n.FillFrom != nil {
-			Node(sb, n.FillFrom, depth+2)
-		}
-		if n.FillTo != nil {
-			Node(sb, n.FillTo, depth+2)
-		}
-		if n.FillStep != nil {
-			Node(sb, n.FillStep, depth+2)
-		}
-	} else {
-		// Use direct children for simple literal FROM/TO cases
-		children := 1 // expression
-		if n.FillFrom != nil {
-			children++
-		}
-		if n.FillTo != nil {
-			children++
-		}
-		if n.FillStep != nil {
-			children++
-		}
-		if n.Collate != "" {
-			children++
-		}
-		fmt.Fprintf(sb, "%sOrderByElement (children %d)\n", indent, children)
-		Node(sb, n.Expression, depth+1)
-		if n.FillFrom != nil {
-			Node(sb, n.FillFrom, depth+1)
-		}
-		if n.FillTo != nil {
-			Node(sb, n.FillTo, depth+1)
-		}
-		if n.FillStep != nil {
-			Node(sb, n.FillStep, depth+1)
-		}
-		if n.Collate != "" {
-			// COLLATE is output as a string literal
-			fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, n.Collate)
-		}
+	// All fill-related children are direct children of OrderByElement
+	children := 1 // expression
+	if n.FillFrom != nil {
+		children++
+	}
+	if n.FillTo != nil {
+		children++
+	}
+	if n.FillStep != nil {
+		children++
+	}
+	if n.FillStaleness != nil {
+		children++
+	}
+	if n.Collate != "" {
+		children++
+	}
+	fmt.Fprintf(sb, "%sOrderByElement (children %d)\n", indent, children)
+	Node(sb, n.Expression, depth+1)
+	if n.FillFrom != nil {
+		Node(sb, n.FillFrom, depth+1)
+	}
+	if n.FillTo != nil {
+		Node(sb, n.FillTo, depth+1)
+	}
+	if n.FillStep != nil {
+		Node(sb, n.FillStep, depth+1)
+	}
+	if n.FillStaleness != nil {
+		Node(sb, n.FillStaleness, depth+1)
+	}
+	if n.Collate != "" {
+		// COLLATE is output as a string literal
+		fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, n.Collate)
 	}
 }
 
 // explainInterpolateElement explains an INTERPOLATE element.
 // Format: InterpolateElement (column colname) (children N)
+// When there's a value expression: output the value as the child
+// When there's no value: output the column identifier as the child
 func explainInterpolateElement(sb *strings.Builder, n *ast.InterpolateElement, indent string, depth int) {
-	children := 0
+	fmt.Fprintf(sb, "%sInterpolateElement (column %s) (children %d)\n", indent, n.Column, 1)
 	if n.Value != nil {
-		children = 1
-	}
-
-	if children > 0 {
-		fmt.Fprintf(sb, "%sInterpolateElement (column %s) (children %d)\n", indent, n.Column, children)
+		// Output value expression as the child
 		Node(sb, n.Value, depth+1)
 	} else {
-		fmt.Fprintf(sb, "%sInterpolateElement (column %s)\n", indent, n.Column)
+		// Output column name as Identifier when no explicit value
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Column)
 	}
 }
 
@@ -539,6 +515,10 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 	// TOP clause
 	if n.Top != nil {
 		count++
+	}
+	// DISTINCT ON columns (counts as 2: Literal UInt64_1 + ExpressionList)
+	if len(n.DistinctOn) > 0 {
+		count += 2
 	}
 	return count
 }

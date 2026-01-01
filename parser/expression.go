@@ -99,6 +99,10 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 
 	for p.currentIs(token.COMMA) {
 		p.nextToken()
+		// Handle trailing commas by checking if next token is a clause keyword
+		if p.isClauseKeyword() {
+			break
+		}
 		expr := p.parseExpression(LOWEST)
 		if expr != nil {
 			// Handle implicit alias (identifier without AS)
@@ -108,6 +112,29 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 	}
 
 	return exprs
+}
+
+// isClauseKeyword returns true if the current token is a SQL clause keyword
+// that should terminate an expression list (used for trailing comma support)
+func (p *Parser) isClauseKeyword() bool {
+	switch p.current.Token {
+	// Only these tokens are unambiguously clause terminators
+	case token.RPAREN, token.SEMICOLON, token.EOF:
+		return true
+	// FROM is a clause keyword unless followed by ( or [ (function/index access)
+	case token.FROM:
+		return !p.peekIs(token.LPAREN) && !p.peekIs(token.LBRACKET)
+	// These keywords can be used as identifiers in ClickHouse
+	// Only treat as clause keywords if NOT followed by expression-like tokens
+	case token.WHERE, token.GROUP, token.HAVING, token.ORDER, token.LIMIT:
+		// If followed by comma, it's likely an identifier in a list
+		return !p.peekIs(token.LPAREN) && !p.peekIs(token.LBRACKET) && !p.peekIs(token.COMMA) && !p.peekIs(token.RPAREN)
+	case token.INTO, token.SETTINGS, token.FORMAT:
+		return !p.peekIs(token.LPAREN) && !p.peekIs(token.LBRACKET) && !p.peekIs(token.EQ) && !p.peekIs(token.COMMA) && !p.peekIs(token.RPAREN)
+	// UNION, EXCEPT, INTERSECT, OFFSET are often used as identifiers
+	// Don't treat them as clause terminators to avoid breaking valid code
+	}
+	return false
 }
 
 // parseGroupingSets parses GROUPING SETS ((a), (b), (a, b))
@@ -243,6 +270,10 @@ func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
 		upper := strings.ToUpper(p.current.Value)
 		// Don't consume SQL set operation keywords that aren't tokens
 		if upper == "INTERSECT" {
+			return expr
+		}
+		// Don't consume PARALLEL as alias if followed by WITH (parallel query syntax)
+		if p.currentIs(token.PARALLEL) && p.peekIs(token.WITH) {
 			return expr
 		}
 		// Don't consume window frame keywords as implicit aliases
@@ -953,6 +984,16 @@ func (p *Parser) parseUnaryMinus() ast.Expression {
 	pos := p.current.Pos
 	p.nextToken() // skip minus
 
+	// Handle -Inf as a special negative infinity literal
+	if p.currentIs(token.INF) {
+		p.nextToken() // skip INF
+		return &ast.Literal{
+			Position: pos,
+			Type:     ast.LiteralFloat,
+			Value:    math.Inf(-1),
+		}
+	}
+
 	// For negative number literals followed by ::, keep them together as a signed literal
 	// This matches ClickHouse's behavior where -0::Int16 becomes CAST('-0', 'Int16')
 	if p.currentIs(token.NUMBER) && p.peekIs(token.COLONCOLON) {
@@ -1000,11 +1041,24 @@ func (p *Parser) parseUnaryMinus() ast.Expression {
 }
 
 func (p *Parser) parseUnaryPlus() ast.Expression {
+	pos := p.current.Pos
+	p.nextToken() // skip plus
+
+	// Handle +Inf as a special positive infinity literal
+	if p.currentIs(token.INF) {
+		p.nextToken() // skip INF
+		return &ast.Literal{
+			Position: pos,
+			Type:     ast.LiteralFloat,
+			Value:    math.Inf(1),
+		}
+	}
+
+	// Standard unary plus handling
 	expr := &ast.UnaryExpr{
-		Position: p.current.Pos,
+		Position: pos,
 		Op:       "+",
 	}
-	p.nextToken()
 	expr.Operand = p.parseExpression(UNARY)
 	return expr
 }
@@ -1729,9 +1783,10 @@ func (p *Parser) parseTrim() ast.Expression {
 	}
 
 	return &ast.FunctionCall{
-		Position:  pos,
-		Name:      fnName,
-		Arguments: args,
+		Position:    pos,
+		Name:        fnName,
+		Arguments:   args,
+		SQLStandard: true, // Mark as SQL standard TRIM syntax
 	}
 }
 
@@ -1962,17 +2017,28 @@ func (p *Parser) parseIsExpression(left ast.Expression) ast.Expression {
 		p.nextToken() // skip DISTINCT
 		if p.currentIs(token.FROM) {
 			p.nextToken() // skip FROM
-			right := p.parseExpression(COMPARE)
-			// IS NOT DISTINCT FROM is same as =, IS DISTINCT FROM is same as !=
-			op := "="
+			// Parse with lower precedence than COMPARE to include operators like IN
+			right := p.parseExpression(NOT_PREC)
+			// IS NOT DISTINCT FROM maps to <=> (isNotDistinctFrom)
+			// IS DISTINCT FROM maps to NOT <=>
 			if not {
-				op = "!="
+				return &ast.BinaryExpr{
+					Position: pos,
+					Left:     left,
+					Op:       "<=>",
+					Right:    right,
+				}
 			}
-			return &ast.BinaryExpr{
+			// IS DISTINCT FROM is NOT(IS NOT DISTINCT FROM)
+			return &ast.UnaryExpr{
 				Position: pos,
-				Left:     left,
-				Op:       op,
-				Right:    right,
+				Op:       "NOT",
+				Operand: &ast.BinaryExpr{
+					Position: pos,
+					Left:     left,
+					Op:       "<=>",
+					Right:    right,
+				},
 			}
 		}
 	}
@@ -2502,6 +2568,11 @@ func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
 	pos := p.current.Pos
 	p.nextToken() // skip EXCEPT
 
+	// Check for STRICT modifier
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STRICT" {
+		p.nextToken()
+	}
+
 	// EXCEPT can have optional parentheses: * EXCEPT (col1, col2) or * EXCEPT col
 	hasParens := p.currentIs(token.LPAREN)
 	if hasParens {
@@ -2542,6 +2613,11 @@ func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
 func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 	pos := p.current.Pos
 	p.nextToken() // skip REPLACE
+
+	// Check for STRICT modifier
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STRICT" {
+		p.nextToken()
+	}
 
 	// REPLACE can have optional parentheses: REPLACE (expr AS col) or REPLACE expr AS col
 	hasParens := p.currentIs(token.LPAREN)
@@ -2684,6 +2760,11 @@ func (p *Parser) parseColumnsApply(matcher *ast.ColumnsMatcher) ast.Expression {
 func (p *Parser) parseColumnsExcept(matcher *ast.ColumnsMatcher) ast.Expression {
 	pos := p.current.Pos
 	p.nextToken() // skip EXCEPT
+
+	// Check for STRICT modifier
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STRICT" {
+		p.nextToken()
+	}
 
 	// EXCEPT can have optional parentheses: COLUMNS(...) EXCEPT (col1, col2) or COLUMNS(...) EXCEPT col
 	hasParens := p.currentIs(token.LPAREN)

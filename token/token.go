@@ -154,6 +154,7 @@ const (
 	OUTFILE
 	OVER
 	PARTITION
+	PARALLEL
 	PASTE
 	POPULATE
 	PREWHERE
@@ -352,6 +353,7 @@ var tokens = [...]string{
 	OUTFILE:      "OUTFILE",
 	OVER:         "OVER",
 	PARTITION:    "PARTITION",
+	PARALLEL:     "PARALLEL",
 	PASTE:        "PASTE",
 	POPULATE:     "POPULATE",
 	PREWHERE:     "PREWHERE",

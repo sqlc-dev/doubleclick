@@ -57,6 +57,7 @@ type SelectQuery struct {
 	Position    token.Position        `json:"-"`
 	With        []Expression          `json:"with,omitempty"`
 	Distinct    bool                  `json:"distinct,omitempty"`
+	DistinctOn  []Expression          `json:"distinct_on,omitempty"` // DISTINCT ON (col1, col2, ...) syntax
 	Top         Expression            `json:"top,omitempty"`
 	Columns     []Expression          `json:"columns"`
 	From        *TablesInSelectQuery  `json:"from,omitempty"`
@@ -199,15 +200,16 @@ const (
 
 // OrderByElement represents an ORDER BY element.
 type OrderByElement struct {
-	Position   token.Position `json:"-"`
-	Expression Expression     `json:"expression"`
-	Descending bool           `json:"descending,omitempty"`
-	NullsFirst *bool          `json:"nulls_first,omitempty"`
-	Collate    string         `json:"collate,omitempty"`
-	WithFill   bool           `json:"with_fill,omitempty"`
-	FillFrom   Expression     `json:"fill_from,omitempty"`
-	FillTo     Expression     `json:"fill_to,omitempty"`
-	FillStep   Expression     `json:"fill_step,omitempty"`
+	Position      token.Position `json:"-"`
+	Expression    Expression     `json:"expression"`
+	Descending    bool           `json:"descending,omitempty"`
+	NullsFirst    *bool          `json:"nulls_first,omitempty"`
+	Collate       string         `json:"collate,omitempty"`
+	WithFill      bool           `json:"with_fill,omitempty"`
+	FillFrom      Expression     `json:"fill_from,omitempty"`
+	FillTo        Expression     `json:"fill_to,omitempty"`
+	FillStep      Expression     `json:"fill_step,omitempty"`
+	FillStaleness Expression     `json:"fill_staleness,omitempty"`
 }
 
 func (o *OrderByElement) Pos() token.Position { return o.Position }
@@ -574,8 +576,11 @@ type AlterCommand struct {
 	Constraint     *Constraint          `json:"constraint,omitempty"`
 	ConstraintName string               `json:"constraint_name,omitempty"`
 	Partition      Expression           `json:"partition,omitempty"`
+	PartitionIsID  bool                 `json:"partition_is_id,omitempty"` // True when using PARTITION ID 'value' syntax
 	FromTable      string               `json:"from_table,omitempty"`
-	FromPath       string               `json:"from_path,omitempty"` // For FETCH PARTITION FROM
+	ToDatabase     string               `json:"to_database,omitempty"` // For MOVE PARTITION TO TABLE
+	ToTable        string               `json:"to_table,omitempty"`    // For MOVE PARTITION TO TABLE
+	FromPath       string               `json:"from_path,omitempty"`   // For FETCH PARTITION FROM
 	TTL            *TTLClause           `json:"ttl,omitempty"`
 	Settings       []*SettingExpr       `json:"settings,omitempty"`
 	Where          Expression           `json:"where,omitempty"`       // For DELETE WHERE
@@ -585,6 +590,7 @@ type AlterCommand struct {
 	StatisticsColumns []string          `json:"statistics_columns,omitempty"` // For ADD/DROP/CLEAR/MATERIALIZE STATISTICS
 	StatisticsTypes   []*FunctionCall   `json:"statistics_types,omitempty"`   // For ADD/MODIFY STATISTICS TYPE
 	Comment           string            `json:"comment,omitempty"`            // For COMMENT COLUMN
+	OrderByExpr       []Expression      `json:"order_by_expr,omitempty"`      // For MODIFY ORDER BY
 }
 
 // Projection represents a projection definition.
@@ -635,6 +641,7 @@ const (
 	AlterAddConstraint     AlterCommandType = "ADD_CONSTRAINT"
 	AlterDropConstraint    AlterCommandType = "DROP_CONSTRAINT"
 	AlterModifyTTL          AlterCommandType = "MODIFY_TTL"
+	AlterMaterializeTTL     AlterCommandType = "MATERIALIZE_TTL"
 	AlterModifySetting      AlterCommandType = "MODIFY_SETTING"
 	AlterDropPartition      AlterCommandType = "DROP_PARTITION"
 	AlterDetachPartition    AlterCommandType = "DETACH_PARTITION"
@@ -653,10 +660,11 @@ const (
 	AlterClearProjection    AlterCommandType = "CLEAR_PROJECTION"
 	AlterAddStatistics      AlterCommandType = "ADD_STATISTICS"
 	AlterModifyStatistics   AlterCommandType = "MODIFY_STATISTICS"
-	AlterDropStatistics     AlterCommandType = "DROP_STATISTICS"
-	AlterClearStatistics    AlterCommandType = "CLEAR_STATISTICS"
+	AlterDropStatistics        AlterCommandType = "DROP_STATISTICS"
+	AlterClearStatistics       AlterCommandType = "CLEAR_STATISTICS"
 	AlterMaterializeStatistics AlterCommandType = "MATERIALIZE_STATISTICS"
 	AlterModifyComment         AlterCommandType = "MODIFY_COMMENT"
+	AlterModifyOrderBy         AlterCommandType = "MODIFY_ORDER_BY"
 )
 
 // TruncateQuery represents a TRUNCATE statement.
@@ -707,9 +715,14 @@ func (d *DetachQuery) statementNode()      {}
 
 // AttachQuery represents an ATTACH statement.
 type AttachQuery struct {
-	Position token.Position `json:"-"`
-	Database string         `json:"database,omitempty"`
-	Table    string         `json:"table,omitempty"`
+	Position          token.Position       `json:"-"`
+	Database          string               `json:"database,omitempty"`
+	Table             string               `json:"table,omitempty"`
+	Columns           []*ColumnDeclaration `json:"columns,omitempty"`
+	ColumnsPrimaryKey []Expression         `json:"columns_primary_key,omitempty"` // PRIMARY KEY in column list
+	Engine            *EngineClause        `json:"engine,omitempty"`
+	OrderBy           []Expression         `json:"order_by,omitempty"`
+	PrimaryKey        []Expression         `json:"primary_key,omitempty"`
 }
 
 func (a *AttachQuery) Pos() token.Position { return a.Position }
@@ -840,10 +853,12 @@ func (c *CheckQuery) statementNode()      {}
 
 // SystemQuery represents a SYSTEM statement.
 type SystemQuery struct {
-	Position token.Position `json:"-"`
-	Command  string         `json:"command"`
-	Database string         `json:"database,omitempty"`
-	Table    string         `json:"table,omitempty"`
+	Position             token.Position `json:"-"`
+	Command              string         `json:"command"`
+	Database             string         `json:"database,omitempty"`
+	Table                string         `json:"table,omitempty"`
+	OnCluster            string         `json:"on_cluster,omitempty"`
+	DuplicateTableOutput bool           `json:"duplicate_table_output,omitempty"` // True for commands that need database/table output twice
 }
 
 func (s *SystemQuery) Pos() token.Position { return s.Position }
@@ -1290,14 +1305,15 @@ func (c *ColumnsMatcher) expressionNode()     {}
 
 // FunctionCall represents a function call.
 type FunctionCall struct {
-	Position   token.Position `json:"-"`
-	Name       string         `json:"name"`
-	Parameters []Expression   `json:"parameters,omitempty"` // For parametric functions like quantile(0.9)(x)
-	Arguments  []Expression   `json:"arguments,omitempty"`
-	Settings   []*SettingExpr `json:"settings,omitempty"` // For table functions with SETTINGS
-	Distinct   bool           `json:"distinct,omitempty"`
-	Over       *WindowSpec    `json:"over,omitempty"`
-	Alias      string         `json:"alias,omitempty"`
+	Position    token.Position `json:"-"`
+	Name        string         `json:"name"`
+	Parameters  []Expression   `json:"parameters,omitempty"` // For parametric functions like quantile(0.9)(x)
+	Arguments   []Expression   `json:"arguments,omitempty"`
+	Settings    []*SettingExpr `json:"settings,omitempty"` // For table functions with SETTINGS
+	Distinct    bool           `json:"distinct,omitempty"`
+	Over        *WindowSpec    `json:"over,omitempty"`
+	Alias       string         `json:"alias,omitempty"`
+	SQLStandard bool           `json:"sql_standard,omitempty"` // True for SQL standard syntax like TRIM(... FROM ...)
 }
 
 func (f *FunctionCall) Pos() token.Position { return f.Position }
@@ -1594,3 +1610,13 @@ type ExistsExpr struct {
 func (e *ExistsExpr) Pos() token.Position { return e.Position }
 func (e *ExistsExpr) End() token.Position { return e.Position }
 func (e *ExistsExpr) expressionNode()     {}
+
+// ParallelWithQuery represents multiple statements executed in parallel with PARALLEL WITH.
+type ParallelWithQuery struct {
+	Position   token.Position `json:"-"`
+	Statements []Statement    `json:"statements"`
+}
+
+func (p *ParallelWithQuery) Pos() token.Position { return p.Position }
+func (p *ParallelWithQuery) End() token.Position { return p.Position }
+func (p *ParallelWithQuery) statementNode()      {}
