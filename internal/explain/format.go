@@ -286,6 +286,9 @@ func FormatDataType(dt *ast.DataType) string {
 			} else {
 				params = append(params, fmt.Sprintf("%v", p))
 			}
+		} else if ident, ok := p.(*ast.Identifier); ok {
+			// Identifier (e.g., function name in AggregateFunction types)
+			params = append(params, ident.Name())
 		} else {
 			params = append(params, fmt.Sprintf("%v", p))
 		}
