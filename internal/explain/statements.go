@@ -1144,11 +1144,11 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
-	if len(n.Settings) > 0 {
-		fmt.Fprintf(sb, "%s Set\n", indent)
-	}
 	if hasFormat {
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+	}
+	if len(n.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
 

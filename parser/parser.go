@@ -4422,12 +4422,6 @@ func (p *Parser) parseAlter() *ast.AlterQuery {
 		p.nextToken()
 	}
 
-	// Parse SETTINGS clause
-	if p.currentIs(token.SETTINGS) {
-		p.nextToken()
-		alter.Settings = p.parseSettingsList()
-	}
-
 	// Parse FORMAT clause
 	if p.currentIs(token.FORMAT) {
 		p.nextToken()
@@ -4438,6 +4432,12 @@ func (p *Parser) parseAlter() *ast.AlterQuery {
 			alter.Format = p.current.Value
 			p.nextToken()
 		}
+	}
+
+	// Parse SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		alter.Settings = p.parseSettingsList()
 	}
 
 	return alter
