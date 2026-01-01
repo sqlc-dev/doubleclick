@@ -4667,6 +4667,9 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					cmd.IfExists = true
 				}
 				cmd.StatisticsColumns = p.parseStatisticsColumnList()
+			} else if p.currentIs(token.TTL) {
+				cmd.Type = ast.AlterMaterializeTTL
+				p.nextToken()
 			}
 		} else {
 			return nil

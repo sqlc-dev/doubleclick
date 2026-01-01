@@ -1171,7 +1171,11 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	if cmdType == ast.AlterDeleteWhere {
 		cmdType = "DELETE"
 	}
-	fmt.Fprintf(sb, "%sAlterCommand %s (children %d)\n", indent, cmdType, children)
+	if children > 0 {
+		fmt.Fprintf(sb, "%sAlterCommand %s (children %d)\n", indent, cmdType, children)
+	} else {
+		fmt.Fprintf(sb, "%sAlterCommand %s\n", indent, cmdType)
+	}
 
 	switch cmd.Type {
 	case ast.AlterAddColumn:
