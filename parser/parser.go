@@ -4538,6 +4538,11 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		} else if p.currentIs(token.PARTITION) {
 			cmd.Type = ast.AlterDropPartition
 			p.nextToken()
+			// Check for PARTITION ID 'value' syntax
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+				p.nextToken()
+				cmd.PartitionIsID = true
+			}
 			cmd.Partition = p.parseExpression(LOWEST)
 		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
 			cmd.Type = ast.AlterDropProjection
@@ -4728,6 +4733,11 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		if p.currentIs(token.PARTITION) {
 			cmd.Type = ast.AlterDetachPartition
 			p.nextToken()
+			// Check for PARTITION ID 'value' syntax
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+				p.nextToken()
+				cmd.PartitionIsID = true
+			}
 			cmd.Partition = p.parseExpression(LOWEST)
 		}
 	case token.ATTACH:
@@ -4735,6 +4745,11 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		if p.currentIs(token.PARTITION) {
 			cmd.Type = ast.AlterAttachPartition
 			p.nextToken()
+			// Check for PARTITION ID 'value' syntax
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+				p.nextToken()
+				cmd.PartitionIsID = true
+			}
 			cmd.Partition = p.parseExpression(LOWEST)
 		}
 	case token.FREEZE:
@@ -4742,6 +4757,11 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		if p.currentIs(token.PARTITION) {
 			cmd.Type = ast.AlterFreezePartition
 			p.nextToken()
+			// Check for PARTITION ID 'value' syntax
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+				p.nextToken()
+				cmd.PartitionIsID = true
+			}
 			cmd.Partition = p.parseExpression(LOWEST)
 		} else {
 			cmd.Type = ast.AlterFreeze
@@ -4751,6 +4771,11 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		if p.currentIs(token.PARTITION) {
 			cmd.Type = ast.AlterReplacePartition
 			p.nextToken()
+			// Check for PARTITION ID 'value' syntax
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+				p.nextToken()
+				cmd.PartitionIsID = true
+			}
 			cmd.Partition = p.parseExpression(LOWEST)
 			if p.currentIs(token.FROM) {
 				p.nextToken()
@@ -4765,6 +4790,11 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		if p.currentIs(token.PARTITION) {
 			cmd.Type = ast.AlterFetchPartition
 			p.nextToken()
+			// Check for PARTITION ID 'value' syntax
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+				p.nextToken()
+				cmd.PartitionIsID = true
+			}
 			cmd.Partition = p.parseExpression(LOWEST)
 			// FROM path
 			if p.currentIs(token.FROM) {

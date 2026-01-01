@@ -575,6 +575,7 @@ type AlterCommand struct {
 	Constraint     *Constraint          `json:"constraint,omitempty"`
 	ConstraintName string               `json:"constraint_name,omitempty"`
 	Partition      Expression           `json:"partition,omitempty"`
+	PartitionIsID  bool                 `json:"partition_is_id,omitempty"` // True when using PARTITION ID 'value' syntax
 	FromTable      string               `json:"from_table,omitempty"`
 	FromPath       string               `json:"from_path,omitempty"` // For FETCH PARTITION FROM
 	TTL            *TTLClause           `json:"ttl,omitempty"`
