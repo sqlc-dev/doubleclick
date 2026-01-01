@@ -4518,22 +4518,48 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			cmd.Type = ast.AlterAddIndex
 			p.nextToken()
 			// Parse index name
+			idxName := ""
 			if p.currentIs(token.IDENT) {
-				cmd.Index = p.current.Value
+				idxName = p.current.Value
+				cmd.Index = idxName
 				p.nextToken()
+			}
+			// Create IndexDef to store full index definition
+			idx := &ast.IndexDefinition{
+				Position: p.current.Pos,
+				Name:     idxName,
 			}
 			// Parse expression in parentheses
 			if p.currentIs(token.LPAREN) {
 				p.nextToken()
-				cmd.IndexExpr = p.parseExpression(LOWEST)
+				idx.Expression = p.parseExpression(LOWEST)
+				cmd.IndexExpr = idx.Expression
 				p.expect(token.RPAREN)
 			}
 			// Parse TYPE
 			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TYPE" {
 				p.nextToken()
+				// Type is a function call like bloom_filter(0.025) or vector_similarity('hnsw', 'L2Distance', 1)
+				pos := p.current.Pos
+				typeName := ""
 				if p.currentIs(token.IDENT) {
-					cmd.IndexType = p.current.Value
+					typeName = p.current.Value
+					cmd.IndexType = typeName
 					p.nextToken()
+				}
+				if typeName != "" {
+					idx.Type = &ast.FunctionCall{
+						Position: pos,
+						Name:     typeName,
+					}
+					// Check for parentheses (type parameters)
+					if p.currentIs(token.LPAREN) {
+						p.nextToken()
+						if !p.currentIs(token.RPAREN) {
+							idx.Type.Arguments = p.parseExpressionList()
+						}
+						p.expect(token.RPAREN)
+					}
 				}
 			}
 			// Parse GRANULARITY
@@ -4545,6 +4571,7 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					p.nextToken()
 				}
 			}
+			cmd.IndexDef = idx
 		} else if p.currentIs(token.CONSTRAINT) {
 			cmd.Type = ast.AlterAddConstraint
 			p.nextToken()

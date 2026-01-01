@@ -163,7 +163,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Projections) > 0 || len(n.Constraints) > 0 {
 		children++
 	}
-	hasStorageChild := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0
+	hasStorageChild := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0 || len(n.ColumnsPrimaryKey) > 0
 	if hasStorageChild {
 		children++
 	}
@@ -287,7 +287,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			inCreateQueryContext = false
 		}
 	}
-	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0
+	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0 || len(n.ColumnsPrimaryKey) > 0
 	if hasStorage {
 		storageChildren := 0
 		if n.Engine != nil {
@@ -318,11 +318,19 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		storageChildDepth := depth + 2
 		if n.Materialized {
 			fmt.Fprintf(sb, "%s ViewTargets (children %d)\n", indent, 1)
-			fmt.Fprintf(sb, "%s  Storage definition (children %d)\n", indent, storageChildren)
+			if storageChildren > 0 {
+				fmt.Fprintf(sb, "%s  Storage definition (children %d)\n", indent, storageChildren)
+			} else {
+				fmt.Fprintf(sb, "%s  Storage definition\n", indent)
+			}
 			storageIndent = indent + "  " // 2 spaces for materialized (format strings add 1 more = 3 total)
 			storageChildDepth = depth + 3
 		} else {
-			fmt.Fprintf(sb, "%s Storage definition (children %d)\n", indent, storageChildren)
+			if storageChildren > 0 {
+				fmt.Fprintf(sb, "%s Storage definition (children %d)\n", indent, storageChildren)
+			} else {
+				fmt.Fprintf(sb, "%s Storage definition\n", indent)
+			}
 		}
 		if n.Engine != nil {
 			if n.Engine.HasParentheses {
@@ -1318,7 +1326,14 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		if cmd.Comment != "" {
 			fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, escapeStringLiteral(cmd.Comment))
 		}
-	case ast.AlterAddIndex, ast.AlterDropIndex, ast.AlterClearIndex, ast.AlterMaterializeIndex:
+	case ast.AlterAddIndex:
+		// ADD INDEX outputs the full Index definition with expression and type
+		if cmd.IndexDef != nil && (cmd.IndexDef.Expression != nil || cmd.IndexDef.Type != nil) {
+			Index(sb, cmd.IndexDef, depth+1)
+		} else if cmd.Index != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
+		}
+	case ast.AlterDropIndex, ast.AlterClearIndex, ast.AlterMaterializeIndex:
 		if cmd.Index != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
 		}
@@ -1541,7 +1556,14 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 		if cmd.Partition != nil {
 			children++
 		}
-	case ast.AlterAddIndex, ast.AlterDropIndex, ast.AlterClearIndex, ast.AlterMaterializeIndex:
+	case ast.AlterAddIndex:
+		// ADD INDEX with IndexDef has 1 child (the Index node)
+		if cmd.IndexDef != nil && (cmd.IndexDef.Expression != nil || cmd.IndexDef.Type != nil) {
+			children = 1
+		} else if cmd.Index != "" {
+			children++
+		}
+	case ast.AlterDropIndex, ast.AlterClearIndex, ast.AlterMaterializeIndex:
 		if cmd.Index != "" {
 			children++
 		}

@@ -572,6 +572,7 @@ type AlterCommand struct {
 	Index          string               `json:"index,omitempty"`
 	IndexExpr      Expression           `json:"index_expr,omitempty"`
 	IndexType      string               `json:"index_type,omitempty"`
+	IndexDef       *IndexDefinition     `json:"index_def,omitempty"`       // For ADD INDEX with full definition
 	Granularity    int                  `json:"granularity,omitempty"`
 	Constraint     *Constraint          `json:"constraint,omitempty"`
 	ConstraintName string               `json:"constraint_name,omitempty"`
