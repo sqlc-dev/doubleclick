@@ -67,9 +67,18 @@ func (p *Parser) precedence(tok token.Token) int {
 
 // precedenceForCurrent returns the precedence for the current token,
 // with special handling for tuple access (number starting with dot)
+// and infix NOT operators (NOT BETWEEN, NOT IN, NOT LIKE, etc.)
 func (p *Parser) precedenceForCurrent() int {
 	if p.currentIs(token.NUMBER) && strings.HasPrefix(p.current.Value, ".") {
 		return HIGHEST // Tuple access like t.1
+	}
+	// When NOT is followed by BETWEEN, IN, LIKE, ILIKE, or REGEXP,
+	// it's an infix operator with COMPARE precedence, not prefix NOT
+	if p.currentIs(token.NOT) {
+		if p.peekIs(token.BETWEEN) || p.peekIs(token.IN) || p.peekIs(token.LIKE) ||
+			p.peekIs(token.ILIKE) || p.peekIs(token.REGEXP) {
+			return COMPARE
+		}
 	}
 	return p.precedence(p.current.Token)
 }
