@@ -5885,7 +5885,109 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 		attach.Table = name
 	}
 
-	return attach
+	// Parse column definitions for ATTACH TABLE name(col1 type, ...)
+	if !isDatabase && p.currentIs(token.LPAREN) {
+		p.nextToken()
+		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			if p.currentIs(token.PRIMARY) {
+				// Handle PRIMARY KEY as table constraint
+				p.nextToken() // skip PRIMARY
+				if p.currentIs(token.KEY) {
+					p.nextToken() // skip KEY
+				}
+				if p.currentIs(token.LPAREN) {
+					p.nextToken() // skip (
+					for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+						expr := p.parseExpression(LOWEST)
+						if expr != nil {
+							attach.ColumnsPrimaryKey = append(attach.ColumnsPrimaryKey, expr)
+						}
+						if p.currentIs(token.COMMA) {
+							p.nextToken()
+						} else {
+							break
+						}
+					}
+					p.expect(token.RPAREN)
+				} else {
+					expr := p.parseExpression(LOWEST)
+					if expr != nil {
+						attach.ColumnsPrimaryKey = append(attach.ColumnsPrimaryKey, expr)
+					}
+				}
+			} else {
+				col := p.parseColumnDeclaration()
+				if col != nil {
+					attach.Columns = append(attach.Columns, col)
+				}
+			}
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
+		}
+		p.expect(token.RPAREN)
+	}
+
+	// Parse ENGINE
+	if p.currentIs(token.ENGINE) {
+		p.nextToken()
+		if p.currentIs(token.EQ) {
+			p.nextToken()
+		}
+		attach.Engine = p.parseEngineClause()
+	}
+
+	// Parse table options (ORDER BY, PRIMARY KEY)
+	for {
+		switch {
+		case p.currentIs(token.ORDER):
+			p.nextToken()
+			if p.expect(token.BY) {
+				if p.currentIs(token.LPAREN) {
+					pos := p.current.Pos
+					p.nextToken()
+					exprs := p.parseExpressionList()
+					p.expect(token.RPAREN)
+					if len(exprs) == 0 || len(exprs) > 1 {
+						attach.OrderBy = []ast.Expression{&ast.Literal{
+							Position: pos,
+							Type:     ast.LiteralTuple,
+							Value:    exprs,
+						}}
+					} else {
+						attach.OrderBy = exprs
+					}
+				} else {
+					attach.OrderBy = []ast.Expression{p.parseExpression(ALIAS_PREC)}
+				}
+			}
+		case p.currentIs(token.PRIMARY):
+			p.nextToken()
+			if p.expect(token.KEY) {
+				if p.currentIs(token.LPAREN) {
+					pos := p.current.Pos
+					p.nextToken()
+					exprs := p.parseExpressionList()
+					p.expect(token.RPAREN)
+					if len(exprs) == 0 || len(exprs) > 1 {
+						attach.PrimaryKey = []ast.Expression{&ast.Literal{
+							Position: pos,
+							Type:     ast.LiteralTuple,
+							Value:    exprs,
+						}}
+					} else {
+						attach.PrimaryKey = exprs
+					}
+				} else {
+					attach.PrimaryKey = []ast.Expression{p.parseExpression(ALIAS_PREC)}
+				}
+			}
+		default:
+			return attach
+		}
+	}
 }
 
 func (p *Parser) parseCheck() *ast.CheckQuery {

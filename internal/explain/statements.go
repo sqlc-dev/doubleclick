@@ -260,8 +260,18 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		}
 		// Output inline PRIMARY KEY (from column list)
 		if len(n.ColumnsPrimaryKey) > 0 {
-			for _, pk := range n.ColumnsPrimaryKey {
-				Node(sb, pk, depth+2)
+			if len(n.ColumnsPrimaryKey) > 1 {
+				// Multiple columns: wrap in Function tuple
+				fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
+				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.ColumnsPrimaryKey))
+				for _, pk := range n.ColumnsPrimaryKey {
+					Node(sb, pk, depth+4)
+				}
+			} else {
+				// Single column: output directly
+				for _, pk := range n.ColumnsPrimaryKey {
+					Node(sb, pk, depth+2)
+				}
 			}
 		}
 	}
@@ -1092,29 +1102,98 @@ func explainDetachQuery(sb *strings.Builder, n *ast.DetachQuery, indent string) 
 	fmt.Fprintf(sb, "%sDetachQuery\n", indent)
 }
 
-func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string) {
-	// Check for database-qualified table name
+func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, depth int) {
+	// Count children: identifier + columns definition (if any) + storage definition (if any)
+	children := 1 // table/database identifier
 	if n.Database != "" && n.Table != "" {
-		// Database-qualified: AttachQuery db table (children 2)
-		fmt.Fprintf(sb, "%sAttachQuery %s %s (children 2)\n", indent, n.Database, n.Table)
+		children++ // extra identifier for database
+	}
+	hasColumns := len(n.Columns) > 0 || len(n.ColumnsPrimaryKey) > 0
+	if hasColumns {
+		children++
+	}
+	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0
+	if hasStorage {
+		children++
+	}
+
+	// Output header
+	if n.Database != "" && n.Table != "" {
+		fmt.Fprintf(sb, "%sAttachQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
-		return
-	}
-	// ATTACH DATABASE db: Database set, Table empty -> "AttachQuery db  (children 1)"
-	if n.Database != "" && n.Table == "" {
-		fmt.Fprintf(sb, "%sAttachQuery %s  (children 1)\n", indent, n.Database)
+	} else if n.Database != "" && n.Table == "" {
+		fmt.Fprintf(sb, "%sAttachQuery %s  (children %d)\n", indent, n.Database, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
-		return
-	}
-	// ATTACH TABLE table: Database empty, Table set -> "AttachQuery table (children 1)" (single space)
-	if n.Table != "" {
-		fmt.Fprintf(sb, "%sAttachQuery %s (children 1)\n", indent, n.Table)
+	} else if n.Table != "" {
+		fmt.Fprintf(sb, "%sAttachQuery %s (children %d)\n", indent, n.Table, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+	} else {
+		fmt.Fprintf(sb, "%sAttachQuery\n", indent)
 		return
 	}
-	// No name
-	fmt.Fprintf(sb, "%sAttachQuery\n", indent)
+
+	// Output columns definition
+	if hasColumns {
+		columnsChildren := 0
+		if len(n.Columns) > 0 {
+			columnsChildren++
+		}
+		if len(n.ColumnsPrimaryKey) > 0 {
+			columnsChildren++
+		}
+		fmt.Fprintf(sb, "%s Columns definition (children %d)\n", indent, columnsChildren)
+		if len(n.Columns) > 0 {
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Columns))
+			for _, col := range n.Columns {
+				Column(sb, col, depth+3)
+			}
+		}
+		// Output inline PRIMARY KEY (from column list)
+		if len(n.ColumnsPrimaryKey) > 0 {
+			if len(n.ColumnsPrimaryKey) > 1 {
+				// Multiple columns: wrap in Function tuple
+				fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
+				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.ColumnsPrimaryKey))
+				for _, pk := range n.ColumnsPrimaryKey {
+					Node(sb, pk, depth+4)
+				}
+			} else {
+				// Single column: output directly
+				for _, pk := range n.ColumnsPrimaryKey {
+					Node(sb, pk, depth+2)
+				}
+			}
+		}
+	}
+
+	// Output storage definition
+	if hasStorage {
+		storageChildren := 0
+		if n.Engine != nil {
+			storageChildren++
+		}
+		if len(n.OrderBy) > 0 {
+			storageChildren++
+		}
+		if len(n.PrimaryKey) > 0 {
+			storageChildren++
+		}
+		fmt.Fprintf(sb, "%s Storage definition (children %d)\n", indent, storageChildren)
+		if n.Engine != nil {
+			fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
+		}
+		if len(n.OrderBy) > 0 {
+			for _, expr := range n.OrderBy {
+				Node(sb, expr, depth+2)
+			}
+		}
+		if len(n.PrimaryKey) > 0 {
+			for _, expr := range n.PrimaryKey {
+				Node(sb, expr, depth+2)
+			}
+		}
+	}
 }
 
 func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, depth int) {

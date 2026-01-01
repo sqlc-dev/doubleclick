@@ -713,9 +713,14 @@ func (d *DetachQuery) statementNode()      {}
 
 // AttachQuery represents an ATTACH statement.
 type AttachQuery struct {
-	Position token.Position `json:"-"`
-	Database string         `json:"database,omitempty"`
-	Table    string         `json:"table,omitempty"`
+	Position          token.Position       `json:"-"`
+	Database          string               `json:"database,omitempty"`
+	Table             string               `json:"table,omitempty"`
+	Columns           []*ColumnDeclaration `json:"columns,omitempty"`
+	ColumnsPrimaryKey []Expression         `json:"columns_primary_key,omitempty"` // PRIMARY KEY in column list
+	Engine            *EngineClause        `json:"engine,omitempty"`
+	OrderBy           []Expression         `json:"order_by,omitempty"`
+	PrimaryKey        []Expression         `json:"primary_key,omitempty"`
 }
 
 func (a *AttachQuery) Pos() token.Position { return a.Position }
