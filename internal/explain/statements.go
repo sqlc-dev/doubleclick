@@ -1610,14 +1610,25 @@ func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent stri
 	}
 
 	children := 1 // identifier
+	if n.Database != "" {
+		children++ // extra identifier for database
+	}
 	if n.Partition != nil {
 		children++
 	}
 
-	fmt.Fprintf(sb, "%sOptimizeQuery  %s (children %d)\n", indent, name, children)
+	if n.Database != "" {
+		// Database-qualified: OptimizeQuery db table (children N)
+		fmt.Fprintf(sb, "%sOptimizeQuery %s %s (children %d)\n", indent, n.Database, name, children)
+	} else {
+		fmt.Fprintf(sb, "%sOptimizeQuery  %s (children %d)\n", indent, name, children)
+	}
 	if n.Partition != nil {
 		fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
 		Node(sb, n.Partition, depth+2)
+	}
+	if n.Database != "" {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 }

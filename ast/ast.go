@@ -578,7 +578,9 @@ type AlterCommand struct {
 	Partition      Expression           `json:"partition,omitempty"`
 	PartitionIsID  bool                 `json:"partition_is_id,omitempty"` // True when using PARTITION ID 'value' syntax
 	FromTable      string               `json:"from_table,omitempty"`
-	FromPath       string               `json:"from_path,omitempty"` // For FETCH PARTITION FROM
+	ToDatabase     string               `json:"to_database,omitempty"` // For MOVE PARTITION TO TABLE
+	ToTable        string               `json:"to_table,omitempty"`    // For MOVE PARTITION TO TABLE
+	FromPath       string               `json:"from_path,omitempty"`   // For FETCH PARTITION FROM
 	TTL            *TTLClause           `json:"ttl,omitempty"`
 	Settings       []*SettingExpr       `json:"settings,omitempty"`
 	Where          Expression           `json:"where,omitempty"`       // For DELETE WHERE

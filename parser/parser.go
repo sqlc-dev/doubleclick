@@ -4712,6 +4712,34 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				cmd.Type = ast.AlterMaterializeTTL
 				p.nextToken()
 			}
+		} else if upper == "MOVE" {
+			p.nextToken()
+			if p.currentIs(token.PARTITION) {
+				cmd.Type = ast.AlterMovePartition
+				p.nextToken()
+				// Check for PARTITION ID 'value' syntax
+				if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+					p.nextToken()
+					cmd.PartitionIsID = true
+				}
+				cmd.Partition = p.parseExpression(LOWEST)
+				// Parse TO TABLE destination
+				if p.currentIs(token.TO) {
+					p.nextToken()
+					if p.currentIs(token.TABLE) {
+						p.nextToken()
+					}
+					// Parse destination table (can be qualified: database.table)
+					destName := p.parseIdentifierName()
+					if p.currentIs(token.DOT) {
+						p.nextToken()
+						cmd.ToDatabase = destName
+						cmd.ToTable = p.parseIdentifierName()
+					} else {
+						cmd.ToTable = destName
+					}
+				}
+			}
 		} else {
 			return nil
 		}
