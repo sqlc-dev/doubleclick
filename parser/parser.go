@@ -4794,6 +4794,16 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					}
 				}
 			}
+		} else if upper == "REMOVE" {
+			p.nextToken()
+			// REMOVE SAMPLE BY
+			if p.currentIs(token.SAMPLE) {
+				p.nextToken() // skip SAMPLE
+				if p.currentIs(token.BY) {
+					p.nextToken() // skip BY
+				}
+				cmd.Type = ast.AlterRemoveSampleBy
+			}
 		} else {
 			return nil
 		}

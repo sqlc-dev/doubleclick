@@ -666,6 +666,7 @@ const (
 	AlterMaterializeStatistics AlterCommandType = "MATERIALIZE_STATISTICS"
 	AlterModifyComment         AlterCommandType = "MODIFY_COMMENT"
 	AlterModifyOrderBy         AlterCommandType = "MODIFY_ORDER_BY"
+	AlterRemoveSampleBy        AlterCommandType = "REMOVE_SAMPLE_BY"
 )
 
 // TruncateQuery represents a TRUNCATE statement.
