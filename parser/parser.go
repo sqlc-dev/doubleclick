@@ -1591,6 +1591,14 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 				pos := p.current.Pos
 				colName := p.parseIdentifierName()
 				if colName != "" {
+					// Handle dotted column names like ip4Map.value (for nested columns)
+					for p.currentIs(token.DOT) {
+						p.nextToken()
+						nextPart := p.parseIdentifierName()
+						if nextPart != "" {
+							colName = colName + "." + nextPart
+						}
+					}
 					ins.Columns = append(ins.Columns, &ast.Identifier{
 						Position: pos,
 						Parts:    []string{colName},
