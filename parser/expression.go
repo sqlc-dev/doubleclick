@@ -99,6 +99,10 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 
 	for p.currentIs(token.COMMA) {
 		p.nextToken()
+		// Handle trailing commas by checking if next token is a clause keyword
+		if p.isClauseKeyword() {
+			break
+		}
 		expr := p.parseExpression(LOWEST)
 		if expr != nil {
 			// Handle implicit alias (identifier without AS)
@@ -108,6 +112,29 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 	}
 
 	return exprs
+}
+
+// isClauseKeyword returns true if the current token is a SQL clause keyword
+// that should terminate an expression list (used for trailing comma support)
+func (p *Parser) isClauseKeyword() bool {
+	switch p.current.Token {
+	// Only these tokens are unambiguously clause terminators
+	case token.RPAREN, token.SEMICOLON, token.EOF:
+		return true
+	// FROM is a clause keyword unless followed by ( or [ (function/index access)
+	case token.FROM:
+		return !p.peekIs(token.LPAREN) && !p.peekIs(token.LBRACKET)
+	// These keywords can be used as identifiers in ClickHouse
+	// Only treat as clause keywords if NOT followed by expression-like tokens
+	case token.WHERE, token.GROUP, token.HAVING, token.ORDER, token.LIMIT:
+		// If followed by comma, it's likely an identifier in a list
+		return !p.peekIs(token.LPAREN) && !p.peekIs(token.LBRACKET) && !p.peekIs(token.COMMA) && !p.peekIs(token.RPAREN)
+	case token.INTO, token.SETTINGS, token.FORMAT:
+		return !p.peekIs(token.LPAREN) && !p.peekIs(token.LBRACKET) && !p.peekIs(token.EQ) && !p.peekIs(token.COMMA) && !p.peekIs(token.RPAREN)
+	// UNION, EXCEPT, INTERSECT, OFFSET are often used as identifiers
+	// Don't treat them as clause terminators to avoid breaking valid code
+	}
+	return false
 }
 
 // parseGroupingSets parses GROUPING SETS ((a), (b), (a, b))
