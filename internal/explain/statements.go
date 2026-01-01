@@ -648,9 +648,9 @@ func explainSystemQuery(sb *strings.Builder, n *ast.SystemQuery, indent string) 
 }
 
 func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string, depth int) {
-	// Determine the type string - only show if explicitly specified
+	// Determine the type string - only show if explicitly specified AND not PLAN (default)
 	typeStr := ""
-	if n.ExplicitType {
+	if n.ExplicitType && n.ExplainType != ast.ExplainPlan {
 		typeStr = " " + string(n.ExplainType)
 	}
 
