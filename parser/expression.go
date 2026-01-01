@@ -984,6 +984,16 @@ func (p *Parser) parseUnaryMinus() ast.Expression {
 	pos := p.current.Pos
 	p.nextToken() // skip minus
 
+	// Handle -Inf as a special negative infinity literal
+	if p.currentIs(token.INF) {
+		p.nextToken() // skip INF
+		return &ast.Literal{
+			Position: pos,
+			Type:     ast.LiteralFloat,
+			Value:    math.Inf(-1),
+		}
+	}
+
 	// For negative number literals followed by ::, keep them together as a signed literal
 	// This matches ClickHouse's behavior where -0::Int16 becomes CAST('-0', 'Int16')
 	if p.currentIs(token.NUMBER) && p.peekIs(token.COLONCOLON) {
@@ -1031,11 +1041,24 @@ func (p *Parser) parseUnaryMinus() ast.Expression {
 }
 
 func (p *Parser) parseUnaryPlus() ast.Expression {
+	pos := p.current.Pos
+	p.nextToken() // skip plus
+
+	// Handle +Inf as a special positive infinity literal
+	if p.currentIs(token.INF) {
+		p.nextToken() // skip INF
+		return &ast.Literal{
+			Position: pos,
+			Type:     ast.LiteralFloat,
+			Value:    math.Inf(1),
+		}
+	}
+
+	// Standard unary plus handling
 	expr := &ast.UnaryExpr{
-		Position: p.current.Pos,
+		Position: pos,
 		Op:       "+",
 	}
-	p.nextToken()
 	expr.Operand = p.parseExpression(UNARY)
 	return expr
 }
