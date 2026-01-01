@@ -81,6 +81,17 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 	}
 
 	if n.Select != nil {
+		// For INSERT with SELECT, temporarily clear Format from the SELECT
+		// (FORMAT in INSERT belongs to INSERT, not SELECT, and shouldn't be output in EXPLAIN)
+		if swu, ok := n.Select.(*ast.SelectWithUnionQuery); ok {
+			for _, sel := range swu.Selects {
+				if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
+					savedFormat := sq.Format
+					sq.Format = nil
+					defer func() { sq.Format = savedFormat }()
+				}
+			}
+		}
 		Node(sb, n.Select, depth+1)
 	}
 
