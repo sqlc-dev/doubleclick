@@ -130,6 +130,9 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseInsert()
 	case token.CREATE:
 		return p.parseCreate()
+	case token.REPLACE:
+		// REPLACE TABLE is equivalent to CREATE OR REPLACE TABLE
+		return p.parseReplace()
 	case token.DROP:
 		// Check for DROP SETTINGS PROFILE
 		if p.peekIs(token.SETTINGS) {
@@ -1821,6 +1824,26 @@ func (p *Parser) parseCreate() ast.Statement {
 		}
 	}
 
+	return create
+}
+
+// parseReplace handles REPLACE TABLE syntax, which is equivalent to CREATE OR REPLACE TABLE
+func (p *Parser) parseReplace() ast.Statement {
+	pos := p.current.Pos
+	p.nextToken() // skip REPLACE
+
+	// REPLACE TABLE name ...
+	if !p.currentIs(token.TABLE) {
+		return nil
+	}
+	p.nextToken() // skip TABLE
+
+	create := &ast.CreateQuery{
+		Position:  pos,
+		OrReplace: true, // REPLACE TABLE implies OR REPLACE
+	}
+
+	p.parseCreateTable(create)
 	return create
 }
 
@@ -5390,7 +5413,7 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 func (p *Parser) isSystemCommandKeyword() bool {
 	switch p.current.Token {
 	case token.TTL, token.SYNC, token.DROP, token.FORMAT, token.FOR, token.INDEX, token.INSERT,
-		token.PRIMARY, token.KEY:
+		token.PRIMARY, token.KEY, token.DISTRIBUTED:
 		return true
 	}
 	// Handle identifiers that are part of SYSTEM commands (not table names)
