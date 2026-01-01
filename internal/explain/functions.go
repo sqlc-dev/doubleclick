@@ -496,8 +496,11 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 			if lit.Type == ast.LiteralArray || lit.Type == ast.LiteralTuple {
 				if useArrayFormat {
 					fmt.Fprintf(sb, "%s  Literal %s\n", indent, FormatLiteral(lit))
+				} else if containsCastExpressions(lit) {
+					// Array contains CastExpr elements - output as Function array with children
+					Node(sb, n.Expr, depth+2)
 				} else {
-					// Complex content - format as string
+					// Simple literals (including negative numbers) - format as string
 					exprStr := formatExprAsString(lit)
 					fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, exprStr)
 				}
@@ -626,6 +629,37 @@ func containsBooleanElements(lit *ast.Literal) bool {
 		if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
 			if containsBooleanElements(innerLit) {
 				return true
+			}
+		}
+	}
+	return false
+}
+
+// containsCastExpressions checks if a literal array/tuple contains CastExpr elements at any level
+func containsCastExpressions(lit *ast.Literal) bool {
+	var exprs []ast.Expression
+	switch lit.Type {
+	case ast.LiteralArray, ast.LiteralTuple:
+		var ok bool
+		exprs, ok = lit.Value.([]ast.Expression)
+		if !ok {
+			return false
+		}
+	default:
+		return false
+	}
+
+	for _, e := range exprs {
+		// Check if this element is a CastExpr
+		if _, ok := e.(*ast.CastExpr); ok {
+			return true
+		}
+		// Check nested arrays/tuples
+		if innerLit, ok := e.(*ast.Literal); ok {
+			if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
+				if containsCastExpressions(innerLit) {
+					return true
+				}
 			}
 		}
 	}
