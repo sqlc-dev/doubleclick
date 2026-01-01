@@ -143,6 +143,8 @@ func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 
 	expr := p.parseExpression(LOWEST)
 	if expr != nil {
+		// Handle implicit alias (identifier without AS)
+		expr = p.parseImplicitAlias(expr)
 		exprs = append(exprs, expr)
 	}
 
@@ -154,6 +156,8 @@ func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 		}
 		expr := p.parseExpression(LOWEST)
 		if expr != nil {
+			// Handle implicit alias (identifier without AS)
+			expr = p.parseImplicitAlias(expr)
 			exprs = append(exprs, expr)
 		}
 	}
@@ -1390,6 +1394,8 @@ func (p *Parser) parseExtract() ast.Expression {
 			if p.currentIs(token.FROM) {
 				p.nextToken()
 				from := p.parseExpression(LOWEST)
+				// Handle implicit alias (identifier without AS)
+				from = p.parseImplicitAlias(from)
 				p.expect(token.RPAREN)
 				return &ast.ExtractExpr{
 					Position: pos,
@@ -1425,7 +1431,10 @@ func (p *Parser) parseExtract() ast.Expression {
 	// or extract(expr, pattern) where expr can be any expression
 	var args []ast.Expression
 	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-		args = append(args, p.parseExpression(LOWEST))
+		arg := p.parseExpression(LOWEST)
+		// Handle implicit alias (identifier without AS)
+		arg = p.parseImplicitAlias(arg)
+		args = append(args, arg)
 		if p.currentIs(token.COMMA) {
 			p.nextToken()
 		} else {

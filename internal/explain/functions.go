@@ -372,9 +372,9 @@ func explainDateAddSubWithInterval(sb *strings.Builder, opFunc string, arg1, arg
 }
 
 // handleDateDiff handles DATE_DIFF/DATEDIFF
-// DATE_DIFF(unit, date1, date2) -> dateDiff('unit', date1, date2)
+// DATE_DIFF(unit, date1, date2[, timezone]) -> dateDiff('unit', date1, date2[, timezone])
 func handleDateDiff(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int) bool {
-	if len(n.Arguments) != 3 {
+	if len(n.Arguments) < 3 || len(n.Arguments) > 4 {
 		return false
 	}
 
@@ -392,12 +392,17 @@ func handleDateDiff(sb *strings.Builder, n *ast.FunctionCall, alias string, inde
 		return false
 	}
 
+	argCount := 3
+	if len(n.Arguments) == 4 {
+		argCount = 4
+	}
+
 	if alias != "" {
 		fmt.Fprintf(sb, "%sFunction dateDiff (alias %s) (children %d)\n", indent, alias, 1)
 	} else {
 		fmt.Fprintf(sb, "%sFunction dateDiff (children %d)\n", indent, 1)
 	}
-	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 3)
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, argCount)
 
 	// First arg: unit as lowercase string literal
 	fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, strings.ToLower(unitName))
@@ -405,6 +410,11 @@ func handleDateDiff(sb *strings.Builder, n *ast.FunctionCall, alias string, inde
 	// Second and third args: dates
 	Node(sb, date1Arg, depth+2)
 	Node(sb, date2Arg, depth+2)
+
+	// Fourth arg: optional timezone
+	if len(n.Arguments) == 4 {
+		Node(sb, n.Arguments[3], depth+2)
+	}
 
 	return true
 }
@@ -1334,13 +1344,10 @@ func explainExtractExprWithAlias(sb *strings.Builder, n *ast.ExtractExpr, alias 
 	// EXTRACT is represented as Function toYear, toMonth, etc.
 	// ClickHouse uses specific function names for date/time extraction
 	fnName := extractFieldToFunction(n.Field)
-	// Use alias from parameter, or fall back to expression's alias
-	effectiveAlias := alias
-	if effectiveAlias == "" {
-		effectiveAlias = n.Alias
-	}
-	if effectiveAlias != "" {
-		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, effectiveAlias, 1)
+	// Only use the external alias parameter (from explicit AS on EXTRACT itself)
+	// NOT the alias from the From expression - that stays on the inner expression
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, 1)
 	} else {
 		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
 	}
