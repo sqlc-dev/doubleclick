@@ -72,6 +72,27 @@ func (l *Lexer) peekChar() rune {
 	return r
 }
 
+// peekCharN peeks N characters ahead (1-indexed, so peekCharN(1) is same as peekChar)
+func (l *Lexer) peekCharN(n int) rune {
+	if l.eof || n < 1 {
+		return 0
+	}
+	bytes, _ := l.reader.Peek(n * 4) // max 4 bytes per UTF-8 rune, ignore error
+	if len(bytes) == 0 {
+		return 0
+	}
+	// Decode runes until we reach the n-th one
+	offset := 0
+	for i := 0; i < n && offset < len(bytes); i++ {
+		r, size := utf8.DecodeRune(bytes[offset:])
+		if i == n-1 {
+			return r
+		}
+		offset += size
+	}
+	return 0
+}
+
 func (l *Lexer) skipWhitespace() {
 	// Skip whitespace, BOM, and other Unicode characters that ClickHouse treats as whitespace.
 	// See: https://github.com/ClickHouse/ClickHouse/blob/master/src/Parsers/Lexer.cpp
@@ -295,9 +316,13 @@ func (l *Lexer) NextToken() Item {
 		l.readChar()
 		return Item{Token: token.CARET, Value: "^", Pos: pos}
 	case '$':
-		// Dollar-quoted strings: $$...$$
+		// Dollar-quoted strings: $$...$$ or $tag$...$tag$
 		if l.peekChar() == '$' {
-			return l.readDollarQuotedString()
+			return l.readDollarQuotedString("")
+		}
+		// Check for tagged dollar quote: $tag$...$tag$
+		if tag := l.tryReadDollarTag(); tag != "" {
+			return l.readDollarQuotedString(tag)
 		}
 		// Otherwise $ starts an identifier (e.g., $alias$name$)
 		return l.readDollarIdentifier()
@@ -677,18 +702,117 @@ func (l *Lexer) readBacktickIdentifier() Item {
 	return Item{Token: token.IDENT, Value: sb.String(), Pos: pos}
 }
 
-// readDollarQuotedString reads a dollar-quoted string $$...$$
-func (l *Lexer) readDollarQuotedString() Item {
+// tryReadDollarTag checks if we have a tagged dollar quote like $tag$...$tag$ and returns the tag
+// It looks ahead without consuming characters to check, then consumes if found
+// Returns empty string if this is not a valid dollar-quoted string (e.g., just an identifier like $alias$name$)
+func (l *Lexer) tryReadDollarTag() string {
+	// Peek ahead to check the pattern $tag$ where tag is identifier chars
+	// We're currently at $, so peek from position 1 onwards
+	// Peek a large buffer to find both opening and closing tags
+	bytes, _ := l.reader.Peek(8192) // peek enough to find closing tag
+	if len(bytes) == 0 {
+		return ""
+	}
+
+	// Check if first char after $ is a valid tag start (letter or _)
+	r, size := utf8.DecodeRune(bytes)
+	if !unicode.IsLetter(r) && r != '_' {
+		return ""
+	}
+
+	// Read the tag name
+	var tag strings.Builder
+	tag.WriteRune(r)
+	offset := size
+
+	for offset < len(bytes) {
+		r, size := utf8.DecodeRune(bytes[offset:])
+		if unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_' {
+			tag.WriteRune(r)
+			offset += size
+		} else {
+			break
+		}
+	}
+
+	// Check if followed by $
+	if offset >= len(bytes) {
+		return ""
+	}
+	r, sz := utf8.DecodeRune(bytes[offset:])
+	if r != '$' {
+		return ""
+	}
+	openingTagEnd := offset + sz // position after the opening $tag$
+
+	// Now verify there's a matching closing $tag$ somewhere
+	// Build the closing tag string
+	closingTag := "$" + tag.String() + "$"
+	closingTagBytes := []byte(closingTag)
+
+	// Search for the closing tag in the remaining bytes
+	found := false
+	for i := openingTagEnd; i <= len(bytes)-len(closingTagBytes); i++ {
+		match := true
+		for j := 0; j < len(closingTagBytes); j++ {
+			if bytes[i+j] != closingTagBytes[j] {
+				match = false
+				break
+			}
+		}
+		if match {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		// No matching closing tag found - this is an identifier, not a dollar-quoted string
+		return ""
+	}
+
+	// Now consume the opening $tag$
+	l.readChar() // skip the initial $
+	for i := 0; i < tag.Len(); i++ {
+		l.readChar()
+	}
+	l.readChar() // skip the closing $
+
+	return tag.String()
+}
+
+// readDollarQuotedString reads a dollar-quoted string $$...$$ or $tag$...$tag$
+func (l *Lexer) readDollarQuotedString(tag string) Item {
 	pos := l.pos
 	var sb strings.Builder
-	l.readChar() // skip first $
-	l.readChar() // skip second $
+
+	// For untagged ($$...$$), skip the initial $$
+	if tag == "" {
+		l.readChar() // skip first $
+		l.readChar() // skip second $
+	}
+	// For tagged ($tag$...$tag$), the tag was already consumed by tryReadDollarTag
+
+	// Build the closing delimiter
+	closingDelim := "$" + tag + "$"
 
 	for !l.eof {
-		if l.ch == '$' && l.peekChar() == '$' {
-			l.readChar() // skip first $
-			l.readChar() // skip second $
-			break
+		// Check for closing delimiter
+		if l.ch == '$' {
+			// Check if this is the start of our closing delimiter
+			match := true
+			for i := 1; i < len(closingDelim) && match; i++ {
+				if l.peekCharN(i) != rune(closingDelim[i]) {
+					match = false
+				}
+			}
+			if match {
+				// Skip the closing delimiter
+				for i := 0; i < len(closingDelim); i++ {
+					l.readChar()
+				}
+				break
+			}
 		}
 		sb.WriteRune(l.ch)
 		l.readChar()
