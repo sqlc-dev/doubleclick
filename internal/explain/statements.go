@@ -177,6 +177,11 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if n.AsTableFunction != nil {
 		children++
 	}
+	// Count Format as a child if present
+	hasFormat := n.Format != ""
+	if hasFormat {
+		children++
+	}
 	// ClickHouse adds an extra space before (children N) for CREATE DATABASE
 	if n.CreateDatabase {
 		fmt.Fprintf(sb, "%sCreateQuery %s  (children %d)\n", indent, EscapeIdentifier(name), children)
@@ -252,7 +257,15 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	}
 	// For materialized views, output AsSelect before storage definition
 	if n.Materialized && n.AsSelect != nil {
+		// Set context flag to prevent Format from being output at SelectWithUnionQuery level
+		// (it will be output at CreateQuery level instead)
+		if hasFormat {
+			inCreateQueryContext = true
+		}
 		Node(sb, n.AsSelect, depth+1)
+		if hasFormat {
+			inCreateQueryContext = false
+		}
 	}
 	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0
 	if hasStorage {
@@ -269,24 +282,9 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		if len(n.PrimaryKey) > 0 {
 			storageChildren++
 		}
-		// SAMPLE BY is only shown in EXPLAIN AST when it's a function (not a simple identifier)
-		// and when it's different from ORDER BY
+		// SAMPLE BY is always shown in EXPLAIN AST when present
 		if n.SampleBy != nil {
-			if _, isIdent := n.SampleBy.(*ast.Identifier); !isIdent {
-				// Check if SAMPLE BY equals ORDER BY - if so, don't show it
-				showSampleBy := true
-				if len(n.OrderBy) == 1 {
-					var orderBySb, sampleBySb strings.Builder
-					Node(&orderBySb, n.OrderBy[0], 0)
-					Node(&sampleBySb, n.SampleBy, 0)
-					if orderBySb.String() == sampleBySb.String() {
-						showSampleBy = false
-					}
-				}
-				if showSampleBy {
-					storageChildren++
-				}
-			}
+			storageChildren++
 		}
 		if n.TTL != nil {
 			storageChildren++
@@ -382,24 +380,9 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				}
 			}
 		}
-		// SAMPLE BY is only shown in EXPLAIN AST when it's a function (not a simple identifier)
-		// and when it's different from ORDER BY
+		// SAMPLE BY is always shown in EXPLAIN AST when present
 		if n.SampleBy != nil {
-			if _, isIdent := n.SampleBy.(*ast.Identifier); !isIdent {
-				// Check if SAMPLE BY equals ORDER BY - if so, don't show it
-				showSampleBy := true
-				if len(n.OrderBy) == 1 {
-					var orderBySb, sampleBySb strings.Builder
-					Node(&orderBySb, n.OrderBy[0], 0)
-					Node(&sampleBySb, n.SampleBy, 0)
-					if orderBySb.String() == sampleBySb.String() {
-						showSampleBy = false
-					}
-				}
-				if showSampleBy {
-					Node(sb, n.SampleBy, storageChildDepth)
-				}
-			}
+			Node(sb, n.SampleBy, storageChildDepth)
 		}
 		if n.TTL != nil {
 			fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", storageIndent)
@@ -416,12 +399,24 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	}
 	// For non-materialized views, output AsSelect after storage
 	if n.AsSelect != nil && !n.Materialized {
+		// Set context flag to prevent Format from being output at SelectWithUnionQuery level
+		// (it will be output at CreateQuery level instead)
+		if hasFormat {
+			inCreateQueryContext = true
+		}
 		// AS SELECT is output directly without Subquery wrapper
 		Node(sb, n.AsSelect, depth+1)
+		if hasFormat {
+			inCreateQueryContext = false
+		}
 	}
 	if n.AsTableFunction != nil {
 		// AS table_function(...) is output directly
 		Node(sb, n.AsTableFunction, depth+1)
+	}
+	// Output FORMAT clause if present
+	if hasFormat {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
 	}
 }
 
@@ -490,18 +485,41 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 	}
 	// Check if we have a database-qualified name (for DROP TABLE db.table)
 	hasDatabase := n.Database != "" && !n.DropDatabase
+	hasFormat := n.Format != ""
+
 	if hasDatabase {
-		// Database-qualified: DropQuery db table (children 2)
-		fmt.Fprintf(sb, "%sDropQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), 2)
+		// Database-qualified: DropQuery db table (children 2 or 3)
+		children := 2
+		if hasFormat {
+			children = 3
+		}
+		fmt.Fprintf(sb, "%sDropQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(n.Database))
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+		if hasFormat {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
 	} else if n.DropDatabase {
 		// DROP DATABASE uses different spacing
-		fmt.Fprintf(sb, "%sDropQuery %s  (children %d)\n", indent, EscapeIdentifier(name), 1)
+		children := 1
+		if hasFormat {
+			children = 2
+		}
+		fmt.Fprintf(sb, "%sDropQuery %s  (children %d)\n", indent, EscapeIdentifier(name), children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+		if hasFormat {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
 	} else {
-		fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), 1)
+		children := 1
+		if hasFormat {
+			children = 2
+		}
+		fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+		if hasFormat {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
 	}
 }
 
@@ -1075,6 +1093,10 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 	if len(n.Settings) > 0 {
 		children++ // Add Set child for SETTINGS
 	}
+	hasFormat := n.Format != ""
+	if hasFormat {
+		children++ // Add Identifier for FORMAT
+	}
 	if n.Database != "" {
 		fmt.Fprintf(sb, "%sAlterQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
 	} else {
@@ -1091,6 +1113,9 @@ func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, de
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 	if len(n.Settings) > 0 {
 		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
+	if hasFormat {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
 	}
 }
 
@@ -1152,6 +1177,10 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		if cmd.ColumnName != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ColumnName)
 		}
+		if cmd.Comment != "" {
+			fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, escapeStringLiteral(cmd.Comment))
+		}
+	case ast.AlterModifyComment:
 		if cmd.Comment != "" {
 			fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, escapeStringLiteral(cmd.Comment))
 		}
@@ -1334,6 +1363,10 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 		if cmd.ColumnName != "" {
 			children++
 		}
+		if cmd.Comment != "" {
+			children++
+		}
+	case ast.AlterModifyComment:
 		if cmd.Comment != "" {
 			children++
 		}
@@ -1533,4 +1566,46 @@ func explainCreateIndexQuery(sb *strings.Builder, n *ast.CreateIndexQuery, inden
 
 	// Child 3: Table name
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+}
+
+func explainAssignment(sb *strings.Builder, n *ast.Assignment, indent string, depth int) {
+	if n == nil {
+		return
+	}
+	// Assignment col_name (children 1)
+	fmt.Fprintf(sb, "%sAssignment %s (children 1)\n", indent, n.Column)
+	if n.Value != nil {
+		Node(sb, n.Value, depth+1)
+	}
+}
+
+func explainUpdateQuery(sb *strings.Builder, n *ast.UpdateQuery, indent string, depth int) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.UpdateQuery\n", indent)
+		return
+	}
+
+	// Count children: always 3 (identifier, where condition, assignments)
+	children := 3
+
+	// UpdateQuery with two spaces before table name
+	if n.Database != "" {
+		fmt.Fprintf(sb, "%sUpdateQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
+	} else {
+		fmt.Fprintf(sb, "%sUpdateQuery  %s (children %d)\n", indent, n.Table, children)
+	}
+
+	// Child 1: Table identifier
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+
+	// Child 2: WHERE condition
+	if n.Where != nil {
+		Node(sb, n.Where, depth+1)
+	}
+
+	// Child 3: Assignments wrapped in ExpressionList
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Assignments))
+	for _, assign := range n.Assignments {
+		Node(sb, assign, depth+2)
+	}
 }

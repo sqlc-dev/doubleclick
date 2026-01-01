@@ -72,7 +72,8 @@ type SelectQuery struct {
 	Having      Expression            `json:"having,omitempty"`
 	Qualify     Expression            `json:"qualify,omitempty"`
 	Window      []*WindowDefinition   `json:"window,omitempty"`
-	OrderBy     []*OrderByElement     `json:"order_by,omitempty"`
+	OrderBy      []*OrderByElement      `json:"order_by,omitempty"`
+	Interpolate  []*InterpolateElement  `json:"interpolate,omitempty"`
 	Limit            Expression            `json:"limit,omitempty"`
 	LimitBy          []Expression          `json:"limit_by,omitempty"`
 	LimitByLimit     Expression            `json:"limit_by_limit,omitempty"`     // LIMIT value before BY (e.g., LIMIT 1 BY x LIMIT 3)
@@ -212,6 +213,17 @@ type OrderByElement struct {
 func (o *OrderByElement) Pos() token.Position { return o.Position }
 func (o *OrderByElement) End() token.Position { return o.Position }
 
+// InterpolateElement represents a single column interpolation in INTERPOLATE clause.
+// Example: INTERPOLATE (value AS value + 1)
+type InterpolateElement struct {
+	Position token.Position `json:"-"`
+	Column   string         `json:"column"`
+	Value    Expression     `json:"value,omitempty"` // nil if just column name
+}
+
+func (i *InterpolateElement) Pos() token.Position { return i.Position }
+func (i *InterpolateElement) End() token.Position { return i.Position }
+
 // SettingExpr represents a setting expression.
 type SettingExpr struct {
 	Position token.Position `json:"-"`
@@ -284,6 +296,7 @@ type CreateQuery struct {
 	FunctionName       string                            `json:"function_name,omitempty"`
 	FunctionBody     Expression           `json:"function_body,omitempty"`
 	UserName         string               `json:"user_name,omitempty"`
+	Format           string               `json:"format,omitempty"` // For FORMAT clause
 }
 
 func (c *CreateQuery) Pos() token.Position { return c.Position }
@@ -493,6 +506,7 @@ type DropQuery struct {
 	OnCluster       string             `json:"on_cluster,omitempty"`
 	DropDatabase    bool               `json:"drop_database,omitempty"`
 	Sync            bool               `json:"sync,omitempty"`
+	Format          string             `json:"format,omitempty"` // For FORMAT clause
 }
 
 func (d *DropQuery) Pos() token.Position { return d.Position }
@@ -512,6 +526,20 @@ func (u *UndropQuery) Pos() token.Position { return u.Position }
 func (u *UndropQuery) End() token.Position { return u.Position }
 func (u *UndropQuery) statementNode()      {}
 
+// UpdateQuery represents a standalone UPDATE statement.
+// In ClickHouse, UPDATE is syntactic sugar for ALTER TABLE ... UPDATE
+type UpdateQuery struct {
+	Position    token.Position `json:"-"`
+	Database    string         `json:"database,omitempty"`
+	Table       string         `json:"table"`
+	Assignments []*Assignment  `json:"assignments"`
+	Where       Expression     `json:"where,omitempty"`
+}
+
+func (u *UpdateQuery) Pos() token.Position { return u.Position }
+func (u *UpdateQuery) End() token.Position { return u.Position }
+func (u *UpdateQuery) statementNode()      {}
+
 // AlterQuery represents an ALTER statement.
 type AlterQuery struct {
 	Position  token.Position  `json:"-"`
@@ -520,6 +548,7 @@ type AlterQuery struct {
 	Commands  []*AlterCommand `json:"commands"`
 	OnCluster string          `json:"on_cluster,omitempty"`
 	Settings  []*SettingExpr  `json:"settings,omitempty"`
+	Format    string          `json:"format,omitempty"` // For FORMAT clause
 }
 
 func (a *AlterQuery) Pos() token.Position { return a.Position }
@@ -624,6 +653,7 @@ const (
 	AlterDropStatistics     AlterCommandType = "DROP_STATISTICS"
 	AlterClearStatistics    AlterCommandType = "CLEAR_STATISTICS"
 	AlterMaterializeStatistics AlterCommandType = "MATERIALIZE_STATISTICS"
+	AlterModifyComment         AlterCommandType = "MODIFY_COMMENT"
 )
 
 // TruncateQuery represents a TRUNCATE statement.

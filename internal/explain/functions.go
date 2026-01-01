@@ -109,6 +109,11 @@ func windowSpecHasContent(w *ast.WindowSpec) bool {
 func handleSpecialFunction(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int) bool {
 	fnName := strings.ToUpper(n.Name)
 
+	// Handle quantified comparison operators (ANY/ALL with comparison operators)
+	if handled := handleQuantifiedComparison(sb, n, alias, indent, depth); handled {
+		return true
+	}
+
 	// POSITION('ll' IN 'Hello') -> position('Hello', 'll')
 	if fnName == "POSITION" && len(n.Arguments) == 1 {
 		if inExpr, ok := n.Arguments[0].(*ast.InExpr); ok {
@@ -134,6 +139,140 @@ func handleSpecialFunction(sb *strings.Builder, n *ast.FunctionCall, alias strin
 	}
 
 	return false
+}
+
+// handleQuantifiedComparison handles ANY/ALL with comparison operators
+// Returns true if the function was handled, false otherwise.
+func handleQuantifiedComparison(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int) bool {
+	fnName := strings.ToLower(n.Name)
+
+	// Check if this is a quantified comparison function
+	var modifier, op string
+	if strings.HasPrefix(fnName, "any") {
+		modifier = "any"
+		op = fnName[3:]
+	} else if strings.HasPrefix(fnName, "all") {
+		modifier = "all"
+		op = fnName[3:]
+	} else {
+		return false
+	}
+
+	// Must have exactly 2 arguments: left expr and subquery
+	if len(n.Arguments) != 2 {
+		return false
+	}
+
+	subquery, ok := n.Arguments[1].(*ast.Subquery)
+	if !ok {
+		return false
+	}
+
+	// Handle based on the operator and modifier
+	switch op {
+	case "equals":
+		if modifier == "any" {
+			// x == ANY (subquery) -> in(x, subquery)
+			return false // Let NormalizeFunctionName handle this
+		}
+		// x == ALL (subquery) -> complex with singleValueOrNull
+		outputQuantifiedWithAggregate(sb, n.Arguments[0], subquery, "in", "singleValueOrNull", alias, indent, depth)
+		return true
+
+	case "notequals":
+		if modifier == "all" {
+			// x != ALL (subquery) -> notIn(x, subquery)
+			return false // Let NormalizeFunctionName handle this
+		}
+		// x != ANY (subquery) -> complex notIn with singleValueOrNull
+		outputQuantifiedWithAggregate(sb, n.Arguments[0], subquery, "notIn", "singleValueOrNull", alias, indent, depth)
+		return true
+
+	case "less":
+		if modifier == "any" {
+			// x < ANY (subquery) -> x < max(subquery)
+			outputQuantifiedWithAggregate(sb, n.Arguments[0], subquery, "less", "max", alias, indent, depth)
+		} else {
+			// x < ALL (subquery) -> x < min(subquery)
+			outputQuantifiedWithAggregate(sb, n.Arguments[0], subquery, "less", "min", alias, indent, depth)
+		}
+		return true
+
+	case "lessorequals":
+		if modifier == "any" {
+			// x <= ANY (subquery) -> x <= max(subquery)
+			outputQuantifiedWithAggregate(sb, n.Arguments[0], subquery, "lessOrEquals", "max", alias, indent, depth)
+		} else {
+			// x <= ALL (subquery) -> x <= min(subquery)
+			outputQuantifiedWithAggregate(sb, n.Arguments[0], subquery, "lessOrEquals", "min", alias, indent, depth)
+		}
+		return true
+
+	case "greater":
+		if modifier == "any" {
+			// x > ANY (subquery) -> x > min(subquery)
+			outputQuantifiedWithAggregate(sb, n.Arguments[0], subquery, "greater", "min", alias, indent, depth)
+		} else {
+			// x > ALL (subquery) -> x > max(subquery)
+			outputQuantifiedWithAggregate(sb, n.Arguments[0], subquery, "greater", "max", alias, indent, depth)
+		}
+		return true
+
+	case "greaterorequals":
+		if modifier == "any" {
+			// x >= ANY (subquery) -> x >= min(subquery)
+			outputQuantifiedWithAggregate(sb, n.Arguments[0], subquery, "greaterOrEquals", "min", alias, indent, depth)
+		} else {
+			// x >= ALL (subquery) -> x >= max(subquery)
+			outputQuantifiedWithAggregate(sb, n.Arguments[0], subquery, "greaterOrEquals", "max", alias, indent, depth)
+		}
+		return true
+	}
+
+	return false
+}
+
+// outputQuantifiedWithAggregate outputs the ClickHouse AST format for quantified comparisons
+// with an aggregate function wrapped around the subquery
+func outputQuantifiedWithAggregate(sb *strings.Builder, left ast.Expression, subquery *ast.Subquery, compFunc, aggFunc string, alias string, indent string, depth int) {
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, compFunc, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, compFunc, 1)
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+	Node(sb, left, depth+2)
+
+	// Output the subquery wrapped with aggregate function
+	// Structure: Subquery -> SelectWithUnionQuery -> ExpressionList -> SelectQuery with 4 children
+	fmt.Fprintf(sb, "%s  Subquery (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s   SelectWithUnionQuery (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s    ExpressionList (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s     SelectQuery (children %d)\n", indent, 4)
+
+	// First ExpressionList with aggregate function
+	fmt.Fprintf(sb, "%s      ExpressionList (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s       Function %s (children %d)\n", indent, aggFunc, 1)
+	fmt.Fprintf(sb, "%s        ExpressionList (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s         Asterisk\n", indent)
+
+	// First TablesInSelectQuery - wrap the original subquery
+	fmt.Fprintf(sb, "%s      TablesInSelectQuery (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s       TablesInSelectQueryElement (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s        TableExpression (children %d)\n", indent, 1)
+	Node(sb, subquery, depth+9)
+
+	// Second ExpressionList with aggregate function (repeated)
+	fmt.Fprintf(sb, "%s      ExpressionList (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s       Function %s (children %d)\n", indent, aggFunc, 1)
+	fmt.Fprintf(sb, "%s        ExpressionList (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s         Asterisk\n", indent)
+
+	// Second TablesInSelectQuery (repeated)
+	fmt.Fprintf(sb, "%s      TablesInSelectQuery (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s       TablesInSelectQueryElement (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s        TableExpression (children %d)\n", indent, 1)
+	Node(sb, subquery, depth+9)
 }
 
 // explainPositionWithIn outputs POSITION(needle IN haystack) as position(haystack, needle)
@@ -1172,8 +1311,16 @@ func parseIntervalString(s string) (value string, unit string) {
 }
 
 func explainExistsExpr(sb *strings.Builder, n *ast.ExistsExpr, indent string, depth int) {
+	explainExistsExprWithAlias(sb, n, "", indent, depth)
+}
+
+func explainExistsExprWithAlias(sb *strings.Builder, n *ast.ExistsExpr, alias string, indent string, depth int) {
 	// EXISTS is represented as Function exists
-	fmt.Fprintf(sb, "%sFunction exists (children %d)\n", indent, 1)
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction exists (alias %s) (children %d)\n", indent, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction exists (children %d)\n", indent, 1)
+	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 	fmt.Fprintf(sb, "%s  Subquery (children %d)\n", indent, 1)
 	Node(sb, n.Query, depth+3)

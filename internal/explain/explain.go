@@ -12,6 +12,10 @@ import (
 // This affects how negated literals with aliases are formatted
 var inSubqueryContext bool
 
+// inCreateQueryContext is a package-level flag to track when we're inside a CreateQuery
+// This affects whether FORMAT is output at SelectWithUnionQuery level (it shouldn't be, as CreateQuery outputs it)
+var inCreateQueryContext bool
+
 // Explain returns the EXPLAIN AST output for a statement, matching ClickHouse's format.
 func Explain(stmt ast.Statement) string {
 	var sb strings.Builder
@@ -57,6 +61,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 	// Expressions
 	case *ast.OrderByElement:
 		explainOrderByElement(sb, n, indent, depth)
+	case *ast.InterpolateElement:
+		explainInterpolateElement(sb, n, indent, depth)
 	case *ast.Identifier:
 		explainIdentifier(sb, n, indent)
 	case *ast.Literal:
@@ -236,6 +242,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainCheckQuery(sb, n, indent)
 	case *ast.CreateIndexQuery:
 		explainCreateIndexQuery(sb, n, indent, depth)
+	case *ast.UpdateQuery:
+		explainUpdateQuery(sb, n, indent, depth)
 
 	// Types
 	case *ast.DataType:
@@ -262,6 +270,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainDictionaryLayout(sb, n, indent, depth)
 	case *ast.DictionaryRange:
 		explainDictionaryRange(sb, n, indent, depth)
+	case *ast.Assignment:
+		explainAssignment(sb, n, indent, depth)
 
 	default:
 		// For unhandled types, just print the type name

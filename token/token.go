@@ -123,6 +123,7 @@ const (
 	INNER
 	INSERT
 	INTERSECT
+	INTERPOLATE
 	INTERVAL
 	INTO
 	IS
@@ -320,6 +321,7 @@ var tokens = [...]string{
 	INNER:        "INNER",
 	INSERT:       "INSERT",
 	INTERSECT:    "INTERSECT",
+	INTERPOLATE:  "INTERPOLATE",
 	INTERVAL:     "INTERVAL",
 	INTO:         "INTO",
 	IS:           "IS",

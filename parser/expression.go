@@ -843,10 +843,16 @@ func (p *Parser) parseNumber() ast.Expression {
 			lit.Source = value // Preserve original source text (e.g., "0.0" vs "0")
 		}
 	} else if isHexFloat {
-		// Parse hex float (Go doesn't support this directly, approximate)
-		// For now, store as string - ClickHouse will interpret it
-		lit.Type = ast.LiteralString
-		lit.Value = value
+		// Parse hex float (Go 1.13+ supports this via ParseFloat)
+		f, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			lit.Type = ast.LiteralString
+			lit.Value = value
+		} else {
+			lit.Type = ast.LiteralFloat
+			lit.Value = f
+			lit.Source = value // Preserve original source text
+		}
 	} else {
 		// Determine the base for parsing
 		// - 0x/0X: hex (base 16)
@@ -1727,7 +1733,7 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 
 	// Check for ANY/ALL subquery comparison modifier: expr >= ANY(subquery)
 	if p.currentIs(token.ANY) || p.currentIs(token.ALL) {
-		modifier := strings.ToUpper(p.current.Value)
+		modifier := strings.ToLower(p.current.Value)
 		p.nextToken()
 		if p.currentIs(token.LPAREN) {
 			p.nextToken()
@@ -1735,10 +1741,13 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 			if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 				subquery := p.parseSelectWithUnion()
 				p.expect(token.RPAREN)
-				// Wrap the comparison in a function call representing ANY/ALL
+				// Create function name that encodes both modifier and operator
+				// e.g., anyEquals, allLess, anyGreaterOrEquals, etc.
+				opName := operatorToName(expr.Op)
+				fnName := modifier + opName
 				return &ast.FunctionCall{
 					Position: expr.Position,
-					Name:     strings.ToLower(modifier) + "Match",
+					Name:     fnName,
 					Arguments: []ast.Expression{
 						left,
 						&ast.Subquery{Position: expr.Position, Query: subquery},
@@ -1763,6 +1772,27 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 
 	expr.Right = p.parseExpression(prec)
 	return expr
+}
+
+// operatorToName converts a comparison operator to a capitalized name for use
+// in ANY/ALL function names (e.g., "==" -> "Equals", "<" -> "Less")
+func operatorToName(op string) string {
+	switch op {
+	case "=", "==":
+		return "Equals"
+	case "!=", "<>":
+		return "NotEquals"
+	case "<":
+		return "Less"
+	case "<=":
+		return "LessOrEquals"
+	case ">":
+		return "Greater"
+	case ">=":
+		return "GreaterOrEquals"
+	default:
+		return "Equals" // fallback
+	}
 }
 
 func (p *Parser) parseLikeExpression(left ast.Expression, not bool) ast.Expression {

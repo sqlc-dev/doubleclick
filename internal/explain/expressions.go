@@ -235,6 +235,31 @@ func containsNonLiteralExpressions(exprs []ast.Expression) bool {
 	return false
 }
 
+// containsNonLiteralInNested checks if an array or tuple literal contains
+// non-literal elements at any nesting level (identifiers, function calls, etc.)
+func containsNonLiteralInNested(lit *ast.Literal) bool {
+	if lit.Type != ast.LiteralArray && lit.Type != ast.LiteralTuple {
+		return false
+	}
+	exprs, ok := lit.Value.([]ast.Expression)
+	if !ok {
+		return false
+	}
+	for _, e := range exprs {
+		// Check if this element is a non-literal (identifier, function call, etc.)
+		if _, isLit := e.(*ast.Literal); !isLit {
+			return true
+		}
+		// Recursively check nested arrays/tuples
+		if innerLit, ok := e.(*ast.Literal); ok {
+			if containsNonLiteralInNested(innerLit) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // containsTuples checks if a slice of expressions contains any tuple literals
 func containsTuples(exprs []ast.Expression) bool {
 	for _, e := range exprs {
@@ -377,10 +402,23 @@ func explainUnaryExpr(sb *strings.Builder, n *ast.UnaryExpr, indent string, dept
 				// Convert positive integer to negative
 				switch val := lit.Value.(type) {
 				case int64:
-					fmt.Fprintf(sb, "%sLiteral Int64_%d\n", indent, -val)
+					negVal := -val
+					// ClickHouse normalizes -0 to UInt64_0
+					if negVal == 0 {
+						fmt.Fprintf(sb, "%sLiteral UInt64_0\n", indent)
+					} else if negVal > 0 {
+						fmt.Fprintf(sb, "%sLiteral UInt64_%d\n", indent, negVal)
+					} else {
+						fmt.Fprintf(sb, "%sLiteral Int64_%d\n", indent, negVal)
+					}
 					return
 				case uint64:
-					fmt.Fprintf(sb, "%sLiteral Int64_-%d\n", indent, val)
+					// ClickHouse normalizes -0 to UInt64_0
+					if val == 0 {
+						fmt.Fprintf(sb, "%sLiteral UInt64_0\n", indent)
+					} else {
+						fmt.Fprintf(sb, "%sLiteral Int64_-%d\n", indent, val)
+					}
 					return
 				}
 			case ast.LiteralFloat:
@@ -432,11 +470,23 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 						needsFunctionFormat = true
 						break
 					}
+					// Also check if nested arrays/tuples contain non-literal elements
+					if lit, ok := expr.(*ast.Literal); ok {
+						if containsNonLiteralInNested(lit) {
+							needsFunctionFormat = true
+							break
+						}
+					}
 				}
 				if needsFunctionFormat {
 					// Render as Function tuple with alias
 					fmt.Fprintf(sb, "%sFunction tuple (alias %s) (children %d)\n", indent, escapeAlias(n.Alias), 1)
-					fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
+					// For empty ExpressionList, don't include children count
+					if len(exprs) > 0 {
+						fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
+					} else {
+						fmt.Fprintf(sb, "%s ExpressionList\n", indent)
+					}
 					for _, expr := range exprs {
 						Node(sb, expr, depth+2)
 					}
@@ -460,6 +510,11 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 					}
 					// Check for identifiers - use Function array
 					if _, ok := expr.(*ast.Identifier); ok {
+						needsFunctionFormat = true
+						break
+					}
+					// Check for function calls - use Function array
+					if _, ok := expr.(*ast.FunctionCall); ok {
 						needsFunctionFormat = true
 						break
 					}
@@ -577,6 +632,9 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 	case *ast.CaseExpr:
 		// CASE expressions with alias
 		explainCaseExprWithAlias(sb, e, n.Alias, indent, depth)
+	case *ast.ExistsExpr:
+		// EXISTS expressions with alias
+		explainExistsExprWithAlias(sb, e, n.Alias, indent, depth)
 	default:
 		// For other types, recursively explain and add alias info
 		Node(sb, n.Expr, depth)

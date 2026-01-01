@@ -200,6 +200,8 @@ func (p *Parser) parseStatement() ast.Statement {
 			return p.parseSetRole()
 		}
 		return p.parseSet()
+	case token.UPDATE:
+		return p.parseUpdate()
 	case token.OPTIMIZE:
 		return p.parseOptimize()
 	case token.SYSTEM:
@@ -284,14 +286,18 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 			}
 			p.nextToken() // skip INTERSECT/EXCEPT
 
-			// Handle DISTINCT if present (ALL case is handled in the loop condition)
-			if p.currentIs(token.DISTINCT) {
+			// Handle ALL or DISTINCT if present
+			if p.currentIs(token.ALL) {
+				op += " ALL"
+				p.nextToken()
+			} else if p.currentIs(token.DISTINCT) {
 				op += " DISTINCT"
 				p.nextToken()
 			}
 			ops = append(ops, op)
 
-			// Parse the next select
+			// Parse the next operand - can be a SELECT with UNION/UNION ALL
+			// (UNION has higher precedence than EXCEPT)
 			var nextStmt ast.Statement
 			if p.currentIs(token.LPAREN) {
 				p.nextToken() // skip (
@@ -302,11 +308,11 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 				p.expect(token.RPAREN)
 				nextStmt = nested
 			} else {
-				sel := p.parseSelect()
-				if sel == nil {
+				// Parse SELECT with possible UNION/UNION ALL
+				nextStmt = p.parseSelectWithUnionOnly()
+				if nextStmt == nil {
 					break
 				}
-				nextStmt = sel
 			}
 			stmts = append(stmts, nextStmt)
 		}
@@ -331,6 +337,13 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 
 	// Parse UNION/INTERSECT ALL/EXCEPT ALL clauses
 	for p.currentIs(token.UNION) || p.currentIs(token.EXCEPT) || p.currentIs(token.INTERSECT) {
+		// Check if we hit INTERSECT/EXCEPT that should use wrapper (not ALL)
+		// If so, we need to wrap the current UNION result as the first operand
+		if p.isIntersectExceptWithWrapper() {
+			// Wrap current query as first operand of INTERSECT/EXCEPT
+			return p.parseIntersectExceptWithFirstOperand(query)
+		}
+
 		var setOp string
 		if p.currentIs(token.UNION) {
 			setOp = "UNION"
@@ -376,23 +389,131 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 	return query
 }
 
+// parseIntersectExceptWithFirstOperand handles the case where UNION is followed by INTERSECT/EXCEPT
+// The unionQuery contains the selects that form the first operand
+func (p *Parser) parseIntersectExceptWithFirstOperand(unionQuery *ast.SelectWithUnionQuery) *ast.SelectWithUnionQuery {
+	// Collect all operands and operators
+	stmts := []ast.Statement{unionQuery}
+	var ops []string
+
+	// Parse all INTERSECT/EXCEPT clauses
+	for p.isIntersectExceptWithWrapper() {
+		var op string
+		if p.currentIs(token.EXCEPT) {
+			op = "EXCEPT"
+		} else {
+			op = "INTERSECT"
+		}
+		p.nextToken() // skip INTERSECT/EXCEPT
+
+		// Handle ALL or DISTINCT if present
+		if p.currentIs(token.ALL) {
+			op += " ALL"
+			p.nextToken()
+		} else if p.currentIs(token.DISTINCT) {
+			op += " DISTINCT"
+			p.nextToken()
+		}
+		ops = append(ops, op)
+
+		// Parse the next select
+		var nextStmt ast.Statement
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			nested := p.parseSelectWithUnion()
+			if nested == nil {
+				break
+			}
+			p.expect(token.RPAREN)
+			nextStmt = nested
+		} else {
+			sel := p.parseSelect()
+			if sel == nil {
+				break
+			}
+			nextStmt = sel
+		}
+		stmts = append(stmts, nextStmt)
+	}
+
+	// Build the tree with proper precedence
+	result := buildIntersectExceptTree(stmts, ops)
+
+	// Return wrapped in SelectWithUnionQuery
+	return &ast.SelectWithUnionQuery{
+		Position: unionQuery.Position,
+		Selects:  []ast.Statement{result},
+	}
+}
+
+// parseSelectWithUnionOnly parses SELECT with UNION/UNION ALL but stops at INTERSECT/EXCEPT.
+// This is used for parsing operands in EXCEPT expressions where UNION has higher precedence.
+func (p *Parser) parseSelectWithUnionOnly() ast.Statement {
+	// Parse first SELECT
+	sel := p.parseSelect()
+	if sel == nil {
+		return nil
+	}
+
+	// Check if followed by UNION (but not INTERSECT/EXCEPT which end this operand)
+	if !p.currentIs(token.UNION) {
+		return sel
+	}
+
+	// Build SelectWithUnionQuery for UNION/UNION ALL chain
+	query := &ast.SelectWithUnionQuery{
+		Position: sel.Pos(),
+		Selects:  []ast.Statement{sel},
+	}
+
+	// Parse UNION/UNION ALL clauses
+	for p.currentIs(token.UNION) {
+		p.nextToken() // skip UNION
+
+		var mode string
+		if p.currentIs(token.ALL) {
+			query.UnionAll = true
+			mode = "ALL"
+			p.nextToken()
+		} else if p.currentIs(token.DISTINCT) {
+			mode = "DISTINCT"
+			p.nextToken()
+		}
+		query.UnionModes = append(query.UnionModes, "UNION "+mode)
+
+		// Handle parenthesized subqueries
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			nested := p.parseSelectWithUnion()
+			if nested == nil {
+				break
+			}
+			p.expect(token.RPAREN)
+			for _, s := range nested.Selects {
+				query.Selects = append(query.Selects, s)
+			}
+		} else {
+			nextSel := p.parseSelect()
+			if nextSel == nil {
+				break
+			}
+			query.Selects = append(query.Selects, nextSel)
+		}
+	}
+
+	return query
+}
+
 // isIntersectExceptWithWrapper checks if the current token is INTERSECT or EXCEPT
 // that should use a SelectIntersectExceptQuery wrapper.
-// Only INTERSECT ALL and EXCEPT ALL are flattened (no wrapper).
-// INTERSECT DISTINCT, INTERSECT, EXCEPT DISTINCT, and EXCEPT all use the wrapper.
+// All INTERSECT and EXCEPT variants (including ALL and DISTINCT) use the wrapper.
 func (p *Parser) isIntersectExceptWithWrapper() bool {
-	if !p.currentIs(token.EXCEPT) && !p.currentIs(token.INTERSECT) {
-		return false
-	}
-	// INTERSECT ALL and EXCEPT ALL are flattened (no wrapper)
-	// All other cases (DISTINCT or no modifier) use the wrapper
-	nextTok := p.peek.Token
-	return nextTok != token.ALL
+	return p.currentIs(token.EXCEPT) || p.currentIs(token.INTERSECT)
 }
 
 // isIntersectOp checks if the operator is an INTERSECT variant (not EXCEPT)
 func isIntersectOp(op string) bool {
-	return op == "INTERSECT" || op == "INTERSECT DISTINCT"
+	return strings.HasPrefix(op, "INTERSECT")
 }
 
 // buildIntersectExceptTree builds the AST tree respecting operator precedence.
@@ -611,6 +732,12 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 			return nil
 		}
 		sel.OrderBy = p.parseOrderByList()
+	}
+
+	// Parse INTERPOLATE clause (comes after ORDER BY ... WITH FILL)
+	if p.currentIs(token.INTERPOLATE) {
+		p.nextToken()
+		sel.Interpolate = p.parseInterpolateList()
 	}
 
 	// Parse LIMIT clause
@@ -1246,6 +1373,54 @@ func (p *Parser) parseOrderByList() []*ast.OrderByElement {
 	return elements
 }
 
+// parseInterpolateList parses INTERPOLATE (col1 AS expr1, col2, col3 AS expr3)
+func (p *Parser) parseInterpolateList() []*ast.InterpolateElement {
+	var elements []*ast.InterpolateElement
+
+	// Expect opening parenthesis
+	if !p.currentIs(token.LPAREN) {
+		return elements
+	}
+	p.nextToken()
+
+	for {
+		if p.currentIs(token.RPAREN) {
+			break
+		}
+
+		// Column name
+		if !p.currentIs(token.IDENT) && !p.current.Token.IsKeyword() {
+			break
+		}
+
+		elem := &ast.InterpolateElement{
+			Position: p.current.Pos,
+			Column:   p.current.Value,
+		}
+		p.nextToken()
+
+		// Optional AS expression
+		if p.currentIs(token.AS) {
+			p.nextToken()
+			elem.Value = p.parseExpression(LOWEST)
+		}
+
+		elements = append(elements, elem)
+
+		if !p.currentIs(token.COMMA) {
+			break
+		}
+		p.nextToken()
+	}
+
+	// Expect closing parenthesis
+	if p.currentIs(token.RPAREN) {
+		p.nextToken()
+	}
+
+	return elements
+}
+
 func (p *Parser) parseSettingsList() []*ast.SettingExpr {
 	var settings []*ast.SettingExpr
 
@@ -1565,6 +1740,19 @@ func (p *Parser) parseCreate() ast.Statement {
 	default:
 		p.errors = append(p.errors, fmt.Errorf("expected TABLE, DATABASE, VIEW, FUNCTION, USER after CREATE"))
 		return nil
+	}
+
+	// Handle FORMAT clause (for things like CREATE TABLE ... FORMAT Null)
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		// Store format name (Null, etc.)
+		if p.currentIs(token.NULL) {
+			create.Format = "Null"
+			p.nextToken()
+		} else if p.currentIs(token.IDENT) {
+			create.Format = p.current.Value
+			p.nextToken()
+		}
 	}
 
 	return create
@@ -2010,6 +2198,17 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		p.nextToken()
 		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) || p.currentIs(token.LPAREN) {
 			create.AsSelect = p.parseSelectWithUnion()
+			// Extract FORMAT from inner SelectQuery and move it to CreateQuery
+			// For CREATE VIEW/MATERIALIZED VIEW, FORMAT should be at CreateQuery level
+			if swu, ok := create.AsSelect.(*ast.SelectWithUnionQuery); ok && swu != nil {
+				for _, sel := range swu.Selects {
+					if sq, ok := sel.(*ast.SelectQuery); ok && sq != nil && sq.Format != nil {
+						create.Format = sq.Format.Name()
+						sq.Format = nil
+						break
+					}
+				}
+			}
 		}
 	}
 }
@@ -3175,9 +3374,20 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 	}
 
 	// Parse column name (can be identifier or keyword like KEY)
+	// Also handles nested column names like n.y
 	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		col.Name = p.current.Value
 		p.nextToken()
+		// Handle nested column names (e.g., n.y for nested columns)
+		for p.currentIs(token.DOT) {
+			p.nextToken() // skip .
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				col.Name += "." + p.current.Value
+				p.nextToken()
+			} else {
+				break
+			}
+		}
 	} else {
 		return nil
 	}
@@ -3463,7 +3673,7 @@ func (p *Parser) isDataTypeName(name string) bool {
 	types := []string{
 		"INT", "INT8", "INT16", "INT32", "INT64", "INT128", "INT256",
 		"UINT8", "UINT16", "UINT32", "UINT64", "UINT128", "UINT256",
-		"FLOAT32", "FLOAT64", "FLOAT",
+		"FLOAT32", "FLOAT64", "FLOAT", "BFLOAT16",
 		"DECIMAL", "DECIMAL32", "DECIMAL64", "DECIMAL128", "DECIMAL256",
 		"STRING", "FIXEDSTRING",
 		"UUID", "DATE", "DATE32", "DATETIME", "DATETIME64",
@@ -3917,8 +4127,12 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 	// Handle FORMAT clause (for things like DROP TABLE ... FORMAT Null)
 	if p.currentIs(token.FORMAT) {
 		p.nextToken()
-		// Skip format name (Null, etc.)
-		if p.currentIs(token.NULL) || p.currentIs(token.IDENT) {
+		// Store format name (Null, etc.)
+		if p.currentIs(token.NULL) {
+			drop.Format = "Null"
+			p.nextToken()
+		} else if p.currentIs(token.IDENT) {
+			drop.Format = p.current.Value
 			p.nextToken()
 		}
 	}
@@ -4000,6 +4214,18 @@ func (p *Parser) parseAlter() *ast.AlterQuery {
 	if p.currentIs(token.SETTINGS) {
 		p.nextToken()
 		alter.Settings = p.parseSettingsList()
+	}
+
+	// Parse FORMAT clause
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		if p.currentIs(token.NULL) {
+			alter.Format = "Null"
+			p.nextToken()
+		} else if p.currentIs(token.IDENT) {
+			alter.Format = p.current.Value
+			p.nextToken()
+		}
 	}
 
 	return alter
@@ -4269,6 +4495,14 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				p.nextToken()
 				cmd.StatisticsTypes = p.parseStatisticsTypeList()
 			}
+		} else if p.currentIs(token.COMMENT) {
+			// MODIFY COMMENT 'comment string'
+			cmd.Type = ast.AlterModifyComment
+			p.nextToken()
+			if p.currentIs(token.STRING) {
+				cmd.Comment = p.current.Value
+				p.nextToken()
+			}
 		}
 	case token.RENAME:
 		p.nextToken()
@@ -4490,6 +4724,61 @@ func (p *Parser) parseUndrop() *ast.UndropQuery {
 	}
 
 	return undrop
+}
+
+func (p *Parser) parseUpdate() *ast.UpdateQuery {
+	update := &ast.UpdateQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip UPDATE
+
+	// Parse table name (can be database.table)
+	tableName := p.parseIdentifierName()
+	if tableName != "" {
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			update.Database = tableName
+			update.Table = p.parseIdentifierName()
+		} else {
+			update.Table = tableName
+		}
+	}
+
+	// Expect SET keyword
+	if !p.currentIs(token.SET) {
+		return update
+	}
+	p.nextToken() // skip SET
+
+	// Parse assignments: col = expr, col = expr, ...
+	for {
+		if !p.currentIs(token.IDENT) && !p.current.Token.IsKeyword() {
+			break
+		}
+		assign := &ast.Assignment{
+			Position: p.current.Pos,
+			Column:   p.current.Value,
+		}
+		p.nextToken() // skip column name
+		if p.currentIs(token.EQ) {
+			p.nextToken() // skip =
+			assign.Value = p.parseExpression(LOWEST)
+		}
+		update.Assignments = append(update.Assignments, assign)
+		if !p.currentIs(token.COMMA) {
+			break
+		}
+		p.nextToken() // skip comma
+	}
+
+	// Parse WHERE clause
+	if p.currentIs(token.WHERE) {
+		p.nextToken() // skip WHERE
+		update.Where = p.parseExpression(LOWEST)
+	}
+
+	return update
 }
 
 func (p *Parser) parseUse() *ast.UseQuery {
@@ -5487,9 +5776,9 @@ func (p *Parser) parseParenthesizedSelect() *ast.SelectWithUnionQuery {
 	pos := p.current.Pos
 	p.nextToken() // skip (
 
-	// Check if this is actually a SELECT statement
-	if !p.currentIs(token.SELECT) && !p.currentIs(token.WITH) {
-		// Not a SELECT, just skip until we find closing paren
+	// Check if this is actually a SELECT statement or nested parentheses
+	if !p.currentIs(token.SELECT) && !p.currentIs(token.WITH) && !p.currentIs(token.LPAREN) {
+		// Not a SELECT and not nested parens, just skip until we find closing paren
 		depth := 1
 		for depth > 0 && !p.currentIs(token.EOF) {
 			if p.currentIs(token.LPAREN) {

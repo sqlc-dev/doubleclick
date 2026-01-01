@@ -13,7 +13,7 @@ func explainSelectIntersectExceptQuery(sb *strings.Builder, n *ast.SelectInterse
 	// ClickHouse wraps first operand in SelectWithUnionQuery when EXCEPT is present
 	hasExcept := false
 	for _, op := range n.Operators {
-		if op == "EXCEPT" {
+		if strings.HasPrefix(op, "EXCEPT") {
 			hasExcept = true
 			break
 		}
@@ -54,10 +54,13 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 		}
 	}
 	// FORMAT clause - check if any SelectQuery has Format set
-	for _, sel := range n.Selects {
-		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
-			Node(sb, sq.Format, depth+1)
-			break
+	// Skip this when inside CreateQuery context, as Format is output at CreateQuery level
+	if !inCreateQueryContext {
+		for _, sel := range n.Selects {
+			if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
+				Node(sb, sq.Format, depth+1)
+				break
+			}
 		}
 	}
 	// When SETTINGS comes AFTER FORMAT, it's output at SelectWithUnionQuery level
@@ -144,6 +147,13 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.OrderBy))
 		for _, o := range n.OrderBy {
 			Node(sb, o, depth+2)
+		}
+	}
+	// INTERPOLATE
+	if len(n.Interpolate) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Interpolate))
+		for _, i := range n.Interpolate {
+			Node(sb, i, depth+2)
 		}
 	}
 	// OFFSET (ClickHouse outputs offset before limit in EXPLAIN AST)
@@ -256,6 +266,22 @@ func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent st
 	}
 }
 
+// explainInterpolateElement explains an INTERPOLATE element.
+// Format: InterpolateElement (column colname) (children N)
+func explainInterpolateElement(sb *strings.Builder, n *ast.InterpolateElement, indent string, depth int) {
+	children := 0
+	if n.Value != nil {
+		children = 1
+	}
+
+	if children > 0 {
+		fmt.Fprintf(sb, "%sInterpolateElement (column %s) (children %d)\n", indent, n.Column, children)
+		Node(sb, n.Value, depth+1)
+	} else {
+		fmt.Fprintf(sb, "%sInterpolateElement (column %s)\n", indent, n.Column)
+	}
+}
+
 // isComplexExpr checks if an expression is complex (not a simple literal)
 func isComplexExpr(expr ast.Expression) bool {
 	if expr == nil {
@@ -289,10 +315,13 @@ func countSelectUnionChildren(n *ast.SelectWithUnionQuery) int {
 		}
 	}
 	// Check if any SelectQuery has Format set
-	for _, sel := range n.Selects {
-		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
-			count++
-			break
+	// Skip this when inside CreateQuery context, as Format is output at CreateQuery level
+	if !inCreateQueryContext {
+		for _, sel := range n.Selects {
+			if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
+				count++
+				break
+			}
 		}
 	}
 	// When SETTINGS comes AFTER FORMAT, it's counted at SelectWithUnionQuery level
@@ -340,6 +369,9 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 		count++
 	}
 	if len(n.OrderBy) > 0 {
+		count++
+	}
+	if len(n.Interpolate) > 0 {
 		count++
 	}
 	if n.LimitByLimit != nil {
