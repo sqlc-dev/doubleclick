@@ -864,6 +864,35 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 				return
 			}
 		}
+		// Arrays containing non-literal expressions should be rendered as Function array
+		if e.Type == ast.LiteralArray {
+			if exprs, ok := e.Value.([]ast.Expression); ok {
+				needsFunctionFormat := false
+				for _, elem := range exprs {
+					if !isSimpleLiteralOrNegation(elem) {
+						needsFunctionFormat = true
+						break
+					}
+				}
+				if needsFunctionFormat {
+					// Render as Function array with alias
+					if n.Name != "" {
+						fmt.Fprintf(sb, "%sFunction array (alias %s) (children %d)\n", indent, n.Name, 1)
+					} else {
+						fmt.Fprintf(sb, "%sFunction array (children %d)\n", indent, 1)
+					}
+					if len(exprs) > 0 {
+						fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
+					} else {
+						fmt.Fprintf(sb, "%s ExpressionList\n", indent)
+					}
+					for _, elem := range exprs {
+						Node(sb, elem, depth+2)
+					}
+					return
+				}
+			}
+		}
 		if n.Name != "" {
 			fmt.Fprintf(sb, "%sLiteral %s (alias %s)\n", indent, FormatLiteral(e), n.Name)
 		} else {
