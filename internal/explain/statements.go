@@ -1014,6 +1014,15 @@ func explainDataType(sb *strings.Builder, n *ast.DataType, indent string, depth 
 
 func explainObjectTypeArgument(sb *strings.Builder, n *ast.ObjectTypeArgument, indent string, depth int) {
 	fmt.Fprintf(sb, "%sASTObjectTypeArgument (children %d)\n", indent, 1)
+	// SKIP function calls are unwrapped - only the path/pattern is shown
+	if fn, ok := n.Expr.(*ast.FunctionCall); ok {
+		if strings.ToUpper(fn.Name) == "SKIP" || strings.ToUpper(fn.Name) == "SKIP REGEXP" {
+			if len(fn.Arguments) > 0 {
+				Node(sb, fn.Arguments[0], depth+1)
+				return
+			}
+		}
+	}
 	Node(sb, n.Expr, depth+1)
 }
 

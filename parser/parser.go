@@ -3689,11 +3689,27 @@ func (p *Parser) parseDataType() *ast.DataType {
 				}
 			}
 
+
 			if isNamedParam {
 				// Parse as name + type pair
+				// For JSON/OBJECT types, the name can be a dotted path like a.b.c
 				pos := p.current.Pos
-				paramName := p.current.Value
+				var nameParts []string
+				nameParts = append(nameParts, p.current.Value)
 				p.nextToken()
+				// Parse additional dotted parts if this is a JSON/OBJECT type
+				if isObjectType {
+					for p.currentIs(token.DOT) {
+						p.nextToken() // consume dot
+						if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+							nameParts = append(nameParts, p.current.Value)
+							p.nextToken()
+						} else {
+							break
+						}
+					}
+				}
+				paramName := strings.Join(nameParts, ".")
 				// Parse the type for this parameter
 				paramType := p.parseDataType()
 				if paramType != nil {
