@@ -2274,6 +2274,12 @@ func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 		case p.currentIs(token.SETTINGS):
 			p.nextToken()
 			create.Settings = p.parseSettingsList()
+		case p.currentIs(token.COMMENT):
+			p.nextToken()
+			if p.currentIs(token.STRING) {
+				create.Comment = p.current.Value
+				p.nextToken()
+			}
 		default:
 			return
 		}

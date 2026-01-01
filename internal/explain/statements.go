@@ -182,6 +182,10 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if hasFormat {
 		children++
 	}
+	// Count Comment as a child if present
+	if n.Comment != "" {
+		children++
+	}
 	// ClickHouse adds an extra space before (children N) for CREATE DATABASE
 	if n.CreateDatabase {
 		fmt.Fprintf(sb, "%sCreateQuery %s  (children %d)\n", indent, EscapeIdentifier(name), children)
@@ -445,6 +449,10 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	// Output FORMAT clause if present
 	if hasFormat {
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+	}
+	// Output COMMENT clause if present
+	if n.Comment != "" {
+		fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, escapeStringLiteral(n.Comment))
 	}
 }
 
