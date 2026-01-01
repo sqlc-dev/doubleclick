@@ -33,6 +33,9 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 	if n.HasSettings {
 		children++
 	}
+	if n.PartitionBy != nil {
+		children++
+	}
 	// Note: InsertQuery uses 3 spaces after name in ClickHouse explain
 	fmt.Fprintf(sb, "%sInsertQuery   (children %d)\n", indent, children)
 
@@ -54,6 +57,15 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 		} else {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		}
+	}
+
+	// PARTITION BY clause (output after Function/Table)
+	if n.PartitionBy != nil {
+		if ident, ok := n.PartitionBy.(*ast.Identifier); ok {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, ident.Name())
+		} else {
+			Node(sb, n.PartitionBy, depth+1)
 		}
 	}
 
