@@ -853,10 +853,12 @@ func (c *CheckQuery) statementNode()      {}
 
 // SystemQuery represents a SYSTEM statement.
 type SystemQuery struct {
-	Position token.Position `json:"-"`
-	Command  string         `json:"command"`
-	Database string         `json:"database,omitempty"`
-	Table    string         `json:"table,omitempty"`
+	Position             token.Position `json:"-"`
+	Command              string         `json:"command"`
+	Database             string         `json:"database,omitempty"`
+	Table                string         `json:"table,omitempty"`
+	OnCluster            string         `json:"on_cluster,omitempty"`
+	DuplicateTableOutput bool           `json:"duplicate_table_output,omitempty"` // True for commands that need database/table output twice
 }
 
 func (s *SystemQuery) Pos() token.Position { return s.Position }

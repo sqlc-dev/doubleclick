@@ -649,6 +649,10 @@ func explainSystemQuery(sb *strings.Builder, n *ast.SystemQuery, indent string) 
 		if n.Table != "" {
 			children++
 		}
+		// For commands that need duplicate output, double the count
+		if n.DuplicateTableOutput && children > 0 {
+			children *= 2
+		}
 	}
 	if children > 0 {
 		fmt.Fprintf(sb, "%sSYSTEM query (children %d)\n", indent, children)
@@ -657,6 +661,15 @@ func explainSystemQuery(sb *strings.Builder, n *ast.SystemQuery, indent string) 
 		}
 		if n.Table != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		}
+		// Output again for duplicate commands
+		if n.DuplicateTableOutput {
+			if n.Database != "" {
+				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+			}
+			if n.Table != "" {
+				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+			}
 		}
 	} else {
 		fmt.Fprintf(sb, "%sSYSTEM query\n", indent)

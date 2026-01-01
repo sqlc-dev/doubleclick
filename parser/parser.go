@@ -5668,6 +5668,15 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 	}
 	sys.Command = strings.Join(parts, " ")
 
+	// Check for ON CLUSTER clause - comes before the table name
+	if p.currentIs(token.ON) {
+		p.nextToken()
+		if p.currentIs(token.CLUSTER) {
+			p.nextToken()
+			sys.OnCluster = p.parseIdentifierName()
+		}
+	}
+
 	// Parse optional table name for commands like SYNC REPLICA table
 	// Table names can be keywords like "system" or dotted like "system.one"
 	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
@@ -5693,6 +5702,18 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 			} else {
 				sys.Table = tableName
 			}
+		}
+	}
+
+	// Set DuplicateTableOutput for commands that need database/table output twice
+	// Only duplicate when we have a qualified name (database != table)
+	upperCmd := strings.ToUpper(sys.Command)
+	if strings.Contains(upperCmd, "STOP DISTRIBUTED SENDS") ||
+		strings.Contains(upperCmd, "START DISTRIBUTED SENDS") ||
+		strings.Contains(upperCmd, "FLUSH DISTRIBUTED") {
+		// Only set duplicate if database and table are different (qualified name)
+		if sys.Database != sys.Table {
+			sys.DuplicateTableOutput = true
 		}
 	}
 
