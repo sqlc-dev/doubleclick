@@ -19,16 +19,162 @@ func explainSelectIntersectExceptQuery(sb *strings.Builder, n *ast.SelectInterse
 		}
 	}
 
+	// Check if first operand has a WITH clause to be inherited by subsequent operands
+	var inheritedWith []ast.Expression
+	if len(n.Selects) > 0 {
+		inheritedWith = extractWithClause(n.Selects[0])
+	}
+
 	childIndent := strings.Repeat(" ", depth+1)
 	for i, sel := range n.Selects {
 		if hasExcept && i == 0 {
 			// Wrap first operand in SelectWithUnionQuery -> ExpressionList format
-			fmt.Fprintf(sb, "%sSelectWithUnionQuery (children 1)\n", childIndent)
-			fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", childIndent)
-			Node(sb, sel, depth+3)
+			// But if it's already a SelectWithUnionQuery, don't double-wrap
+			if _, isUnion := sel.(*ast.SelectWithUnionQuery); isUnion {
+				Node(sb, sel, depth+1)
+			} else {
+				fmt.Fprintf(sb, "%sSelectWithUnionQuery (children 1)\n", childIndent)
+				fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", childIndent)
+				Node(sb, sel, depth+3)
+			}
+		} else if i > 0 && len(inheritedWith) > 0 {
+			// Subsequent operands inherit the WITH clause from the first operand
+			explainSelectQueryWithInheritedWith(sb, sel, inheritedWith, depth+1)
 		} else {
 			Node(sb, sel, depth+1)
 		}
+	}
+}
+
+// extractWithClause extracts the WITH clause from a statement (if it's a SelectQuery)
+func extractWithClause(stmt ast.Statement) []ast.Expression {
+	switch s := stmt.(type) {
+	case *ast.SelectQuery:
+		return s.With
+	case *ast.SelectWithUnionQuery:
+		// Check the first select in the union
+		if len(s.Selects) > 0 {
+			return extractWithClause(s.Selects[0])
+		}
+	}
+	return nil
+}
+
+// explainSelectQueryWithInheritedWith outputs a SELECT with an inherited WITH clause
+// The inherited WITH clause is output AFTER the columns (not before, like a regular WITH)
+func explainSelectQueryWithInheritedWith(sb *strings.Builder, stmt ast.Statement, inheritedWith []ast.Expression, depth int) {
+	sq, ok := stmt.(*ast.SelectQuery)
+	if !ok {
+		// Not a SelectQuery, output normally
+		Node(sb, stmt, depth)
+		return
+	}
+
+	// If the SelectQuery already has a WITH clause, output normally
+	if len(sq.With) > 0 {
+		Node(sb, stmt, depth)
+		return
+	}
+
+	// Output SelectQuery with inherited WITH clause after columns
+	indent := strings.Repeat(" ", depth)
+	children := countSelectQueryChildren(sq) + 1 // +1 for inherited WITH clause
+	fmt.Fprintf(sb, "%sSelectQuery (children %d)\n", indent, children)
+
+	// Columns (ExpressionList) - output BEFORE inherited WITH
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(sq.Columns))
+	for _, col := range sq.Columns {
+		Node(sb, col, depth+2)
+	}
+
+	// Inherited WITH clause (ExpressionList) - output AFTER columns
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(inheritedWith))
+	for _, w := range inheritedWith {
+		Node(sb, w, depth+2)
+	}
+
+	// FROM (including ARRAY JOIN as part of TablesInSelectQuery)
+	if sq.From != nil || sq.ArrayJoin != nil {
+		TablesWithArrayJoin(sb, sq.From, sq.ArrayJoin, depth+1)
+	}
+	// PREWHERE
+	if sq.PreWhere != nil {
+		Node(sb, sq.PreWhere, depth+1)
+	}
+	// WHERE
+	if sq.Where != nil {
+		Node(sb, sq.Where, depth+1)
+	}
+	// GROUP BY (skip for GROUP BY ALL which doesn't output an expression list)
+	if len(sq.GroupBy) > 0 && !sq.GroupByAll {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(sq.GroupBy))
+		for _, g := range sq.GroupBy {
+			Node(sb, g, depth+2)
+		}
+	}
+	// HAVING
+	if sq.Having != nil {
+		Node(sb, sq.Having, depth+1)
+	}
+	// QUALIFY
+	if sq.Qualify != nil {
+		Node(sb, sq.Qualify, depth+1)
+	}
+	// WINDOW clause
+	if len(sq.Window) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(sq.Window))
+		for range sq.Window {
+			fmt.Fprintf(sb, "%s  WindowListElement\n", indent)
+		}
+	}
+	// ORDER BY
+	if len(sq.OrderBy) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(sq.OrderBy))
+		for _, o := range sq.OrderBy {
+			Node(sb, o, depth+2)
+		}
+	}
+	// INTERPOLATE
+	if len(sq.Interpolate) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(sq.Interpolate))
+		for _, i := range sq.Interpolate {
+			Node(sb, i, depth+2)
+		}
+	}
+	// OFFSET
+	if sq.Offset != nil {
+		Node(sb, sq.Offset, depth+1)
+	}
+	// LIMIT BY handling
+	if sq.LimitByLimit != nil {
+		Node(sb, sq.LimitByLimit, depth+1)
+		if len(sq.LimitBy) > 0 {
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(sq.LimitBy))
+			for _, expr := range sq.LimitBy {
+				Node(sb, expr, depth+2)
+			}
+		}
+		if sq.Limit != nil {
+			Node(sb, sq.Limit, depth+1)
+		}
+	} else if len(sq.LimitBy) > 0 {
+		if sq.Limit != nil {
+			Node(sb, sq.Limit, depth+1)
+		}
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(sq.LimitBy))
+		for _, expr := range sq.LimitBy {
+			Node(sb, expr, depth+2)
+		}
+	} else if sq.Limit != nil {
+		Node(sb, sq.Limit, depth+1)
+	}
+	// SETTINGS
+	if len(sq.Settings) > 0 && !sq.SettingsAfterFormat {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
+	// TOP clause
+	if sq.Top != nil {
+		Node(sb, sq.Top, depth+1)
 	}
 }
 
