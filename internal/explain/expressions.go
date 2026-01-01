@@ -228,9 +228,16 @@ func containsOnlyArraysOrTuples(exprs []ast.Expression) bool {
 // any non-literal expressions (identifiers, function calls, etc.)
 func containsNonLiteralExpressions(exprs []ast.Expression) bool {
 	for _, e := range exprs {
-		if _, ok := e.(*ast.Literal); !ok {
-			return true
+		if _, ok := e.(*ast.Literal); ok {
+			continue
 		}
+		// Unary minus of a literal (negative number) is also acceptable
+		if unary, ok := e.(*ast.UnaryExpr); ok && unary.Op == "-" {
+			if _, ok := unary.Operand.(*ast.Literal); ok {
+				continue
+			}
+		}
+		return true
 	}
 	return false
 }
