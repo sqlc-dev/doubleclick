@@ -3383,8 +3383,8 @@ func (p *Parser) parseDictionarySource() *ast.DictionarySource {
 	}
 	p.nextToken() // skip (
 
-	// Parse source type (e.g., CLICKHOUSE, MYSQL, FILE)
-	if p.currentIs(token.IDENT) {
+	// Parse source type (e.g., CLICKHOUSE, MYSQL, FILE, NULL)
+	if p.currentIs(token.IDENT) || p.currentIs(token.NULL) || p.current.Token.IsKeyword() {
 		source.Type = strings.ToUpper(p.current.Value)
 		p.nextToken()
 	}
