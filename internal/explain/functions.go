@@ -138,6 +138,22 @@ func handleSpecialFunction(sb *strings.Builder, n *ast.FunctionCall, alias strin
 		return handleDateDiff(sb, n, alias, indent, depth)
 	}
 
+	// TRIM functions with empty string as trim characters - simplify to just the string
+	// Only for SQL standard syntax: trim(LEADING '' FROM 'foo') -> just 'foo'
+	// Direct function calls like trimLeft('foo', '') are NOT simplified
+	if n.SQLStandard && (fnName == "TRIM" || fnName == "LTRIM" || fnName == "RTRIM" ||
+		fnName == "TRIMLEFT" || fnName == "TRIMRIGHT" || fnName == "TRIMBOTH") {
+		if len(n.Arguments) == 2 {
+			if lit, ok := n.Arguments[1].(*ast.Literal); ok {
+				if lit.Type == ast.LiteralString && lit.Value == "" {
+					// Trim with empty string is a no-op, just output the original string
+					Node(sb, n.Arguments[0], depth)
+					return true
+				}
+			}
+		}
+	}
+
 	return false
 }
 

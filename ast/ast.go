@@ -1303,14 +1303,15 @@ func (c *ColumnsMatcher) expressionNode()     {}
 
 // FunctionCall represents a function call.
 type FunctionCall struct {
-	Position   token.Position `json:"-"`
-	Name       string         `json:"name"`
-	Parameters []Expression   `json:"parameters,omitempty"` // For parametric functions like quantile(0.9)(x)
-	Arguments  []Expression   `json:"arguments,omitempty"`
-	Settings   []*SettingExpr `json:"settings,omitempty"` // For table functions with SETTINGS
-	Distinct   bool           `json:"distinct,omitempty"`
-	Over       *WindowSpec    `json:"over,omitempty"`
-	Alias      string         `json:"alias,omitempty"`
+	Position    token.Position `json:"-"`
+	Name        string         `json:"name"`
+	Parameters  []Expression   `json:"parameters,omitempty"` // For parametric functions like quantile(0.9)(x)
+	Arguments   []Expression   `json:"arguments,omitempty"`
+	Settings    []*SettingExpr `json:"settings,omitempty"` // For table functions with SETTINGS
+	Distinct    bool           `json:"distinct,omitempty"`
+	Over        *WindowSpec    `json:"over,omitempty"`
+	Alias       string         `json:"alias,omitempty"`
+	SQLStandard bool           `json:"sql_standard,omitempty"` // True for SQL standard syntax like TRIM(... FROM ...)
 }
 
 func (f *FunctionCall) Pos() token.Position { return f.Position }

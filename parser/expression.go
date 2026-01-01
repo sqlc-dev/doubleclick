@@ -1783,9 +1783,10 @@ func (p *Parser) parseTrim() ast.Expression {
 	}
 
 	return &ast.FunctionCall{
-		Position:  pos,
-		Name:      fnName,
-		Arguments: args,
+		Position:    pos,
+		Name:        fnName,
+		Arguments:   args,
+		SQLStandard: true, // Mark as SQL standard TRIM syntax
 	}
 }
 
