@@ -671,6 +671,10 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 	// Handle WITH clause
 	if p.currentIs(token.WITH) {
 		p.nextToken()
+		// Skip RECURSIVE keyword if present
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "RECURSIVE" {
+			p.nextToken()
+		}
 		sel.With = p.parseWithClause()
 	}
 
