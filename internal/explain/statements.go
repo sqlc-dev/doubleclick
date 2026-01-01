@@ -1341,9 +1341,23 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		} else if cmd.Index != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
 		}
-	case ast.AlterDropIndex, ast.AlterClearIndex, ast.AlterMaterializeIndex:
+	case ast.AlterDropIndex, ast.AlterClearIndex:
 		if cmd.Index != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
+		}
+	case ast.AlterMaterializeIndex:
+		if cmd.Index != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
+		}
+		// MATERIALIZE INDEX can have IN PARTITION ID clause
+		if cmd.Partition != nil && cmd.PartitionIsID {
+			if lit, ok := cmd.Partition.(*ast.Literal); ok {
+				fmt.Fprintf(sb, "%s Partition_ID Literal_\\'%s\\' (children 1)\n", indent, lit.Value)
+				Node(sb, cmd.Partition, depth+2)
+			} else {
+				fmt.Fprintf(sb, "%s Partition_ID (children 1)\n", indent)
+				Node(sb, cmd.Partition, depth+2)
+			}
 		}
 	case ast.AlterAddConstraint:
 		if cmd.Constraint != nil {
@@ -1571,8 +1585,16 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 		} else if cmd.Index != "" {
 			children++
 		}
-	case ast.AlterDropIndex, ast.AlterClearIndex, ast.AlterMaterializeIndex:
+	case ast.AlterDropIndex, ast.AlterClearIndex:
 		if cmd.Index != "" {
+			children++
+		}
+	case ast.AlterMaterializeIndex:
+		if cmd.Index != "" {
+			children++
+		}
+		// MATERIALIZE INDEX can have IN PARTITION ID clause
+		if cmd.Partition != nil && cmd.PartitionIsID {
 			children++
 		}
 	case ast.AlterAddConstraint:
