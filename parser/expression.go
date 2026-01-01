@@ -272,6 +272,10 @@ func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
 		if upper == "INTERSECT" {
 			return expr
 		}
+		// Don't consume PARALLEL as alias if followed by WITH (parallel query syntax)
+		if p.currentIs(token.PARALLEL) && p.peekIs(token.WITH) {
+			return expr
+		}
 		// Don't consume window frame keywords as implicit aliases
 		switch upper {
 		case "ROWS", "RANGE", "GROUPS", "UNBOUNDED", "PRECEDING", "FOLLOWING", "CURRENT":

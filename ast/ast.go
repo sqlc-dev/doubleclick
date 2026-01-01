@@ -1597,3 +1597,13 @@ type ExistsExpr struct {
 func (e *ExistsExpr) Pos() token.Position { return e.Position }
 func (e *ExistsExpr) End() token.Position { return e.Position }
 func (e *ExistsExpr) expressionNode()     {}
+
+// ParallelWithQuery represents multiple statements executed in parallel with PARALLEL WITH.
+type ParallelWithQuery struct {
+	Position   token.Position `json:"-"`
+	Statements []Statement    `json:"statements"`
+}
+
+func (p *ParallelWithQuery) Pos() token.Position { return p.Position }
+func (p *ParallelWithQuery) End() token.Position { return p.Position }
+func (p *ParallelWithQuery) statementNode()      {}

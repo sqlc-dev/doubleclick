@@ -246,6 +246,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainCreateIndexQuery(sb, n, indent, depth)
 	case *ast.UpdateQuery:
 		explainUpdateQuery(sb, n, indent, depth)
+	case *ast.ParallelWithQuery:
+		explainParallelWithQuery(sb, n, indent, depth)
 
 	// Types
 	case *ast.DataType:

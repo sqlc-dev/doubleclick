@@ -1006,7 +1006,7 @@ func explainExistsTableQuery(sb *strings.Builder, n *ast.ExistsQuery, indent str
 	}
 
 	// For TABLE/DICTIONARY/VIEW, show database and object name
-	name := n.Table
+	name := " " + n.Table // Prefix with space for alignment (where database would be)
 	children := 1
 	if n.Database != "" {
 		name = n.Database + " " + n.Table
@@ -1688,5 +1688,41 @@ func explainUpdateQuery(sb *strings.Builder, n *ast.UpdateQuery, indent string, 
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Assignments))
 	for _, assign := range n.Assignments {
 		Node(sb, assign, depth+2)
+	}
+}
+
+func explainParallelWithQuery(sb *strings.Builder, n *ast.ParallelWithQuery, indent string, depth int) {
+	if n == nil || len(n.Statements) == 0 {
+		fmt.Fprintf(sb, "%sParallelWithQuery\n", indent)
+		return
+	}
+
+	// Build the name from the first statement
+	name := getParallelWithName(n.Statements[0])
+	count := len(n.Statements)
+
+	fmt.Fprintf(sb, "%sParallelWithQuery %d %s (children %d)\n", indent, count, name, count)
+
+	for _, stmt := range n.Statements {
+		Node(sb, stmt, depth+1)
+	}
+}
+
+func getParallelWithName(stmt ast.Statement) string {
+	switch s := stmt.(type) {
+	case *ast.DropQuery:
+		tableName := ""
+		if len(s.Tables) > 0 {
+			if s.Tables[0].Table != "" {
+				tableName = s.Tables[0].Table
+			}
+		}
+		return "DropQuery__" + tableName
+	case *ast.CreateQuery:
+		return "CreateQuery_" + s.Table
+	case *ast.InsertQuery:
+		return "InsertQuery__"
+	default:
+		return "Statement"
 	}
 }

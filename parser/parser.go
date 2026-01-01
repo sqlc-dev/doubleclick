@@ -99,6 +99,10 @@ func (p *Parser) ParseStatements(ctx context.Context) ([]ast.Statement, error) {
 
 		stmt := p.parseStatement()
 		if stmt != nil {
+			// Check for PARALLEL WITH to chain statements
+			if p.currentIs(token.PARALLEL) && p.peekIs(token.WITH) {
+				stmt = p.parseParallelWith(stmt)
+			}
 			statements = append(statements, stmt)
 		}
 
@@ -112,6 +116,25 @@ func (p *Parser) ParseStatements(ctx context.Context) ([]ast.Statement, error) {
 		return statements, fmt.Errorf("parse errors: %v", p.errors)
 	}
 	return statements, nil
+}
+
+// parseParallelWith parses PARALLEL WITH clauses to chain statements
+func (p *Parser) parseParallelWith(first ast.Statement) *ast.ParallelWithQuery {
+	parallel := &ast.ParallelWithQuery{
+		Position:   first.Pos(),
+		Statements: []ast.Statement{first},
+	}
+
+	for p.currentIs(token.PARALLEL) && p.peekIs(token.WITH) {
+		p.nextToken() // skip PARALLEL
+		p.nextToken() // skip WITH
+		stmt := p.parseStatement()
+		if stmt != nil {
+			parallel.Statements = append(parallel.Statements, stmt)
+		}
+	}
+
+	return parallel
 }
 
 func (p *Parser) parseStatement() ast.Statement {
@@ -1343,6 +1366,10 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 			p.nextToken()
 		}
 	} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && !p.isKeywordForClause() {
+		// Don't consume PARALLEL as alias if followed by WITH (parallel query syntax)
+		if p.currentIs(token.PARALLEL) && p.peekIs(token.WITH) {
+			return expr
+		}
 		expr.Alias = p.current.Value
 		p.nextToken()
 	}
