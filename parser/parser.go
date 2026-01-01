@@ -6087,8 +6087,8 @@ func (p *Parser) parseProjection() *ast.Projection {
 		Position: p.current.Pos,
 	}
 
-	// Parse projection name
-	if p.currentIs(token.IDENT) {
+	// Parse projection name (can be identifier or keyword like VALUES)
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		proj.Name = p.current.Value
 		p.nextToken()
 	}
