@@ -561,24 +561,30 @@ func explainRenameQuery(sb *strings.Builder, n *ast.RenameQuery, indent string, 
 		fmt.Fprintf(sb, "%s*ast.RenameQuery\n", indent)
 		return
 	}
-	// Count identifiers: 4 per pair (from_db, from_table, to_db, to_table)
-	children := len(n.Pairs) * 4
+	// Count identifiers: 2 per pair if no database, 4 per pair if databases specified
+	children := 0
+	for _, pair := range n.Pairs {
+		if pair.FromDatabase != "" {
+			children++
+		}
+		children++ // from table
+		if pair.ToDatabase != "" {
+			children++
+		}
+		children++ // to table
+	}
 	fmt.Fprintf(sb, "%sRename (children %d)\n", indent, children)
 	for _, pair := range n.Pairs {
-		// From database
-		fromDB := pair.FromDatabase
-		if fromDB == "" {
-			fromDB = "default"
+		// From database (only if specified)
+		if pair.FromDatabase != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, pair.FromDatabase)
 		}
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, fromDB)
 		// From table
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, pair.FromTable)
-		// To database
-		toDB := pair.ToDatabase
-		if toDB == "" {
-			toDB = "default"
+		// To database (only if specified)
+		if pair.ToDatabase != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, pair.ToDatabase)
 		}
-		fmt.Fprintf(sb, "%s Identifier %s\n", indent, toDB)
 		// To table
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, pair.ToTable)
 	}

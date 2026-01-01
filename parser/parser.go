@@ -1839,24 +1839,39 @@ func (p *Parser) parseCreate() ast.Statement {
 	return create
 }
 
-// parseReplace handles REPLACE TABLE syntax, which is equivalent to CREATE OR REPLACE TABLE
+// parseReplace handles REPLACE TABLE/DICTIONARY syntax, which is equivalent to CREATE OR REPLACE
 func (p *Parser) parseReplace() ast.Statement {
 	pos := p.current.Pos
 	p.nextToken() // skip REPLACE
 
 	// REPLACE TABLE name ...
-	if !p.currentIs(token.TABLE) {
-		return nil
-	}
-	p.nextToken() // skip TABLE
+	if p.currentIs(token.TABLE) {
+		p.nextToken() // skip TABLE
 
-	create := &ast.CreateQuery{
-		Position:  pos,
-		OrReplace: true, // REPLACE TABLE implies OR REPLACE
+		create := &ast.CreateQuery{
+			Position:  pos,
+			OrReplace: true, // REPLACE TABLE implies OR REPLACE
+		}
+
+		p.parseCreateTable(create)
+		return create
 	}
 
-	p.parseCreateTable(create)
-	return create
+	// REPLACE DICTIONARY name ...
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
+		p.nextToken() // skip DICTIONARY
+
+		create := &ast.CreateQuery{
+			Position:         pos,
+			OrReplace:        true,
+			CreateDictionary: true,
+		}
+
+		p.parseCreateDictionary(create)
+		return create
+	}
+
+	return nil
 }
 
 func (p *Parser) parseCreateIndex(pos token.Position) *ast.CreateIndexQuery {
@@ -3350,15 +3365,28 @@ func (p *Parser) parseKeyValuePairs() []*ast.KeyValuePair {
 		}
 
 		// Parse value (can be various types - string, number, function call, identifier)
-		if !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) && !p.currentIs(token.IDENT) && !p.current.Token.IsKeyword() {
-			pair.Value = p.parseExpression(LOWEST)
-		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-			// If next token is an identifier/keyword, treat it as start of next pair
-			// unless it's a function call (has LPAREN after)
-			if p.peekIs(token.LPAREN) {
+		// Value is present if current token is:
+		// - A string, number, or other literal
+		// - An identifier followed by LPAREN (function call)
+		// - An identifier NOT followed by an identifier (key-only pairs have adjacent identifiers)
+		if !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				// Check if this is the value or the start of the next key
+				// If peek is an identifier/keyword, this identifier is the value
+				// If peek is RPAREN/EOF, this identifier is the value
+				// If peek is LPAREN, this is a function call value
+				if p.peekIs(token.IDENT) || (p.peek.Token.IsKeyword() && !p.peekIs(token.LPAREN)) {
+					// This identifier is followed by another identifier/keyword, treat as value
+					pair.Value = &ast.Identifier{Position: p.current.Pos, Parts: []string{p.current.Value}}
+					p.nextToken()
+				} else {
+					// Either a function call, or this identifier is the last thing before )
+					pair.Value = p.parseExpression(LOWEST)
+				}
+			} else {
+				// Non-identifier value (string, number, etc.)
 				pair.Value = p.parseExpression(LOWEST)
 			}
-			// Otherwise no value for this pair (key only)
 		}
 
 		pairs = append(pairs, pair)
@@ -5693,7 +5721,12 @@ func (p *Parser) parseExchange() *ast.ExchangeQuery {
 
 	p.nextToken() // skip EXCHANGE
 
-	if !p.expect(token.TABLES) {
+	// Handle EXCHANGE TABLES or EXCHANGE DICTIONARIES
+	if p.currentIs(token.TABLES) {
+		p.nextToken()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARIES" {
+		p.nextToken()
+	} else {
 		return nil
 	}
 
