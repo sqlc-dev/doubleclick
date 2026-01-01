@@ -4764,6 +4764,22 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				cmd.Comment = p.current.Value
 				p.nextToken()
 			}
+		} else if p.currentIs(token.ORDER) {
+			// MODIFY ORDER BY (expr, ...)
+			cmd.Type = ast.AlterModifyOrderBy
+			p.nextToken() // skip ORDER
+			if p.currentIs(token.BY) {
+				p.nextToken() // skip BY
+			}
+			// Parse the order by expression(s)
+			if p.currentIs(token.LPAREN) {
+				p.nextToken() // skip (
+				cmd.OrderByExpr = p.parseExpressionList()
+				p.expect(token.RPAREN)
+			} else {
+				// Single expression without parentheses
+				cmd.OrderByExpr = []ast.Expression{p.parseExpression(LOWEST)}
+			}
 		}
 	case token.RENAME:
 		p.nextToken()

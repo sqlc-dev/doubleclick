@@ -588,6 +588,7 @@ type AlterCommand struct {
 	StatisticsColumns []string          `json:"statistics_columns,omitempty"` // For ADD/DROP/CLEAR/MATERIALIZE STATISTICS
 	StatisticsTypes   []*FunctionCall   `json:"statistics_types,omitempty"`   // For ADD/MODIFY STATISTICS TYPE
 	Comment           string            `json:"comment,omitempty"`            // For COMMENT COLUMN
+	OrderByExpr       []Expression      `json:"order_by_expr,omitempty"`      // For MODIFY ORDER BY
 }
 
 // Projection represents a projection definition.
@@ -657,10 +658,11 @@ const (
 	AlterClearProjection    AlterCommandType = "CLEAR_PROJECTION"
 	AlterAddStatistics      AlterCommandType = "ADD_STATISTICS"
 	AlterModifyStatistics   AlterCommandType = "MODIFY_STATISTICS"
-	AlterDropStatistics     AlterCommandType = "DROP_STATISTICS"
-	AlterClearStatistics    AlterCommandType = "CLEAR_STATISTICS"
+	AlterDropStatistics        AlterCommandType = "DROP_STATISTICS"
+	AlterClearStatistics       AlterCommandType = "CLEAR_STATISTICS"
 	AlterMaterializeStatistics AlterCommandType = "MATERIALIZE_STATISTICS"
 	AlterModifyComment         AlterCommandType = "MODIFY_COMMENT"
+	AlterModifyOrderBy         AlterCommandType = "MODIFY_ORDER_BY"
 )
 
 // TruncateQuery represents a TRUNCATE statement.

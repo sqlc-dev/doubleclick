@@ -1296,6 +1296,20 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		explainStatisticsCommand(sb, cmd, indent, depth)
 	case ast.AlterDropStatistics, ast.AlterClearStatistics, ast.AlterMaterializeStatistics:
 		explainStatisticsCommand(sb, cmd, indent, depth)
+	case ast.AlterModifyOrderBy:
+		// When there are multiple expressions, wrap them in a tuple function
+		if len(cmd.OrderByExpr) > 1 {
+			fmt.Fprintf(sb, "%s Function tuple (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(cmd.OrderByExpr))
+			for _, expr := range cmd.OrderByExpr {
+				Node(sb, expr, depth+3)
+			}
+		} else {
+			// Single expression - output directly
+			for _, expr := range cmd.OrderByExpr {
+				Node(sb, expr, depth+1)
+			}
+		}
 	default:
 		if cmd.Partition != nil {
 			Node(sb, cmd.Partition, depth+1)
@@ -1487,6 +1501,11 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 	case ast.AlterDropStatistics, ast.AlterClearStatistics, ast.AlterMaterializeStatistics:
 		// Statistics commands without TYPE have one child (Stat node with just columns)
 		if len(cmd.StatisticsColumns) > 0 {
+			children = 1
+		}
+	case ast.AlterModifyOrderBy:
+		// MODIFY ORDER BY: multiple expressions wrapped in tuple (1 child), single expression (1 child)
+		if len(cmd.OrderByExpr) > 0 {
 			children = 1
 		}
 	default:
