@@ -5681,9 +5681,13 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 				p.nextToken()
 			}
 		} else {
-			// For RELOAD DICTIONARY commands, the dictionary name appears as both database and table in EXPLAIN
-			if strings.Contains(strings.ToUpper(sys.Command), "RELOAD DICTIONARY") ||
-				strings.Contains(strings.ToUpper(sys.Command), "DROP REPLICA") {
+			// For certain commands, the table name appears as both database and table in EXPLAIN
+			upperCmd := strings.ToUpper(sys.Command)
+			if strings.Contains(upperCmd, "RELOAD DICTIONARY") ||
+				strings.Contains(upperCmd, "DROP REPLICA") ||
+				strings.Contains(upperCmd, "STOP DISTRIBUTED SENDS") ||
+				strings.Contains(upperCmd, "START DISTRIBUTED SENDS") ||
+				strings.Contains(upperCmd, "FLUSH DISTRIBUTED") {
 				sys.Database = tableName
 				sys.Table = tableName
 			} else {
