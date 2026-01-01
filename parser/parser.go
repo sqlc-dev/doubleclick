@@ -1854,10 +1854,7 @@ func (p *Parser) parseCreateIndex(pos token.Position) *ast.CreateIndexQuery {
 		Position: pos,
 	}
 
-	// Parse index name
-	query.IndexName = p.parseIdentifierName()
-
-	// Skip IF NOT EXISTS if present
+	// Skip IF NOT EXISTS if present (comes before index name)
 	if p.currentIs(token.IF) {
 		p.nextToken() // IF
 		if p.currentIs(token.NOT) {
@@ -1867,6 +1864,9 @@ func (p *Parser) parseCreateIndex(pos token.Position) *ast.CreateIndexQuery {
 			p.nextToken() // EXISTS
 		}
 	}
+
+	// Parse index name
+	query.IndexName = p.parseIdentifierName()
 
 	// Expect ON
 	if p.currentIs(token.ON) {
@@ -1902,6 +1902,22 @@ func (p *Parser) parseCreateIndex(pos token.Position) *ast.CreateIndexQuery {
 
 		if p.currentIs(token.RPAREN) {
 			p.nextToken() // skip )
+		}
+	}
+
+	// Parse TYPE clause
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TYPE" {
+		p.nextToken() // skip TYPE
+		query.Type = p.parseIdentifierName()
+	}
+
+	// Parse GRANULARITY clause
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "GRANULARITY" {
+		p.nextToken() // skip GRANULARITY
+		if p.currentIs(token.NUMBER) {
+			val, _ := strconv.Atoi(p.current.Value)
+			query.Granularity = val
+			p.nextToken()
 		}
 	}
 
@@ -4021,6 +4037,7 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		dropFunction = true
 		p.nextToken()
 	case token.INDEX:
+		drop.Index = "_pending_"
 		p.nextToken()
 	case token.SETTINGS:
 		// DROP SETTINGS PROFILE
@@ -4116,6 +4133,20 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 			drop.RowPolicy = tableName
 		} else if drop.SettingsProfile == "_pending_" {
 			drop.SettingsProfile = tableName
+		} else if drop.Index == "_pending_" {
+			drop.Index = tableName
+			// For DROP INDEX, parse ON table_name
+			if p.currentIs(token.ON) {
+				p.nextToken() // skip ON
+				tableNamePart := p.parseIdentifierName()
+				if p.currentIs(token.DOT) {
+					p.nextToken()
+					drop.Database = tableNamePart
+					drop.Table = p.parseIdentifierName()
+				} else {
+					drop.Table = tableNamePart
+				}
+			}
 		} else if dropDictionary {
 			drop.Dictionary = tableName
 			// Also set Table/Tables for backward compatibility with AST JSON

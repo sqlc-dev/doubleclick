@@ -503,6 +503,7 @@ type DropQuery struct {
 	Policy          string             `json:"policy,omitempty"`   // For DROP POLICY
 	RowPolicy       string             `json:"row_policy,omitempty"` // For DROP ROW POLICY
 	SettingsProfile string             `json:"settings_profile,omitempty"` // For DROP SETTINGS PROFILE
+	Index           string             `json:"index,omitempty"`            // For DROP INDEX
 	Temporary       bool               `json:"temporary,omitempty"`
 	OnCluster       string             `json:"on_cluster,omitempty"`
 	DropDatabase    bool               `json:"drop_database,omitempty"`
@@ -1107,10 +1108,12 @@ func (d *DropWorkloadQuery) statementNode()      {}
 
 // CreateIndexQuery represents a CREATE INDEX statement.
 type CreateIndexQuery struct {
-	Position  token.Position `json:"-"`
-	IndexName string         `json:"index_name"`
-	Table     string         `json:"table"`
-	Columns   []Expression   `json:"columns,omitempty"`
+	Position    token.Position `json:"-"`
+	IndexName   string         `json:"index_name"`
+	Table       string         `json:"table"`
+	Columns     []Expression   `json:"columns,omitempty"`
+	Type        string         `json:"type,omitempty"`        // Index type (minmax, bloom_filter, etc.)
+	Granularity int            `json:"granularity,omitempty"` // GRANULARITY value
 }
 
 func (c *CreateIndexQuery) Pos() token.Position { return c.Position }
