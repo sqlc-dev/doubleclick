@@ -5570,7 +5570,12 @@ func (p *Parser) parseRename() *ast.RenameQuery {
 
 	p.nextToken() // skip RENAME
 
-	if !p.expect(token.TABLE) {
+	// Handle RENAME TABLE or RENAME DICTIONARY
+	if p.currentIs(token.TABLE) {
+		p.nextToken()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
+		p.nextToken()
+	} else {
 		return nil
 	}
 
