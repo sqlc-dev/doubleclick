@@ -57,6 +57,7 @@ type SelectQuery struct {
 	Position    token.Position        `json:"-"`
 	With        []Expression          `json:"with,omitempty"`
 	Distinct    bool                  `json:"distinct,omitempty"`
+	DistinctOn  []Expression          `json:"distinct_on,omitempty"` // DISTINCT ON (col1, col2, ...) syntax
 	Top         Expression            `json:"top,omitempty"`
 	Columns     []Expression          `json:"columns"`
 	From        *TablesInSelectQuery  `json:"from,omitempty"`

@@ -341,6 +341,14 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 	if n.Top != nil {
 		Node(sb, n.Top, depth+1)
 	}
+	// DISTINCT ON columns
+	if len(n.DistinctOn) > 0 {
+		fmt.Fprintf(sb, "%s Literal UInt64_1\n", indent)
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.DistinctOn))
+		for _, col := range n.DistinctOn {
+			Node(sb, col, depth+2)
+		}
+	}
 }
 
 func explainOrderByElement(sb *strings.Builder, n *ast.OrderByElement, indent string, depth int) {
@@ -539,6 +547,10 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 	// TOP clause
 	if n.Top != nil {
 		count++
+	}
+	// DISTINCT ON columns (counts as 2: Literal UInt64_1 + ExpressionList)
+	if len(n.DistinctOn) > 0 {
+		count += 2
 	}
 	return count
 }

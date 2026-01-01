@@ -682,6 +682,14 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 	if p.currentIs(token.DISTINCT) {
 		sel.Distinct = true
 		p.nextToken()
+		// Check for DISTINCT ON (col1, col2, ...)
+		if p.currentIs(token.ON) {
+			p.nextToken() // skip ON
+			if p.expect(token.LPAREN) {
+				sel.DistinctOn = p.parseExpressionList()
+				p.expect(token.RPAREN)
+			}
+		}
 	} else if p.currentIs(token.ALL) {
 		// ALL is the default, just skip it
 		p.nextToken()
@@ -5947,6 +5955,14 @@ func (p *Parser) parseFromSelectSyntax() *ast.SelectWithUnionQuery {
 	if p.currentIs(token.DISTINCT) {
 		sel.Distinct = true
 		p.nextToken()
+		// Check for DISTINCT ON (col1, col2, ...)
+		if p.currentIs(token.ON) {
+			p.nextToken() // skip ON
+			if p.expect(token.LPAREN) {
+				sel.DistinctOn = p.parseExpressionList()
+				p.expect(token.RPAREN)
+			}
+		}
 	}
 
 	// Parse column list
