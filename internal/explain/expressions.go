@@ -498,6 +498,7 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 		if e.Type == ast.LiteralArray {
 			if exprs, ok := e.Value.([]ast.Expression); ok {
 				needsFunctionFormat := false
+				hasNestedArrays := false
 				// Empty arrays always use Function array format
 				if len(exprs) == 0 {
 					needsFunctionFormat = true
@@ -507,6 +508,17 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 					if lit, ok := expr.(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
 						needsFunctionFormat = true
 						break
+					}
+					// Check for nested arrays
+					if lit, ok := expr.(*ast.Literal); ok && lit.Type == ast.LiteralArray {
+						hasNestedArrays = true
+						// Check if inner array is empty or contains empty arrays
+						if innerExprs, ok := lit.Value.([]ast.Expression); ok {
+							if len(innerExprs) == 0 || containsEmptyArrays(innerExprs) {
+								needsFunctionFormat = true
+								break
+							}
+						}
 					}
 					// Check for identifiers - use Function array
 					if _, ok := expr.(*ast.Identifier); ok {
@@ -518,6 +530,14 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 						needsFunctionFormat = true
 						break
 					}
+				}
+				// Also check for empty arrays at any depth within nested arrays
+				if hasNestedArrays && containsEmptyArraysRecursive(exprs) {
+					needsFunctionFormat = true
+				}
+				// Also check for tuples at any depth within nested arrays
+				if hasNestedArrays && containsTuplesRecursive(exprs) {
+					needsFunctionFormat = true
 				}
 				if needsFunctionFormat {
 					// Render as Function array with alias
