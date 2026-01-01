@@ -1057,7 +1057,11 @@ func explainNameTypePair(sb *strings.Builder, n *ast.NameTypePair, indent string
 
 func explainParameter(sb *strings.Builder, n *ast.Parameter, indent string) {
 	if n.Name != "" {
-		fmt.Fprintf(sb, "%sQueryParameter %s\n", indent, n.Name)
+		if n.Type != nil {
+			fmt.Fprintf(sb, "%sQueryParameter %s:%s\n", indent, n.Name, FormatDataType(n.Type))
+		} else {
+			fmt.Fprintf(sb, "%sQueryParameter %s\n", indent, n.Name)
+		}
 	} else {
 		fmt.Fprintf(sb, "%sQueryParameter\n", indent)
 	}
