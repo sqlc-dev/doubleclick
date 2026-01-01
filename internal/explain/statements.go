@@ -1518,6 +1518,25 @@ func explainTruncateQuery(sb *strings.Builder, n *ast.TruncateQuery, indent stri
 	}
 }
 
+func explainDeleteQuery(sb *strings.Builder, n *ast.DeleteQuery, indent string, depth int) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.DeleteQuery\n", indent)
+		return
+	}
+
+	// Count children: Where expression + table identifier
+	children := 1 // table identifier
+	if n.Where != nil {
+		children++
+	}
+
+	fmt.Fprintf(sb, "%sDeleteQuery  %s (children %d)\n", indent, n.Table, children)
+	if n.Where != nil {
+		Node(sb, n.Where, depth+1)
+	}
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+}
+
 func explainCheckQuery(sb *strings.Builder, n *ast.CheckQuery, indent string) {
 	if n == nil {
 		fmt.Fprintf(sb, "%s*ast.CheckQuery\n", indent)

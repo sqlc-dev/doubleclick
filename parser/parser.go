@@ -205,6 +205,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseSet()
 	case token.UPDATE:
 		return p.parseUpdate()
+	case token.DELETE:
+		return p.parseDelete()
 	case token.OPTIMIZE:
 		return p.parseOptimize()
 	case token.SYSTEM:
@@ -4968,6 +4970,39 @@ func (p *Parser) parseUpdate() *ast.UpdateQuery {
 	return update
 }
 
+func (p *Parser) parseDelete() *ast.DeleteQuery {
+	del := &ast.DeleteQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip DELETE
+
+	// Skip optional FROM
+	if p.currentIs(token.FROM) {
+		p.nextToken()
+	}
+
+	// Parse table name (can be database.table)
+	tableName := p.parseIdentifierName()
+	if tableName != "" {
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			del.Database = tableName
+			del.Table = p.parseIdentifierName()
+		} else {
+			del.Table = tableName
+		}
+	}
+
+	// Parse WHERE clause
+	if p.currentIs(token.WHERE) {
+		p.nextToken() // skip WHERE
+		del.Where = p.parseExpression(LOWEST)
+	}
+
+	return del
+}
+
 func (p *Parser) parseUse() *ast.UseQuery {
 	use := &ast.UseQuery{
 		Position: p.current.Pos,
@@ -5483,7 +5518,14 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 				p.nextToken()
 			}
 		} else {
-			sys.Table = tableName
+			// For RELOAD DICTIONARY commands, the dictionary name appears as both database and table in EXPLAIN
+			if strings.Contains(strings.ToUpper(sys.Command), "RELOAD DICTIONARY") ||
+				strings.Contains(strings.ToUpper(sys.Command), "DROP REPLICA") {
+				sys.Database = tableName
+				sys.Table = tableName
+			} else {
+				sys.Table = tableName
+			}
 		}
 	}
 

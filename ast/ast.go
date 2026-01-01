@@ -672,6 +672,18 @@ func (t *TruncateQuery) Pos() token.Position { return t.Position }
 func (t *TruncateQuery) End() token.Position { return t.Position }
 func (t *TruncateQuery) statementNode()      {}
 
+// DeleteQuery represents a lightweight DELETE statement.
+type DeleteQuery struct {
+	Position token.Position `json:"-"`
+	Database string         `json:"database,omitempty"`
+	Table    string         `json:"table"`
+	Where    Expression     `json:"where,omitempty"`
+}
+
+func (d *DeleteQuery) Pos() token.Position { return d.Position }
+func (d *DeleteQuery) End() token.Position { return d.Position }
+func (d *DeleteQuery) statementNode()      {}
+
 // UseQuery represents a USE statement.
 type UseQuery struct {
 	Position token.Position `json:"-"`

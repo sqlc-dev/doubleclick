@@ -238,6 +238,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainOptimizeQuery(sb, n, indent, depth)
 	case *ast.TruncateQuery:
 		explainTruncateQuery(sb, n, indent)
+	case *ast.DeleteQuery:
+		explainDeleteQuery(sb, n, indent, depth)
 	case *ast.CheckQuery:
 		explainCheckQuery(sb, n, indent)
 	case *ast.CreateIndexQuery:
