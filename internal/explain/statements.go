@@ -219,6 +219,10 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		if len(primaryKeyColumns) > 0 {
 			childrenCount++ // Add for Function tuple containing PRIMARY KEY columns
 		}
+		// Check for inline PRIMARY KEY (from column list, e.g., "n int, primary key n")
+		if len(n.ColumnsPrimaryKey) > 0 {
+			childrenCount++ // Add for the primary key identifier(s)
+		}
 		fmt.Fprintf(sb, "%s Columns definition (children %d)\n", indent, childrenCount)
 		if len(n.Columns) > 0 {
 			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Columns))
@@ -252,6 +256,12 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(primaryKeyColumns))
 			for _, colName := range primaryKeyColumns {
 				fmt.Fprintf(sb, "%s    Identifier %s\n", indent, colName)
+			}
+		}
+		// Output inline PRIMARY KEY (from column list)
+		if len(n.ColumnsPrimaryKey) > 0 {
+			for _, pk := range n.ColumnsPrimaryKey {
+				Node(sb, pk, depth+2)
 			}
 		}
 	}

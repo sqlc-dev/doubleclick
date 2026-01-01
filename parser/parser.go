@@ -1977,6 +1977,34 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 						p.nextToken()
 					}
 				}
+			} else if p.currentIs(token.PRIMARY) {
+				// Handle PRIMARY KEY as table constraint: PRIMARY KEY (col1, col2) or PRIMARY KEY col
+				p.nextToken() // skip PRIMARY
+				if p.currentIs(token.KEY) {
+					p.nextToken() // skip KEY
+				}
+				// Parse the primary key column(s) into create.PrimaryKey
+				if p.currentIs(token.LPAREN) {
+					p.nextToken() // skip (
+					for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+						expr := p.parseExpression(LOWEST)
+						if expr != nil {
+							create.ColumnsPrimaryKey = append(create.ColumnsPrimaryKey, expr)
+						}
+						if p.currentIs(token.COMMA) {
+							p.nextToken()
+						} else {
+							break
+						}
+					}
+					p.expect(token.RPAREN)
+				} else {
+					// Single column: PRIMARY KEY col
+					expr := p.parseExpression(LOWEST)
+					if expr != nil {
+						create.ColumnsPrimaryKey = append(create.ColumnsPrimaryKey, expr)
+					}
+				}
 			} else {
 				col := p.parseColumnDeclaration()
 				if col != nil {
