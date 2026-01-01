@@ -4569,9 +4569,17 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			} else if p.currentIs(token.COLUMN) {
 				cmd.Type = ast.AlterClearColumn
 				p.nextToken()
-				if p.currentIs(token.IDENT) {
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 					cmd.ColumnName = p.current.Value
 					p.nextToken()
+				}
+				// Parse IN PARTITION
+				if p.currentIs(token.IN) {
+					p.nextToken() // skip IN
+					if p.currentIs(token.PARTITION) {
+						p.nextToken() // skip PARTITION
+						cmd.Partition = p.parseExpression(LOWEST)
+					}
 				}
 			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
 				cmd.Type = ast.AlterClearProjection
@@ -4757,6 +4765,20 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				if p.currentIs(token.STRING) {
 					cmd.FromPath = p.current.Value
 					p.nextToken()
+				}
+			}
+		}
+	case token.APPLY:
+		// APPLY PATCHES IN PARTITION expr
+		p.nextToken() // skip APPLY
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PATCHES" {
+			p.nextToken() // skip PATCHES
+			cmd.Type = ast.AlterApplyPatches
+			if p.currentIs(token.IN) {
+				p.nextToken() // skip IN
+				if p.currentIs(token.PARTITION) {
+					p.nextToken() // skip PARTITION
+					cmd.Partition = p.parseExpression(LOWEST)
 				}
 			}
 		}

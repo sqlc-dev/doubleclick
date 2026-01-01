@@ -1198,7 +1198,8 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ColumnName)
 		}
 		if cmd.Partition != nil {
-			Node(sb, cmd.Partition, depth+1)
+			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+			Node(sb, cmd.Partition, depth+2)
 		}
 	case ast.AlterCommentColumn:
 		if cmd.ColumnName != "" {
@@ -1233,7 +1234,7 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	case ast.AlterModifySetting:
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
-		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition:
+		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition, ast.AlterApplyPatches:
 		if cmd.Partition != nil {
 			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
 			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
@@ -1430,7 +1431,7 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 	case ast.AlterModifySetting:
 		children = 1
 	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
-		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition:
+		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition, ast.AlterApplyPatches:
 		if cmd.Partition != nil {
 			children++
 		}

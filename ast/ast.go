@@ -644,6 +644,7 @@ const (
 	AlterMovePartition      AlterCommandType = "MOVE_PARTITION"
 	AlterFreezePartition    AlterCommandType = "FREEZE_PARTITION"
 	AlterFreeze             AlterCommandType = "FREEZE"
+	AlterApplyPatches       AlterCommandType = "APPLY_PATCHES"
 	AlterDeleteWhere        AlterCommandType = "DELETE_WHERE"
 	AlterUpdate             AlterCommandType = "UPDATE"
 	AlterAddProjection      AlterCommandType = "ADD_PROJECTION"
