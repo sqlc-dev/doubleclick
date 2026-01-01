@@ -1962,17 +1962,28 @@ func (p *Parser) parseIsExpression(left ast.Expression) ast.Expression {
 		p.nextToken() // skip DISTINCT
 		if p.currentIs(token.FROM) {
 			p.nextToken() // skip FROM
-			right := p.parseExpression(COMPARE)
-			// IS NOT DISTINCT FROM is same as =, IS DISTINCT FROM is same as !=
-			op := "="
+			// Parse with lower precedence than COMPARE to include operators like IN
+			right := p.parseExpression(NOT_PREC)
+			// IS NOT DISTINCT FROM maps to <=> (isNotDistinctFrom)
+			// IS DISTINCT FROM maps to NOT <=>
 			if not {
-				op = "!="
+				return &ast.BinaryExpr{
+					Position: pos,
+					Left:     left,
+					Op:       "<=>",
+					Right:    right,
+				}
 			}
-			return &ast.BinaryExpr{
+			// IS DISTINCT FROM is NOT(IS NOT DISTINCT FROM)
+			return &ast.UnaryExpr{
 				Position: pos,
-				Left:     left,
-				Op:       op,
-				Right:    right,
+				Op:       "NOT",
+				Operand: &ast.BinaryExpr{
+					Position: pos,
+					Left:     left,
+					Op:       "<=>",
+					Right:    right,
+				},
 			}
 		}
 	}
