@@ -357,6 +357,8 @@ func NormalizeFunctionName(name string) string {
 		"least":      "least",
 		"concat_ws":  "concat",
 		"position":   "position",
+		"date_diff":  "dateDiff",
+		"datediff":   "dateDiff",
 		// SQL standard ANY/ALL subquery operators - simple cases
 		"anyequals":    "in",
 		"allnotequals": "notIn",
