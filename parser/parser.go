@@ -1057,7 +1057,8 @@ func (p *Parser) parseWithClause() []ast.Expression {
 			// AS name is optional
 			if p.currentIs(token.AS) {
 				p.nextToken()
-				if p.currentIs(token.IDENT) {
+				// Alias can be IDENT or certain keywords (KEY, VALUES, etc.)
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 					elem.Name = p.current.Value
 					p.nextToken()
 				}
