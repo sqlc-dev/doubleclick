@@ -1468,6 +1468,12 @@ func (p *Parser) parseOrderByList() []*ast.OrderByElement {
 				p.nextToken()
 				elem.FillStep = p.parseExpression(LOWEST)
 			}
+
+			// Handle STALENESS
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "STALENESS" {
+				p.nextToken()
+				elem.FillStaleness = p.parseExpression(LOWEST)
+			}
 		}
 
 		elements = append(elements, elem)

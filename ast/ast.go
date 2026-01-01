@@ -200,15 +200,16 @@ const (
 
 // OrderByElement represents an ORDER BY element.
 type OrderByElement struct {
-	Position   token.Position `json:"-"`
-	Expression Expression     `json:"expression"`
-	Descending bool           `json:"descending,omitempty"`
-	NullsFirst *bool          `json:"nulls_first,omitempty"`
-	Collate    string         `json:"collate,omitempty"`
-	WithFill   bool           `json:"with_fill,omitempty"`
-	FillFrom   Expression     `json:"fill_from,omitempty"`
-	FillTo     Expression     `json:"fill_to,omitempty"`
-	FillStep   Expression     `json:"fill_step,omitempty"`
+	Position      token.Position `json:"-"`
+	Expression    Expression     `json:"expression"`
+	Descending    bool           `json:"descending,omitempty"`
+	NullsFirst    *bool          `json:"nulls_first,omitempty"`
+	Collate       string         `json:"collate,omitempty"`
+	WithFill      bool           `json:"with_fill,omitempty"`
+	FillFrom      Expression     `json:"fill_from,omitempty"`
+	FillTo        Expression     `json:"fill_to,omitempty"`
+	FillStep      Expression     `json:"fill_step,omitempty"`
+	FillStaleness Expression     `json:"fill_staleness,omitempty"`
 }
 
 func (o *OrderByElement) Pos() token.Position { return o.Position }
