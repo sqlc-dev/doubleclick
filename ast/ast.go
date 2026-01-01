@@ -272,11 +272,12 @@ type CreateQuery struct {
 	Columns          []*ColumnDeclaration `json:"columns,omitempty"`
 	Indexes          []*IndexDefinition   `json:"indexes,omitempty"`
 	Projections      []*Projection        `json:"projections,omitempty"`
-	Constraints      []*Constraint        `json:"constraints,omitempty"`
-	Engine           *EngineClause        `json:"engine,omitempty"`
-	OrderBy          []Expression         `json:"order_by,omitempty"`
-	PartitionBy      Expression           `json:"partition_by,omitempty"`
-	PrimaryKey       []Expression         `json:"primary_key,omitempty"`
+	Constraints         []*Constraint        `json:"constraints,omitempty"`
+	ColumnsPrimaryKey   []Expression         `json:"columns_primary_key,omitempty"` // PRIMARY KEY in column list
+	Engine              *EngineClause        `json:"engine,omitempty"`
+	OrderBy             []Expression         `json:"order_by,omitempty"`
+	PartitionBy         Expression           `json:"partition_by,omitempty"`
+	PrimaryKey          []Expression         `json:"primary_key,omitempty"`
 	SampleBy         Expression           `json:"sample_by,omitempty"`
 	TTL              *TTLClause           `json:"ttl,omitempty"`
 	Settings         []*SettingExpr       `json:"settings,omitempty"`
@@ -502,6 +503,7 @@ type DropQuery struct {
 	Policy          string             `json:"policy,omitempty"`   // For DROP POLICY
 	RowPolicy       string             `json:"row_policy,omitempty"` // For DROP ROW POLICY
 	SettingsProfile string             `json:"settings_profile,omitempty"` // For DROP SETTINGS PROFILE
+	Index           string             `json:"index,omitempty"`            // For DROP INDEX
 	Temporary       bool               `json:"temporary,omitempty"`
 	OnCluster       string             `json:"on_cluster,omitempty"`
 	DropDatabase    bool               `json:"drop_database,omitempty"`
@@ -642,6 +644,7 @@ const (
 	AlterMovePartition      AlterCommandType = "MOVE_PARTITION"
 	AlterFreezePartition    AlterCommandType = "FREEZE_PARTITION"
 	AlterFreeze             AlterCommandType = "FREEZE"
+	AlterApplyPatches       AlterCommandType = "APPLY_PATCHES"
 	AlterDeleteWhere        AlterCommandType = "DELETE_WHERE"
 	AlterUpdate             AlterCommandType = "UPDATE"
 	AlterAddProjection      AlterCommandType = "ADD_PROJECTION"
@@ -668,6 +671,18 @@ type TruncateQuery struct {
 func (t *TruncateQuery) Pos() token.Position { return t.Position }
 func (t *TruncateQuery) End() token.Position { return t.Position }
 func (t *TruncateQuery) statementNode()      {}
+
+// DeleteQuery represents a lightweight DELETE statement.
+type DeleteQuery struct {
+	Position token.Position `json:"-"`
+	Database string         `json:"database,omitempty"`
+	Table    string         `json:"table"`
+	Where    Expression     `json:"where,omitempty"`
+}
+
+func (d *DeleteQuery) Pos() token.Position { return d.Position }
+func (d *DeleteQuery) End() token.Position { return d.Position }
+func (d *DeleteQuery) statementNode()      {}
 
 // UseQuery represents a USE statement.
 type UseQuery struct {
@@ -1106,10 +1121,12 @@ func (d *DropWorkloadQuery) statementNode()      {}
 
 // CreateIndexQuery represents a CREATE INDEX statement.
 type CreateIndexQuery struct {
-	Position  token.Position `json:"-"`
-	IndexName string         `json:"index_name"`
-	Table     string         `json:"table"`
-	Columns   []Expression   `json:"columns,omitempty"`
+	Position    token.Position `json:"-"`
+	IndexName   string         `json:"index_name"`
+	Table       string         `json:"table"`
+	Columns     []Expression   `json:"columns,omitempty"`
+	Type        string         `json:"type,omitempty"`        // Index type (minmax, bloom_filter, etc.)
+	Granularity int            `json:"granularity,omitempty"` // GRANULARITY value
 }
 
 func (c *CreateIndexQuery) Pos() token.Position { return c.Position }

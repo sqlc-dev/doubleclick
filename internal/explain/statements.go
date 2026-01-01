@@ -219,6 +219,10 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		if len(primaryKeyColumns) > 0 {
 			childrenCount++ // Add for Function tuple containing PRIMARY KEY columns
 		}
+		// Check for inline PRIMARY KEY (from column list, e.g., "n int, primary key n")
+		if len(n.ColumnsPrimaryKey) > 0 {
+			childrenCount++ // Add for the primary key identifier(s)
+		}
 		fmt.Fprintf(sb, "%s Columns definition (children %d)\n", indent, childrenCount)
 		if len(n.Columns) > 0 {
 			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Columns))
@@ -252,6 +256,12 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(primaryKeyColumns))
 			for _, colName := range primaryKeyColumns {
 				fmt.Fprintf(sb, "%s    Identifier %s\n", indent, colName)
+			}
+		}
+		// Output inline PRIMARY KEY (from column list)
+		if len(n.ColumnsPrimaryKey) > 0 {
+			for _, pk := range n.ColumnsPrimaryKey {
+				Node(sb, pk, depth+2)
 			}
 		}
 	}
@@ -463,6 +473,14 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 		return
 	}
 
+	// DROP INDEX - outputs as DropIndexQuery with two spaces before table name
+	if n.Index != "" {
+		fmt.Fprintf(sb, "%sDropIndexQuery  %s (children %d)\n", indent, n.Table, 2)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Index)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		return
+	}
+
 	// Handle multiple tables: DROP TABLE t1, t2, t3
 	if len(n.Tables) > 1 {
 		fmt.Fprintf(sb, "%sDropQuery   (children %d)\n", indent, 1)
@@ -630,9 +648,9 @@ func explainSystemQuery(sb *strings.Builder, n *ast.SystemQuery, indent string) 
 }
 
 func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string, depth int) {
-	// Determine the type string - only show if explicitly specified
+	// Determine the type string - only show if explicitly specified AND not PLAN (default)
 	typeStr := ""
-	if n.ExplicitType {
+	if n.ExplicitType && n.ExplainType != ast.ExplainPlan {
 		typeStr = " " + string(n.ExplainType)
 	}
 
@@ -1014,6 +1032,15 @@ func explainDataType(sb *strings.Builder, n *ast.DataType, indent string, depth 
 
 func explainObjectTypeArgument(sb *strings.Builder, n *ast.ObjectTypeArgument, indent string, depth int) {
 	fmt.Fprintf(sb, "%sASTObjectTypeArgument (children %d)\n", indent, 1)
+	// SKIP function calls are unwrapped - only the path/pattern is shown
+	if fn, ok := n.Expr.(*ast.FunctionCall); ok {
+		if strings.ToUpper(fn.Name) == "SKIP" || strings.ToUpper(fn.Name) == "SKIP REGEXP" {
+			if len(fn.Arguments) > 0 {
+				Node(sb, fn.Arguments[0], depth+1)
+				return
+			}
+		}
+	}
 	Node(sb, n.Expr, depth+1)
 }
 
@@ -1171,7 +1198,8 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ColumnName)
 		}
 		if cmd.Partition != nil {
-			Node(sb, cmd.Partition, depth+1)
+			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+			Node(sb, cmd.Partition, depth+2)
 		}
 	case ast.AlterCommentColumn:
 		if cmd.ColumnName != "" {
@@ -1206,7 +1234,7 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	case ast.AlterModifySetting:
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
-		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition:
+		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition, ast.AlterApplyPatches:
 		if cmd.Partition != nil {
 			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
 			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
@@ -1403,7 +1431,7 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 	case ast.AlterModifySetting:
 		children = 1
 	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
-		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition:
+		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition, ast.AlterApplyPatches:
 		if cmd.Partition != nil {
 			children++
 		}
@@ -1490,6 +1518,25 @@ func explainTruncateQuery(sb *strings.Builder, n *ast.TruncateQuery, indent stri
 	}
 }
 
+func explainDeleteQuery(sb *strings.Builder, n *ast.DeleteQuery, indent string, depth int) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.DeleteQuery\n", indent)
+		return
+	}
+
+	// Count children: Where expression + table identifier
+	children := 1 // table identifier
+	if n.Where != nil {
+		children++
+	}
+
+	fmt.Fprintf(sb, "%sDeleteQuery  %s (children %d)\n", indent, n.Table, children)
+	if n.Where != nil {
+		Node(sb, n.Where, depth+1)
+	}
+	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+}
+
 func explainCheckQuery(sb *strings.Builder, n *ast.CheckQuery, indent string) {
 	if n == nil {
 		fmt.Fprintf(sb, "%s*ast.CheckQuery\n", indent)
@@ -1545,8 +1592,13 @@ func explainCreateIndexQuery(sb *strings.Builder, n *ast.CreateIndexQuery, inden
 	// Child 1: Index name
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.IndexName)
 
-	// Child 2: Index wrapper with columns
-	fmt.Fprintf(sb, "%s Index (children 1)\n", indent)
+	// Child 2: Index wrapper with columns and type
+	// Index has 1 child for columns-only, 2 children if TYPE is specified
+	indexChildren := 1
+	if n.Type != "" {
+		indexChildren = 2
+	}
+	fmt.Fprintf(sb, "%s Index (children %d)\n", indent, indexChildren)
 
 	// For single column, output as Identifier
 	// For multiple columns or if there are any special cases, output as Function tuple
@@ -1561,6 +1613,12 @@ func explainCreateIndexQuery(sb *strings.Builder, n *ast.CreateIndexQuery, inden
 	} else {
 		// Multiple columns or empty - always Function tuple with ExpressionList
 		fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
+		fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+	}
+
+	// Output TYPE as Function with empty ExpressionList
+	if n.Type != "" {
+		fmt.Fprintf(sb, "%s  Function %s (children 1)\n", indent, n.Type)
 		fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
 	}
 

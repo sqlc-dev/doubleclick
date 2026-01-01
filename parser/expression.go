@@ -67,9 +67,18 @@ func (p *Parser) precedence(tok token.Token) int {
 
 // precedenceForCurrent returns the precedence for the current token,
 // with special handling for tuple access (number starting with dot)
+// and infix NOT operators (NOT BETWEEN, NOT IN, NOT LIKE, etc.)
 func (p *Parser) precedenceForCurrent() int {
 	if p.currentIs(token.NUMBER) && strings.HasPrefix(p.current.Value, ".") {
 		return HIGHEST // Tuple access like t.1
+	}
+	// When NOT is followed by BETWEEN, IN, LIKE, ILIKE, or REGEXP,
+	// it's an infix operator with COMPARE precedence, not prefix NOT
+	if p.currentIs(token.NOT) {
+		if p.peekIs(token.BETWEEN) || p.peekIs(token.IN) || p.peekIs(token.LIKE) ||
+			p.peekIs(token.ILIKE) || p.peekIs(token.REGEXP) {
+			return COMPARE
+		}
 	}
 	return p.precedence(p.current.Token)
 }
@@ -143,6 +152,8 @@ func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 
 	expr := p.parseExpression(LOWEST)
 	if expr != nil {
+		// Handle implicit alias (identifier without AS)
+		expr = p.parseImplicitAlias(expr)
 		exprs = append(exprs, expr)
 	}
 
@@ -154,6 +165,8 @@ func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 		}
 		expr := p.parseExpression(LOWEST)
 		if expr != nil {
+			// Handle implicit alias (identifier without AS)
+			expr = p.parseImplicitAlias(expr)
 			exprs = append(exprs, expr)
 		}
 	}
@@ -1390,6 +1403,8 @@ func (p *Parser) parseExtract() ast.Expression {
 			if p.currentIs(token.FROM) {
 				p.nextToken()
 				from := p.parseExpression(LOWEST)
+				// Handle implicit alias (identifier without AS)
+				from = p.parseImplicitAlias(from)
 				p.expect(token.RPAREN)
 				return &ast.ExtractExpr{
 					Position: pos,
@@ -1425,7 +1440,10 @@ func (p *Parser) parseExtract() ast.Expression {
 	// or extract(expr, pattern) where expr can be any expression
 	var args []ast.Expression
 	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-		args = append(args, p.parseExpression(LOWEST))
+		arg := p.parseExpression(LOWEST)
+		// Handle implicit alias (identifier without AS)
+		arg = p.parseImplicitAlias(arg)
+		args = append(args, arg)
 		if p.currentIs(token.COMMA) {
 			p.nextToken()
 		} else {

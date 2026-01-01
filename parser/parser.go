@@ -130,6 +130,9 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseInsert()
 	case token.CREATE:
 		return p.parseCreate()
+	case token.REPLACE:
+		// REPLACE TABLE is equivalent to CREATE OR REPLACE TABLE
+		return p.parseReplace()
 	case token.DROP:
 		// Check for DROP SETTINGS PROFILE
 		if p.peekIs(token.SETTINGS) {
@@ -202,6 +205,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseSet()
 	case token.UPDATE:
 		return p.parseUpdate()
+	case token.DELETE:
+		return p.parseDelete()
 	case token.OPTIMIZE:
 		return p.parseOptimize()
 	case token.SYSTEM:
@@ -296,8 +301,8 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 			}
 			ops = append(ops, op)
 
-			// Parse the next operand - can be a SELECT with UNION/UNION ALL
-			// (UNION has higher precedence than EXCEPT)
+			// Parse the next operand
+			// UNION has LOWER precedence than INTERSECT/EXCEPT, so don't consume UNION here
 			var nextStmt ast.Statement
 			if p.currentIs(token.LPAREN) {
 				p.nextToken() // skip (
@@ -308,11 +313,12 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 				p.expect(token.RPAREN)
 				nextStmt = nested
 			} else {
-				// Parse SELECT with possible UNION/UNION ALL
-				nextStmt = p.parseSelectWithUnionOnly()
-				if nextStmt == nil {
+				// Parse just a SELECT (don't consume UNION which has lower precedence)
+				sel := p.parseSelect()
+				if sel == nil {
 					break
 				}
+				nextStmt = sel
 			}
 			stmts = append(stmts, nextStmt)
 		}
@@ -321,18 +327,19 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 		result := buildIntersectExceptTree(stmts, ops)
 
 		query.Selects = append(query.Selects, result)
-		return query
-	}
-
-	// Handle regular case (UNION, INTERSECT ALL, EXCEPT ALL, or single SELECT)
-	if firstWasParenthesized {
-		if nested, ok := firstItem.(*ast.SelectWithUnionQuery); ok {
-			for _, s := range nested.Selects {
-				query.Selects = append(query.Selects, s)
-			}
-		}
+		// Don't return yet - there might be a UNION ALL following the INTERSECT/EXCEPT chain
+		// Fall through to the UNION parsing section
 	} else {
-		query.Selects = append(query.Selects, firstItem)
+		// Handle regular case (UNION, INTERSECT ALL, EXCEPT ALL, or single SELECT)
+		if firstWasParenthesized {
+			if nested, ok := firstItem.(*ast.SelectWithUnionQuery); ok {
+				for _, s := range nested.Selects {
+					query.Selects = append(query.Selects, s)
+				}
+			}
+		} else {
+			query.Selects = append(query.Selects, firstItem)
+		}
 	}
 
 	// Parse UNION/INTERSECT ALL/EXCEPT ALL clauses
@@ -390,10 +397,35 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 }
 
 // parseIntersectExceptWithFirstOperand handles the case where UNION is followed by INTERSECT/EXCEPT
-// The unionQuery contains the selects that form the first operand
+// Precedence: INTERSECT > UNION > EXCEPT
+// So: "A UNION ALL B INTERSECT C" = "A UNION ALL (B INTERSECT C)" - pop last SELECT for INTERSECT
+//     "A UNION ALL B EXCEPT C" = "(A UNION ALL B) EXCEPT C" - use entire UNION for EXCEPT
 func (p *Parser) parseIntersectExceptWithFirstOperand(unionQuery *ast.SelectWithUnionQuery) *ast.SelectWithUnionQuery {
-	// Collect all operands and operators
-	stmts := []ast.Statement{unionQuery}
+	// Check if we're starting with INTERSECT or EXCEPT to determine precedence behavior
+	startsWithIntersect := p.currentIs(token.INTERSECT)
+
+	var firstOperand ast.Statement
+	if startsWithIntersect {
+		// INTERSECT has higher precedence than UNION
+		// Pop the last select from unionQuery to be the first operand of INTERSECT
+		firstOperand = unionQuery.Selects[len(unionQuery.Selects)-1]
+		unionQuery.Selects = unionQuery.Selects[:len(unionQuery.Selects)-1]
+		// Also remove the last union mode if it exists
+		if len(unionQuery.UnionModes) > 0 {
+			unionQuery.UnionModes = unionQuery.UnionModes[:len(unionQuery.UnionModes)-1]
+		}
+	} else {
+		// EXCEPT has lower precedence than UNION
+		// Use the entire union as the first operand
+		firstOperand = unionQuery
+		// Create a new query to hold the result
+		unionQuery = &ast.SelectWithUnionQuery{
+			Position: unionQuery.Position,
+		}
+	}
+
+	// Collect operands starting with the first operand
+	stmts := []ast.Statement{firstOperand}
 	var ops []string
 
 	// Parse all INTERSECT/EXCEPT clauses
@@ -439,11 +471,50 @@ func (p *Parser) parseIntersectExceptWithFirstOperand(unionQuery *ast.SelectWith
 	// Build the tree with proper precedence
 	result := buildIntersectExceptTree(stmts, ops)
 
-	// Return wrapped in SelectWithUnionQuery
-	return &ast.SelectWithUnionQuery{
-		Position: unionQuery.Position,
-		Selects:  []ast.Statement{result},
+	// Add the result to the union query
+	unionQuery.Selects = append(unionQuery.Selects, result)
+
+	// Continue parsing any UNION/UNION ALL that follows the INTERSECT/EXCEPT chain
+	for p.currentIs(token.UNION) || p.currentIs(token.EXCEPT) || p.currentIs(token.INTERSECT) {
+		// If we hit another INTERSECT/EXCEPT, we need to handle it recursively
+		if p.isIntersectExceptWithWrapper() {
+			return p.parseIntersectExceptWithFirstOperand(unionQuery)
+		}
+
+		p.nextToken() // skip UNION
+
+		var mode string
+		if p.currentIs(token.ALL) {
+			unionQuery.UnionAll = true
+			mode = "ALL"
+			p.nextToken()
+		} else if p.currentIs(token.DISTINCT) {
+			mode = "DISTINCT"
+			p.nextToken()
+		}
+		unionQuery.UnionModes = append(unionQuery.UnionModes, "UNION "+mode)
+
+		// Handle parenthesized subqueries
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			nested := p.parseSelectWithUnion()
+			if nested == nil {
+				break
+			}
+			p.expect(token.RPAREN)
+			for _, s := range nested.Selects {
+				unionQuery.Selects = append(unionQuery.Selects, s)
+			}
+		} else {
+			sel := p.parseSelect()
+			if sel == nil {
+				break
+			}
+			unionQuery.Selects = append(unionQuery.Selects, sel)
+		}
 	}
+
+	return unionQuery
 }
 
 // parseSelectWithUnionOnly parses SELECT with UNION/UNION ALL but stops at INTERSECT/EXCEPT.
@@ -988,7 +1059,8 @@ func (p *Parser) parseWithClause() []ast.Expression {
 			// AS name is optional
 			if p.currentIs(token.AS) {
 				p.nextToken()
-				if p.currentIs(token.IDENT) {
+				// Alias can be IDENT or certain keywords (KEY, VALUES, etc.)
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 					elem.Name = p.current.Value
 					p.nextToken()
 				}
@@ -1060,13 +1132,10 @@ func (p *Parser) parseTableElementWithJoin() *ast.TablesInSelectQueryElement {
 	if p.currentIs(token.COMMA) {
 		p.nextToken()
 		elem.Table = p.parseTableExpression()
-		// ClickHouse adds an empty TableJoin node for comma joins, but only
-		// when the table is NOT a subquery (subqueries don't get TableJoin nodes)
+		// ClickHouse adds an empty TableJoin node for comma joins
 		if elem.Table != nil {
-			if _, isSubquery := elem.Table.Table.(*ast.Subquery); !isSubquery {
-				elem.Join = &ast.TableJoin{
-					Position: elem.Position,
-				}
+			elem.Join = &ast.TableJoin{
+				Position: elem.Position,
 			}
 		}
 		return elem
@@ -1758,6 +1827,26 @@ func (p *Parser) parseCreate() ast.Statement {
 	return create
 }
 
+// parseReplace handles REPLACE TABLE syntax, which is equivalent to CREATE OR REPLACE TABLE
+func (p *Parser) parseReplace() ast.Statement {
+	pos := p.current.Pos
+	p.nextToken() // skip REPLACE
+
+	// REPLACE TABLE name ...
+	if !p.currentIs(token.TABLE) {
+		return nil
+	}
+	p.nextToken() // skip TABLE
+
+	create := &ast.CreateQuery{
+		Position:  pos,
+		OrReplace: true, // REPLACE TABLE implies OR REPLACE
+	}
+
+	p.parseCreateTable(create)
+	return create
+}
+
 func (p *Parser) parseCreateIndex(pos token.Position) *ast.CreateIndexQuery {
 	p.nextToken() // skip INDEX
 
@@ -1765,10 +1854,7 @@ func (p *Parser) parseCreateIndex(pos token.Position) *ast.CreateIndexQuery {
 		Position: pos,
 	}
 
-	// Parse index name
-	query.IndexName = p.parseIdentifierName()
-
-	// Skip IF NOT EXISTS if present
+	// Skip IF NOT EXISTS if present (comes before index name)
 	if p.currentIs(token.IF) {
 		p.nextToken() // IF
 		if p.currentIs(token.NOT) {
@@ -1778,6 +1864,9 @@ func (p *Parser) parseCreateIndex(pos token.Position) *ast.CreateIndexQuery {
 			p.nextToken() // EXISTS
 		}
 	}
+
+	// Parse index name
+	query.IndexName = p.parseIdentifierName()
 
 	// Expect ON
 	if p.currentIs(token.ON) {
@@ -1813,6 +1902,22 @@ func (p *Parser) parseCreateIndex(pos token.Position) *ast.CreateIndexQuery {
 
 		if p.currentIs(token.RPAREN) {
 			p.nextToken() // skip )
+		}
+	}
+
+	// Parse TYPE clause
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TYPE" {
+		p.nextToken() // skip TYPE
+		query.Type = p.parseIdentifierName()
+	}
+
+	// Parse GRANULARITY clause
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "GRANULARITY" {
+		p.nextToken() // skip GRANULARITY
+		if p.currentIs(token.NUMBER) {
+			val, _ := strconv.Atoi(p.current.Value)
+			query.Granularity = val
+			p.nextToken()
 		}
 	}
 
@@ -1886,6 +1991,34 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 					// Skip other constraint types we don't know about
 					for !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
 						p.nextToken()
+					}
+				}
+			} else if p.currentIs(token.PRIMARY) {
+				// Handle PRIMARY KEY as table constraint: PRIMARY KEY (col1, col2) or PRIMARY KEY col
+				p.nextToken() // skip PRIMARY
+				if p.currentIs(token.KEY) {
+					p.nextToken() // skip KEY
+				}
+				// Parse the primary key column(s) into create.PrimaryKey
+				if p.currentIs(token.LPAREN) {
+					p.nextToken() // skip (
+					for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+						expr := p.parseExpression(LOWEST)
+						if expr != nil {
+							create.ColumnsPrimaryKey = append(create.ColumnsPrimaryKey, expr)
+						}
+						if p.currentIs(token.COMMA) {
+							p.nextToken()
+						} else {
+							break
+						}
+					}
+					p.expect(token.RPAREN)
+				} else {
+					// Single column: PRIMARY KEY col
+					expr := p.parseExpression(LOWEST)
+					if expr != nil {
+						create.ColumnsPrimaryKey = append(create.ColumnsPrimaryKey, expr)
 					}
 				}
 			} else {
@@ -3623,11 +3756,27 @@ func (p *Parser) parseDataType() *ast.DataType {
 				}
 			}
 
+
 			if isNamedParam {
 				// Parse as name + type pair
+				// For JSON/OBJECT types, the name can be a dotted path like a.b.c
 				pos := p.current.Pos
-				paramName := p.current.Value
+				var nameParts []string
+				nameParts = append(nameParts, p.current.Value)
 				p.nextToken()
+				// Parse additional dotted parts if this is a JSON/OBJECT type
+				if isObjectType {
+					for p.currentIs(token.DOT) {
+						p.nextToken() // consume dot
+						if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+							nameParts = append(nameParts, p.current.Value)
+							p.nextToken()
+						} else {
+							break
+						}
+					}
+				}
+				paramName := strings.Join(nameParts, ".")
 				// Parse the type for this parameter
 				paramType := p.parseDataType()
 				if paramType != nil {
@@ -3888,6 +4037,7 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		dropFunction = true
 		p.nextToken()
 	case token.INDEX:
+		drop.Index = "_pending_"
 		p.nextToken()
 	case token.SETTINGS:
 		// DROP SETTINGS PROFILE
@@ -3983,6 +4133,20 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 			drop.RowPolicy = tableName
 		} else if drop.SettingsProfile == "_pending_" {
 			drop.SettingsProfile = tableName
+		} else if drop.Index == "_pending_" {
+			drop.Index = tableName
+			// For DROP INDEX, parse ON table_name
+			if p.currentIs(token.ON) {
+				p.nextToken() // skip ON
+				tableNamePart := p.parseIdentifierName()
+				if p.currentIs(token.DOT) {
+					p.nextToken()
+					drop.Database = tableNamePart
+					drop.Table = p.parseIdentifierName()
+				} else {
+					drop.Table = tableNamePart
+				}
+			}
 		} else if dropDictionary {
 			drop.Dictionary = tableName
 			// Also set Table/Tables for backward compatibility with AST JSON
@@ -4404,9 +4568,17 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			} else if p.currentIs(token.COLUMN) {
 				cmd.Type = ast.AlterClearColumn
 				p.nextToken()
-				if p.currentIs(token.IDENT) {
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 					cmd.ColumnName = p.current.Value
 					p.nextToken()
+				}
+				// Parse IN PARTITION
+				if p.currentIs(token.IN) {
+					p.nextToken() // skip IN
+					if p.currentIs(token.PARTITION) {
+						p.nextToken() // skip PARTITION
+						cmd.Partition = p.parseExpression(LOWEST)
+					}
 				}
 			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
 				cmd.Type = ast.AlterClearProjection
@@ -4595,6 +4767,20 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				}
 			}
 		}
+	case token.APPLY:
+		// APPLY PATCHES IN PARTITION expr
+		p.nextToken() // skip APPLY
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PATCHES" {
+			p.nextToken() // skip PATCHES
+			cmd.Type = ast.AlterApplyPatches
+			if p.currentIs(token.IN) {
+				p.nextToken() // skip IN
+				if p.currentIs(token.PARTITION) {
+					p.nextToken() // skip PARTITION
+					cmd.Partition = p.parseExpression(LOWEST)
+				}
+			}
+		}
 	case token.DELETE:
 		// DELETE WHERE condition - mutation to delete rows
 		cmd.Type = ast.AlterDeleteWhere
@@ -4779,6 +4965,39 @@ func (p *Parser) parseUpdate() *ast.UpdateQuery {
 	}
 
 	return update
+}
+
+func (p *Parser) parseDelete() *ast.DeleteQuery {
+	del := &ast.DeleteQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip DELETE
+
+	// Skip optional FROM
+	if p.currentIs(token.FROM) {
+		p.nextToken()
+	}
+
+	// Parse table name (can be database.table)
+	tableName := p.parseIdentifierName()
+	if tableName != "" {
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			del.Database = tableName
+			del.Table = p.parseIdentifierName()
+		} else {
+			del.Table = tableName
+		}
+	}
+
+	// Parse WHERE clause
+	if p.currentIs(token.WHERE) {
+		p.nextToken() // skip WHERE
+		del.Where = p.parseExpression(LOWEST)
+	}
+
+	return del
 }
 
 func (p *Parser) parseUse() *ast.UseQuery {
@@ -5296,7 +5515,14 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 				p.nextToken()
 			}
 		} else {
-			sys.Table = tableName
+			// For RELOAD DICTIONARY commands, the dictionary name appears as both database and table in EXPLAIN
+			if strings.Contains(strings.ToUpper(sys.Command), "RELOAD DICTIONARY") ||
+				strings.Contains(strings.ToUpper(sys.Command), "DROP REPLICA") {
+				sys.Database = tableName
+				sys.Table = tableName
+			} else {
+				sys.Table = tableName
+			}
 		}
 	}
 
@@ -5308,7 +5534,7 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 func (p *Parser) isSystemCommandKeyword() bool {
 	switch p.current.Token {
 	case token.TTL, token.SYNC, token.DROP, token.FORMAT, token.FOR, token.INDEX, token.INSERT,
-		token.PRIMARY, token.KEY:
+		token.PRIMARY, token.KEY, token.DISTRIBUTED:
 		return true
 	}
 	// Handle identifiers that are part of SYSTEM commands (not table names)
@@ -5861,8 +6087,8 @@ func (p *Parser) parseProjection() *ast.Projection {
 		Position: p.current.Pos,
 	}
 
-	// Parse projection name
-	if p.currentIs(token.IDENT) {
+	// Parse projection name (can be identifier or keyword like VALUES)
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		proj.Name = p.current.Value
 		p.nextToken()
 	}
