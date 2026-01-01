@@ -534,6 +534,50 @@ func (l *Lexer) readHexString() Item {
 	return Item{Token: token.STRING, Value: sb.String(), Pos: pos}
 }
 
+func (l *Lexer) readBinaryString() Item {
+	pos := l.pos
+	var sb strings.Builder
+	l.readChar() // skip opening quote
+
+	// Collect all binary digits first
+	var bits []byte
+	for !l.eof {
+		if l.ch == '\'' {
+			l.readChar() // skip closing quote
+			break
+		}
+		if l.ch == '0' || l.ch == '1' {
+			bits = append(bits, byte(l.ch-'0'))
+		}
+		l.readChar()
+	}
+
+	// Convert groups of 8 bits to bytes
+	// Process bits from left to right, grouping from the left
+	// If we have fewer than 8 bits, pad with zeros on the left
+	if len(bits) > 0 {
+		// Pad the bits to make them a multiple of 8 (pad on left)
+		remainder := len(bits) % 8
+		if remainder != 0 {
+			padding := 8 - remainder
+			paddedBits := make([]byte, len(bits)+padding)
+			copy(paddedBits[padding:], bits)
+			bits = paddedBits
+		}
+
+		// Convert each group of 8 bits to a byte
+		for i := 0; i < len(bits); i += 8 {
+			var byteVal byte
+			for j := 0; j < 8; j++ {
+				byteVal = byteVal<<1 | bits[i+j]
+			}
+			sb.WriteByte(byteVal)
+		}
+	}
+
+	return Item{Token: token.STRING, Value: sb.String(), Pos: pos}
+}
+
 func (l *Lexer) readQuotedIdentifier() Item {
 	pos := l.pos
 	var sb strings.Builder
@@ -974,7 +1018,7 @@ func (l *Lexer) readIdentifier() Item {
 	// Check for binary string literal: b'...' or B'...'
 	if (l.ch == 'b' || l.ch == 'B') && l.peekChar() == '\'' {
 		l.readChar() // skip b
-		return l.readString('\'') // read as regular string
+		return l.readBinaryString() // read as binary-decoded string
 	}
 
 	for isIdentChar(l.ch) {
