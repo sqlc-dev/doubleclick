@@ -4420,6 +4420,11 @@ func (p *Parser) parseAlter() *ast.AlterQuery {
 
 	p.nextToken() // skip ALTER
 
+	// Skip TEMPORARY keyword if present
+	if p.currentIs(token.TEMPORARY) {
+		p.nextToken()
+	}
+
 	if !p.expect(token.TABLE) {
 		return nil
 	}
@@ -4516,8 +4521,17 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "AFTER" {
 				p.nextToken()
 				if p.currentIs(token.IDENT) {
-					cmd.AfterColumn = p.current.Value
+					// Handle dotted column names like AddedNested1.B
+					afterCol := p.current.Value
 					p.nextToken()
+					for p.currentIs(token.DOT) {
+						p.nextToken() // skip DOT
+						if p.currentIs(token.IDENT) {
+							afterCol += "." + p.current.Value
+							p.nextToken()
+						}
+					}
+					cmd.AfterColumn = afterCol
 				}
 			}
 		} else if p.currentIs(token.INDEX) {
@@ -4632,8 +4646,17 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				cmd.IfExists = true
 			}
 			if p.currentIs(token.IDENT) {
-				cmd.ColumnName = p.current.Value
+				// Handle dotted column names like NestedColumn.A
+				colName := p.current.Value
 				p.nextToken()
+				for p.currentIs(token.DOT) {
+					p.nextToken() // skip DOT
+					if p.currentIs(token.IDENT) {
+						colName += "." + p.current.Value
+						p.nextToken()
+					}
+				}
+				cmd.ColumnName = colName
 			}
 		} else if p.currentIs(token.INDEX) {
 			cmd.Type = ast.AlterDropIndex
@@ -4812,6 +4835,14 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		if p.currentIs(token.COLUMN) {
 			cmd.Type = ast.AlterModifyColumn
 			p.nextToken()
+			// Handle IF EXISTS
+			if p.currentIs(token.IF) {
+				p.nextToken()
+				if p.currentIs(token.EXISTS) {
+					cmd.IfExists = true
+					p.nextToken()
+				}
+			}
 			// Handle MODIFY COLUMN name REMOVE ... (e.g., REMOVE COMMENT)
 			// Check if the next token after column name is REMOVE
 			if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "REMOVE" {
