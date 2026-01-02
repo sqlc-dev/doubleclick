@@ -33,8 +33,8 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 	}
 
 	children := 1 // arguments ExpressionList
-	if len(n.Parameters) > 0 {
-		children++ // parameters ExpressionList
+	if n.Parameters != nil {
+		children++ // parameters ExpressionList (even if empty, like medianGK()(x))
 	}
 	// Only count WindowDefinition as a child for inline window specs that have content
 	// Empty OVER () doesn't produce a WindowDefinition in ClickHouse EXPLAIN AST
@@ -83,8 +83,13 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 		fmt.Fprintf(sb, "%s  Set\n", indent)
 	}
 	// Parameters (for parametric functions)
-	if len(n.Parameters) > 0 {
-		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Parameters))
+	// Output even when empty (e.g., medianGK()(x) has empty parameters)
+	if n.Parameters != nil {
+		fmt.Fprintf(sb, "%s ExpressionList", indent)
+		if len(n.Parameters) > 0 {
+			fmt.Fprintf(sb, " (children %d)", len(n.Parameters))
+		}
+		fmt.Fprintln(sb)
 		for _, p := range n.Parameters {
 			Node(sb, p, depth+2)
 		}

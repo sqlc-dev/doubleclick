@@ -2329,10 +2329,16 @@ func (p *Parser) parseTernary(condition ast.Expression) ast.Expression {
 func (p *Parser) parseParametricFunctionCall(fn *ast.FunctionCall) *ast.FunctionCall {
 	// The first FunctionCall's arguments become the parameters
 	// and we parse the second set of arguments
+	// Ensure Parameters is an empty slice (not nil) even for empty ()
+	// This distinguishes "no parameters" from "empty parameters" like medianGK()(x)
+	params := fn.Arguments
+	if params == nil {
+		params = []ast.Expression{}
+	}
 	result := &ast.FunctionCall{
 		Position:   fn.Position,
 		Name:       fn.Name,
-		Parameters: fn.Arguments, // Parameters are the first ()'s content
+		Parameters: params, // Parameters are the first ()'s content
 	}
 
 	p.nextToken() // skip (
