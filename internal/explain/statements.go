@@ -1800,6 +1800,9 @@ func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent stri
 	if n.Cleanup {
 		name += "_cleanup"
 	}
+	if n.Dedupe {
+		name += "_deduplicate"
+	}
 
 	hasSettings := len(n.Settings) > 0
 	children := 1 // identifier
