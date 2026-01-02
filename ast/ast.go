@@ -490,8 +490,9 @@ func (e *EngineClause) End() token.Position { return e.Position }
 
 // TTLClause represents a TTL clause.
 type TTLClause struct {
-	Position   token.Position `json:"-"`
-	Expression Expression     `json:"expression"`
+	Position    token.Position `json:"-"`
+	Expression  Expression     `json:"expression"`
+	Expressions []Expression   `json:"expressions,omitempty"` // Additional TTL expressions (for multiple TTL elements)
 }
 
 func (t *TTLClause) Pos() token.Position { return t.Position }

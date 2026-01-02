@@ -463,9 +463,15 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			Node(sb, n.SampleBy, storageChildDepth)
 		}
 		if n.TTL != nil {
-			fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", storageIndent)
+			// Count total TTL elements (1 for Expression + len(Expressions))
+			ttlCount := 1 + len(n.TTL.Expressions)
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", storageIndent, ttlCount)
 			fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", storageIndent)
 			Node(sb, n.TTL.Expression, storageChildDepth+2)
+			for _, expr := range n.TTL.Expressions {
+				fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", storageIndent)
+				Node(sb, expr, storageChildDepth+2)
+			}
 		}
 		if len(n.Settings) > 0 {
 			fmt.Fprintf(sb, "%s Set\n", storageIndent)
@@ -1542,9 +1548,15 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	case ast.AlterModifyTTL:
 		if cmd.TTL != nil && cmd.TTL.Expression != nil {
 			// TTL is wrapped in ExpressionList and TTLElement
-			fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", indent)
+			// Count total TTL elements (1 for Expression + len(Expressions))
+			ttlCount := 1 + len(cmd.TTL.Expressions)
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, ttlCount)
 			fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", indent)
 			Node(sb, cmd.TTL.Expression, depth+3)
+			for _, expr := range cmd.TTL.Expressions {
+				fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", indent)
+				Node(sb, expr, depth+3)
+			}
 		}
 	case ast.AlterModifySetting:
 		fmt.Fprintf(sb, "%s Set\n", indent)

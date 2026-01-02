@@ -2364,6 +2364,16 @@ func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 				Position:   p.current.Pos,
 				Expression: p.parseExpression(ALIAS_PREC), // Use ALIAS_PREC for AS SELECT
 			}
+			// Skip RECOMPRESS CODEC(...) if present
+			p.skipTTLModifiers()
+			// Parse additional TTL elements (comma-separated)
+			for p.currentIs(token.COMMA) {
+				p.nextToken() // skip comma
+				expr := p.parseExpression(ALIAS_PREC)
+				create.TTL.Expressions = append(create.TTL.Expressions, expr)
+				// Skip RECOMPRESS CODEC(...) if present
+				p.skipTTLModifiers()
+			}
 			// Handle TTL GROUP BY x SET y = max(y) syntax
 			if p.currentIs(token.GROUP) {
 				p.nextToken()
@@ -5168,6 +5178,16 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				Position:   p.current.Pos,
 				Expression: p.parseExpression(LOWEST),
 			}
+			// Skip RECOMPRESS CODEC(...) and other TTL modifiers
+			p.skipTTLModifiers()
+			// Parse additional TTL elements (comma-separated)
+			for p.currentIs(token.COMMA) {
+				p.nextToken() // skip comma
+				expr := p.parseExpression(LOWEST)
+				cmd.TTL.Expressions = append(cmd.TTL.Expressions, expr)
+				// Skip RECOMPRESS CODEC(...) if present
+				p.skipTTLModifiers()
+			}
 		} else if p.currentIs(token.SETTINGS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "SETTING") {
 			// Both SETTINGS and SETTING (singular) are accepted
 			cmd.Type = ast.AlterModifySetting
@@ -7216,4 +7236,51 @@ func (p *Parser) parseTransactionControl() *ast.TransactionControlQuery {
 	}
 
 	return query
+}
+
+// skipTTLModifiers skips TTL modifiers like RECOMPRESS CODEC(...), DELETE, TO DISK, TO VOLUME
+func (p *Parser) skipTTLModifiers() {
+	for {
+		// Skip RECOMPRESS CODEC(...)
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "RECOMPRESS" {
+			p.nextToken() // skip RECOMPRESS
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CODEC" {
+				p.nextToken() // skip CODEC
+				if p.currentIs(token.LPAREN) {
+					// Skip the entire CODEC(...) call
+					depth := 1
+					p.nextToken() // skip (
+					for depth > 0 && !p.currentIs(token.EOF) {
+						if p.currentIs(token.LPAREN) {
+							depth++
+						} else if p.currentIs(token.RPAREN) {
+							depth--
+						}
+						p.nextToken()
+					}
+				}
+			}
+			continue
+		}
+		// Skip DELETE (TTL ... DELETE)
+		if p.currentIs(token.DELETE) {
+			p.nextToken()
+			continue
+		}
+		// Skip TO DISK 'name' or TO VOLUME 'name'
+		if p.currentIs(token.TO) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) {
+				upper := strings.ToUpper(p.current.Value)
+				if upper == "DISK" || upper == "VOLUME" {
+					p.nextToken()
+					if p.currentIs(token.STRING) {
+						p.nextToken()
+					}
+					continue
+				}
+			}
+		}
+		break
+	}
 }
