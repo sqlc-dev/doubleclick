@@ -4985,6 +4985,12 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		}
 	}
 
+	// Handle SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken() // skip SETTINGS
+		drop.Settings = p.parseSettingsList()
+	}
+
 	return drop
 }
 

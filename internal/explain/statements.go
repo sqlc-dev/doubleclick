@@ -615,12 +615,18 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 	} else {
 		children := 1
 		if hasFormat {
-			children = 2
+			children++
+		}
+		if len(n.Settings) > 0 {
+			children++
 		}
 		fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 		if hasFormat {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
+		if len(n.Settings) > 0 {
+			fmt.Fprintf(sb, "%s Set\n", indent)
 		}
 	}
 }

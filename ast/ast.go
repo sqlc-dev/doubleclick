@@ -520,7 +520,8 @@ type DropQuery struct {
 	OnCluster       string             `json:"on_cluster,omitempty"`
 	DropDatabase    bool               `json:"drop_database,omitempty"`
 	Sync            bool               `json:"sync,omitempty"`
-	Format          string             `json:"format,omitempty"` // For FORMAT clause
+	Format          string             `json:"format,omitempty"`   // For FORMAT clause
+	Settings        []*SettingExpr     `json:"settings,omitempty"` // For SETTINGS clause
 }
 
 func (d *DropQuery) Pos() token.Position { return d.Position }
