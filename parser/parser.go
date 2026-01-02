@@ -5862,6 +5862,12 @@ func (p *Parser) parseShow() ast.Statement {
 		Position: pos,
 	}
 
+	// Handle TEMPORARY keyword (SHOW TEMPORARY TABLES)
+	if p.currentIs(token.TEMPORARY) {
+		show.Temporary = true
+		p.nextToken()
+	}
+
 	switch p.current.Token {
 	case token.TABLES:
 		show.ShowType = ast.ShowTables
@@ -7191,6 +7197,12 @@ func (p *Parser) parseExistsStatement() *ast.ExistsQuery {
 	}
 
 	p.nextToken() // skip EXISTS
+
+	// Check for TEMPORARY keyword
+	if p.currentIs(token.TEMPORARY) {
+		exists.Temporary = true
+		p.nextToken()
+	}
 
 	// Check for DICTIONARY, DATABASE, VIEW, or TABLE keyword
 	if p.currentIs(token.TABLE) {

@@ -775,6 +775,7 @@ func (d *DescribeQuery) statementNode()      {}
 type ShowQuery struct {
 	Position      token.Position `json:"-"`
 	ShowType      ShowType       `json:"show_type"`
+	Temporary     bool           `json:"temporary,omitempty"`
 	Database      string         `json:"database,omitempty"`
 	From          string         `json:"from,omitempty"`
 	Like          string         `json:"like,omitempty"`
@@ -956,6 +957,7 @@ const (
 type ExistsQuery struct {
 	Position   token.Position `json:"-"`
 	ExistsType ExistsType     `json:"exists_type,omitempty"`
+	Temporary  bool           `json:"temporary,omitempty"`
 	Database   string         `json:"database,omitempty"`
 	Table      string         `json:"table"`
 	Settings   []*SettingExpr `json:"settings,omitempty"`
