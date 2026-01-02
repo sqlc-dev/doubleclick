@@ -9,17 +9,83 @@ import (
 
 // normalizeIntervalUnit converts interval units to title-cased singular form
 // e.g., "years" -> "Year", "MONTH" -> "Month", "days" -> "Day"
+// Also handles SQL standard abbreviations: QQ -> Quarter, YY -> Year, MM -> Month, etc.
+// And SQL_TSI_* prefixes: SQL_TSI_MONTH -> Month, SQL_TSI_YEAR -> Year, etc.
 func normalizeIntervalUnit(unit string) string {
 	if len(unit) == 0 {
 		return ""
 	}
 	u := strings.ToLower(unit)
+
+	// Handle SQL_TSI_* prefixes (SQL ODBC standard)
+	if strings.HasPrefix(u, "sql_tsi_") {
+		u = u[8:] // Remove "sql_tsi_" prefix
+	}
+
+	// Handle SQL standard abbreviations
+	abbrevs := map[string]string{
+		"yy":  "year",
+		"qq":  "quarter",
+		"mm":  "month",
+		"wk":  "week",
+		"ww":  "week",
+		"dd":  "day",
+		"hh":  "hour",
+		"mi":  "minute",
+		"ss":  "second",
+		"ms":  "millisecond",
+		"us":  "microsecond",
+		"ns":  "nanosecond",
+	}
+	if expanded, ok := abbrevs[u]; ok {
+		u = expanded
+	}
+
 	// Remove trailing 's' for plural forms
 	if strings.HasSuffix(u, "s") && len(u) > 1 {
 		u = u[:len(u)-1]
 	}
 	// Title-case
 	return strings.ToUpper(u[:1]) + u[1:]
+}
+
+// normalizeIntervalUnitToLiteral converts interval units to lowercase string form for dateDiff
+// e.g., "YEAR" -> "year", "QQ" -> "quarter", "SQL_TSI_MONTH" -> "month"
+func normalizeIntervalUnitToLiteral(unit string) string {
+	if len(unit) == 0 {
+		return ""
+	}
+	u := strings.ToLower(unit)
+
+	// Handle SQL_TSI_* prefixes (SQL ODBC standard)
+	if strings.HasPrefix(u, "sql_tsi_") {
+		u = u[8:] // Remove "sql_tsi_" prefix
+	}
+
+	// Handle SQL standard abbreviations
+	abbrevs := map[string]string{
+		"yy":  "year",
+		"qq":  "quarter",
+		"mm":  "month",
+		"wk":  "week",
+		"ww":  "week",
+		"dd":  "day",
+		"hh":  "hour",
+		"mi":  "minute",
+		"ss":  "second",
+		"ms":  "millisecond",
+		"us":  "microsecond",
+		"ns":  "nanosecond",
+	}
+	if expanded, ok := abbrevs[u]; ok {
+		return expanded
+	}
+
+	// Remove trailing 's' for plural forms
+	if strings.HasSuffix(u, "s") && len(u) > 1 {
+		u = u[:len(u)-1]
+	}
+	return u
 }
 
 func explainFunctionCall(sb *strings.Builder, n *ast.FunctionCall, indent string, depth int) {
@@ -33,8 +99,8 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 	}
 
 	children := 1 // arguments ExpressionList
-	if len(n.Parameters) > 0 {
-		children++ // parameters ExpressionList
+	if n.Parameters != nil {
+		children++ // parameters ExpressionList (even if empty, like medianGK()(x))
 	}
 	// Only count WindowDefinition as a child for inline window specs that have content
 	// Empty OVER () doesn't produce a WindowDefinition in ClickHouse EXPLAIN AST
@@ -83,8 +149,13 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 		fmt.Fprintf(sb, "%s  Set\n", indent)
 	}
 	// Parameters (for parametric functions)
-	if len(n.Parameters) > 0 {
-		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Parameters))
+	// Output even when empty (e.g., medianGK()(x) has empty parameters)
+	if n.Parameters != nil {
+		fmt.Fprintf(sb, "%s ExpressionList", indent)
+		if len(n.Parameters) > 0 {
+			fmt.Fprintf(sb, " (children %d)", len(n.Parameters))
+		}
+		fmt.Fprintln(sb)
 		for _, p := range n.Parameters {
 			Node(sb, p, depth+2)
 		}
@@ -420,8 +491,8 @@ func handleDateDiff(sb *strings.Builder, n *ast.FunctionCall, alias string, inde
 	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, argCount)
 
-	// First arg: unit as lowercase string literal
-	fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, strings.ToLower(unitName))
+	// First arg: unit as lowercase string literal (with SQL abbreviations expanded)
+	fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, normalizeIntervalUnitToLiteral(unitName))
 
 	// Second and third args: dates
 	Node(sb, date1Arg, depth+2)
@@ -883,6 +954,7 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 	// - All string literals + NULLs
 	// - All boolean literals + NULLs
 	// - All tuple literals that contain only primitive literals (recursively)
+	// - All primitive literals of mixed types (when left side is a tuple)
 	canBeTupleLiteral := false
 	if n.Query == nil && len(n.List) > 1 {
 		allNumericOrNull := true
@@ -890,7 +962,8 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 		allBooleansOrNull := true
 		allTuples := true
 		allTuplesArePrimitive := true
-		hasNonNull := false // Need at least one non-null value
+		allPrimitiveLiterals := true // New: check if all are primitive literals (any type)
+		hasNonNull := false          // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
 				if lit.Type == ast.LiteralNull {
@@ -910,10 +983,14 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				if lit.Type != ast.LiteralTuple {
 					allTuples = false
 				} else {
-					// Check if this tuple contains only primitive literals
-					if !containsOnlyPrimitiveLiterals(lit) {
+					// Check if this tuple contains only primitive literals (including unary negation)
+					if !containsOnlyPrimitiveLiteralsWithUnary(lit) {
 						allTuplesArePrimitive = false
 					}
+				}
+				// Check if it's a primitive literal type (not a tuple or complex type)
+				if lit.Type == ast.LiteralTuple || lit.Type == ast.LiteralArray {
+					allPrimitiveLiterals = false
 				}
 			} else if isNumericExpr(item) {
 				// Unary minus of numeric is still numeric
@@ -921,16 +998,19 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				allStringsOrNull = false
 				allBooleansOrNull = false
 				allTuples = false
+				// Numeric expression counts as primitive
 			} else {
 				allNumericOrNull = false
 				allStringsOrNull = false
 				allBooleansOrNull = false
 				allTuples = false
+				allPrimitiveLiterals = false
 				break
 			}
 		}
-		// For tuples, only combine if all contain primitive literals
-		canBeTupleLiteral = hasNonNull && (allNumericOrNull || allStringsOrNull || allBooleansOrNull || (allTuples && allTuplesArePrimitive))
+		// Allow combining mixed primitive literals into a tuple when comparing tuples
+		// This handles cases like: (1,'') IN (-1,'') where the right side should be a single tuple literal
+		canBeTupleLiteral = hasNonNull && (allNumericOrNull || allStringsOrNull || allBooleansOrNull || (allTuples && allTuplesArePrimitive) || allPrimitiveLiterals)
 	}
 
 	// Count arguments: expr + list items or subquery
@@ -1010,8 +1090,8 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 
 // explainTupleInInList renders a tuple in an IN list - either as Literal or Function tuple
 func explainTupleInInList(sb *strings.Builder, lit *ast.Literal, indent string, depth int) {
-	if containsOnlyPrimitiveLiterals(lit) {
-		// All primitives - render as Literal Tuple_
+	if containsOnlyPrimitiveLiteralsWithUnary(lit) {
+		// All primitives (including unary negation) - render as Literal Tuple_
 		fmt.Fprintf(sb, "%s Literal %s\n", indent, FormatLiteral(lit))
 	} else {
 		// Contains expressions - render as Function tuple
@@ -1344,17 +1424,33 @@ func explainIntervalExpr(sb *strings.Builder, n *ast.IntervalExpr, alias string,
 	unit := n.Unit
 	value := n.Value
 
-	// Handle string literals like INTERVAL '2 years' - extract value and unit
+	// Handle string literals like INTERVAL '2 years' or INTERVAL '-1 SECOND 2 MINUTE -3 MONTH 1 YEAR'
 	if unit == "" {
 		if lit, ok := n.Value.(*ast.Literal); ok && lit.Type == ast.LiteralString {
 			if strVal, ok := lit.Value.(string); ok {
-				val, u := parseIntervalString(strVal)
-				if u != "" {
-					unit = u
-					// Create a numeric literal for the value
+				parts := parseMultiIntervalString(strVal)
+				if len(parts) > 1 {
+					// Multi-part interval - output as tuple
+					if alias != "" {
+						fmt.Fprintf(sb, "%sFunction tuple (alias %s) (children %d)\n", indent, alias, 1)
+					} else {
+						fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
+					}
+					fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(parts))
+					for _, part := range parts {
+						unitNorm := normalizeIntervalUnit(part.unit)
+						fnName := "toInterval" + unitNorm
+						fmt.Fprintf(sb, "%s  Function %s (children %d)\n", indent, fnName, 1)
+						fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
+						// Output the literal value with proper type
+						explainIntervalLiteralValue(sb, part.value, indent+"    ", depth+4)
+					}
+					return
+				} else if len(parts) == 1 {
+					unit = parts[0].unit
 					value = &ast.Literal{
 						Type:  ast.LiteralInteger,
-						Value: val,
+						Value: parts[0].value,
 					}
 				}
 			}
@@ -1372,18 +1468,62 @@ func explainIntervalExpr(sb *strings.Builder, n *ast.IntervalExpr, alias string,
 	Node(sb, value, depth+2)
 }
 
+// explainIntervalLiteralValue outputs a literal value for an interval part
+// Negative values use Int64, positive values use UInt64
+func explainIntervalLiteralValue(sb *strings.Builder, value string, indent string, depth int) {
+	if strings.HasPrefix(value, "-") {
+		fmt.Fprintf(sb, "%sLiteral Int64_%s\n", indent, value)
+	} else {
+		fmt.Fprintf(sb, "%sLiteral UInt64_%s\n", indent, value)
+	}
+}
+
+// intervalPart represents a single part of a multi-part interval string
+type intervalPart struct {
+	value string
+	unit  string
+}
+
 // parseIntervalString parses a string like "2 years" into value and unit
 func parseIntervalString(s string) (value string, unit string) {
+	parts := parseMultiIntervalString(s)
+	if len(parts) >= 1 {
+		return parts[0].value, parts[0].unit
+	}
+	return s, ""
+}
+
+// parseMultiIntervalString parses a string like "-1 SECOND 2 MINUTE -3 MONTH 1 YEAR"
+// into multiple interval parts
+func parseMultiIntervalString(s string) []intervalPart {
 	// Trim surrounding quotes if present
 	s = strings.Trim(s, "'\"")
 	s = strings.TrimSpace(s)
 
-	// Find the split between number and unit
-	parts := strings.Fields(s)
-	if len(parts) >= 2 {
-		return parts[0], parts[1]
+	// Split into tokens
+	tokens := strings.Fields(s)
+	if len(tokens) == 0 {
+		return nil
 	}
-	return s, ""
+
+	var parts []intervalPart
+	i := 0
+	for i < len(tokens) {
+		// Get value (may be negative, starts with -)
+		value := tokens[i]
+		i++
+
+		// Get unit
+		if i >= len(tokens) {
+			break
+		}
+		unit := tokens[i]
+		i++
+
+		parts = append(parts, intervalPart{value: value, unit: unit})
+	}
+
+	return parts
 }
 
 func explainExistsExpr(sb *strings.Builder, n *ast.ExistsExpr, indent string, depth int) {

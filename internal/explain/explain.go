@@ -331,6 +331,9 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	if col.Codec != nil {
 		children++
 	}
+	if len(col.Settings) > 0 {
+		children++
+	}
 	if children > 0 {
 		fmt.Fprintf(sb, "%sColumnDeclaration %s (children %d)\n", indent, col.Name, children)
 	} else {
@@ -353,6 +356,9 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	}
 	if col.Codec != nil {
 		explainCodecExpr(sb, col.Codec, indent+" ", depth+1)
+	}
+	if len(col.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
 

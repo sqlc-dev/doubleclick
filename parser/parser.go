@@ -416,6 +416,37 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 		}
 	}
 
+	// Parse union-level SETTINGS and FORMAT (for queries like SELECT ... SETTINGS ... SETTINGS ... FORMAT ...)
+	// These come after the individual SELECTs have been parsed
+	var formatParsed bool
+	for p.currentIs(token.SETTINGS) || p.currentIs(token.FORMAT) {
+		if p.currentIs(token.SETTINGS) {
+			p.nextToken()
+			settings := p.parseSettingsList()
+			query.Settings = settings
+			if formatParsed {
+				query.SettingsAfterFormat = true
+			} else {
+				query.SettingsBeforeFormat = true
+			}
+		} else if p.currentIs(token.FORMAT) {
+			p.nextToken()
+			formatParsed = true
+			// Get the format name and attach to first SELECT
+			if len(query.Selects) > 0 {
+				if sq, ok := query.Selects[0].(*ast.SelectQuery); ok {
+					if p.currentIs(token.NULL) {
+						sq.Format = &ast.Identifier{Position: p.current.Pos, Parts: []string{"Null"}}
+						p.nextToken()
+					} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+						sq.Format = &ast.Identifier{Position: p.current.Pos, Parts: []string{p.current.Value}}
+						p.nextToken()
+					}
+				}
+			}
+		}
+	}
+
 	return query
 }
 
@@ -984,8 +1015,9 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		}
 	}
 
-	// Parse FORMAT clause (format names can be keywords like Null, JSON, etc.)
-	if p.currentIs(token.FORMAT) {
+	// Only parse FORMAT if there were no SETTINGS before it
+	// If SETTINGS was parsed above, FORMAT belongs at union level (parseSelectWithUnion will handle it)
+	if p.currentIs(token.FORMAT) && len(sel.Settings) == 0 {
 		p.nextToken()
 		if p.currentIs(token.IDENT) || p.currentIs(token.NULL) || p.current.Token.IsKeyword() {
 			sel.Format = &ast.Identifier{
@@ -999,13 +1031,12 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.SETTINGS) {
 			p.nextToken()
 		}
-	}
-
-	// Parse SETTINGS clause (can come after FORMAT)
-	if p.currentIs(token.SETTINGS) {
-		p.nextToken()
-		sel.Settings = p.parseSettingsList()
-		sel.SettingsAfterFormat = true
+		// Parse SETTINGS clause that comes AFTER FORMAT (belongs to this SELECT)
+		if p.currentIs(token.SETTINGS) {
+			p.nextToken()
+			sel.Settings = p.parseSettingsList()
+			sel.SettingsAfterFormat = true
+		}
 	}
 
 	return sel
@@ -2026,6 +2057,15 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 		}
 	}
 
+	// Handle CLONE AS source_table
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CLONE" {
+		p.nextToken() // skip CLONE
+		if p.currentIs(token.AS) {
+			p.nextToken() // skip AS
+			create.CloneAs = p.parseIdentifierName()
+		}
+	}
+
 	// Parse column definitions and indexes
 	if p.currentIs(token.LPAREN) {
 		p.nextToken()
@@ -2274,6 +2314,12 @@ func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 		case p.currentIs(token.SETTINGS):
 			p.nextToken()
 			create.Settings = p.parseSettingsList()
+		case p.currentIs(token.COMMENT):
+			p.nextToken()
+			if p.currentIs(token.STRING) {
+				create.Comment = p.current.Value
+				p.nextToken()
+			}
 		default:
 			return
 		}
@@ -3377,8 +3423,8 @@ func (p *Parser) parseDictionarySource() *ast.DictionarySource {
 	}
 	p.nextToken() // skip (
 
-	// Parse source type (e.g., CLICKHOUSE, MYSQL, FILE)
-	if p.currentIs(token.IDENT) {
+	// Parse source type (e.g., CLICKHOUSE, MYSQL, FILE, NULL)
+	if p.currentIs(token.IDENT) || p.currentIs(token.NULL) || p.current.Token.IsKeyword() {
 		source.Type = strings.ToUpper(p.current.Value)
 		p.nextToken()
 	}
@@ -3709,6 +3755,16 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 			col.Comment = p.current.Value
 			p.nextToken()
 		}
+	}
+
+	// Parse column-level SETTINGS (key = value, ...)
+	// Only parse if SETTINGS is followed by LPAREN (column-level settings use parentheses)
+	// If no LPAREN, leave SETTINGS for the parent (ALTER/CREATE) to handle
+	if p.currentIs(token.SETTINGS) && p.peek.Token == token.LPAREN {
+		p.nextToken() // skip SETTINGS
+		p.nextToken() // skip (
+		col.Settings = p.parseSettingsList()
+		p.expect(token.RPAREN)
 	}
 
 	return col
@@ -4414,6 +4470,11 @@ func (p *Parser) parseAlter() *ast.AlterQuery {
 
 	p.nextToken() // skip ALTER
 
+	// Skip TEMPORARY keyword if present
+	if p.currentIs(token.TEMPORARY) {
+		p.nextToken()
+	}
+
 	if !p.expect(token.TABLE) {
 		return nil
 	}
@@ -4510,30 +4571,65 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "AFTER" {
 				p.nextToken()
 				if p.currentIs(token.IDENT) {
-					cmd.AfterColumn = p.current.Value
+					// Handle dotted column names like AddedNested1.B
+					afterCol := p.current.Value
 					p.nextToken()
+					for p.currentIs(token.DOT) {
+						p.nextToken() // skip DOT
+						if p.currentIs(token.IDENT) {
+							afterCol += "." + p.current.Value
+							p.nextToken()
+						}
+					}
+					cmd.AfterColumn = afterCol
 				}
 			}
 		} else if p.currentIs(token.INDEX) {
 			cmd.Type = ast.AlterAddIndex
 			p.nextToken()
 			// Parse index name
+			idxName := ""
 			if p.currentIs(token.IDENT) {
-				cmd.Index = p.current.Value
+				idxName = p.current.Value
+				cmd.Index = idxName
 				p.nextToken()
+			}
+			// Create IndexDef to store full index definition
+			idx := &ast.IndexDefinition{
+				Position: p.current.Pos,
+				Name:     idxName,
 			}
 			// Parse expression in parentheses
 			if p.currentIs(token.LPAREN) {
 				p.nextToken()
-				cmd.IndexExpr = p.parseExpression(LOWEST)
+				idx.Expression = p.parseExpression(LOWEST)
+				cmd.IndexExpr = idx.Expression
 				p.expect(token.RPAREN)
 			}
 			// Parse TYPE
 			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TYPE" {
 				p.nextToken()
+				// Type is a function call like bloom_filter(0.025) or vector_similarity('hnsw', 'L2Distance', 1)
+				pos := p.current.Pos
+				typeName := ""
 				if p.currentIs(token.IDENT) {
-					cmd.IndexType = p.current.Value
+					typeName = p.current.Value
+					cmd.IndexType = typeName
 					p.nextToken()
+				}
+				if typeName != "" {
+					idx.Type = &ast.FunctionCall{
+						Position: pos,
+						Name:     typeName,
+					}
+					// Check for parentheses (type parameters)
+					if p.currentIs(token.LPAREN) {
+						p.nextToken()
+						if !p.currentIs(token.RPAREN) {
+							idx.Type.Arguments = p.parseExpressionList()
+						}
+						p.expect(token.RPAREN)
+					}
 				}
 			}
 			// Parse GRANULARITY
@@ -4545,6 +4641,7 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					p.nextToken()
 				}
 			}
+			cmd.IndexDef = idx
 		} else if p.currentIs(token.CONSTRAINT) {
 			cmd.Type = ast.AlterAddConstraint
 			p.nextToken()
@@ -4599,8 +4696,17 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				cmd.IfExists = true
 			}
 			if p.currentIs(token.IDENT) {
-				cmd.ColumnName = p.current.Value
+				// Handle dotted column names like NestedColumn.A
+				colName := p.current.Value
 				p.nextToken()
+				for p.currentIs(token.DOT) {
+					p.nextToken() // skip DOT
+					if p.currentIs(token.IDENT) {
+						colName += "." + p.current.Value
+						p.nextToken()
+					}
+				}
+				cmd.ColumnName = colName
 			}
 		} else if p.currentIs(token.INDEX) {
 			cmd.Type = ast.AlterDropIndex
@@ -4624,6 +4730,12 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				p.nextToken()
 				cmd.PartitionIsID = true
 			}
+			cmd.Partition = p.parseExpression(LOWEST)
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PART" {
+			// DROP PART is treated like DROP PARTITION in ClickHouse
+			cmd.Type = ast.AlterDropPartition
+			cmd.IsPart = true
+			p.nextToken()
 			cmd.Partition = p.parseExpression(LOWEST)
 		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
 			cmd.Type = ast.AlterDropProjection
@@ -4658,6 +4770,14 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				if p.currentIs(token.IDENT) {
 					cmd.Index = p.current.Value
 					p.nextToken()
+				}
+				// Parse IN PARTITION clause
+				if p.currentIs(token.IN) {
+					p.nextToken() // skip IN
+					if p.currentIs(token.PARTITION) {
+						p.nextToken() // skip PARTITION
+						cmd.Partition = p.parseExpression(LOWEST)
+					}
 				}
 			} else if p.currentIs(token.COLUMN) {
 				cmd.Type = ast.AlterClearColumn
@@ -4699,6 +4819,39 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				if p.currentIs(token.IDENT) {
 					cmd.Index = p.current.Value
 					p.nextToken()
+				}
+				// Parse IN PARTITION ID clause
+				if p.currentIs(token.IN) {
+					p.nextToken() // skip IN
+					if p.currentIs(token.PARTITION) {
+						p.nextToken() // skip PARTITION
+						// Check for PARTITION ID 'value' syntax
+						if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+							p.nextToken()
+							cmd.PartitionIsID = true
+						}
+						cmd.Partition = p.parseExpression(LOWEST)
+					}
+				}
+			} else if p.currentIs(token.COLUMN) {
+				cmd.Type = ast.AlterMaterializeColumn
+				p.nextToken()
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					cmd.ColumnName = p.current.Value
+					p.nextToken()
+				}
+				// Parse IN PARTITION clause
+				if p.currentIs(token.IN) {
+					p.nextToken() // skip IN
+					if p.currentIs(token.PARTITION) {
+						p.nextToken() // skip PARTITION
+						// Check for PARTITION ID 'value' syntax
+						if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+							p.nextToken()
+							cmd.PartitionIsID = true
+						}
+						cmd.Partition = p.parseExpression(LOWEST)
+					}
 				}
 			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
 				cmd.Type = ast.AlterMaterializeProjection
@@ -4748,6 +4901,16 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					}
 				}
 			}
+		} else if upper == "REMOVE" {
+			p.nextToken()
+			// REMOVE SAMPLE BY
+			if p.currentIs(token.SAMPLE) {
+				p.nextToken() // skip SAMPLE
+				if p.currentIs(token.BY) {
+					p.nextToken() // skip BY
+				}
+				cmd.Type = ast.AlterRemoveSampleBy
+			}
 		} else {
 			return nil
 		}
@@ -4756,6 +4919,14 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		if p.currentIs(token.COLUMN) {
 			cmd.Type = ast.AlterModifyColumn
 			p.nextToken()
+			// Handle IF EXISTS
+			if p.currentIs(token.IF) {
+				p.nextToken()
+				if p.currentIs(token.EXISTS) {
+					cmd.IfExists = true
+					p.nextToken()
+				}
+			}
 			// Handle MODIFY COLUMN name REMOVE ... (e.g., REMOVE COMMENT)
 			// Check if the next token after column name is REMOVE
 			if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "REMOVE" {
@@ -4767,8 +4938,44 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.COMMA) {
 					p.nextToken()
 				}
+			} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peek.Token == token.MODIFY {
+				// MODIFY COLUMN colname MODIFY SETTING key = value
+				colName := p.current.Value
+				p.nextToken() // skip column name
+				cmd.Column = &ast.ColumnDeclaration{Name: colName}
+				p.nextToken() // skip MODIFY
+				if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "SETTING" {
+					p.nextToken() // skip SETTING
+					cmd.Settings = p.parseSettingsList()
+				}
+			} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "RESET" {
+				// MODIFY COLUMN colname RESET SETTING key, key2, ...
+				colName := p.current.Value
+				p.nextToken() // skip column name
+				cmd.Column = &ast.ColumnDeclaration{Name: colName}
+				p.nextToken() // skip RESET
+				if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "SETTING" {
+					p.nextToken() // skip SETTING
+					// Parse comma-separated list of setting names
+					for {
+						if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+							cmd.ResetSettings = append(cmd.ResetSettings, p.current.Value)
+							p.nextToken()
+						}
+						if p.currentIs(token.COMMA) {
+							p.nextToken()
+						} else {
+							break
+						}
+					}
+				}
 			} else {
 				cmd.Column = p.parseColumnDeclaration()
+			}
+			// Parse AFTER column_name clause
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "AFTER" {
+				p.nextToken() // skip AFTER
+				cmd.AfterColumn = p.parseIdentifierName()
 			}
 		} else if p.currentIs(token.TTL) {
 			cmd.Type = ast.AlterModifyTTL
@@ -4816,6 +5023,14 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				// Single expression without parentheses
 				cmd.OrderByExpr = []ast.Expression{p.parseExpression(LOWEST)}
 			}
+		} else if p.currentIs(token.SAMPLE) {
+			// MODIFY SAMPLE BY expr
+			cmd.Type = ast.AlterModifySampleBy
+			p.nextToken() // skip SAMPLE
+			if p.currentIs(token.BY) {
+				p.nextToken() // skip BY
+			}
+			cmd.SampleByExpr = p.parseExpression(LOWEST)
 		}
 	case token.RENAME:
 		p.nextToken()
@@ -4867,6 +5082,12 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				cmd.PartitionIsID = true
 			}
 			cmd.Partition = p.parseExpression(LOWEST)
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PART" {
+			// DETACH PART is displayed as DROP_PARTITION in ClickHouse EXPLAIN
+			cmd.Type = ast.AlterDropPartition
+			cmd.IsPart = true
+			p.nextToken()
+			cmd.Partition = p.parseExpression(LOWEST)
 		}
 	case token.ATTACH:
 		p.nextToken()
@@ -4878,6 +5099,12 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				p.nextToken()
 				cmd.PartitionIsID = true
 			}
+			cmd.Partition = p.parseExpression(LOWEST)
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PART" {
+			// ATTACH PART uses ATTACH_PARTITION type in ClickHouse EXPLAIN
+			cmd.Type = ast.AlterAttachPartition
+			cmd.IsPart = true
+			p.nextToken()
 			cmd.Partition = p.parseExpression(LOWEST)
 		}
 	case token.FREEZE:
@@ -5029,6 +5256,12 @@ func (p *Parser) parseTruncate() *ast.TruncateQuery {
 			p.nextToken()
 			trunc.OnCluster = p.parseIdentifierName()
 		}
+	}
+
+	// Handle SETTINGS
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		trunc.Settings = p.parseSettingsList()
 	}
 
 	return trunc
@@ -5624,6 +5857,12 @@ func (p *Parser) parseOptimize() *ast.OptimizeQuery {
 		p.nextToken()
 	}
 
+	// Handle SETTINGS
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		opt.Settings = p.parseSettingsList()
+	}
+
 	return opt
 }
 
@@ -5661,6 +5900,35 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 					}
 				}
 				break
+			}
+			// Special case: for SYNC REPLICA commands, check if next token is a mode keyword (PULL/LIGHTWEIGHT/STRICT)
+			// followed by end-of-statement. If so, current token is the table name.
+			if p.peekIs(token.IDENT) {
+				nextUpper := strings.ToUpper(p.peek.Value)
+				if nextUpper == "PULL" || nextUpper == "LIGHTWEIGHT" || nextUpper == "STRICT" {
+					// Look ahead one more token to check if it's followed by end-of-statement
+					currentValue := p.current.Value
+					p.nextToken() // now at mode keyword
+					modeValue := p.current.Value
+					if p.peekIs(token.SEMICOLON) || p.peekIs(token.EOF) || p.peekIs(token.FORMAT) {
+						// Mode keyword is followed by end-of-statement
+						// Include mode in command, but NOT the table name
+						parts = append(parts, modeValue)
+						p.nextToken() // move past mode keyword
+						// Restore table name info for later parsing
+						sys.Command = strings.Join(parts, " ")
+						sys.Table = currentValue
+						// Skip the normal table parsing since we've set it here
+						return sys
+					}
+					// Not followed by end-of-statement, continue normally
+					// But we've consumed tokens, so we need to handle this carefully
+					// For now, let's add both to parts and continue
+					parts = append(parts, currentValue)
+					parts = append(parts, modeValue)
+					p.nextToken()
+					continue
+				}
 			}
 		}
 		parts = append(parts, p.current.Value)
@@ -5832,6 +6100,12 @@ func (p *Parser) parseRename() *ast.RenameQuery {
 		}
 	}
 
+	// Handle SETTINGS
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		rename.Settings = p.parseSettingsList()
+	}
+
 	return rename
 }
 
@@ -5894,23 +6168,29 @@ func (p *Parser) parseDetach() *ast.DetachQuery {
 
 	p.nextToken() // skip DETACH
 
-	// Check for DATABASE keyword - if present, store in Database field
+	// Check for DATABASE, TABLE, or DICTIONARY keyword
 	isDatabase := false
+	isDictionary := false
 	if p.currentIs(token.DATABASE) {
 		isDatabase = true
 		p.nextToken()
 	} else if p.currentIs(token.TABLE) {
 		p.nextToken()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
+		isDictionary = true
+		p.nextToken()
 	}
 
-	// Parse name (can be qualified: database.table for TABLE, not for DATABASE)
+	// Parse name (can be qualified: database.table for TABLE, not for DATABASE/DICTIONARY)
 	name := p.parseIdentifierName()
-	if p.currentIs(token.DOT) && !isDatabase {
+	if p.currentIs(token.DOT) && !isDatabase && !isDictionary {
 		p.nextToken()
 		detach.Database = name
 		detach.Table = p.parseIdentifierName()
 	} else if isDatabase {
 		detach.Database = name
+	} else if isDictionary {
+		detach.Dictionary = name
 	} else {
 		detach.Table = name
 	}
@@ -5925,23 +6205,29 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 
 	p.nextToken() // skip ATTACH
 
-	// Check for DATABASE keyword - if present, store in Database field
+	// Check for DATABASE, TABLE, or DICTIONARY keyword
 	isDatabase := false
+	isDictionary := false
 	if p.currentIs(token.DATABASE) {
 		isDatabase = true
 		p.nextToken()
 	} else if p.currentIs(token.TABLE) {
 		p.nextToken()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
+		isDictionary = true
+		p.nextToken()
 	}
 
-	// Parse name (can be qualified: database.table for TABLE, not for DATABASE)
+	// Parse name (can be qualified: database.table for TABLE, not for DATABASE/DICTIONARY)
 	name := p.parseIdentifierName()
-	if p.currentIs(token.DOT) && !isDatabase {
+	if p.currentIs(token.DOT) && !isDatabase && !isDictionary {
 		p.nextToken()
 		attach.Database = name
 		attach.Table = p.parseIdentifierName()
 	} else if isDatabase {
 		attach.Database = name
+	} else if isDictionary {
+		attach.Dictionary = name
 	} else {
 		attach.Table = name
 	}
@@ -6338,7 +6624,61 @@ func (p *Parser) parseParenthesizedSelect() *ast.SelectWithUnionQuery {
 
 	p.expect(token.RPAREN)
 
-	// Wrap the result
+	// Wrap the result as first operand
+	firstItem := inner
+
+	// Check for UNION/EXCEPT/INTERSECT after the parenthesized select
+	if p.isIntersectExceptWithWrapper() {
+		// Handle INTERSECT/EXCEPT that creates SelectIntersectExceptQuery
+		stmts := []ast.Statement{firstItem}
+		var ops []string
+
+		for p.isIntersectExceptWithWrapper() {
+			var op string
+			if p.currentIs(token.EXCEPT) {
+				op = "EXCEPT"
+			} else {
+				op = "INTERSECT"
+			}
+			p.nextToken() // skip INTERSECT/EXCEPT
+
+			if p.currentIs(token.ALL) {
+				op += " ALL"
+				p.nextToken()
+			} else if p.currentIs(token.DISTINCT) {
+				op += " DISTINCT"
+				p.nextToken()
+			}
+			ops = append(ops, op)
+
+			// Parse the next operand
+			var nextStmt ast.Statement
+			if p.currentIs(token.LPAREN) {
+				p.nextToken() // skip (
+				nested := p.parseSelectWithUnion()
+				if nested == nil {
+					break
+				}
+				p.expect(token.RPAREN)
+				nextStmt = nested
+			} else {
+				sel := p.parseSelect()
+				if sel == nil {
+					break
+				}
+				nextStmt = sel
+			}
+			stmts = append(stmts, nextStmt)
+		}
+
+		result := buildIntersectExceptTree(stmts, ops)
+		return &ast.SelectWithUnionQuery{
+			Position: pos,
+			Selects:  []ast.Statement{result},
+		}
+	}
+
+	// Check for UNION ALL / UNION
 	query := &ast.SelectWithUnionQuery{
 		Position: pos,
 	}
@@ -6348,6 +6688,73 @@ func (p *Parser) parseParenthesizedSelect() *ast.SelectWithUnionQuery {
 		}
 		query.UnionModes = inner.UnionModes
 		query.UnionAll = inner.UnionAll
+	}
+
+	// Handle UNION after parenthesized select
+	for p.currentIs(token.UNION) {
+		p.nextToken() // skip UNION
+		mode := ""
+		if p.currentIs(token.ALL) {
+			mode = "ALL"
+			query.UnionAll = true
+			p.nextToken()
+		} else if p.currentIs(token.DISTINCT) {
+			mode = "DISTINCT"
+			p.nextToken()
+		}
+		query.UnionModes = append(query.UnionModes, mode)
+
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			nested := p.parseSelectWithUnion()
+			if nested == nil {
+				break
+			}
+			p.expect(token.RPAREN)
+			// Flatten nested selects into current query
+			for _, s := range nested.Selects {
+				query.Selects = append(query.Selects, s)
+			}
+		} else {
+			sel := p.parseSelect()
+			if sel == nil {
+				break
+			}
+			query.Selects = append(query.Selects, sel)
+		}
+	}
+
+	// Parse FORMAT and SETTINGS in either order after UNION
+	// SETTINGS may come before FORMAT: (SELECT ...) UNION ALL (SELECT ...) SETTINGS x=1 FORMAT TSV
+	// FORMAT may come before SETTINGS: (SELECT ...) UNION ALL (SELECT ...) FORMAT TSV SETTINGS x=1
+	var formatParsed bool
+	for p.currentIs(token.FORMAT) || p.currentIs(token.SETTINGS) {
+		if p.currentIs(token.FORMAT) {
+			p.nextToken()
+			formatParsed = true
+			// Get the format name and attach to first SELECT
+			if len(query.Selects) > 0 {
+				if sq, ok := query.Selects[0].(*ast.SelectQuery); ok {
+					if p.currentIs(token.NULL) {
+						sq.Format = &ast.Identifier{Position: p.current.Pos, Parts: []string{"Null"}}
+						p.nextToken()
+					} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+						sq.Format = &ast.Identifier{Position: p.current.Pos, Parts: []string{p.current.Value}}
+						p.nextToken()
+					}
+				}
+			}
+		} else if p.currentIs(token.SETTINGS) {
+			p.nextToken()
+			settings := p.parseSettingsList()
+			// Store union-level settings in the SelectWithUnionQuery
+			query.Settings = settings
+			if formatParsed {
+				query.SettingsAfterFormat = true
+			} else {
+				query.SettingsBeforeFormat = true
+			}
+		}
 	}
 
 	return query
@@ -6387,6 +6794,12 @@ func (p *Parser) parseExistsStatement() *ast.ExistsQuery {
 		} else {
 			exists.Table = name
 		}
+	}
+
+	// Handle SETTINGS
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		exists.Settings = p.parseSettingsList()
 	}
 
 	return exists

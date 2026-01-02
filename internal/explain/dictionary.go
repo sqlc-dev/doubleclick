@@ -99,18 +99,15 @@ func explainDictionaryDefinition(sb *strings.Builder, n *ast.DictionaryDefinitio
 // explainDictionarySource outputs a dictionary SOURCE clause.
 func explainDictionarySource(sb *strings.Builder, n *ast.DictionarySource, indent string, depth int) {
 	// FunctionWithKeyValueArguments has extra space before name
-	children := 0
+	// Always has 1 child for ExpressionList (even when empty)
+	fmt.Fprintf(sb, "%sFunctionWithKeyValueArguments  %s (children %d)\n", indent, strings.ToLower(n.Type), 1)
 	if len(n.Args) > 0 {
-		children = 1
-	}
-	if children > 0 {
-		fmt.Fprintf(sb, "%sFunctionWithKeyValueArguments  %s (children %d)\n", indent, strings.ToLower(n.Type), children)
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Args))
 		for _, arg := range n.Args {
 			explainKeyValuePair(sb, arg, indent+"  ", depth+2)
 		}
 	} else {
-		fmt.Fprintf(sb, "%sFunctionWithKeyValueArguments  %s\n", indent, strings.ToLower(n.Type))
+		fmt.Fprintf(sb, "%s ExpressionList\n", indent)
 	}
 }
 

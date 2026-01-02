@@ -1151,6 +1151,12 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 		lambda.Parenthesized = true
 	}
 
+	// Mark identifiers as parenthesized so (t).world becomes tupleElement(t, 'world')
+	// instead of being treated as compound identifier t.world
+	if ident, ok := first.(*ast.Identifier); ok {
+		ident.Parenthesized = true
+	}
+
 	return first
 }
 
@@ -2185,7 +2191,9 @@ func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
 
 	// Regular identifier access (keywords can also be column/field names after DOT)
 	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-		if ident, ok := left.(*ast.Identifier); ok {
+		// For non-parenthesized identifiers, append to parts (compound identifier like a.b.c)
+		// For parenthesized identifiers like (t), create TupleAccess instead
+		if ident, ok := left.(*ast.Identifier); ok && !ident.Parenthesized {
 			ident.Parts = append(ident.Parts, p.current.Value)
 			p.nextToken()
 
@@ -2205,6 +2213,23 @@ func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
 			}
 
 			return ident
+		}
+
+		// For non-identifier expressions (ArrayAccess, FunctionCall, etc.) or
+		// parenthesized identifiers like (t), create TupleAccess with the field name.
+		// This handles: array[1].field, func().field, (t).field
+		fieldName := p.current.Value
+		pos := p.current.Pos
+		p.nextToken()
+
+		return &ast.TupleAccess{
+			Position: pos,
+			Tuple:    left,
+			Index: &ast.Literal{
+				Position: pos,
+				Type:     ast.LiteralString,
+				Value:    fieldName,
+			},
 		}
 	}
 
@@ -2329,10 +2354,16 @@ func (p *Parser) parseTernary(condition ast.Expression) ast.Expression {
 func (p *Parser) parseParametricFunctionCall(fn *ast.FunctionCall) *ast.FunctionCall {
 	// The first FunctionCall's arguments become the parameters
 	// and we parse the second set of arguments
+	// Ensure Parameters is an empty slice (not nil) even for empty ()
+	// This distinguishes "no parameters" from "empty parameters" like medianGK()(x)
+	params := fn.Arguments
+	if params == nil {
+		params = []ast.Expression{}
+	}
 	result := &ast.FunctionCall{
 		Position:   fn.Position,
 		Name:       fn.Name,
-		Parameters: fn.Arguments, // Parameters are the first ()'s content
+		Parameters: params, // Parameters are the first ()'s content
 	}
 
 	p.nextToken() // skip (
