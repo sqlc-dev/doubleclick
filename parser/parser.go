@@ -5881,6 +5881,35 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 				}
 				break
 			}
+			// Special case: for SYNC REPLICA commands, check if next token is a mode keyword (PULL/LIGHTWEIGHT/STRICT)
+			// followed by end-of-statement. If so, current token is the table name.
+			if p.peekIs(token.IDENT) {
+				nextUpper := strings.ToUpper(p.peek.Value)
+				if nextUpper == "PULL" || nextUpper == "LIGHTWEIGHT" || nextUpper == "STRICT" {
+					// Look ahead one more token to check if it's followed by end-of-statement
+					currentValue := p.current.Value
+					p.nextToken() // now at mode keyword
+					modeValue := p.current.Value
+					if p.peekIs(token.SEMICOLON) || p.peekIs(token.EOF) || p.peekIs(token.FORMAT) {
+						// Mode keyword is followed by end-of-statement
+						// Include mode in command, but NOT the table name
+						parts = append(parts, modeValue)
+						p.nextToken() // move past mode keyword
+						// Restore table name info for later parsing
+						sys.Command = strings.Join(parts, " ")
+						sys.Table = currentValue
+						// Skip the normal table parsing since we've set it here
+						return sys
+					}
+					// Not followed by end-of-statement, continue normally
+					// But we've consumed tokens, so we need to handle this carefully
+					// For now, let's add both to parts and continue
+					parts = append(parts, currentValue)
+					parts = append(parts, modeValue)
+					p.nextToken()
+					continue
+				}
+			}
 		}
 		parts = append(parts, p.current.Value)
 		p.nextToken()
