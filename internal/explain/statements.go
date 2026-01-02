@@ -1327,6 +1327,17 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		if cmd.AfterColumn != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.AfterColumn)
 		}
+		// For MODIFY COLUMN ... MODIFY SETTING
+		if len(cmd.Settings) > 0 {
+			fmt.Fprintf(sb, "%s Set\n", indent)
+		}
+		// For MODIFY COLUMN ... RESET SETTING (outputs ExpressionList with Identifiers)
+		if len(cmd.ResetSettings) > 0 {
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(cmd.ResetSettings))
+			for _, name := range cmd.ResetSettings {
+				fmt.Fprintf(sb, "%s  Identifier %s\n", indent, name)
+			}
+		}
 	case ast.AlterDropColumn:
 		if cmd.ColumnName != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ColumnName)
@@ -1570,6 +1581,14 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 			children++
 		}
 		if cmd.AfterColumn != "" {
+			children++
+		}
+		// For MODIFY COLUMN ... MODIFY SETTING
+		if len(cmd.Settings) > 0 {
+			children++
+		}
+		// For MODIFY COLUMN ... RESET SETTING
+		if len(cmd.ResetSettings) > 0 {
 			children++
 		}
 	case ast.AlterDropColumn:

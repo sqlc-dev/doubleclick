@@ -323,6 +323,7 @@ type ColumnDeclaration struct {
 	TTL           Expression     `json:"ttl,omitempty"`
 	PrimaryKey    bool           `json:"primary_key,omitempty"` // PRIMARY KEY constraint
 	Comment       string         `json:"comment,omitempty"`
+	Settings      []*SettingExpr `json:"settings,omitempty"`    // Column-level SETTINGS
 }
 
 func (c *ColumnDeclaration) Pos() token.Position { return c.Position }
@@ -596,6 +597,7 @@ type AlterCommand struct {
 	StatisticsTypes   []*FunctionCall   `json:"statistics_types,omitempty"`   // For ADD/MODIFY STATISTICS TYPE
 	Comment           string            `json:"comment,omitempty"`            // For COMMENT COLUMN
 	OrderByExpr       []Expression      `json:"order_by_expr,omitempty"`      // For MODIFY ORDER BY
+	ResetSettings     []string          `json:"reset_settings,omitempty"`     // For MODIFY COLUMN ... RESET SETTING
 }
 
 // Projection represents a projection definition.

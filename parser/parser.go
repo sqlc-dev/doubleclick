@@ -3748,6 +3748,16 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 		}
 	}
 
+	// Parse column-level SETTINGS (key = value, ...)
+	// Only parse if SETTINGS is followed by LPAREN (column-level settings use parentheses)
+	// If no LPAREN, leave SETTINGS for the parent (ALTER/CREATE) to handle
+	if p.currentIs(token.SETTINGS) && p.peek.Token == token.LPAREN {
+		p.nextToken() // skip SETTINGS
+		p.nextToken() // skip (
+		col.Settings = p.parseSettingsList()
+		p.expect(token.RPAREN)
+	}
+
 	return col
 }
 
@@ -4884,6 +4894,37 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				// Skip REMOVE COMMENT etc.
 				for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.COMMA) {
 					p.nextToken()
+				}
+			} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peek.Token == token.MODIFY {
+				// MODIFY COLUMN colname MODIFY SETTING key = value
+				colName := p.current.Value
+				p.nextToken() // skip column name
+				cmd.Column = &ast.ColumnDeclaration{Name: colName}
+				p.nextToken() // skip MODIFY
+				if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "SETTING" {
+					p.nextToken() // skip SETTING
+					cmd.Settings = p.parseSettingsList()
+				}
+			} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "RESET" {
+				// MODIFY COLUMN colname RESET SETTING key, key2, ...
+				colName := p.current.Value
+				p.nextToken() // skip column name
+				cmd.Column = &ast.ColumnDeclaration{Name: colName}
+				p.nextToken() // skip RESET
+				if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "SETTING" {
+					p.nextToken() // skip SETTING
+					// Parse comma-separated list of setting names
+					for {
+						if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+							cmd.ResetSettings = append(cmd.ResetSettings, p.current.Value)
+							p.nextToken()
+						}
+						if p.currentIs(token.COMMA) {
+							p.nextToken()
+						} else {
+							break
+						}
+					}
 				}
 			} else {
 				cmd.Column = p.parseColumnDeclaration()
