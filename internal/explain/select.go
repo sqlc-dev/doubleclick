@@ -134,6 +134,10 @@ func explainSelectQueryWithInheritedWith(sb *strings.Builder, stmt ast.Statement
 			Node(sb, o, depth+2)
 		}
 	}
+	// SETTINGS (when INTERPOLATE is present, SETTINGS comes before INTERPOLATE)
+	if len(sq.Settings) > 0 && len(sq.Interpolate) > 0 && !sq.SettingsAfterFormat {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
 	// INTERPOLATE
 	if len(sq.Interpolate) > 0 {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(sq.Interpolate))
@@ -168,8 +172,8 @@ func explainSelectQueryWithInheritedWith(sb *strings.Builder, stmt ast.Statement
 	} else if sq.Limit != nil {
 		Node(sb, sq.Limit, depth+1)
 	}
-	// SETTINGS
-	if len(sq.Settings) > 0 && !sq.SettingsAfterFormat {
+	// SETTINGS (when no INTERPOLATE - the case with INTERPOLATE is handled above)
+	if len(sq.Settings) > 0 && len(sq.Interpolate) == 0 && !sq.SettingsAfterFormat {
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 	// TOP clause
@@ -304,6 +308,10 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 			Node(sb, o, depth+2)
 		}
 	}
+	// SETTINGS (when INTERPOLATE is present, SETTINGS comes before INTERPOLATE)
+	if len(n.Settings) > 0 && len(n.Interpolate) > 0 && !n.SettingsAfterFormat {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
 	// INTERPOLATE
 	if len(n.Interpolate) > 0 {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Interpolate))
@@ -343,7 +351,8 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 	}
 	// SETTINGS is output at SelectQuery level only when NOT after FORMAT
 	// When SettingsAfterFormat is true, it's output at SelectWithUnionQuery level instead
-	if len(n.Settings) > 0 && !n.SettingsAfterFormat {
+	// When INTERPOLATE is present, SETTINGS was already output above
+	if len(n.Settings) > 0 && len(n.Interpolate) == 0 && !n.SettingsAfterFormat {
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 	// TOP clause is output at the end
