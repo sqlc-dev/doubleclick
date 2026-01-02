@@ -360,9 +360,14 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 				// but we need to unwrap tuples and output elements directly
 				if lit, ok := g.(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
 					if elements, ok := lit.Value.([]ast.Expression); ok {
-						fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(elements))
-						for _, elem := range elements {
-							Node(sb, elem, depth+3)
+						if len(elements) == 0 {
+							// Empty grouping set () outputs ExpressionList without children count
+							fmt.Fprintf(sb, "%s  ExpressionList\n", indent)
+						} else {
+							fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(elements))
+							for _, elem := range elements {
+								Node(sb, elem, depth+3)
+							}
 						}
 					} else {
 						// Fallback for unexpected tuple value type
