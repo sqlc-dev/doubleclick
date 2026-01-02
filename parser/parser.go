@@ -3749,7 +3749,7 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 	}
 
 	// Parse COMMENT
-	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "COMMENT" {
+	if p.currentIs(token.COMMENT) {
 		p.nextToken()
 		if p.currentIs(token.STRING) {
 			col.Comment = p.current.Value
