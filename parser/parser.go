@@ -2466,12 +2466,38 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 	}
 
 	// Parse column definitions (e.g., CREATE VIEW v (x UInt64) AS SELECT ...)
+	// For MATERIALIZED VIEW, this can also include INDEX, PROJECTION, and PRIMARY KEY
 	if p.currentIs(token.LPAREN) {
 		p.nextToken()
 		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-			col := p.parseColumnDeclaration()
-			if col != nil {
-				create.Columns = append(create.Columns, col)
+			// Handle INDEX definition
+			if p.currentIs(token.INDEX) {
+				idx := p.parseIndexDefinition()
+				if idx != nil {
+					create.Indexes = append(create.Indexes, idx)
+				}
+			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
+				// Parse PROJECTION definitions: PROJECTION name (SELECT ...)
+				p.nextToken() // skip PROJECTION
+				proj := p.parseProjection()
+				if proj != nil {
+					create.Projections = append(create.Projections, proj)
+				}
+			} else if p.currentIs(token.PRIMARY) {
+				// PRIMARY KEY in column list
+				p.nextToken() // skip PRIMARY
+				if p.currentIs(token.KEY) {
+					p.nextToken() // skip KEY
+					expr := p.parseExpression(LOWEST)
+					if expr != nil {
+						create.ColumnsPrimaryKey = append(create.ColumnsPrimaryKey, expr)
+					}
+				}
+			} else {
+				col := p.parseColumnDeclaration()
+				if col != nil {
+					create.Columns = append(create.Columns, col)
+				}
 			}
 			if p.currentIs(token.COMMA) {
 				p.nextToken()
