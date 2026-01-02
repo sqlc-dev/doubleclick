@@ -1158,6 +1158,12 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 		ident.Parenthesized = true
 	}
 
+	// Mark literals as parenthesized so -(1) outputs as negate function
+	// instead of being folded into a negative literal
+	if lit, ok := first.(*ast.Literal); ok {
+		lit.Parenthesized = true
+	}
+
 	return first
 }
 

@@ -402,8 +402,9 @@ func collectLogicalOperands(n *ast.BinaryExpr) []ast.Expression {
 
 func explainUnaryExpr(sb *strings.Builder, n *ast.UnaryExpr, indent string, depth int) {
 	// Handle negate of literal numbers - output as negative literal instead of function
+	// BUT only if the literal is NOT parenthesized (e.g., -1 folds, but -(1) stays as negate function)
 	if n.Op == "-" {
-		if lit, ok := n.Operand.(*ast.Literal); ok {
+		if lit, ok := n.Operand.(*ast.Literal); ok && !lit.Parenthesized {
 			switch lit.Type {
 			case ast.LiteralInteger:
 				// Convert positive integer to negative
