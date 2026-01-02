@@ -1349,17 +1349,33 @@ func explainIntervalExpr(sb *strings.Builder, n *ast.IntervalExpr, alias string,
 	unit := n.Unit
 	value := n.Value
 
-	// Handle string literals like INTERVAL '2 years' - extract value and unit
+	// Handle string literals like INTERVAL '2 years' or INTERVAL '-1 SECOND 2 MINUTE -3 MONTH 1 YEAR'
 	if unit == "" {
 		if lit, ok := n.Value.(*ast.Literal); ok && lit.Type == ast.LiteralString {
 			if strVal, ok := lit.Value.(string); ok {
-				val, u := parseIntervalString(strVal)
-				if u != "" {
-					unit = u
-					// Create a numeric literal for the value
+				parts := parseMultiIntervalString(strVal)
+				if len(parts) > 1 {
+					// Multi-part interval - output as tuple
+					if alias != "" {
+						fmt.Fprintf(sb, "%sFunction tuple (alias %s) (children %d)\n", indent, alias, 1)
+					} else {
+						fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
+					}
+					fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(parts))
+					for _, part := range parts {
+						unitNorm := normalizeIntervalUnit(part.unit)
+						fnName := "toInterval" + unitNorm
+						fmt.Fprintf(sb, "%s  Function %s (children %d)\n", indent, fnName, 1)
+						fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
+						// Output the literal value with proper type
+						explainIntervalLiteralValue(sb, part.value, indent+"    ", depth+4)
+					}
+					return
+				} else if len(parts) == 1 {
+					unit = parts[0].unit
 					value = &ast.Literal{
 						Type:  ast.LiteralInteger,
-						Value: val,
+						Value: parts[0].value,
 					}
 				}
 			}
@@ -1377,18 +1393,62 @@ func explainIntervalExpr(sb *strings.Builder, n *ast.IntervalExpr, alias string,
 	Node(sb, value, depth+2)
 }
 
+// explainIntervalLiteralValue outputs a literal value for an interval part
+// Negative values use Int64, positive values use UInt64
+func explainIntervalLiteralValue(sb *strings.Builder, value string, indent string, depth int) {
+	if strings.HasPrefix(value, "-") {
+		fmt.Fprintf(sb, "%sLiteral Int64_%s\n", indent, value)
+	} else {
+		fmt.Fprintf(sb, "%sLiteral UInt64_%s\n", indent, value)
+	}
+}
+
+// intervalPart represents a single part of a multi-part interval string
+type intervalPart struct {
+	value string
+	unit  string
+}
+
 // parseIntervalString parses a string like "2 years" into value and unit
 func parseIntervalString(s string) (value string, unit string) {
+	parts := parseMultiIntervalString(s)
+	if len(parts) >= 1 {
+		return parts[0].value, parts[0].unit
+	}
+	return s, ""
+}
+
+// parseMultiIntervalString parses a string like "-1 SECOND 2 MINUTE -3 MONTH 1 YEAR"
+// into multiple interval parts
+func parseMultiIntervalString(s string) []intervalPart {
 	// Trim surrounding quotes if present
 	s = strings.Trim(s, "'\"")
 	s = strings.TrimSpace(s)
 
-	// Find the split between number and unit
-	parts := strings.Fields(s)
-	if len(parts) >= 2 {
-		return parts[0], parts[1]
+	// Split into tokens
+	tokens := strings.Fields(s)
+	if len(tokens) == 0 {
+		return nil
 	}
-	return s, ""
+
+	var parts []intervalPart
+	i := 0
+	for i < len(tokens) {
+		// Get value (may be negative, starts with -)
+		value := tokens[i]
+		i++
+
+		// Get unit
+		if i >= len(tokens) {
+			break
+		}
+		unit := tokens[i]
+		i++
+
+		parts = append(parts, intervalPart{value: value, unit: unit})
+	}
+
+	return parts
 }
 
 func explainExistsExpr(sb *strings.Builder, n *ast.ExistsExpr, indent string, depth int) {
