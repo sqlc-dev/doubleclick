@@ -155,6 +155,12 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		fmt.Fprintf(sb, "%sCreateSettingsProfileQuery\n", indent)
 	case *ast.DropSettingsProfileQuery:
 		fmt.Fprintf(sb, "%sDROP SETTINGS PROFILE query\n", indent)
+	case *ast.CreateNamedCollectionQuery:
+		fmt.Fprintf(sb, "%sCreateNamedCollectionQuery\n", indent)
+	case *ast.AlterNamedCollectionQuery:
+		fmt.Fprintf(sb, "%sAlterNamedCollectionQuery\n", indent)
+	case *ast.DropNamedCollectionQuery:
+		fmt.Fprintf(sb, "%sDropNamedCollectionQuery\n", indent)
 	case *ast.ShowCreateSettingsProfileQuery:
 		// Use PROFILES (plural) when multiple profiles are specified
 		queryName := "SHOW CREATE SETTINGS PROFILE query"

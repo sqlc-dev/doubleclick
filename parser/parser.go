@@ -247,6 +247,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "WORKLOAD" {
 			return p.parseDropWorkload()
 		}
+		// Check for DROP NAMED COLLECTION
+		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "NAMED" {
+			return p.parseDropNamedCollection()
+		}
 		return p.parseDrop()
 	case token.ALTER:
 		// Check for ALTER USER
@@ -268,6 +272,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		// Check for ALTER ROLE
 		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "ROLE" {
 			return p.parseAlterRole()
+		}
+		// Check for ALTER NAMED COLLECTION
+		if p.peek.Token == token.IDENT && strings.ToUpper(p.peek.Value) == "NAMED" {
+			return p.parseAlterNamedCollection()
 		}
 		return p.parseAlter()
 	case token.TRUNCATE:
@@ -1938,12 +1946,7 @@ func (p *Parser) parseCreate() ast.Statement {
 			p.parseCreateDictionary(create)
 		case "NAMED":
 			// CREATE NAMED COLLECTION name AS key=value, ...
-			p.nextToken() // skip NAMED
-			// Skip "COLLECTION" if present
-			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "COLLECTION" {
-				p.nextToken()
-			}
-			p.parseCreateGeneric(create)
+			return p.parseCreateNamedCollection(pos)
 		case "PROFILE":
 			// CREATE PROFILE (without SETTINGS keyword)
 			return p.parseCreateSettingsProfile(pos)
@@ -3195,6 +3198,108 @@ func (p *Parser) parseCreateQuota(pos token.Position) *ast.CreateQuotaQuery {
 
 	// Parse quota name
 	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+		query.Name = p.current.Value
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseCreateNamedCollection(pos token.Position) *ast.CreateNamedCollectionQuery {
+	query := &ast.CreateNamedCollectionQuery{
+		Position: pos,
+	}
+
+	// Skip NAMED keyword
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "NAMED" {
+		p.nextToken()
+	}
+
+	// Skip COLLECTION keyword
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "COLLECTION" {
+		p.nextToken()
+	}
+
+	// Parse collection name
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() || p.currentIs(token.STRING) {
+		query.Name = p.current.Value
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (AS key=value, ...)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseAlterNamedCollection() *ast.AlterNamedCollectionQuery {
+	pos := p.current.Pos
+	p.nextToken() // skip ALTER
+
+	query := &ast.AlterNamedCollectionQuery{
+		Position: pos,
+	}
+
+	// Skip NAMED keyword
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "NAMED" {
+		p.nextToken()
+	}
+
+	// Skip COLLECTION keyword
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "COLLECTION" {
+		p.nextToken()
+	}
+
+	// Parse collection name
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() || p.currentIs(token.STRING) {
+		query.Name = p.current.Value
+		p.nextToken()
+	}
+
+	// Skip the rest of the statement (DELETE key, SET key=value, ...)
+	for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return query
+}
+
+func (p *Parser) parseDropNamedCollection() *ast.DropNamedCollectionQuery {
+	pos := p.current.Pos
+	p.nextToken() // skip DROP
+
+	query := &ast.DropNamedCollectionQuery{
+		Position: pos,
+	}
+
+	// Skip NAMED keyword
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "NAMED" {
+		p.nextToken()
+	}
+
+	// Skip COLLECTION keyword
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "COLLECTION" {
+		p.nextToken()
+	}
+
+	// Handle IF EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.EXISTS) {
+			query.IfExists = true
+			p.nextToken()
+		}
+	}
+
+	// Parse collection name
+	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() || p.currentIs(token.STRING) {
 		query.Name = p.current.Value
 		p.nextToken()
 	}

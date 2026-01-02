@@ -1046,6 +1046,37 @@ func (d *DropSettingsProfileQuery) Pos() token.Position { return d.Position }
 func (d *DropSettingsProfileQuery) End() token.Position { return d.Position }
 func (d *DropSettingsProfileQuery) statementNode()      {}
 
+// CreateNamedCollectionQuery represents a CREATE NAMED COLLECTION statement.
+type CreateNamedCollectionQuery struct {
+	Position token.Position `json:"-"`
+	Name     string         `json:"name,omitempty"`
+}
+
+func (c *CreateNamedCollectionQuery) Pos() token.Position { return c.Position }
+func (c *CreateNamedCollectionQuery) End() token.Position { return c.Position }
+func (c *CreateNamedCollectionQuery) statementNode()      {}
+
+// AlterNamedCollectionQuery represents an ALTER NAMED COLLECTION statement.
+type AlterNamedCollectionQuery struct {
+	Position token.Position `json:"-"`
+	Name     string         `json:"name,omitempty"`
+}
+
+func (a *AlterNamedCollectionQuery) Pos() token.Position { return a.Position }
+func (a *AlterNamedCollectionQuery) End() token.Position { return a.Position }
+func (a *AlterNamedCollectionQuery) statementNode()      {}
+
+// DropNamedCollectionQuery represents a DROP NAMED COLLECTION statement.
+type DropNamedCollectionQuery struct {
+	Position token.Position `json:"-"`
+	Name     string         `json:"name,omitempty"`
+	IfExists bool           `json:"if_exists,omitempty"`
+}
+
+func (d *DropNamedCollectionQuery) Pos() token.Position { return d.Position }
+func (d *DropNamedCollectionQuery) End() token.Position { return d.Position }
+func (d *DropNamedCollectionQuery) statementNode()      {}
+
 // ShowCreateSettingsProfileQuery represents a SHOW CREATE SETTINGS PROFILE statement.
 type ShowCreateSettingsProfileQuery struct {
 	Position token.Position `json:"-"`
