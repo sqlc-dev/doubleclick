@@ -75,6 +75,15 @@ func (p *Parser) peekIs(t token.Token) bool {
 	return p.peek.Token == t
 }
 
+func (p *Parser) peekPeekIs(t token.Token) bool {
+	return p.peekPeek.Token == t
+}
+
+// isColumnsFunction checks if current token is COLUMNS function (for column expressions)
+func (p *Parser) isColumnsFunction() bool {
+	return p.currentIs(token.COLUMNS) && p.peekIs(token.LPAREN)
+}
+
 // peekPeekIsIntervalUnit checks if the third lookahead token is an interval unit
 // This is used for distinguishing "INTERVAL '2' AS n minute" patterns
 func (p *Parser) peekPeekIsIntervalUnit() bool {
@@ -1703,11 +1712,24 @@ func (p *Parser) parseInsert() *ast.InsertQuery {
 	// Parse column list
 	if p.currentIs(token.LPAREN) {
 		p.nextToken()
-		// Check for (*) meaning all columns
-		if p.currentIs(token.ASTERISK) {
-			ins.AllColumns = true
-			p.nextToken()
+		// Check for special column expressions (*, table.*, COLUMNS(...), with EXCEPT/APPLY/REPLACE)
+		if p.currentIs(token.ASTERISK) || p.isColumnsFunction() ||
+			(p.currentIs(token.IDENT) && p.peekIs(token.DOT) && p.peekPeekIs(token.ASTERISK)) {
+			// Parse as expression to handle EXCEPT/APPLY/REPLACE transformers
+			expr := p.parseExpression(LOWEST)
+			if expr != nil {
+				ins.ColumnExpressions = append(ins.ColumnExpressions, expr)
+			}
+			// Handle comma-separated expressions
+			for p.currentIs(token.COMMA) {
+				p.nextToken()
+				expr = p.parseExpression(LOWEST)
+				if expr != nil {
+					ins.ColumnExpressions = append(ins.ColumnExpressions, expr)
+				}
+			}
 		} else {
+			// Regular column names
 			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
 				pos := p.current.Pos
 				colName := p.parseIdentifierName()

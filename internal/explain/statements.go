@@ -24,7 +24,7 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 			children++ // Database identifier (separate from table)
 		}
 	}
-	if len(n.Columns) > 0 || n.AllColumns {
+	if len(n.ColumnExpressions) > 0 || len(n.Columns) > 0 || n.AllColumns {
 		children++ // Column list
 	}
 	if n.Select != nil {
@@ -70,7 +70,12 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 	}
 
 	// Column list
-	if n.AllColumns {
+	if len(n.ColumnExpressions) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.ColumnExpressions))
+		for _, expr := range n.ColumnExpressions {
+			Node(sb, expr, depth+2)
+		}
+	} else if n.AllColumns {
 		fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", indent)
 		fmt.Fprintf(sb, "%s  Asterisk\n", indent)
 	} else if len(n.Columns) > 0 {

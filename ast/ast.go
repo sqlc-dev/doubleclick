@@ -242,20 +242,21 @@ func (s *SettingExpr) End() token.Position { return s.Position }
 
 // InsertQuery represents an INSERT statement.
 type InsertQuery struct {
-	Position    token.Position   `json:"-"`
-	Database    string           `json:"database,omitempty"`
-	Table       string           `json:"table,omitempty"`
-	Function    *FunctionCall    `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
-	Columns     []*Identifier    `json:"columns,omitempty"`
-	AllColumns  bool             `json:"all_columns,omitempty"` // For (*) syntax meaning all columns
-	PartitionBy Expression       `json:"partition_by,omitempty"` // For PARTITION BY clause
-	Infile      string           `json:"infile,omitempty"`       // For FROM INFILE clause
-	Compression string           `json:"compression,omitempty"`  // For COMPRESSION clause
-	Values      [][]Expression   `json:"-"`                      // For VALUES clause (format only, not in AST JSON)
-	Select      Statement        `json:"select,omitempty"`
-	Format      *Identifier      `json:"format,omitempty"`
-	HasSettings bool             `json:"has_settings,omitempty"` // For SETTINGS clause
-	Settings    []*SettingExpr   `json:"settings,omitempty"`     // For SETTINGS clause in INSERT
+	Position          token.Position   `json:"-"`
+	Database          string           `json:"database,omitempty"`
+	Table             string           `json:"table,omitempty"`
+	Function          *FunctionCall    `json:"function,omitempty"` // For INSERT INTO FUNCTION syntax
+	Columns           []*Identifier    `json:"columns,omitempty"`
+	ColumnExpressions []Expression     `json:"column_expressions,omitempty"` // For asterisk/COLUMNS expressions with transformers
+	AllColumns        bool             `json:"all_columns,omitempty"`        // For (*) syntax meaning all columns
+	PartitionBy       Expression       `json:"partition_by,omitempty"`       // For PARTITION BY clause
+	Infile            string           `json:"infile,omitempty"`             // For FROM INFILE clause
+	Compression       string           `json:"compression,omitempty"`        // For COMPRESSION clause
+	Values            [][]Expression   `json:"-"`                            // For VALUES clause (format only, not in AST JSON)
+	Select            Statement        `json:"select,omitempty"`
+	Format            *Identifier      `json:"format,omitempty"`
+	HasSettings       bool             `json:"has_settings,omitempty"` // For SETTINGS clause
+	Settings          []*SettingExpr   `json:"settings,omitempty"`     // For SETTINGS clause in INSERT
 }
 
 func (i *InsertQuery) Pos() token.Position { return i.Position }
