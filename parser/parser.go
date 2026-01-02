@@ -4159,7 +4159,8 @@ func (p *Parser) parseCodecExpr() *ast.CodecExpr {
 	}
 
 	for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
-		if p.currentIs(token.IDENT) {
+		// Accept IDENT or keywords as codec names (e.g., "Default" is a keyword)
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 			name := p.current.Value
 			pos := p.current.Pos
 			p.nextToken()
