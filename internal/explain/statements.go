@@ -1619,6 +1619,14 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		if cmd.SampleByExpr != nil {
 			Node(sb, cmd.SampleByExpr, depth+1)
 		}
+	case ast.AlterResetSetting:
+		// RESET SETTING outputs ExpressionList with Identifier children
+		if len(cmd.ResetSettings) > 0 {
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(cmd.ResetSettings))
+			for _, name := range cmd.ResetSettings {
+				fmt.Fprintf(sb, "%s  Identifier %s\n", indent, name)
+			}
+		}
 	default:
 		if cmd.Partition != nil {
 			Node(sb, cmd.Partition, depth+1)
@@ -1857,6 +1865,11 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 	case ast.AlterModifySampleBy:
 		// MODIFY SAMPLE BY: single expression (1 child)
 		if cmd.SampleByExpr != nil {
+			children = 1
+		}
+	case ast.AlterResetSetting:
+		// RESET SETTING: ExpressionList with setting names (1 child)
+		if len(cmd.ResetSettings) > 0 {
 			children = 1
 		}
 	default:

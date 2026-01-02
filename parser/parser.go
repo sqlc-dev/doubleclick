@@ -5077,6 +5077,24 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				}
 				cmd.Type = ast.AlterRemoveSampleBy
 			}
+		} else if upper == "RESET" {
+			p.nextToken() // skip RESET
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "SETTING" {
+				p.nextToken() // skip SETTING
+				cmd.Type = ast.AlterResetSetting
+				// Parse comma-separated list of setting names
+				for {
+					if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+						cmd.ResetSettings = append(cmd.ResetSettings, p.current.Value)
+						p.nextToken()
+					}
+					if p.currentIs(token.COMMA) {
+						p.nextToken()
+					} else {
+						break
+					}
+				}
+			}
 		} else {
 			return nil
 		}
