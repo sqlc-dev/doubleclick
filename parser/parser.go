@@ -4958,6 +4958,11 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			} else {
 				cmd.Column = p.parseColumnDeclaration()
 			}
+			// Parse AFTER column_name clause
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "AFTER" {
+				p.nextToken() // skip AFTER
+				cmd.AfterColumn = p.parseIdentifierName()
+			}
 		} else if p.currentIs(token.TTL) {
 			cmd.Type = ast.AlterModifyTTL
 			p.nextToken()
