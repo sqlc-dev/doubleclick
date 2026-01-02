@@ -888,6 +888,7 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 	// - All string literals + NULLs
 	// - All boolean literals + NULLs
 	// - All tuple literals that contain only primitive literals (recursively)
+	// - All primitive literals of mixed types (when left side is a tuple)
 	canBeTupleLiteral := false
 	if n.Query == nil && len(n.List) > 1 {
 		allNumericOrNull := true
@@ -895,7 +896,8 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 		allBooleansOrNull := true
 		allTuples := true
 		allTuplesArePrimitive := true
-		hasNonNull := false // Need at least one non-null value
+		allPrimitiveLiterals := true // New: check if all are primitive literals (any type)
+		hasNonNull := false          // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
 				if lit.Type == ast.LiteralNull {
@@ -920,22 +922,29 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 						allTuplesArePrimitive = false
 					}
 				}
+				// Check if it's a primitive literal type (not a tuple or complex type)
+				if lit.Type == ast.LiteralTuple || lit.Type == ast.LiteralArray {
+					allPrimitiveLiterals = false
+				}
 			} else if isNumericExpr(item) {
 				// Unary minus of numeric is still numeric
 				hasNonNull = true
 				allStringsOrNull = false
 				allBooleansOrNull = false
 				allTuples = false
+				// Numeric expression counts as primitive
 			} else {
 				allNumericOrNull = false
 				allStringsOrNull = false
 				allBooleansOrNull = false
 				allTuples = false
+				allPrimitiveLiterals = false
 				break
 			}
 		}
-		// For tuples, only combine if all contain primitive literals
-		canBeTupleLiteral = hasNonNull && (allNumericOrNull || allStringsOrNull || allBooleansOrNull || (allTuples && allTuplesArePrimitive))
+		// Allow combining mixed primitive literals into a tuple when comparing tuples
+		// This handles cases like: (1,'') IN (-1,'') where the right side should be a single tuple literal
+		canBeTupleLiteral = hasNonNull && (allNumericOrNull || allStringsOrNull || allBooleansOrNull || (allTuples && allTuplesArePrimitive) || allPrimitiveLiterals)
 	}
 
 	// Count arguments: expr + list items or subquery
