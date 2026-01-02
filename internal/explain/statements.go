@@ -1449,6 +1449,10 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	if cmdType == ast.AlterDeleteWhere {
 		cmdType = "DELETE"
 	}
+	// FREEZE (without partition) is shown as FREEZE_ALL in EXPLAIN AST
+	if cmdType == ast.AlterFreeze {
+		cmdType = "FREEZE_ALL"
+	}
 	if children > 0 {
 		fmt.Fprintf(sb, "%sAlterCommand %s (children %d)\n", indent, cmdType, children)
 	} else {
