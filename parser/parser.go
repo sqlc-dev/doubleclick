@@ -6002,6 +6002,12 @@ func (p *Parser) parseDelete() *ast.DeleteQuery {
 		del.Where = p.parseExpression(LOWEST)
 	}
 
+	// Parse SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken() // skip SETTINGS
+		del.Settings = p.parseSettingsList()
+	}
+
 	return del
 }
 

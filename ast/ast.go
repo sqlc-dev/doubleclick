@@ -709,6 +709,7 @@ type DeleteQuery struct {
 	Database string         `json:"database,omitempty"`
 	Table    string         `json:"table"`
 	Where    Expression     `json:"where,omitempty"`
+	Settings []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (d *DeleteQuery) Pos() token.Position { return d.Position }

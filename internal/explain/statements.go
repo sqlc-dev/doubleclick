@@ -2026,9 +2026,12 @@ func explainDeleteQuery(sb *strings.Builder, n *ast.DeleteQuery, indent string, 
 		return
 	}
 
-	// Count children: Where expression + table identifier
+	// Count children: Where expression + table identifier + settings
 	children := 1 // table identifier
 	if n.Where != nil {
+		children++
+	}
+	if len(n.Settings) > 0 {
 		children++
 	}
 
@@ -2037,6 +2040,9 @@ func explainDeleteQuery(sb *strings.Builder, n *ast.DeleteQuery, indent string, 
 		Node(sb, n.Where, depth+1)
 	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+	if len(n.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
 }
 
 func explainCheckQuery(sb *strings.Builder, n *ast.CheckQuery, indent string) {
