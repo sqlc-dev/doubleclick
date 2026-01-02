@@ -1163,9 +1163,10 @@ func (c *CreateIndexQuery) statementNode()      {}
 
 // Identifier represents an identifier.
 type Identifier struct {
-	Position token.Position `json:"-"`
-	Parts    []string       `json:"parts"` // e.g., ["db", "table", "column"] for db.table.column
-	Alias    string         `json:"alias,omitempty"`
+	Position      token.Position `json:"-"`
+	Parts         []string       `json:"parts"` // e.g., ["db", "table", "column"] for db.table.column
+	Alias         string         `json:"alias,omitempty"`
+	Parenthesized bool           `json:"-"` // true if wrapped in parentheses, affects dot access parsing
 }
 
 func (i *Identifier) Pos() token.Position { return i.Position }
