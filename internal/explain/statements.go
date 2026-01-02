@@ -602,14 +602,29 @@ func explainUndropQuery(sb *strings.Builder, n *ast.UndropQuery, indent string, 
 	name := n.Table
 	// Check if we have a database-qualified name (for UNDROP TABLE db.table)
 	hasDatabase := n.Database != ""
+	hasFormat := n.Format != ""
 	if hasDatabase {
-		// Database-qualified: UndropQuery db table (children 2)
-		fmt.Fprintf(sb, "%sUndropQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), 2)
+		// Database-qualified: UndropQuery db table (children 2 or 3)
+		children := 2
+		if hasFormat {
+			children = 3
+		}
+		fmt.Fprintf(sb, "%sUndropQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(n.Database))
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+		if hasFormat {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
 	} else {
-		fmt.Fprintf(sb, "%sUndropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), 1)
+		children := 1
+		if hasFormat {
+			children = 2
+		}
+		fmt.Fprintf(sb, "%sUndropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+		if hasFormat {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
 	}
 }
 

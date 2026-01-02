@@ -530,6 +530,7 @@ type UndropQuery struct {
 	Table     string         `json:"table"`
 	OnCluster string         `json:"on_cluster,omitempty"`
 	UUID      string         `json:"uuid,omitempty"`
+	Format    string         `json:"format,omitempty"`
 }
 
 func (u *UndropQuery) Pos() token.Position { return u.Position }

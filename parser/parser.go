@@ -4490,6 +4490,12 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		}
 	}
 
+	// Handle SYNC (can appear before or after FORMAT)
+	if p.currentIs(token.SYNC) {
+		drop.Sync = true
+		p.nextToken()
+	}
+
 	// Handle FORMAT clause (for things like DROP TABLE ... FORMAT Null)
 	if p.currentIs(token.FORMAT) {
 		p.nextToken()
@@ -4503,7 +4509,7 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		}
 	}
 
-	// Handle SYNC
+	// Handle SYNC again (can also appear after FORMAT)
 	if p.currentIs(token.SYNC) {
 		drop.Sync = true
 		p.nextToken()
@@ -5361,6 +5367,18 @@ func (p *Parser) parseUndrop() *ast.UndropQuery {
 		p.nextToken()
 		if p.currentIs(token.STRING) {
 			undrop.UUID = p.current.Value
+			p.nextToken()
+		}
+	}
+
+	// Handle FORMAT clause
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		if p.currentIs(token.NULL) {
+			undrop.Format = "Null"
+			p.nextToken()
+		} else if p.currentIs(token.IDENT) {
+			undrop.Format = p.current.Value
 			p.nextToken()
 		}
 	}
