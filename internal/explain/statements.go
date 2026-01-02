@@ -178,6 +178,14 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	}
 	// Check for database-qualified table/view name
 	hasDatabase := n.Database != "" && !n.CreateDatabase && (n.Table != "" || n.View != "")
+	// Check for column-level PRIMARY KEY modifiers (e.g., "a String PRIMARY KEY")
+	hasColumnPrimaryKey := false
+	for _, col := range n.Columns {
+		if col.PrimaryKey {
+			hasColumnPrimaryKey = true
+			break
+		}
+	}
 	// Count children: name + columns + engine/storage
 	children := 1 // name identifier
 	if hasDatabase {
@@ -186,7 +194,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Projections) > 0 || len(n.Constraints) > 0 {
 		children++
 	}
-	hasStorageChild := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0 || len(n.ColumnsPrimaryKey) > 0
+	hasStorageChild := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0 || len(n.ColumnsPrimaryKey) > 0 || hasColumnPrimaryKey
 	if hasStorageChild {
 		children++
 	}
@@ -314,7 +322,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			inCreateQueryContext = false
 		}
 	}
-	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0 || len(n.ColumnsPrimaryKey) > 0
+	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0 || len(n.ColumnsPrimaryKey) > 0 || hasColumnPrimaryKey
 	if hasStorage {
 		storageChildren := 0
 		if n.Engine != nil {
