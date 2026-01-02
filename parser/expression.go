@@ -2214,27 +2214,36 @@ func (p *Parser) parseArrayAccess(left ast.Expression) ast.Expression {
 	return expr
 }
 
-// parseTupleAccessFromNumber handles tuple access like t.1 where .1 was lexed as a single NUMBER token
+// parseTupleAccessFromNumber handles tuple access like t.1 or t.1.2.3 where .1 or .1.2.3 was lexed as a single NUMBER token
 func (p *Parser) parseTupleAccessFromNumber(left ast.Expression) ast.Expression {
-	// The current value is like ".1" - extract the index part
+	// The current value is like ".1" or ".1.2" - extract the index parts
 	indexStr := strings.TrimPrefix(p.current.Value, ".")
 	pos := p.current.Pos
 	p.nextToken()
 
-	idx, err := strconv.ParseInt(indexStr, 10, 64)
-	if err != nil {
-		return left
+	// Split by dots to handle chained access like .1.2.3
+	parts := strings.Split(indexStr, ".")
+	result := left
+
+	for _, part := range parts {
+		idx, err := strconv.ParseInt(part, 10, 64)
+		if err != nil {
+			// If any part fails to parse as integer, return what we have so far
+			return result
+		}
+
+		result = &ast.TupleAccess{
+			Position: pos,
+			Tuple:    result,
+			Index: &ast.Literal{
+				Position: pos,
+				Type:     ast.LiteralInteger,
+				Value:    idx,
+			},
+		}
 	}
 
-	return &ast.TupleAccess{
-		Position: pos,
-		Tuple:    left,
-		Index: &ast.Literal{
-			Position: pos,
-			Type:     ast.LiteralInteger,
-			Value:    idx,
-		},
-	}
+	return result
 }
 
 func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
