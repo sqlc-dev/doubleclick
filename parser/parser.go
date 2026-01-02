@@ -4810,6 +4810,26 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 						cmd.Partition = p.parseExpression(LOWEST)
 					}
 				}
+			} else if p.currentIs(token.COLUMN) {
+				cmd.Type = ast.AlterMaterializeColumn
+				p.nextToken()
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					cmd.ColumnName = p.current.Value
+					p.nextToken()
+				}
+				// Parse IN PARTITION clause
+				if p.currentIs(token.IN) {
+					p.nextToken() // skip IN
+					if p.currentIs(token.PARTITION) {
+						p.nextToken() // skip PARTITION
+						// Check for PARTITION ID 'value' syntax
+						if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+							p.nextToken()
+							cmd.PartitionIsID = true
+						}
+						cmd.Partition = p.parseExpression(LOWEST)
+					}
+				}
 			} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
 				cmd.Type = ast.AlterMaterializeProjection
 				p.nextToken()

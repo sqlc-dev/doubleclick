@@ -1393,6 +1393,14 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 				Node(sb, cmd.Partition, depth+2)
 			}
 		}
+	case ast.AlterMaterializeColumn:
+		if cmd.ColumnName != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ColumnName)
+		}
+		if cmd.Partition != nil {
+			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+			Node(sb, cmd.Partition, depth+2)
+		}
 	case ast.AlterAddConstraint:
 		if cmd.Constraint != nil {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Constraint.Name)
@@ -1637,6 +1645,13 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 		}
 		// MATERIALIZE INDEX can have IN PARTITION ID clause
 		if cmd.Partition != nil && cmd.PartitionIsID {
+			children++
+		}
+	case ast.AlterMaterializeColumn:
+		if cmd.ColumnName != "" {
+			children++
+		}
+		if cmd.Partition != nil {
 			children++
 		}
 	case ast.AlterAddConstraint:
