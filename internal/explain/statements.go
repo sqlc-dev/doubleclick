@@ -1516,6 +1516,11 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 				Node(sb, expr, depth+1)
 			}
 		}
+	case ast.AlterModifySampleBy:
+		// Single expression - output directly
+		if cmd.SampleByExpr != nil {
+			Node(sb, cmd.SampleByExpr, depth+1)
+		}
 	default:
 		if cmd.Partition != nil {
 			Node(sb, cmd.Partition, depth+1)
@@ -1745,6 +1750,11 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 	case ast.AlterModifyOrderBy:
 		// MODIFY ORDER BY: multiple expressions wrapped in tuple (1 child), single expression (1 child)
 		if len(cmd.OrderByExpr) > 0 {
+			children = 1
+		}
+	case ast.AlterModifySampleBy:
+		// MODIFY SAMPLE BY: single expression (1 child)
+		if cmd.SampleByExpr != nil {
 			children = 1
 		}
 	default:

@@ -5023,6 +5023,14 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				// Single expression without parentheses
 				cmd.OrderByExpr = []ast.Expression{p.parseExpression(LOWEST)}
 			}
+		} else if p.currentIs(token.SAMPLE) {
+			// MODIFY SAMPLE BY expr
+			cmd.Type = ast.AlterModifySampleBy
+			p.nextToken() // skip SAMPLE
+			if p.currentIs(token.BY) {
+				p.nextToken() // skip BY
+			}
+			cmd.SampleByExpr = p.parseExpression(LOWEST)
 		}
 	case token.RENAME:
 		p.nextToken()

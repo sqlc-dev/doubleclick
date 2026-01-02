@@ -599,6 +599,7 @@ type AlterCommand struct {
 	StatisticsTypes   []*FunctionCall   `json:"statistics_types,omitempty"`   // For ADD/MODIFY STATISTICS TYPE
 	Comment           string            `json:"comment,omitempty"`            // For COMMENT COLUMN
 	OrderByExpr       []Expression      `json:"order_by_expr,omitempty"`      // For MODIFY ORDER BY
+	SampleByExpr      Expression        `json:"sample_by_expr,omitempty"`     // For MODIFY SAMPLE BY
 	ResetSettings     []string          `json:"reset_settings,omitempty"`     // For MODIFY COLUMN ... RESET SETTING
 }
 
@@ -675,6 +676,7 @@ const (
 	AlterMaterializeStatistics AlterCommandType = "MATERIALIZE_STATISTICS"
 	AlterModifyComment         AlterCommandType = "MODIFY_COMMENT"
 	AlterModifyOrderBy         AlterCommandType = "MODIFY_ORDER_BY"
+	AlterModifySampleBy        AlterCommandType = "MODIFY_SAMPLE_BY"
 	AlterRemoveSampleBy        AlterCommandType = "REMOVE_SAMPLE_BY"
 )
 
