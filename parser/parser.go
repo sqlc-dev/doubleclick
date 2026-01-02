@@ -208,7 +208,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.SELECT:
 		return p.parseSelectWithUnion()
 	case token.WITH:
-		return p.parseSelectWithUnion()
+		// WITH can precede SELECT or INSERT in ClickHouse
+		return p.parseWithStatement()
 	case token.FROM:
 		// FROM ... SELECT syntax (ClickHouse extension)
 		return p.parseFromSelectSyntax()
@@ -337,6 +338,234 @@ func (p *Parser) parseStatement() ast.Statement {
 		p.nextToken()
 		return nil
 	}
+}
+
+// parseWithStatement parses WITH ... (SELECT|INSERT) statements
+// WITH clause can precede both SELECT and INSERT in ClickHouse
+func (p *Parser) parseWithStatement() ast.Statement {
+	// Save position to check for WITH ... INSERT later
+	pos := p.current.Pos
+
+	// Peek ahead to see if this is WITH ... INSERT
+	// We need to parse the WITH clause first to check what follows
+	p.nextToken() // skip WITH
+
+	// Skip RECURSIVE keyword if present
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "RECURSIVE" {
+		p.nextToken()
+	}
+
+	// Parse the WITH clause
+	with := p.parseWithClause()
+
+	// Now check what follows: INSERT or SELECT
+	if p.currentIs(token.INSERT) {
+		// WITH ... INSERT ... SELECT syntax
+		ins := p.parseInsert()
+		if ins != nil {
+			// Store the WITH clause in InsertQuery.With for explain to handle
+			// Don't propagate to SelectQuery.With - the explain code will output
+			// the inherited WITH at the end of each SelectQuery's children
+			ins.With = with
+		}
+		return ins
+	}
+
+	// For SELECT, we use parseSelectWithParsedWith to continue with normal parsing
+	// but with the already-parsed WITH clause
+	return p.parseSelectWithUnionWithParsedWith(pos, with)
+}
+
+// parseSelectWithUnionWithParsedWith parses a SELECT with an already-parsed WITH clause
+func (p *Parser) parseSelectWithUnionWithParsedWith(pos token.Position, with []ast.Expression) *ast.SelectWithUnionQuery {
+	query := &ast.SelectWithUnionQuery{
+		Position: pos,
+	}
+
+	// Parse first select with the pre-parsed WITH clause
+	sel := p.parseSelectWithParsedWith(with)
+	if sel == nil {
+		return nil
+	}
+
+	// Check for INTERSECT/EXCEPT
+	if p.isIntersectExceptWithWrapper() {
+		stmts := []ast.Statement{sel}
+		var ops []string
+
+		for p.isIntersectExceptWithWrapper() {
+			var op string
+			if p.currentIs(token.EXCEPT) {
+				op = "EXCEPT"
+			} else {
+				op = "INTERSECT"
+			}
+			p.nextToken()
+
+			if p.currentIs(token.ALL) {
+				op += " ALL"
+				p.nextToken()
+			} else if p.currentIs(token.DISTINCT) {
+				op += " DISTINCT"
+				p.nextToken()
+			}
+			ops = append(ops, op)
+
+			var nextStmt ast.Statement
+			if p.currentIs(token.LPAREN) {
+				p.nextToken()
+				nested := p.parseSelectWithUnion()
+				if nested == nil {
+					break
+				}
+				p.expect(token.RPAREN)
+				nextStmt = nested
+			} else {
+				nextSel := p.parseSelect()
+				if nextSel == nil {
+					break
+				}
+				nextStmt = nextSel
+			}
+			stmts = append(stmts, nextStmt)
+		}
+
+		result := buildIntersectExceptTree(stmts, ops)
+		query.Selects = append(query.Selects, result)
+
+		// Handle UNION after INTERSECT/EXCEPT
+		for p.currentIs(token.UNION) {
+			p.nextToken()
+			mode := "ALL"
+			if p.currentIs(token.ALL) {
+				p.nextToken()
+			} else if p.currentIs(token.DISTINCT) {
+				mode = "DISTINCT"
+				p.nextToken()
+			}
+			query.UnionModes = append(query.UnionModes, mode)
+
+			var nextStmt ast.Statement
+			if p.currentIs(token.LPAREN) {
+				p.nextToken()
+				nested := p.parseSelectWithUnion()
+				if nested == nil {
+					break
+				}
+				p.expect(token.RPAREN)
+				nextStmt = nested
+			} else {
+				nextSel := p.parseSelect()
+				if nextSel == nil {
+					break
+				}
+				nextStmt = nextSel
+			}
+			query.Selects = append(query.Selects, nextStmt)
+		}
+
+		// Parse union-level SETTINGS and FORMAT
+		var formatParsed bool
+		for p.currentIs(token.SETTINGS) || p.currentIs(token.FORMAT) {
+			if p.currentIs(token.SETTINGS) {
+				p.nextToken()
+				settings := p.parseSettingsList()
+				query.Settings = settings
+				if formatParsed {
+					query.SettingsAfterFormat = true
+				} else {
+					query.SettingsBeforeFormat = true
+				}
+			} else if p.currentIs(token.FORMAT) {
+				p.nextToken()
+				formatParsed = true
+				if len(query.Selects) > 0 {
+					if sq, ok := query.Selects[0].(*ast.SelectQuery); ok {
+						if p.currentIs(token.NULL) {
+							sq.Format = &ast.Identifier{Position: p.current.Pos, Parts: []string{"Null"}}
+							p.nextToken()
+						} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+							sq.Format = &ast.Identifier{Position: p.current.Pos, Parts: []string{p.current.Value}}
+							p.nextToken()
+						}
+					}
+				}
+			}
+		}
+
+		return query
+	}
+
+	query.Selects = append(query.Selects, sel)
+
+	// Handle UNION
+	for p.currentIs(token.UNION) {
+		p.nextToken()
+		mode := "ALL"
+		if p.currentIs(token.ALL) {
+			mode = "ALL"
+			p.nextToken()
+		} else if p.currentIs(token.DISTINCT) {
+			mode = "DISTINCT"
+			p.nextToken()
+		}
+		query.UnionModes = append(query.UnionModes, mode)
+
+		var nextStmt ast.Statement
+		if p.currentIs(token.LPAREN) {
+			p.nextToken()
+			nested := p.parseSelectWithUnion()
+			if nested == nil {
+				break
+			}
+			p.expect(token.RPAREN)
+			nextStmt = nested
+		} else {
+			nextSelect := p.parseSelect()
+			if nextSelect == nil {
+				break
+			}
+			nextStmt = nextSelect
+		}
+		query.Selects = append(query.Selects, nextStmt)
+	}
+
+	// Parse union-level SETTINGS and FORMAT
+	var formatParsed bool
+	for p.currentIs(token.SETTINGS) || p.currentIs(token.FORMAT) {
+		if p.currentIs(token.SETTINGS) {
+			p.nextToken()
+			settings := p.parseSettingsList()
+			query.Settings = settings
+			if formatParsed {
+				query.SettingsAfterFormat = true
+			} else {
+				query.SettingsBeforeFormat = true
+			}
+		} else if p.currentIs(token.FORMAT) {
+			p.nextToken()
+			formatParsed = true
+			if len(query.Selects) > 0 {
+				if sq, ok := query.Selects[0].(*ast.SelectQuery); ok {
+					if p.currentIs(token.NULL) {
+						sq.Format = &ast.Identifier{Position: p.current.Pos, Parts: []string{"Null"}}
+						p.nextToken()
+					} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+						sq.Format = &ast.Identifier{Position: p.current.Pos, Parts: []string{p.current.Value}}
+						p.nextToken()
+					}
+				}
+			}
+		}
+	}
+
+	return query
+}
+
+// parseSelectWithParsedWith parses a SELECT statement with an already-parsed WITH clause
+func (p *Parser) parseSelectWithParsedWith(with []ast.Expression) *ast.SelectQuery {
+	// Use the internal helper that does the actual parsing
+	return p.parseSelectInternal(with)
 }
 
 // parseSelectWithUnion parses SELECT ... UNION/INTERSECT/EXCEPT ... queries
@@ -792,12 +1021,18 @@ func buildIntersectExceptTree(stmts []ast.Statement, ops []string) ast.Statement
 }
 
 func (p *Parser) parseSelect() *ast.SelectQuery {
+	return p.parseSelectInternal(nil)
+}
+
+// parseSelectInternal parses a SELECT query with an optional pre-parsed WITH clause
+func (p *Parser) parseSelectInternal(preParsedWith []ast.Expression) *ast.SelectQuery {
 	sel := &ast.SelectQuery{
 		Position: p.current.Pos,
+		With:     preParsedWith,
 	}
 
-	// Handle WITH clause
-	if p.currentIs(token.WITH) {
+	// Handle WITH clause only if not pre-parsed
+	if preParsedWith == nil && p.currentIs(token.WITH) {
 		p.nextToken()
 		// Skip RECURSIVE keyword if present
 		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "RECURSIVE" {

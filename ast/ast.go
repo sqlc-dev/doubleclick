@@ -254,6 +254,7 @@ type InsertQuery struct {
 	Compression       string           `json:"compression,omitempty"`        // For COMPRESSION clause
 	Values            [][]Expression   `json:"-"`                            // For VALUES clause (format only, not in AST JSON)
 	Select            Statement        `json:"select,omitempty"`
+	With              []Expression     `json:"with,omitempty"` // For WITH ... INSERT ... SELECT syntax
 	Format            *Identifier      `json:"format,omitempty"`
 	HasSettings       bool             `json:"has_settings,omitempty"` // For SETTINGS clause
 	Settings          []*SettingExpr   `json:"settings,omitempty"`     // For SETTINGS clause in INSERT

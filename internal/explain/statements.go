@@ -97,7 +97,13 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 				}
 			}
 		}
-		Node(sb, n.Select, depth+1)
+		// If this INSERT has an inherited WITH clause (from WITH ... INSERT syntax),
+		// use the special explain function that outputs WITH at the end of each SelectQuery
+		if len(n.With) > 0 {
+			ExplainSelectWithInheritedWith(sb, n.Select, n.With, depth+1)
+		} else {
+			Node(sb, n.Select, depth+1)
+		}
 	}
 
 	if n.HasSettings {
