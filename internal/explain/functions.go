@@ -9,17 +9,83 @@ import (
 
 // normalizeIntervalUnit converts interval units to title-cased singular form
 // e.g., "years" -> "Year", "MONTH" -> "Month", "days" -> "Day"
+// Also handles SQL standard abbreviations: QQ -> Quarter, YY -> Year, MM -> Month, etc.
+// And SQL_TSI_* prefixes: SQL_TSI_MONTH -> Month, SQL_TSI_YEAR -> Year, etc.
 func normalizeIntervalUnit(unit string) string {
 	if len(unit) == 0 {
 		return ""
 	}
 	u := strings.ToLower(unit)
+
+	// Handle SQL_TSI_* prefixes (SQL ODBC standard)
+	if strings.HasPrefix(u, "sql_tsi_") {
+		u = u[8:] // Remove "sql_tsi_" prefix
+	}
+
+	// Handle SQL standard abbreviations
+	abbrevs := map[string]string{
+		"yy":  "year",
+		"qq":  "quarter",
+		"mm":  "month",
+		"wk":  "week",
+		"ww":  "week",
+		"dd":  "day",
+		"hh":  "hour",
+		"mi":  "minute",
+		"ss":  "second",
+		"ms":  "millisecond",
+		"us":  "microsecond",
+		"ns":  "nanosecond",
+	}
+	if expanded, ok := abbrevs[u]; ok {
+		u = expanded
+	}
+
 	// Remove trailing 's' for plural forms
 	if strings.HasSuffix(u, "s") && len(u) > 1 {
 		u = u[:len(u)-1]
 	}
 	// Title-case
 	return strings.ToUpper(u[:1]) + u[1:]
+}
+
+// normalizeIntervalUnitToLiteral converts interval units to lowercase string form for dateDiff
+// e.g., "YEAR" -> "year", "QQ" -> "quarter", "SQL_TSI_MONTH" -> "month"
+func normalizeIntervalUnitToLiteral(unit string) string {
+	if len(unit) == 0 {
+		return ""
+	}
+	u := strings.ToLower(unit)
+
+	// Handle SQL_TSI_* prefixes (SQL ODBC standard)
+	if strings.HasPrefix(u, "sql_tsi_") {
+		u = u[8:] // Remove "sql_tsi_" prefix
+	}
+
+	// Handle SQL standard abbreviations
+	abbrevs := map[string]string{
+		"yy":  "year",
+		"qq":  "quarter",
+		"mm":  "month",
+		"wk":  "week",
+		"ww":  "week",
+		"dd":  "day",
+		"hh":  "hour",
+		"mi":  "minute",
+		"ss":  "second",
+		"ms":  "millisecond",
+		"us":  "microsecond",
+		"ns":  "nanosecond",
+	}
+	if expanded, ok := abbrevs[u]; ok {
+		return expanded
+	}
+
+	// Remove trailing 's' for plural forms
+	if strings.HasSuffix(u, "s") && len(u) > 1 {
+		u = u[:len(u)-1]
+	}
+	return u
 }
 
 func explainFunctionCall(sb *strings.Builder, n *ast.FunctionCall, indent string, depth int) {
@@ -425,8 +491,8 @@ func handleDateDiff(sb *strings.Builder, n *ast.FunctionCall, alias string, inde
 	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, argCount)
 
-	// First arg: unit as lowercase string literal
-	fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, strings.ToLower(unitName))
+	// First arg: unit as lowercase string literal (with SQL abbreviations expanded)
+	fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, normalizeIntervalUnitToLiteral(unitName))
 
 	// Second and third args: dates
 	Node(sb, date1Arg, depth+2)
