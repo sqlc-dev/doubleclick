@@ -81,6 +81,34 @@ func (p *Parser) peekPeekIsIntervalUnit() bool {
 	return isIntervalUnit(p.peekPeek.Value)
 }
 
+// isExplainFollowedByStatement checks if EXPLAIN is followed by tokens that indicate
+// an EXPLAIN statement (SELECT, WITH, AST, SYNTAX, etc.) rather than being used as an identifier
+func (p *Parser) isExplainFollowedByStatement() bool {
+	// EXPLAIN can be followed by:
+	// - SELECT, WITH (for EXPLAIN SELECT ...)
+	// - QUERY, AST, SYNTAX, PLAN, PIPELINE, ESTIMATE, TABLE, CURRENT (explain types)
+	// - Identifier for explain options like "header = 1"
+	// If followed by comparison operators (LIKE, =, etc.) or logical operators, it's being used as identifier
+	switch p.peek.Token {
+	case token.SELECT, token.WITH:
+		return true
+	case token.IDENT:
+		// Check if it's an EXPLAIN type or option
+		upperValue := strings.ToUpper(p.peek.Value)
+		switch upperValue {
+		case "QUERY", "AST", "SYNTAX", "PLAN", "PIPELINE", "ESTIMATE", "TABLE", "CURRENT":
+			return true
+		case "HEADER", "ACTIONS", "DESCRIPTION", "JSON", "GRAPH", "COMPACT", "INDEXES", "SORTING", "AGGREGATION":
+			// These are explain options
+			return true
+		}
+		return false
+	default:
+		// If followed by operators like LIKE, =, <, >, etc., it's being used as identifier
+		return false
+	}
+}
+
 func (p *Parser) expect(t token.Token) bool {
 	if p.currentIs(t) {
 		p.nextToken()

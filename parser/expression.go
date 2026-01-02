@@ -1104,8 +1104,9 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 			Query:    subquery,
 		}
 	}
-	// EXPLAIN as subquery
-	if p.currentIs(token.EXPLAIN) {
+	// EXPLAIN as subquery - but only if followed by tokens that make sense for EXPLAIN
+	// (not when EXPLAIN is used as an identifier, e.g., "explain LIKE ...")
+	if p.currentIs(token.EXPLAIN) && p.isExplainFollowedByStatement() {
 		explain := p.parseExplain()
 		p.expect(token.RPAREN)
 		return &ast.Subquery{
