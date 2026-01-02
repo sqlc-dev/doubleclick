@@ -662,9 +662,16 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 
 	p.nextToken() // skip (
 
-	// Handle DISTINCT
-	if p.currentIs(token.DISTINCT) {
+	// Handle DISTINCT modifier (but not if DISTINCT is being used as a column name)
+	// If DISTINCT is followed by ) or , then it's a column reference, not a modifier
+	if p.currentIs(token.DISTINCT) && !p.peekIs(token.RPAREN) && !p.peekIs(token.COMMA) {
 		fn.Distinct = true
+		p.nextToken()
+	}
+
+	// Handle ALL modifier (but not if ALL is being used as a column name)
+	// If ALL is followed by ) or , then it's a column reference, not a modifier
+	if p.currentIs(token.ALL) && !p.peekIs(token.RPAREN) && !p.peekIs(token.COMMA) {
 		p.nextToken()
 	}
 
@@ -2547,9 +2554,16 @@ func (p *Parser) parseKeywordAsFunction() ast.Expression {
 		Name:     name,
 	}
 
-	// Handle DISTINCT
-	if p.currentIs(token.DISTINCT) {
+	// Handle DISTINCT modifier (but not if DISTINCT is being used as a column name)
+	// If DISTINCT is followed by ) or , then it's a column reference, not a modifier
+	if p.currentIs(token.DISTINCT) && !p.peekIs(token.RPAREN) && !p.peekIs(token.COMMA) {
 		fn.Distinct = true
+		p.nextToken()
+	}
+
+	// Handle ALL modifier (but not if ALL is being used as a column name)
+	// If ALL is followed by ) or , then it's a column reference, not a modifier
+	if p.currentIs(token.ALL) && !p.peekIs(token.RPAREN) && !p.peekIs(token.COMMA) {
 		p.nextToken()
 	}
 
