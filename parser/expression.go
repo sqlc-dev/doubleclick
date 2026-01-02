@@ -749,7 +749,7 @@ func (p *Parser) parseWindowSpec() *ast.WindowSpec {
 		return spec
 	}
 
-	// Check for named window reference inside parentheses: OVER (w0)
+	// Check for named window reference inside parentheses: OVER (w0) or OVER (w0 ORDER BY ...)
 	// This happens when the identifier is not a known clause keyword
 	if p.currentIs(token.IDENT) {
 		upper := strings.ToUpper(p.current.Value)
@@ -757,8 +757,8 @@ func (p *Parser) parseWindowSpec() *ast.WindowSpec {
 		if upper != "PARTITION" && upper != "ORDER" && upper != "ROWS" && upper != "RANGE" && upper != "GROUPS" {
 			spec.Name = p.current.Value
 			p.nextToken()
-			p.expect(token.RPAREN)
-			return spec
+			// Don't return early - there may be more clauses after the window name
+			// e.g., OVER (w1 ROWS UNBOUNDED PRECEDING)
 		}
 	}
 

@@ -6720,6 +6720,15 @@ func (p *Parser) parseWindowDefinitions() []*ast.WindowDefinition {
 			Position: p.current.Pos,
 		}
 
+		// Check for named window reference (e.g., w1 as (w0 ORDER BY ...))
+		if p.currentIs(token.IDENT) {
+			upper := strings.ToUpper(p.current.Value)
+			if upper != "PARTITION" && upper != "ORDER" && upper != "ROWS" && upper != "RANGE" && upper != "GROUPS" {
+				spec.Name = p.current.Value
+				p.nextToken()
+			}
+		}
+
 		// Parse PARTITION BY
 		if p.currentIs(token.PARTITION) {
 			p.nextToken()
