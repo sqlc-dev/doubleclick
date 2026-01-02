@@ -4771,6 +4771,14 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					cmd.Index = p.current.Value
 					p.nextToken()
 				}
+				// Parse IN PARTITION clause
+				if p.currentIs(token.IN) {
+					p.nextToken() // skip IN
+					if p.currentIs(token.PARTITION) {
+						p.nextToken() // skip PARTITION
+						cmd.Partition = p.parseExpression(LOWEST)
+					}
+				}
 			} else if p.currentIs(token.COLUMN) {
 				cmd.Type = ast.AlterClearColumn
 				p.nextToken()

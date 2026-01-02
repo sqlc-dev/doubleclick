@@ -1320,6 +1320,10 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	if cmdType == ast.AlterClearColumn {
 		cmdType = ast.AlterDropColumn
 	}
+	// CLEAR_INDEX is shown as DROP_INDEX in EXPLAIN AST
+	if cmdType == ast.AlterClearIndex {
+		cmdType = ast.AlterDropIndex
+	}
 	// DELETE_WHERE is shown as DELETE in EXPLAIN AST
 	if cmdType == ast.AlterDeleteWhere {
 		cmdType = "DELETE"
@@ -1397,17 +1401,27 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		if cmd.Index != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
 		}
+		// CLEAR INDEX IN PARTITION clause
+		if cmd.Partition != nil {
+			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+			Node(sb, cmd.Partition, depth+2)
+		}
 	case ast.AlterMaterializeIndex:
 		if cmd.Index != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
 		}
-		// MATERIALIZE INDEX can have IN PARTITION ID clause
-		if cmd.Partition != nil && cmd.PartitionIsID {
-			if lit, ok := cmd.Partition.(*ast.Literal); ok {
-				fmt.Fprintf(sb, "%s Partition_ID Literal_\\'%s\\' (children 1)\n", indent, lit.Value)
-				Node(sb, cmd.Partition, depth+2)
+		// MATERIALIZE INDEX can have IN PARTITION or IN PARTITION ID clause
+		if cmd.Partition != nil {
+			if cmd.PartitionIsID {
+				if lit, ok := cmd.Partition.(*ast.Literal); ok {
+					fmt.Fprintf(sb, "%s Partition_ID Literal_\\'%s\\' (children 1)\n", indent, lit.Value)
+					Node(sb, cmd.Partition, depth+2)
+				} else {
+					fmt.Fprintf(sb, "%s Partition_ID (children 1)\n", indent)
+					Node(sb, cmd.Partition, depth+2)
+				}
 			} else {
-				fmt.Fprintf(sb, "%s Partition_ID (children 1)\n", indent)
+				fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
 				Node(sb, cmd.Partition, depth+2)
 			}
 		}
@@ -1660,12 +1674,15 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 		if cmd.Index != "" {
 			children++
 		}
+		if cmd.Partition != nil {
+			children++
+		}
 	case ast.AlterMaterializeIndex:
 		if cmd.Index != "" {
 			children++
 		}
-		// MATERIALIZE INDEX can have IN PARTITION ID clause
-		if cmd.Partition != nil && cmd.PartitionIsID {
+		// MATERIALIZE INDEX can have IN PARTITION or IN PARTITION ID clause
+		if cmd.Partition != nil {
 			children++
 		}
 	case ast.AlterMaterializeColumn:
