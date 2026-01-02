@@ -806,25 +806,44 @@ func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string
 	}
 
 	// Check if inner statement has FORMAT clause - this should be output as child of Explain
+	// Also check for SETTINGS after FORMAT (these are at the EXPLAIN level, not part of the SELECT)
 	var format *ast.Identifier
+	var hasSettingsAfterFormat bool
+	var savedSettings []*ast.SettingExpr
 	if swu, ok := n.Statement.(*ast.SelectWithUnionQuery); ok {
+		// Check for union-level settings after format
+		if swu.SettingsAfterFormat && len(swu.Settings) > 0 {
+			hasSettingsAfterFormat = true
+			savedSettings = swu.Settings
+			swu.Settings = nil
+			defer func() { swu.Settings = savedSettings }()
+		}
 		for _, sel := range swu.Selects {
-			if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
-				format = sq.Format
-				// Temporarily nil out the format so it's not output by SelectWithUnionQuery
-				sq.Format = nil
-				defer func() { sq.Format = format }()
+			if sq, ok := sel.(*ast.SelectQuery); ok {
+				if sq.Format != nil {
+					format = sq.Format
+					// Temporarily nil out the format so it's not output by SelectWithUnionQuery
+					sq.Format = nil
+					defer func() { sq.Format = format }()
+				}
+				// Check for settings after format in the SelectQuery
+				if sq.SettingsAfterFormat && len(sq.Settings) > 0 && !hasSettingsAfterFormat {
+					hasSettingsAfterFormat = true
+					savedSettings = sq.Settings
+					sq.Settings = nil
+					defer func() { sq.Settings = savedSettings }()
+				}
 				break
 			}
 		}
 	}
 
-	// Count children: settings (if present) + statement + format (if present)
+	// Count children: statement + format (if present) + settings (if present)
 	children := 1
-	if n.HasSettings {
+	if format != nil {
 		children++
 	}
-	if format != nil {
+	if n.HasSettings || hasSettingsAfterFormat {
 		children++
 	}
 
@@ -835,12 +854,19 @@ func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string
 	} else {
 		fmt.Fprintf(sb, "%sExplain%s (children %d)\n", indent, typeStr, children)
 	}
+	// EXPLAIN-level settings (like header = 0) come BEFORE the statement
 	if n.HasSettings {
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
+	// Output the statement
 	Node(sb, n.Statement, depth+1)
+	// Format comes after statement
 	if format != nil {
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, format.Parts[len(format.Parts)-1])
+	}
+	// Settings after format (at the query level, e.g., FORMAT Null SETTINGS ...) come last
+	if hasSettingsAfterFormat {
+		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
 
