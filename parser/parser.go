@@ -4502,6 +4502,7 @@ func (p *Parser) isDataTypeName(name string) bool {
 		"POINT", "RING", "POLYGON", "MULTIPOLYGON",
 		"TIME64", "TIME",
 		"DYNAMIC",
+		"QBIT",
 	}
 	for _, t := range types {
 		if upper == t {
