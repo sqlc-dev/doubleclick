@@ -2561,17 +2561,19 @@ func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 				if p.currentIs(token.LPAREN) {
 					pos := p.current.Pos
 					p.nextToken()
-					exprs := p.parseExpressionList()
+					exprs, hasModifier := p.parseCreateOrderByExpressions()
 					p.expect(token.RPAREN)
-					// Store tuple literal for ORDER BY (expr1, expr2, ...) or ORDER BY ()
-					if len(exprs) == 0 || len(exprs) > 1 {
+					// Track if any ASC/DESC modifiers were present
+					create.OrderByHasModifiers = hasModifier
+					// Store tuple literal for ORDER BY with multiple exprs, empty tuple, or any with ASC/DESC modifiers
+					if len(exprs) == 0 || len(exprs) > 1 || hasModifier {
 						create.OrderBy = []ast.Expression{&ast.Literal{
 							Position: pos,
 							Type:     ast.LiteralTuple,
 							Value:    exprs,
 						}}
 					} else {
-						// Single expression in parentheses - just extract it
+						// Single expression in parentheses without modifiers - just extract it
 						create.OrderBy = exprs
 					}
 				} else {

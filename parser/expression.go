@@ -114,6 +114,50 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 	return exprs
 }
 
+// parseCreateOrderByExpressions parses expressions for CREATE TABLE ORDER BY clause.
+// Returns the expressions and a boolean indicating if any ASC/DESC modifier was found.
+// This is different from regular expression list parsing because ORDER BY in CREATE TABLE
+// can have ASC/DESC modifiers that affect the EXPLAIN output (should be Function tuple if any modifier).
+func (p *Parser) parseCreateOrderByExpressions() ([]ast.Expression, bool) {
+	var exprs []ast.Expression
+	hasModifier := false
+
+	if p.currentIs(token.RPAREN) || p.currentIs(token.EOF) {
+		return exprs, hasModifier
+	}
+
+	expr := p.parseExpression(LOWEST)
+	if expr != nil {
+		exprs = append(exprs, expr)
+	}
+	// Consume ASC/DESC modifier
+	if p.currentIs(token.ASC) {
+		hasModifier = true
+		p.nextToken()
+	} else if p.currentIs(token.DESC) {
+		hasModifier = true
+		p.nextToken()
+	}
+
+	for p.currentIs(token.COMMA) {
+		p.nextToken()
+		expr := p.parseExpression(LOWEST)
+		if expr != nil {
+			exprs = append(exprs, expr)
+		}
+		// Consume ASC/DESC modifier
+		if p.currentIs(token.ASC) {
+			hasModifier = true
+			p.nextToken()
+		} else if p.currentIs(token.DESC) {
+			hasModifier = true
+			p.nextToken()
+		}
+	}
+
+	return exprs, hasModifier
+}
+
 // isClauseKeyword returns true if the current token is a SQL clause keyword
 // that should terminate an expression list (used for trailing comma support)
 func (p *Parser) isClauseKeyword() bool {

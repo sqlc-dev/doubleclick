@@ -282,9 +282,10 @@ type CreateQuery struct {
 	Projections      []*Projection        `json:"projections,omitempty"`
 	Constraints         []*Constraint        `json:"constraints,omitempty"`
 	ColumnsPrimaryKey   []Expression         `json:"columns_primary_key,omitempty"` // PRIMARY KEY in column list
-	Engine              *EngineClause        `json:"engine,omitempty"`
-	OrderBy             []Expression         `json:"order_by,omitempty"`
-	PartitionBy         Expression           `json:"partition_by,omitempty"`
+	Engine               *EngineClause        `json:"engine,omitempty"`
+	OrderBy              []Expression         `json:"order_by,omitempty"`
+	OrderByHasModifiers  bool                 `json:"order_by_has_modifiers,omitempty"` // True if ORDER BY has ASC/DESC modifiers
+	PartitionBy          Expression           `json:"partition_by,omitempty"`
 	PrimaryKey          []Expression         `json:"primary_key,omitempty"`
 	SampleBy         Expression           `json:"sample_by,omitempty"`
 	TTL              *TTLClause           `json:"ttl,omitempty"`

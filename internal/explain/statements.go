@@ -410,33 +410,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				Node(sb, n.PartitionBy, storageChildDepth)
 			}
 		}
-		if len(n.OrderBy) > 0 {
-			if len(n.OrderBy) == 1 {
-				if ident, ok := n.OrderBy[0].(*ast.Identifier); ok {
-					fmt.Fprintf(sb, "%s Identifier %s\n", storageIndent, ident.Name())
-				} else if lit, ok := n.OrderBy[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
-					// Handle tuple literal (including empty tuple from ORDER BY ())
-					exprs, _ := lit.Value.([]ast.Expression)
-					fmt.Fprintf(sb, "%s Function tuple (children %d)\n", storageIndent, 1)
-					if len(exprs) > 0 {
-						fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(exprs))
-						for _, e := range exprs {
-							Node(sb, e, storageChildDepth+2)
-						}
-					} else {
-						fmt.Fprintf(sb, "%s  ExpressionList\n", storageIndent)
-					}
-				} else {
-					Node(sb, n.OrderBy[0], storageChildDepth)
-				}
-			} else {
-				fmt.Fprintf(sb, "%s Function tuple (children %d)\n", storageIndent, 1)
-				fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(n.OrderBy))
-				for _, o := range n.OrderBy {
-					Node(sb, o, storageChildDepth+2)
-				}
-			}
-		}
+		// PRIMARY KEY comes before ORDER BY in EXPLAIN output
 		if len(n.PrimaryKey) > 0 {
 			if len(n.PrimaryKey) == 1 {
 				if ident, ok := n.PrimaryKey[0].(*ast.Identifier); ok {
@@ -461,6 +435,41 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(n.PrimaryKey))
 				for _, p := range n.PrimaryKey {
 					Node(sb, p, storageChildDepth+2)
+				}
+			}
+		}
+		// ORDER BY comes after PRIMARY KEY in EXPLAIN output
+		if len(n.OrderBy) > 0 {
+			if len(n.OrderBy) == 1 {
+				if ident, ok := n.OrderBy[0].(*ast.Identifier); ok {
+					fmt.Fprintf(sb, "%s Identifier %s\n", storageIndent, ident.Name())
+				} else if lit, ok := n.OrderBy[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+					// Handle tuple literal - for ORDER BY with modifiers (DESC/ASC),
+					// ClickHouse outputs just "Function tuple" without children
+					// For empty tuples or regular tuples without modifiers, output children
+					if n.OrderByHasModifiers {
+						fmt.Fprintf(sb, "%s Function tuple\n", storageIndent)
+					} else {
+						exprs, _ := lit.Value.([]ast.Expression)
+						fmt.Fprintf(sb, "%s Function tuple (children %d)\n", storageIndent, 1)
+						if len(exprs) > 0 {
+							fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(exprs))
+							for _, e := range exprs {
+								Node(sb, e, storageChildDepth+2)
+							}
+						} else {
+							fmt.Fprintf(sb, "%s  ExpressionList\n", storageIndent)
+						}
+					}
+				} else {
+					Node(sb, n.OrderBy[0], storageChildDepth)
+				}
+			} else {
+				// Multiple ORDER BY expressions without modifiers
+				fmt.Fprintf(sb, "%s Function tuple (children %d)\n", storageIndent, 1)
+				fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(n.OrderBy))
+				for _, o := range n.OrderBy {
+					Node(sb, o, storageChildDepth+2)
 				}
 			}
 		}
