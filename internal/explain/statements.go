@@ -1491,6 +1491,10 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		} else if cmd.Index != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
 		}
+		// AFTER clause
+		if cmd.AfterIndex != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.AfterIndex)
+		}
 	case ast.AlterDropIndex, ast.AlterClearIndex:
 		if cmd.Index != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
@@ -1767,6 +1771,10 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 		if cmd.IndexDef != nil && (cmd.IndexDef.Expression != nil || cmd.IndexDef.Type != nil) {
 			children = 1
 		} else if cmd.Index != "" {
+			children++
+		}
+		// AFTER clause adds another child
+		if cmd.AfterIndex != "" {
 			children++
 		}
 	case ast.AlterDropIndex, ast.AlterClearIndex:

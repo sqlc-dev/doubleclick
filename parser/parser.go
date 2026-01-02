@@ -4753,12 +4753,16 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				Position: p.current.Pos,
 				Name:     idxName,
 			}
-			// Parse expression in parentheses
+			// Parse expression - can be in parentheses or bare expression until TYPE keyword
 			if p.currentIs(token.LPAREN) {
 				p.nextToken()
 				idx.Expression = p.parseExpression(LOWEST)
 				cmd.IndexExpr = idx.Expression
 				p.expect(token.RPAREN)
+			} else if !p.currentIs(token.IDENT) || strings.ToUpper(p.current.Value) != "TYPE" {
+				// Parse bare expression (not in parentheses) - ends at TYPE keyword
+				idx.Expression = p.parseExpression(ALIAS_PREC)
+				cmd.IndexExpr = idx.Expression
 			}
 			// Parse TYPE
 			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TYPE" {
@@ -4792,6 +4796,14 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				if p.currentIs(token.NUMBER) {
 					granularity, _ := strconv.Atoi(p.current.Value)
 					cmd.Granularity = granularity
+					p.nextToken()
+				}
+			}
+			// Parse AFTER
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "AFTER" {
+				p.nextToken()
+				if p.currentIs(token.IDENT) {
+					cmd.AfterIndex = p.current.Value
 					p.nextToken()
 				}
 			}
