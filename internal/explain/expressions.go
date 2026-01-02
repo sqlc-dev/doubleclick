@@ -2,6 +2,7 @@ package explain
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/sqlc-dev/doubleclick/ast"
@@ -434,6 +435,19 @@ func explainUnaryExpr(sb *strings.Builder, n *ast.UnaryExpr, indent string, dept
 				s := FormatFloat(-val)
 				fmt.Fprintf(sb, "%sLiteral Float64_%s\n", indent, s)
 				return
+			case ast.LiteralString:
+				// Handle BigInt - very large numbers stored as strings
+				// ClickHouse converts these to Float64 in scientific notation
+				if lit.IsBigInt {
+					if strVal, ok := lit.Value.(string); ok {
+						// Parse the string as float64 and negate it
+						if f, err := strconv.ParseFloat(strVal, 64); err == nil {
+							s := FormatFloat(-f)
+							fmt.Fprintf(sb, "%sLiteral Float64_%s\n", indent, s)
+							return
+						}
+					}
+				}
 			}
 		}
 	}
