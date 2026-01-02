@@ -1451,6 +1451,9 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 					fmt.Fprintf(sb, "%s Partition_ID (children 1)\n", indent)
 					Node(sb, cmd.Partition, depth+2)
 				}
+			} else if cmd.IsPart {
+				// PART expressions are output directly without Partition wrapper
+				Node(sb, cmd.Partition, depth+1)
 			} else {
 				fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
 				Node(sb, cmd.Partition, depth+2)

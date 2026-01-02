@@ -584,6 +584,7 @@ type AlterCommand struct {
 	ConstraintName string               `json:"constraint_name,omitempty"`
 	Partition      Expression           `json:"partition,omitempty"`
 	PartitionIsID  bool                 `json:"partition_is_id,omitempty"` // True when using PARTITION ID 'value' syntax
+	IsPart         bool                 `json:"-"`                         // True for PART (not PARTITION) - output directly without Partition wrapper
 	FromTable      string               `json:"from_table,omitempty"`
 	ToDatabase     string               `json:"to_database,omitempty"` // For MOVE PARTITION TO TABLE
 	ToTable        string               `json:"to_table,omitempty"`    // For MOVE PARTITION TO TABLE

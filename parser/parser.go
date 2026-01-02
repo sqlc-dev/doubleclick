@@ -4731,6 +4731,12 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				cmd.PartitionIsID = true
 			}
 			cmd.Partition = p.parseExpression(LOWEST)
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PART" {
+			// DROP PART is treated like DROP PARTITION in ClickHouse
+			cmd.Type = ast.AlterDropPartition
+			cmd.IsPart = true
+			p.nextToken()
+			cmd.Partition = p.parseExpression(LOWEST)
 		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PROJECTION" {
 			cmd.Type = ast.AlterDropProjection
 			p.nextToken()
@@ -5060,6 +5066,12 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				cmd.PartitionIsID = true
 			}
 			cmd.Partition = p.parseExpression(LOWEST)
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PART" {
+			// DETACH PART is displayed as DROP_PARTITION in ClickHouse EXPLAIN
+			cmd.Type = ast.AlterDropPartition
+			cmd.IsPart = true
+			p.nextToken()
+			cmd.Partition = p.parseExpression(LOWEST)
 		}
 	case token.ATTACH:
 		p.nextToken()
@@ -5071,6 +5083,12 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				p.nextToken()
 				cmd.PartitionIsID = true
 			}
+			cmd.Partition = p.parseExpression(LOWEST)
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PART" {
+			// ATTACH PART uses ATTACH_PARTITION type in ClickHouse EXPLAIN
+			cmd.Type = ast.AlterAttachPartition
+			cmd.IsPart = true
+			p.nextToken()
 			cmd.Partition = p.parseExpression(LOWEST)
 		}
 	case token.FREEZE:
