@@ -1158,6 +1158,12 @@ func explainDetachQuery(sb *strings.Builder, n *ast.DetachQuery, indent string) 
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 		return
 	}
+	// DETACH DICTIONARY dict: Dictionary set -> "DetachQuery  dict (children 1)"
+	if n.Dictionary != "" {
+		fmt.Fprintf(sb, "%sDetachQuery  %s (children 1)\n", indent, n.Dictionary)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Dictionary)
+		return
+	}
 	// No name
 	fmt.Fprintf(sb, "%sDetachQuery\n", indent)
 }
@@ -1188,6 +1194,10 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 	} else if n.Table != "" {
 		fmt.Fprintf(sb, "%sAttachQuery %s (children %d)\n", indent, n.Table, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+	} else if n.Dictionary != "" {
+		fmt.Fprintf(sb, "%sAttachQuery %s (children %d)\n", indent, n.Dictionary, children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Dictionary)
+		return // Dictionary doesn't have columns or storage
 	} else {
 		fmt.Fprintf(sb, "%sAttachQuery\n", indent)
 		return

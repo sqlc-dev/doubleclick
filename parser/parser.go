@@ -6087,23 +6087,29 @@ func (p *Parser) parseDetach() *ast.DetachQuery {
 
 	p.nextToken() // skip DETACH
 
-	// Check for DATABASE keyword - if present, store in Database field
+	// Check for DATABASE, TABLE, or DICTIONARY keyword
 	isDatabase := false
+	isDictionary := false
 	if p.currentIs(token.DATABASE) {
 		isDatabase = true
 		p.nextToken()
 	} else if p.currentIs(token.TABLE) {
 		p.nextToken()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
+		isDictionary = true
+		p.nextToken()
 	}
 
-	// Parse name (can be qualified: database.table for TABLE, not for DATABASE)
+	// Parse name (can be qualified: database.table for TABLE, not for DATABASE/DICTIONARY)
 	name := p.parseIdentifierName()
-	if p.currentIs(token.DOT) && !isDatabase {
+	if p.currentIs(token.DOT) && !isDatabase && !isDictionary {
 		p.nextToken()
 		detach.Database = name
 		detach.Table = p.parseIdentifierName()
 	} else if isDatabase {
 		detach.Database = name
+	} else if isDictionary {
+		detach.Dictionary = name
 	} else {
 		detach.Table = name
 	}
@@ -6118,23 +6124,29 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 
 	p.nextToken() // skip ATTACH
 
-	// Check for DATABASE keyword - if present, store in Database field
+	// Check for DATABASE, TABLE, or DICTIONARY keyword
 	isDatabase := false
+	isDictionary := false
 	if p.currentIs(token.DATABASE) {
 		isDatabase = true
 		p.nextToken()
 	} else if p.currentIs(token.TABLE) {
 		p.nextToken()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
+		isDictionary = true
+		p.nextToken()
 	}
 
-	// Parse name (can be qualified: database.table for TABLE, not for DATABASE)
+	// Parse name (can be qualified: database.table for TABLE, not for DATABASE/DICTIONARY)
 	name := p.parseIdentifierName()
-	if p.currentIs(token.DOT) && !isDatabase {
+	if p.currentIs(token.DOT) && !isDatabase && !isDictionary {
 		p.nextToken()
 		attach.Database = name
 		attach.Table = p.parseIdentifierName()
 	} else if isDatabase {
 		attach.Database = name
+	} else if isDictionary {
+		attach.Dictionary = name
 	} else {
 		attach.Table = name
 	}

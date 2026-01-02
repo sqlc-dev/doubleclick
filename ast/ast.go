@@ -714,9 +714,10 @@ func (u *UseQuery) statementNode()      {}
 
 // DetachQuery represents a DETACH statement.
 type DetachQuery struct {
-	Position token.Position `json:"-"`
-	Database string         `json:"database,omitempty"`
-	Table    string         `json:"table,omitempty"`
+	Position   token.Position `json:"-"`
+	Database   string         `json:"database,omitempty"`
+	Table      string         `json:"table,omitempty"`
+	Dictionary string         `json:"dictionary,omitempty"`
 }
 
 func (d *DetachQuery) Pos() token.Position { return d.Position }
@@ -728,6 +729,7 @@ type AttachQuery struct {
 	Position          token.Position       `json:"-"`
 	Database          string               `json:"database,omitempty"`
 	Table             string               `json:"table,omitempty"`
+	Dictionary        string               `json:"dictionary,omitempty"`
 	Columns           []*ColumnDeclaration `json:"columns,omitempty"`
 	ColumnsPrimaryKey []Expression         `json:"columns_primary_key,omitempty"` // PRIMARY KEY in column list
 	Engine            *EngineClause        `json:"engine,omitempty"`
