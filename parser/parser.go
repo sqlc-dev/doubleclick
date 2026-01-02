@@ -2145,6 +2145,15 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 		}
 	}
 
+	// Handle UUID clause (CREATE TABLE name UUID 'uuid-value' ...)
+	// The UUID is not shown in EXPLAIN AST output, but we need to skip it
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "UUID" {
+		p.nextToken() // skip UUID
+		if p.currentIs(token.STRING) {
+			p.nextToken() // skip the UUID value
+		}
+	}
+
 	// Parse column definitions and indexes
 	if p.currentIs(token.LPAREN) {
 		p.nextToken()
@@ -6366,9 +6375,10 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 
 	p.nextToken() // skip ATTACH
 
-	// Check for DATABASE, TABLE, or DICTIONARY keyword
+	// Check for DATABASE, TABLE, DICTIONARY, or MATERIALIZED VIEW keyword
 	isDatabase := false
 	isDictionary := false
+	isMaterializedView := false
 	if p.currentIs(token.DATABASE) {
 		isDatabase = true
 		p.nextToken()
@@ -6377,6 +6387,13 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
 		isDictionary = true
 		p.nextToken()
+	} else if p.currentIs(token.MATERIALIZED) {
+		p.nextToken()
+		if p.currentIs(token.VIEW) {
+			isMaterializedView = true
+			attach.IsMaterializedView = true
+			p.nextToken()
+		}
 	}
 
 	// Parse name (can be qualified: database.table for TABLE, not for DATABASE/DICTIONARY)
@@ -6392,6 +6409,32 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 	} else {
 		attach.Table = name
 	}
+
+	// Parse UUID clause (for ATTACH MATERIALIZED VIEW mv UUID 'uuid' ...)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "UUID" {
+		p.nextToken()
+		if p.currentIs(token.STRING) {
+			attach.UUID = p.current.Value
+			p.nextToken()
+		}
+	}
+
+	// Parse TO INNER UUID clause (for ATTACH MATERIALIZED VIEW mv UUID 'uuid' TO INNER UUID 'inner_uuid' ...)
+	if p.currentIs(token.TO) {
+		p.nextToken()
+		if p.currentIs(token.INNER) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "UUID" {
+				p.nextToken()
+				if p.currentIs(token.STRING) {
+					attach.InnerUUID = p.current.Value
+					p.nextToken()
+				}
+			}
+		}
+	}
+
+	_ = isMaterializedView
 
 	// Parse column definitions for ATTACH TABLE name(col1 type, ...)
 	if !isDatabase && p.currentIs(token.LPAREN) {
@@ -6447,9 +6490,14 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 		attach.Engine = p.parseEngineClause()
 	}
 
-	// Parse table options (ORDER BY, PRIMARY KEY)
+	// Parse table options (ORDER BY, PRIMARY KEY, PARTITION BY, AS SELECT)
 	for {
 		switch {
+		case p.currentIs(token.PARTITION):
+			p.nextToken()
+			if p.expect(token.BY) {
+				attach.PartitionBy = p.parseExpression(ALIAS_PREC)
+			}
 		case p.currentIs(token.ORDER):
 			p.nextToken()
 			if p.expect(token.BY) {
@@ -6491,6 +6539,12 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 				} else {
 					attach.PrimaryKey = []ast.Expression{p.parseExpression(ALIAS_PREC)}
 				}
+			}
+		case p.currentIs(token.AS):
+			// AS SELECT clause for materialized views
+			p.nextToken()
+			if p.currentIs(token.SELECT) {
+				attach.SelectQuery = p.parseSelectWithUnion()
 			}
 		default:
 			return attach

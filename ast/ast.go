@@ -733,15 +733,20 @@ func (d *DetachQuery) statementNode()      {}
 
 // AttachQuery represents an ATTACH statement.
 type AttachQuery struct {
-	Position          token.Position       `json:"-"`
-	Database          string               `json:"database,omitempty"`
-	Table             string               `json:"table,omitempty"`
-	Dictionary        string               `json:"dictionary,omitempty"`
-	Columns           []*ColumnDeclaration `json:"columns,omitempty"`
-	ColumnsPrimaryKey []Expression         `json:"columns_primary_key,omitempty"` // PRIMARY KEY in column list
-	Engine            *EngineClause        `json:"engine,omitempty"`
-	OrderBy           []Expression         `json:"order_by,omitempty"`
-	PrimaryKey        []Expression         `json:"primary_key,omitempty"`
+	Position           token.Position       `json:"-"`
+	Database           string               `json:"database,omitempty"`
+	Table              string               `json:"table,omitempty"`
+	Dictionary         string               `json:"dictionary,omitempty"`
+	Columns            []*ColumnDeclaration `json:"columns,omitempty"`
+	ColumnsPrimaryKey  []Expression         `json:"columns_primary_key,omitempty"` // PRIMARY KEY in column list
+	Engine             *EngineClause        `json:"engine,omitempty"`
+	OrderBy            []Expression         `json:"order_by,omitempty"`
+	PrimaryKey         []Expression         `json:"primary_key,omitempty"`
+	IsMaterializedView bool                 `json:"is_materialized_view,omitempty"`
+	UUID               string               `json:"uuid,omitempty"`       // UUID clause
+	InnerUUID          string               `json:"inner_uuid,omitempty"` // TO INNER UUID clause
+	PartitionBy        Expression           `json:"partition_by,omitempty"`
+	SelectQuery        Statement            `json:"select_query,omitempty"` // AS SELECT clause
 }
 
 func (a *AttachQuery) Pos() token.Position { return a.Position }

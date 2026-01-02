@@ -1225,7 +1225,7 @@ func explainDetachQuery(sb *strings.Builder, n *ast.DetachQuery, indent string) 
 }
 
 func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, depth int) {
-	// Count children: identifier + columns definition (if any) + storage definition (if any)
+	// Count children: identifier + columns definition (if any) + select query (if any) + storage/view targets (if any)
 	children := 1 // table/database identifier
 	if n.Database != "" && n.Table != "" {
 		children++ // extra identifier for database
@@ -1234,9 +1234,13 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 	if hasColumns {
 		children++
 	}
-	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0
-	if hasStorage {
+	hasSelectQuery := n.SelectQuery != nil
+	if hasSelectQuery {
 		children++
+	}
+	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil
+	if hasStorage {
+		children++ // ViewTargets or Storage definition
 	}
 
 	// Output header
@@ -1293,30 +1297,64 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 		}
 	}
 
-	// Output storage definition
+	// Output select query (for materialized views)
+	if hasSelectQuery {
+		Node(sb, n.SelectQuery, depth+1)
+	}
+
+	// Output storage definition (or ViewTargets for materialized views)
 	if hasStorage {
 		storageChildren := 0
 		if n.Engine != nil {
 			storageChildren++
 		}
+		if n.PartitionBy != nil {
+			storageChildren++
+		}
 		if len(n.OrderBy) > 0 {
 			storageChildren++
 		}
 		if len(n.PrimaryKey) > 0 {
 			storageChildren++
 		}
-		fmt.Fprintf(sb, "%s Storage definition (children %d)\n", indent, storageChildren)
-		if n.Engine != nil {
-			fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
-		}
-		if len(n.OrderBy) > 0 {
-			for _, expr := range n.OrderBy {
-				Node(sb, expr, depth+2)
+
+		// For materialized views, wrap in ViewTargets
+		if n.IsMaterializedView {
+			fmt.Fprintf(sb, "%s ViewTargets (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s  Storage definition (children %d)\n", indent, storageChildren)
+			if n.Engine != nil {
+				fmt.Fprintf(sb, "%s   Function %s\n", indent, n.Engine.Name)
 			}
-		}
-		if len(n.PrimaryKey) > 0 {
-			for _, expr := range n.PrimaryKey {
-				Node(sb, expr, depth+2)
+			if n.PartitionBy != nil {
+				Node(sb, n.PartitionBy, depth+3)
+			}
+			if len(n.OrderBy) > 0 {
+				for _, expr := range n.OrderBy {
+					Node(sb, expr, depth+3)
+				}
+			}
+			if len(n.PrimaryKey) > 0 {
+				for _, expr := range n.PrimaryKey {
+					Node(sb, expr, depth+3)
+				}
+			}
+		} else {
+			fmt.Fprintf(sb, "%s Storage definition (children %d)\n", indent, storageChildren)
+			if n.Engine != nil {
+				fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
+			}
+			if n.PartitionBy != nil {
+				Node(sb, n.PartitionBy, depth+2)
+			}
+			if len(n.OrderBy) > 0 {
+				for _, expr := range n.OrderBy {
+					Node(sb, expr, depth+2)
+				}
+			}
+			if len(n.PrimaryKey) > 0 {
+				for _, expr := range n.PrimaryKey {
+					Node(sb, expr, depth+2)
+				}
 			}
 		}
 	}
