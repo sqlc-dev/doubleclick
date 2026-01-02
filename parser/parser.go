@@ -3561,10 +3561,17 @@ func (p *Parser) parseDictionaryPrimaryKey() []ast.Expression {
 			p.nextToken() // skip )
 		}
 	} else {
-		// Single identifier
-		expr := p.parseExpression(LOWEST)
-		if expr != nil {
-			keys = append(keys, expr)
+		// Can be comma-separated identifiers: PRIMARY KEY id, id_key
+		for {
+			expr := p.parseExpression(LOWEST)
+			if expr != nil {
+				keys = append(keys, expr)
+			}
+			if p.currentIs(token.COMMA) {
+				p.nextToken()
+			} else {
+				break
+			}
 		}
 	}
 
