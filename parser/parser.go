@@ -13,12 +13,33 @@ import (
 	"github.com/sqlc-dev/doubleclick/token"
 )
 
+// intervalUnits contains valid SQL interval unit names
+var intervalUnits = map[string]bool{
+	"YEAR": true, "YEARS": true,
+	"QUARTER": true, "QUARTERS": true,
+	"MONTH": true, "MONTHS": true,
+	"WEEK": true, "WEEKS": true,
+	"DAY": true, "DAYS": true,
+	"HOUR": true, "HOURS": true,
+	"MINUTE": true, "MINUTES": true,
+	"SECOND": true, "SECONDS": true,
+	"MILLISECOND": true, "MILLISECONDS": true,
+	"MICROSECOND": true, "MICROSECONDS": true,
+	"NANOSECOND": true, "NANOSECONDS": true,
+}
+
+// isIntervalUnit checks if the given string is a valid interval unit name
+func isIntervalUnit(s string) bool {
+	return intervalUnits[strings.ToUpper(s)]
+}
+
 // Parser parses ClickHouse SQL statements.
 type Parser struct {
-	lexer   *lexer.Lexer
-	current lexer.Item
-	peek    lexer.Item
-	errors  []error
+	lexer    *lexer.Lexer
+	current  lexer.Item
+	peek     lexer.Item
+	peekPeek lexer.Item // Third lookahead token for special cases
+	errors   []error
 }
 
 // New creates a new Parser from an io.Reader.
@@ -26,7 +47,8 @@ func New(r io.Reader) *Parser {
 	p := &Parser{
 		lexer: lexer.New(r),
 	}
-	// Read two tokens to initialize current and peek
+	// Read three tokens to initialize current, peek, and peekPeek
+	p.nextToken()
 	p.nextToken()
 	p.nextToken()
 	return p
@@ -34,10 +56,11 @@ func New(r io.Reader) *Parser {
 
 func (p *Parser) nextToken() {
 	p.current = p.peek
+	p.peek = p.peekPeek
 	for {
-		p.peek = p.lexer.NextToken()
+		p.peekPeek = p.lexer.NextToken()
 		// Skip whitespace and comments
-		if p.peek.Token == token.WHITESPACE || p.peek.Token == token.LINE_COMMENT {
+		if p.peekPeek.Token == token.WHITESPACE || p.peekPeek.Token == token.LINE_COMMENT {
 			continue
 		}
 		break
@@ -50,6 +73,12 @@ func (p *Parser) currentIs(t token.Token) bool {
 
 func (p *Parser) peekIs(t token.Token) bool {
 	return p.peek.Token == t
+}
+
+// peekPeekIsIntervalUnit checks if the third lookahead token is an interval unit
+// This is used for distinguishing "INTERVAL '2' AS n minute" patterns
+func (p *Parser) peekPeekIsIntervalUnit() bool {
+	return isIntervalUnit(p.peekPeek.Value)
 }
 
 func (p *Parser) expect(t token.Token) bool {

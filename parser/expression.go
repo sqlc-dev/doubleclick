@@ -1529,17 +1529,25 @@ func (p *Parser) parseInterval() ast.Expression {
 	expr.Value = p.parseExpression(ALIAS_PREC)
 
 	// Handle INTERVAL '2' AS n minute - where AS n is alias on the value
-	if p.currentIs(token.AS) {
-		p.nextToken() // skip AS
-		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+	// Only consume AS if it's followed by an identifier AND that identifier is followed by an interval unit
+	// This distinguishes "INTERVAL '2' AS n minute" from "INTERVAL '1 MONTH 1 DAY' AS e4"
+	if p.currentIs(token.AS) && (p.peekIs(token.IDENT) || p.peek.Token.IsKeyword()) {
+		// Look ahead to check if the identifier after alias is an interval unit
+		// If so, consume the alias; otherwise leave AS for the outer context
+		if isIntervalUnit(p.peek.Value) {
+			// AS is followed by unit (e.g., "AS minute") - don't consume
+		} else if p.peekPeekIsIntervalUnit() {
+			// AS alias unit pattern - consume the alias
+			p.nextToken() // skip AS
 			alias := p.current.Value
 			p.nextToken()
 			expr.Value = p.wrapWithAlias(expr.Value, alias)
 		}
+		// Otherwise, leave AS for outer context (e.g., WITH ... AS e4)
 	}
 
 	// Parse unit (interval units are identifiers like DAY, MONTH, etc.)
-	if p.currentIs(token.IDENT) {
+	if p.currentIs(token.IDENT) && isIntervalUnit(p.current.Value) {
 		expr.Unit = strings.ToUpper(p.current.Value)
 		p.nextToken()
 	}
