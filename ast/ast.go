@@ -1221,6 +1221,7 @@ type Literal struct {
 	Negative      bool           `json:"negative,omitempty"`      // True if literal was explicitly negative (for -0)
 	Parenthesized bool           `json:"parenthesized,omitempty"` // True if wrapped in explicit parentheses
 	SpacedCommas  bool           `json:"spaced_commas,omitempty"` // True if array/tuple had spaces after commas
+	IsBigInt      bool           `json:"is_big_int,omitempty"`    // True if this is a large integer stored as string
 }
 
 func (l *Literal) Pos() token.Position { return l.Position }

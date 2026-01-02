@@ -573,9 +573,14 @@ func formatElementAsString(expr ast.Expression) string {
 		case ast.LiteralFloat:
 			return fmt.Sprintf("%v", e.Value)
 		case ast.LiteralString:
+			s := e.Value.(string)
+			// Check if this is a big integer stored as string (too large for int64/uint64)
+			// These should NOT be quoted when formatted in arrays
+			if e.IsBigInt {
+				return s
+			}
 			// Quote strings with single quotes, triple-escape for nested context
 			// Expected output format is \\\' (three backslashes + quote)
-			s := e.Value.(string)
 			// Triple-escape single quotes for nested string literal context
 			s = strings.ReplaceAll(s, "'", "\\\\\\'")
 			return "\\\\\\'" + s + "\\\\\\'"

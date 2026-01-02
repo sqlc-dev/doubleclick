@@ -926,8 +926,10 @@ func (p *Parser) parseNumber() ast.Expression {
 			// Try unsigned uint64 for large positive numbers
 			u, uerr := strconv.ParseUint(value, base, 64)
 			if uerr != nil {
+				// Too large for int64/uint64, store as string with IsBigInt flag
 				lit.Type = ast.LiteralString
 				lit.Value = value
+				lit.IsBigInt = true
 			} else {
 				lit.Type = ast.LiteralInteger
 				lit.Value = u // Store as uint64
