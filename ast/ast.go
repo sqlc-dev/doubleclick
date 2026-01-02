@@ -687,6 +687,7 @@ type TruncateQuery struct {
 	Database  string         `json:"database,omitempty"`
 	Table     string         `json:"table"`
 	OnCluster string         `json:"on_cluster,omitempty"`
+	Settings  []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (t *TruncateQuery) Pos() token.Position { return t.Position }
@@ -847,6 +848,7 @@ type OptimizeQuery struct {
 	Cleanup   bool           `json:"cleanup,omitempty"`
 	Dedupe    bool           `json:"dedupe,omitempty"`
 	OnCluster string         `json:"on_cluster,omitempty"`
+	Settings  []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (o *OptimizeQuery) Pos() token.Position { return o.Position }
@@ -906,6 +908,7 @@ type RenameQuery struct {
 	From      string         `json:"from,omitempty"`    // Deprecated: for backward compat
 	To        string         `json:"to,omitempty"`      // Deprecated: for backward compat
 	OnCluster string         `json:"on_cluster,omitempty"`
+	Settings  []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (r *RenameQuery) Pos() token.Position { return r.Position }
@@ -942,6 +945,7 @@ type ExistsQuery struct {
 	ExistsType ExistsType     `json:"exists_type,omitempty"`
 	Database   string         `json:"database,omitempty"`
 	Table      string         `json:"table"`
+	Settings   []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (e *ExistsQuery) Pos() token.Position { return e.Position }

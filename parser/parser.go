@@ -5258,6 +5258,12 @@ func (p *Parser) parseTruncate() *ast.TruncateQuery {
 		}
 	}
 
+	// Handle SETTINGS
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		trunc.Settings = p.parseSettingsList()
+	}
+
 	return trunc
 }
 
@@ -5851,6 +5857,12 @@ func (p *Parser) parseOptimize() *ast.OptimizeQuery {
 		p.nextToken()
 	}
 
+	// Handle SETTINGS
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		opt.Settings = p.parseSettingsList()
+	}
+
 	return opt
 }
 
@@ -6086,6 +6098,12 @@ func (p *Parser) parseRename() *ast.RenameQuery {
 			p.nextToken()
 			rename.OnCluster = p.parseIdentifierName()
 		}
+	}
+
+	// Handle SETTINGS
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		rename.Settings = p.parseSettingsList()
 	}
 
 	return rename
@@ -6776,6 +6794,12 @@ func (p *Parser) parseExistsStatement() *ast.ExistsQuery {
 		} else {
 			exists.Table = name
 		}
+	}
+
+	// Handle SETTINGS
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		exists.Settings = p.parseSettingsList()
 	}
 
 	return exists

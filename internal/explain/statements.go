@@ -619,6 +619,7 @@ func explainRenameQuery(sb *strings.Builder, n *ast.RenameQuery, indent string, 
 		return
 	}
 	// Count identifiers: 2 per pair if no database, 4 per pair if databases specified
+	hasSettings := len(n.Settings) > 0
 	children := 0
 	for _, pair := range n.Pairs {
 		if pair.FromDatabase != "" {
@@ -629,6 +630,9 @@ func explainRenameQuery(sb *strings.Builder, n *ast.RenameQuery, indent string, 
 			children++
 		}
 		children++ // to table
+	}
+	if hasSettings {
+		children++
 	}
 	fmt.Fprintf(sb, "%sRename (children %d)\n", indent, children)
 	for _, pair := range n.Pairs {
@@ -644,6 +648,9 @@ func explainRenameQuery(sb *strings.Builder, n *ast.RenameQuery, indent string, 
 		}
 		// To table
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, pair.ToTable)
+	}
+	if hasSettings {
+		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
 
@@ -1067,11 +1074,20 @@ func explainExistsTableQuery(sb *strings.Builder, n *ast.ExistsQuery, indent str
 		queryType = "ExistsViewQuery"
 	}
 
+	hasSettings := len(n.Settings) > 0
+
 	// EXISTS DATABASE has only one child (the database name stored in Table)
 	if n.ExistsType == ast.ExistsDatabase {
 		name := n.Table
-		fmt.Fprintf(sb, "%s%s %s  (children %d)\n", indent, queryType, name, 1)
+		children := 1
+		if hasSettings {
+			children++
+		}
+		fmt.Fprintf(sb, "%s%s %s  (children %d)\n", indent, queryType, name, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+		if hasSettings {
+			fmt.Fprintf(sb, "%s Set\n", indent)
+		}
 		return
 	}
 
@@ -1082,11 +1098,17 @@ func explainExistsTableQuery(sb *strings.Builder, n *ast.ExistsQuery, indent str
 		name = n.Database + " " + n.Table
 		children = 2
 	}
+	if hasSettings {
+		children++
+	}
 	fmt.Fprintf(sb, "%s%s %s (children %d)\n", indent, queryType, name, children)
 	if n.Database != "" {
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+	if hasSettings {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
 }
 
 func explainDataType(sb *strings.Builder, n *ast.DataType, indent string, depth int) {
@@ -1779,11 +1801,15 @@ func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent stri
 		name += "_cleanup"
 	}
 
+	hasSettings := len(n.Settings) > 0
 	children := 1 // identifier
 	if n.Database != "" {
 		children++ // extra identifier for database
 	}
 	if n.Partition != nil {
+		children++
+	}
+	if hasSettings {
 		children++
 	}
 
@@ -1801,6 +1827,9 @@ func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent stri
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+	if hasSettings {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
 }
 
 func explainTruncateQuery(sb *strings.Builder, n *ast.TruncateQuery, indent string) {
@@ -1809,14 +1838,28 @@ func explainTruncateQuery(sb *strings.Builder, n *ast.TruncateQuery, indent stri
 		return
 	}
 
+	// Count children (table identifiers + settings)
+	hasSettings := len(n.Settings) > 0
+
 	if n.Database != "" {
-		// Database-qualified: TruncateQuery db table (children 2)
-		fmt.Fprintf(sb, "%sTruncateQuery %s %s (children 2)\n", indent, n.Database, n.Table)
+		// Database-qualified: TruncateQuery db table (children 2 or 3)
+		children := 2
+		if hasSettings {
+			children++
+		}
+		fmt.Fprintf(sb, "%sTruncateQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 	} else {
-		fmt.Fprintf(sb, "%sTruncateQuery  %s (children 1)\n", indent, n.Table)
+		children := 1
+		if hasSettings {
+			children++
+		}
+		fmt.Fprintf(sb, "%sTruncateQuery  %s (children %d)\n", indent, n.Table, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+	}
+	if hasSettings {
+		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
 
