@@ -2600,6 +2600,7 @@ func (p *Parser) parseCreateUser(create *ast.CreateQuery) {
 				}
 				// Skip auth method name (plaintext_password, sha256_password, etc.)
 				// Stop at BY (token), comma, or next section keywords
+				gotAuthValue := false
 				for p.currentIs(token.IDENT) {
 					ident := strings.ToUpper(p.current.Value)
 					// Stop at HOST, SETTINGS, DEFAULT, GRANTEES - don't consume these
@@ -2607,8 +2608,10 @@ func (p *Parser) parseCreateUser(create *ast.CreateQuery) {
 						break
 					}
 					p.nextToken()
-					// Handle REALM/SERVER string values (for kerberos/ldap)
+					// Handle REALM/SERVER string values (for kerberos/ldap) - capture them!
 					if p.currentIs(token.STRING) && (ident == "REALM" || ident == "SERVER") {
+						create.AuthenticationValues = append(create.AuthenticationValues, p.current.Value)
+						gotAuthValue = true
 						p.nextToken()
 					}
 				}
@@ -2617,9 +2620,11 @@ func (p *Parser) parseCreateUser(create *ast.CreateQuery) {
 					p.nextToken()
 					if p.currentIs(token.STRING) {
 						create.AuthenticationValues = append(create.AuthenticationValues, p.current.Value)
+						gotAuthValue = true
 						p.nextToken()
 					}
 				}
+				_ = gotAuthValue // suppress unused variable warning if any
 				// Check for comma (multiple auth methods)
 				if p.currentIs(token.COMMA) {
 					p.nextToken()
@@ -2674,7 +2679,9 @@ func (p *Parser) parseAlterUser() *ast.CreateQuery {
 						break
 					}
 					p.nextToken()
+					// Handle REALM/SERVER string values (for kerberos/ldap) - capture them!
 					if p.currentIs(token.STRING) && (ident == "REALM" || ident == "SERVER") {
+						create.AuthenticationValues = append(create.AuthenticationValues, p.current.Value)
 						p.nextToken()
 					}
 				}
@@ -5629,7 +5636,11 @@ func (p *Parser) parseShow() ast.Statement {
 			show.ShowType = ast.ShowCreateUser
 			p.nextToken()
 			// Skip user name and host pattern until FORMAT or end
+			// Also check for commas to detect multiple users
 			for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.FORMAT) {
+				if p.currentIs(token.COMMA) {
+					show.MultipleUsers = true
+				}
 				p.nextToken()
 			}
 			// Parse FORMAT clause if present

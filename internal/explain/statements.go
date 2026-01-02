@@ -117,16 +117,19 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	}
 	if n.CreateUser || n.AlterUser {
 		if n.HasAuthenticationData {
-			fmt.Fprintf(sb, "%sCreateUserQuery (children 1)\n", indent)
-			// AuthenticationData has children if there are auth values
+			// Each authentication value is a separate AuthenticationData child
 			if len(n.AuthenticationValues) > 0 {
-				fmt.Fprintf(sb, "%s AuthenticationData (children %d)\n", indent, len(n.AuthenticationValues))
+				fmt.Fprintf(sb, "%sCreateUserQuery (children %d)\n", indent, len(n.AuthenticationValues))
 				for _, val := range n.AuthenticationValues {
+					// Each AuthenticationData has 1 child (the Literal value)
+					fmt.Fprintf(sb, "%s AuthenticationData (children 1)\n", indent)
 					// Escape the value - strings need \' escaping
 					escaped := escapeStringLiteral(val)
 					fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, escaped)
 				}
 			} else {
+				// No values - just output CreateUserQuery with 1 child
+				fmt.Fprintf(sb, "%sCreateUserQuery (children 1)\n", indent)
 				fmt.Fprintf(sb, "%s AuthenticationData\n", indent)
 			}
 		} else {
@@ -970,11 +973,15 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 
 	// SHOW CREATE USER has special output format
 	if n.ShowType == ast.ShowCreateUser {
+		userWord := "USER"
+		if n.MultipleUsers {
+			userWord = "USERS"
+		}
 		if n.Format != "" {
-			fmt.Fprintf(sb, "%sSHOW CREATE USER query (children 1)\n", indent)
+			fmt.Fprintf(sb, "%sSHOW CREATE %s query (children 1)\n", indent, userWord)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
 		} else {
-			fmt.Fprintf(sb, "%sSHOW CREATE USER query\n", indent)
+			fmt.Fprintf(sb, "%sSHOW CREATE %s query\n", indent, userWord)
 		}
 		return
 	}
