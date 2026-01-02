@@ -160,9 +160,22 @@ func formatArrayLiteral(val interface{}) string {
 				if lit.Type == ast.LiteralInteger {
 					switch val := lit.Value.(type) {
 					case int64:
-						parts = append(parts, fmt.Sprintf("Int64_%d", -val))
+						negVal := -val
+						// ClickHouse normalizes -0 to UInt64_0
+						if negVal == 0 {
+							parts = append(parts, "UInt64_0")
+						} else if negVal > 0 {
+							parts = append(parts, fmt.Sprintf("UInt64_%d", negVal))
+						} else {
+							parts = append(parts, fmt.Sprintf("Int64_%d", negVal))
+						}
 					case uint64:
-						parts = append(parts, fmt.Sprintf("Int64_-%d", val))
+						// ClickHouse normalizes -0 to UInt64_0
+						if val == 0 {
+							parts = append(parts, "UInt64_0")
+						} else {
+							parts = append(parts, fmt.Sprintf("Int64_-%d", val))
+						}
 					default:
 						parts = append(parts, fmt.Sprintf("Int64_-%v", lit.Value))
 					}
@@ -195,8 +208,19 @@ func formatNumericExpr(e ast.Expression) (string, bool) {
 		if lit, ok := unary.Operand.(*ast.Literal); ok {
 			switch val := lit.Value.(type) {
 			case int64:
-				return fmt.Sprintf("Int64_%d", -val), true
+				negVal := -val
+				// ClickHouse normalizes -0 to UInt64_0
+				if negVal == 0 {
+					return "UInt64_0", true
+				} else if negVal > 0 {
+					return fmt.Sprintf("UInt64_%d", negVal), true
+				}
+				return fmt.Sprintf("Int64_%d", negVal), true
 			case uint64:
+				// ClickHouse normalizes -0 to UInt64_0
+				if val == 0 {
+					return "UInt64_0", true
+				}
 				return fmt.Sprintf("Int64_%d", -int64(val)), true
 			case float64:
 				return fmt.Sprintf("Float64_%s", FormatFloat(-val)), true
