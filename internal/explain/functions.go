@@ -579,8 +579,8 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 			if lit.Type == ast.LiteralArray || lit.Type == ast.LiteralTuple {
 				if useArrayFormat {
 					fmt.Fprintf(sb, "%s  Literal %s\n", indent, FormatLiteral(lit))
-				} else if containsCastExpressions(lit) {
-					// Array contains CastExpr elements - output as Function array with children
+				} else if containsCastExpressions(lit) || !containsOnlyLiterals(lit) {
+					// Array contains CastExpr or non-literal elements - output as Function array with children
 					Node(sb, n.Expr, depth+2)
 				} else {
 					// Simple literals (including negative numbers) - format as string
@@ -750,6 +750,7 @@ func containsCastExpressions(lit *ast.Literal) bool {
 }
 
 // containsOnlyLiterals checks if a literal array/tuple contains only literal values (no expressions)
+// This includes negated literals (UnaryExpr with Op="-" and Literal operand)
 func containsOnlyLiterals(lit *ast.Literal) bool {
 	var exprs []ast.Expression
 	switch lit.Type {
@@ -764,16 +765,24 @@ func containsOnlyLiterals(lit *ast.Literal) bool {
 	}
 
 	for _, e := range exprs {
-		innerLit, ok := e.(*ast.Literal)
-		if !ok {
-			return false
+		// Check if it's a direct literal
+		if innerLit, ok := e.(*ast.Literal); ok {
+			// Nested arrays/tuples need recursive check
+			if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
+				if !containsOnlyLiterals(innerLit) {
+					return false
+				}
+			}
+			continue
 		}
-		// Nested arrays/tuples need recursive check
-		if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
-			if !containsOnlyLiterals(innerLit) {
-				return false
+		// Check if it's a negated literal (e.g., -1)
+		if unary, ok := e.(*ast.UnaryExpr); ok && unary.Op == "-" {
+			if _, isLit := unary.Operand.(*ast.Literal); isLit {
+				continue
 			}
 		}
+		// Not a literal or negated literal
+		return false
 	}
 	return true
 }

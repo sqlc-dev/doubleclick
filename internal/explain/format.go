@@ -469,7 +469,7 @@ func formatExprAsString(expr ast.Expression) string {
 		case ast.LiteralNull:
 			return "NULL"
 		case ast.LiteralArray:
-			return formatArrayAsString(e.Value)
+			return formatArrayAsStringFromLiteral(e)
 		case ast.LiteralTuple:
 			return formatTupleAsString(e.Value)
 		default:
@@ -517,6 +517,24 @@ func formatExprAsString(expr ast.Expression) string {
 	default:
 		return fmt.Sprintf("%v", expr)
 	}
+}
+
+// formatArrayAsStringFromLiteral formats an array literal as a string for :: cast syntax
+// It preserves original spacing from the source
+func formatArrayAsStringFromLiteral(lit *ast.Literal) string {
+	exprs, ok := lit.Value.([]ast.Expression)
+	if !ok {
+		return "[]"
+	}
+	var parts []string
+	for _, e := range exprs {
+		parts = append(parts, formatElementAsString(e))
+	}
+	separator := ","
+	if lit.SpacedCommas {
+		separator = ", "
+	}
+	return "[" + strings.Join(parts, separator) + "]"
 }
 
 // formatArrayAsString formats an array literal as a string for :: cast syntax
@@ -569,7 +587,7 @@ func formatElementAsString(expr ast.Expression) string {
 		case ast.LiteralNull:
 			return "NULL"
 		case ast.LiteralArray:
-			return formatArrayAsString(e.Value)
+			return formatArrayAsStringFromLiteral(e)
 		case ast.LiteralTuple:
 			return formatTupleAsString(e.Value)
 		default:

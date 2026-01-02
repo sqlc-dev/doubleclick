@@ -1219,6 +1219,7 @@ type Literal struct {
 	Source        string         `json:"source,omitempty"`        // Original source text (for preserving 0.0 vs 0)
 	Negative      bool           `json:"negative,omitempty"`      // True if literal was explicitly negative (for -0)
 	Parenthesized bool           `json:"parenthesized,omitempty"` // True if wrapped in explicit parentheses
+	SpacedCommas  bool           `json:"spaced_commas,omitempty"` // True if array/tuple had spaces after commas
 }
 
 func (l *Literal) Pos() token.Position { return l.Position }

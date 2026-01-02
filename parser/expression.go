@@ -1181,10 +1181,36 @@ func (p *Parser) parseArrayLiteral() ast.Expression {
 	p.nextToken() // skip [
 
 	var elements []ast.Expression
-	if !p.currentIs(token.RBRACKET) {
-		elements = p.parseExpressionList()
+	spacedCommas := false
+
+	if !p.currentIs(token.RBRACKET) && !p.currentIs(token.EOF) {
+		// Parse first element
+		expr := p.parseExpression(LOWEST)
+		if expr != nil {
+			expr = p.parseImplicitAlias(expr)
+			elements = append(elements, expr)
+		}
+
+		for p.currentIs(token.COMMA) {
+			commaPos := p.current.Pos.Offset
+			p.nextToken() // skip comma
+			// Check if there's whitespace between comma and next token
+			// A comma is 1 byte, so if offset difference > 1, there's whitespace
+			if p.current.Pos.Offset > commaPos+1 {
+				spacedCommas = true
+			}
+			if p.currentIs(token.RBRACKET) {
+				break // Handle trailing comma
+			}
+			expr := p.parseExpression(LOWEST)
+			if expr != nil {
+				expr = p.parseImplicitAlias(expr)
+				elements = append(elements, expr)
+			}
+		}
 	}
 	lit.Value = elements
+	lit.SpacedCommas = spacedCommas
 
 	p.expect(token.RBRACKET)
 	return lit
