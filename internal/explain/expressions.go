@@ -670,13 +670,8 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 		// CAST expressions always show the alias from the AliasedExpr wrapper
 		explainCastExprWithAlias(sb, e, n.Alias, indent, depth)
 	case *ast.ArrayAccess:
-		// Array access - show alias only when array is not a literal
-		// ClickHouse hides alias when array access is on a literal
-		if _, isLit := e.Array.(*ast.Literal); isLit {
-			explainArrayAccess(sb, e, indent, depth)
-		} else {
-			explainArrayAccessWithAlias(sb, e, n.Alias, indent, depth)
-		}
+		// Array access with alias
+		explainArrayAccessWithAlias(sb, e, n.Alias, indent, depth)
 	case *ast.TupleAccess:
 		// Tuple access with alias
 		explainTupleAccessWithAlias(sb, e, n.Alias, indent, depth)
