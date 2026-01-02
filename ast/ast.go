@@ -299,6 +299,7 @@ type CreateQuery struct {
 	AlterUser        bool                 `json:"alter_user,omitempty"`
 	HasAuthenticationData bool            `json:"has_authentication_data,omitempty"`
 	AuthenticationValues []string         `json:"authentication_values,omitempty"` // Password/hash values from IDENTIFIED BY
+	SSHKeyCount          int              `json:"ssh_key_count,omitempty"`         // Number of SSH keys for ssh_key auth
 	CreateDictionary   bool                              `json:"create_dictionary,omitempty"`
 	DictionaryAttrs    []*DictionaryAttributeDeclaration `json:"dictionary_attrs,omitempty"`
 	DictionaryDef      *DictionaryDefinition             `json:"dictionary_def,omitempty"`

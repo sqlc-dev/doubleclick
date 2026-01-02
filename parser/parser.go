@@ -2646,6 +2646,8 @@ func (p *Parser) parseCreateUser(create *ast.CreateQuery) {
 				if p.currentIs(token.WITH) {
 					p.nextToken()
 				}
+				// Check for ssh_key authentication method
+				isSSHKey := p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "SSH_KEY"
 				// Skip auth method name (plaintext_password, sha256_password, etc.)
 				// Stop at BY (token), comma, or next section keywords
 				gotAuthValue := false
@@ -2663,10 +2665,35 @@ func (p *Parser) parseCreateUser(create *ast.CreateQuery) {
 						p.nextToken()
 					}
 				}
-				// Check for BY 'value' (BY is a keyword token, not IDENT)
+				// Check for BY 'value' or BY KEY ... TYPE ... (SSH key auth)
 				if p.currentIs(token.BY) {
 					p.nextToken()
-					if p.currentIs(token.STRING) {
+					if isSSHKey {
+						// Parse SSH key format: BY KEY 'key' TYPE 'type' [, KEY 'key' TYPE 'type' ...]
+						for {
+							if p.currentIs(token.KEY) {
+								p.nextToken()
+								if p.currentIs(token.STRING) {
+									p.nextToken() // skip key value
+								}
+								// Skip TYPE 'algorithm'
+								if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TYPE" {
+									p.nextToken()
+									if p.currentIs(token.STRING) {
+										p.nextToken() // skip type value
+									}
+								}
+								create.SSHKeyCount++
+							}
+							// Check for comma (multiple keys)
+							if p.currentIs(token.COMMA) {
+								p.nextToken()
+								continue
+							}
+							break
+						}
+						gotAuthValue = true
+					} else if p.currentIs(token.STRING) {
 						create.AuthenticationValues = append(create.AuthenticationValues, p.current.Value)
 						gotAuthValue = true
 						p.nextToken()

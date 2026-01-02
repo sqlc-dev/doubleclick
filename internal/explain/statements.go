@@ -132,6 +132,13 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 					escaped := escapeStringLiteral(val)
 					fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, escaped)
 				}
+			} else if n.SSHKeyCount > 0 {
+				// SSH key authentication - each key is a PublicSSHKey child
+				fmt.Fprintf(sb, "%sCreateUserQuery (children 1)\n", indent)
+				fmt.Fprintf(sb, "%s AuthenticationData (children %d)\n", indent, n.SSHKeyCount)
+				for i := 0; i < n.SSHKeyCount; i++ {
+					fmt.Fprintf(sb, "%s  PublicSSHKey\n", indent)
+				}
 			} else {
 				// No values - just output CreateUserQuery with 1 child
 				fmt.Fprintf(sb, "%sCreateUserQuery (children 1)\n", indent)
