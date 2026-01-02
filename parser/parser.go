@@ -5838,6 +5838,8 @@ func (p *Parser) parseShow() ast.Statement {
 				show.ShowType = ast.ShowDictionaries
 			case "FUNCTIONS":
 				show.ShowType = ast.ShowFunctions
+			case "SETTING":
+				show.ShowType = ast.ShowSetting
 			case "INDEXES", "INDICES", "KEYS":
 				// SHOW INDEXES/INDICES/KEYS FROM table - treat as ShowColumns
 				show.ShowType = ast.ShowColumns

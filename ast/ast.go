@@ -810,6 +810,7 @@ const (
 	ShowDictionaries            ShowType = "DICTIONARIES"
 	ShowFunctions               ShowType = "FUNCTIONS"
 	ShowSettings                ShowType = "SETTINGS"
+	ShowSetting                 ShowType = "SETTING"
 	ShowGrants                  ShowType = "GRANTS"
 )
 
