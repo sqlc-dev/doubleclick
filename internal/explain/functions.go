@@ -115,13 +115,21 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 	if n.Distinct {
 		fnName = fnName + "Distinct"
 	}
+	// Append "If" if the function has a FILTER clause
+	if n.Filter != nil {
+		fnName = fnName + "If"
+	}
 	if alias != "" {
 		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, children)
 	} else {
 		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, children)
 	}
 	// Arguments (Settings are included as part of argument count)
+	// FILTER condition is also an additional argument
 	argCount := len(n.Arguments)
+	if n.Filter != nil {
+		argCount++ // Filter condition is counted as an argument
+	}
 	if len(n.Settings) > 0 {
 		argCount++ // Set is counted as one argument
 	}
@@ -143,6 +151,10 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 			}
 		}
 		Node(sb, arg, depth+2)
+	}
+	// Filter condition appears after regular arguments
+	if n.Filter != nil {
+		Node(sb, n.Filter, depth+2)
 	}
 	// Settings appear as Set node inside ExpressionList
 	if len(n.Settings) > 0 {

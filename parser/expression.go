@@ -707,9 +707,8 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 			p.nextToken() // skip (
 			if p.currentIs(token.WHERE) {
 				p.nextToken() // skip WHERE
-				// Parse the filter condition - just consume it for now
-				// The filter is essentially a where clause for the aggregate
-				p.parseExpression(LOWEST)
+				// Parse the filter condition and store it
+				fn.Filter = p.parseExpression(LOWEST)
 			}
 			p.expect(token.RPAREN)
 		}
@@ -2584,7 +2583,7 @@ func (p *Parser) parseKeywordAsFunction() ast.Expression {
 			p.nextToken() // skip (
 			if p.currentIs(token.WHERE) {
 				p.nextToken() // skip WHERE
-				p.parseExpression(LOWEST)
+				fn.Filter = p.parseExpression(LOWEST)
 			}
 			p.expect(token.RPAREN)
 		}

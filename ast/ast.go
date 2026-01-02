@@ -1334,6 +1334,7 @@ type FunctionCall struct {
 	Arguments   []Expression   `json:"arguments,omitempty"`
 	Settings    []*SettingExpr `json:"settings,omitempty"` // For table functions with SETTINGS
 	Distinct    bool           `json:"distinct,omitempty"`
+	Filter      Expression     `json:"filter,omitempty"`       // FILTER(WHERE condition) clause
 	Over        *WindowSpec    `json:"over,omitempty"`
 	Alias       string         `json:"alias,omitempty"`
 	SQLStandard bool           `json:"sql_standard,omitempty"` // True for SQL standard syntax like TRIM(... FROM ...)
