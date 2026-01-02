@@ -806,7 +806,16 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		sel.With = p.parseWithClause()
 	}
 
-	if !p.expect(token.SELECT) {
+	// Handle FROM ... SELECT syntax (ClickHouse extension)
+	// This can come after WITH clause: WITH 1 as n FROM ... SELECT ...
+	if p.currentIs(token.FROM) {
+		p.nextToken() // skip FROM
+		sel.From = p.parseTablesInSelect()
+		// Now expect SELECT
+		if !p.expect(token.SELECT) {
+			return nil
+		}
+	} else if !p.expect(token.SELECT) {
 		return nil
 	}
 
@@ -1407,6 +1416,10 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) || p.currentIs(token.LPAREN) {
 			// SELECT, WITH, or nested (SELECT...) for UNION queries like ((SELECT 1) UNION ALL SELECT 2)
 			subquery := p.parseSelectWithUnion()
+			expr.Table = &ast.Subquery{Query: subquery}
+		} else if p.currentIs(token.FROM) {
+			// FROM ... SELECT (ClickHouse extension) - e.g., FROM (FROM numbers(1) SELECT *)
+			subquery := p.parseFromSelectSyntax()
 			expr.Table = &ast.Subquery{Query: subquery}
 		} else if p.currentIs(token.EXPLAIN) {
 			// EXPLAIN as subquery in FROM clause
