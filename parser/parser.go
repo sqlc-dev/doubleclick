@@ -5411,6 +5411,27 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			}
 			p.nextToken() // skip comma
 		}
+		// Handle IN PARTITION (UPDATE ... IN PARTITION <partition> WHERE ...)
+		// The expression parser may have incorrectly consumed "expr IN PARTITION" as an InExpression.
+		// Check if the last assignment value is an InExpression with right side being "PARTITION".
+		if len(cmd.Assignments) > 0 {
+			lastAssign := cmd.Assignments[len(cmd.Assignments)-1]
+			if inExpr, ok := lastAssign.Value.(*ast.InExpr); ok && len(inExpr.List) == 1 {
+				if ident, ok := inExpr.List[0].(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "PARTITION" {
+					// Fix the mis-parse: the actual assignment value is the left side of IN
+					lastAssign.Value = inExpr.Expr
+					// Current token should be the partition expression (e.g., ALL)
+					cmd.Partition = p.parseExpression(LOWEST)
+				}
+			}
+		}
+		if p.currentIs(token.IN) {
+			p.nextToken() // skip IN
+			if p.currentIs(token.PARTITION) {
+				p.nextToken() // skip PARTITION
+				cmd.Partition = p.parseExpression(LOWEST)
+			}
+		}
 		if p.currentIs(token.WHERE) {
 			p.nextToken() // skip WHERE
 			cmd.Where = p.parseExpression(LOWEST)

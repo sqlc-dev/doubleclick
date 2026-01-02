@@ -1476,8 +1476,13 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ColumnName)
 		}
 		if cmd.Partition != nil {
-			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
-			Node(sb, cmd.Partition, depth+2)
+			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
+			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
+				fmt.Fprintf(sb, "%s Partition_ID \n", indent)
+			} else {
+				fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+				Node(sb, cmd.Partition, depth+2)
+			}
 		}
 	case ast.AlterCommentColumn:
 		if cmd.ColumnName != "" {
@@ -1507,8 +1512,13 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		}
 		// CLEAR INDEX IN PARTITION clause
 		if cmd.Partition != nil {
-			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
-			Node(sb, cmd.Partition, depth+2)
+			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
+			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
+				fmt.Fprintf(sb, "%s Partition_ID \n", indent)
+			} else {
+				fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+				Node(sb, cmd.Partition, depth+2)
+			}
 		}
 	case ast.AlterMaterializeIndex:
 		if cmd.Index != "" {
@@ -1590,6 +1600,16 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 			Node(sb, cmd.Where, depth+1)
 		}
 	case ast.AlterUpdate:
+		// Output order: Partition, Where, Assignments
+		if cmd.Partition != nil {
+			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
+			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
+				fmt.Fprintf(sb, "%s Partition_ID \n", indent)
+			} else {
+				fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+				Node(sb, cmd.Partition, depth+2)
+			}
+		}
 		if cmd.Where != nil {
 			Node(sb, cmd.Where, depth+1)
 		}
@@ -1845,6 +1865,9 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 			children++
 		}
 	case ast.AlterUpdate:
+		if cmd.Partition != nil {
+			children++
+		}
 		if len(cmd.Assignments) > 0 {
 			children++
 		}
@@ -1928,8 +1951,13 @@ func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent stri
 		fmt.Fprintf(sb, "%sOptimizeQuery  %s (children %d)\n", indent, name, children)
 	}
 	if n.Partition != nil {
-		fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
-		Node(sb, n.Partition, depth+2)
+		// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
+		if ident, ok := n.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
+			fmt.Fprintf(sb, "%s Partition_ID \n", indent)
+		} else {
+			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+			Node(sb, n.Partition, depth+2)
+		}
 	}
 	if n.Database != "" {
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
