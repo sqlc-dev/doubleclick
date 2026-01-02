@@ -558,6 +558,10 @@ func formatArrayAsStringFromLiteral(lit *ast.Literal) string {
 	if lit.SpacedCommas {
 		separator = ", "
 	}
+	// Use outer spaces when source had whitespace after [ (e.g., for multi-line arrays)
+	if lit.SpacedBrackets {
+		return "[ " + strings.Join(parts, separator) + " ]"
+	}
 	return "[" + strings.Join(parts, separator) + "]"
 }
 

@@ -1224,7 +1224,12 @@ func (p *Parser) parseArrayLiteral() ast.Expression {
 		Position: p.current.Pos,
 		Type:     ast.LiteralArray,
 	}
+	bracketPos := p.current.Pos.Offset
 	p.nextToken() // skip [
+
+	// Check if there's whitespace/newline after the opening bracket
+	// A bracket is 1 byte, so if offset difference > 1, there's whitespace
+	spacedBrackets := p.current.Pos.Offset > bracketPos+1
 
 	var elements []ast.Expression
 	spacedCommas := false
@@ -1257,6 +1262,7 @@ func (p *Parser) parseArrayLiteral() ast.Expression {
 	}
 	lit.Value = elements
 	lit.SpacedCommas = spacedCommas
+	lit.SpacedBrackets = spacedBrackets
 
 	p.expect(token.RBRACKET)
 	return lit

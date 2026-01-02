@@ -1261,14 +1261,15 @@ func (t *TableIdentifier) expressionNode()     {}
 
 // Literal represents a literal value.
 type Literal struct {
-	Position      token.Position `json:"-"`
-	Type          LiteralType    `json:"type"`
-	Value         interface{}    `json:"value"`
-	Source        string         `json:"source,omitempty"`        // Original source text (for preserving 0.0 vs 0)
-	Negative      bool           `json:"negative,omitempty"`      // True if literal was explicitly negative (for -0)
-	Parenthesized bool           `json:"parenthesized,omitempty"` // True if wrapped in explicit parentheses
-	SpacedCommas  bool           `json:"spaced_commas,omitempty"` // True if array/tuple had spaces after commas
-	IsBigInt      bool           `json:"is_big_int,omitempty"`    // True if this is a large integer stored as string
+	Position       token.Position `json:"-"`
+	Type           LiteralType    `json:"type"`
+	Value          interface{}    `json:"value"`
+	Source         string         `json:"source,omitempty"`          // Original source text (for preserving 0.0 vs 0)
+	Negative       bool           `json:"negative,omitempty"`        // True if literal was explicitly negative (for -0)
+	Parenthesized  bool           `json:"parenthesized,omitempty"`   // True if wrapped in explicit parentheses
+	SpacedCommas   bool           `json:"spaced_commas,omitempty"`   // True if array/tuple had spaces after commas
+	SpacedBrackets bool           `json:"spaced_brackets,omitempty"` // True if array had whitespace after [ and before ]
+	IsBigInt       bool           `json:"is_big_int,omitempty"`      // True if this is a large integer stored as string
 }
 
 func (l *Literal) Pos() token.Position { return l.Position }
