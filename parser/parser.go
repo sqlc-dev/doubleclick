@@ -416,6 +416,37 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 		}
 	}
 
+	// Parse union-level SETTINGS and FORMAT (for queries like SELECT ... SETTINGS ... SETTINGS ... FORMAT ...)
+	// These come after the individual SELECTs have been parsed
+	var formatParsed bool
+	for p.currentIs(token.SETTINGS) || p.currentIs(token.FORMAT) {
+		if p.currentIs(token.SETTINGS) {
+			p.nextToken()
+			settings := p.parseSettingsList()
+			query.Settings = settings
+			if formatParsed {
+				query.SettingsAfterFormat = true
+			} else {
+				query.SettingsBeforeFormat = true
+			}
+		} else if p.currentIs(token.FORMAT) {
+			p.nextToken()
+			formatParsed = true
+			// Get the format name and attach to first SELECT
+			if len(query.Selects) > 0 {
+				if sq, ok := query.Selects[0].(*ast.SelectQuery); ok {
+					if p.currentIs(token.NULL) {
+						sq.Format = &ast.Identifier{Position: p.current.Pos, Parts: []string{"Null"}}
+						p.nextToken()
+					} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+						sq.Format = &ast.Identifier{Position: p.current.Pos, Parts: []string{p.current.Value}}
+						p.nextToken()
+					}
+				}
+			}
+		}
+	}
+
 	return query
 }
 
@@ -984,8 +1015,9 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		}
 	}
 
-	// Parse FORMAT clause (format names can be keywords like Null, JSON, etc.)
-	if p.currentIs(token.FORMAT) {
+	// Only parse FORMAT if there were no SETTINGS before it
+	// If SETTINGS was parsed above, FORMAT belongs at union level (parseSelectWithUnion will handle it)
+	if p.currentIs(token.FORMAT) && len(sel.Settings) == 0 {
 		p.nextToken()
 		if p.currentIs(token.IDENT) || p.currentIs(token.NULL) || p.current.Token.IsKeyword() {
 			sel.Format = &ast.Identifier{
@@ -999,13 +1031,12 @@ func (p *Parser) parseSelect() *ast.SelectQuery {
 		for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.SETTINGS) {
 			p.nextToken()
 		}
-	}
-
-	// Parse SETTINGS clause (can come after FORMAT)
-	if p.currentIs(token.SETTINGS) {
-		p.nextToken()
-		sel.Settings = p.parseSettingsList()
-		sel.SettingsAfterFormat = true
+		// Parse SETTINGS clause that comes AFTER FORMAT (belongs to this SELECT)
+		if p.currentIs(token.SETTINGS) {
+			p.nextToken()
+			sel.Settings = p.parseSettingsList()
+			sel.SettingsAfterFormat = true
+		}
 	}
 
 	return sel
@@ -6505,7 +6536,6 @@ func (p *Parser) parseParenthesizedSelect() *ast.SelectWithUnionQuery {
 		}
 		query.UnionModes = append(query.UnionModes, mode)
 
-		var nextStmt ast.Statement
 		if p.currentIs(token.LPAREN) {
 			p.nextToken() // skip (
 			nested := p.parseSelectWithUnion()
@@ -6513,15 +6543,50 @@ func (p *Parser) parseParenthesizedSelect() *ast.SelectWithUnionQuery {
 				break
 			}
 			p.expect(token.RPAREN)
-			nextStmt = nested
+			// Flatten nested selects into current query
+			for _, s := range nested.Selects {
+				query.Selects = append(query.Selects, s)
+			}
 		} else {
 			sel := p.parseSelect()
 			if sel == nil {
 				break
 			}
-			nextStmt = sel
+			query.Selects = append(query.Selects, sel)
 		}
-		query.Selects = append(query.Selects, nextStmt)
+	}
+
+	// Parse FORMAT and SETTINGS in either order after UNION
+	// SETTINGS may come before FORMAT: (SELECT ...) UNION ALL (SELECT ...) SETTINGS x=1 FORMAT TSV
+	// FORMAT may come before SETTINGS: (SELECT ...) UNION ALL (SELECT ...) FORMAT TSV SETTINGS x=1
+	var formatParsed bool
+	for p.currentIs(token.FORMAT) || p.currentIs(token.SETTINGS) {
+		if p.currentIs(token.FORMAT) {
+			p.nextToken()
+			formatParsed = true
+			// Get the format name and attach to first SELECT
+			if len(query.Selects) > 0 {
+				if sq, ok := query.Selects[0].(*ast.SelectQuery); ok {
+					if p.currentIs(token.NULL) {
+						sq.Format = &ast.Identifier{Position: p.current.Pos, Parts: []string{"Null"}}
+						p.nextToken()
+					} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+						sq.Format = &ast.Identifier{Position: p.current.Pos, Parts: []string{p.current.Value}}
+						p.nextToken()
+					}
+				}
+			}
+		} else if p.currentIs(token.SETTINGS) {
+			p.nextToken()
+			settings := p.parseSettingsList()
+			// Store union-level settings in the SelectWithUnionQuery
+			query.Settings = settings
+			if formatParsed {
+				query.SettingsAfterFormat = true
+			} else {
+				query.SettingsBeforeFormat = true
+			}
+		}
 	}
 
 	return query

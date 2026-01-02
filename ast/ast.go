@@ -31,10 +31,13 @@ type Expression interface {
 
 // SelectWithUnionQuery represents a SELECT query possibly with UNION.
 type SelectWithUnionQuery struct {
-	Position     token.Position `json:"-"`
-	Selects      []Statement    `json:"selects"`
-	UnionAll     bool           `json:"union_all,omitempty"`
-	UnionModes   []string       `json:"union_modes,omitempty"` // "ALL", "DISTINCT", or "" for each union
+	Position             token.Position `json:"-"`
+	Selects              []Statement    `json:"selects"`
+	UnionAll             bool           `json:"union_all,omitempty"`
+	UnionModes           []string       `json:"union_modes,omitempty"` // "ALL", "DISTINCT", or "" for each union
+	Settings             []*SettingExpr `json:"settings,omitempty"`    // Union-level SETTINGS
+	SettingsAfterFormat  bool           `json:"settings_after_format,omitempty"`
+	SettingsBeforeFormat bool           `json:"settings_before_format,omitempty"`
 }
 
 func (s *SelectWithUnionQuery) Pos() token.Position { return s.Position }
@@ -80,8 +83,9 @@ type SelectQuery struct {
 	LimitByLimit     Expression            `json:"limit_by_limit,omitempty"`     // LIMIT value before BY (e.g., LIMIT 1 BY x LIMIT 3)
 	LimitByHasLimit  bool                  `json:"limit_by_has_limit,omitempty"` // true if LIMIT BY was followed by another LIMIT
 	Offset           Expression            `json:"offset,omitempty"`
-	Settings           []*SettingExpr        `json:"settings,omitempty"`
-	SettingsAfterFormat bool                 `json:"settings_after_format,omitempty"` // true if SETTINGS came after FORMAT
+	Settings            []*SettingExpr `json:"settings,omitempty"`
+	SettingsAfterFormat bool           `json:"settings_after_format,omitempty"`  // true if SETTINGS came after FORMAT (at union level)
+	SettingsBeforeFormat bool          `json:"settings_before_format,omitempty"` // true if SETTINGS came before FORMAT (at union level)
 	IntoOutfile *IntoOutfileClause    `json:"into_outfile,omitempty"`
 	Format      *Identifier           `json:"format,omitempty"`
 }

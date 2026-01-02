@@ -199,6 +199,10 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 			break
 		}
 	}
+	// When SETTINGS comes BEFORE FORMAT, output Set first
+	if n.SettingsBeforeFormat && len(n.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
 	// FORMAT clause - check if any SelectQuery has Format set
 	// Skip this when inside CreateQuery context, as Format is output at CreateQuery level
 	if !inCreateQueryContext {
@@ -209,11 +213,16 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 			}
 		}
 	}
-	// When SETTINGS comes AFTER FORMAT, it's output at SelectWithUnionQuery level
-	for _, sel := range n.Selects {
-		if sq, ok := sel.(*ast.SelectQuery); ok && sq.SettingsAfterFormat && len(sq.Settings) > 0 {
-			fmt.Fprintf(sb, "%s Set\n", indent)
-			break
+	// When SETTINGS comes AFTER FORMAT, output Set last (check SelectWithUnionQuery first, then SelectQuery)
+	if n.SettingsAfterFormat && len(n.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	} else {
+		// Legacy check for settings on SelectQuery
+		for _, sel := range n.Selects {
+			if sq, ok := sel.(*ast.SelectQuery); ok && sq.SettingsAfterFormat && len(sq.Settings) > 0 {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+				break
+			}
 		}
 	}
 }
@@ -446,11 +455,16 @@ func countSelectUnionChildren(n *ast.SelectWithUnionQuery) int {
 			}
 		}
 	}
-	// When SETTINGS comes AFTER FORMAT, it's counted at SelectWithUnionQuery level
-	for _, sel := range n.Selects {
-		if sq, ok := sel.(*ast.SelectQuery); ok && sq.SettingsAfterFormat && len(sq.Settings) > 0 {
-			count++
-			break
+	// Count union-level SETTINGS (either before or after FORMAT)
+	if len(n.Settings) > 0 && (n.SettingsBeforeFormat || n.SettingsAfterFormat) {
+		count++
+	} else {
+		// Legacy check for settings on SelectQuery
+		for _, sel := range n.Selects {
+			if sq, ok := sel.(*ast.SelectQuery); ok && sq.SettingsAfterFormat && len(sq.Settings) > 0 {
+				count++
+				break
+			}
 		}
 	}
 	return count
