@@ -6425,7 +6425,61 @@ func (p *Parser) parseParenthesizedSelect() *ast.SelectWithUnionQuery {
 
 	p.expect(token.RPAREN)
 
-	// Wrap the result
+	// Wrap the result as first operand
+	firstItem := inner
+
+	// Check for UNION/EXCEPT/INTERSECT after the parenthesized select
+	if p.isIntersectExceptWithWrapper() {
+		// Handle INTERSECT/EXCEPT that creates SelectIntersectExceptQuery
+		stmts := []ast.Statement{firstItem}
+		var ops []string
+
+		for p.isIntersectExceptWithWrapper() {
+			var op string
+			if p.currentIs(token.EXCEPT) {
+				op = "EXCEPT"
+			} else {
+				op = "INTERSECT"
+			}
+			p.nextToken() // skip INTERSECT/EXCEPT
+
+			if p.currentIs(token.ALL) {
+				op += " ALL"
+				p.nextToken()
+			} else if p.currentIs(token.DISTINCT) {
+				op += " DISTINCT"
+				p.nextToken()
+			}
+			ops = append(ops, op)
+
+			// Parse the next operand
+			var nextStmt ast.Statement
+			if p.currentIs(token.LPAREN) {
+				p.nextToken() // skip (
+				nested := p.parseSelectWithUnion()
+				if nested == nil {
+					break
+				}
+				p.expect(token.RPAREN)
+				nextStmt = nested
+			} else {
+				sel := p.parseSelect()
+				if sel == nil {
+					break
+				}
+				nextStmt = sel
+			}
+			stmts = append(stmts, nextStmt)
+		}
+
+		result := buildIntersectExceptTree(stmts, ops)
+		return &ast.SelectWithUnionQuery{
+			Position: pos,
+			Selects:  []ast.Statement{result},
+		}
+	}
+
+	// Check for UNION ALL / UNION
 	query := &ast.SelectWithUnionQuery{
 		Position: pos,
 	}
@@ -6435,6 +6489,39 @@ func (p *Parser) parseParenthesizedSelect() *ast.SelectWithUnionQuery {
 		}
 		query.UnionModes = inner.UnionModes
 		query.UnionAll = inner.UnionAll
+	}
+
+	// Handle UNION after parenthesized select
+	for p.currentIs(token.UNION) {
+		p.nextToken() // skip UNION
+		mode := ""
+		if p.currentIs(token.ALL) {
+			mode = "ALL"
+			query.UnionAll = true
+			p.nextToken()
+		} else if p.currentIs(token.DISTINCT) {
+			mode = "DISTINCT"
+			p.nextToken()
+		}
+		query.UnionModes = append(query.UnionModes, mode)
+
+		var nextStmt ast.Statement
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			nested := p.parseSelectWithUnion()
+			if nested == nil {
+				break
+			}
+			p.expect(token.RPAREN)
+			nextStmt = nested
+		} else {
+			sel := p.parseSelect()
+			if sel == nil {
+				break
+			}
+			nextStmt = sel
+		}
+		query.Selects = append(query.Selects, nextStmt)
 	}
 
 	return query
