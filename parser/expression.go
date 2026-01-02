@@ -441,7 +441,11 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 	case token.TRIM:
 		return p.parseTrim()
 	case token.COLUMNS:
-		return p.parseColumnsMatcher()
+		// COLUMNS() is a column matcher, but 'columns' alone is an identifier (e.g., table name)
+		if p.peekIs(token.LPAREN) {
+			return p.parseColumnsMatcher()
+		}
+		return p.parseKeywordAsIdentifier()
 	case token.ARRAY:
 		// array(1,2,3) constructor or array as identifier (column name)
 		if p.peekIs(token.LPAREN) {

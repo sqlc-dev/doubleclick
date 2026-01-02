@@ -4663,12 +4663,39 @@ func (p *Parser) parseEngineClause() *ast.EngineClause {
 		engine.HasParentheses = true
 		p.nextToken()
 		if !p.currentIs(token.RPAREN) {
-			engine.Parameters = p.parseExpressionList()
+			// Engine parameters should not parse implicit aliases
+			// e.g., Distributed('cluster', database, table) - table is NOT an alias for database
+			engine.Parameters = p.parseEngineParameters()
 		}
 		p.expect(token.RPAREN)
 	}
 
 	return engine
+}
+
+// parseEngineParameters parses comma-separated expressions for engine clauses
+// without treating identifiers as implicit aliases
+func (p *Parser) parseEngineParameters() []ast.Expression {
+	var exprs []ast.Expression
+
+	if p.currentIs(token.RPAREN) || p.currentIs(token.EOF) {
+		return exprs
+	}
+
+	expr := p.parseExpression(LOWEST)
+	if expr != nil {
+		exprs = append(exprs, expr)
+	}
+
+	for p.currentIs(token.COMMA) {
+		p.nextToken()
+		expr := p.parseExpression(LOWEST)
+		if expr != nil {
+			exprs = append(exprs, expr)
+		}
+	}
+
+	return exprs
 }
 
 func (p *Parser) parseDrop() *ast.DropQuery {
