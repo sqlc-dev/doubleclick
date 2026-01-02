@@ -262,10 +262,10 @@ func explainViewExplain(sb *strings.Builder, n *ast.ExplainQuery, alias string, 
 	// Now output the viewExplain function
 	fmt.Fprintf(sb, "%s       Function viewExplain (children %d)\n", indent, 1)
 	fmt.Fprintf(sb, "%s        ExpressionList (children %d)\n", indent, 3)
-	// First argument: 'EXPLAIN' or 'EXPLAIN SYNTAX' etc.
-	// PLAN is the default and never shown; only show non-default types like SYNTAX
+	// First argument: 'EXPLAIN' or 'EXPLAIN AST' or 'EXPLAIN SYNTAX' etc.
+	// PLAN is the default and never shown; other types like AST, SYNTAX should be shown
 	explainTypeStr := "EXPLAIN"
-	if n.ExplicitType && n.ExplainType != "" && n.ExplainType != ast.ExplainAST && n.ExplainType != ast.ExplainPlan {
+	if n.ExplicitType && n.ExplainType != "" && n.ExplainType != ast.ExplainPlan {
 		explainTypeStr = "EXPLAIN " + string(n.ExplainType)
 	}
 	fmt.Fprintf(sb, "%s         Literal \\'%s\\'\n", indent, explainTypeStr)
