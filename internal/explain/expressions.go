@@ -478,8 +478,13 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 						needsFunctionFormat = true
 						break
 					}
-					// Also check if nested arrays/tuples contain non-literal elements
+					// Check if tuple contains array literals - these need Function tuple format
 					if lit, ok := expr.(*ast.Literal); ok {
+						if lit.Type == ast.LiteralArray {
+							needsFunctionFormat = true
+							break
+						}
+						// Also check if nested arrays/tuples contain non-literal elements
 						if containsNonLiteralInNested(lit) {
 							needsFunctionFormat = true
 							break
