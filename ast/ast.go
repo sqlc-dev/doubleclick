@@ -289,6 +289,7 @@ type CreateQuery struct {
 	Settings         []*SettingExpr       `json:"settings,omitempty"`
 	AsSelect         Statement            `json:"as_select,omitempty"`
 	AsTableFunction  Expression           `json:"as_table_function,omitempty"` // AS table_function(...) in CREATE TABLE
+	CloneAs          string               `json:"clone_as,omitempty"`          // CLONE AS source_table in CREATE TABLE
 	Comment          string               `json:"comment,omitempty"`
 	OnCluster        string               `json:"on_cluster,omitempty"`
 	CreateDatabase   bool                 `json:"create_database,omitempty"`
@@ -640,6 +641,7 @@ const (
 	AlterModifyColumn      AlterCommandType = "MODIFY_COLUMN"
 	AlterRenameColumn      AlterCommandType = "RENAME_COLUMN"
 	AlterClearColumn       AlterCommandType = "CLEAR_COLUMN"
+	AlterMaterializeColumn AlterCommandType = "MATERIALIZE_COLUMN"
 	AlterCommentColumn     AlterCommandType = "COMMENT_COLUMN"
 	AlterAddIndex          AlterCommandType = "ADD_INDEX"
 	AlterDropIndex         AlterCommandType = "DROP_INDEX"

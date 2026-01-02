@@ -2057,6 +2057,15 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 		}
 	}
 
+	// Handle CLONE AS source_table
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CLONE" {
+		p.nextToken() // skip CLONE
+		if p.currentIs(token.AS) {
+			p.nextToken() // skip AS
+			create.CloneAs = p.parseIdentifierName()
+		}
+	}
+
 	// Parse column definitions and indexes
 	if p.currentIs(token.LPAREN) {
 		p.nextToken()
