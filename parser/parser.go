@@ -4755,11 +4755,14 @@ func (p *Parser) parseDrop() *ast.DropQuery {
 		}
 	}
 
-	// Handle IF EXISTS
+	// Handle IF EXISTS or IF EMPTY
 	if p.currentIs(token.IF) {
 		p.nextToken()
 		if p.currentIs(token.EXISTS) {
 			drop.IfExists = true
+			p.nextToken()
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "EMPTY" {
+			// IF EMPTY - skip the EMPTY keyword
 			p.nextToken()
 		}
 	}
