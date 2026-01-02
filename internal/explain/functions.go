@@ -983,8 +983,8 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				if lit.Type != ast.LiteralTuple {
 					allTuples = false
 				} else {
-					// Check if this tuple contains only primitive literals
-					if !containsOnlyPrimitiveLiterals(lit) {
+					// Check if this tuple contains only primitive literals (including unary negation)
+					if !containsOnlyPrimitiveLiteralsWithUnary(lit) {
 						allTuplesArePrimitive = false
 					}
 				}
@@ -1090,8 +1090,8 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 
 // explainTupleInInList renders a tuple in an IN list - either as Literal or Function tuple
 func explainTupleInInList(sb *strings.Builder, lit *ast.Literal, indent string, depth int) {
-	if containsOnlyPrimitiveLiterals(lit) {
-		// All primitives - render as Literal Tuple_
+	if containsOnlyPrimitiveLiteralsWithUnary(lit) {
+		// All primitives (including unary negation) - render as Literal Tuple_
 		fmt.Fprintf(sb, "%s Literal %s\n", indent, FormatLiteral(lit))
 	} else {
 		// Contains expressions - render as Function tuple
