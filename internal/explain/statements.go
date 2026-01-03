@@ -1456,6 +1456,70 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 	}
 }
 
+func explainBackupQuery(sb *strings.Builder, n *ast.BackupQuery, indent string) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.BackupQuery\n", indent)
+		return
+	}
+
+	// Count children: function target + format identifier
+	children := 0
+	if n.Target != nil {
+		children++
+	}
+	if n.Format != "" {
+		children++
+	}
+
+	if children > 0 {
+		fmt.Fprintf(sb, "%sBackupQuery (children %d)\n", indent, children)
+	} else {
+		fmt.Fprintf(sb, "%sBackupQuery\n", indent)
+	}
+
+	// Output target function (e.g., Null, Disk('path'))
+	if n.Target != nil {
+		fmt.Fprintf(sb, "%s Function %s\n", indent, n.Target.Name)
+	}
+
+	// Output format identifier
+	if n.Format != "" {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+	}
+}
+
+func explainRestoreQuery(sb *strings.Builder, n *ast.RestoreQuery, indent string) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.RestoreQuery\n", indent)
+		return
+	}
+
+	// Count children: function source + format identifier
+	children := 0
+	if n.Source != nil {
+		children++
+	}
+	if n.Format != "" {
+		children++
+	}
+
+	if children > 0 {
+		fmt.Fprintf(sb, "%sRestoreQuery (children %d)\n", indent, children)
+	} else {
+		fmt.Fprintf(sb, "%sRestoreQuery\n", indent)
+	}
+
+	// Output source function (e.g., Null, Disk('path'))
+	if n.Source != nil {
+		fmt.Fprintf(sb, "%s Function %s\n", indent, n.Source.Name)
+	}
+
+	// Output format identifier
+	if n.Format != "" {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+	}
+}
+
 func explainAlterQuery(sb *strings.Builder, n *ast.AlterQuery, indent string, depth int) {
 	if n == nil {
 		fmt.Fprintf(sb, "%s*ast.AlterQuery\n", indent)

@@ -332,6 +332,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseTransactionControl()
 	case token.ROLLBACK:
 		return p.parseTransactionControl()
+	case token.BACKUP:
+		return p.parseBackup()
+	case token.RESTORE:
+		return p.parseRestore()
 	default:
 		p.errors = append(p.errors, fmt.Errorf("unexpected token %s at line %d, column %d",
 			p.current.Token, p.current.Pos.Line, p.current.Pos.Column))
@@ -7813,6 +7817,150 @@ func (p *Parser) parseRevoke() *ast.GrantQuery {
 	}
 
 	return grant
+}
+
+func (p *Parser) parseBackup() *ast.BackupQuery {
+	backup := &ast.BackupQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip BACKUP
+
+	// Parse what to backup: TABLE, DATABASE, DICTIONARY, ALL, TEMPORARY
+	if p.currentIs(token.TABLE) {
+		p.nextToken()
+		name := p.parseIdentifierName()
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			backup.Database = name
+			backup.Table = p.parseIdentifierName()
+		} else {
+			backup.Table = name
+		}
+	} else if p.currentIs(token.DATABASE) {
+		p.nextToken()
+		backup.Database = p.parseIdentifierName()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
+		p.nextToken()
+		backup.Dictionary = p.parseIdentifierName()
+	} else if p.currentIs(token.ALL) {
+		backup.All = true
+		p.nextToken()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TEMPORARY" {
+		backup.Temporary = true
+		p.nextToken()
+		if p.currentIs(token.TABLE) {
+			p.nextToken()
+		}
+	}
+
+	// Parse TO clause
+	if p.currentIs(token.TO) {
+		p.nextToken()
+		// Parse target - it's a function call like Null or Disk('path')
+		if p.currentIs(token.NULL) || p.currentIs(token.IDENT) {
+			name := p.current.Value
+			p.nextToken()
+			fn := &ast.FunctionCall{
+				Position: backup.Position,
+				Name:     name,
+			}
+			if p.currentIs(token.LPAREN) {
+				p.nextToken()
+				if !p.currentIs(token.RPAREN) {
+					fn.Arguments = p.parseExpressionList()
+				}
+				p.expect(token.RPAREN)
+			}
+			backup.Target = fn
+		}
+	}
+
+	// Parse SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		backup.Settings = p.parseSettingsList()
+	}
+
+	// Parse FORMAT clause
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		backup.Format = p.parseIdentifierName()
+	}
+
+	return backup
+}
+
+func (p *Parser) parseRestore() *ast.RestoreQuery {
+	restore := &ast.RestoreQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip RESTORE
+
+	// Parse what to restore: TABLE, DATABASE, DICTIONARY, ALL, TEMPORARY
+	if p.currentIs(token.TABLE) {
+		p.nextToken()
+		name := p.parseIdentifierName()
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			restore.Database = name
+			restore.Table = p.parseIdentifierName()
+		} else {
+			restore.Table = name
+		}
+	} else if p.currentIs(token.DATABASE) {
+		p.nextToken()
+		restore.Database = p.parseIdentifierName()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
+		p.nextToken()
+		restore.Dictionary = p.parseIdentifierName()
+	} else if p.currentIs(token.ALL) {
+		restore.All = true
+		p.nextToken()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TEMPORARY" {
+		restore.Temporary = true
+		p.nextToken()
+		if p.currentIs(token.TABLE) {
+			p.nextToken()
+		}
+	}
+
+	// Parse FROM clause
+	if p.currentIs(token.FROM) {
+		p.nextToken()
+		// Parse source - it's a function call like Null or Disk('path')
+		if p.currentIs(token.NULL) || p.currentIs(token.IDENT) {
+			name := p.current.Value
+			p.nextToken()
+			fn := &ast.FunctionCall{
+				Position: restore.Position,
+				Name:     name,
+			}
+			if p.currentIs(token.LPAREN) {
+				p.nextToken()
+				if !p.currentIs(token.RPAREN) {
+					fn.Arguments = p.parseExpressionList()
+				}
+				p.expect(token.RPAREN)
+			}
+			restore.Source = fn
+		}
+	}
+
+	// Parse SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		restore.Settings = p.parseSettingsList()
+	}
+
+	// Parse FORMAT clause
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		restore.Format = p.parseIdentifierName()
+	}
+
+	return restore
 }
 
 // parseTransactionControl handles BEGIN, COMMIT, ROLLBACK, and SET TRANSACTION SNAPSHOT statements

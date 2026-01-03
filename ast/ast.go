@@ -765,6 +765,40 @@ func (a *AttachQuery) Pos() token.Position { return a.Position }
 func (a *AttachQuery) End() token.Position { return a.Position }
 func (a *AttachQuery) statementNode()      {}
 
+// BackupQuery represents a BACKUP statement.
+type BackupQuery struct {
+	Position   token.Position `json:"-"`
+	Database   string         `json:"database,omitempty"`
+	Table      string         `json:"table,omitempty"`
+	Dictionary string         `json:"dictionary,omitempty"`
+	All        bool           `json:"all,omitempty"` // BACKUP ALL
+	Temporary  bool           `json:"temporary,omitempty"`
+	Target     *FunctionCall  `json:"target,omitempty"` // Disk('path') or Null
+	Settings   []*SettingExpr `json:"settings,omitempty"`
+	Format     string         `json:"format,omitempty"`
+}
+
+func (b *BackupQuery) Pos() token.Position { return b.Position }
+func (b *BackupQuery) End() token.Position { return b.Position }
+func (b *BackupQuery) statementNode()      {}
+
+// RestoreQuery represents a RESTORE statement.
+type RestoreQuery struct {
+	Position   token.Position `json:"-"`
+	Database   string         `json:"database,omitempty"`
+	Table      string         `json:"table,omitempty"`
+	Dictionary string         `json:"dictionary,omitempty"`
+	All        bool           `json:"all,omitempty"` // RESTORE ALL
+	Temporary  bool           `json:"temporary,omitempty"`
+	Source     *FunctionCall  `json:"source,omitempty"` // Disk('path') or Null
+	Settings   []*SettingExpr `json:"settings,omitempty"`
+	Format     string         `json:"format,omitempty"`
+}
+
+func (r *RestoreQuery) Pos() token.Position { return r.Position }
+func (r *RestoreQuery) End() token.Position { return r.Position }
+func (r *RestoreQuery) statementNode()      {}
+
 // DescribeQuery represents a DESCRIBE statement.
 type DescribeQuery struct {
 	Position      token.Position   `json:"-"`

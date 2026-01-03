@@ -63,6 +63,7 @@ const (
 	ASC
 	ASOF
 	ATTACH
+	BACKUP
 	BEGIN
 	BETWEEN
 	BOTH
@@ -163,6 +164,7 @@ const (
 	REGEXP
 	RENAME
 	REPLACE
+	RESTORE
 	REVOKE
 	RIGHT
 	ROLLBACK
@@ -262,6 +264,7 @@ var tokens = [...]string{
 	ASC:          "ASC",
 	ASOF:         "ASOF",
 	ATTACH:       "ATTACH",
+	BACKUP:       "BACKUP",
 	BEGIN:        "BEGIN",
 	BETWEEN:      "BETWEEN",
 	BOTH:         "BOTH",
@@ -362,6 +365,7 @@ var tokens = [...]string{
 	REGEXP:       "REGEXP",
 	RENAME:       "RENAME",
 	REPLACE:      "REPLACE",
+	RESTORE:      "RESTORE",
 	REVOKE:       "REVOKE",
 	RIGHT:        "RIGHT",
 	ROLLBACK:     "ROLLBACK",
