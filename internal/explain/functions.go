@@ -125,10 +125,24 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, children)
 	}
 	// Arguments (Settings are included as part of argument count)
-	// FILTER condition is also an additional argument
-	argCount := len(n.Arguments)
+	// FILTER condition is appended to arguments for -If suffix functions
+	// count(name) FILTER (WHERE cond) -> countIf(name, cond) - 2 args
+	// count(*) FILTER (WHERE cond) -> countIf(cond) - 1 arg (asterisk dropped)
+	var argCount int
+	filterArgs := n.Arguments
 	if n.Filter != nil {
-		argCount++ // Filter condition is counted as an argument
+		// Filter condition is appended as an extra argument
+		// But first, remove any Asterisk arguments (count(*) case)
+		var nonAsteriskArgs []ast.Expression
+		for _, arg := range n.Arguments {
+			if _, isAsterisk := arg.(*ast.Asterisk); !isAsterisk {
+				nonAsteriskArgs = append(nonAsteriskArgs, arg)
+			}
+		}
+		filterArgs = nonAsteriskArgs
+		argCount = len(filterArgs) + 1 // +1 for filter condition
+	} else {
+		argCount = len(n.Arguments)
 	}
 	if len(n.Settings) > 0 {
 		argCount++ // Set is counted as one argument
@@ -138,7 +152,12 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 		fmt.Fprintf(sb, " (children %d)", argCount)
 	}
 	fmt.Fprintln(sb)
-	for _, arg := range n.Arguments {
+	// Output arguments (filterArgs excludes Asterisk when FILTER is present)
+	argsToOutput := filterArgs
+	if n.Filter == nil {
+		argsToOutput = n.Arguments
+	}
+	for _, arg := range argsToOutput {
 		// For view() table function, unwrap Subquery wrapper
 		// Also reset the subquery context since view() SELECT is not in a Subquery node
 		if strings.ToLower(n.Name) == "view" {
@@ -152,7 +171,7 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 		}
 		Node(sb, arg, depth+2)
 	}
-	// Filter condition appears after regular arguments
+	// Append filter condition at the end
 	if n.Filter != nil {
 		Node(sb, n.Filter, depth+2)
 	}
