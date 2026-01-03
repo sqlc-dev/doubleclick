@@ -80,14 +80,14 @@ func explainDictionaryDefinition(sb *strings.Builder, n *ast.DictionaryDefinitio
 		explainDictionaryLifetime(sb, n.Lifetime, indent+" ", depth+1)
 	}
 
-	// RANGE (if present, comes before LAYOUT)
-	if n.Range != nil {
-		explainDictionaryRange(sb, n.Range, indent+" ", depth+1)
-	}
-
-	// LAYOUT
+	// LAYOUT (comes before RANGE in EXPLAIN output)
 	if n.Layout != nil {
 		explainDictionaryLayout(sb, n.Layout, indent+" ", depth+1)
+	}
+
+	// RANGE
+	if n.Range != nil {
+		explainDictionaryRange(sb, n.Range, indent+" ", depth+1)
 	}
 
 	// SETTINGS

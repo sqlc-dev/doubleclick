@@ -61,7 +61,7 @@ func extractWithClause(stmt ast.Statement) []ast.Expression {
 }
 
 // explainSelectQueryWithInheritedWith outputs a SELECT with an inherited WITH clause
-// The inherited WITH clause is output AFTER the columns (not before, like a regular WITH)
+// The inherited WITH clause is output at the END of children (after columns and tables)
 func explainSelectQueryWithInheritedWith(sb *strings.Builder, stmt ast.Statement, inheritedWith []ast.Expression, depth int) {
 	sq, ok := stmt.(*ast.SelectQuery)
 	if !ok {
@@ -76,21 +76,15 @@ func explainSelectQueryWithInheritedWith(sb *strings.Builder, stmt ast.Statement
 		return
 	}
 
-	// Output SelectQuery with inherited WITH clause after columns
+	// Output SelectQuery with inherited WITH clause at the end
 	indent := strings.Repeat(" ", depth)
 	children := countSelectQueryChildren(sq) + 1 // +1 for inherited WITH clause
 	fmt.Fprintf(sb, "%sSelectQuery (children %d)\n", indent, children)
 
-	// Columns (ExpressionList) - output BEFORE inherited WITH
+	// Columns (ExpressionList) - output first
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(sq.Columns))
 	for _, col := range sq.Columns {
 		Node(sb, col, depth+2)
-	}
-
-	// Inherited WITH clause (ExpressionList) - output AFTER columns
-	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(inheritedWith))
-	for _, w := range inheritedWith {
-		Node(sb, w, depth+2)
 	}
 
 	// FROM (including ARRAY JOIN as part of TablesInSelectQuery)
@@ -145,23 +139,31 @@ func explainSelectQueryWithInheritedWith(sb *strings.Builder, stmt ast.Statement
 			Node(sb, i, depth+2)
 		}
 	}
-	// OFFSET
-	if sq.Offset != nil {
-		Node(sb, sq.Offset, depth+1)
-	}
-	// LIMIT BY handling
+	// LIMIT BY handling - order: LimitByOffset, LimitByLimit, LimitBy expressions, Offset, Limit
 	if sq.LimitByLimit != nil {
+		// Output LIMIT BY offset first (if present)
+		if sq.LimitByOffset != nil {
+			Node(sb, sq.LimitByOffset, depth+1)
+		}
+		// Output LIMIT BY count
 		Node(sb, sq.LimitByLimit, depth+1)
+		// Output LIMIT BY expressions
 		if len(sq.LimitBy) > 0 {
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(sq.LimitBy))
 			for _, expr := range sq.LimitBy {
 				Node(sb, expr, depth+2)
 			}
 		}
+		// Output regular OFFSET
+		if sq.Offset != nil {
+			Node(sb, sq.Offset, depth+1)
+		}
+		// Output regular LIMIT
 		if sq.Limit != nil {
 			Node(sb, sq.Limit, depth+1)
 		}
 	} else if len(sq.LimitBy) > 0 {
+		// LIMIT BY without explicit LimitByLimit
 		if sq.Limit != nil {
 			Node(sb, sq.Limit, depth+1)
 		}
@@ -169,8 +171,14 @@ func explainSelectQueryWithInheritedWith(sb *strings.Builder, stmt ast.Statement
 		for _, expr := range sq.LimitBy {
 			Node(sb, expr, depth+2)
 		}
-	} else if sq.Limit != nil {
-		Node(sb, sq.Limit, depth+1)
+	} else {
+		// No LIMIT BY - just regular OFFSET and LIMIT
+		if sq.Offset != nil {
+			Node(sb, sq.Offset, depth+1)
+		}
+		if sq.Limit != nil {
+			Node(sb, sq.Limit, depth+1)
+		}
 	}
 	// SETTINGS (when no INTERPOLATE - the case with INTERPOLATE is handled above)
 	if len(sq.Settings) > 0 && len(sq.Interpolate) == 0 && !sq.SettingsAfterFormat {
@@ -179,6 +187,105 @@ func explainSelectQueryWithInheritedWith(sb *strings.Builder, stmt ast.Statement
 	// TOP clause
 	if sq.Top != nil {
 		Node(sb, sq.Top, depth+1)
+	}
+
+	// Inherited WITH clause (ExpressionList) - output at the END
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(inheritedWith))
+	for _, w := range inheritedWith {
+		Node(sb, w, depth+2)
+	}
+}
+
+// ExplainSelectWithInheritedWith recursively explains a select statement with inherited WITH clause
+// This is used for WITH ... INSERT ... SELECT where the WITH clause belongs to the INSERT
+// but needs to be output at the end of each SelectQuery in the tree
+func ExplainSelectWithInheritedWith(sb *strings.Builder, stmt ast.Statement, inheritedWith []ast.Expression, depth int) {
+	switch s := stmt.(type) {
+	case *ast.SelectWithUnionQuery:
+		explainSelectWithUnionQueryWithInheritedWith(sb, s, inheritedWith, depth)
+	case *ast.SelectIntersectExceptQuery:
+		explainSelectIntersectExceptQueryWithInheritedWith(sb, s, inheritedWith, depth)
+	case *ast.SelectQuery:
+		explainSelectQueryWithInheritedWith(sb, s, inheritedWith, depth)
+	default:
+		Node(sb, stmt, depth)
+	}
+}
+
+// explainSelectWithUnionQueryWithInheritedWith explains a SelectWithUnionQuery with inherited WITH
+func explainSelectWithUnionQueryWithInheritedWith(sb *strings.Builder, n *ast.SelectWithUnionQuery, inheritedWith []ast.Expression, depth int) {
+	if n == nil {
+		return
+	}
+	indent := strings.Repeat(" ", depth)
+	children := countSelectUnionChildren(n)
+	fmt.Fprintf(sb, "%sSelectWithUnionQuery (children %d)\n", indent, children)
+
+	selects := simplifyUnionSelects(n.Selects)
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(selects))
+	for _, sel := range selects {
+		ExplainSelectWithInheritedWith(sb, sel, inheritedWith, depth+2)
+	}
+
+	// INTO OUTFILE clause
+	for _, sel := range n.Selects {
+		if sq, ok := sel.(*ast.SelectQuery); ok && sq.IntoOutfile != nil {
+			fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, sq.IntoOutfile.Filename)
+			break
+		}
+	}
+	// SETTINGS before FORMAT
+	if n.SettingsBeforeFormat && len(n.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
+	// FORMAT clause - check individual SelectQuery nodes
+	for _, sel := range n.Selects {
+		if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
+			Node(sb, sq.Format, depth+1)
+			break
+		}
+	}
+	// SETTINGS after FORMAT
+	if n.SettingsAfterFormat && len(n.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	} else {
+		for _, sel := range n.Selects {
+			if sq, ok := sel.(*ast.SelectQuery); ok && sq.SettingsAfterFormat && len(sq.Settings) > 0 {
+				fmt.Fprintf(sb, "%s Set\n", indent)
+				break
+			}
+		}
+	}
+}
+
+// explainSelectIntersectExceptQueryWithInheritedWith explains a SelectIntersectExceptQuery with inherited WITH
+func explainSelectIntersectExceptQueryWithInheritedWith(sb *strings.Builder, n *ast.SelectIntersectExceptQuery, inheritedWith []ast.Expression, depth int) {
+	indent := strings.Repeat(" ", depth)
+	fmt.Fprintf(sb, "%sSelectIntersectExceptQuery (children %d)\n", indent, len(n.Selects))
+
+	// Check if EXCEPT is present - affects how first operand is wrapped
+	hasExcept := false
+	for _, op := range n.Operators {
+		if strings.HasPrefix(op, "EXCEPT") {
+			hasExcept = true
+			break
+		}
+	}
+
+	for i, sel := range n.Selects {
+		if hasExcept && i == 0 {
+			// Wrap first operand in SelectWithUnionQuery format
+			if _, isUnion := sel.(*ast.SelectWithUnionQuery); isUnion {
+				ExplainSelectWithInheritedWith(sb, sel, inheritedWith, depth+1)
+			} else {
+				childIndent := strings.Repeat(" ", depth+1)
+				fmt.Fprintf(sb, "%sSelectWithUnionQuery (children 1)\n", childIndent)
+				fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", childIndent)
+				ExplainSelectWithInheritedWith(sb, sel, inheritedWith, depth+3)
+			}
+		} else {
+			ExplainSelectWithInheritedWith(sb, sel, inheritedWith, depth+1)
+		}
 	}
 }
 
@@ -267,9 +374,14 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 				// but we need to unwrap tuples and output elements directly
 				if lit, ok := g.(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
 					if elements, ok := lit.Value.([]ast.Expression); ok {
-						fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(elements))
-						for _, elem := range elements {
-							Node(sb, elem, depth+3)
+						if len(elements) == 0 {
+							// Empty grouping set () outputs ExpressionList without children count
+							fmt.Fprintf(sb, "%s  ExpressionList\n", indent)
+						} else {
+							fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(elements))
+							for _, elem := range elements {
+								Node(sb, elem, depth+3)
+							}
 						}
 					} else {
 						// Fallback for unexpected tuple value type
@@ -319,25 +431,31 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 			Node(sb, i, depth+2)
 		}
 	}
-	// OFFSET (ClickHouse outputs offset before limit in EXPLAIN AST)
-	if n.Offset != nil {
-		Node(sb, n.Offset, depth+1)
-	}
-	// LIMIT BY handling
+	// LIMIT BY handling - order: LimitByOffset, LimitByLimit, LimitBy expressions, Offset, Limit
 	if n.LimitByLimit != nil {
-		// Case: LIMIT n BY x LIMIT m -> output LimitByLimit, LimitBy, Limit
+		// Output LIMIT BY offset first (if present)
+		if n.LimitByOffset != nil {
+			Node(sb, n.LimitByOffset, depth+1)
+		}
+		// Output LIMIT BY count
 		Node(sb, n.LimitByLimit, depth+1)
+		// Output LIMIT BY expressions
 		if len(n.LimitBy) > 0 {
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.LimitBy))
 			for _, expr := range n.LimitBy {
 				Node(sb, expr, depth+2)
 			}
 		}
+		// Output regular OFFSET
+		if n.Offset != nil {
+			Node(sb, n.Offset, depth+1)
+		}
+		// Output regular LIMIT
 		if n.Limit != nil {
 			Node(sb, n.Limit, depth+1)
 		}
 	} else if len(n.LimitBy) > 0 {
-		// Case: LIMIT n BY x (no second LIMIT) -> output Limit, then LimitBy
+		// LIMIT BY without explicit LimitByLimit
 		if n.Limit != nil {
 			Node(sb, n.Limit, depth+1)
 		}
@@ -345,9 +463,14 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 		for _, expr := range n.LimitBy {
 			Node(sb, expr, depth+2)
 		}
-	} else if n.Limit != nil {
-		// Case: plain LIMIT n (no BY)
-		Node(sb, n.Limit, depth+1)
+	} else {
+		// No LIMIT BY - just regular OFFSET and LIMIT
+		if n.Offset != nil {
+			Node(sb, n.Offset, depth+1)
+		}
+		if n.Limit != nil {
+			Node(sb, n.Limit, depth+1)
+		}
 	}
 	// SETTINGS is output at SelectQuery level only when NOT after FORMAT
 	// When SettingsAfterFormat is true, it's output at SelectWithUnionQuery level instead
@@ -519,8 +642,11 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 	if len(n.Interpolate) > 0 {
 		count++
 	}
+	if n.LimitByOffset != nil {
+		count++ // LIMIT offset in "LIMIT offset, count BY x"
+	}
 	if n.LimitByLimit != nil {
-		count++ // LIMIT n in "LIMIT n BY x LIMIT m"
+		count++ // LIMIT count in "LIMIT n BY x LIMIT m"
 	}
 	if n.Limit != nil {
 		count++

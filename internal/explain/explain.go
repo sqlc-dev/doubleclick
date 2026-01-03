@@ -155,6 +155,12 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		fmt.Fprintf(sb, "%sCreateSettingsProfileQuery\n", indent)
 	case *ast.DropSettingsProfileQuery:
 		fmt.Fprintf(sb, "%sDROP SETTINGS PROFILE query\n", indent)
+	case *ast.CreateNamedCollectionQuery:
+		fmt.Fprintf(sb, "%sCreateNamedCollectionQuery\n", indent)
+	case *ast.AlterNamedCollectionQuery:
+		fmt.Fprintf(sb, "%sAlterNamedCollectionQuery\n", indent)
+	case *ast.DropNamedCollectionQuery:
+		fmt.Fprintf(sb, "%sDropNamedCollectionQuery\n", indent)
 	case *ast.ShowCreateSettingsProfileQuery:
 		// Use PROFILES (plural) when multiple profiles are specified
 		queryName := "SHOW CREATE SETTINGS PROFILE query"
@@ -334,6 +340,9 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	if len(col.Settings) > 0 {
 		children++
 	}
+	if col.Comment != "" {
+		children++
+	}
 	if children > 0 {
 		fmt.Fprintf(sb, "%sColumnDeclaration %s (children %d)\n", indent, col.Name, children)
 	} else {
@@ -359,6 +368,9 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	}
 	if len(col.Settings) > 0 {
 		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
+	if col.Comment != "" {
+		fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, col.Comment)
 	}
 }
 

@@ -24,7 +24,7 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 			children++ // Database identifier (separate from table)
 		}
 	}
-	if len(n.Columns) > 0 || n.AllColumns {
+	if len(n.ColumnExpressions) > 0 || len(n.Columns) > 0 || n.AllColumns {
 		children++ // Column list
 	}
 	if n.Select != nil {
@@ -70,7 +70,12 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 	}
 
 	// Column list
-	if n.AllColumns {
+	if len(n.ColumnExpressions) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.ColumnExpressions))
+		for _, expr := range n.ColumnExpressions {
+			Node(sb, expr, depth+2)
+		}
+	} else if n.AllColumns {
 		fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", indent)
 		fmt.Fprintf(sb, "%s  Asterisk\n", indent)
 	} else if len(n.Columns) > 0 {
@@ -92,7 +97,13 @@ func explainInsertQuery(sb *strings.Builder, n *ast.InsertQuery, indent string, 
 				}
 			}
 		}
-		Node(sb, n.Select, depth+1)
+		// If this INSERT has an inherited WITH clause (from WITH ... INSERT syntax),
+		// use the special explain function that outputs WITH at the end of each SelectQuery
+		if len(n.With) > 0 {
+			ExplainSelectWithInheritedWith(sb, n.Select, n.With, depth+1)
+		} else {
+			Node(sb, n.Select, depth+1)
+		}
 	}
 
 	if n.HasSettings {
@@ -117,16 +128,26 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	}
 	if n.CreateUser || n.AlterUser {
 		if n.HasAuthenticationData {
-			fmt.Fprintf(sb, "%sCreateUserQuery (children 1)\n", indent)
-			// AuthenticationData has children if there are auth values
+			// Each authentication value is a separate AuthenticationData child
 			if len(n.AuthenticationValues) > 0 {
-				fmt.Fprintf(sb, "%s AuthenticationData (children %d)\n", indent, len(n.AuthenticationValues))
+				fmt.Fprintf(sb, "%sCreateUserQuery (children %d)\n", indent, len(n.AuthenticationValues))
 				for _, val := range n.AuthenticationValues {
+					// Each AuthenticationData has 1 child (the Literal value)
+					fmt.Fprintf(sb, "%s AuthenticationData (children 1)\n", indent)
 					// Escape the value - strings need \' escaping
 					escaped := escapeStringLiteral(val)
 					fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, escaped)
 				}
+			} else if n.SSHKeyCount > 0 {
+				// SSH key authentication - each key is a PublicSSHKey child
+				fmt.Fprintf(sb, "%sCreateUserQuery (children 1)\n", indent)
+				fmt.Fprintf(sb, "%s AuthenticationData (children %d)\n", indent, n.SSHKeyCount)
+				for i := 0; i < n.SSHKeyCount; i++ {
+					fmt.Fprintf(sb, "%s  PublicSSHKey\n", indent)
+				}
 			} else {
+				// No values - just output CreateUserQuery with 1 child
+				fmt.Fprintf(sb, "%sCreateUserQuery (children 1)\n", indent)
 				fmt.Fprintf(sb, "%s AuthenticationData\n", indent)
 			}
 		} else {
@@ -389,33 +410,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				Node(sb, n.PartitionBy, storageChildDepth)
 			}
 		}
-		if len(n.OrderBy) > 0 {
-			if len(n.OrderBy) == 1 {
-				if ident, ok := n.OrderBy[0].(*ast.Identifier); ok {
-					fmt.Fprintf(sb, "%s Identifier %s\n", storageIndent, ident.Name())
-				} else if lit, ok := n.OrderBy[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
-					// Handle tuple literal (including empty tuple from ORDER BY ())
-					exprs, _ := lit.Value.([]ast.Expression)
-					fmt.Fprintf(sb, "%s Function tuple (children %d)\n", storageIndent, 1)
-					if len(exprs) > 0 {
-						fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(exprs))
-						for _, e := range exprs {
-							Node(sb, e, storageChildDepth+2)
-						}
-					} else {
-						fmt.Fprintf(sb, "%s  ExpressionList\n", storageIndent)
-					}
-				} else {
-					Node(sb, n.OrderBy[0], storageChildDepth)
-				}
-			} else {
-				fmt.Fprintf(sb, "%s Function tuple (children %d)\n", storageIndent, 1)
-				fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(n.OrderBy))
-				for _, o := range n.OrderBy {
-					Node(sb, o, storageChildDepth+2)
-				}
-			}
-		}
+		// PRIMARY KEY comes before ORDER BY in EXPLAIN output
 		if len(n.PrimaryKey) > 0 {
 			if len(n.PrimaryKey) == 1 {
 				if ident, ok := n.PrimaryKey[0].(*ast.Identifier); ok {
@@ -443,14 +438,55 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				}
 			}
 		}
+		// ORDER BY comes after PRIMARY KEY in EXPLAIN output
+		if len(n.OrderBy) > 0 {
+			if len(n.OrderBy) == 1 {
+				if ident, ok := n.OrderBy[0].(*ast.Identifier); ok {
+					fmt.Fprintf(sb, "%s Identifier %s\n", storageIndent, ident.Name())
+				} else if lit, ok := n.OrderBy[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+					// Handle tuple literal - for ORDER BY with modifiers (DESC/ASC),
+					// ClickHouse outputs just "Function tuple" without children
+					// For empty tuples or regular tuples without modifiers, output children
+					if n.OrderByHasModifiers {
+						fmt.Fprintf(sb, "%s Function tuple\n", storageIndent)
+					} else {
+						exprs, _ := lit.Value.([]ast.Expression)
+						fmt.Fprintf(sb, "%s Function tuple (children %d)\n", storageIndent, 1)
+						if len(exprs) > 0 {
+							fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(exprs))
+							for _, e := range exprs {
+								Node(sb, e, storageChildDepth+2)
+							}
+						} else {
+							fmt.Fprintf(sb, "%s  ExpressionList\n", storageIndent)
+						}
+					}
+				} else {
+					Node(sb, n.OrderBy[0], storageChildDepth)
+				}
+			} else {
+				// Multiple ORDER BY expressions without modifiers
+				fmt.Fprintf(sb, "%s Function tuple (children %d)\n", storageIndent, 1)
+				fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", storageIndent, len(n.OrderBy))
+				for _, o := range n.OrderBy {
+					Node(sb, o, storageChildDepth+2)
+				}
+			}
+		}
 		// SAMPLE BY is always shown in EXPLAIN AST when present
 		if n.SampleBy != nil {
 			Node(sb, n.SampleBy, storageChildDepth)
 		}
 		if n.TTL != nil {
-			fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", storageIndent)
+			// Count total TTL elements (1 for Expression + len(Expressions))
+			ttlCount := 1 + len(n.TTL.Expressions)
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", storageIndent, ttlCount)
 			fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", storageIndent)
 			Node(sb, n.TTL.Expression, storageChildDepth+2)
+			for _, expr := range n.TTL.Expressions {
+				fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", storageIndent)
+				Node(sb, expr, storageChildDepth+2)
+			}
 		}
 		if len(n.Settings) > 0 {
 			fmt.Fprintf(sb, "%s Set\n", storageIndent)
@@ -588,12 +624,18 @@ func explainDropQuery(sb *strings.Builder, n *ast.DropQuery, indent string, dept
 	} else {
 		children := 1
 		if hasFormat {
-			children = 2
+			children++
+		}
+		if len(n.Settings) > 0 {
+			children++
 		}
 		fmt.Fprintf(sb, "%sDropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
 		if hasFormat {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
+		if len(n.Settings) > 0 {
+			fmt.Fprintf(sb, "%s Set\n", indent)
 		}
 	}
 }
@@ -602,14 +644,29 @@ func explainUndropQuery(sb *strings.Builder, n *ast.UndropQuery, indent string, 
 	name := n.Table
 	// Check if we have a database-qualified name (for UNDROP TABLE db.table)
 	hasDatabase := n.Database != ""
+	hasFormat := n.Format != ""
 	if hasDatabase {
-		// Database-qualified: UndropQuery db table (children 2)
-		fmt.Fprintf(sb, "%sUndropQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), 2)
+		// Database-qualified: UndropQuery db table (children 2 or 3)
+		children := 2
+		if hasFormat {
+			children = 3
+		}
+		fmt.Fprintf(sb, "%sUndropQuery %s %s (children %d)\n", indent, EscapeIdentifier(n.Database), EscapeIdentifier(name), children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(n.Database))
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+		if hasFormat {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
 	} else {
-		fmt.Fprintf(sb, "%sUndropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), 1)
+		children := 1
+		if hasFormat {
+			children = 2
+		}
+		fmt.Fprintf(sb, "%sUndropQuery  %s (children %d)\n", indent, EscapeIdentifier(name), children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, EscapeIdentifier(name))
+		if hasFormat {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+		}
 	}
 }
 
@@ -749,25 +806,44 @@ func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string
 	}
 
 	// Check if inner statement has FORMAT clause - this should be output as child of Explain
+	// Also check for SETTINGS after FORMAT (these are at the EXPLAIN level, not part of the SELECT)
 	var format *ast.Identifier
+	var hasSettingsAfterFormat bool
+	var savedSettings []*ast.SettingExpr
 	if swu, ok := n.Statement.(*ast.SelectWithUnionQuery); ok {
+		// Check for union-level settings after format
+		if swu.SettingsAfterFormat && len(swu.Settings) > 0 {
+			hasSettingsAfterFormat = true
+			savedSettings = swu.Settings
+			swu.Settings = nil
+			defer func() { swu.Settings = savedSettings }()
+		}
 		for _, sel := range swu.Selects {
-			if sq, ok := sel.(*ast.SelectQuery); ok && sq.Format != nil {
-				format = sq.Format
-				// Temporarily nil out the format so it's not output by SelectWithUnionQuery
-				sq.Format = nil
-				defer func() { sq.Format = format }()
+			if sq, ok := sel.(*ast.SelectQuery); ok {
+				if sq.Format != nil {
+					format = sq.Format
+					// Temporarily nil out the format so it's not output by SelectWithUnionQuery
+					sq.Format = nil
+					defer func() { sq.Format = format }()
+				}
+				// Check for settings after format in the SelectQuery
+				if sq.SettingsAfterFormat && len(sq.Settings) > 0 && !hasSettingsAfterFormat {
+					hasSettingsAfterFormat = true
+					savedSettings = sq.Settings
+					sq.Settings = nil
+					defer func() { sq.Settings = savedSettings }()
+				}
 				break
 			}
 		}
 	}
 
-	// Count children: settings (if present) + statement + format (if present)
+	// Count children: statement + format (if present) + settings (if present)
 	children := 1
-	if n.HasSettings {
+	if format != nil {
 		children++
 	}
-	if format != nil {
+	if n.HasSettings || hasSettingsAfterFormat {
 		children++
 	}
 
@@ -778,12 +854,19 @@ func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string
 	} else {
 		fmt.Fprintf(sb, "%sExplain%s (children %d)\n", indent, typeStr, children)
 	}
+	// EXPLAIN-level settings (like header = 0) come BEFORE the statement
 	if n.HasSettings {
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
+	// Output the statement
 	Node(sb, n.Statement, depth+1)
+	// Format comes after statement
 	if format != nil {
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, format.Parts[len(format.Parts)-1])
+	}
+	// Settings after format (at the query level, e.g., FORMAT Null SETTINGS ...) come last
+	if hasSettingsAfterFormat {
+		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
 
@@ -955,11 +1038,15 @@ func explainShowQuery(sb *strings.Builder, n *ast.ShowQuery, indent string) {
 
 	// SHOW CREATE USER has special output format
 	if n.ShowType == ast.ShowCreateUser {
+		userWord := "USER"
+		if n.MultipleUsers {
+			userWord = "USERS"
+		}
 		if n.Format != "" {
-			fmt.Fprintf(sb, "%sSHOW CREATE USER query (children 1)\n", indent)
+			fmt.Fprintf(sb, "%sSHOW CREATE %s query (children 1)\n", indent, userWord)
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
 		} else {
-			fmt.Fprintf(sb, "%sSHOW CREATE USER query\n", indent)
+			fmt.Fprintf(sb, "%sSHOW CREATE %s query\n", indent, userWord)
 		}
 		return
 	}
@@ -1191,7 +1278,7 @@ func explainDetachQuery(sb *strings.Builder, n *ast.DetachQuery, indent string) 
 }
 
 func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, depth int) {
-	// Count children: identifier + columns definition (if any) + storage definition (if any)
+	// Count children: identifier + columns definition (if any) + select query (if any) + storage/view targets (if any)
 	children := 1 // table/database identifier
 	if n.Database != "" && n.Table != "" {
 		children++ // extra identifier for database
@@ -1200,9 +1287,13 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 	if hasColumns {
 		children++
 	}
-	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0
-	if hasStorage {
+	hasSelectQuery := n.SelectQuery != nil
+	if hasSelectQuery {
 		children++
+	}
+	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil
+	if hasStorage {
+		children++ // ViewTargets or Storage definition
 	}
 
 	// Output header
@@ -1259,30 +1350,64 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 		}
 	}
 
-	// Output storage definition
+	// Output select query (for materialized views)
+	if hasSelectQuery {
+		Node(sb, n.SelectQuery, depth+1)
+	}
+
+	// Output storage definition (or ViewTargets for materialized views)
 	if hasStorage {
 		storageChildren := 0
 		if n.Engine != nil {
 			storageChildren++
 		}
+		if n.PartitionBy != nil {
+			storageChildren++
+		}
 		if len(n.OrderBy) > 0 {
 			storageChildren++
 		}
 		if len(n.PrimaryKey) > 0 {
 			storageChildren++
 		}
-		fmt.Fprintf(sb, "%s Storage definition (children %d)\n", indent, storageChildren)
-		if n.Engine != nil {
-			fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
-		}
-		if len(n.OrderBy) > 0 {
-			for _, expr := range n.OrderBy {
-				Node(sb, expr, depth+2)
+
+		// For materialized views, wrap in ViewTargets
+		if n.IsMaterializedView {
+			fmt.Fprintf(sb, "%s ViewTargets (children 1)\n", indent)
+			fmt.Fprintf(sb, "%s  Storage definition (children %d)\n", indent, storageChildren)
+			if n.Engine != nil {
+				fmt.Fprintf(sb, "%s   Function %s\n", indent, n.Engine.Name)
 			}
-		}
-		if len(n.PrimaryKey) > 0 {
-			for _, expr := range n.PrimaryKey {
-				Node(sb, expr, depth+2)
+			if n.PartitionBy != nil {
+				Node(sb, n.PartitionBy, depth+3)
+			}
+			if len(n.OrderBy) > 0 {
+				for _, expr := range n.OrderBy {
+					Node(sb, expr, depth+3)
+				}
+			}
+			if len(n.PrimaryKey) > 0 {
+				for _, expr := range n.PrimaryKey {
+					Node(sb, expr, depth+3)
+				}
+			}
+		} else {
+			fmt.Fprintf(sb, "%s Storage definition (children %d)\n", indent, storageChildren)
+			if n.Engine != nil {
+				fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
+			}
+			if n.PartitionBy != nil {
+				Node(sb, n.PartitionBy, depth+2)
+			}
+			if len(n.OrderBy) > 0 {
+				for _, expr := range n.OrderBy {
+					Node(sb, expr, depth+2)
+				}
+			}
+			if len(n.PrimaryKey) > 0 {
+				for _, expr := range n.PrimaryKey {
+					Node(sb, expr, depth+2)
+				}
 			}
 		}
 	}
@@ -1350,6 +1475,10 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	if cmdType == ast.AlterDeleteWhere {
 		cmdType = "DELETE"
 	}
+	// FREEZE (without partition) is shown as FREEZE_ALL in EXPLAIN AST
+	if cmdType == ast.AlterFreeze {
+		cmdType = "FREEZE_ALL"
+	}
 	if children > 0 {
 		fmt.Fprintf(sb, "%sAlterCommand %s (children %d)\n", indent, cmdType, children)
 	} else {
@@ -1398,8 +1527,13 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ColumnName)
 		}
 		if cmd.Partition != nil {
-			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
-			Node(sb, cmd.Partition, depth+2)
+			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
+			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
+				fmt.Fprintf(sb, "%s Partition_ID \n", indent)
+			} else {
+				fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+				Node(sb, cmd.Partition, depth+2)
+			}
 		}
 	case ast.AlterCommentColumn:
 		if cmd.ColumnName != "" {
@@ -1419,14 +1553,23 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		} else if cmd.Index != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
 		}
+		// AFTER clause
+		if cmd.AfterIndex != "" {
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.AfterIndex)
+		}
 	case ast.AlterDropIndex, ast.AlterClearIndex:
 		if cmd.Index != "" {
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Index)
 		}
 		// CLEAR INDEX IN PARTITION clause
 		if cmd.Partition != nil {
-			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
-			Node(sb, cmd.Partition, depth+2)
+			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
+			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
+				fmt.Fprintf(sb, "%s Partition_ID \n", indent)
+			} else {
+				fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+				Node(sb, cmd.Partition, depth+2)
+			}
 		}
 	case ast.AlterMaterializeIndex:
 		if cmd.Index != "" {
@@ -1466,9 +1609,15 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	case ast.AlterModifyTTL:
 		if cmd.TTL != nil && cmd.TTL.Expression != nil {
 			// TTL is wrapped in ExpressionList and TTLElement
-			fmt.Fprintf(sb, "%s ExpressionList (children 1)\n", indent)
+			// Count total TTL elements (1 for Expression + len(Expressions))
+			ttlCount := 1 + len(cmd.TTL.Expressions)
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, ttlCount)
 			fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", indent)
 			Node(sb, cmd.TTL.Expression, depth+3)
+			for _, expr := range cmd.TTL.Expressions {
+				fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", indent)
+				Node(sb, expr, depth+3)
+			}
 		}
 	case ast.AlterModifySetting:
 		fmt.Fprintf(sb, "%s Set\n", indent)
@@ -1502,6 +1651,16 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 			Node(sb, cmd.Where, depth+1)
 		}
 	case ast.AlterUpdate:
+		// Output order: Partition, Where, Assignments
+		if cmd.Partition != nil {
+			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
+			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
+				fmt.Fprintf(sb, "%s Partition_ID \n", indent)
+			} else {
+				fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+				Node(sb, cmd.Partition, depth+2)
+			}
+		}
 		if cmd.Where != nil {
 			Node(sb, cmd.Where, depth+1)
 		}
@@ -1542,6 +1701,14 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		// Single expression - output directly
 		if cmd.SampleByExpr != nil {
 			Node(sb, cmd.SampleByExpr, depth+1)
+		}
+	case ast.AlterResetSetting:
+		// RESET SETTING outputs ExpressionList with Identifier children
+		if len(cmd.ResetSettings) > 0 {
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(cmd.ResetSettings))
+			for _, name := range cmd.ResetSettings {
+				fmt.Fprintf(sb, "%s  Identifier %s\n", indent, name)
+			}
 		}
 	default:
 		if cmd.Partition != nil {
@@ -1697,6 +1864,10 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 		} else if cmd.Index != "" {
 			children++
 		}
+		// AFTER clause adds another child
+		if cmd.AfterIndex != "" {
+			children++
+		}
 	case ast.AlterDropIndex, ast.AlterClearIndex:
 		if cmd.Index != "" {
 			children++
@@ -1745,6 +1916,9 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 			children++
 		}
 	case ast.AlterUpdate:
+		if cmd.Partition != nil {
+			children++
+		}
 		if len(cmd.Assignments) > 0 {
 			children++
 		}
@@ -1779,6 +1953,11 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 		if cmd.SampleByExpr != nil {
 			children = 1
 		}
+	case ast.AlterResetSetting:
+		// RESET SETTING: ExpressionList with setting names (1 child)
+		if len(cmd.ResetSettings) > 0 {
+			children = 1
+		}
 	default:
 		if cmd.Partition != nil {
 			children++
@@ -1800,6 +1979,9 @@ func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent stri
 	if n.Cleanup {
 		name += "_cleanup"
 	}
+	if n.Dedupe {
+		name += "_deduplicate"
+	}
 
 	hasSettings := len(n.Settings) > 0
 	children := 1 // identifier
@@ -1820,8 +2002,13 @@ func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent stri
 		fmt.Fprintf(sb, "%sOptimizeQuery  %s (children %d)\n", indent, name, children)
 	}
 	if n.Partition != nil {
-		fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
-		Node(sb, n.Partition, depth+2)
+		// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
+		if ident, ok := n.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
+			fmt.Fprintf(sb, "%s Partition_ID \n", indent)
+		} else {
+			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+			Node(sb, n.Partition, depth+2)
+		}
 	}
 	if n.Database != "" {
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
@@ -1869,9 +2056,12 @@ func explainDeleteQuery(sb *strings.Builder, n *ast.DeleteQuery, indent string, 
 		return
 	}
 
-	// Count children: Where expression + table identifier
+	// Count children: Where expression + table identifier + settings
 	children := 1 // table identifier
 	if n.Where != nil {
+		children++
+	}
+	if len(n.Settings) > 0 {
 		children++
 	}
 
@@ -1880,6 +2070,9 @@ func explainDeleteQuery(sb *strings.Builder, n *ast.DeleteQuery, indent string, 
 		Node(sb, n.Where, depth+1)
 	}
 	fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
+	if len(n.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
 }
 
 func explainCheckQuery(sb *strings.Builder, n *ast.CheckQuery, indent string) {

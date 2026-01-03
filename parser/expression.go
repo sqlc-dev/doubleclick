@@ -114,6 +114,50 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 	return exprs
 }
 
+// parseCreateOrderByExpressions parses expressions for CREATE TABLE ORDER BY clause.
+// Returns the expressions and a boolean indicating if any ASC/DESC modifier was found.
+// This is different from regular expression list parsing because ORDER BY in CREATE TABLE
+// can have ASC/DESC modifiers that affect the EXPLAIN output (should be Function tuple if any modifier).
+func (p *Parser) parseCreateOrderByExpressions() ([]ast.Expression, bool) {
+	var exprs []ast.Expression
+	hasModifier := false
+
+	if p.currentIs(token.RPAREN) || p.currentIs(token.EOF) {
+		return exprs, hasModifier
+	}
+
+	expr := p.parseExpression(LOWEST)
+	if expr != nil {
+		exprs = append(exprs, expr)
+	}
+	// Consume ASC/DESC modifier
+	if p.currentIs(token.ASC) {
+		hasModifier = true
+		p.nextToken()
+	} else if p.currentIs(token.DESC) {
+		hasModifier = true
+		p.nextToken()
+	}
+
+	for p.currentIs(token.COMMA) {
+		p.nextToken()
+		expr := p.parseExpression(LOWEST)
+		if expr != nil {
+			exprs = append(exprs, expr)
+		}
+		// Consume ASC/DESC modifier
+		if p.currentIs(token.ASC) {
+			hasModifier = true
+			p.nextToken()
+		} else if p.currentIs(token.DESC) {
+			hasModifier = true
+			p.nextToken()
+		}
+	}
+
+	return exprs, hasModifier
+}
+
 // isClauseKeyword returns true if the current token is a SQL clause keyword
 // that should terminate an expression list (used for trailing comma support)
 func (p *Parser) isClauseKeyword() bool {
@@ -397,7 +441,11 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 	case token.TRIM:
 		return p.parseTrim()
 	case token.COLUMNS:
-		return p.parseColumnsMatcher()
+		// COLUMNS() is a column matcher, but 'columns' alone is an identifier (e.g., table name)
+		if p.peekIs(token.LPAREN) {
+			return p.parseColumnsMatcher()
+		}
+		return p.parseKeywordAsIdentifier()
 	case token.ARRAY:
 		// array(1,2,3) constructor or array as identifier (column name)
 		if p.peekIs(token.LPAREN) {
@@ -662,9 +710,16 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 
 	p.nextToken() // skip (
 
-	// Handle DISTINCT
-	if p.currentIs(token.DISTINCT) {
+	// Handle DISTINCT modifier (but not if DISTINCT is being used as a column name)
+	// If DISTINCT is followed by ) or , then it's a column reference, not a modifier
+	if p.currentIs(token.DISTINCT) && !p.peekIs(token.RPAREN) && !p.peekIs(token.COMMA) {
 		fn.Distinct = true
+		p.nextToken()
+	}
+
+	// Handle ALL modifier (but not if ALL is being used as a column name)
+	// If ALL is followed by ) or , then it's a column reference, not a modifier
+	if p.currentIs(token.ALL) && !p.peekIs(token.RPAREN) && !p.peekIs(token.COMMA) {
 		p.nextToken()
 	}
 
@@ -707,9 +762,8 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 			p.nextToken() // skip (
 			if p.currentIs(token.WHERE) {
 				p.nextToken() // skip WHERE
-				// Parse the filter condition - just consume it for now
-				// The filter is essentially a where clause for the aggregate
-				p.parseExpression(LOWEST)
+				// Parse the filter condition and store it
+				fn.Filter = p.parseExpression(LOWEST)
 			}
 			p.expect(token.RPAREN)
 		}
@@ -743,7 +797,7 @@ func (p *Parser) parseWindowSpec() *ast.WindowSpec {
 		return spec
 	}
 
-	// Check for named window reference inside parentheses: OVER (w0)
+	// Check for named window reference inside parentheses: OVER (w0) or OVER (w0 ORDER BY ...)
 	// This happens when the identifier is not a known clause keyword
 	if p.currentIs(token.IDENT) {
 		upper := strings.ToUpper(p.current.Value)
@@ -751,8 +805,8 @@ func (p *Parser) parseWindowSpec() *ast.WindowSpec {
 		if upper != "PARTITION" && upper != "ORDER" && upper != "ROWS" && upper != "RANGE" && upper != "GROUPS" {
 			spec.Name = p.current.Value
 			p.nextToken()
-			p.expect(token.RPAREN)
-			return spec
+			// Don't return early - there may be more clauses after the window name
+			// e.g., OVER (w1 ROWS UNBOUNDED PRECEDING)
 		}
 	}
 
@@ -920,8 +974,10 @@ func (p *Parser) parseNumber() ast.Expression {
 			// Try unsigned uint64 for large positive numbers
 			u, uerr := strconv.ParseUint(value, base, 64)
 			if uerr != nil {
+				// Too large for int64/uint64, store as string with IsBigInt flag
 				lit.Type = ast.LiteralString
 				lit.Value = value
+				lit.IsBigInt = true
 			} else {
 				lit.Type = ast.LiteralInteger
 				lit.Value = u // Store as uint64
@@ -1104,8 +1160,9 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 			Query:    subquery,
 		}
 	}
-	// EXPLAIN as subquery
-	if p.currentIs(token.EXPLAIN) {
+	// EXPLAIN as subquery - but only if followed by tokens that make sense for EXPLAIN
+	// (not when EXPLAIN is used as an identifier, e.g., "explain LIKE ...")
+	if p.currentIs(token.EXPLAIN) && p.isExplainFollowedByStatement() {
 		explain := p.parseExplain()
 		p.expect(token.RPAREN)
 		return &ast.Subquery{
@@ -1157,6 +1214,12 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 		ident.Parenthesized = true
 	}
 
+	// Mark literals as parenthesized so -(1) outputs as negate function
+	// instead of being folded into a negative literal
+	if lit, ok := first.(*ast.Literal); ok {
+		lit.Parenthesized = true
+	}
+
 	return first
 }
 
@@ -1165,13 +1228,45 @@ func (p *Parser) parseArrayLiteral() ast.Expression {
 		Position: p.current.Pos,
 		Type:     ast.LiteralArray,
 	}
+	bracketPos := p.current.Pos.Offset
 	p.nextToken() // skip [
 
+	// Check if there's whitespace/newline after the opening bracket
+	// A bracket is 1 byte, so if offset difference > 1, there's whitespace
+	spacedBrackets := p.current.Pos.Offset > bracketPos+1
+
 	var elements []ast.Expression
-	if !p.currentIs(token.RBRACKET) {
-		elements = p.parseExpressionList()
+	spacedCommas := false
+
+	if !p.currentIs(token.RBRACKET) && !p.currentIs(token.EOF) {
+		// Parse first element
+		expr := p.parseExpression(LOWEST)
+		if expr != nil {
+			expr = p.parseImplicitAlias(expr)
+			elements = append(elements, expr)
+		}
+
+		for p.currentIs(token.COMMA) {
+			commaPos := p.current.Pos.Offset
+			p.nextToken() // skip comma
+			// Check if there's whitespace between comma and next token
+			// A comma is 1 byte, so if offset difference > 1, there's whitespace
+			if p.current.Pos.Offset > commaPos+1 {
+				spacedCommas = true
+			}
+			if p.currentIs(token.RBRACKET) {
+				break // Handle trailing comma
+			}
+			expr := p.parseExpression(LOWEST)
+			if expr != nil {
+				expr = p.parseImplicitAlias(expr)
+				elements = append(elements, expr)
+			}
+		}
 	}
 	lit.Value = elements
+	lit.SpacedCommas = spacedCommas
+	lit.SpacedBrackets = spacedBrackets
 
 	p.expect(token.RBRACKET)
 	return lit
@@ -1529,17 +1624,25 @@ func (p *Parser) parseInterval() ast.Expression {
 	expr.Value = p.parseExpression(ALIAS_PREC)
 
 	// Handle INTERVAL '2' AS n minute - where AS n is alias on the value
-	if p.currentIs(token.AS) {
-		p.nextToken() // skip AS
-		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+	// Only consume AS if it's followed by an identifier AND that identifier is followed by an interval unit
+	// This distinguishes "INTERVAL '2' AS n minute" from "INTERVAL '1 MONTH 1 DAY' AS e4"
+	if p.currentIs(token.AS) && (p.peekIs(token.IDENT) || p.peek.Token.IsKeyword()) {
+		// Look ahead to check if the identifier after alias is an interval unit
+		// If so, consume the alias; otherwise leave AS for the outer context
+		if isIntervalUnit(p.peek.Value) {
+			// AS is followed by unit (e.g., "AS minute") - don't consume
+		} else if p.peekPeekIsIntervalUnit() {
+			// AS alias unit pattern - consume the alias
+			p.nextToken() // skip AS
 			alias := p.current.Value
 			p.nextToken()
 			expr.Value = p.wrapWithAlias(expr.Value, alias)
 		}
+		// Otherwise, leave AS for outer context (e.g., WITH ... AS e4)
 	}
 
 	// Parse unit (interval units are identifiers like DAY, MONTH, etc.)
-	if p.currentIs(token.IDENT) {
+	if p.currentIs(token.IDENT) && isIntervalUnit(p.current.Value) {
 		expr.Unit = strings.ToUpper(p.current.Value)
 		p.nextToken()
 	}
@@ -2121,27 +2224,36 @@ func (p *Parser) parseArrayAccess(left ast.Expression) ast.Expression {
 	return expr
 }
 
-// parseTupleAccessFromNumber handles tuple access like t.1 where .1 was lexed as a single NUMBER token
+// parseTupleAccessFromNumber handles tuple access like t.1 or t.1.2.3 where .1 or .1.2.3 was lexed as a single NUMBER token
 func (p *Parser) parseTupleAccessFromNumber(left ast.Expression) ast.Expression {
-	// The current value is like ".1" - extract the index part
+	// The current value is like ".1" or ".1.2" - extract the index parts
 	indexStr := strings.TrimPrefix(p.current.Value, ".")
 	pos := p.current.Pos
 	p.nextToken()
 
-	idx, err := strconv.ParseInt(indexStr, 10, 64)
-	if err != nil {
-		return left
+	// Split by dots to handle chained access like .1.2.3
+	parts := strings.Split(indexStr, ".")
+	result := left
+
+	for _, part := range parts {
+		idx, err := strconv.ParseInt(part, 10, 64)
+		if err != nil {
+			// If any part fails to parse as integer, return what we have so far
+			return result
+		}
+
+		result = &ast.TupleAccess{
+			Position: pos,
+			Tuple:    result,
+			Index: &ast.Literal{
+				Position: pos,
+				Type:     ast.LiteralInteger,
+				Value:    idx,
+			},
+		}
 	}
 
-	return &ast.TupleAccess{
-		Position: pos,
-		Tuple:    left,
-		Index: &ast.Literal{
-			Position: pos,
-			Type:     ast.LiteralInteger,
-			Value:    idx,
-		},
-	}
+	return result
 }
 
 func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
@@ -2533,9 +2645,16 @@ func (p *Parser) parseKeywordAsFunction() ast.Expression {
 		Name:     name,
 	}
 
-	// Handle DISTINCT
-	if p.currentIs(token.DISTINCT) {
+	// Handle DISTINCT modifier (but not if DISTINCT is being used as a column name)
+	// If DISTINCT is followed by ) or , then it's a column reference, not a modifier
+	if p.currentIs(token.DISTINCT) && !p.peekIs(token.RPAREN) && !p.peekIs(token.COMMA) {
 		fn.Distinct = true
+		p.nextToken()
+	}
+
+	// Handle ALL modifier (but not if ALL is being used as a column name)
+	// If ALL is followed by ) or , then it's a column reference, not a modifier
+	if p.currentIs(token.ALL) && !p.peekIs(token.RPAREN) && !p.peekIs(token.COMMA) {
 		p.nextToken()
 	}
 
@@ -2569,7 +2688,7 @@ func (p *Parser) parseKeywordAsFunction() ast.Expression {
 			p.nextToken() // skip (
 			if p.currentIs(token.WHERE) {
 				p.nextToken() // skip WHERE
-				p.parseExpression(LOWEST)
+				fn.Filter = p.parseExpression(LOWEST)
 			}
 			p.expect(token.RPAREN)
 		}

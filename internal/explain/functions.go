@@ -115,13 +115,35 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 	if n.Distinct {
 		fnName = fnName + "Distinct"
 	}
+	// Append "If" if the function has a FILTER clause
+	if n.Filter != nil {
+		fnName = fnName + "If"
+	}
 	if alias != "" {
 		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, children)
 	} else {
 		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, children)
 	}
 	// Arguments (Settings are included as part of argument count)
-	argCount := len(n.Arguments)
+	// FILTER condition is appended to arguments for -If suffix functions
+	// count(name) FILTER (WHERE cond) -> countIf(name, cond) - 2 args
+	// count(*) FILTER (WHERE cond) -> countIf(cond) - 1 arg (asterisk dropped)
+	var argCount int
+	filterArgs := n.Arguments
+	if n.Filter != nil {
+		// Filter condition is appended as an extra argument
+		// But first, remove any Asterisk arguments (count(*) case)
+		var nonAsteriskArgs []ast.Expression
+		for _, arg := range n.Arguments {
+			if _, isAsterisk := arg.(*ast.Asterisk); !isAsterisk {
+				nonAsteriskArgs = append(nonAsteriskArgs, arg)
+			}
+		}
+		filterArgs = nonAsteriskArgs
+		argCount = len(filterArgs) + 1 // +1 for filter condition
+	} else {
+		argCount = len(n.Arguments)
+	}
 	if len(n.Settings) > 0 {
 		argCount++ // Set is counted as one argument
 	}
@@ -130,7 +152,12 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 		fmt.Fprintf(sb, " (children %d)", argCount)
 	}
 	fmt.Fprintln(sb)
-	for _, arg := range n.Arguments {
+	// Output arguments (filterArgs excludes Asterisk when FILTER is present)
+	argsToOutput := filterArgs
+	if n.Filter == nil {
+		argsToOutput = n.Arguments
+	}
+	for _, arg := range argsToOutput {
 		// For view() table function, unwrap Subquery wrapper
 		// Also reset the subquery context since view() SELECT is not in a Subquery node
 		if strings.ToLower(n.Name) == "view" {
@@ -143,6 +170,10 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 			}
 		}
 		Node(sb, arg, depth+2)
+	}
+	// Append filter condition at the end
+	if n.Filter != nil {
+		Node(sb, n.Filter, depth+2)
 	}
 	// Settings appear as Set node inside ExpressionList
 	if len(n.Settings) > 0 {
@@ -567,8 +598,8 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 			if lit.Type == ast.LiteralArray || lit.Type == ast.LiteralTuple {
 				if useArrayFormat {
 					fmt.Fprintf(sb, "%s  Literal %s\n", indent, FormatLiteral(lit))
-				} else if containsCastExpressions(lit) {
-					// Array contains CastExpr elements - output as Function array with children
+				} else if containsCastExpressions(lit) || !containsOnlyLiterals(lit) {
+					// Array contains CastExpr or non-literal elements - output as Function array with children
 					Node(sb, n.Expr, depth+2)
 				} else {
 					// Simple literals (including negative numbers) - format as string
@@ -738,6 +769,7 @@ func containsCastExpressions(lit *ast.Literal) bool {
 }
 
 // containsOnlyLiterals checks if a literal array/tuple contains only literal values (no expressions)
+// This includes negated literals (UnaryExpr with Op="-" and Literal operand)
 func containsOnlyLiterals(lit *ast.Literal) bool {
 	var exprs []ast.Expression
 	switch lit.Type {
@@ -752,16 +784,24 @@ func containsOnlyLiterals(lit *ast.Literal) bool {
 	}
 
 	for _, e := range exprs {
-		innerLit, ok := e.(*ast.Literal)
-		if !ok {
-			return false
+		// Check if it's a direct literal
+		if innerLit, ok := e.(*ast.Literal); ok {
+			// Nested arrays/tuples need recursive check
+			if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
+				if !containsOnlyLiterals(innerLit) {
+					return false
+				}
+			}
+			continue
 		}
-		// Nested arrays/tuples need recursive check
-		if innerLit.Type == ast.LiteralArray || innerLit.Type == ast.LiteralTuple {
-			if !containsOnlyLiterals(innerLit) {
-				return false
+		// Check if it's a negated literal (e.g., -1)
+		if unary, ok := e.(*ast.UnaryExpr); ok && unary.Op == "-" {
+			if _, isLit := unary.Operand.(*ast.Literal); isLit {
+				continue
 			}
 		}
+		// Not a literal or negated literal
+		return false
 	}
 	return true
 }
@@ -986,10 +1026,11 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 					// Check if this tuple contains only primitive literals (including unary negation)
 					if !containsOnlyPrimitiveLiteralsWithUnary(lit) {
 						allTuplesArePrimitive = false
+						allPrimitiveLiterals = false // Non-primitive tuple breaks the mixed literal check too
 					}
 				}
-				// Check if it's a primitive literal type (not a tuple or complex type)
-				if lit.Type == ast.LiteralTuple || lit.Type == ast.LiteralArray {
+				// Arrays break the primitive literals check
+				if lit.Type == ast.LiteralArray {
 					allPrimitiveLiterals = false
 				}
 			} else if isNumericExpr(item) {
@@ -1133,7 +1174,8 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 		allBooleansOrNull := true
 		allTuples := true
 		allTuplesArePrimitive := true
-		hasNonNull := false // Need at least one non-null value
+		allPrimitiveLiterals := true // Any mix of primitive literals (numbers, strings, booleans, null, primitive tuples)
+		hasNonNull := false          // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
 				if lit.Type == ast.LiteralNull {
@@ -1155,6 +1197,7 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 				} else {
 					if !containsOnlyPrimitiveLiterals(lit) {
 						allTuplesArePrimitive = false
+						allPrimitiveLiterals = false
 					}
 				}
 			} else if isNumericExpr(item) {
@@ -1167,10 +1210,11 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 				allStringsOrNull = false
 				allBooleansOrNull = false
 				allTuples = false
+				allPrimitiveLiterals = false
 				break
 			}
 		}
-		canBeTupleLiteral = hasNonNull && (allNumericOrNull || (allStringsOrNull && len(n.List) <= maxStringTupleSizeWithAlias) || allBooleansOrNull || (allTuples && allTuplesArePrimitive))
+		canBeTupleLiteral = hasNonNull && (allNumericOrNull || (allStringsOrNull && len(n.List) <= maxStringTupleSizeWithAlias) || allBooleansOrNull || (allTuples && allTuplesArePrimitive) || allPrimitiveLiterals)
 	}
 
 	// Count arguments

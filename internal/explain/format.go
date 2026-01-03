@@ -160,9 +160,22 @@ func formatArrayLiteral(val interface{}) string {
 				if lit.Type == ast.LiteralInteger {
 					switch val := lit.Value.(type) {
 					case int64:
-						parts = append(parts, fmt.Sprintf("Int64_%d", -val))
+						negVal := -val
+						// ClickHouse normalizes -0 to UInt64_0
+						if negVal == 0 {
+							parts = append(parts, "UInt64_0")
+						} else if negVal > 0 {
+							parts = append(parts, fmt.Sprintf("UInt64_%d", negVal))
+						} else {
+							parts = append(parts, fmt.Sprintf("Int64_%d", negVal))
+						}
 					case uint64:
-						parts = append(parts, fmt.Sprintf("Int64_-%d", val))
+						// ClickHouse normalizes -0 to UInt64_0
+						if val == 0 {
+							parts = append(parts, "UInt64_0")
+						} else {
+							parts = append(parts, fmt.Sprintf("Int64_-%d", val))
+						}
 					default:
 						parts = append(parts, fmt.Sprintf("Int64_-%v", lit.Value))
 					}
@@ -195,8 +208,19 @@ func formatNumericExpr(e ast.Expression) (string, bool) {
 		if lit, ok := unary.Operand.(*ast.Literal); ok {
 			switch val := lit.Value.(type) {
 			case int64:
-				return fmt.Sprintf("Int64_%d", -val), true
+				negVal := -val
+				// ClickHouse normalizes -0 to UInt64_0
+				if negVal == 0 {
+					return "UInt64_0", true
+				} else if negVal > 0 {
+					return fmt.Sprintf("UInt64_%d", negVal), true
+				}
+				return fmt.Sprintf("Int64_%d", negVal), true
 			case uint64:
+				// ClickHouse normalizes -0 to UInt64_0
+				if val == 0 {
+					return "UInt64_0", true
+				}
 				return fmt.Sprintf("Int64_%d", -int64(val)), true
 			case float64:
 				return fmt.Sprintf("Float64_%s", FormatFloat(-val)), true
@@ -289,6 +313,13 @@ func FormatDataType(dt *ast.DataType) string {
 		} else if ident, ok := p.(*ast.Identifier); ok {
 			// Identifier (e.g., function name in AggregateFunction types)
 			params = append(params, ident.Name())
+		} else if unary, ok := p.(*ast.UnaryExpr); ok {
+			// Unary expression (e.g., -1 for negative numbers)
+			if lit, ok := unary.Operand.(*ast.Literal); ok {
+				params = append(params, fmt.Sprintf("%s%v", unary.Op, lit.Value))
+			} else {
+				params = append(params, fmt.Sprintf("%v", p))
+			}
 		} else {
 			params = append(params, fmt.Sprintf("%v", p))
 		}
@@ -469,7 +500,7 @@ func formatExprAsString(expr ast.Expression) string {
 		case ast.LiteralNull:
 			return "NULL"
 		case ast.LiteralArray:
-			return formatArrayAsString(e.Value)
+			return formatArrayAsStringFromLiteral(e)
 		case ast.LiteralTuple:
 			return formatTupleAsString(e.Value)
 		default:
@@ -519,6 +550,28 @@ func formatExprAsString(expr ast.Expression) string {
 	}
 }
 
+// formatArrayAsStringFromLiteral formats an array literal as a string for :: cast syntax
+// It preserves original spacing from the source
+func formatArrayAsStringFromLiteral(lit *ast.Literal) string {
+	exprs, ok := lit.Value.([]ast.Expression)
+	if !ok {
+		return "[]"
+	}
+	var parts []string
+	for _, e := range exprs {
+		parts = append(parts, formatElementAsString(e))
+	}
+	separator := ","
+	if lit.SpacedCommas {
+		separator = ", "
+	}
+	// Use outer spaces when source had whitespace after [ (e.g., for multi-line arrays)
+	if lit.SpacedBrackets {
+		return "[ " + strings.Join(parts, separator) + " ]"
+	}
+	return "[" + strings.Join(parts, separator) + "]"
+}
+
 // formatArrayAsString formats an array literal as a string for :: cast syntax
 func formatArrayAsString(val interface{}) string {
 	exprs, ok := val.([]ast.Expression)
@@ -555,9 +608,14 @@ func formatElementAsString(expr ast.Expression) string {
 		case ast.LiteralFloat:
 			return fmt.Sprintf("%v", e.Value)
 		case ast.LiteralString:
+			s := e.Value.(string)
+			// Check if this is a big integer stored as string (too large for int64/uint64)
+			// These should NOT be quoted when formatted in arrays
+			if e.IsBigInt {
+				return s
+			}
 			// Quote strings with single quotes, triple-escape for nested context
 			// Expected output format is \\\' (three backslashes + quote)
-			s := e.Value.(string)
 			// Triple-escape single quotes for nested string literal context
 			s = strings.ReplaceAll(s, "'", "\\\\\\'")
 			return "\\\\\\'" + s + "\\\\\\'"
@@ -569,7 +627,7 @@ func formatElementAsString(expr ast.Expression) string {
 		case ast.LiteralNull:
 			return "NULL"
 		case ast.LiteralArray:
-			return formatArrayAsString(e.Value)
+			return formatArrayAsStringFromLiteral(e)
 		case ast.LiteralTuple:
 			return formatTupleAsString(e.Value)
 		default:

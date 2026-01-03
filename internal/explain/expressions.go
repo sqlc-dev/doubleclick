@@ -2,6 +2,7 @@ package explain
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/sqlc-dev/doubleclick/ast"
@@ -402,8 +403,9 @@ func collectLogicalOperands(n *ast.BinaryExpr) []ast.Expression {
 
 func explainUnaryExpr(sb *strings.Builder, n *ast.UnaryExpr, indent string, depth int) {
 	// Handle negate of literal numbers - output as negative literal instead of function
+	// BUT only if the literal is NOT parenthesized (e.g., -1 folds, but -(1) stays as negate function)
 	if n.Op == "-" {
-		if lit, ok := n.Operand.(*ast.Literal); ok {
+		if lit, ok := n.Operand.(*ast.Literal); ok && !lit.Parenthesized {
 			switch lit.Type {
 			case ast.LiteralInteger:
 				// Convert positive integer to negative
@@ -433,6 +435,19 @@ func explainUnaryExpr(sb *strings.Builder, n *ast.UnaryExpr, indent string, dept
 				s := FormatFloat(-val)
 				fmt.Fprintf(sb, "%sLiteral Float64_%s\n", indent, s)
 				return
+			case ast.LiteralString:
+				// Handle BigInt - very large numbers stored as strings
+				// ClickHouse converts these to Float64 in scientific notation
+				if lit.IsBigInt {
+					if strVal, ok := lit.Value.(string); ok {
+						// Parse the string as float64 and negate it
+						if f, err := strconv.ParseFloat(strVal, 64); err == nil {
+							s := FormatFloat(-f)
+							fmt.Fprintf(sb, "%sLiteral Float64_%s\n", indent, s)
+							return
+						}
+					}
+				}
 			}
 		}
 	}
@@ -477,8 +492,13 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 						needsFunctionFormat = true
 						break
 					}
-					// Also check if nested arrays/tuples contain non-literal elements
+					// Check if tuple contains array literals - these need Function tuple format
 					if lit, ok := expr.(*ast.Literal); ok {
+						if lit.Type == ast.LiteralArray {
+							needsFunctionFormat = true
+							break
+						}
+						// Also check if nested arrays/tuples contain non-literal elements
 						if containsNonLiteralInNested(lit) {
 							needsFunctionFormat = true
 							break
