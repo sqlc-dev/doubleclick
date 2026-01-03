@@ -6990,12 +6990,16 @@ func (p *Parser) parseDetach() *ast.DetachQuery {
 		p.nextToken()
 	}
 
-	// Parse name (can be qualified: database.table for TABLE, not for DATABASE/DICTIONARY)
+	// Parse name (can be qualified: database.table for TABLE, database.dict for DICTIONARY)
 	name := p.parseIdentifierName()
-	if p.currentIs(token.DOT) && !isDatabase && !isDictionary {
+	if p.currentIs(token.DOT) && !isDatabase {
 		p.nextToken()
 		detach.Database = name
-		detach.Table = p.parseIdentifierName()
+		if isDictionary {
+			detach.Dictionary = p.parseIdentifierName()
+		} else {
+			detach.Table = p.parseIdentifierName()
+		}
 	} else if isDatabase {
 		detach.Database = name
 	} else if isDictionary {
@@ -7047,12 +7051,16 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 		}
 	}
 
-	// Parse name (can be qualified: database.table for TABLE, not for DATABASE/DICTIONARY)
+	// Parse name (can be qualified: database.table for TABLE, database.dict for DICTIONARY)
 	name := p.parseIdentifierName()
-	if p.currentIs(token.DOT) && !isDatabase && !isDictionary {
+	if p.currentIs(token.DOT) && !isDatabase {
 		p.nextToken()
 		attach.Database = name
-		attach.Table = p.parseIdentifierName()
+		if isDictionary {
+			attach.Dictionary = p.parseIdentifierName()
+		} else {
+			attach.Table = p.parseIdentifierName()
+		}
 	} else if isDatabase {
 		attach.Database = name
 	} else if isDictionary {

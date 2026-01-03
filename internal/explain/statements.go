@@ -1255,8 +1255,16 @@ func explainDetachQuery(sb *strings.Builder, n *ast.DetachQuery, indent string) 
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 		return
 	}
+	// Check for database-qualified dictionary name
+	if n.Database != "" && n.Dictionary != "" {
+		// Database-qualified: DetachQuery db dict (children 2)
+		fmt.Fprintf(sb, "%sDetachQuery %s %s (children 2)\n", indent, n.Database, n.Dictionary)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Dictionary)
+		return
+	}
 	// DETACH DATABASE db: Database set, Table empty -> "DetachQuery db  (children 1)"
-	if n.Database != "" && n.Table == "" {
+	if n.Database != "" && n.Table == "" && n.Dictionary == "" {
 		fmt.Fprintf(sb, "%sDetachQuery %s  (children 1)\n", indent, n.Database)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 		return
@@ -1280,7 +1288,7 @@ func explainDetachQuery(sb *strings.Builder, n *ast.DetachQuery, indent string) 
 func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, depth int) {
 	// Count children: identifier + columns definition (if any) + select query (if any) + storage/view targets (if any)
 	children := 1 // table/database identifier
-	if n.Database != "" && n.Table != "" {
+	if n.Database != "" && (n.Table != "" || n.Dictionary != "") {
 		children++ // extra identifier for database
 	}
 	hasColumns := len(n.Columns) > 0 || len(n.ColumnsPrimaryKey) > 0 || len(n.Indexes) > 0
@@ -1301,7 +1309,13 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 		fmt.Fprintf(sb, "%sAttachQuery %s %s (children %d)\n", indent, n.Database, n.Table, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
-	} else if n.Database != "" && n.Table == "" {
+	} else if n.Database != "" && n.Dictionary != "" {
+		// Database-qualified dictionary: ATTACH DICTIONARY db.dict
+		fmt.Fprintf(sb, "%sAttachQuery %s %s (children %d)\n", indent, n.Database, n.Dictionary, children)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Dictionary)
+		return // Dictionary doesn't have columns or storage
+	} else if n.Database != "" && n.Table == "" && n.Dictionary == "" {
 		fmt.Fprintf(sb, "%sAttachQuery %s  (children %d)\n", indent, n.Database, children)
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Database)
 	} else if n.Table != "" {
