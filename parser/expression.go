@@ -1669,14 +1669,22 @@ func (p *Parser) parseInterval() ast.Expression {
 }
 
 func (p *Parser) parseExists() ast.Expression {
-	expr := &ast.ExistsExpr{
-		Position: p.current.Pos,
-	}
+	pos := p.current.Pos
 	p.nextToken() // skip EXISTS
 
-	if !p.expect(token.LPAREN) {
-		return nil
+	// If not followed by (, treat EXISTS as an identifier (column name)
+	if !p.currentIs(token.LPAREN) {
+		return &ast.Identifier{
+			Position: pos,
+			Parts:    []string{"exists"},
+		}
 	}
+
+	expr := &ast.ExistsExpr{
+		Position: pos,
+	}
+
+	p.nextToken() // skip (
 
 	expr.Query = p.parseSelectWithUnion()
 
