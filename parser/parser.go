@@ -2513,6 +2513,10 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 						}
 					}
 					p.expect(token.RPAREN)
+					// If no columns were added, mark that we saw an empty PRIMARY KEY ()
+					if len(create.ColumnsPrimaryKey) == 0 {
+						create.HasEmptyColumnsPrimaryKey = true
+					}
 				} else {
 					// Single column: PRIMARY KEY col
 					expr := p.parseExpression(LOWEST)

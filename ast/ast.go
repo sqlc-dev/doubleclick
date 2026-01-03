@@ -282,7 +282,8 @@ type CreateQuery struct {
 	Indexes          []*IndexDefinition   `json:"indexes,omitempty"`
 	Projections      []*Projection        `json:"projections,omitempty"`
 	Constraints         []*Constraint        `json:"constraints,omitempty"`
-	ColumnsPrimaryKey   []Expression         `json:"columns_primary_key,omitempty"` // PRIMARY KEY in column list
+	ColumnsPrimaryKey       []Expression         `json:"columns_primary_key,omitempty"`        // PRIMARY KEY in column list
+	HasEmptyColumnsPrimaryKey bool               `json:"has_empty_columns_primary_key,omitempty"` // TRUE if PRIMARY KEY () was seen with empty parens
 	Engine               *EngineClause        `json:"engine,omitempty"`
 	OrderBy              []Expression         `json:"order_by,omitempty"`
 	OrderByHasModifiers  bool                 `json:"order_by_has_modifiers,omitempty"` // True if ORDER BY has ASC/DESC modifiers
@@ -760,7 +761,8 @@ type AttachQuery struct {
 	Table              string               `json:"table,omitempty"`
 	Dictionary         string               `json:"dictionary,omitempty"`
 	Columns            []*ColumnDeclaration `json:"columns,omitempty"`
-	ColumnsPrimaryKey  []Expression         `json:"columns_primary_key,omitempty"` // PRIMARY KEY in column list
+	ColumnsPrimaryKey       []Expression         `json:"columns_primary_key,omitempty"`        // PRIMARY KEY in column list
+	HasEmptyColumnsPrimaryKey bool               `json:"has_empty_columns_primary_key,omitempty"` // TRUE if PRIMARY KEY () was seen with empty parens
 	Indexes            []*IndexDefinition   `json:"indexes,omitempty"`             // INDEX definitions in column list
 	Engine             *EngineClause        `json:"engine,omitempty"`
 	OrderBy            []Expression         `json:"order_by,omitempty"`

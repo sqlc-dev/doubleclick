@@ -276,7 +276,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			childrenCount++ // Add for Function tuple containing PRIMARY KEY columns
 		}
 		// Check for inline PRIMARY KEY (from column list, e.g., "n int, primary key n")
-		if len(n.ColumnsPrimaryKey) > 0 {
+		if len(n.ColumnsPrimaryKey) > 0 || n.HasEmptyColumnsPrimaryKey {
 			childrenCount++ // Add for the primary key identifier(s)
 		}
 		fmt.Fprintf(sb, "%s Columns definition (children %d)\n", indent, childrenCount)
@@ -315,8 +315,12 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			}
 		}
 		// Output inline PRIMARY KEY (from column list)
-		if len(n.ColumnsPrimaryKey) > 0 {
-			if len(n.ColumnsPrimaryKey) > 1 {
+		if len(n.ColumnsPrimaryKey) > 0 || n.HasEmptyColumnsPrimaryKey {
+			if n.HasEmptyColumnsPrimaryKey {
+				// Empty PRIMARY KEY ()
+				fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
+				fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+			} else if len(n.ColumnsPrimaryKey) > 1 {
 				// Multiple columns: wrap in Function tuple
 				fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
 				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.ColumnsPrimaryKey))
@@ -1355,7 +1359,7 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 		if len(n.Indexes) > 0 {
 			columnsChildren++
 		}
-		if len(n.ColumnsPrimaryKey) > 0 {
+		if len(n.ColumnsPrimaryKey) > 0 || n.HasEmptyColumnsPrimaryKey {
 			columnsChildren++
 		}
 		fmt.Fprintf(sb, "%s Columns definition (children %d)\n", indent, columnsChildren)
@@ -1373,8 +1377,12 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 			}
 		}
 		// Output inline PRIMARY KEY (from column list)
-		if len(n.ColumnsPrimaryKey) > 0 {
-			if len(n.ColumnsPrimaryKey) > 1 {
+		if len(n.ColumnsPrimaryKey) > 0 || n.HasEmptyColumnsPrimaryKey {
+			if n.HasEmptyColumnsPrimaryKey {
+				// Empty PRIMARY KEY ()
+				fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
+				fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+			} else if len(n.ColumnsPrimaryKey) > 1 {
 				// Multiple columns: wrap in Function tuple
 				fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
 				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.ColumnsPrimaryKey))
