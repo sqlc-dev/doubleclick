@@ -2065,8 +2065,9 @@ func (p *Parser) parseInExpression(left ast.Expression, not bool) ast.Expression
 		expr.List = []ast.Expression{arr}
 	} else {
 		// Could be identifier, tuple function, or other expression
-		// Parse as expression
-		innerExpr := p.parseExpression(CALL)
+		// Parse as expression with MUL_PREC to include :: cast operator
+		// (which has CALL precedence, so using MUL_PREC ensures it's consumed)
+		innerExpr := p.parseExpression(MUL_PREC)
 		if innerExpr != nil {
 			expr.List = []ast.Expression{innerExpr}
 		}
