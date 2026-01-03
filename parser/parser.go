@@ -5305,9 +5305,10 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TYPE" {
 				p.nextToken()
 				// Type is a function call like bloom_filter(0.025) or vector_similarity('hnsw', 'L2Distance', 1)
+				// Note: Index types can be keywords (e.g., SET) so we accept both IDENT and keywords
 				pos := p.current.Pos
 				typeName := ""
-				if p.currentIs(token.IDENT) {
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 					typeName = p.current.Value
 					cmd.IndexType = typeName
 					p.nextToken()
@@ -5339,7 +5340,8 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			// Parse AFTER
 			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "AFTER" {
 				p.nextToken()
-				if p.currentIs(token.IDENT) {
+				// Index name can be an identifier or keyword
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 					cmd.AfterIndex = p.current.Value
 					p.nextToken()
 				}
