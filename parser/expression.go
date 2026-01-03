@@ -626,13 +626,17 @@ func (p *Parser) parseIdentifierOrFunction() ast.Expression {
 	// Convert to globalVariable('varname') function call with alias @@varname
 	if strings.HasPrefix(name, "@@") {
 		varName := name[2:] // Strip @@
-		// Handle @@session.var or @@global.var
+		// Handle @@session.var or @@global.var - strip the session/global prefix
 		if p.currentIs(token.DOT) {
-			p.nextToken()
-			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-				varName = varName + "." + p.current.Value
-				name = name + "." + p.current.Value
-				p.nextToken()
+			upper := strings.ToUpper(varName)
+			if upper == "SESSION" || upper == "GLOBAL" {
+				// Skip the session/global qualifier
+				p.nextToken() // skip DOT
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					varName = p.current.Value
+					name = "@@" + p.current.Value
+					p.nextToken()
+				}
 			}
 		}
 		return &ast.FunctionCall{
