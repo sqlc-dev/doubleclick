@@ -552,6 +552,12 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 		return p.parseLambda(left)
 	case token.EXCEPT:
 		// Handle * EXCEPT (col1, col2) or COLUMNS(...) EXCEPT (col1, col2)
+		// But NOT "SELECT (*) EXCEPT SELECT 1" which is a set operation
+		// Check if EXCEPT is followed by SELECT - if so, it's a set operation
+		if p.peekIs(token.SELECT) {
+			// This is EXCEPT as set operation, not column exclusion
+			return left
+		}
 		if asterisk, ok := left.(*ast.Asterisk); ok {
 			return p.parseAsteriskExcept(asterisk)
 		}
