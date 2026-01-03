@@ -1773,9 +1773,23 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.ConstraintName)
 		}
 	case ast.AlterModifyTTL:
-		if cmd.TTL != nil && cmd.TTL.Expression != nil {
+		if cmd.TTL != nil && len(cmd.TTL.Elements) > 0 {
 			// TTL is wrapped in ExpressionList and TTLElement
-			// Count total TTL elements (1 for Expression + len(Expressions))
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(cmd.TTL.Elements))
+			for _, elem := range cmd.TTL.Elements {
+				// Count children: 1 for Expr, +1 for Where if present
+				ttlChildren := 1
+				if elem.Where != nil {
+					ttlChildren++
+				}
+				fmt.Fprintf(sb, "%s  TTLElement (children %d)\n", indent, ttlChildren)
+				Node(sb, elem.Expr, depth+3)
+				if elem.Where != nil {
+					Node(sb, elem.Where, depth+3)
+				}
+			}
+		} else if cmd.TTL != nil && cmd.TTL.Expression != nil {
+			// Fallback for backward compatibility (Expression/Expressions fields)
 			ttlCount := 1 + len(cmd.TTL.Expressions)
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, ttlCount)
 			fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", indent)

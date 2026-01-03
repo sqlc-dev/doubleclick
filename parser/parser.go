@@ -5682,18 +5682,24 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			cmd.Type = ast.AlterModifyTTL
 			p.nextToken()
 			cmd.TTL = &ast.TTLClause{
-				Position:   p.current.Pos,
-				Expression: p.parseExpression(LOWEST),
+				Position: p.current.Pos,
 			}
-			// Skip RECOMPRESS CODEC(...) and other TTL modifiers
-			p.skipTTLModifiers()
-			// Parse additional TTL elements (comma-separated)
-			for p.currentIs(token.COMMA) {
-				p.nextToken() // skip comma
-				expr := p.parseExpression(LOWEST)
-				cmd.TTL.Expressions = append(cmd.TTL.Expressions, expr)
-				// Skip RECOMPRESS CODEC(...) if present
-				p.skipTTLModifiers()
+			// Parse TTL elements using parseTTLElement (captures WHERE clause)
+			for {
+				elem := p.parseTTLElement()
+				cmd.TTL.Elements = append(cmd.TTL.Elements, elem)
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+			// Keep backward compatibility with Expression/Expressions fields
+			if len(cmd.TTL.Elements) > 0 {
+				cmd.TTL.Expression = cmd.TTL.Elements[0].Expr
+				for i := 1; i < len(cmd.TTL.Elements); i++ {
+					cmd.TTL.Expressions = append(cmd.TTL.Expressions, cmd.TTL.Elements[i].Expr)
+				}
 			}
 		} else if p.currentIs(token.SETTINGS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "SETTING") {
 			// Both SETTINGS and SETTING (singular) are accepted
