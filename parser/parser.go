@@ -6678,6 +6678,19 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 		if p.currentIs(token.IDENT) && p.peekIs(token.DOT) {
 			break
 		}
+		// Check if we've completed a command that expects a table name next
+		// Commands like STOP MERGES, START MERGES, STOP TTL MERGES, START TTL MERGES, etc.
+		if len(parts) > 0 {
+			upperCmd := strings.ToUpper(strings.Join(parts, " "))
+			if strings.HasSuffix(upperCmd, " MERGES") ||
+				strings.HasSuffix(upperCmd, " MOVES") ||
+				strings.HasSuffix(upperCmd, " FETCHES") ||
+				strings.HasSuffix(upperCmd, " SENDS") ||
+				strings.HasSuffix(upperCmd, " MUTATIONS") {
+				// Next token should be the table name
+				break
+			}
+		}
 		// Check if this is a plain IDENT (not a command keyword) followed by end-of-statement
 		// This indicates it's likely a table name, not part of the command
 		// Exception: after FAILPOINT, the identifier is the failpoint name (part of command)
