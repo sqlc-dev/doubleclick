@@ -6777,7 +6777,8 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 	upperCmd := strings.ToUpper(sys.Command)
 	if strings.Contains(upperCmd, "STOP DISTRIBUTED SENDS") ||
 		strings.Contains(upperCmd, "START DISTRIBUTED SENDS") ||
-		strings.Contains(upperCmd, "FLUSH DISTRIBUTED") {
+		strings.Contains(upperCmd, "FLUSH DISTRIBUTED") ||
+		strings.Contains(upperCmd, "RELOAD DICTIONARY") {
 		// Only set duplicate if database and table are different (qualified name)
 		if sys.Database != sys.Table {
 			sys.DuplicateTableOutput = true
