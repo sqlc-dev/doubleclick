@@ -2821,6 +2821,24 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		} else {
 			create.To = toName
 		}
+
+		// For MATERIALIZED VIEW ... TO target (columns) syntax,
+		// column definitions can come after the TO target
+		if p.currentIs(token.LPAREN) && len(create.Columns) == 0 {
+			p.nextToken()
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				col := p.parseColumnDeclaration()
+				if col != nil {
+					create.Columns = append(create.Columns, col)
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+			p.expect(token.RPAREN)
+		}
 	}
 
 	// Parse ENGINE (for materialized views)
