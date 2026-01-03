@@ -5657,15 +5657,15 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		if p.currentIs(token.COLUMN) {
 			cmd.Type = ast.AlterRenameColumn
 			p.nextToken()
-			if p.currentIs(token.IDENT) {
-				cmd.ColumnName = p.current.Value
-				p.nextToken()
+			// Parse column name (can be dotted like n.x for nested columns)
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				cmd.ColumnName = p.parseDottedIdentifier()
 			}
 			if p.currentIs(token.TO) {
 				p.nextToken()
-				if p.currentIs(token.IDENT) {
-					cmd.NewName = p.current.Value
-					p.nextToken()
+				// Parse new column name (can also be dotted)
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					cmd.NewName = p.parseDottedIdentifier()
 				}
 			}
 		}
@@ -7246,6 +7246,29 @@ func (p *Parser) parseIdentifierName() string {
 	}
 
 	return ""
+}
+
+// parseDottedIdentifier parses an identifier that may contain dots (e.g., n.x for nested columns)
+func (p *Parser) parseDottedIdentifier() string {
+	if !p.currentIs(token.IDENT) && !p.current.Token.IsKeyword() {
+		return ""
+	}
+
+	parts := []string{p.current.Value}
+	p.nextToken()
+
+	// Continue parsing if followed by dots
+	for p.currentIs(token.DOT) {
+		p.nextToken() // skip .
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			parts = append(parts, p.current.Value)
+			p.nextToken()
+		} else {
+			break
+		}
+	}
+
+	return strings.Join(parts, ".")
 }
 
 // parseFromSelectSyntax handles ClickHouse's FROM ... SELECT syntax
