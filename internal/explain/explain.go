@@ -258,6 +258,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainUpdateQuery(sb, n, indent, depth)
 	case *ast.ParallelWithQuery:
 		explainParallelWithQuery(sb, n, indent, depth)
+	case *ast.KillQuery:
+		explainKillQuery(sb, n, indent, depth)
 
 	// Types
 	case *ast.DataType:

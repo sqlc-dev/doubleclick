@@ -336,6 +336,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseBackup()
 	case token.RESTORE:
 		return p.parseRestore()
+	case token.KILL:
+		return p.parseKill()
 	default:
 		p.errors = append(p.errors, fmt.Errorf("unexpected token %s at line %d, column %d",
 			p.current.Token, p.current.Pos.Line, p.current.Pos.Column))
@@ -8033,6 +8035,64 @@ func (p *Parser) parseTransactionControl() *ast.TransactionControlQuery {
 					p.nextToken()
 				}
 			}
+		}
+	}
+
+	return query
+}
+
+// parseKill handles KILL QUERY/MUTATION statements
+func (p *Parser) parseKill() *ast.KillQuery {
+	query := &ast.KillQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip KILL
+
+	// Parse QUERY or MUTATION
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "QUERY" {
+		query.Type = "QUERY"
+		p.nextToken()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "MUTATION" {
+		query.Type = "MUTATION"
+		p.nextToken()
+	}
+
+	// Parse WHERE clause
+	if p.currentIs(token.WHERE) {
+		p.nextToken() // skip WHERE
+		query.Where = p.parseExpression(LOWEST)
+	}
+
+	// Parse SYNC/ASYNC/TEST
+	for p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		switch upper {
+		case "SYNC":
+			query.Sync = true
+			p.nextToken()
+		case "ASYNC":
+			query.Sync = false
+			p.nextToken()
+		case "TEST":
+			query.Test = true
+			p.nextToken()
+		default:
+			// Exit loop for unknown keywords
+			goto endModifiers
+		}
+	}
+endModifiers:
+
+	// Parse FORMAT clause
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		if p.currentIs(token.NULL) {
+			query.Format = "Null"
+			p.nextToken()
+		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			query.Format = p.current.Value
+			p.nextToken()
 		}
 	}
 

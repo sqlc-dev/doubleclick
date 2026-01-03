@@ -1045,6 +1045,20 @@ func (s *ShowGrantsQuery) Pos() token.Position { return s.Position }
 func (s *ShowGrantsQuery) End() token.Position { return s.Position }
 func (s *ShowGrantsQuery) statementNode()      {}
 
+// KillQuery represents a KILL QUERY/MUTATION statement.
+type KillQuery struct {
+	Position token.Position `json:"-"`
+	Type     string         `json:"type"`              // "QUERY" or "MUTATION"
+	Where    Expression     `json:"where,omitempty"`   // WHERE condition
+	Sync     bool           `json:"sync,omitempty"`    // SYNC mode (default false = ASYNC)
+	Test     bool           `json:"test,omitempty"`    // TEST mode
+	Format   string         `json:"format,omitempty"`  // FORMAT clause
+}
+
+func (k *KillQuery) Pos() token.Position { return k.Position }
+func (k *KillQuery) End() token.Position { return k.Position }
+func (k *KillQuery) statementNode()      {}
+
 // ShowPrivilegesQuery represents a SHOW PRIVILEGES statement.
 type ShowPrivilegesQuery struct {
 	Position token.Position `json:"-"`

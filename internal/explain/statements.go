@@ -2250,6 +2250,62 @@ func explainDeleteQuery(sb *strings.Builder, n *ast.DeleteQuery, indent string, 
 	}
 }
 
+func explainKillQuery(sb *strings.Builder, n *ast.KillQuery, indent string, depth int) {
+	if n == nil {
+		fmt.Fprintf(sb, "%s*ast.KillQuery\n", indent)
+		return
+	}
+
+	// Build the header in ClickHouse format:
+	// KillQueryQuery Function_and ASYNC (children 2)
+	// The function name uses underscore instead of space
+	funcName := ""
+	if n.Where != nil {
+		switch expr := n.Where.(type) {
+		case *ast.BinaryExpr:
+			funcName = "Function_" + strings.ToLower(expr.Op)
+		case *ast.FunctionCall:
+			funcName = "Function_" + expr.Name
+		default:
+			funcName = "Function"
+		}
+	}
+
+	mode := "ASYNC"
+	if n.Sync {
+		mode = "SYNC"
+	}
+	if n.Test {
+		mode = "TEST"
+	}
+
+	// Count children: WHERE expression + FORMAT identifier
+	children := 0
+	if n.Where != nil {
+		children++
+	}
+	if n.Format != "" {
+		children++
+	}
+
+	// Header: KillQueryQuery Function_xxx MODE (children N)
+	if funcName != "" {
+		fmt.Fprintf(sb, "%sKillQueryQuery %s %s (children %d)\n", indent, funcName, mode, children)
+	} else {
+		fmt.Fprintf(sb, "%sKillQueryQuery %s (children %d)\n", indent, mode, children)
+	}
+
+	// Output WHERE expression
+	if n.Where != nil {
+		Node(sb, n.Where, depth+1)
+	}
+
+	// Output FORMAT as Identifier
+	if n.Format != "" {
+		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+	}
+}
+
 func explainCheckQuery(sb *strings.Builder, n *ast.CheckQuery, indent string) {
 	if n == nil {
 		fmt.Fprintf(sb, "%s*ast.CheckQuery\n", indent)
