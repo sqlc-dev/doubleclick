@@ -6994,6 +6994,18 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 		}
 	}
 
+	// Handle IF NOT EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.NOT) {
+			p.nextToken()
+			if p.currentIs(token.EXISTS) {
+				attach.IfNotExists = true
+				p.nextToken()
+			}
+		}
+	}
+
 	// Parse name (can be qualified: database.table for TABLE, not for DATABASE/DICTIONARY)
 	name := p.parseIdentifierName()
 	if p.currentIs(token.DOT) && !isDatabase && !isDictionary {

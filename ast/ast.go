@@ -743,6 +743,7 @@ func (d *DetachQuery) statementNode()      {}
 // AttachQuery represents an ATTACH statement.
 type AttachQuery struct {
 	Position           token.Position       `json:"-"`
+	IfNotExists        bool                 `json:"if_not_exists,omitempty"`
 	Database           string               `json:"database,omitempty"`
 	Table              string               `json:"table,omitempty"`
 	Dictionary         string               `json:"dictionary,omitempty"`
