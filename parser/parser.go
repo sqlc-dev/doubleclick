@@ -1080,6 +1080,11 @@ func (p *Parser) parseSelectInternal(preParsedWith []ast.Expression) *ast.Select
 		p.nextToken()
 		// Use MUL_PREC to stop at * (which would be parsed as column selector, not multiplication)
 		sel.Top = p.parseExpression(MUL_PREC)
+		// WITH TIES modifier after TOP
+		if p.currentIs(token.WITH) && p.peekIs(token.TIES) {
+			p.nextToken() // skip WITH
+			p.nextToken() // skip TIES
+		}
 	}
 
 	// Parse column list
