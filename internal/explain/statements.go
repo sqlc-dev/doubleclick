@@ -478,14 +478,30 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			Node(sb, n.SampleBy, storageChildDepth)
 		}
 		if n.TTL != nil {
-			// Count total TTL elements (1 for Expression + len(Expressions))
-			ttlCount := 1 + len(n.TTL.Expressions)
-			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", storageIndent, ttlCount)
-			fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", storageIndent)
-			Node(sb, n.TTL.Expression, storageChildDepth+2)
-			for _, expr := range n.TTL.Expressions {
+			// Use Elements if available (has WHERE conditions), otherwise use legacy Expression/Expressions
+			if len(n.TTL.Elements) > 0 {
+				fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", storageIndent, len(n.TTL.Elements))
+				for _, elem := range n.TTL.Elements {
+					children := 1
+					if elem.Where != nil {
+						children = 2
+					}
+					fmt.Fprintf(sb, "%s  TTLElement (children %d)\n", storageIndent, children)
+					Node(sb, elem.Expr, storageChildDepth+2)
+					if elem.Where != nil {
+						Node(sb, elem.Where, storageChildDepth+2)
+					}
+				}
+			} else {
+				// Legacy: use Expression/Expressions
+				ttlCount := 1 + len(n.TTL.Expressions)
+				fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", storageIndent, ttlCount)
 				fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", storageIndent)
-				Node(sb, expr, storageChildDepth+2)
+				Node(sb, n.TTL.Expression, storageChildDepth+2)
+				for _, expr := range n.TTL.Expressions {
+					fmt.Fprintf(sb, "%s  TTLElement (children 1)\n", storageIndent)
+					Node(sb, expr, storageChildDepth+2)
+				}
 			}
 		}
 		if len(n.Settings) > 0 {

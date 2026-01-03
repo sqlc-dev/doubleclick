@@ -496,10 +496,21 @@ type TTLClause struct {
 	Position    token.Position `json:"-"`
 	Expression  Expression     `json:"expression"`
 	Expressions []Expression   `json:"expressions,omitempty"` // Additional TTL expressions (for multiple TTL elements)
+	Elements    []*TTLElement  `json:"elements,omitempty"`    // TTL elements with WHERE conditions
 }
 
 func (t *TTLClause) Pos() token.Position { return t.Position }
 func (t *TTLClause) End() token.Position { return t.Position }
+
+// TTLElement represents a single TTL element with optional WHERE condition.
+type TTLElement struct {
+	Position token.Position `json:"-"`
+	Expr     Expression     `json:"expr"`
+	Where    Expression     `json:"where,omitempty"` // WHERE condition for DELETE
+}
+
+func (t *TTLElement) Pos() token.Position { return t.Position }
+func (t *TTLElement) End() token.Position { return t.Position }
 
 // DropQuery represents a DROP statement.
 type DropQuery struct {

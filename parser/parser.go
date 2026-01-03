@@ -2656,53 +2656,24 @@ func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 		case p.currentIs(token.TTL):
 			p.nextToken()
 			create.TTL = &ast.TTLClause{
-				Position:   p.current.Pos,
-				Expression: p.parseExpression(ALIAS_PREC), // Use ALIAS_PREC for AS SELECT
+				Position: p.current.Pos,
 			}
-			// Skip RECOMPRESS CODEC(...) if present
-			p.skipTTLModifiers()
-			// Parse additional TTL elements (comma-separated)
-			for p.currentIs(token.COMMA) {
-				p.nextToken() // skip comma
-				expr := p.parseExpression(ALIAS_PREC)
-				create.TTL.Expressions = append(create.TTL.Expressions, expr)
-				// Skip RECOMPRESS CODEC(...) if present
-				p.skipTTLModifiers()
-			}
-			// Handle TTL GROUP BY x SET y = max(y) syntax
-			if p.currentIs(token.GROUP) {
-				p.nextToken()
-				if p.currentIs(token.BY) {
+			// Parse TTL elements (comma-separated)
+			for {
+				elem := p.parseTTLElement()
+				create.TTL.Elements = append(create.TTL.Elements, elem)
+				if p.currentIs(token.COMMA) {
 					p.nextToken()
-					// Parse GROUP BY expressions (can have multiple, comma separated)
-					for {
-						p.parseExpression(ALIAS_PREC)
-						if p.currentIs(token.COMMA) {
-							p.nextToken()
-						} else {
-							break
-						}
-					}
+				} else {
+					break
 				}
 			}
-			// Handle SET clause in TTL (aggregation expressions for TTL GROUP BY)
-			if p.currentIs(token.SET) {
-				p.nextToken()
-				// Parse SET expressions until we hit a keyword or end
-				for !p.currentIs(token.SETTINGS) && !p.currentIs(token.AS) && !p.currentIs(token.WHERE) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.EOF) {
-					p.parseExpression(ALIAS_PREC)
-					if p.currentIs(token.COMMA) {
-						p.nextToken()
-					} else {
-						break
-					}
+			// Keep backward compatibility with Expression/Expressions fields
+			if len(create.TTL.Elements) > 0 {
+				create.TTL.Expression = create.TTL.Elements[0].Expr
+				for i := 1; i < len(create.TTL.Elements); i++ {
+					create.TTL.Expressions = append(create.TTL.Expressions, create.TTL.Elements[i].Expr)
 				}
-			}
-			// Handle WHERE clause in TTL (conditional deletion)
-			if p.currentIs(token.WHERE) {
-				p.nextToken()
-				// Parse WHERE condition
-				p.parseExpression(ALIAS_PREC)
 			}
 		case p.currentIs(token.SETTINGS):
 			p.nextToken()
@@ -8066,6 +8037,119 @@ func (p *Parser) parseTransactionControl() *ast.TransactionControlQuery {
 	}
 
 	return query
+}
+
+// parseTTLElement parses a single TTL element: expression [DELETE] [WHERE condition] [GROUP BY ...] [SET ...]
+func (p *Parser) parseTTLElement() *ast.TTLElement {
+	elem := &ast.TTLElement{
+		Position: p.current.Pos,
+		Expr:     p.parseExpression(ALIAS_PREC),
+	}
+	// Skip RECOMPRESS CODEC(...), DELETE, TO DISK, TO VOLUME (but not WHERE)
+	p.skipTTLModifiersExceptWhere()
+	// Handle WHERE clause for this TTL element (conditional deletion)
+	if p.currentIs(token.WHERE) {
+		p.nextToken()
+		elem.Where = p.parseExpression(ALIAS_PREC)
+	}
+	// Handle GROUP BY x SET y = max(y) syntax (skip for now, already parsed in Where or just skip)
+	if p.currentIs(token.GROUP) {
+		p.nextToken()
+		if p.currentIs(token.BY) {
+			p.nextToken()
+			for {
+				p.parseExpression(ALIAS_PREC)
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+		}
+	}
+	// Handle SET clause - assignments are comma separated (id = expr, id = expr, ...)
+	// We need to distinguish between:
+	// - Comma continuing SET: followed by IDENT = pattern
+	// - Comma starting new TTL: followed by expression (like d + toIntervalYear(...))
+	if p.currentIs(token.SET) {
+		p.nextToken()
+		for {
+			// Parse assignment expression: id = expr
+			p.parseExpression(ALIAS_PREC)
+			// Check for comma
+			if p.currentIs(token.COMMA) {
+				// Look ahead to check pattern. We need to see: COMMA IDENT EQ
+				// Save state to peek ahead
+				savedCurrent := p.current
+				savedPeek := p.peek
+				p.nextToken() // skip comma to see what follows
+				isSetContinuation := false
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					if p.peekIs(token.EQ) {
+						// It's another SET assignment (id = expr)
+						isSetContinuation = true
+					}
+				}
+				if isSetContinuation {
+					// Continue parsing SET assignments (already consumed comma)
+					continue
+				}
+				// Not a SET assignment - restore state so caller sees the comma
+				p.current = savedCurrent
+				p.peek = savedPeek
+				break
+			}
+			// No comma, end of SET clause
+			break
+		}
+	}
+	return elem
+}
+
+// skipTTLModifiersExceptWhere skips TTL modifiers but stops at WHERE
+func (p *Parser) skipTTLModifiersExceptWhere() {
+	for {
+		// Skip RECOMPRESS CODEC(...)
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "RECOMPRESS" {
+			p.nextToken()
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CODEC" {
+				p.nextToken()
+				if p.currentIs(token.LPAREN) {
+					depth := 1
+					p.nextToken()
+					for depth > 0 && !p.currentIs(token.EOF) {
+						if p.currentIs(token.LPAREN) {
+							depth++
+						} else if p.currentIs(token.RPAREN) {
+							depth--
+						}
+						p.nextToken()
+					}
+				}
+			}
+			continue
+		}
+		// Skip DELETE (TTL ... DELETE)
+		if p.currentIs(token.DELETE) {
+			p.nextToken()
+			continue
+		}
+		// Skip TO DISK 'name' or TO VOLUME 'name'
+		if p.currentIs(token.TO) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) {
+				upper := strings.ToUpper(p.current.Value)
+				if upper == "DISK" || upper == "VOLUME" {
+					p.nextToken()
+					if p.currentIs(token.STRING) {
+						p.nextToken()
+					}
+					continue
+				}
+			}
+		}
+		break
+	}
 }
 
 // skipTTLModifiers skips TTL modifiers like RECOMPRESS CODEC(...), DELETE, TO DISK, TO VOLUME
