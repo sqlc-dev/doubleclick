@@ -1261,8 +1261,8 @@ func (p *Parser) parseSelectInternal(preParsedWith []ast.Expression) *ast.Select
 	if p.currentIs(token.OFFSET) {
 		p.nextToken()
 		sel.Offset = p.parseExpression(LOWEST)
-		// Skip optional ROWS keyword
-		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROWS" {
+		// Skip optional ROW/ROWS keyword (SQL standard)
+		if p.currentIs(token.IDENT) && (strings.ToUpper(p.current.Value) == "ROW" || strings.ToUpper(p.current.Value) == "ROWS") {
 			p.nextToken()
 		}
 		// LIMIT n OFFSET m BY expr syntax - handle BY after OFFSET
