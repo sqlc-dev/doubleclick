@@ -6278,8 +6278,16 @@ func (p *Parser) parseShow() ast.Statement {
 	case token.TABLES:
 		show.ShowType = ast.ShowTables
 		p.nextToken()
+	case token.TABLE:
+		// SHOW TABLE is equivalent to SHOW CREATE TABLE
+		show.ShowType = ast.ShowCreate
+		p.nextToken()
 	case token.DATABASES:
 		show.ShowType = ast.ShowDatabases
+		p.nextToken()
+	case token.DATABASE:
+		// SHOW DATABASE is equivalent to SHOW CREATE DATABASE
+		show.ShowType = ast.ShowCreateDB
 		p.nextToken()
 	case token.COLUMNS:
 		show.ShowType = ast.ShowColumns
