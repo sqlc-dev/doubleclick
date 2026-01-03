@@ -1477,9 +1477,17 @@ func explainBackupQuery(sb *strings.Builder, n *ast.BackupQuery, indent string) 
 		fmt.Fprintf(sb, "%sBackupQuery\n", indent)
 	}
 
-	// Output target function (e.g., Null, Disk('path'))
+	// Output target function (e.g., Null, Disk('path'), Memory('b1'))
 	if n.Target != nil {
-		fmt.Fprintf(sb, "%s Function %s\n", indent, n.Target.Name)
+		if len(n.Target.Arguments) > 0 {
+			fmt.Fprintf(sb, "%s Function %s (children 1)\n", indent, n.Target.Name)
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Target.Arguments))
+			for _, arg := range n.Target.Arguments {
+				Node(sb, arg, 3)
+			}
+		} else {
+			fmt.Fprintf(sb, "%s Function %s\n", indent, n.Target.Name)
+		}
 	}
 
 	// Output format identifier
@@ -1509,9 +1517,17 @@ func explainRestoreQuery(sb *strings.Builder, n *ast.RestoreQuery, indent string
 		fmt.Fprintf(sb, "%sRestoreQuery\n", indent)
 	}
 
-	// Output source function (e.g., Null, Disk('path'))
+	// Output source function (e.g., Null, Disk('path'), Memory('b1'))
 	if n.Source != nil {
-		fmt.Fprintf(sb, "%s Function %s\n", indent, n.Source.Name)
+		if len(n.Source.Arguments) > 0 {
+			fmt.Fprintf(sb, "%s Function %s (children 1)\n", indent, n.Source.Name)
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Source.Arguments))
+			for _, arg := range n.Source.Arguments {
+				Node(sb, arg, 3)
+			}
+		} else {
+			fmt.Fprintf(sb, "%s Function %s\n", indent, n.Source.Name)
+		}
 	}
 
 	// Output format identifier
