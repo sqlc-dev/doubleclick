@@ -1068,8 +1068,16 @@ func (p *Parser) parseUnaryMinus() ast.Expression {
 			lit.Value = f
 			lit.Source = numVal // Preserve original source text
 		} else {
-			i, _ := strconv.ParseInt(numVal, 10, 64)
-			lit.Value = i
+			// Try to parse as int64
+			i, err := strconv.ParseInt(numVal, 10, 64)
+			if err != nil {
+				// Number is too large for int64, store as string (for Int128/Int256)
+				lit.Type = ast.LiteralString
+				lit.Value = numVal
+				lit.IsBigInt = true
+			} else {
+				lit.Value = i
+			}
 		}
 		p.nextToken() // move past number
 		// Apply postfix operators like :: using the expression parsing loop
