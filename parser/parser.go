@@ -4320,8 +4320,8 @@ func (p *Parser) parseDataType() *ast.DataType {
 
 	// For MySQL-compatible INT types, handle display width and UNSIGNED/SIGNED
 	upperName := strings.ToUpper(dt.Name)
-	isMySQLIntType := upperName == "INT" || upperName == "TINYINT" || upperName == "SMALLINT" ||
-		upperName == "MEDIUMINT" || upperName == "BIGINT"
+	isMySQLIntType := upperName == "INT" || upperName == "INT1" || upperName == "TINYINT" || upperName == "SMALLINT" ||
+		upperName == "MEDIUMINT" || upperName == "BIGINT" || upperName == "INTEGER"
 
 	if isMySQLIntType && p.currentIs(token.LPAREN) {
 		// Skip the display width parameter (e.g., INT(11))
@@ -4333,11 +4333,83 @@ func (p *Parser) parseDataType() *ast.DataType {
 	}
 
 	// Handle UNSIGNED/SIGNED modifiers for MySQL INT types
-	if isMySQLIntType && p.currentIs(token.IDENT) {
+	if isMySQLIntType && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) {
 		modifier := strings.ToUpper(p.current.Value)
 		if modifier == "UNSIGNED" || modifier == "SIGNED" {
 			dt.Name = dt.Name + " " + p.current.Value
 			p.nextToken()
+		}
+	}
+
+	// Handle DOUBLE PRECISION
+	if upperName == "DOUBLE" && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) {
+		if strings.ToUpper(p.current.Value) == "PRECISION" {
+			dt.Name = dt.Name + " " + p.current.Value
+			p.nextToken()
+		}
+	}
+
+	// Handle multi-word character types
+	// CHAR VARYING, CHAR LARGE OBJECT, CHARACTER VARYING, CHARACTER LARGE OBJECT
+	// NCHAR VARYING, NCHAR LARGE OBJECT
+	if upperName == "CHAR" || upperName == "CHARACTER" || upperName == "NCHAR" {
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			modifier := strings.ToUpper(p.current.Value)
+			if modifier == "VARYING" {
+				dt.Name = dt.Name + " " + p.current.Value
+				p.nextToken()
+			} else if modifier == "LARGE" {
+				dt.Name = dt.Name + " " + p.current.Value
+				p.nextToken()
+				// Expect OBJECT
+				if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && strings.ToUpper(p.current.Value) == "OBJECT" {
+					dt.Name = dt.Name + " " + p.current.Value
+					p.nextToken()
+				}
+			}
+		}
+	}
+
+	// Handle BINARY VARYING, BINARY LARGE OBJECT
+	if upperName == "BINARY" && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) {
+		modifier := strings.ToUpper(p.current.Value)
+		if modifier == "VARYING" {
+			dt.Name = dt.Name + " " + p.current.Value
+			p.nextToken()
+		} else if modifier == "LARGE" {
+			dt.Name = dt.Name + " " + p.current.Value
+			p.nextToken()
+			// Expect OBJECT
+			if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && strings.ToUpper(p.current.Value) == "OBJECT" {
+				dt.Name = dt.Name + " " + p.current.Value
+				p.nextToken()
+			}
+		}
+	}
+
+	// Handle NATIONAL CHAR, NATIONAL CHARACTER, etc.
+	if upperName == "NATIONAL" && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) {
+		// NATIONAL can be followed by CHAR or CHARACTER
+		nextWord := strings.ToUpper(p.current.Value)
+		if nextWord == "CHAR" || nextWord == "CHARACTER" {
+			dt.Name = dt.Name + " " + p.current.Value
+			p.nextToken()
+			// Can be followed by VARYING or LARGE OBJECT
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				modifier := strings.ToUpper(p.current.Value)
+				if modifier == "VARYING" {
+					dt.Name = dt.Name + " " + p.current.Value
+					p.nextToken()
+				} else if modifier == "LARGE" {
+					dt.Name = dt.Name + " " + p.current.Value
+					p.nextToken()
+					// Expect OBJECT
+					if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && strings.ToUpper(p.current.Value) == "OBJECT" {
+						dt.Name = dt.Name + " " + p.current.Value
+						p.nextToken()
+					}
+				}
+			}
 		}
 	}
 
