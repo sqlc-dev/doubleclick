@@ -211,6 +211,11 @@ func windowSpecHasContent(w *ast.WindowSpec) bool {
 func handleSpecialFunction(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int) bool {
 	fnName := strings.ToUpper(n.Name)
 
+	// Handle kql() function - transforms KQL (Kusto Query Language) to SQL
+	if fnName == "KQL" {
+		return handleKQLFunction(sb, n, alias, indent, depth)
+	}
+
 	// Handle quantified comparison operators (ANY/ALL with comparison operators)
 	if handled := handleQuantifiedComparison(sb, n, alias, indent, depth); handled {
 		return true
@@ -1670,5 +1675,207 @@ func explainWindowSpec(sb *strings.Builder, n *ast.WindowSpec, indent string, de
 		}
 	} else {
 		fmt.Fprintf(sb, "%sWindowDefinition\n", indent)
+	}
+}
+
+// handleKQLFunction handles the kql() table function.
+// kql() transforms Kusto Query Language (KQL) into SQL and wraps it in a view() function.
+// Example: kql($$Customers|project FirstName$$) -> view(SELECT FirstName FROM Customers)
+func handleKQLFunction(sb *strings.Builder, n *ast.FunctionCall, alias string, indent string, depth int) bool {
+	if len(n.Arguments) != 1 {
+		return false
+	}
+
+	// Get the KQL string from the argument
+	lit, ok := n.Arguments[0].(*ast.Literal)
+	if !ok || lit.Type != ast.LiteralString {
+		return false
+	}
+
+	kqlStr, ok := lit.Value.(string)
+	if !ok {
+		return false
+	}
+
+	// Parse the KQL string
+	parsed := parseKQL(kqlStr)
+	if parsed == nil {
+		return false
+	}
+
+	// Output as Function view
+	fmt.Fprintf(sb, "%sFunction view (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s  SelectWithUnionQuery (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
+
+	// Calculate children count for SelectQuery
+	// Always have: TablesInSelectQuery, ExpressionList (columns)
+	// Optionally: WHERE clause (Function equals/etc)
+	selectChildren := 2
+	if parsed.filter != nil {
+		selectChildren = 3
+	}
+
+	fmt.Fprintf(sb, "%s    SelectQuery (children %d)\n", indent, selectChildren)
+
+	// Output TablesInSelectQuery first
+	fmt.Fprintf(sb, "%s     TablesInSelectQuery (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s      TablesInSelectQueryElement (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s       TableExpression (children %d)\n", indent, 1)
+	fmt.Fprintf(sb, "%s        TableIdentifier %s\n", indent, parsed.tableName)
+
+	// Output WHERE clause if present (before columns in the order shown in expected output)
+	if parsed.filter != nil {
+		explainKQLFilter(sb, parsed.filter, indent+"     ", depth+5)
+	}
+
+	// Output columns (ExpressionList)
+	fmt.Fprintf(sb, "%s     ExpressionList (children %d)\n", indent, len(parsed.columns))
+	for _, col := range parsed.columns {
+		fmt.Fprintf(sb, "%s      Identifier %s\n", indent, col)
+	}
+
+	return true
+}
+
+// kqlParsed represents a parsed KQL query
+type kqlParsed struct {
+	tableName string
+	columns   []string
+	filter    *kqlFilter
+}
+
+// kqlFilter represents a KQL filter condition
+type kqlFilter struct {
+	left     string
+	operator string
+	right    string
+}
+
+// parseKQL parses a KQL string into its components
+// Supports: TableName | project col1, col2, ... | filter condition
+func parseKQL(kql string) *kqlParsed {
+	// Split by pipe operator
+	parts := splitKQLPipes(kql)
+	if len(parts) == 0 {
+		return nil
+	}
+
+	result := &kqlParsed{}
+
+	// First part is always the table name
+	result.tableName = strings.TrimSpace(parts[0])
+
+	// Process remaining operators
+	for i := 1; i < len(parts); i++ {
+		part := strings.TrimSpace(parts[i])
+
+		if strings.HasPrefix(strings.ToLower(part), "project ") {
+			// project col1, col2, ...
+			columnsStr := strings.TrimPrefix(part, "project ")
+			columnsStr = strings.TrimPrefix(columnsStr, "PROJECT ")
+			cols := strings.Split(columnsStr, ",")
+			for _, col := range cols {
+				result.columns = append(result.columns, strings.TrimSpace(col))
+			}
+		} else if strings.HasPrefix(strings.ToLower(part), "filter ") {
+			// filter condition
+			conditionStr := strings.TrimPrefix(part, "filter ")
+			conditionStr = strings.TrimPrefix(conditionStr, "FILTER ")
+			result.filter = parseKQLCondition(conditionStr)
+		}
+	}
+
+	return result
+}
+
+// splitKQLPipes splits a KQL string by pipe operators
+func splitKQLPipes(kql string) []string {
+	var parts []string
+	var current strings.Builder
+	inQuote := false
+	quoteChar := byte(0)
+
+	for i := 0; i < len(kql); i++ {
+		c := kql[i]
+
+		if !inQuote && (c == '\'' || c == '"') {
+			inQuote = true
+			quoteChar = c
+			current.WriteByte(c)
+		} else if inQuote && c == quoteChar {
+			inQuote = false
+			current.WriteByte(c)
+		} else if !inQuote && c == '|' {
+			parts = append(parts, current.String())
+			current.Reset()
+		} else {
+			current.WriteByte(c)
+		}
+	}
+
+	if current.Len() > 0 {
+		parts = append(parts, current.String())
+	}
+
+	return parts
+}
+
+// parseKQLCondition parses a KQL condition like "LastName=='Diaz'"
+func parseKQLCondition(cond string) *kqlFilter {
+	cond = strings.TrimSpace(cond)
+
+	// Try to match comparison operators
+	// KQL uses == for equality
+	operators := []string{"==", "!=", ">=", "<=", ">", "<"}
+	for _, op := range operators {
+		if idx := strings.Index(cond, op); idx > 0 {
+			left := strings.TrimSpace(cond[:idx])
+			right := strings.TrimSpace(cond[idx+len(op):])
+			return &kqlFilter{
+				left:     left,
+				operator: op,
+				right:    right,
+			}
+		}
+	}
+
+	return nil
+}
+
+// explainKQLFilter outputs the EXPLAIN AST for a KQL filter condition
+func explainKQLFilter(sb *strings.Builder, filter *kqlFilter, indent string, depth int) {
+	// Map KQL operators to ClickHouse function names
+	fnName := "equals"
+	switch filter.operator {
+	case "==":
+		fnName = "equals"
+	case "!=":
+		fnName = "notEquals"
+	case ">":
+		fnName = "greater"
+	case "<":
+		fnName = "less"
+	case ">=":
+		fnName = "greaterOrEquals"
+	case "<=":
+		fnName = "lessOrEquals"
+	}
+
+	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+	fmt.Fprintf(sb, "%s  Identifier %s\n", indent, filter.left)
+
+	// Output the right side - could be a string literal or identifier
+	rightVal := filter.right
+	if (strings.HasPrefix(rightVal, "'") && strings.HasSuffix(rightVal, "'")) ||
+		(strings.HasPrefix(rightVal, "\"") && strings.HasSuffix(rightVal, "\"")) {
+		// String literal - remove quotes and escape for output
+		rightVal = rightVal[1 : len(rightVal)-1]
+		fmt.Fprintf(sb, "%s  Literal \\'%s\\'\n", indent, rightVal)
+	} else {
+		// Identifier
+		fmt.Fprintf(sb, "%s  Identifier %s\n", indent, rightVal)
 	}
 }
