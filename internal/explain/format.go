@@ -378,7 +378,6 @@ func NormalizeFunctionName(name string) string {
 		"ltrim":    "trimLeft",
 		"rtrim":    "trimRight",
 		"ceiling":  "ceil",
-		"ln":       "log",
 		"log10":    "log10",
 		"log2":     "log2",
 		"rand":     "rand",
@@ -458,19 +457,19 @@ func formatExprAsString(expr ast.Expression) string {
 	switch e := expr.(type) {
 	case *ast.Literal:
 		// Handle explicitly negative literals (like -0 in -0::Int16)
-		prefix := ""
-		if e.Negative {
-			prefix = "-"
-		}
 		switch e.Type {
 		case ast.LiteralInteger:
-			// For explicitly negative literals, show the absolute value with prefix
+			// For explicitly negative literals, we need to format with the negative sign
 			if e.Negative {
 				switch v := e.Value.(type) {
 				case int64:
-					if v <= 0 {
-						return fmt.Sprintf("-%d", -v)
+					// If the value is already negative (including INT64_MIN), just print it directly
+					// This avoids overflow when trying to negate INT64_MIN
+					if v < 0 {
+						return fmt.Sprintf("%d", v)
 					}
+					// Value is positive or zero, add the negative sign
+					return fmt.Sprintf("-%d", v)
 				case uint64:
 					return fmt.Sprintf("-%d", v)
 				}
@@ -484,9 +483,12 @@ func formatExprAsString(expr ast.Expression) string {
 			if e.Negative {
 				switch v := e.Value.(type) {
 				case float64:
-					if v <= 0 {
-						return fmt.Sprintf("%s%v", prefix, -v)
+					// If the value is already negative, just print it directly
+					if v < 0 {
+						return fmt.Sprintf("%v", v)
 					}
+					// Value is positive or zero, add the negative sign
+					return fmt.Sprintf("-%v", v)
 				}
 			}
 			return fmt.Sprintf("%v", e.Value)
@@ -606,6 +608,10 @@ func formatElementAsString(expr ast.Expression) string {
 		case ast.LiteralInteger:
 			return fmt.Sprintf("%d", e.Value)
 		case ast.LiteralFloat:
+			// Use Source if available (preserves original text for large numbers)
+			if e.Source != "" {
+				return e.Source
+			}
 			return fmt.Sprintf("%v", e.Value)
 		case ast.LiteralString:
 			s := e.Value.(string)

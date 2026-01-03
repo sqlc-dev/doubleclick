@@ -238,6 +238,10 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainDetachQuery(sb, n, indent)
 	case *ast.AttachQuery:
 		explainAttachQuery(sb, n, indent, depth)
+	case *ast.BackupQuery:
+		explainBackupQuery(sb, n, indent)
+	case *ast.RestoreQuery:
+		explainRestoreQuery(sb, n, indent)
 	case *ast.AlterQuery:
 		explainAlterQuery(sb, n, indent, depth)
 	case *ast.OptimizeQuery:
@@ -254,6 +258,8 @@ func Node(sb *strings.Builder, node interface{}, depth int) {
 		explainUpdateQuery(sb, n, indent, depth)
 	case *ast.ParallelWithQuery:
 		explainParallelWithQuery(sb, n, indent, depth)
+	case *ast.KillQuery:
+		explainKillQuery(sb, n, indent, depth)
 
 	// Types
 	case *ast.DataType:

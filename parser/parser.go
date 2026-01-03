@@ -332,6 +332,12 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseTransactionControl()
 	case token.ROLLBACK:
 		return p.parseTransactionControl()
+	case token.BACKUP:
+		return p.parseBackup()
+	case token.RESTORE:
+		return p.parseRestore()
+	case token.KILL:
+		return p.parseKill()
 	default:
 		p.errors = append(p.errors, fmt.Errorf("unexpected token %s at line %d, column %d",
 			p.current.Token, p.current.Pos.Line, p.current.Pos.Column))
@@ -1076,6 +1082,11 @@ func (p *Parser) parseSelectInternal(preParsedWith []ast.Expression) *ast.Select
 		p.nextToken()
 		// Use MUL_PREC to stop at * (which would be parsed as column selector, not multiplication)
 		sel.Top = p.parseExpression(MUL_PREC)
+		// WITH TIES modifier after TOP
+		if p.currentIs(token.WITH) && p.peekIs(token.TIES) {
+			p.nextToken() // skip WITH
+			p.nextToken() // skip TIES
+		}
 	}
 
 	// Parse column list
@@ -1238,6 +1249,12 @@ func (p *Parser) parseSelectInternal(preParsedWith []ast.Expression) *ast.Select
 				p.nextToken()
 				sel.Limit = p.parseExpression(LOWEST)
 				sel.LimitByHasLimit = true
+				// Handle LIMIT offset, count syntax
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+					sel.Offset = sel.Limit
+					sel.Limit = p.parseExpression(LOWEST)
+				}
 			}
 		}
 
@@ -1252,8 +1269,8 @@ func (p *Parser) parseSelectInternal(preParsedWith []ast.Expression) *ast.Select
 	if p.currentIs(token.OFFSET) {
 		p.nextToken()
 		sel.Offset = p.parseExpression(LOWEST)
-		// Skip optional ROWS keyword
-		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ROWS" {
+		// Skip optional ROW/ROWS keyword (SQL standard)
+		if p.currentIs(token.IDENT) && (strings.ToUpper(p.current.Value) == "ROW" || strings.ToUpper(p.current.Value) == "ROWS") {
 			p.nextToken()
 		}
 		// LIMIT n OFFSET m BY expr syntax - handle BY after OFFSET
@@ -1386,7 +1403,11 @@ func (p *Parser) parseWithClause() []ast.Expression {
 
 		// Check if it's the "name AS (subquery)" syntax (standard SQL CTE)
 		// or "expr AS name" syntax (ClickHouse scalar)
-		if p.currentIs(token.IDENT) && p.peekIs(token.AS) {
+		// Allow keywords as CTE names (e.g., WITH table AS (SELECT 1))
+		// But exclude NULL/TRUE/FALSE which have special literal meanings
+		isNameToken := p.currentIs(token.IDENT) ||
+			(p.current.Token.IsKeyword() && !p.currentIs(token.NULL) && !p.currentIs(token.TRUE) && !p.currentIs(token.FALSE))
+		if isNameToken && p.peekIs(token.AS) {
 			// This could be "name AS (subquery)" or "ident AS alias" for scalar
 			// Need to look ahead to determine: if IDENT AS LPAREN (SELECT...) -> CTE
 			// If IDENT AS IDENT -> scalar WITH (first ident is expression, second is alias)
@@ -1645,7 +1666,12 @@ func (p *Parser) parseTableElementWithJoin() *ast.TablesInSelectQueryElement {
 		p.nextToken()
 		if p.currentIs(token.LPAREN) {
 			p.nextToken()
-			join.Using = p.parseExpressionList()
+			exprs := p.parseExpressionList()
+			if exprs == nil {
+				// Empty USING () - use empty non-nil slice to distinguish from no USING
+				exprs = []ast.Expression{}
+			}
+			join.Using = exprs
 			p.expect(token.RPAREN)
 		} else {
 			join.Using = p.parseExpressionList()
@@ -1707,7 +1733,26 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 		}
 	}
 
-	// Handle FINAL
+	// Handle alias (keywords like LEFT, RIGHT, FIRST can be used as aliases after AS,
+	// or without AS if they're not clause keywords)
+	// In ClickHouse, alias comes BEFORE FINAL: FROM table t FINAL
+	if p.currentIs(token.AS) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			expr.Alias = p.current.Value
+			p.nextToken()
+		}
+	} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && !p.isKeywordForClause() && !p.currentIs(token.FINAL) && !p.currentIs(token.SAMPLE) {
+		// Don't consume PARALLEL as alias if followed by WITH (parallel query syntax)
+		if p.currentIs(token.PARALLEL) && p.peekIs(token.WITH) {
+			return expr
+		}
+		// Don't consume FINAL or SAMPLE as alias
+		expr.Alias = p.current.Value
+		p.nextToken()
+	}
+
+	// Handle FINAL (after alias)
 	if p.currentIs(token.FINAL) {
 		expr.Final = true
 		p.nextToken()
@@ -1724,23 +1769,6 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 			p.nextToken()
 			expr.Sample.Offset = p.parseExpression(LOWEST)
 		}
-	}
-
-	// Handle alias (keywords like LEFT, RIGHT, FIRST can be used as aliases after AS,
-	// or without AS if they're not clause keywords)
-	if p.currentIs(token.AS) {
-		p.nextToken()
-		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-			expr.Alias = p.current.Value
-			p.nextToken()
-		}
-	} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && !p.isKeywordForClause() {
-		// Don't consume PARALLEL as alias if followed by WITH (parallel query syntax)
-		if p.currentIs(token.PARALLEL) && p.peekIs(token.WITH) {
-			return expr
-		}
-		expr.Alias = p.current.Value
-		p.nextToken()
 	}
 
 	return expr
@@ -2485,6 +2513,10 @@ func (p *Parser) parseCreateTable(create *ast.CreateQuery) {
 						}
 					}
 					p.expect(token.RPAREN)
+					// If no columns were added, mark that we saw an empty PRIMARY KEY ()
+					if len(create.ColumnsPrimaryKey) == 0 {
+						create.HasEmptyColumnsPrimaryKey = true
+					}
 				} else {
 					// Single column: PRIMARY KEY col
 					expr := p.parseExpression(LOWEST)
@@ -2630,53 +2662,24 @@ func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 		case p.currentIs(token.TTL):
 			p.nextToken()
 			create.TTL = &ast.TTLClause{
-				Position:   p.current.Pos,
-				Expression: p.parseExpression(ALIAS_PREC), // Use ALIAS_PREC for AS SELECT
+				Position: p.current.Pos,
 			}
-			// Skip RECOMPRESS CODEC(...) if present
-			p.skipTTLModifiers()
-			// Parse additional TTL elements (comma-separated)
-			for p.currentIs(token.COMMA) {
-				p.nextToken() // skip comma
-				expr := p.parseExpression(ALIAS_PREC)
-				create.TTL.Expressions = append(create.TTL.Expressions, expr)
-				// Skip RECOMPRESS CODEC(...) if present
-				p.skipTTLModifiers()
-			}
-			// Handle TTL GROUP BY x SET y = max(y) syntax
-			if p.currentIs(token.GROUP) {
-				p.nextToken()
-				if p.currentIs(token.BY) {
+			// Parse TTL elements (comma-separated)
+			for {
+				elem := p.parseTTLElement()
+				create.TTL.Elements = append(create.TTL.Elements, elem)
+				if p.currentIs(token.COMMA) {
 					p.nextToken()
-					// Parse GROUP BY expressions (can have multiple, comma separated)
-					for {
-						p.parseExpression(ALIAS_PREC)
-						if p.currentIs(token.COMMA) {
-							p.nextToken()
-						} else {
-							break
-						}
-					}
+				} else {
+					break
 				}
 			}
-			// Handle SET clause in TTL (aggregation expressions for TTL GROUP BY)
-			if p.currentIs(token.SET) {
-				p.nextToken()
-				// Parse SET expressions until we hit a keyword or end
-				for !p.currentIs(token.SETTINGS) && !p.currentIs(token.AS) && !p.currentIs(token.WHERE) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.EOF) {
-					p.parseExpression(ALIAS_PREC)
-					if p.currentIs(token.COMMA) {
-						p.nextToken()
-					} else {
-						break
-					}
+			// Keep backward compatibility with Expression/Expressions fields
+			if len(create.TTL.Elements) > 0 {
+				create.TTL.Expression = create.TTL.Elements[0].Expr
+				for i := 1; i < len(create.TTL.Elements); i++ {
+					create.TTL.Expressions = append(create.TTL.Expressions, create.TTL.Elements[i].Expr)
 				}
-			}
-			// Handle WHERE clause in TTL (conditional deletion)
-			if p.currentIs(token.WHERE) {
-				p.nextToken()
-				// Parse WHERE condition
-				p.parseExpression(ALIAS_PREC)
 			}
 		case p.currentIs(token.SETTINGS):
 			p.nextToken()
@@ -2820,6 +2823,24 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 			create.To = p.parseIdentifierName()
 		} else {
 			create.To = toName
+		}
+
+		// For MATERIALIZED VIEW ... TO target (columns) syntax,
+		// column definitions can come after the TO target
+		if p.currentIs(token.LPAREN) && len(create.Columns) == 0 {
+			p.nextToken()
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				col := p.parseColumnDeclaration()
+				if col != nil {
+					create.Columns = append(create.Columns, col)
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+			p.expect(token.RPAREN)
 		}
 	}
 
@@ -4199,8 +4220,9 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 	// Check if next token indicates type is omitted
 	// DEFAULT/MATERIALIZED/ALIAS indicate we go straight to default expression
 	// CODEC indicates we go straight to codec specification (no type)
+	// COMMENT indicates we go straight to comment (no type)
 	isCodec := p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CODEC"
-	if p.currentIs(token.DEFAULT) || p.currentIs(token.MATERIALIZED) || p.currentIs(token.ALIAS) || isCodec {
+	if p.currentIs(token.DEFAULT) || p.currentIs(token.MATERIALIZED) || p.currentIs(token.ALIAS) || isCodec || p.currentIs(token.COMMENT) {
 		// Type is omitted, skip to parsing below
 	} else {
 		// Parse data type
@@ -4320,8 +4342,8 @@ func (p *Parser) parseDataType() *ast.DataType {
 
 	// For MySQL-compatible INT types, handle display width and UNSIGNED/SIGNED
 	upperName := strings.ToUpper(dt.Name)
-	isMySQLIntType := upperName == "INT" || upperName == "TINYINT" || upperName == "SMALLINT" ||
-		upperName == "MEDIUMINT" || upperName == "BIGINT"
+	isMySQLIntType := upperName == "INT" || upperName == "INT1" || upperName == "TINYINT" || upperName == "SMALLINT" ||
+		upperName == "MEDIUMINT" || upperName == "BIGINT" || upperName == "INTEGER"
 
 	if isMySQLIntType && p.currentIs(token.LPAREN) {
 		// Skip the display width parameter (e.g., INT(11))
@@ -4333,11 +4355,83 @@ func (p *Parser) parseDataType() *ast.DataType {
 	}
 
 	// Handle UNSIGNED/SIGNED modifiers for MySQL INT types
-	if isMySQLIntType && p.currentIs(token.IDENT) {
+	if isMySQLIntType && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) {
 		modifier := strings.ToUpper(p.current.Value)
 		if modifier == "UNSIGNED" || modifier == "SIGNED" {
 			dt.Name = dt.Name + " " + p.current.Value
 			p.nextToken()
+		}
+	}
+
+	// Handle DOUBLE PRECISION
+	if upperName == "DOUBLE" && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) {
+		if strings.ToUpper(p.current.Value) == "PRECISION" {
+			dt.Name = dt.Name + " " + p.current.Value
+			p.nextToken()
+		}
+	}
+
+	// Handle multi-word character types
+	// CHAR VARYING, CHAR LARGE OBJECT, CHARACTER VARYING, CHARACTER LARGE OBJECT
+	// NCHAR VARYING, NCHAR LARGE OBJECT
+	if upperName == "CHAR" || upperName == "CHARACTER" || upperName == "NCHAR" {
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			modifier := strings.ToUpper(p.current.Value)
+			if modifier == "VARYING" {
+				dt.Name = dt.Name + " " + p.current.Value
+				p.nextToken()
+			} else if modifier == "LARGE" {
+				dt.Name = dt.Name + " " + p.current.Value
+				p.nextToken()
+				// Expect OBJECT
+				if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && strings.ToUpper(p.current.Value) == "OBJECT" {
+					dt.Name = dt.Name + " " + p.current.Value
+					p.nextToken()
+				}
+			}
+		}
+	}
+
+	// Handle BINARY VARYING, BINARY LARGE OBJECT
+	if upperName == "BINARY" && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) {
+		modifier := strings.ToUpper(p.current.Value)
+		if modifier == "VARYING" {
+			dt.Name = dt.Name + " " + p.current.Value
+			p.nextToken()
+		} else if modifier == "LARGE" {
+			dt.Name = dt.Name + " " + p.current.Value
+			p.nextToken()
+			// Expect OBJECT
+			if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && strings.ToUpper(p.current.Value) == "OBJECT" {
+				dt.Name = dt.Name + " " + p.current.Value
+				p.nextToken()
+			}
+		}
+	}
+
+	// Handle NATIONAL CHAR, NATIONAL CHARACTER, etc.
+	if upperName == "NATIONAL" && (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) {
+		// NATIONAL can be followed by CHAR or CHARACTER
+		nextWord := strings.ToUpper(p.current.Value)
+		if nextWord == "CHAR" || nextWord == "CHARACTER" {
+			dt.Name = dt.Name + " " + p.current.Value
+			p.nextToken()
+			// Can be followed by VARYING or LARGE OBJECT
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				modifier := strings.ToUpper(p.current.Value)
+				if modifier == "VARYING" {
+					dt.Name = dt.Name + " " + p.current.Value
+					p.nextToken()
+				} else if modifier == "LARGE" {
+					dt.Name = dt.Name + " " + p.current.Value
+					p.nextToken()
+					// Expect OBJECT
+					if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && strings.ToUpper(p.current.Value) == "OBJECT" {
+						dt.Name = dt.Name + " " + p.current.Value
+						p.nextToken()
+					}
+				}
+			}
 		}
 	}
 
@@ -5179,24 +5273,20 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				Position: p.current.Pos,
 				Name:     idxName,
 			}
-			// Parse expression - can be in parentheses or bare expression until TYPE keyword
-			if p.currentIs(token.LPAREN) {
-				p.nextToken()
+			// Parse expression - let parseExpression handle parentheses naturally
+			// This allows (a, b, c) to be parsed as a tuple
+			if !p.currentIs(token.IDENT) || strings.ToUpper(p.current.Value) != "TYPE" {
 				idx.Expression = p.parseExpression(LOWEST)
-				cmd.IndexExpr = idx.Expression
-				p.expect(token.RPAREN)
-			} else if !p.currentIs(token.IDENT) || strings.ToUpper(p.current.Value) != "TYPE" {
-				// Parse bare expression (not in parentheses) - ends at TYPE keyword
-				idx.Expression = p.parseExpression(ALIAS_PREC)
 				cmd.IndexExpr = idx.Expression
 			}
 			// Parse TYPE
 			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TYPE" {
 				p.nextToken()
 				// Type is a function call like bloom_filter(0.025) or vector_similarity('hnsw', 'L2Distance', 1)
+				// Note: Index types can be keywords (e.g., SET) so we accept both IDENT and keywords
 				pos := p.current.Pos
 				typeName := ""
-				if p.currentIs(token.IDENT) {
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 					typeName = p.current.Value
 					cmd.IndexType = typeName
 					p.nextToken()
@@ -5228,7 +5318,8 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			// Parse AFTER
 			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "AFTER" {
 				p.nextToken()
-				if p.currentIs(token.IDENT) {
+				// Index name can be an identifier or keyword
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 					cmd.AfterIndex = p.current.Value
 					p.nextToken()
 				}
@@ -5591,18 +5682,24 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			cmd.Type = ast.AlterModifyTTL
 			p.nextToken()
 			cmd.TTL = &ast.TTLClause{
-				Position:   p.current.Pos,
-				Expression: p.parseExpression(LOWEST),
+				Position: p.current.Pos,
 			}
-			// Skip RECOMPRESS CODEC(...) and other TTL modifiers
-			p.skipTTLModifiers()
-			// Parse additional TTL elements (comma-separated)
-			for p.currentIs(token.COMMA) {
-				p.nextToken() // skip comma
-				expr := p.parseExpression(LOWEST)
-				cmd.TTL.Expressions = append(cmd.TTL.Expressions, expr)
-				// Skip RECOMPRESS CODEC(...) if present
-				p.skipTTLModifiers()
+			// Parse TTL elements using parseTTLElement (captures WHERE clause)
+			for {
+				elem := p.parseTTLElement()
+				cmd.TTL.Elements = append(cmd.TTL.Elements, elem)
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+			// Keep backward compatibility with Expression/Expressions fields
+			if len(cmd.TTL.Elements) > 0 {
+				cmd.TTL.Expression = cmd.TTL.Elements[0].Expr
+				for i := 1; i < len(cmd.TTL.Elements); i++ {
+					cmd.TTL.Expressions = append(cmd.TTL.Expressions, cmd.TTL.Elements[i].Expr)
+				}
 			}
 		} else if p.currentIs(token.SETTINGS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "SETTING") {
 			// Both SETTINGS and SETTING (singular) are accepted
@@ -5657,15 +5754,15 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		if p.currentIs(token.COLUMN) {
 			cmd.Type = ast.AlterRenameColumn
 			p.nextToken()
-			if p.currentIs(token.IDENT) {
-				cmd.ColumnName = p.current.Value
-				p.nextToken()
+			// Parse column name (can be dotted like n.x for nested columns)
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+				cmd.ColumnName = p.parseDottedIdentifier()
 			}
 			if p.currentIs(token.TO) {
 				p.nextToken()
-				if p.currentIs(token.IDENT) {
-					cmd.NewName = p.current.Value
-					p.nextToken()
+				// Parse new column name (can also be dotted)
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					cmd.NewName = p.parseDottedIdentifier()
 				}
 			}
 		}
@@ -6049,6 +6146,15 @@ func (p *Parser) parseDelete() *ast.DeleteQuery {
 		}
 	}
 
+	// Parse IN PARTITION clause
+	if p.currentIs(token.IN) {
+		p.nextToken() // skip IN
+		if p.currentIs(token.PARTITION) {
+			p.nextToken() // skip PARTITION
+			del.Partition = p.parseExpression(LOWEST)
+		}
+	}
+
 	// Parse WHERE clause
 	if p.currentIs(token.WHERE) {
 		p.nextToken() // skip WHERE
@@ -6174,8 +6280,16 @@ func (p *Parser) parseShow() ast.Statement {
 	case token.TABLES:
 		show.ShowType = ast.ShowTables
 		p.nextToken()
+	case token.TABLE:
+		// SHOW TABLE is equivalent to SHOW CREATE TABLE
+		show.ShowType = ast.ShowCreate
+		p.nextToken()
 	case token.DATABASES:
 		show.ShowType = ast.ShowDatabases
+		p.nextToken()
+	case token.DATABASE:
+		// SHOW DATABASE is equivalent to SHOW CREATE DATABASE
+		show.ShowType = ast.ShowCreateDB
 		p.nextToken()
 	case token.COLUMNS:
 		show.ShowType = ast.ShowColumns
@@ -6513,6 +6627,11 @@ func (p *Parser) parseOptimize() *ast.OptimizeQuery {
 	// Handle PARTITION
 	if p.currentIs(token.PARTITION) {
 		p.nextToken()
+		// Check for PARTITION ID 'value' syntax
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+			opt.PartitionByID = true
+			p.nextToken()
+		}
 		opt.Partition = p.parseExpression(LOWEST)
 	}
 
@@ -6560,6 +6679,19 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 		// Check if this IDENT is followed by DOT - if so, it's a table name, not part of the command
 		if p.currentIs(token.IDENT) && p.peekIs(token.DOT) {
 			break
+		}
+		// Check if we've completed a command that expects a table name next
+		// Commands like STOP MERGES, START MERGES, STOP TTL MERGES, START TTL MERGES, etc.
+		if len(parts) > 0 {
+			upperCmd := strings.ToUpper(strings.Join(parts, " "))
+			if strings.HasSuffix(upperCmd, " MERGES") ||
+				strings.HasSuffix(upperCmd, " MOVES") ||
+				strings.HasSuffix(upperCmd, " FETCHES") ||
+				strings.HasSuffix(upperCmd, " SENDS") ||
+				strings.HasSuffix(upperCmd, " MUTATIONS") {
+				// Next token should be the table name
+				break
+			}
 		}
 		// Check if this is a plain IDENT (not a command keyword) followed by end-of-statement
 		// This indicates it's likely a table name, not part of the command
@@ -6655,7 +6787,8 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 	upperCmd := strings.ToUpper(sys.Command)
 	if strings.Contains(upperCmd, "STOP DISTRIBUTED SENDS") ||
 		strings.Contains(upperCmd, "START DISTRIBUTED SENDS") ||
-		strings.Contains(upperCmd, "FLUSH DISTRIBUTED") {
+		strings.Contains(upperCmd, "FLUSH DISTRIBUTED") ||
+		strings.Contains(upperCmd, "RELOAD DICTIONARY") {
 		// Only set duplicate if database and table are different (qualified name)
 		if sys.Database != sys.Table {
 			sys.DuplicateTableOutput = true
@@ -6858,12 +6991,16 @@ func (p *Parser) parseDetach() *ast.DetachQuery {
 		p.nextToken()
 	}
 
-	// Parse name (can be qualified: database.table for TABLE, not for DATABASE/DICTIONARY)
+	// Parse name (can be qualified: database.table for TABLE, database.dict for DICTIONARY)
 	name := p.parseIdentifierName()
-	if p.currentIs(token.DOT) && !isDatabase && !isDictionary {
+	if p.currentIs(token.DOT) && !isDatabase {
 		p.nextToken()
 		detach.Database = name
-		detach.Table = p.parseIdentifierName()
+		if isDictionary {
+			detach.Dictionary = p.parseIdentifierName()
+		} else {
+			detach.Table = p.parseIdentifierName()
+		}
 	} else if isDatabase {
 		detach.Database = name
 	} else if isDictionary {
@@ -6903,12 +7040,28 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 		}
 	}
 
-	// Parse name (can be qualified: database.table for TABLE, not for DATABASE/DICTIONARY)
+	// Handle IF NOT EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.NOT) {
+			p.nextToken()
+			if p.currentIs(token.EXISTS) {
+				attach.IfNotExists = true
+				p.nextToken()
+			}
+		}
+	}
+
+	// Parse name (can be qualified: database.table for TABLE, database.dict for DICTIONARY)
 	name := p.parseIdentifierName()
-	if p.currentIs(token.DOT) && !isDatabase && !isDictionary {
+	if p.currentIs(token.DOT) && !isDatabase {
 		p.nextToken()
 		attach.Database = name
-		attach.Table = p.parseIdentifierName()
+		if isDictionary {
+			attach.Dictionary = p.parseIdentifierName()
+		} else {
+			attach.Table = p.parseIdentifierName()
+		}
 	} else if isDatabase {
 		attach.Database = name
 	} else if isDictionary {
@@ -6972,6 +7125,12 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 					if expr != nil {
 						attach.ColumnsPrimaryKey = append(attach.ColumnsPrimaryKey, expr)
 					}
+				}
+			} else if p.currentIs(token.INDEX) {
+				// Handle INDEX definition
+				idx := p.parseIndexDefinition()
+				if idx != nil {
+					attach.Indexes = append(attach.Indexes, idx)
 				}
 			} else {
 				col := p.parseColumnDeclaration()
@@ -7053,6 +7212,10 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 			if p.currentIs(token.SELECT) {
 				attach.SelectQuery = p.parseSelectWithUnion()
 			}
+		case p.currentIs(token.SETTINGS):
+			// SETTINGS clause
+			p.nextToken()
+			attach.Settings = p.parseSettingsList()
 		default:
 			return attach
 		}
@@ -7246,6 +7409,29 @@ func (p *Parser) parseIdentifierName() string {
 	}
 
 	return ""
+}
+
+// parseDottedIdentifier parses an identifier that may contain dots (e.g., n.x for nested columns)
+func (p *Parser) parseDottedIdentifier() string {
+	if !p.currentIs(token.IDENT) && !p.current.Token.IsKeyword() {
+		return ""
+	}
+
+	parts := []string{p.current.Value}
+	p.nextToken()
+
+	// Continue parsing if followed by dots
+	for p.currentIs(token.DOT) {
+		p.nextToken() // skip .
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			parts = append(parts, p.current.Value)
+			p.nextToken()
+		} else {
+			break
+		}
+	}
+
+	return strings.Join(parts, ".")
 }
 
 // parseFromSelectSyntax handles ClickHouse's FROM ... SELECT syntax
@@ -7679,6 +7865,150 @@ func (p *Parser) parseRevoke() *ast.GrantQuery {
 	return grant
 }
 
+func (p *Parser) parseBackup() *ast.BackupQuery {
+	backup := &ast.BackupQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip BACKUP
+
+	// Parse what to backup: TABLE, DATABASE, DICTIONARY, ALL, TEMPORARY
+	if p.currentIs(token.TABLE) {
+		p.nextToken()
+		name := p.parseIdentifierName()
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			backup.Database = name
+			backup.Table = p.parseIdentifierName()
+		} else {
+			backup.Table = name
+		}
+	} else if p.currentIs(token.DATABASE) {
+		p.nextToken()
+		backup.Database = p.parseIdentifierName()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
+		p.nextToken()
+		backup.Dictionary = p.parseIdentifierName()
+	} else if p.currentIs(token.ALL) {
+		backup.All = true
+		p.nextToken()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TEMPORARY" {
+		backup.Temporary = true
+		p.nextToken()
+		if p.currentIs(token.TABLE) {
+			p.nextToken()
+		}
+	}
+
+	// Parse TO clause
+	if p.currentIs(token.TO) {
+		p.nextToken()
+		// Parse target - it's a function call like Null or Disk('path')
+		if p.currentIs(token.NULL) || p.currentIs(token.IDENT) {
+			name := p.current.Value
+			p.nextToken()
+			fn := &ast.FunctionCall{
+				Position: backup.Position,
+				Name:     name,
+			}
+			if p.currentIs(token.LPAREN) {
+				p.nextToken()
+				if !p.currentIs(token.RPAREN) {
+					fn.Arguments = p.parseExpressionList()
+				}
+				p.expect(token.RPAREN)
+			}
+			backup.Target = fn
+		}
+	}
+
+	// Parse SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		backup.Settings = p.parseSettingsList()
+	}
+
+	// Parse FORMAT clause
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		backup.Format = p.parseIdentifierName()
+	}
+
+	return backup
+}
+
+func (p *Parser) parseRestore() *ast.RestoreQuery {
+	restore := &ast.RestoreQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip RESTORE
+
+	// Parse what to restore: TABLE, DATABASE, DICTIONARY, ALL, TEMPORARY
+	if p.currentIs(token.TABLE) {
+		p.nextToken()
+		name := p.parseIdentifierName()
+		if p.currentIs(token.DOT) {
+			p.nextToken()
+			restore.Database = name
+			restore.Table = p.parseIdentifierName()
+		} else {
+			restore.Table = name
+		}
+	} else if p.currentIs(token.DATABASE) {
+		p.nextToken()
+		restore.Database = p.parseIdentifierName()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
+		p.nextToken()
+		restore.Dictionary = p.parseIdentifierName()
+	} else if p.currentIs(token.ALL) {
+		restore.All = true
+		p.nextToken()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TEMPORARY" {
+		restore.Temporary = true
+		p.nextToken()
+		if p.currentIs(token.TABLE) {
+			p.nextToken()
+		}
+	}
+
+	// Parse FROM clause
+	if p.currentIs(token.FROM) {
+		p.nextToken()
+		// Parse source - it's a function call like Null or Disk('path')
+		if p.currentIs(token.NULL) || p.currentIs(token.IDENT) {
+			name := p.current.Value
+			p.nextToken()
+			fn := &ast.FunctionCall{
+				Position: restore.Position,
+				Name:     name,
+			}
+			if p.currentIs(token.LPAREN) {
+				p.nextToken()
+				if !p.currentIs(token.RPAREN) {
+					fn.Arguments = p.parseExpressionList()
+				}
+				p.expect(token.RPAREN)
+			}
+			restore.Source = fn
+		}
+	}
+
+	// Parse SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		restore.Settings = p.parseSettingsList()
+	}
+
+	// Parse FORMAT clause
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		restore.Format = p.parseIdentifierName()
+	}
+
+	return restore
+}
+
 // parseTransactionControl handles BEGIN, COMMIT, ROLLBACK, and SET TRANSACTION SNAPSHOT statements
 func (p *Parser) parseTransactionControl() *ast.TransactionControlQuery {
 	query := &ast.TransactionControlQuery{
@@ -7720,6 +8050,177 @@ func (p *Parser) parseTransactionControl() *ast.TransactionControlQuery {
 	}
 
 	return query
+}
+
+// parseKill handles KILL QUERY/MUTATION statements
+func (p *Parser) parseKill() *ast.KillQuery {
+	query := &ast.KillQuery{
+		Position: p.current.Pos,
+	}
+
+	p.nextToken() // skip KILL
+
+	// Parse QUERY or MUTATION
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "QUERY" {
+		query.Type = "QUERY"
+		p.nextToken()
+	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "MUTATION" {
+		query.Type = "MUTATION"
+		p.nextToken()
+	}
+
+	// Parse WHERE clause
+	if p.currentIs(token.WHERE) {
+		p.nextToken() // skip WHERE
+		query.Where = p.parseExpression(LOWEST)
+	}
+
+	// Parse SYNC/ASYNC/TEST
+	for p.currentIs(token.IDENT) {
+		upper := strings.ToUpper(p.current.Value)
+		switch upper {
+		case "SYNC":
+			query.Sync = true
+			p.nextToken()
+		case "ASYNC":
+			query.Sync = false
+			p.nextToken()
+		case "TEST":
+			query.Test = true
+			p.nextToken()
+		default:
+			// Exit loop for unknown keywords
+			goto endModifiers
+		}
+	}
+endModifiers:
+
+	// Parse FORMAT clause
+	if p.currentIs(token.FORMAT) {
+		p.nextToken()
+		if p.currentIs(token.NULL) {
+			query.Format = "Null"
+			p.nextToken()
+		} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			query.Format = p.current.Value
+			p.nextToken()
+		}
+	}
+
+	return query
+}
+
+// parseTTLElement parses a single TTL element: expression [DELETE] [WHERE condition] [GROUP BY ...] [SET ...]
+func (p *Parser) parseTTLElement() *ast.TTLElement {
+	elem := &ast.TTLElement{
+		Position: p.current.Pos,
+		Expr:     p.parseExpression(ALIAS_PREC),
+	}
+	// Skip RECOMPRESS CODEC(...), DELETE, TO DISK, TO VOLUME (but not WHERE)
+	p.skipTTLModifiersExceptWhere()
+	// Handle WHERE clause for this TTL element (conditional deletion)
+	if p.currentIs(token.WHERE) {
+		p.nextToken()
+		elem.Where = p.parseExpression(ALIAS_PREC)
+	}
+	// Handle GROUP BY x SET y = max(y) syntax (skip for now, already parsed in Where or just skip)
+	if p.currentIs(token.GROUP) {
+		p.nextToken()
+		if p.currentIs(token.BY) {
+			p.nextToken()
+			for {
+				p.parseExpression(ALIAS_PREC)
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+		}
+	}
+	// Handle SET clause - assignments are comma separated (id = expr, id = expr, ...)
+	// We need to distinguish between:
+	// - Comma continuing SET: followed by IDENT = pattern
+	// - Comma starting new TTL: followed by expression (like d + toIntervalYear(...))
+	if p.currentIs(token.SET) {
+		p.nextToken()
+		for {
+			// Parse assignment expression: id = expr
+			p.parseExpression(ALIAS_PREC)
+			// Check for comma
+			if p.currentIs(token.COMMA) {
+				// Look ahead to check pattern. We need to see: COMMA IDENT EQ
+				// Save state to peek ahead
+				savedCurrent := p.current
+				savedPeek := p.peek
+				p.nextToken() // skip comma to see what follows
+				isSetContinuation := false
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					if p.peekIs(token.EQ) {
+						// It's another SET assignment (id = expr)
+						isSetContinuation = true
+					}
+				}
+				if isSetContinuation {
+					// Continue parsing SET assignments (already consumed comma)
+					continue
+				}
+				// Not a SET assignment - restore state so caller sees the comma
+				p.current = savedCurrent
+				p.peek = savedPeek
+				break
+			}
+			// No comma, end of SET clause
+			break
+		}
+	}
+	return elem
+}
+
+// skipTTLModifiersExceptWhere skips TTL modifiers but stops at WHERE
+func (p *Parser) skipTTLModifiersExceptWhere() {
+	for {
+		// Skip RECOMPRESS CODEC(...)
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "RECOMPRESS" {
+			p.nextToken()
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CODEC" {
+				p.nextToken()
+				if p.currentIs(token.LPAREN) {
+					depth := 1
+					p.nextToken()
+					for depth > 0 && !p.currentIs(token.EOF) {
+						if p.currentIs(token.LPAREN) {
+							depth++
+						} else if p.currentIs(token.RPAREN) {
+							depth--
+						}
+						p.nextToken()
+					}
+				}
+			}
+			continue
+		}
+		// Skip DELETE (TTL ... DELETE)
+		if p.currentIs(token.DELETE) {
+			p.nextToken()
+			continue
+		}
+		// Skip TO DISK 'name' or TO VOLUME 'name'
+		if p.currentIs(token.TO) {
+			p.nextToken()
+			if p.currentIs(token.IDENT) {
+				upper := strings.ToUpper(p.current.Value)
+				if upper == "DISK" || upper == "VOLUME" {
+					p.nextToken()
+					if p.currentIs(token.STRING) {
+						p.nextToken()
+					}
+					continue
+				}
+			}
+		}
+		break
+	}
 }
 
 // skipTTLModifiers skips TTL modifiers like RECOMPRESS CODEC(...), DELETE, TO DISK, TO VOLUME
