@@ -1060,6 +1060,10 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 		}
 	case *ast.CastExpr:
 		explainCastExprWithAlias(sb, e, n.Name, indent, depth)
+	case *ast.ArrayAccess:
+		explainArrayAccessWithAlias(sb, e, n.Name, indent, depth)
+	case *ast.BetweenExpr:
+		explainBetweenExprWithAlias(sb, e, n.Name, indent, depth)
 	default:
 		// For other types, just output the expression (alias may be lost)
 		Node(sb, n.Query, depth)

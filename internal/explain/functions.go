@@ -1442,6 +1442,48 @@ func explainBetweenExpr(sb *strings.Builder, n *ast.BetweenExpr, indent string, 
 	}
 }
 
+func explainBetweenExprWithAlias(sb *strings.Builder, n *ast.BetweenExpr, alias string, indent string, depth int) {
+	if n.Not {
+		// NOT BETWEEN is transformed to: expr < low OR expr > high
+		// Represented as: Function or with two comparisons: less and greater
+		if alias != "" {
+			fmt.Fprintf(sb, "%sFunction or (alias %s) (children %d)\n", indent, alias, 1)
+		} else {
+			fmt.Fprintf(sb, "%sFunction or (children %d)\n", indent, 1)
+		}
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+		// less(expr, low)
+		fmt.Fprintf(sb, "%s  Function less (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 2)
+		Node(sb, n.Expr, depth+4)
+		Node(sb, n.Low, depth+4)
+		// greater(expr, high)
+		fmt.Fprintf(sb, "%s  Function greater (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 2)
+		Node(sb, n.Expr, depth+4)
+		Node(sb, n.High, depth+4)
+	} else {
+		// BETWEEN is represented as Function and with two comparisons
+		// expr >= low AND expr <= high
+		if alias != "" {
+			fmt.Fprintf(sb, "%sFunction and (alias %s) (children %d)\n", indent, alias, 1)
+		} else {
+			fmt.Fprintf(sb, "%sFunction and (children %d)\n", indent, 1)
+		}
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+		// greaterOrEquals(expr, low)
+		fmt.Fprintf(sb, "%s  Function greaterOrEquals (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 2)
+		Node(sb, n.Expr, depth+4)
+		Node(sb, n.Low, depth+4)
+		// lessOrEquals(expr, high)
+		fmt.Fprintf(sb, "%s  Function lessOrEquals (children %d)\n", indent, 1)
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 2)
+		Node(sb, n.Expr, depth+4)
+		Node(sb, n.High, depth+4)
+	}
+}
+
 func explainIsNullExpr(sb *strings.Builder, n *ast.IsNullExpr, indent string, depth int) {
 	// IS NULL is represented as Function isNull
 	fnName := "isNull"
