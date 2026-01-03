@@ -1922,7 +1922,10 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 	p.nextToken()
 
 	// Check for ANY/ALL subquery comparison modifier: expr >= ANY(subquery)
-	if p.currentIs(token.ANY) || p.currentIs(token.ALL) {
+	// Only apply for comparison operators, not for AND/OR which might be followed by any() function calls
+	isComparisonOp := expr.Op == "=" || expr.Op == "==" || expr.Op == "!=" || expr.Op == "<>" ||
+		expr.Op == "<" || expr.Op == "<=" || expr.Op == ">" || expr.Op == ">="
+	if isComparisonOp && (p.currentIs(token.ANY) || p.currentIs(token.ALL)) {
 		modifier := strings.ToLower(p.current.Value)
 		p.nextToken()
 		if p.currentIs(token.LPAREN) {

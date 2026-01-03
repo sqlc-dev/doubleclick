@@ -398,8 +398,13 @@ func collectLogicalOperands(n *ast.BinaryExpr) []ast.Expression {
 		operands = append(operands, n.Left)
 	}
 
-	// Don't flatten right side - explicit parentheses would be on the left in left-associative parsing
-	operands = append(operands, n.Right)
+	// Also flatten right side if it's the same operator and not parenthesized
+	// This handles both left-associative and right-associative parsing
+	if right, ok := n.Right.(*ast.BinaryExpr); ok && right.Op == n.Op && !right.Parenthesized {
+		operands = append(operands, collectLogicalOperands(right)...)
+	} else {
+		operands = append(operands, n.Right)
+	}
 
 	return operands
 }
