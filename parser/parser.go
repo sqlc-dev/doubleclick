@@ -7045,6 +7045,12 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 						attach.ColumnsPrimaryKey = append(attach.ColumnsPrimaryKey, expr)
 					}
 				}
+			} else if p.currentIs(token.INDEX) {
+				// Handle INDEX definition
+				idx := p.parseIndexDefinition()
+				if idx != nil {
+					attach.Indexes = append(attach.Indexes, idx)
+				}
 			} else {
 				col := p.parseColumnDeclaration()
 				if col != nil {
@@ -7125,6 +7131,10 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 			if p.currentIs(token.SELECT) {
 				attach.SelectQuery = p.parseSelectWithUnion()
 			}
+		case p.currentIs(token.SETTINGS):
+			// SETTINGS clause
+			p.nextToken()
+			attach.Settings = p.parseSettingsList()
 		default:
 			return attach
 		}

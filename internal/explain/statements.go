@@ -1283,7 +1283,7 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 	if n.Database != "" && n.Table != "" {
 		children++ // extra identifier for database
 	}
-	hasColumns := len(n.Columns) > 0 || len(n.ColumnsPrimaryKey) > 0
+	hasColumns := len(n.Columns) > 0 || len(n.ColumnsPrimaryKey) > 0 || len(n.Indexes) > 0
 	if hasColumns {
 		children++
 	}
@@ -1291,7 +1291,7 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 	if hasSelectQuery {
 		children++
 	}
-	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil
+	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || len(n.Settings) > 0
 	if hasStorage {
 		children++ // ViewTargets or Storage definition
 	}
@@ -1322,6 +1322,9 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 		if len(n.Columns) > 0 {
 			columnsChildren++
 		}
+		if len(n.Indexes) > 0 {
+			columnsChildren++
+		}
 		if len(n.ColumnsPrimaryKey) > 0 {
 			columnsChildren++
 		}
@@ -1330,6 +1333,13 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Columns))
 			for _, col := range n.Columns {
 				Column(sb, col, depth+3)
+			}
+		}
+		// Output indexes
+		if len(n.Indexes) > 0 {
+			fmt.Fprintf(sb, "%s  ExpressionList (children %d)\n", indent, len(n.Indexes))
+			for _, idx := range n.Indexes {
+				Index(sb, idx, depth+3)
 			}
 		}
 		// Output inline PRIMARY KEY (from column list)
@@ -1370,13 +1380,28 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 		if len(n.PrimaryKey) > 0 {
 			storageChildren++
 		}
+		if len(n.Settings) > 0 {
+			storageChildren++
+		}
 
 		// For materialized views, wrap in ViewTargets
 		if n.IsMaterializedView {
 			fmt.Fprintf(sb, "%s ViewTargets (children 1)\n", indent)
 			fmt.Fprintf(sb, "%s  Storage definition (children %d)\n", indent, storageChildren)
 			if n.Engine != nil {
-				fmt.Fprintf(sb, "%s   Function %s\n", indent, n.Engine.Name)
+				if n.Engine.HasParentheses {
+					fmt.Fprintf(sb, "%s   Function %s (children 1)\n", indent, n.Engine.Name)
+					if len(n.Engine.Parameters) > 0 {
+						fmt.Fprintf(sb, "%s    ExpressionList (children %d)\n", indent, len(n.Engine.Parameters))
+						for _, param := range n.Engine.Parameters {
+							Node(sb, param, depth+5)
+						}
+					} else {
+						fmt.Fprintf(sb, "%s    ExpressionList\n", indent)
+					}
+				} else {
+					fmt.Fprintf(sb, "%s   Function %s\n", indent, n.Engine.Name)
+				}
 			}
 			if n.PartitionBy != nil {
 				Node(sb, n.PartitionBy, depth+3)
@@ -1391,10 +1416,25 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 					Node(sb, expr, depth+3)
 				}
 			}
+			if len(n.Settings) > 0 {
+				fmt.Fprintf(sb, "%s   Set\n", indent)
+			}
 		} else {
 			fmt.Fprintf(sb, "%s Storage definition (children %d)\n", indent, storageChildren)
 			if n.Engine != nil {
-				fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
+				if n.Engine.HasParentheses {
+					fmt.Fprintf(sb, "%s  Function %s (children 1)\n", indent, n.Engine.Name)
+					if len(n.Engine.Parameters) > 0 {
+						fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.Engine.Parameters))
+						for _, param := range n.Engine.Parameters {
+							Node(sb, param, depth+4)
+						}
+					} else {
+						fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+					}
+				} else {
+					fmt.Fprintf(sb, "%s  Function %s\n", indent, n.Engine.Name)
+				}
 			}
 			if n.PartitionBy != nil {
 				Node(sb, n.PartitionBy, depth+2)
@@ -1408,6 +1448,9 @@ func explainAttachQuery(sb *strings.Builder, n *ast.AttachQuery, indent string, 
 				for _, expr := range n.PrimaryKey {
 					Node(sb, expr, depth+2)
 				}
+			}
+			if len(n.Settings) > 0 {
+				fmt.Fprintf(sb, "%s  Set\n", indent)
 			}
 		}
 	}

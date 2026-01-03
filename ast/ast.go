@@ -748,6 +748,7 @@ type AttachQuery struct {
 	Dictionary         string               `json:"dictionary,omitempty"`
 	Columns            []*ColumnDeclaration `json:"columns,omitempty"`
 	ColumnsPrimaryKey  []Expression         `json:"columns_primary_key,omitempty"` // PRIMARY KEY in column list
+	Indexes            []*IndexDefinition   `json:"indexes,omitempty"`             // INDEX definitions in column list
 	Engine             *EngineClause        `json:"engine,omitempty"`
 	OrderBy            []Expression         `json:"order_by,omitempty"`
 	PrimaryKey         []Expression         `json:"primary_key,omitempty"`
@@ -756,6 +757,7 @@ type AttachQuery struct {
 	InnerUUID          string               `json:"inner_uuid,omitempty"` // TO INNER UUID clause
 	PartitionBy        Expression           `json:"partition_by,omitempty"`
 	SelectQuery        Statement            `json:"select_query,omitempty"` // AS SELECT clause
+	Settings           []*SettingExpr       `json:"settings,omitempty"`     // SETTINGS clause
 }
 
 func (a *AttachQuery) Pos() token.Position { return a.Position }
