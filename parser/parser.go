@@ -1247,6 +1247,12 @@ func (p *Parser) parseSelectInternal(preParsedWith []ast.Expression) *ast.Select
 				p.nextToken()
 				sel.Limit = p.parseExpression(LOWEST)
 				sel.LimitByHasLimit = true
+				// Handle LIMIT offset, count syntax
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+					sel.Offset = sel.Limit
+					sel.Limit = p.parseExpression(LOWEST)
+				}
 			}
 		}
 
