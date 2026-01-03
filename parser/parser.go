@@ -6168,6 +6168,15 @@ func (p *Parser) parseDelete() *ast.DeleteQuery {
 		}
 	}
 
+	// Parse IN PARTITION clause
+	if p.currentIs(token.IN) {
+		p.nextToken() // skip IN
+		if p.currentIs(token.PARTITION) {
+			p.nextToken() // skip PARTITION
+			del.Partition = p.parseExpression(LOWEST)
+		}
+	}
+
 	// Parse WHERE clause
 	if p.currentIs(token.WHERE) {
 		p.nextToken() // skip WHERE

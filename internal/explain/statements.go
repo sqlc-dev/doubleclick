@@ -2198,8 +2198,11 @@ func explainDeleteQuery(sb *strings.Builder, n *ast.DeleteQuery, indent string, 
 		return
 	}
 
-	// Count children: Where expression + table identifier + settings
+	// Count children: Partition + Where expression + table identifier + settings
 	children := 1 // table identifier
+	if n.Partition != nil {
+		children++
+	}
 	if n.Where != nil {
 		children++
 	}
@@ -2208,6 +2211,11 @@ func explainDeleteQuery(sb *strings.Builder, n *ast.DeleteQuery, indent string, 
 	}
 
 	fmt.Fprintf(sb, "%sDeleteQuery  %s (children %d)\n", indent, n.Table, children)
+	// Output order: Partition, Where, Table identifier, Settings
+	if n.Partition != nil {
+		fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
+		Node(sb, n.Partition, depth+2)
+	}
 	if n.Where != nil {
 		Node(sb, n.Where, depth+1)
 	}
