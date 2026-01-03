@@ -1725,7 +1725,26 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 		}
 	}
 
-	// Handle FINAL
+	// Handle alias (keywords like LEFT, RIGHT, FIRST can be used as aliases after AS,
+	// or without AS if they're not clause keywords)
+	// In ClickHouse, alias comes BEFORE FINAL: FROM table t FINAL
+	if p.currentIs(token.AS) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			expr.Alias = p.current.Value
+			p.nextToken()
+		}
+	} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && !p.isKeywordForClause() && !p.currentIs(token.FINAL) && !p.currentIs(token.SAMPLE) {
+		// Don't consume PARALLEL as alias if followed by WITH (parallel query syntax)
+		if p.currentIs(token.PARALLEL) && p.peekIs(token.WITH) {
+			return expr
+		}
+		// Don't consume FINAL or SAMPLE as alias
+		expr.Alias = p.current.Value
+		p.nextToken()
+	}
+
+	// Handle FINAL (after alias)
 	if p.currentIs(token.FINAL) {
 		expr.Final = true
 		p.nextToken()
@@ -1742,23 +1761,6 @@ func (p *Parser) parseTableExpression() *ast.TableExpression {
 			p.nextToken()
 			expr.Sample.Offset = p.parseExpression(LOWEST)
 		}
-	}
-
-	// Handle alias (keywords like LEFT, RIGHT, FIRST can be used as aliases after AS,
-	// or without AS if they're not clause keywords)
-	if p.currentIs(token.AS) {
-		p.nextToken()
-		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-			expr.Alias = p.current.Value
-			p.nextToken()
-		}
-	} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && !p.isKeywordForClause() {
-		// Don't consume PARALLEL as alias if followed by WITH (parallel query syntax)
-		if p.currentIs(token.PARALLEL) && p.peekIs(token.WITH) {
-			return expr
-		}
-		expr.Alias = p.current.Value
-		p.nextToken()
 	}
 
 	return expr
