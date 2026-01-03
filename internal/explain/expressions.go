@@ -132,6 +132,10 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 
 			for _, e := range exprs {
 				if lit, ok := e.(*ast.Literal); ok {
+					// Parenthesized elements require Function array format
+					if lit.Parenthesized {
+						shouldUseFunctionArray = true
+					}
 					if lit.Type == ast.LiteralArray {
 						hasNestedArrays = true
 						// Check if inner array needs Function array format:
