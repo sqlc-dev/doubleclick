@@ -2163,6 +2163,15 @@ func explainOptimizeQuery(sb *strings.Builder, n *ast.OptimizeQuery, indent stri
 		// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
 		if ident, ok := n.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
 			fmt.Fprintf(sb, "%s Partition_ID \n", indent)
+		} else if n.PartitionByID {
+			// PARTITION ID 'value' is shown as Partition_ID Literal_'value' (children 1)
+			if lit, ok := n.Partition.(*ast.Literal); ok {
+				fmt.Fprintf(sb, "%s Partition_ID Literal_\\'%s\\' (children 1)\n", indent, lit.Value)
+				Node(sb, n.Partition, depth+2)
+			} else {
+				fmt.Fprintf(sb, "%s Partition_ID (children 1)\n", indent)
+				Node(sb, n.Partition, depth+2)
+			}
 		} else {
 			fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
 			Node(sb, n.Partition, depth+2)

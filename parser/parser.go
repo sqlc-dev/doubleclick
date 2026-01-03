@@ -6620,6 +6620,11 @@ func (p *Parser) parseOptimize() *ast.OptimizeQuery {
 	// Handle PARTITION
 	if p.currentIs(token.PARTITION) {
 		p.nextToken()
+		// Check for PARTITION ID 'value' syntax
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+			opt.PartitionByID = true
+			p.nextToken()
+		}
 		opt.Partition = p.parseExpression(LOWEST)
 	}
 

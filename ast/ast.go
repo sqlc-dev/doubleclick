@@ -909,15 +909,16 @@ func (s *SetQuery) statementNode()      {}
 
 // OptimizeQuery represents an OPTIMIZE statement.
 type OptimizeQuery struct {
-	Position  token.Position `json:"-"`
-	Database  string         `json:"database,omitempty"`
-	Table     string         `json:"table"`
-	Partition Expression     `json:"partition,omitempty"`
-	Final     bool           `json:"final,omitempty"`
-	Cleanup   bool           `json:"cleanup,omitempty"`
-	Dedupe    bool           `json:"dedupe,omitempty"`
-	OnCluster string         `json:"on_cluster,omitempty"`
-	Settings  []*SettingExpr `json:"settings,omitempty"`
+	Position      token.Position `json:"-"`
+	Database      string         `json:"database,omitempty"`
+	Table         string         `json:"table"`
+	Partition     Expression     `json:"partition,omitempty"`
+	PartitionByID bool           `json:"partition_by_id,omitempty"` // PARTITION ID vs PARTITION expr
+	Final         bool           `json:"final,omitempty"`
+	Cleanup       bool           `json:"cleanup,omitempty"`
+	Dedupe        bool           `json:"dedupe,omitempty"`
+	OnCluster     string         `json:"on_cluster,omitempty"`
+	Settings      []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (o *OptimizeQuery) Pos() token.Position { return o.Position }
