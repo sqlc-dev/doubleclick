@@ -5267,15 +5267,10 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				Position: p.current.Pos,
 				Name:     idxName,
 			}
-			// Parse expression - can be in parentheses or bare expression until TYPE keyword
-			if p.currentIs(token.LPAREN) {
-				p.nextToken()
+			// Parse expression - let parseExpression handle parentheses naturally
+			// This allows (a, b, c) to be parsed as a tuple
+			if !p.currentIs(token.IDENT) || strings.ToUpper(p.current.Value) != "TYPE" {
 				idx.Expression = p.parseExpression(LOWEST)
-				cmd.IndexExpr = idx.Expression
-				p.expect(token.RPAREN)
-			} else if !p.currentIs(token.IDENT) || strings.ToUpper(p.current.Value) != "TYPE" {
-				// Parse bare expression (not in parentheses) - ends at TYPE keyword
-				idx.Expression = p.parseExpression(ALIAS_PREC)
 				cmd.IndexExpr = idx.Expression
 			}
 			// Parse TYPE
