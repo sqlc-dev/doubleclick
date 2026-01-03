@@ -2749,9 +2749,28 @@ func (p *Parser) parseKeywordAsIdentifier() ast.Expression {
 	name := p.current.Value
 	p.nextToken()
 
+	// Check for qualified identifier (system.one.* or system.one.col)
+	parts := []string{name}
+	for p.currentIs(token.DOT) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			parts = append(parts, p.current.Value)
+			p.nextToken()
+		} else if p.currentIs(token.ASTERISK) {
+			// table.*
+			p.nextToken()
+			return &ast.Asterisk{
+				Position: pos,
+				Table:    strings.Join(parts, "."),
+			}
+		} else {
+			break
+		}
+	}
+
 	return &ast.Identifier{
 		Position: pos,
-		Parts:    []string{name},
+		Parts:    parts,
 	}
 }
 
