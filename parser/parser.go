@@ -7081,6 +7081,18 @@ func (p *Parser) parseCheck() *ast.CheckQuery {
 		check.Table = tableName
 	}
 
+	// Parse optional PARTITION clause
+	if p.currentIs(token.PARTITION) {
+		p.nextToken() // skip PARTITION
+		check.Partition = p.parseExpression(LOWEST)
+	}
+
+	// Parse optional PART clause
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PART" {
+		p.nextToken() // skip PART
+		check.Part = p.parseExpression(LOWEST)
+	}
+
 	// Parse optional FORMAT
 	if p.currentIs(token.FORMAT) {
 		p.nextToken() // skip FORMAT
