@@ -56,19 +56,17 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 				fmt.Fprintf(sb, "%s ExpressionList\n", indent)
 				return
 			}
-			// Single-element tuples (from trailing comma syntax like (1,)) always render as Function tuple
-			if len(exprs) == 1 {
-				fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
-				fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
-				for _, e := range exprs {
-					Node(sb, e, depth+2)
-				}
-				return
-			}
+			// Check if any element is parenthesized (e.g., ((1), (2)) vs (1, 2))
+			// Parenthesized elements mean the tuple should render as Function tuple
+			hasParenthesizedElement := false
 			hasComplexExpr := false
 			for _, e := range exprs {
-				// Simple literals (numbers, strings, etc.) are OK
+				// Check for parenthesized literals
 				if lit, isLit := e.(*ast.Literal); isLit {
+					if lit.Parenthesized {
+						hasParenthesizedElement = true
+						break
+					}
 					// Nested tuples that contain only primitive literals are OK
 					if lit.Type == ast.LiteralTuple {
 						if !containsOnlyPrimitiveLiteralsWithUnary(lit) {
@@ -82,7 +80,6 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 						hasComplexExpr = true
 						break
 					}
-					// Other literals are simple
 					continue
 				}
 				// Unary negation of numeric literals is also simple
@@ -97,8 +94,9 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 				hasComplexExpr = true
 				break
 			}
-			if hasComplexExpr {
-				// Render as Function tuple instead of Literal
+			// Single-element tuples (from trailing comma syntax like (1,)) always render as Function tuple
+			// Tuples with complex expressions or parenthesized elements also render as Function tuple
+			if len(exprs) == 1 || hasComplexExpr || hasParenthesizedElement {
 				fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
 				fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
 				for _, e := range exprs {

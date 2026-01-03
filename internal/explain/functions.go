@@ -1107,9 +1107,42 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 		// Otherwise, output the element directly
 		if lit, ok := n.List[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
 			// Wrap tuple literal in Function tuple
-			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
-			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
-			Node(sb, n.List[0], depth+4)
+			// Check if all elements are parenthesized primitives - if so, expand them
+			// Otherwise, keep the tuple as a Literal
+			elems, ok := lit.Value.([]ast.Expression)
+			if !ok {
+				// Fallback if Value isn't []ast.Expression
+				fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+				fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
+				Node(sb, n.List[0], depth+4)
+			} else {
+				// Check if all elements are parenthesized primitives
+				allParenthesizedPrimitives := true
+				for _, elem := range elems {
+					if primLit, isPrim := elem.(*ast.Literal); isPrim {
+						if !primLit.Parenthesized || primLit.Type == ast.LiteralTuple || primLit.Type == ast.LiteralArray {
+							allParenthesizedPrimitives = false
+							break
+						}
+					} else {
+						allParenthesizedPrimitives = false
+						break
+					}
+				}
+
+				fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+				if allParenthesizedPrimitives {
+					// Expand the elements
+					fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(elems))
+					for _, elem := range elems {
+						Node(sb, elem, depth+4)
+					}
+				} else {
+					// Keep as a single Literal Tuple
+					fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
+					Node(sb, n.List[0], depth+4)
+				}
+			}
 		} else {
 			// Single non-tuple element - output directly
 			Node(sb, n.List[0], depth+2)
