@@ -313,6 +313,13 @@ func FormatDataType(dt *ast.DataType) string {
 		} else if ident, ok := p.(*ast.Identifier); ok {
 			// Identifier (e.g., function name in AggregateFunction types)
 			params = append(params, ident.Name())
+		} else if unary, ok := p.(*ast.UnaryExpr); ok {
+			// Unary expression (e.g., -1 for negative numbers)
+			if lit, ok := unary.Operand.(*ast.Literal); ok {
+				params = append(params, fmt.Sprintf("%s%v", unary.Op, lit.Value))
+			} else {
+				params = append(params, fmt.Sprintf("%v", p))
+			}
 		} else {
 			params = append(params, fmt.Sprintf("%v", p))
 		}
