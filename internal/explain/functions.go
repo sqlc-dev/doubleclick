@@ -614,6 +614,13 @@ func explainCastExprWithAlias(sb *strings.Builder, n *ast.CastExpr, alias string
 			} else if lit.Type == ast.LiteralNull {
 				// NULL stays as Literal NULL, not formatted as a string
 				fmt.Fprintf(sb, "%s  Literal NULL\n", indent)
+			} else if lit.Type == ast.LiteralBoolean {
+				// Booleans use Bool_1/Bool_0 format
+				if lit.Value.(bool) {
+					fmt.Fprintf(sb, "%s  Literal Bool_1\n", indent)
+				} else {
+					fmt.Fprintf(sb, "%s  Literal Bool_0\n", indent)
+				}
 			} else {
 				// Simple literal - format as string (escape special chars for string literals)
 				exprStr := formatExprAsString(lit)
