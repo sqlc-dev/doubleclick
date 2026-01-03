@@ -692,6 +692,7 @@ const (
 // TruncateQuery represents a TRUNCATE statement.
 type TruncateQuery struct {
 	Position  token.Position `json:"-"`
+	Temporary bool           `json:"temporary,omitempty"`
 	IfExists  bool           `json:"if_exists,omitempty"`
 	Database  string         `json:"database,omitempty"`
 	Table     string         `json:"table"`

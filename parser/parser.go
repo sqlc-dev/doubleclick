@@ -5849,6 +5849,12 @@ func (p *Parser) parseTruncate() *ast.TruncateQuery {
 
 	p.nextToken() // skip TRUNCATE
 
+	// Handle TEMPORARY keyword
+	if p.currentIs(token.TEMPORARY) {
+		trunc.Temporary = true
+		p.nextToken()
+	}
+
 	if p.currentIs(token.TABLE) {
 		p.nextToken()
 	}
