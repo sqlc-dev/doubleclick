@@ -1723,7 +1723,12 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		}
 	case ast.AlterAddConstraint:
 		if cmd.Constraint != nil {
-			fmt.Fprintf(sb, "%s Identifier %s\n", indent, cmd.Constraint.Name)
+			if cmd.Constraint.Expression != nil {
+				fmt.Fprintf(sb, "%s Constraint (children 1)\n", indent)
+				Node(sb, cmd.Constraint.Expression, depth+2)
+			} else {
+				fmt.Fprintf(sb, "%s Constraint\n", indent)
+			}
 		}
 	case ast.AlterDropConstraint:
 		if cmd.ConstraintName != "" {
