@@ -139,23 +139,31 @@ func explainSelectQueryWithInheritedWith(sb *strings.Builder, stmt ast.Statement
 			Node(sb, i, depth+2)
 		}
 	}
-	// OFFSET
-	if sq.Offset != nil {
-		Node(sb, sq.Offset, depth+1)
-	}
-	// LIMIT BY handling
+	// LIMIT BY handling - order: LimitByOffset, LimitByLimit, LimitBy expressions, Offset, Limit
 	if sq.LimitByLimit != nil {
+		// Output LIMIT BY offset first (if present)
+		if sq.LimitByOffset != nil {
+			Node(sb, sq.LimitByOffset, depth+1)
+		}
+		// Output LIMIT BY count
 		Node(sb, sq.LimitByLimit, depth+1)
+		// Output LIMIT BY expressions
 		if len(sq.LimitBy) > 0 {
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(sq.LimitBy))
 			for _, expr := range sq.LimitBy {
 				Node(sb, expr, depth+2)
 			}
 		}
+		// Output regular OFFSET
+		if sq.Offset != nil {
+			Node(sb, sq.Offset, depth+1)
+		}
+		// Output regular LIMIT
 		if sq.Limit != nil {
 			Node(sb, sq.Limit, depth+1)
 		}
 	} else if len(sq.LimitBy) > 0 {
+		// LIMIT BY without explicit LimitByLimit
 		if sq.Limit != nil {
 			Node(sb, sq.Limit, depth+1)
 		}
@@ -163,8 +171,14 @@ func explainSelectQueryWithInheritedWith(sb *strings.Builder, stmt ast.Statement
 		for _, expr := range sq.LimitBy {
 			Node(sb, expr, depth+2)
 		}
-	} else if sq.Limit != nil {
-		Node(sb, sq.Limit, depth+1)
+	} else {
+		// No LIMIT BY - just regular OFFSET and LIMIT
+		if sq.Offset != nil {
+			Node(sb, sq.Offset, depth+1)
+		}
+		if sq.Limit != nil {
+			Node(sb, sq.Limit, depth+1)
+		}
 	}
 	// SETTINGS (when no INTERPOLATE - the case with INTERPOLATE is handled above)
 	if len(sq.Settings) > 0 && len(sq.Interpolate) == 0 && !sq.SettingsAfterFormat {
@@ -417,25 +431,31 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 			Node(sb, i, depth+2)
 		}
 	}
-	// OFFSET (ClickHouse outputs offset before limit in EXPLAIN AST)
-	if n.Offset != nil {
-		Node(sb, n.Offset, depth+1)
-	}
-	// LIMIT BY handling
+	// LIMIT BY handling - order: LimitByOffset, LimitByLimit, LimitBy expressions, Offset, Limit
 	if n.LimitByLimit != nil {
-		// Case: LIMIT n BY x LIMIT m -> output LimitByLimit, LimitBy, Limit
+		// Output LIMIT BY offset first (if present)
+		if n.LimitByOffset != nil {
+			Node(sb, n.LimitByOffset, depth+1)
+		}
+		// Output LIMIT BY count
 		Node(sb, n.LimitByLimit, depth+1)
+		// Output LIMIT BY expressions
 		if len(n.LimitBy) > 0 {
 			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.LimitBy))
 			for _, expr := range n.LimitBy {
 				Node(sb, expr, depth+2)
 			}
 		}
+		// Output regular OFFSET
+		if n.Offset != nil {
+			Node(sb, n.Offset, depth+1)
+		}
+		// Output regular LIMIT
 		if n.Limit != nil {
 			Node(sb, n.Limit, depth+1)
 		}
 	} else if len(n.LimitBy) > 0 {
-		// Case: LIMIT n BY x (no second LIMIT) -> output Limit, then LimitBy
+		// LIMIT BY without explicit LimitByLimit
 		if n.Limit != nil {
 			Node(sb, n.Limit, depth+1)
 		}
@@ -443,9 +463,14 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 		for _, expr := range n.LimitBy {
 			Node(sb, expr, depth+2)
 		}
-	} else if n.Limit != nil {
-		// Case: plain LIMIT n (no BY)
-		Node(sb, n.Limit, depth+1)
+	} else {
+		// No LIMIT BY - just regular OFFSET and LIMIT
+		if n.Offset != nil {
+			Node(sb, n.Offset, depth+1)
+		}
+		if n.Limit != nil {
+			Node(sb, n.Limit, depth+1)
+		}
 	}
 	// SETTINGS is output at SelectQuery level only when NOT after FORMAT
 	// When SettingsAfterFormat is true, it's output at SelectWithUnionQuery level instead
@@ -617,8 +642,11 @@ func countSelectQueryChildren(n *ast.SelectQuery) int {
 	if len(n.Interpolate) > 0 {
 		count++
 	}
+	if n.LimitByOffset != nil {
+		count++ // LIMIT offset in "LIMIT offset, count BY x"
+	}
 	if n.LimitByLimit != nil {
-		count++ // LIMIT n in "LIMIT n BY x LIMIT m"
+		count++ // LIMIT count in "LIMIT n BY x LIMIT m"
 	}
 	if n.Limit != nil {
 		count++

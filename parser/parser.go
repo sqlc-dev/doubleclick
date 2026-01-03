@@ -1210,6 +1210,19 @@ func (p *Parser) parseSelectInternal(preParsedWith []ast.Expression) *ast.Select
 		// LIMIT BY clause (ClickHouse specific: LIMIT n BY expr1, expr2, ...)
 		if p.currentIs(token.BY) {
 			p.nextToken()
+			// If we had comma syntax (LIMIT offset, count BY ...), save values for LIMIT BY
+			// Otherwise just LIMIT n BY ... uses n as the count
+			if sel.Offset != nil {
+				// LIMIT offset, count BY ... -> LimitByOffset=offset, LimitByLimit=count
+				sel.LimitByOffset = sel.Offset
+				sel.LimitByLimit = sel.Limit
+				sel.Offset = nil
+				sel.Limit = nil
+			} else {
+				// LIMIT n BY ... -> LimitByLimit=n
+				sel.LimitByLimit = sel.Limit
+				sel.Limit = nil
+			}
 			// Parse LIMIT BY expressions
 			for !p.isEndOfExpression() {
 				expr := p.parseExpression(LOWEST)
@@ -1223,8 +1236,6 @@ func (p *Parser) parseSelectInternal(preParsedWith []ast.Expression) *ast.Select
 			// After LIMIT BY, there can be another LIMIT for overall output
 			if p.currentIs(token.LIMIT) {
 				p.nextToken()
-				// Save the LIMIT BY limit value (e.g., LIMIT 1 BY x -> LimitByLimit=1)
-				sel.LimitByLimit = sel.Limit
 				sel.Limit = p.parseExpression(LOWEST)
 				sel.LimitByHasLimit = true
 			}
@@ -1248,6 +1259,11 @@ func (p *Parser) parseSelectInternal(preParsedWith []ast.Expression) *ast.Select
 		// LIMIT n OFFSET m BY expr syntax - handle BY after OFFSET
 		if p.currentIs(token.BY) && sel.Limit != nil && len(sel.LimitBy) == 0 {
 			p.nextToken()
+			// Move Limit and Offset to LimitByLimit and LimitByOffset
+			sel.LimitByLimit = sel.Limit
+			sel.LimitByOffset = sel.Offset
+			sel.Limit = nil
+			sel.Offset = nil
 			// Parse LIMIT BY expressions
 			for !p.isEndOfExpression() {
 				expr := p.parseExpression(LOWEST)
