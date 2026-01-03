@@ -1390,7 +1390,11 @@ func (p *Parser) parseWithClause() []ast.Expression {
 
 		// Check if it's the "name AS (subquery)" syntax (standard SQL CTE)
 		// or "expr AS name" syntax (ClickHouse scalar)
-		if p.currentIs(token.IDENT) && p.peekIs(token.AS) {
+		// Allow keywords as CTE names (e.g., WITH table AS (SELECT 1))
+		// But exclude NULL/TRUE/FALSE which have special literal meanings
+		isNameToken := p.currentIs(token.IDENT) ||
+			(p.current.Token.IsKeyword() && !p.currentIs(token.NULL) && !p.currentIs(token.TRUE) && !p.currentIs(token.FALSE))
+		if isNameToken && p.peekIs(token.AS) {
 			// This could be "name AS (subquery)" or "ident AS alias" for scalar
 			// Need to look ahead to determine: if IDENT AS LPAREN (SELECT...) -> CTE
 			// If IDENT AS IDENT -> scalar WITH (first ident is expression, second is alias)
