@@ -8,9 +8,12 @@ import (
 	"github.com/sqlc-dev/doubleclick/ast"
 )
 
-// escapeAlias escapes backslashes in alias names for EXPLAIN output
+// escapeAlias escapes backslashes and single quotes in alias names for EXPLAIN output
 func escapeAlias(alias string) string {
-	return strings.ReplaceAll(alias, "\\", "\\\\")
+	// Escape backslashes first, then single quotes
+	result := strings.ReplaceAll(alias, "\\", "\\\\")
+	result = strings.ReplaceAll(result, "'", "\\'")
+	return result
 }
 
 func explainIdentifier(sb *strings.Builder, n *ast.Identifier, indent string) {
