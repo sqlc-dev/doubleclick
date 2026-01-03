@@ -1658,7 +1658,12 @@ func (p *Parser) parseTableElementWithJoin() *ast.TablesInSelectQueryElement {
 		p.nextToken()
 		if p.currentIs(token.LPAREN) {
 			p.nextToken()
-			join.Using = p.parseExpressionList()
+			exprs := p.parseExpressionList()
+			if exprs == nil {
+				// Empty USING () - use empty non-nil slice to distinguish from no USING
+				exprs = []ast.Expression{}
+			}
+			join.Using = exprs
 			p.expect(token.RPAREN)
 		} else {
 			join.Using = p.parseExpressionList()

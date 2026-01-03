@@ -312,7 +312,7 @@ func explainTableJoin(sb *strings.Builder, n *ast.TableJoin, indent string, dept
 	if n.On != nil {
 		children++
 	}
-	if len(n.Using) > 0 {
+	if n.Using != nil {
 		children++
 	}
 	if children > 0 {
@@ -323,10 +323,15 @@ func explainTableJoin(sb *strings.Builder, n *ast.TableJoin, indent string, dept
 	if n.On != nil {
 		Node(sb, n.On, depth+1)
 	}
-	if len(n.Using) > 0 {
-		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Using))
-		for _, u := range n.Using {
-			Node(sb, u, depth+2)
+	if n.Using != nil {
+		if len(n.Using) > 0 {
+			fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Using))
+			for _, u := range n.Using {
+				Node(sb, u, depth+2)
+			}
+		} else {
+			// Empty USING ()
+			fmt.Fprintf(sb, "%s ExpressionList\n", indent)
 		}
 	}
 }
