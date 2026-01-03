@@ -1739,9 +1739,9 @@ func (p *Parser) parseParameter() ast.Expression {
 
 	// Parse {name:Type} format
 	parts := strings.SplitN(value, ":", 2)
-	param.Name = parts[0]
+	param.Name = strings.TrimSpace(parts[0])
 	if len(parts) > 1 {
-		param.Type = &ast.DataType{Name: parts[1]}
+		param.Type = &ast.DataType{Name: strings.TrimSpace(parts[1])}
 	}
 
 	return param
