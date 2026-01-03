@@ -2,12 +2,30 @@ package parser
 
 import (
 	"math"
+	"math/big"
 	"strconv"
 	"strings"
 
 	"github.com/sqlc-dev/doubleclick/ast"
 	"github.com/sqlc-dev/doubleclick/token"
 )
+
+// parseHexToFloat converts a hex string (with 0x prefix) to float64
+// Used for hex numbers that overflow uint64
+func parseHexToFloat(s string) (float64, bool) {
+	if !strings.HasPrefix(strings.ToLower(s), "0x") {
+		return 0, false
+	}
+	hexPart := s[2:]
+	bi := new(big.Int)
+	_, ok := bi.SetString(hexPart, 16)
+	if !ok {
+		return 0, false
+	}
+	f := new(big.Float).SetInt(bi)
+	result, _ := f.Float64()
+	return result, true
+}
 
 // Operator precedence levels
 const (
@@ -984,10 +1002,28 @@ func (p *Parser) parseNumber() ast.Expression {
 			// Try unsigned uint64 for large positive numbers
 			u, uerr := strconv.ParseUint(value, base, 64)
 			if uerr != nil {
-				// Too large for int64/uint64, store as string with IsBigInt flag
-				lit.Type = ast.LiteralString
-				lit.Value = value
-				lit.IsBigInt = true
+				// Too large for int64/uint64, try as float64
+				var f float64
+				var ok bool
+				if isHex {
+					// For hex numbers, use parseHexToFloat since strconv.ParseFloat
+					// doesn't handle hex integers without 'p' exponent
+					f, ok = parseHexToFloat(value)
+				} else {
+					var ferr error
+					f, ferr = strconv.ParseFloat(value, 64)
+					ok = ferr == nil
+				}
+				if !ok {
+					// Still can't parse, store as string with IsBigInt flag
+					lit.Type = ast.LiteralString
+					lit.Value = value
+					lit.IsBigInt = true
+				} else {
+					lit.Type = ast.LiteralFloat
+					lit.Value = f
+					lit.Source = value // Preserve original source text
+				}
 			} else {
 				lit.Type = ast.LiteralInteger
 				lit.Value = u // Store as uint64

@@ -435,8 +435,15 @@ func explainUnaryExpr(sb *strings.Builder, n *ast.UnaryExpr, indent string, dept
 					// ClickHouse normalizes -0 to UInt64_0
 					if val == 0 {
 						fmt.Fprintf(sb, "%sLiteral UInt64_0\n", indent)
-					} else {
+					} else if val <= 9223372036854775808 {
+						// Value fits in int64 when negated
+						// Note: -9223372036854775808 is int64 min, so 9223372036854775808 is included
 						fmt.Fprintf(sb, "%sLiteral Int64_-%d\n", indent, val)
+					} else {
+						// Value too large for int64 - output as Float64
+						f := -float64(val)
+						s := FormatFloat(f)
+						fmt.Fprintf(sb, "%sLiteral Float64_%s\n", indent, s)
 					}
 					return
 				}
@@ -657,7 +664,16 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 						fmt.Fprintf(sb, "%sLiteral Int64_%d (alias %s)\n", indent, -val, escapeAlias(n.Alias))
 						return
 					case uint64:
-						fmt.Fprintf(sb, "%sLiteral Int64_-%d (alias %s)\n", indent, val, escapeAlias(n.Alias))
+						if val <= 9223372036854775808 {
+							// Value fits in int64 when negated
+							// Note: -9223372036854775808 is int64 min, so 9223372036854775808 is included
+							fmt.Fprintf(sb, "%sLiteral Int64_-%d (alias %s)\n", indent, val, escapeAlias(n.Alias))
+						} else {
+							// Value too large for int64 - output as Float64
+							f := -float64(val)
+							s := FormatFloat(f)
+							fmt.Fprintf(sb, "%sLiteral Float64_%s (alias %s)\n", indent, s, escapeAlias(n.Alias))
+						}
 						return
 					}
 				case ast.LiteralFloat:

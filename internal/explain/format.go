@@ -608,6 +608,10 @@ func formatElementAsString(expr ast.Expression) string {
 		case ast.LiteralInteger:
 			return fmt.Sprintf("%d", e.Value)
 		case ast.LiteralFloat:
+			// Use Source if available (preserves original text for large numbers)
+			if e.Source != "" {
+				return e.Source
+			}
 			return fmt.Sprintf("%v", e.Value)
 		case ast.LiteralString:
 			s := e.Value.(string)
