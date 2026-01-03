@@ -792,9 +792,14 @@ func explainSingleTransformer(sb *strings.Builder, t *ast.ColumnTransformer, ind
 	case "apply":
 		fmt.Fprintf(sb, "%s ColumnsApplyTransformer\n", indent)
 	case "except":
-		fmt.Fprintf(sb, "%s ColumnsExceptTransformer (children %d)\n", indent, len(t.Except))
-		for _, col := range t.Except {
-			fmt.Fprintf(sb, "%s  Identifier %s\n", indent, col)
+		// If it's a regex pattern, output without children
+		if t.Pattern != "" {
+			fmt.Fprintf(sb, "%s ColumnsExceptTransformer\n", indent)
+		} else {
+			fmt.Fprintf(sb, "%s ColumnsExceptTransformer (children %d)\n", indent, len(t.Except))
+			for _, col := range t.Except {
+				fmt.Fprintf(sb, "%s  Identifier %s\n", indent, col)
+			}
 		}
 	case "replace":
 		fmt.Fprintf(sb, "%s ColumnsReplaceTransformer (children %d)\n", indent, len(t.Replaces))

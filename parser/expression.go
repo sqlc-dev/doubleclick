@@ -2285,6 +2285,17 @@ func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
 		}
 	}
 
+	// Check for expression.* (tuple expansion) where left is not an identifier
+	// This handles cases like tuple(1, 'a').* or CAST(...).*
+	if p.currentIs(token.ASTERISK) {
+		// This is a tuple expansion - it becomes an Asterisk with the expression as context
+		// In ClickHouse EXPLAIN AST, this is shown simply as Asterisk
+		p.nextToken() // skip *
+		return &ast.Asterisk{
+			Position: left.Pos(),
+		}
+	}
+
 	// Check for tuple access with number
 	if p.currentIs(token.NUMBER) {
 		expr := &ast.TupleAccess{
@@ -2731,10 +2742,25 @@ func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
 		p.nextToken()
 	}
 
-	// EXCEPT can have optional parentheses: * EXCEPT (col1, col2) or * EXCEPT col
+	// EXCEPT can have optional parentheses: * EXCEPT (col1, col2) or * EXCEPT col or * EXCEPT('pattern')
 	hasParens := p.currentIs(token.LPAREN)
 	if hasParens {
 		p.nextToken() // skip (
+	}
+
+	// Check for regex pattern (string literal)
+	if p.currentIs(token.STRING) {
+		pattern := p.current.Value
+		p.nextToken()
+		asterisk.Transformers = append(asterisk.Transformers, &ast.ColumnTransformer{
+			Position: pos,
+			Type:     "except",
+			Pattern:  pattern,
+		})
+		if hasParens {
+			p.expect(token.RPAREN)
+		}
+		return asterisk
 	}
 
 	var exceptCols []string

@@ -1360,6 +1360,7 @@ type ColumnTransformer struct {
 	Apply       string         `json:"apply,omitempty"`        // function name for APPLY
 	ApplyLambda Expression     `json:"apply_lambda,omitempty"` // lambda expression for APPLY x -> expr
 	Except      []string       `json:"except,omitempty"`       // column names for EXCEPT
+	Pattern     string         `json:"pattern,omitempty"`      // regex pattern for EXCEPT('pattern')
 	Replaces    []*ReplaceExpr `json:"replaces,omitempty"`     // replacement expressions for REPLACE
 }
 
