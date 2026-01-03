@@ -378,7 +378,6 @@ func NormalizeFunctionName(name string) string {
 		"ltrim":    "trimLeft",
 		"rtrim":    "trimRight",
 		"ceiling":  "ceil",
-		"ln":       "log",
 		"log10":    "log10",
 		"log2":     "log2",
 		"rand":     "rand",
