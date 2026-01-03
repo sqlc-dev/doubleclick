@@ -1433,10 +1433,8 @@ func explainCaseExprWithAlias(sb *strings.Builder, n *ast.CaseExpr, alias string
 	// CASE is represented as Function multiIf or caseWithExpression
 	if n.Operand != nil {
 		// CASE x WHEN ... form
-		argCount := 1 + len(n.Whens)*2 // operand + (condition, result) pairs
-		if n.Else != nil {
-			argCount++
-		}
+		// Always has ELSE (explicit or implicit NULL)
+		argCount := 1 + len(n.Whens)*2 + 1 // operand + (condition, result) pairs + else
 		if alias != "" {
 			fmt.Fprintf(sb, "%sFunction caseWithExpression (alias %s) (children %d)\n", indent, alias, 1)
 		} else {
@@ -1450,6 +1448,9 @@ func explainCaseExprWithAlias(sb *strings.Builder, n *ast.CaseExpr, alias string
 		}
 		if n.Else != nil {
 			Node(sb, n.Else, depth+2)
+		} else {
+			// Implicit NULL when no ELSE clause
+			fmt.Fprintf(sb, "%s  Literal NULL\n", indent)
 		}
 	} else {
 		// CASE WHEN ... form
