@@ -1026,10 +1026,11 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 					// Check if this tuple contains only primitive literals (including unary negation)
 					if !containsOnlyPrimitiveLiteralsWithUnary(lit) {
 						allTuplesArePrimitive = false
+						allPrimitiveLiterals = false // Non-primitive tuple breaks the mixed literal check too
 					}
 				}
-				// Check if it's a primitive literal type (not a tuple or complex type)
-				if lit.Type == ast.LiteralTuple || lit.Type == ast.LiteralArray {
+				// Arrays break the primitive literals check
+				if lit.Type == ast.LiteralArray {
 					allPrimitiveLiterals = false
 				}
 			} else if isNumericExpr(item) {
@@ -1173,7 +1174,8 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 		allBooleansOrNull := true
 		allTuples := true
 		allTuplesArePrimitive := true
-		hasNonNull := false // Need at least one non-null value
+		allPrimitiveLiterals := true // Any mix of primitive literals (numbers, strings, booleans, null, primitive tuples)
+		hasNonNull := false          // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
 				if lit.Type == ast.LiteralNull {
@@ -1195,6 +1197,7 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 				} else {
 					if !containsOnlyPrimitiveLiterals(lit) {
 						allTuplesArePrimitive = false
+						allPrimitiveLiterals = false
 					}
 				}
 			} else if isNumericExpr(item) {
@@ -1207,10 +1210,11 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 				allStringsOrNull = false
 				allBooleansOrNull = false
 				allTuples = false
+				allPrimitiveLiterals = false
 				break
 			}
 		}
-		canBeTupleLiteral = hasNonNull && (allNumericOrNull || (allStringsOrNull && len(n.List) <= maxStringTupleSizeWithAlias) || allBooleansOrNull || (allTuples && allTuplesArePrimitive))
+		canBeTupleLiteral = hasNonNull && (allNumericOrNull || (allStringsOrNull && len(n.List) <= maxStringTupleSizeWithAlias) || allBooleansOrNull || (allTuples && allTuplesArePrimitive) || allPrimitiveLiterals)
 	}
 
 	// Count arguments
