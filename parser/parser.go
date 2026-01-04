@@ -5817,6 +5817,14 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				cmd.PartitionIsID = true
 			}
 			cmd.Partition = p.parseExpression(LOWEST)
+			// Handle FROM table (ATTACH PARTITION ... FROM table)
+			if p.currentIs(token.FROM) {
+				p.nextToken()
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					cmd.FromTable = p.current.Value
+					p.nextToken()
+				}
+			}
 		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PART" {
 			// ATTACH PART uses ATTACH_PARTITION type in ClickHouse EXPLAIN
 			cmd.Type = ast.AlterAttachPartition

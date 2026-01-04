@@ -1620,6 +1620,10 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	if cmdType == ast.AlterClearStatistics {
 		cmdType = ast.AlterDropStatistics
 	}
+	// ATTACH PARTITION ... FROM table is shown as REPLACE_PARTITION in EXPLAIN AST
+	if cmdType == ast.AlterAttachPartition && cmd.FromTable != "" {
+		cmdType = ast.AlterReplacePartition
+	}
 	// DETACH_PARTITION is shown as DROP_PARTITION in EXPLAIN AST
 	if cmdType == ast.AlterDetachPartition {
 		cmdType = ast.AlterDropPartition
