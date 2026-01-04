@@ -1112,6 +1112,36 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 		explainArrayAccessWithAlias(sb, e, n.Name, indent, depth)
 	case *ast.BetweenExpr:
 		explainBetweenExprWithAlias(sb, e, n.Name, indent, depth)
+	case *ast.UnaryExpr:
+		// For unary minus with numeric literal, output as negative literal with alias
+		if e.Op == "-" {
+			if lit, ok := e.Operand.(*ast.Literal); ok && (lit.Type == ast.LiteralInteger || lit.Type == ast.LiteralFloat) {
+				// Format as negative literal
+				negLit := &ast.Literal{
+					Position: lit.Position,
+					Type:     lit.Type,
+					Value:    lit.Value,
+				}
+				if n.Name != "" {
+					fmt.Fprintf(sb, "%sLiteral %s (alias %s)\n", indent, formatNegativeLiteral(negLit), n.Name)
+				} else {
+					fmt.Fprintf(sb, "%sLiteral %s\n", indent, formatNegativeLiteral(negLit))
+				}
+				return
+			}
+		}
+		// For other unary expressions, output as function
+		fnName := "negate"
+		if e.Op == "NOT" {
+			fnName = "not"
+		}
+		if n.Name != "" {
+			fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, n.Name, 1)
+		} else {
+			fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+		}
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
+		Node(sb, e.Operand, depth+2)
 	default:
 		// For other types, just output the expression (alias may be lost)
 		Node(sb, n.Query, depth)

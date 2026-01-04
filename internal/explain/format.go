@@ -144,6 +144,26 @@ func FormatLiteral(lit *ast.Literal) string {
 	}
 }
 
+// formatNegativeLiteral formats a numeric literal with a negative sign prepended
+func formatNegativeLiteral(lit *ast.Literal) string {
+	switch lit.Type {
+	case ast.LiteralInteger:
+		switch val := lit.Value.(type) {
+		case int64:
+			return fmt.Sprintf("Int64_-%d", val)
+		case uint64:
+			return fmt.Sprintf("Int64_-%d", val)
+		default:
+			return fmt.Sprintf("Int64_-%v", lit.Value)
+		}
+	case ast.LiteralFloat:
+		val := lit.Value.(float64)
+		return fmt.Sprintf("Float64_-%s", FormatFloat(val))
+	default:
+		return fmt.Sprintf("-%v", lit.Value)
+	}
+}
+
 // formatArrayLiteral formats an array literal for EXPLAIN AST output
 func formatArrayLiteral(val interface{}) string {
 	exprs, ok := val.([]ast.Expression)
