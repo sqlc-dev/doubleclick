@@ -7785,6 +7785,12 @@ func (p *Parser) parseProjection() *ast.Projection {
 		Position: p.current.Pos,
 	}
 
+	// Parse WITH clause if present
+	if p.currentIs(token.WITH) {
+		p.nextToken() // skip WITH
+		proj.Select.With = p.parseWithClause()
+	}
+
 	// Parse SELECT keyword (optional in projection)
 	if p.currentIs(token.SELECT) {
 		p.nextToken()

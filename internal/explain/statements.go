@@ -1914,6 +1914,9 @@ func explainProjection(sb *strings.Builder, p *ast.Projection, indent string, de
 
 func explainProjectionSelectQuery(sb *strings.Builder, q *ast.ProjectionSelectQuery, indent string, depth int) {
 	children := 0
+	if len(q.With) > 0 {
+		children++
+	}
 	if len(q.Columns) > 0 {
 		children++
 	}
@@ -1924,6 +1927,13 @@ func explainProjectionSelectQuery(sb *strings.Builder, q *ast.ProjectionSelectQu
 		children++
 	}
 	fmt.Fprintf(sb, "%sProjectionSelectQuery (children %d)\n", indent, children)
+	// Output WITH clause first
+	if len(q.With) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(q.With))
+		for _, w := range q.With {
+			Node(sb, w, depth+2)
+		}
+	}
 	if len(q.Columns) > 0 {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(q.Columns))
 		for _, col := range q.Columns {
