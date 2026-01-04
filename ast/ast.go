@@ -700,6 +700,7 @@ const (
 	AlterModifyOrderBy         AlterCommandType = "MODIFY_ORDER_BY"
 	AlterModifySampleBy        AlterCommandType = "MODIFY_SAMPLE_BY"
 	AlterRemoveSampleBy        AlterCommandType = "REMOVE_SAMPLE_BY"
+	AlterApplyDeletedMask      AlterCommandType = "APPLY_DELETED_MASK"
 )
 
 // TruncateQuery represents a TRUNCATE statement.

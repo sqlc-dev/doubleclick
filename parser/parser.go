@@ -5879,6 +5879,7 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		}
 	case token.APPLY:
 		// APPLY PATCHES IN PARTITION expr
+		// APPLY DELETED MASK [IN PARTITION expr]
 		p.nextToken() // skip APPLY
 		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PATCHES" {
 			p.nextToken() // skip PATCHES
@@ -5888,6 +5889,19 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				if p.currentIs(token.PARTITION) {
 					p.nextToken() // skip PARTITION
 					cmd.Partition = p.parseExpression(LOWEST)
+				}
+			}
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DELETED" {
+			p.nextToken() // skip DELETED
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "MASK" {
+				p.nextToken() // skip MASK
+				cmd.Type = ast.AlterApplyDeletedMask
+				if p.currentIs(token.IN) {
+					p.nextToken() // skip IN
+					if p.currentIs(token.PARTITION) {
+						p.nextToken() // skip PARTITION
+						cmd.Partition = p.parseExpression(LOWEST)
+					}
 				}
 			}
 		}
