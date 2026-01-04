@@ -6389,6 +6389,13 @@ func (p *Parser) parseShow() ast.Statement {
 	case token.SETTINGS:
 		show.ShowType = ast.ShowSettings
 		p.nextToken()
+	case token.FULL:
+		// SHOW FULL COLUMNS/FIELDS FROM table - treat as ShowColumns
+		p.nextToken()
+		if p.currentIs(token.COLUMNS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "FIELDS") {
+			p.nextToken()
+		}
+		show.ShowType = ast.ShowColumns
 	default:
 		// Handle SHOW PROCESSLIST, SHOW DICTIONARIES, SHOW FUNCTIONS, etc.
 		if p.currentIs(token.IDENT) {
@@ -6402,9 +6409,18 @@ func (p *Parser) parseShow() ast.Statement {
 				show.ShowType = ast.ShowFunctions
 			case "SETTING":
 				show.ShowType = ast.ShowSetting
-			case "INDEXES", "INDICES", "KEYS":
-				// SHOW INDEXES/INDICES/KEYS FROM table - treat as ShowColumns
+			case "INDEXES", "INDICES", "KEYS", "FIELDS":
+				// SHOW INDEXES/INDICES/KEYS/FIELDS FROM table - treat as ShowColumns
 				show.ShowType = ast.ShowColumns
+			case "FULL":
+				// SHOW FULL COLUMNS/FIELDS FROM table - treat as ShowColumns
+				p.nextToken()
+				if p.currentIs(token.COLUMNS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "FIELDS") {
+					p.nextToken()
+				}
+				show.ShowType = ast.ShowColumns
+				// Don't consume another token, fall through to FROM parsing
+				goto parseFrom
 			case "EXTENDED":
 				// SHOW EXTENDED INDEX FROM table - treat as ShowColumns
 				p.nextToken()
