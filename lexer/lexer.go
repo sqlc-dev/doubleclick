@@ -500,6 +500,8 @@ func (l *Lexer) readString(quote rune) Item {
 				sb.WriteRune('\f')
 			case 'v':
 				sb.WriteRune('\v')
+			case 'e':
+				sb.WriteRune('\x1b') // escape character (ASCII 27)
 			case 'x':
 				// Hex escape: \xNN
 				l.readChar()

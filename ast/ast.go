@@ -282,7 +282,8 @@ type CreateQuery struct {
 	Indexes          []*IndexDefinition   `json:"indexes,omitempty"`
 	Projections      []*Projection        `json:"projections,omitempty"`
 	Constraints         []*Constraint        `json:"constraints,omitempty"`
-	ColumnsPrimaryKey   []Expression         `json:"columns_primary_key,omitempty"` // PRIMARY KEY in column list
+	ColumnsPrimaryKey       []Expression         `json:"columns_primary_key,omitempty"`        // PRIMARY KEY in column list
+	HasEmptyColumnsPrimaryKey bool               `json:"has_empty_columns_primary_key,omitempty"` // TRUE if PRIMARY KEY () was seen with empty parens
 	Engine               *EngineClause        `json:"engine,omitempty"`
 	OrderBy              []Expression         `json:"order_by,omitempty"`
 	OrderByHasModifiers  bool                 `json:"order_by_has_modifiers,omitempty"` // True if ORDER BY has ASC/DESC modifiers
@@ -496,10 +497,21 @@ type TTLClause struct {
 	Position    token.Position `json:"-"`
 	Expression  Expression     `json:"expression"`
 	Expressions []Expression   `json:"expressions,omitempty"` // Additional TTL expressions (for multiple TTL elements)
+	Elements    []*TTLElement  `json:"elements,omitempty"`    // TTL elements with WHERE conditions
 }
 
 func (t *TTLClause) Pos() token.Position { return t.Position }
 func (t *TTLClause) End() token.Position { return t.Position }
+
+// TTLElement represents a single TTL element with optional WHERE condition.
+type TTLElement struct {
+	Position token.Position `json:"-"`
+	Expr     Expression     `json:"expr"`
+	Where    Expression     `json:"where,omitempty"` // WHERE condition for DELETE
+}
+
+func (t *TTLElement) Pos() token.Position { return t.Position }
+func (t *TTLElement) End() token.Position { return t.Position }
 
 // DropQuery represents a DROP statement.
 type DropQuery struct {
@@ -707,11 +719,12 @@ func (t *TruncateQuery) statementNode()      {}
 
 // DeleteQuery represents a lightweight DELETE statement.
 type DeleteQuery struct {
-	Position token.Position `json:"-"`
-	Database string         `json:"database,omitempty"`
-	Table    string         `json:"table"`
-	Where    Expression     `json:"where,omitempty"`
-	Settings []*SettingExpr `json:"settings,omitempty"`
+	Position  token.Position `json:"-"`
+	Database  string         `json:"database,omitempty"`
+	Table     string         `json:"table"`
+	Partition Expression     `json:"partition,omitempty"` // IN PARTITION clause
+	Where     Expression     `json:"where,omitempty"`
+	Settings  []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (d *DeleteQuery) Pos() token.Position { return d.Position }
@@ -743,11 +756,14 @@ func (d *DetachQuery) statementNode()      {}
 // AttachQuery represents an ATTACH statement.
 type AttachQuery struct {
 	Position           token.Position       `json:"-"`
+	IfNotExists        bool                 `json:"if_not_exists,omitempty"`
 	Database           string               `json:"database,omitempty"`
 	Table              string               `json:"table,omitempty"`
 	Dictionary         string               `json:"dictionary,omitempty"`
 	Columns            []*ColumnDeclaration `json:"columns,omitempty"`
-	ColumnsPrimaryKey  []Expression         `json:"columns_primary_key,omitempty"` // PRIMARY KEY in column list
+	ColumnsPrimaryKey       []Expression         `json:"columns_primary_key,omitempty"`        // PRIMARY KEY in column list
+	HasEmptyColumnsPrimaryKey bool               `json:"has_empty_columns_primary_key,omitempty"` // TRUE if PRIMARY KEY () was seen with empty parens
+	Indexes            []*IndexDefinition   `json:"indexes,omitempty"`             // INDEX definitions in column list
 	Engine             *EngineClause        `json:"engine,omitempty"`
 	OrderBy            []Expression         `json:"order_by,omitempty"`
 	PrimaryKey         []Expression         `json:"primary_key,omitempty"`
@@ -756,11 +772,46 @@ type AttachQuery struct {
 	InnerUUID          string               `json:"inner_uuid,omitempty"` // TO INNER UUID clause
 	PartitionBy        Expression           `json:"partition_by,omitempty"`
 	SelectQuery        Statement            `json:"select_query,omitempty"` // AS SELECT clause
+	Settings           []*SettingExpr       `json:"settings,omitempty"`     // SETTINGS clause
 }
 
 func (a *AttachQuery) Pos() token.Position { return a.Position }
 func (a *AttachQuery) End() token.Position { return a.Position }
 func (a *AttachQuery) statementNode()      {}
+
+// BackupQuery represents a BACKUP statement.
+type BackupQuery struct {
+	Position   token.Position `json:"-"`
+	Database   string         `json:"database,omitempty"`
+	Table      string         `json:"table,omitempty"`
+	Dictionary string         `json:"dictionary,omitempty"`
+	All        bool           `json:"all,omitempty"` // BACKUP ALL
+	Temporary  bool           `json:"temporary,omitempty"`
+	Target     *FunctionCall  `json:"target,omitempty"` // Disk('path') or Null
+	Settings   []*SettingExpr `json:"settings,omitempty"`
+	Format     string         `json:"format,omitempty"`
+}
+
+func (b *BackupQuery) Pos() token.Position { return b.Position }
+func (b *BackupQuery) End() token.Position { return b.Position }
+func (b *BackupQuery) statementNode()      {}
+
+// RestoreQuery represents a RESTORE statement.
+type RestoreQuery struct {
+	Position   token.Position `json:"-"`
+	Database   string         `json:"database,omitempty"`
+	Table      string         `json:"table,omitempty"`
+	Dictionary string         `json:"dictionary,omitempty"`
+	All        bool           `json:"all,omitempty"` // RESTORE ALL
+	Temporary  bool           `json:"temporary,omitempty"`
+	Source     *FunctionCall  `json:"source,omitempty"` // Disk('path') or Null
+	Settings   []*SettingExpr `json:"settings,omitempty"`
+	Format     string         `json:"format,omitempty"`
+}
+
+func (r *RestoreQuery) Pos() token.Position { return r.Position }
+func (r *RestoreQuery) End() token.Position { return r.Position }
+func (r *RestoreQuery) statementNode()      {}
 
 // DescribeQuery represents a DESCRIBE statement.
 type DescribeQuery struct {
@@ -860,15 +911,16 @@ func (s *SetQuery) statementNode()      {}
 
 // OptimizeQuery represents an OPTIMIZE statement.
 type OptimizeQuery struct {
-	Position  token.Position `json:"-"`
-	Database  string         `json:"database,omitempty"`
-	Table     string         `json:"table"`
-	Partition Expression     `json:"partition,omitempty"`
-	Final     bool           `json:"final,omitempty"`
-	Cleanup   bool           `json:"cleanup,omitempty"`
-	Dedupe    bool           `json:"dedupe,omitempty"`
-	OnCluster string         `json:"on_cluster,omitempty"`
-	Settings  []*SettingExpr `json:"settings,omitempty"`
+	Position      token.Position `json:"-"`
+	Database      string         `json:"database,omitempty"`
+	Table         string         `json:"table"`
+	Partition     Expression     `json:"partition,omitempty"`
+	PartitionByID bool           `json:"partition_by_id,omitempty"` // PARTITION ID vs PARTITION expr
+	Final         bool           `json:"final,omitempty"`
+	Cleanup       bool           `json:"cleanup,omitempty"`
+	Dedupe        bool           `json:"dedupe,omitempty"`
+	OnCluster     string         `json:"on_cluster,omitempty"`
+	Settings      []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (o *OptimizeQuery) Pos() token.Position { return o.Position }
@@ -994,6 +1046,20 @@ type ShowGrantsQuery struct {
 func (s *ShowGrantsQuery) Pos() token.Position { return s.Position }
 func (s *ShowGrantsQuery) End() token.Position { return s.Position }
 func (s *ShowGrantsQuery) statementNode()      {}
+
+// KillQuery represents a KILL QUERY/MUTATION statement.
+type KillQuery struct {
+	Position token.Position `json:"-"`
+	Type     string         `json:"type"`              // "QUERY" or "MUTATION"
+	Where    Expression     `json:"where,omitempty"`   // WHERE condition
+	Sync     bool           `json:"sync,omitempty"`    // SYNC mode (default false = ASYNC)
+	Test     bool           `json:"test,omitempty"`    // TEST mode
+	Format   string         `json:"format,omitempty"`  // FORMAT clause
+}
+
+func (k *KillQuery) Pos() token.Position { return k.Position }
+func (k *KillQuery) End() token.Position { return k.Position }
+func (k *KillQuery) statementNode()      {}
 
 // ShowPrivilegesQuery represents a SHOW PRIVILEGES statement.
 type ShowPrivilegesQuery struct {
@@ -1360,6 +1426,7 @@ type ColumnTransformer struct {
 	Apply       string         `json:"apply,omitempty"`        // function name for APPLY
 	ApplyLambda Expression     `json:"apply_lambda,omitempty"` // lambda expression for APPLY x -> expr
 	Except      []string       `json:"except,omitempty"`       // column names for EXCEPT
+	Pattern     string         `json:"pattern,omitempty"`      // regex pattern for EXCEPT('pattern')
 	Replaces    []*ReplaceExpr `json:"replaces,omitempty"`     // replacement expressions for REPLACE
 }
 

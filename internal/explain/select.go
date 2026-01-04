@@ -300,8 +300,20 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 	selects := simplifyUnionSelects(n.Selects)
 	// Wrap selects in ExpressionList
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(selects))
-	for _, sel := range selects {
-		Node(sb, sel, depth+2)
+
+	// Check if first operand has a WITH clause to be inherited by subsequent operands
+	var inheritedWith []ast.Expression
+	if len(selects) > 0 {
+		inheritedWith = extractWithClause(selects[0])
+	}
+
+	for i, sel := range selects {
+		if i > 0 && len(inheritedWith) > 0 {
+			// Subsequent operands inherit the WITH clause from the first operand
+			explainSelectQueryWithInheritedWith(sb, sel, inheritedWith, depth+2)
+		} else {
+			Node(sb, sel, depth+2)
+		}
 	}
 	// INTO OUTFILE clause - check if any SelectQuery has IntoOutfile set
 	for _, sel := range n.Selects {

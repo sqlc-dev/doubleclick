@@ -8,9 +8,12 @@ import (
 	"github.com/sqlc-dev/doubleclick/ast"
 )
 
-// escapeAlias escapes backslashes in alias names for EXPLAIN output
+// escapeAlias escapes backslashes and single quotes in alias names for EXPLAIN output
 func escapeAlias(alias string) string {
-	return strings.ReplaceAll(alias, "\\", "\\\\")
+	// Escape backslashes first, then single quotes
+	result := strings.ReplaceAll(alias, "\\", "\\\\")
+	result = strings.ReplaceAll(result, "'", "\\'")
+	return result
 }
 
 func explainIdentifier(sb *strings.Builder, n *ast.Identifier, indent string) {
@@ -53,19 +56,17 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 				fmt.Fprintf(sb, "%s ExpressionList\n", indent)
 				return
 			}
-			// Single-element tuples (from trailing comma syntax like (1,)) always render as Function tuple
-			if len(exprs) == 1 {
-				fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
-				fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
-				for _, e := range exprs {
-					Node(sb, e, depth+2)
-				}
-				return
-			}
+			// Check if any element is parenthesized (e.g., ((1), (2)) vs (1, 2))
+			// Parenthesized elements mean the tuple should render as Function tuple
+			hasParenthesizedElement := false
 			hasComplexExpr := false
 			for _, e := range exprs {
-				// Simple literals (numbers, strings, etc.) are OK
+				// Check for parenthesized literals
 				if lit, isLit := e.(*ast.Literal); isLit {
+					if lit.Parenthesized {
+						hasParenthesizedElement = true
+						break
+					}
 					// Nested tuples that contain only primitive literals are OK
 					if lit.Type == ast.LiteralTuple {
 						if !containsOnlyPrimitiveLiteralsWithUnary(lit) {
@@ -79,7 +80,6 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 						hasComplexExpr = true
 						break
 					}
-					// Other literals are simple
 					continue
 				}
 				// Unary negation of numeric literals is also simple
@@ -94,8 +94,9 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 				hasComplexExpr = true
 				break
 			}
-			if hasComplexExpr {
-				// Render as Function tuple instead of Literal
+			// Single-element tuples (from trailing comma syntax like (1,)) always render as Function tuple
+			// Tuples with complex expressions or parenthesized elements also render as Function tuple
+			if len(exprs) == 1 || hasComplexExpr || hasParenthesizedElement {
 				fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
 				fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
 				for _, e := range exprs {
@@ -131,6 +132,10 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 
 			for _, e := range exprs {
 				if lit, ok := e.(*ast.Literal); ok {
+					// Parenthesized elements require Function array format
+					if lit.Parenthesized {
+						shouldUseFunctionArray = true
+					}
 					if lit.Type == ast.LiteralArray {
 						hasNestedArrays = true
 						// Check if inner array needs Function array format:
@@ -395,8 +400,13 @@ func collectLogicalOperands(n *ast.BinaryExpr) []ast.Expression {
 		operands = append(operands, n.Left)
 	}
 
-	// Don't flatten right side - explicit parentheses would be on the left in left-associative parsing
-	operands = append(operands, n.Right)
+	// Also flatten right side if it's the same operator and not parenthesized
+	// This handles both left-associative and right-associative parsing
+	if right, ok := n.Right.(*ast.BinaryExpr); ok && right.Op == n.Op && !right.Parenthesized {
+		operands = append(operands, collectLogicalOperands(right)...)
+	} else {
+		operands = append(operands, n.Right)
+	}
 
 	return operands
 }
@@ -425,8 +435,15 @@ func explainUnaryExpr(sb *strings.Builder, n *ast.UnaryExpr, indent string, dept
 					// ClickHouse normalizes -0 to UInt64_0
 					if val == 0 {
 						fmt.Fprintf(sb, "%sLiteral UInt64_0\n", indent)
-					} else {
+					} else if val <= 9223372036854775808 {
+						// Value fits in int64 when negated
+						// Note: -9223372036854775808 is int64 min, so 9223372036854775808 is included
 						fmt.Fprintf(sb, "%sLiteral Int64_-%d\n", indent, val)
+					} else {
+						// Value too large for int64 - output as Float64
+						f := -float64(val)
+						s := FormatFloat(f)
+						fmt.Fprintf(sb, "%sLiteral Float64_%s\n", indent, s)
 					}
 					return
 				}
@@ -647,7 +664,16 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 						fmt.Fprintf(sb, "%sLiteral Int64_%d (alias %s)\n", indent, -val, escapeAlias(n.Alias))
 						return
 					case uint64:
-						fmt.Fprintf(sb, "%sLiteral Int64_-%d (alias %s)\n", indent, val, escapeAlias(n.Alias))
+						if val <= 9223372036854775808 {
+							// Value fits in int64 when negated
+							// Note: -9223372036854775808 is int64 min, so 9223372036854775808 is included
+							fmt.Fprintf(sb, "%sLiteral Int64_-%d (alias %s)\n", indent, val, escapeAlias(n.Alias))
+						} else {
+							// Value too large for int64 - output as Float64
+							f := -float64(val)
+							s := FormatFloat(f)
+							fmt.Fprintf(sb, "%sLiteral Float64_%s (alias %s)\n", indent, s, escapeAlias(n.Alias))
+						}
 						return
 					}
 				case ast.LiteralFloat:
@@ -789,9 +815,14 @@ func explainSingleTransformer(sb *strings.Builder, t *ast.ColumnTransformer, ind
 	case "apply":
 		fmt.Fprintf(sb, "%s ColumnsApplyTransformer\n", indent)
 	case "except":
-		fmt.Fprintf(sb, "%s ColumnsExceptTransformer (children %d)\n", indent, len(t.Except))
-		for _, col := range t.Except {
-			fmt.Fprintf(sb, "%s  Identifier %s\n", indent, col)
+		// If it's a regex pattern, output without children
+		if t.Pattern != "" {
+			fmt.Fprintf(sb, "%s ColumnsExceptTransformer\n", indent)
+		} else {
+			fmt.Fprintf(sb, "%s ColumnsExceptTransformer (children %d)\n", indent, len(t.Except))
+			for _, col := range t.Except {
+				fmt.Fprintf(sb, "%s  Identifier %s\n", indent, col)
+			}
 		}
 	case "replace":
 		fmt.Fprintf(sb, "%s ColumnsReplaceTransformer (children %d)\n", indent, len(t.Replaces))
@@ -1029,6 +1060,10 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 		}
 	case *ast.CastExpr:
 		explainCastExprWithAlias(sb, e, n.Name, indent, depth)
+	case *ast.ArrayAccess:
+		explainArrayAccessWithAlias(sb, e, n.Name, indent, depth)
+	case *ast.BetweenExpr:
+		explainBetweenExprWithAlias(sb, e, n.Name, indent, depth)
 	default:
 		// For other types, just output the expression (alias may be lost)
 		Node(sb, n.Query, depth)

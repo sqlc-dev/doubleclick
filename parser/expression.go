@@ -2,12 +2,30 @@ package parser
 
 import (
 	"math"
+	"math/big"
 	"strconv"
 	"strings"
 
 	"github.com/sqlc-dev/doubleclick/ast"
 	"github.com/sqlc-dev/doubleclick/token"
 )
+
+// parseHexToFloat converts a hex string (with 0x prefix) to float64
+// Used for hex numbers that overflow uint64
+func parseHexToFloat(s string) (float64, bool) {
+	if !strings.HasPrefix(strings.ToLower(s), "0x") {
+		return 0, false
+	}
+	hexPart := s[2:]
+	bi := new(big.Int)
+	_, ok := bi.SetString(hexPart, 16)
+	if !ok {
+		return 0, false
+	}
+	f := new(big.Float).SetInt(bi)
+	result, _ := f.Float64()
+	return result, true
+}
 
 // Operator precedence levels
 const (
@@ -552,6 +570,12 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 		return p.parseLambda(left)
 	case token.EXCEPT:
 		// Handle * EXCEPT (col1, col2) or COLUMNS(...) EXCEPT (col1, col2)
+		// But NOT "SELECT (*) EXCEPT SELECT 1" which is a set operation
+		// Check if EXCEPT is followed by SELECT - if so, it's a set operation
+		if p.peekIs(token.SELECT) {
+			// This is EXCEPT as set operation, not column exclusion
+			return left
+		}
 		if asterisk, ok := left.(*ast.Asterisk); ok {
 			return p.parseAsteriskExcept(asterisk)
 		}
@@ -620,13 +644,17 @@ func (p *Parser) parseIdentifierOrFunction() ast.Expression {
 	// Convert to globalVariable('varname') function call with alias @@varname
 	if strings.HasPrefix(name, "@@") {
 		varName := name[2:] // Strip @@
-		// Handle @@session.var or @@global.var
+		// Handle @@session.var or @@global.var - strip the session/global prefix
 		if p.currentIs(token.DOT) {
-			p.nextToken()
-			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-				varName = varName + "." + p.current.Value
-				name = name + "." + p.current.Value
-				p.nextToken()
+			upper := strings.ToUpper(varName)
+			if upper == "SESSION" || upper == "GLOBAL" {
+				// Skip the session/global qualifier
+				p.nextToken() // skip DOT
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					varName = p.current.Value
+					name = "@@" + p.current.Value
+					p.nextToken()
+				}
 			}
 		}
 		return &ast.FunctionCall{
@@ -974,10 +1002,28 @@ func (p *Parser) parseNumber() ast.Expression {
 			// Try unsigned uint64 for large positive numbers
 			u, uerr := strconv.ParseUint(value, base, 64)
 			if uerr != nil {
-				// Too large for int64/uint64, store as string with IsBigInt flag
-				lit.Type = ast.LiteralString
-				lit.Value = value
-				lit.IsBigInt = true
+				// Too large for int64/uint64, try as float64
+				var f float64
+				var ok bool
+				if isHex {
+					// For hex numbers, use parseHexToFloat since strconv.ParseFloat
+					// doesn't handle hex integers without 'p' exponent
+					f, ok = parseHexToFloat(value)
+				} else {
+					var ferr error
+					f, ferr = strconv.ParseFloat(value, 64)
+					ok = ferr == nil
+				}
+				if !ok {
+					// Still can't parse, store as string with IsBigInt flag
+					lit.Type = ast.LiteralString
+					lit.Value = value
+					lit.IsBigInt = true
+				} else {
+					lit.Type = ast.LiteralFloat
+					lit.Value = f
+					lit.Source = value // Preserve original source text
+				}
 			} else {
 				lit.Type = ast.LiteralInteger
 				lit.Value = u // Store as uint64
@@ -1068,8 +1114,16 @@ func (p *Parser) parseUnaryMinus() ast.Expression {
 			lit.Value = f
 			lit.Source = numVal // Preserve original source text
 		} else {
-			i, _ := strconv.ParseInt(numVal, 10, 64)
-			lit.Value = i
+			// Try to parse as int64
+			i, err := strconv.ParseInt(numVal, 10, 64)
+			if err != nil {
+				// Number is too large for int64, store as string (for Int128/Int256)
+				lit.Type = ast.LiteralString
+				lit.Value = numVal
+				lit.IsBigInt = true
+			} else {
+				lit.Value = i
+			}
 		}
 		p.nextToken() // move past number
 		// Apply postfix operators like :: using the expression parsing loop
@@ -1651,14 +1705,22 @@ func (p *Parser) parseInterval() ast.Expression {
 }
 
 func (p *Parser) parseExists() ast.Expression {
-	expr := &ast.ExistsExpr{
-		Position: p.current.Pos,
-	}
+	pos := p.current.Pos
 	p.nextToken() // skip EXISTS
 
-	if !p.expect(token.LPAREN) {
-		return nil
+	// If not followed by (, treat EXISTS as an identifier (column name)
+	if !p.currentIs(token.LPAREN) {
+		return &ast.Identifier{
+			Position: pos,
+			Parts:    []string{"exists"},
+		}
 	}
+
+	expr := &ast.ExistsExpr{
+		Position: pos,
+	}
+
+	p.nextToken() // skip (
 
 	expr.Query = p.parseSelectWithUnion()
 
@@ -1677,9 +1739,9 @@ func (p *Parser) parseParameter() ast.Expression {
 
 	// Parse {name:Type} format
 	parts := strings.SplitN(value, ":", 2)
-	param.Name = parts[0]
+	param.Name = strings.TrimSpace(parts[0])
 	if len(parts) > 1 {
-		param.Type = &ast.DataType{Name: parts[1]}
+		param.Type = &ast.DataType{Name: strings.TrimSpace(parts[1])}
 	}
 
 	return param
@@ -1914,7 +1976,10 @@ func (p *Parser) parseBinaryExpression(left ast.Expression) ast.Expression {
 	p.nextToken()
 
 	// Check for ANY/ALL subquery comparison modifier: expr >= ANY(subquery)
-	if p.currentIs(token.ANY) || p.currentIs(token.ALL) {
+	// Only apply for comparison operators, not for AND/OR which might be followed by any() function calls
+	isComparisonOp := expr.Op == "=" || expr.Op == "==" || expr.Op == "!=" || expr.Op == "<>" ||
+		expr.Op == "<" || expr.Op == "<=" || expr.Op == ">" || expr.Op == ">="
+	if isComparisonOp && (p.currentIs(token.ANY) || p.currentIs(token.ALL)) {
 		modifier := strings.ToLower(p.current.Value)
 		p.nextToken()
 		if p.currentIs(token.LPAREN) {
@@ -2054,8 +2119,9 @@ func (p *Parser) parseInExpression(left ast.Expression, not bool) ast.Expression
 		expr.List = []ast.Expression{arr}
 	} else {
 		// Could be identifier, tuple function, or other expression
-		// Parse as expression
-		innerExpr := p.parseExpression(CALL)
+		// Parse as expression with MUL_PREC to include :: cast operator
+		// (which has CALL precedence, so using MUL_PREC ensures it's consumed)
+		innerExpr := p.parseExpression(MUL_PREC)
 		if innerExpr != nil {
 			expr.List = []ast.Expression{innerExpr}
 		}
@@ -2274,6 +2340,17 @@ func (p *Parser) parseDotAccess(left ast.Expression) ast.Expression {
 				Position: left.Pos(),
 				Parts:    []string{pathPart},
 			}
+		}
+	}
+
+	// Check for expression.* (tuple expansion) where left is not an identifier
+	// This handles cases like tuple(1, 'a').* or CAST(...).*
+	if p.currentIs(token.ASTERISK) {
+		// This is a tuple expansion - it becomes an Asterisk with the expression as context
+		// In ClickHouse EXPLAIN AST, this is shown simply as Asterisk
+		p.nextToken() // skip *
+		return &ast.Asterisk{
+			Position: left.Pos(),
 		}
 	}
 
@@ -2708,9 +2785,28 @@ func (p *Parser) parseKeywordAsIdentifier() ast.Expression {
 	name := p.current.Value
 	p.nextToken()
 
+	// Check for qualified identifier (system.one.* or system.one.col)
+	parts := []string{name}
+	for p.currentIs(token.DOT) {
+		p.nextToken()
+		if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+			parts = append(parts, p.current.Value)
+			p.nextToken()
+		} else if p.currentIs(token.ASTERISK) {
+			// table.*
+			p.nextToken()
+			return &ast.Asterisk{
+				Position: pos,
+				Table:    strings.Join(parts, "."),
+			}
+		} else {
+			break
+		}
+	}
+
 	return &ast.Identifier{
 		Position: pos,
-		Parts:    []string{name},
+		Parts:    parts,
 	}
 }
 
@@ -2723,10 +2819,25 @@ func (p *Parser) parseAsteriskExcept(asterisk *ast.Asterisk) ast.Expression {
 		p.nextToken()
 	}
 
-	// EXCEPT can have optional parentheses: * EXCEPT (col1, col2) or * EXCEPT col
+	// EXCEPT can have optional parentheses: * EXCEPT (col1, col2) or * EXCEPT col or * EXCEPT('pattern')
 	hasParens := p.currentIs(token.LPAREN)
 	if hasParens {
 		p.nextToken() // skip (
+	}
+
+	// Check for regex pattern (string literal)
+	if p.currentIs(token.STRING) {
+		pattern := p.current.Value
+		p.nextToken()
+		asterisk.Transformers = append(asterisk.Transformers, &ast.ColumnTransformer{
+			Position: pos,
+			Type:     "except",
+			Pattern:  pattern,
+		})
+		if hasParens {
+			p.expect(token.RPAREN)
+		}
+		return asterisk
 	}
 
 	var exceptCols []string
