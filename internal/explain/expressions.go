@@ -211,6 +211,31 @@ func isSimpleLiteralOrNegation(e ast.Expression) bool {
 	return false
 }
 
+// isSimpleLiteralOrNestedLiteral checks if an expression is a literal (including nested tuples/arrays of literals)
+// Returns false for complex expressions like subqueries, function calls, identifiers, etc.
+func isSimpleLiteralOrNestedLiteral(e ast.Expression) bool {
+	if lit, ok := e.(*ast.Literal); ok {
+		// For nested arrays/tuples, recursively check if all elements are also literals
+		if lit.Type == ast.LiteralArray || lit.Type == ast.LiteralTuple {
+			if exprs, ok := lit.Value.([]ast.Expression); ok {
+				for _, elem := range exprs {
+					if !isSimpleLiteralOrNestedLiteral(elem) {
+						return false
+					}
+				}
+			}
+		}
+		return true
+	}
+	// Unary minus of a literal integer/float is also simple (negative number)
+	if unary, ok := e.(*ast.UnaryExpr); ok && unary.Op == "-" {
+		if lit, ok := unary.Operand.(*ast.Literal); ok {
+			return lit.Type == ast.LiteralInteger || lit.Type == ast.LiteralFloat
+		}
+	}
+	return false
+}
+
 // containsOnlyArraysOrTuples checks if a slice of expressions contains
 // only array or tuple literals (including empty arrays).
 // Returns true if the slice is empty or contains only arrays/tuples.
@@ -952,16 +977,39 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 	// When name is empty, don't show the alias part
 	switch e := n.Query.(type) {
 	case *ast.Literal:
-		// Empty tuples should be rendered as Function tuple, not Literal
+		// Tuples containing complex expressions (subqueries, function calls, etc) should be rendered as Function tuple
+		// But tuples of simple literals (including nested tuples of literals) stay as Literal
 		if e.Type == ast.LiteralTuple {
-			if exprs, ok := e.Value.([]ast.Expression); ok && len(exprs) == 0 {
-				if n.Name != "" {
-					fmt.Fprintf(sb, "%sFunction tuple (alias %s) (children %d)\n", indent, n.Name, 1)
+			if exprs, ok := e.Value.([]ast.Expression); ok {
+				needsFunctionFormat := false
+				// Empty tuples always use Function tuple format
+				if len(exprs) == 0 {
+					needsFunctionFormat = true
 				} else {
-					fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
+					for _, expr := range exprs {
+						// Check if any element is a truly complex expression (not just a literal)
+						if !isSimpleLiteralOrNestedLiteral(expr) {
+							needsFunctionFormat = true
+							break
+						}
+					}
 				}
-				fmt.Fprintf(sb, "%s ExpressionList\n", indent)
-				return
+				if needsFunctionFormat {
+					if n.Name != "" {
+						fmt.Fprintf(sb, "%sFunction tuple (alias %s) (children %d)\n", indent, n.Name, 1)
+					} else {
+						fmt.Fprintf(sb, "%sFunction tuple (children %d)\n", indent, 1)
+					}
+					if len(exprs) > 0 {
+						fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(exprs))
+					} else {
+						fmt.Fprintf(sb, "%s ExpressionList\n", indent)
+					}
+					for _, expr := range exprs {
+						Node(sb, expr, depth+2)
+					}
+					return
+				}
 			}
 		}
 		// Arrays containing non-literal expressions should be rendered as Function array
