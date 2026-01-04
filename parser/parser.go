@@ -6771,6 +6771,7 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 			upperCmd := strings.ToUpper(sys.Command)
 			if strings.Contains(upperCmd, "RELOAD DICTIONARY") ||
 				strings.Contains(upperCmd, "DROP REPLICA") ||
+				strings.Contains(upperCmd, "RESTORE REPLICA") ||
 				strings.Contains(upperCmd, "STOP DISTRIBUTED SENDS") ||
 				strings.Contains(upperCmd, "START DISTRIBUTED SENDS") ||
 				strings.Contains(upperCmd, "FLUSH DISTRIBUTED") {
@@ -6803,7 +6804,7 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 func (p *Parser) isSystemCommandKeyword() bool {
 	switch p.current.Token {
 	case token.TTL, token.SYNC, token.DROP, token.FORMAT, token.FOR, token.INDEX, token.INSERT,
-		token.PRIMARY, token.KEY, token.DISTRIBUTED:
+		token.PRIMARY, token.KEY, token.DISTRIBUTED, token.RESTORE:
 		return true
 	}
 	// Handle identifiers that are part of SYSTEM commands (not table names)
