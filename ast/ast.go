@@ -985,6 +985,7 @@ type RenameQuery struct {
 	To        string         `json:"to,omitempty"`      // Deprecated: for backward compat
 	OnCluster string         `json:"on_cluster,omitempty"`
 	Settings  []*SettingExpr `json:"settings,omitempty"`
+	IfExists  bool           `json:"if_exists,omitempty"` // IF EXISTS modifier
 }
 
 func (r *RenameQuery) Pos() token.Position { return r.Position }

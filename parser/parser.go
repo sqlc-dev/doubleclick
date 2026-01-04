@@ -6887,6 +6887,13 @@ func (p *Parser) parseRename() *ast.RenameQuery {
 		return nil
 	}
 
+	// Handle IF EXISTS after TABLE/DICTIONARY
+	if p.currentIs(token.IF) && p.peekIs(token.EXISTS) {
+		p.nextToken() // skip IF
+		p.nextToken() // skip EXISTS
+		rename.IfExists = true
+	}
+
 	// Parse rename pairs (can have multiple: t1 TO t2, t3 TO t4, ...)
 	for {
 		pair := &ast.RenamePair{}
