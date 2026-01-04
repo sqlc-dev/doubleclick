@@ -446,7 +446,13 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		if len(n.OrderBy) > 0 {
 			if len(n.OrderBy) == 1 {
 				if ident, ok := n.OrderBy[0].(*ast.Identifier); ok {
-					fmt.Fprintf(sb, "%s Identifier %s\n", storageIndent, ident.Name())
+					// When ORDER BY has modifiers (ASC/DESC), wrap in StorageOrderByElement
+					if n.OrderByHasModifiers {
+						fmt.Fprintf(sb, "%s StorageOrderByElement (children %d)\n", storageIndent, 1)
+						fmt.Fprintf(sb, "%s  Identifier %s\n", storageIndent, ident.Name())
+					} else {
+						fmt.Fprintf(sb, "%s Identifier %s\n", storageIndent, ident.Name())
+					}
 				} else if lit, ok := n.OrderBy[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
 					// Handle tuple literal - for ORDER BY with modifiers (DESC/ASC),
 					// ClickHouse outputs just "Function tuple" without children

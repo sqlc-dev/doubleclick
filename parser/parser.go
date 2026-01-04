@@ -2626,7 +2626,13 @@ func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 					}
 				} else {
 					// Use ALIAS_PREC to avoid consuming AS keyword (for AS SELECT)
-					create.OrderBy = []ast.Expression{p.parseExpression(ALIAS_PREC)}
+					expr := p.parseExpression(ALIAS_PREC)
+					create.OrderBy = []ast.Expression{expr}
+					// Handle ASC/DESC modifier after single non-parenthesized ORDER BY expression
+					if p.currentIs(token.ASC) || p.currentIs(token.DESC) {
+						create.OrderByHasModifiers = true
+						p.nextToken()
+					}
 				}
 			}
 		case p.currentIs(token.PRIMARY):
