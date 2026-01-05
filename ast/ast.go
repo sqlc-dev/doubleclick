@@ -637,6 +637,7 @@ func (p *Projection) End() token.Position { return p.Position }
 // ProjectionSelectQuery represents the SELECT part of a projection.
 type ProjectionSelectQuery struct {
 	Position token.Position   `json:"-"`
+	With     []Expression     `json:"with,omitempty"` // WITH clause expressions
 	Columns  []Expression     `json:"columns"`
 	GroupBy  []Expression     `json:"group_by,omitempty"`
 	OrderBy  []Expression     `json:"order_by,omitempty"` // ORDER BY columns
@@ -700,6 +701,7 @@ const (
 	AlterModifyOrderBy         AlterCommandType = "MODIFY_ORDER_BY"
 	AlterModifySampleBy        AlterCommandType = "MODIFY_SAMPLE_BY"
 	AlterRemoveSampleBy        AlterCommandType = "REMOVE_SAMPLE_BY"
+	AlterApplyDeletedMask      AlterCommandType = "APPLY_DELETED_MASK"
 )
 
 // TruncateQuery represents a TRUNCATE statement.
@@ -983,6 +985,7 @@ type RenameQuery struct {
 	To        string         `json:"to,omitempty"`      // Deprecated: for backward compat
 	OnCluster string         `json:"on_cluster,omitempty"`
 	Settings  []*SettingExpr `json:"settings,omitempty"`
+	IfExists  bool           `json:"if_exists,omitempty"` // IF EXISTS modifier
 }
 
 func (r *RenameQuery) Pos() token.Position { return r.Position }

@@ -2626,7 +2626,13 @@ func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 					}
 				} else {
 					// Use ALIAS_PREC to avoid consuming AS keyword (for AS SELECT)
-					create.OrderBy = []ast.Expression{p.parseExpression(ALIAS_PREC)}
+					expr := p.parseExpression(ALIAS_PREC)
+					create.OrderBy = []ast.Expression{expr}
+					// Handle ASC/DESC modifier after single non-parenthesized ORDER BY expression
+					if p.currentIs(token.ASC) || p.currentIs(token.DESC) {
+						create.OrderByHasModifiers = true
+						p.nextToken()
+					}
 				}
 			}
 		case p.currentIs(token.PRIMARY):
@@ -5817,6 +5823,14 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				cmd.PartitionIsID = true
 			}
 			cmd.Partition = p.parseExpression(LOWEST)
+			// Handle FROM table (ATTACH PARTITION ... FROM table)
+			if p.currentIs(token.FROM) {
+				p.nextToken()
+				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
+					cmd.FromTable = p.current.Value
+					p.nextToken()
+				}
+			}
 		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PART" {
 			// ATTACH PART uses ATTACH_PARTITION type in ClickHouse EXPLAIN
 			cmd.Type = ast.AlterAttachPartition
@@ -5879,6 +5893,7 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		}
 	case token.APPLY:
 		// APPLY PATCHES IN PARTITION expr
+		// APPLY DELETED MASK [IN PARTITION expr]
 		p.nextToken() // skip APPLY
 		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "PATCHES" {
 			p.nextToken() // skip PATCHES
@@ -5888,6 +5903,19 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				if p.currentIs(token.PARTITION) {
 					p.nextToken() // skip PARTITION
 					cmd.Partition = p.parseExpression(LOWEST)
+				}
+			}
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DELETED" {
+			p.nextToken() // skip DELETED
+			if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "MASK" {
+				p.nextToken() // skip MASK
+				cmd.Type = ast.AlterApplyDeletedMask
+				if p.currentIs(token.IN) {
+					p.nextToken() // skip IN
+					if p.currentIs(token.PARTITION) {
+						p.nextToken() // skip PARTITION
+						cmd.Partition = p.parseExpression(LOWEST)
+					}
 				}
 			}
 		}
@@ -6367,6 +6395,13 @@ func (p *Parser) parseShow() ast.Statement {
 	case token.SETTINGS:
 		show.ShowType = ast.ShowSettings
 		p.nextToken()
+	case token.FULL:
+		// SHOW FULL COLUMNS/FIELDS FROM table - treat as ShowColumns
+		p.nextToken()
+		if p.currentIs(token.COLUMNS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "FIELDS") {
+			p.nextToken()
+		}
+		show.ShowType = ast.ShowColumns
 	default:
 		// Handle SHOW PROCESSLIST, SHOW DICTIONARIES, SHOW FUNCTIONS, etc.
 		if p.currentIs(token.IDENT) {
@@ -6380,9 +6415,18 @@ func (p *Parser) parseShow() ast.Statement {
 				show.ShowType = ast.ShowFunctions
 			case "SETTING":
 				show.ShowType = ast.ShowSetting
-			case "INDEXES", "INDICES", "KEYS":
-				// SHOW INDEXES/INDICES/KEYS FROM table - treat as ShowColumns
+			case "INDEXES", "INDICES", "KEYS", "FIELDS":
+				// SHOW INDEXES/INDICES/KEYS/FIELDS FROM table - treat as ShowColumns
 				show.ShowType = ast.ShowColumns
+			case "FULL":
+				// SHOW FULL COLUMNS/FIELDS FROM table - treat as ShowColumns
+				p.nextToken()
+				if p.currentIs(token.COLUMNS) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "FIELDS") {
+					p.nextToken()
+				}
+				show.ShowType = ast.ShowColumns
+				// Don't consume another token, fall through to FROM parsing
+				goto parseFrom
 			case "EXTENDED":
 				// SHOW EXTENDED INDEX FROM table - treat as ShowColumns
 				p.nextToken()
@@ -6771,6 +6815,7 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 			upperCmd := strings.ToUpper(sys.Command)
 			if strings.Contains(upperCmd, "RELOAD DICTIONARY") ||
 				strings.Contains(upperCmd, "DROP REPLICA") ||
+				strings.Contains(upperCmd, "RESTORE REPLICA") ||
 				strings.Contains(upperCmd, "STOP DISTRIBUTED SENDS") ||
 				strings.Contains(upperCmd, "START DISTRIBUTED SENDS") ||
 				strings.Contains(upperCmd, "FLUSH DISTRIBUTED") {
@@ -6803,7 +6848,7 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 func (p *Parser) isSystemCommandKeyword() bool {
 	switch p.current.Token {
 	case token.TTL, token.SYNC, token.DROP, token.FORMAT, token.FOR, token.INDEX, token.INSERT,
-		token.PRIMARY, token.KEY, token.DISTRIBUTED:
+		token.PRIMARY, token.KEY, token.DISTRIBUTED, token.RESTORE:
 		return true
 	}
 	// Handle identifiers that are part of SYSTEM commands (not table names)
@@ -6846,6 +6891,13 @@ func (p *Parser) parseRename() *ast.RenameQuery {
 		p.nextToken()
 	} else {
 		return nil
+	}
+
+	// Handle IF EXISTS after TABLE/DICTIONARY
+	if p.currentIs(token.IF) && p.peekIs(token.EXISTS) {
+		p.nextToken() // skip IF
+		p.nextToken() // skip EXISTS
+		rename.IfExists = true
 	}
 
 	// Parse rename pairs (can have multiple: t1 TO t2, t3 TO t4, ...)
@@ -7760,6 +7812,12 @@ func (p *Parser) parseProjection() *ast.Projection {
 
 	proj.Select = &ast.ProjectionSelectQuery{
 		Position: p.current.Pos,
+	}
+
+	// Parse WITH clause if present
+	if p.currentIs(token.WITH) {
+		p.nextToken() // skip WITH
+		proj.Select.With = p.parseWithClause()
 	}
 
 	// Parse SELECT keyword (optional in projection)

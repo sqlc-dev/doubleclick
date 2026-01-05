@@ -1133,7 +1133,12 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
 				if allParenthesizedPrimitives {
 					// Expand the elements
-					fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(elems))
+					// For empty tuples, don't include children count
+					if len(elems) == 0 {
+						fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
+					} else {
+						fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(elems))
+					}
 					for _, elem := range elems {
 						Node(sb, elem, depth+4)
 					}

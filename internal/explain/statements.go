@@ -446,7 +446,13 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		if len(n.OrderBy) > 0 {
 			if len(n.OrderBy) == 1 {
 				if ident, ok := n.OrderBy[0].(*ast.Identifier); ok {
-					fmt.Fprintf(sb, "%s Identifier %s\n", storageIndent, ident.Name())
+					// When ORDER BY has modifiers (ASC/DESC), wrap in StorageOrderByElement
+					if n.OrderByHasModifiers {
+						fmt.Fprintf(sb, "%s StorageOrderByElement (children %d)\n", storageIndent, 1)
+						fmt.Fprintf(sb, "%s  Identifier %s\n", storageIndent, ident.Name())
+					} else {
+						fmt.Fprintf(sb, "%s Identifier %s\n", storageIndent, ident.Name())
+					}
 				} else if lit, ok := n.OrderBy[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
 					// Handle tuple literal - for ORDER BY with modifiers (DESC/ASC),
 					// ClickHouse outputs just "Function tuple" without children
@@ -1620,6 +1626,10 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	if cmdType == ast.AlterClearStatistics {
 		cmdType = ast.AlterDropStatistics
 	}
+	// ATTACH PARTITION ... FROM table is shown as REPLACE_PARTITION in EXPLAIN AST
+	if cmdType == ast.AlterAttachPartition && cmd.FromTable != "" {
+		cmdType = ast.AlterReplacePartition
+	}
 	// DETACH_PARTITION is shown as DROP_PARTITION in EXPLAIN AST
 	if cmdType == ast.AlterDetachPartition {
 		cmdType = ast.AlterDropPartition
@@ -1802,7 +1812,7 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	case ast.AlterModifySetting:
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
-		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition, ast.AlterApplyPatches:
+		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition, ast.AlterApplyPatches, ast.AlterApplyDeletedMask:
 		if cmd.Partition != nil {
 			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
 			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
@@ -1910,6 +1920,9 @@ func explainProjection(sb *strings.Builder, p *ast.Projection, indent string, de
 
 func explainProjectionSelectQuery(sb *strings.Builder, q *ast.ProjectionSelectQuery, indent string, depth int) {
 	children := 0
+	if len(q.With) > 0 {
+		children++
+	}
 	if len(q.Columns) > 0 {
 		children++
 	}
@@ -1920,6 +1933,13 @@ func explainProjectionSelectQuery(sb *strings.Builder, q *ast.ProjectionSelectQu
 		children++
 	}
 	fmt.Fprintf(sb, "%sProjectionSelectQuery (children %d)\n", indent, children)
+	// Output WITH clause first
+	if len(q.With) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(q.With))
+		for _, w := range q.With {
+			Node(sb, w, depth+2)
+		}
+	}
 	if len(q.Columns) > 0 {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(q.Columns))
 		for _, col := range q.Columns {
@@ -2085,7 +2105,7 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 	case ast.AlterModifySetting:
 		children = 1
 	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
-		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition, ast.AlterApplyPatches:
+		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition, ast.AlterApplyPatches, ast.AlterApplyDeletedMask:
 		if cmd.Partition != nil {
 			children++
 		}

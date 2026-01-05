@@ -298,8 +298,13 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 	// ClickHouse optimizes UNION ALL when selects have identical expressions but different aliases.
 	// In that case, only the first SELECT is shown since column names come from the first SELECT anyway.
 	selects := simplifyUnionSelects(n.Selects)
+
+	// Check if we need to group selects due to mode changes
+	// e.g., A UNION DISTINCT B UNION ALL C -> (A UNION DISTINCT B) UNION ALL C
+	groupedSelects := groupSelectsByUnionMode(selects, n.UnionModes)
+
 	// Wrap selects in ExpressionList
-	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(selects))
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(groupedSelects))
 
 	// Check if first operand has a WITH clause to be inherited by subsequent operands
 	var inheritedWith []ast.Expression
@@ -307,7 +312,7 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 		inheritedWith = extractWithClause(selects[0])
 	}
 
-	for i, sel := range selects {
+	for i, sel := range groupedSelects {
 		if i > 0 && len(inheritedWith) > 0 {
 			// Subsequent operands inherit the WITH clause from the first operand
 			explainSelectQueryWithInheritedWith(sb, sel, inheritedWith, depth+2)
@@ -618,6 +623,62 @@ func countSelectUnionChildren(n *ast.SelectWithUnionQuery) int {
 // ClickHouse does not simplify UNION ALL queries in EXPLAIN AST output.
 func simplifyUnionSelects(selects []ast.Statement) []ast.Statement {
 	return selects
+}
+
+// groupSelectsByUnionMode groups selects when union modes change from DISTINCT to ALL.
+// For example, A UNION DISTINCT B UNION ALL C becomes (A UNION DISTINCT B) UNION ALL C.
+// This matches ClickHouse's EXPLAIN AST output which nests DISTINCT groups before ALL.
+// Note: The reverse (ALL followed by DISTINCT) does NOT trigger nesting.
+func groupSelectsByUnionMode(selects []ast.Statement, unionModes []string) []ast.Statement {
+	if len(selects) < 3 || len(unionModes) < 2 {
+		return selects
+	}
+
+	// Normalize union modes (strip "UNION " prefix if present)
+	normalizeMode := func(mode string) string {
+		if len(mode) > 6 && mode[:6] == "UNION " {
+			return mode[6:]
+		}
+		return mode
+	}
+
+	// Only group when DISTINCT transitions to ALL
+	// Find first DISTINCT mode, then check if it's followed by ALL
+	firstMode := normalizeMode(unionModes[0])
+	if firstMode != "DISTINCT" {
+		return selects
+	}
+
+	// Find where DISTINCT ends and ALL begins
+	modeChangeIdx := -1
+	for i := 1; i < len(unionModes); i++ {
+		if normalizeMode(unionModes[i]) == "ALL" {
+			modeChangeIdx = i
+			break
+		}
+	}
+
+	// If no DISTINCT->ALL transition found, return as-is
+	if modeChangeIdx == -1 {
+		return selects
+	}
+
+	// Create a nested SelectWithUnionQuery for selects 0..modeChangeIdx (inclusive)
+	// modeChangeIdx is the index of the union operator, so we include selects[0] through selects[modeChangeIdx]
+	nestedSelects := selects[:modeChangeIdx+1]
+	nestedModes := unionModes[:modeChangeIdx]
+
+	nested := &ast.SelectWithUnionQuery{
+		Selects:    nestedSelects,
+		UnionModes: nestedModes,
+	}
+
+	// Result is [nested, selects[modeChangeIdx+1], ...]
+	result := make([]ast.Statement, 0, len(selects)-modeChangeIdx)
+	result = append(result, nested)
+	result = append(result, selects[modeChangeIdx+1:]...)
+
+	return result
 }
 
 func countSelectQueryChildren(n *ast.SelectQuery) int {
