@@ -3758,6 +3758,17 @@ func (p *Parser) parseCreateWorkload(pos token.Position) *ast.CreateWorkloadQuer
 		p.nextToken()
 	}
 
+	// Check for IF NOT EXISTS
+	if p.currentIs(token.IF) {
+		p.nextToken()
+		if p.currentIs(token.NOT) {
+			p.nextToken()
+			if p.currentIs(token.EXISTS) {
+				p.nextToken()
+			}
+		}
+	}
+
 	// Get workload name
 	if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		query.Name = p.current.Value
