@@ -1684,6 +1684,10 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 	if cmdType == ast.AlterClearIndex {
 		cmdType = ast.AlterDropIndex
 	}
+	// CLEAR_PROJECTION is shown as DROP_PROJECTION in EXPLAIN AST
+	if cmdType == ast.AlterClearProjection {
+		cmdType = ast.AlterDropProjection
+	}
 	// DELETE_WHERE is shown as DELETE in EXPLAIN AST
 	if cmdType == ast.AlterDeleteWhere {
 		cmdType = "DELETE"
