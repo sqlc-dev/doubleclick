@@ -808,6 +808,17 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 	case *ast.ExistsExpr:
 		// EXISTS expressions with alias
 		explainExistsExprWithAlias(sb, e, n.Alias, indent, depth)
+	case *ast.Parameter:
+		// QueryParameter with alias
+		if e.Name != "" {
+			if e.Type != nil {
+				fmt.Fprintf(sb, "%sQueryParameter %s:%s (alias %s)\n", indent, e.Name, FormatDataType(e.Type), escapeAlias(n.Alias))
+			} else {
+				fmt.Fprintf(sb, "%sQueryParameter %s (alias %s)\n", indent, e.Name, escapeAlias(n.Alias))
+			}
+		} else {
+			fmt.Fprintf(sb, "%sQueryParameter (alias %s)\n", indent, escapeAlias(n.Alias))
+		}
 	default:
 		// For other types, recursively explain and add alias info
 		Node(sb, n.Expr, depth)
