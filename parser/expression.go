@@ -2110,7 +2110,8 @@ func (p *Parser) parseInExpression(left ast.Expression, not bool) ast.Expression
 		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 			expr.Query = p.parseSelectWithUnion()
 		} else {
-			expr.List = p.parseExpressionList()
+			// Parse IN list manually to detect trailing comma
+			expr.List, expr.TrailingComma = p.parseInList()
 		}
 		p.expect(token.RPAREN)
 	} else if p.currentIs(token.LBRACKET) {
@@ -2128,6 +2129,37 @@ func (p *Parser) parseInExpression(left ast.Expression, not bool) ast.Expression
 	}
 
 	return expr
+}
+
+// parseInList parses an expression list for IN expressions and returns
+// whether the list had a trailing comma (which indicates a single-element tuple).
+func (p *Parser) parseInList() ([]ast.Expression, bool) {
+	var exprs []ast.Expression
+	trailingComma := false
+
+	if p.currentIs(token.RPAREN) || p.currentIs(token.EOF) {
+		return exprs, false
+	}
+
+	expr := p.parseExpression(LOWEST)
+	if expr != nil {
+		exprs = append(exprs, expr)
+	}
+
+	for p.currentIs(token.COMMA) {
+		p.nextToken() // consume comma
+		// Check if this is a trailing comma (followed by RPAREN)
+		if p.currentIs(token.RPAREN) {
+			trailingComma = true
+			break
+		}
+		expr := p.parseExpression(LOWEST)
+		if expr != nil {
+			exprs = append(exprs, expr)
+		}
+	}
+
+	return exprs, trailingComma
 }
 
 func (p *Parser) parseBetweenExpression(left ast.Expression, not bool) ast.Expression {

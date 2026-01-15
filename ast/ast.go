@@ -1717,12 +1717,13 @@ func (b *BetweenExpr) expressionNode()     {}
 
 // InExpr represents an IN expression.
 type InExpr struct {
-	Position token.Position `json:"-"`
-	Expr     Expression     `json:"expr"`
-	Not      bool           `json:"not,omitempty"`
-	Global   bool           `json:"global,omitempty"`
-	List     []Expression   `json:"list,omitempty"`
-	Query    Statement      `json:"query,omitempty"`
+	Position      token.Position `json:"-"`
+	Expr          Expression     `json:"expr"`
+	Not           bool           `json:"not,omitempty"`
+	Global        bool           `json:"global,omitempty"`
+	List          []Expression   `json:"list,omitempty"`
+	Query         Statement      `json:"query,omitempty"`
+	TrailingComma bool           `json:"trailing_comma,omitempty"` // true if list had trailing comma like (2,)
 }
 
 func (i *InExpr) Pos() token.Position { return i.Position }

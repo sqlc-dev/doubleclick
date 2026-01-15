@@ -1079,6 +1079,9 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 			if lit, ok := n.List[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
 				// Single tuple literal gets wrapped in Function tuple, so count as 1
 				argCount++
+			} else if n.TrailingComma {
+				// Single element with trailing comma (e.g., (2,)) gets wrapped in Function tuple
+				argCount++
 			} else {
 				argCount += len(n.List)
 			}
@@ -1148,6 +1151,11 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 					Node(sb, n.List[0], depth+4)
 				}
 			}
+		} else if n.TrailingComma {
+			// Single element with trailing comma (e.g., (2,)) - wrap in Function tuple
+			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
+			Node(sb, n.List[0], depth+4)
 		} else {
 			// Single non-tuple element - output directly
 			Node(sb, n.List[0], depth+2)
@@ -1277,6 +1285,9 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 		if len(n.List) == 1 {
 			if lit, ok := n.List[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
 				argCount++
+			} else if n.TrailingComma {
+				// Single element with trailing comma (e.g., (2,)) gets wrapped in Function tuple
+				argCount++
 			} else {
 				argCount += len(n.List)
 			}
@@ -1312,6 +1323,11 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 		fmt.Fprintf(sb, "%s  Literal %s\n", indent, FormatLiteral(tupleLit))
 	} else if len(n.List) == 1 {
 		if lit, ok := n.List[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
+			Node(sb, n.List[0], depth+4)
+		} else if n.TrailingComma {
+			// Single element with trailing comma (e.g., (2,)) - wrap in Function tuple
 			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
 			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
 			Node(sb, n.List[0], depth+4)
