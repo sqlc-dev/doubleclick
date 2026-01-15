@@ -238,6 +238,10 @@ func TestParser(t *testing.T) {
 						if idx := strings.Index(expected, "\nThe query succeeded but the server error"); idx != -1 {
 							expected = strings.TrimSpace(expected[:idx])
 						}
+						// Strip trailing "OK" line (ClickHouse success indicator, not part of AST)
+						if strings.HasSuffix(expected, "\nOK") {
+							expected = strings.TrimSpace(expected[:len(expected)-3])
+						}
 						actual := strings.TrimSpace(parser.Explain(stmts[0]))
 						// Use case-insensitive comparison since ClickHouse EXPLAIN AST has inconsistent casing
 						if !strings.EqualFold(actual, expected) {
