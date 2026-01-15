@@ -110,16 +110,16 @@ func explainSelectQueryWithInheritedWith(sb *strings.Builder, stmt ast.Statement
 	if sq.Having != nil {
 		Node(sb, sq.Having, depth+1)
 	}
-	// QUALIFY
-	if sq.Qualify != nil {
-		Node(sb, sq.Qualify, depth+1)
-	}
-	// WINDOW clause
+	// WINDOW clause - output before QUALIFY
 	if len(sq.Window) > 0 {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(sq.Window))
 		for range sq.Window {
 			fmt.Fprintf(sb, "%s  WindowListElement\n", indent)
 		}
+	}
+	// QUALIFY
+	if sq.Qualify != nil {
+		Node(sb, sq.Qualify, depth+1)
 	}
 	// ORDER BY
 	if len(sq.OrderBy) > 0 {
@@ -430,16 +430,16 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 	if n.Having != nil {
 		Node(sb, n.Having, depth+1)
 	}
-	// QUALIFY
-	if n.Qualify != nil {
-		Node(sb, n.Qualify, depth+1)
-	}
-	// WINDOW clause (named window definitions)
+	// WINDOW clause (named window definitions) - output before QUALIFY
 	if len(n.Window) > 0 {
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(n.Window))
 		for range n.Window {
 			fmt.Fprintf(sb, "%s  WindowListElement\n", indent)
 		}
+	}
+	// QUALIFY
+	if n.Qualify != nil {
+		Node(sb, n.Qualify, depth+1)
 	}
 	// ORDER BY
 	if len(n.OrderBy) > 0 {
