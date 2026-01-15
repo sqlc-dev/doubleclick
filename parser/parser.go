@@ -6491,6 +6491,14 @@ func (p *Parser) parseShow() ast.Statement {
 				show.ShowType = ast.ShowColumns
 				// Don't consume another token, fall through to FROM parsing
 				goto parseFrom
+			case "CHANGED":
+				// SHOW CHANGED SETTINGS - treat as ShowSettings
+				p.nextToken()
+				if p.currentIs(token.SETTINGS) {
+					show.ShowType = ast.ShowSettings
+					p.nextToken()
+				}
+				goto parseFrom
 			}
 			p.nextToken()
 		}
