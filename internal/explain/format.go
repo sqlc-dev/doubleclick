@@ -288,6 +288,20 @@ func formatInListAsTuple(list []ast.Expression) string {
 	return fmt.Sprintf("Tuple_(%s)", strings.Join(parts, ", "))
 }
 
+// needsBacktickQuoting checks if an identifier contains characters that require backtick quoting
+func needsBacktickQuoting(name string) bool {
+	if name == "" {
+		return false
+	}
+	// Check each character - backticks needed if name contains non-alphanumeric/underscore chars
+	for _, c := range name {
+		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_') {
+			return true
+		}
+	}
+	return false
+}
+
 // FormatDataType formats a DataType for EXPLAIN AST output
 func FormatDataType(dt *ast.DataType) string {
 	if dt == nil {
@@ -313,7 +327,12 @@ func FormatDataType(dt *ast.DataType) string {
 			params = append(params, FormatDataType(nested))
 		} else if ntp, ok := p.(*ast.NameTypePair); ok {
 			// Named tuple field: "name Type"
-			params = append(params, ntp.Name+" "+FormatDataType(ntp.Type))
+			// Wrap name in backticks if it contains special characters
+			name := ntp.Name
+			if needsBacktickQuoting(name) {
+				name = "`" + name + "`"
+			}
+			params = append(params, name+" "+FormatDataType(ntp.Type))
 		} else if binExpr, ok := p.(*ast.BinaryExpr); ok {
 			// Binary expression (e.g., 'hello' = 1 for Enum types)
 			params = append(params, formatBinaryExprForType(binExpr))
