@@ -712,10 +712,9 @@ func (p *Parser) parseSelectWithUnion() *ast.SelectWithUnionQuery {
 				break
 			}
 			p.expect(token.RPAREN)
-			// Flatten nested selects into current query
-			for _, s := range nested.Selects {
-				query.Selects = append(query.Selects, s)
-			}
+			// Keep parenthesized union as nested SelectWithUnionQuery
+			// This allows proper grouping in the explain phase
+			query.Selects = append(query.Selects, nested)
 		} else {
 			sel := p.parseSelect()
 			if sel == nil {
@@ -7692,10 +7691,8 @@ func (p *Parser) parseParenthesizedSelect() *ast.SelectWithUnionQuery {
 				break
 			}
 			p.expect(token.RPAREN)
-			// Flatten nested selects into current query
-			for _, s := range nested.Selects {
-				query.Selects = append(query.Selects, s)
-			}
+			// Keep parenthesized union as nested SelectWithUnionQuery
+			query.Selects = append(query.Selects, nested)
 		} else {
 			sel := p.parseSelect()
 			if sel == nil {

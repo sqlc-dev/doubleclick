@@ -222,8 +222,15 @@ func explainSelectWithUnionQueryWithInheritedWith(sb *strings.Builder, n *ast.Se
 	fmt.Fprintf(sb, "%sSelectWithUnionQuery (children %d)\n", indent, children)
 
 	selects := simplifyUnionSelects(n.Selects)
-	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(selects))
-	for _, sel := range selects {
+
+	// Expand any nested SelectWithUnionQuery that would be grouped
+	expandedSelects, expandedModes := expandNestedUnions(selects, n.UnionModes)
+
+	// Check if we need to group selects due to mode changes
+	groupedSelects := groupSelectsByUnionMode(expandedSelects, expandedModes)
+
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(groupedSelects))
+	for _, sel := range groupedSelects {
 		ExplainSelectWithInheritedWith(sb, sel, inheritedWith, depth+2)
 	}
 
@@ -299,9 +306,13 @@ func explainSelectWithUnionQuery(sb *strings.Builder, n *ast.SelectWithUnionQuer
 	// In that case, only the first SELECT is shown since column names come from the first SELECT anyway.
 	selects := simplifyUnionSelects(n.Selects)
 
+	// Expand any nested SelectWithUnionQuery that would be grouped
+	// This flattens [S1, nested(5)] into [S1, grouped(4), S6] when grouping applies
+	expandedSelects, expandedModes := expandNestedUnions(selects, n.UnionModes)
+
 	// Check if we need to group selects due to mode changes
 	// e.g., A UNION DISTINCT B UNION ALL C -> (A UNION DISTINCT B) UNION ALL C
-	groupedSelects := groupSelectsByUnionMode(selects, n.UnionModes)
+	groupedSelects := groupSelectsByUnionMode(expandedSelects, expandedModes)
 
 	// Wrap selects in ExpressionList
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(groupedSelects))
@@ -625,6 +636,99 @@ func simplifyUnionSelects(selects []ast.Statement) []ast.Statement {
 	return selects
 }
 
+// expandNestedUnions expands nested SelectWithUnionQuery elements.
+// - If a nested union has only ALL modes, it's completely flattened
+// - If a nested union has a DISTINCT->ALL transition, it's expanded to grouped results
+// For example, [S1, nested(S2,S3,S4,S5,S6)] with modes [ALL] where nested has modes [ALL,"",DISTINCT,ALL]
+// becomes [S1, grouped(S2,S3,S4,S5), S6] with modes [ALL, ALL]
+func expandNestedUnions(selects []ast.Statement, unionModes []string) ([]ast.Statement, []string) {
+	result := make([]ast.Statement, 0, len(selects))
+	resultModes := make([]string, 0, len(unionModes))
+
+	// Helper to check if all modes are ALL
+	allModesAreAll := func(modes []string) bool {
+		for _, m := range modes {
+			normalized := m
+			if len(m) > 6 && m[:6] == "UNION " {
+				normalized = m[6:]
+			}
+			if normalized != "ALL" && normalized != "" {
+				// "" can be bare UNION which may default to DISTINCT
+				// but we treat it as potentially non-ALL
+				return false
+			}
+			// For "" (bare UNION), we check if it's truly all-ALL by also checking
+			// that DISTINCT is not present
+			if normalized == "" {
+				return false // bare UNION may be DISTINCT based on settings
+			}
+		}
+		return true
+	}
+
+	for i, sel := range selects {
+		if nested, ok := sel.(*ast.SelectWithUnionQuery); ok {
+			// Single select in parentheses - flatten it
+			if len(nested.Selects) == 1 {
+				result = append(result, nested.Selects[0])
+				if i > 0 && i-1 < len(unionModes) {
+					resultModes = append(resultModes, unionModes[i-1])
+				}
+				continue
+			}
+			// Check if all nested modes are ALL - if so, flatten completely
+			if allModesAreAll(nested.UnionModes) {
+				// Flatten completely: add outer mode first, then all nested selects and modes
+				if i > 0 && i-1 < len(unionModes) {
+					resultModes = append(resultModes, unionModes[i-1])
+				}
+				// Add first nested select
+				if len(nested.Selects) > 0 {
+					// Recursively expand in case of deeply nested unions
+					expandedNested, expandedNestedModes := expandNestedUnions(nested.Selects, nested.UnionModes)
+					for j, s := range expandedNested {
+						result = append(result, s)
+						if j < len(expandedNestedModes) {
+							resultModes = append(resultModes, expandedNestedModes[j])
+						}
+					}
+				}
+			} else {
+				// Check if this nested union would be grouped (DISTINCT->ALL transition)
+				grouped := groupSelectsByUnionMode(nested.Selects, nested.UnionModes)
+				if len(grouped) > 1 {
+					// Grouping produced multiple elements - expand them
+					// The outer mode (if any) applies to the first expanded element
+					if i > 0 && i-1 < len(unionModes) {
+						resultModes = append(resultModes, unionModes[i-1])
+					}
+					// Add all grouped elements and their modes
+					for j, g := range grouped {
+						result = append(result, g)
+						if j < len(grouped)-1 {
+							// Mode between grouped elements is ALL (from the transition point)
+							resultModes = append(resultModes, "UNION ALL")
+						}
+					}
+				} else {
+					// No grouping, keep as-is
+					result = append(result, sel)
+					if i > 0 && i-1 < len(unionModes) {
+						resultModes = append(resultModes, unionModes[i-1])
+					}
+				}
+			}
+		} else {
+			result = append(result, sel)
+			if i > 0 && i-1 < len(unionModes) {
+				resultModes = append(resultModes, unionModes[i-1])
+			}
+		}
+	}
+
+	return result, resultModes
+}
+
 // groupSelectsByUnionMode groups selects when union modes change from DISTINCT to ALL.
 // For example, A UNION DISTINCT B UNION ALL C becomes (A UNION DISTINCT B) UNION ALL C.
 // This matches ClickHouse's EXPLAIN AST output which nests DISTINCT groups before ALL.
@@ -642,19 +746,17 @@ func groupSelectsByUnionMode(selects []ast.Statement, unionModes []string) []ast
 		return mode
 	}
 
-	// Only group when DISTINCT transitions to ALL
-	// Find first DISTINCT mode, then check if it's followed by ALL
-	firstMode := normalizeMode(unionModes[0])
-	if firstMode != "DISTINCT" {
-		return selects
-	}
-
-	// Find where DISTINCT ends and ALL begins
+	// Find the last DISTINCT->ALL transition
+	// A transition occurs when a non-ALL mode (DISTINCT or bare "") is followed by ALL
 	modeChangeIdx := -1
 	for i := 1; i < len(unionModes); i++ {
-		if normalizeMode(unionModes[i]) == "ALL" {
+		prevMode := normalizeMode(unionModes[i-1])
+		currMode := normalizeMode(unionModes[i])
+		// Check for non-ALL -> ALL transition
+		// Non-ALL means DISTINCT or "" (bare UNION, which defaults to DISTINCT)
+		if currMode == "ALL" && prevMode != "ALL" {
 			modeChangeIdx = i
-			break
+			// Continue to find the LAST such transition
 		}
 	}
 
