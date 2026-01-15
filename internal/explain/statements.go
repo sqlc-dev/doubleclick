@@ -2391,7 +2391,23 @@ func explainKillQuery(sb *strings.Builder, n *ast.KillQuery, indent string, dept
 	if n.Where != nil {
 		switch expr := n.Where.(type) {
 		case *ast.BinaryExpr:
-			funcName = "Function_" + strings.ToLower(expr.Op)
+			// Map operators to function names
+			opName := strings.ToLower(expr.Op)
+			switch opName {
+			case "=":
+				opName = "equals"
+			case "!=", "<>":
+				opName = "notEquals"
+			case "<":
+				opName = "less"
+			case "<=":
+				opName = "lessOrEquals"
+			case ">":
+				opName = "greater"
+			case ">=":
+				opName = "greaterOrEquals"
+			}
+			funcName = "Function_" + opName
 		case *ast.FunctionCall:
 			funcName = "Function_" + expr.Name
 		default:
@@ -2407,12 +2423,15 @@ func explainKillQuery(sb *strings.Builder, n *ast.KillQuery, indent string, dept
 		mode = "TEST"
 	}
 
-	// Count children: WHERE expression + FORMAT identifier
+	// Count children: WHERE expression + FORMAT identifier + Settings
 	children := 0
 	if n.Where != nil {
 		children++
 	}
 	if n.Format != "" {
+		children++
+	}
+	if len(n.Settings) > 0 {
 		children++
 	}
 
@@ -2431,6 +2450,11 @@ func explainKillQuery(sb *strings.Builder, n *ast.KillQuery, indent string, dept
 	// Output FORMAT as Identifier
 	if n.Format != "" {
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Format)
+	}
+
+	// Output Settings
+	if len(n.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
 

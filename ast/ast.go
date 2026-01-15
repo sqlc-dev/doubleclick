@@ -1069,6 +1069,7 @@ type KillQuery struct {
 	Sync     bool           `json:"sync,omitempty"`    // SYNC mode (default false = ASYNC)
 	Test     bool           `json:"test,omitempty"`    // TEST mode
 	Format   string         `json:"format,omitempty"`  // FORMAT clause
+	Settings []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (k *KillQuery) Pos() token.Position { return k.Position }

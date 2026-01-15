@@ -8380,6 +8380,12 @@ endModifiers:
 		}
 	}
 
+	// Parse SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken() // skip SETTINGS
+		query.Settings = p.parseSettingsList()
+	}
+
 	return query
 }
 
