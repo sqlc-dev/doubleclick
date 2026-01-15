@@ -6034,7 +6034,8 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		p.nextToken() // skip UPDATE
 		// Parse assignments
 		for {
-			if !p.currentIs(token.IDENT) {
+			// Column name can be IDENT or keyword (e.g., key, value)
+			if !p.currentIs(token.IDENT) && !p.current.Token.IsKeyword() {
 				break
 			}
 			assign := &ast.Assignment{
