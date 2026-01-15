@@ -1536,12 +1536,7 @@ func explainIsNullExpr(sb *strings.Builder, n *ast.IsNullExpr, indent string, de
 }
 
 func explainCaseExpr(sb *strings.Builder, n *ast.CaseExpr, indent string, depth int) {
-	// Only output alias if it's unquoted (ClickHouse doesn't show quoted aliases)
-	alias := ""
-	if n.Alias != "" && !n.QuotedAlias {
-		alias = n.Alias
-	}
-	explainCaseExprWithAlias(sb, n, alias, indent, depth)
+	explainCaseExprWithAlias(sb, n, n.Alias, indent, depth)
 }
 
 func explainCaseExprWithAlias(sb *strings.Builder, n *ast.CaseExpr, alias string, indent string, depth int) {
