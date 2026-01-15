@@ -6374,6 +6374,11 @@ func (p *Parser) parseDescribe() *ast.DescribeQuery {
 		}
 	}
 
+	// Skip FINAL keyword if present (can appear after table function)
+	if p.currentIs(token.FINAL) {
+		p.nextToken()
+	}
+
 	// Parse FORMAT clause
 	if p.currentIs(token.FORMAT) {
 		p.nextToken()
