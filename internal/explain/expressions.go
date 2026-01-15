@@ -4,9 +4,47 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/sqlc-dev/doubleclick/ast"
 )
+
+// sanitizeUTF8 replaces invalid UTF-8 bytes with the Unicode replacement character (U+FFFD)
+// and null bytes with the escape sequence \0.
+// This matches ClickHouse's behavior of displaying special bytes in EXPLAIN AST output.
+func sanitizeUTF8(s string) string {
+	// Check if we need to process at all
+	needsProcessing := !utf8.ValidString(s)
+	if !needsProcessing {
+		for i := 0; i < len(s); i++ {
+			if s[i] == 0 {
+				needsProcessing = true
+				break
+			}
+		}
+	}
+	if !needsProcessing {
+		return s
+	}
+
+	var result strings.Builder
+	for i := 0; i < len(s); {
+		r, size := utf8.DecodeRuneInString(s[i:])
+		if r == utf8.RuneError && size == 1 {
+			// Invalid byte - write replacement character
+			result.WriteRune('\uFFFD')
+			i++
+		} else if r == 0 {
+			// Null byte - write as escape sequence \0
+			result.WriteString("\\0")
+			i += size
+		} else {
+			result.WriteRune(r)
+			i += size
+		}
+	}
+	return result.String()
+}
 
 // escapeAlias escapes backslashes and single quotes in alias names for EXPLAIN output
 func escapeAlias(alias string) string {
@@ -25,21 +63,31 @@ func explainIdentifier(sb *strings.Builder, n *ast.Identifier, indent string) {
 	}
 }
 
-// formatIdentifierName formats an identifier name, handling JSON path notation
+// escapeIdentifierPart escapes backslashes and single quotes in an identifier part
+// and sanitizes invalid UTF-8 bytes
+func escapeIdentifierPart(s string) string {
+	s = sanitizeUTF8(s)
+	s = strings.ReplaceAll(s, "\\", "\\\\")
+	s = strings.ReplaceAll(s, "'", "\\'")
+	return s
+}
+
+// formatIdentifierName formats an identifier name, handling JSON path notation,
+// sanitizing invalid UTF-8 bytes, and escaping special characters
 func formatIdentifierName(n *ast.Identifier) string {
 	if len(n.Parts) == 0 {
 		return ""
 	}
 	if len(n.Parts) == 1 {
-		return n.Parts[0]
+		return escapeIdentifierPart(n.Parts[0])
 	}
-	result := n.Parts[0]
+	result := escapeIdentifierPart(n.Parts[0])
 	for _, p := range n.Parts[1:] {
 		// JSON path notation: ^fieldname should be formatted as ^`fieldname`
 		if strings.HasPrefix(p, "^") {
-			result += ".^`" + p[1:] + "`"
+			result += ".^`" + escapeIdentifierPart(p[1:]) + "`"
 		} else {
-			result += "." + p
+			result += "." + escapeIdentifierPart(p)
 		}
 	}
 	return result

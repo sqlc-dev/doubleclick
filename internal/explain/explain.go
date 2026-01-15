@@ -350,9 +350,9 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 		children++
 	}
 	if children > 0 {
-		fmt.Fprintf(sb, "%sColumnDeclaration %s (children %d)\n", indent, col.Name, children)
+		fmt.Fprintf(sb, "%sColumnDeclaration %s (children %d)\n", indent, sanitizeUTF8(col.Name), children)
 	} else {
-		fmt.Fprintf(sb, "%sColumnDeclaration %s\n", indent, col.Name)
+		fmt.Fprintf(sb, "%sColumnDeclaration %s\n", indent, sanitizeUTF8(col.Name))
 	}
 	if col.Type != nil {
 		Node(sb, col.Type, depth+1)

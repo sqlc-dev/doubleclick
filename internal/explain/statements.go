@@ -460,9 +460,9 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 					// When ORDER BY has modifiers (ASC/DESC), wrap in StorageOrderByElement
 					if n.OrderByHasModifiers {
 						fmt.Fprintf(sb, "%s StorageOrderByElement (children %d)\n", storageIndent, 1)
-						fmt.Fprintf(sb, "%s  Identifier %s\n", storageIndent, ident.Name())
+						fmt.Fprintf(sb, "%s  Identifier %s\n", storageIndent, sanitizeUTF8(ident.Name()))
 					} else {
-						fmt.Fprintf(sb, "%s Identifier %s\n", storageIndent, ident.Name())
+						fmt.Fprintf(sb, "%s Identifier %s\n", storageIndent, sanitizeUTF8(ident.Name()))
 					}
 				} else if lit, ok := n.OrderBy[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
 					// Handle tuple literal - for ORDER BY with modifiers (DESC/ASC),

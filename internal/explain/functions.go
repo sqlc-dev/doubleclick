@@ -7,11 +7,11 @@ import (
 	"github.com/sqlc-dev/doubleclick/ast"
 )
 
-// escapeFunctionAlias escapes single quotes in function alias names.
-// Unlike escapeAlias (for column aliases), this does NOT escape backslashes
-// since ClickHouse EXPLAIN AST preserves backslashes in function aliases.
+// escapeFunctionAlias escapes backslashes and single quotes in function alias names.
+// This is needed because the lexer processes escape sequences in backtick identifiers.
 func escapeFunctionAlias(alias string) string {
-	return strings.ReplaceAll(alias, "'", "\\'")
+	result := strings.ReplaceAll(alias, "\\", "\\\\")
+	return strings.ReplaceAll(result, "'", "\\'")
 }
 
 // normalizeIntervalUnit converts interval units to title-cased singular form
