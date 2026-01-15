@@ -5899,6 +5899,12 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		if p.currentIs(token.COLUMN) {
 			cmd.Type = ast.AlterRenameColumn
 			p.nextToken()
+			// Handle IF EXISTS
+			if p.currentIs(token.IF) {
+				p.nextToken()
+				p.expect(token.EXISTS)
+				cmd.IfExists = true
+			}
 			// Parse column name (can be dotted like n.x for nested columns)
 			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 				cmd.ColumnName = p.parseDottedIdentifier()
