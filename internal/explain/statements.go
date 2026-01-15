@@ -226,6 +226,10 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if n.Comment != "" && len(n.Settings) > 0 && !n.SettingsBeforeComment {
 		children++
 	}
+	// QuerySettings (second SETTINGS clause) is a separate child of CreateQuery
+	if len(n.QuerySettings) > 0 {
+		children++
+	}
 	// For materialized views with TO clause but no storage, count ViewTargets as a child
 	if n.Materialized && n.To != "" && !hasStorageChild {
 		children++ // ViewTargets
@@ -556,6 +560,10 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	}
 	// Output Settings at CreateQuery level when SETTINGS comes after COMMENT
 	if n.Comment != "" && len(n.Settings) > 0 && !n.SettingsBeforeComment {
+		fmt.Fprintf(sb, "%s Set\n", indent)
+	}
+	// Output QuerySettings (second SETTINGS clause) at CreateQuery level
+	if len(n.QuerySettings) > 0 {
 		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }

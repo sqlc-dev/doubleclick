@@ -292,6 +292,7 @@ type CreateQuery struct {
 	SampleBy         Expression           `json:"sample_by,omitempty"`
 	TTL              *TTLClause           `json:"ttl,omitempty"`
 	Settings             []*SettingExpr       `json:"settings,omitempty"`
+	QuerySettings        []*SettingExpr       `json:"query_settings,omitempty"`          // Query-level SETTINGS (second SETTINGS clause)
 	SettingsBeforeComment bool                `json:"settings_before_comment,omitempty"` // True if SETTINGS comes before COMMENT
 	AsSelect         Statement            `json:"as_select,omitempty"`
 	AsTableFunction  Expression           `json:"as_table_function,omitempty"` // AS table_function(...) in CREATE TABLE

@@ -2692,7 +2692,13 @@ func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 				create.SettingsBeforeComment = true
 			}
 			p.nextToken()
-			create.Settings = p.parseSettingsList()
+			settings := p.parseSettingsList()
+			// If Settings is already set, this is a second SETTINGS clause (query-level)
+			if len(create.Settings) > 0 {
+				create.QuerySettings = settings
+			} else {
+				create.Settings = settings
+			}
 		case p.currentIs(token.COMMENT):
 			p.nextToken()
 			if p.currentIs(token.STRING) {
@@ -2741,6 +2747,22 @@ func (p *Parser) parseCreateDatabase(create *ast.CreateQuery) {
 			p.nextToken()
 		}
 		create.Engine = p.parseEngineClause()
+	}
+
+	// Handle ORDER BY clause (ClickHouse allows ORDER BY in CREATE DATABASE)
+	// This is stored as OrderBy for output in Storage definition
+	if p.currentIs(token.ORDER) {
+		p.nextToken() // skip ORDER
+		if p.currentIs(token.BY) {
+			p.nextToken() // skip BY
+		}
+		create.OrderBy = []ast.Expression{p.parseExpression(LOWEST)}
+	}
+
+	// Handle SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		create.Settings = p.parseSettingsList()
 	}
 }
 
