@@ -1,0 +1,117 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "floor",
+          "arguments": [
+            {
+              "left": {
+                "name": "log2",
+                "arguments": [
+                  {
+                    "left": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "op": "+",
+                    "right": {
+                      "parts": [
+                        "number"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "op": "/",
+              "right": {
+                "name": "log2",
+                "arguments": [
+                  {
+                    "type": "Float",
+                    "value": 1.5,
+                    "source": "1.5"
+                  }
+                ]
+              }
+            }
+          ],
+          "alias": "k"
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        },
+        {
+          "name": "quantileTiming",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 10000
+              }
+            }
+          ],
+          "alias": "q"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 1000000
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

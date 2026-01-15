@@ -1,0 +1,69 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "Integer",
+            "value": 16
+          },
+          "alias": "offset"
+        },
+        {
+          "name": "toFixedString",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "Hello"
+            },
+            {
+              "type": "Integer",
+              "value": 6
+            }
+          ],
+          "alias": "s"
+        },
+        {
+          "name": "subString",
+          "arguments": [
+            {
+              "name": "bin",
+              "arguments": [
+                {
+                  "parts": [
+                    "s"
+                  ]
+                }
+              ]
+            },
+            {
+              "parts": [
+                "offset"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "bin",
+          "arguments": [
+            {
+              "name": "bitSlice",
+              "arguments": [
+                {
+                  "parts": [
+                    "s"
+                  ]
+                },
+                {
+                  "parts": [
+                    "offset"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

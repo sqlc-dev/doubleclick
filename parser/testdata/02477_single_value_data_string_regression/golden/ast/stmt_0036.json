@@ -1,0 +1,56 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "fuzz4"
+        },
+        {
+          "name": "finalizeAggregation",
+          "arguments": [
+            {
+              "expr": {
+                "name": "unhex",
+                "arguments": [
+                  {
+                    "left": {
+                      "left": {
+                        "type": "String",
+                        "value": "04000000"
+                      },
+                      "op": "||",
+                      "right": {
+                        "type": "String",
+                        "value": "30313233"
+                      }
+                    },
+                    "op": "||",
+                    "right": {
+                      "type": "String",
+                      "value": "00"
+                    }
+                  }
+                ]
+              },
+              "type": {
+                "name": "AggregateFunction(argMax, String, UInt64)"
+              }
+            }
+          ],
+          "alias": "x"
+        },
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

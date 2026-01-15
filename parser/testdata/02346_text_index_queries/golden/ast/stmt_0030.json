@@ -1,0 +1,114 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "read_rows"
+            ]
+          },
+          "op": "==",
+          "right": {
+            "type": "Integer",
+            "value": 4
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "query_kind"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "Select"
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "current_database"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "name": "currentDatabase"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "name": "endsWith",
+              "arguments": [
+                {
+                  "name": "trimRight",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "query"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "SELECT * FROM tab_x WHERE s IN ('x Alick a01 y', 'x Alick a06 y') ORDER BY k;"
+                }
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "result_rows"
+            ]
+          },
+          "op": "==",
+          "right": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

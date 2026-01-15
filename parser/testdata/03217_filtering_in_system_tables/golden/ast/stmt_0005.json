@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "database"
+          ]
+        },
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "name": "left",
+          "arguments": [
+            {
+              "parts": [
+                "replica_name"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "replicas"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "test_03217_system_tables_replica_1"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "replica_name"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "r1%"
+          }
+        }
+      }
+    }
+  ]
+}

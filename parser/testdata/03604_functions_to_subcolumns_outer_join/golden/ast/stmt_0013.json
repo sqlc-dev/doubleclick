@@ -1,0 +1,96 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "parts": [
+              "t1",
+              "nullableStringCol"
+            ]
+          }
+        },
+        {
+          "expr": {
+            "parts": [
+              "t2",
+              "nullableStringCol"
+            ]
+          }
+        },
+        {
+          "expr": {
+            "parts": [
+              "t3",
+              "nullableStringCol"
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "users_ext"
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "users_ext"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "FULL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "uid"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "uid"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "users_ext"
+              },
+              "alias": "t3"
+            },
+            "join": {
+              "type": "FULL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "uid"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t3",
+                    "uid"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

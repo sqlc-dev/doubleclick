@@ -1,0 +1,116 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "value"
+          ]
+        },
+        {
+          "parts": [
+            "time"
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "parts": [
+                "exp_smooth"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 3
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "type": "Integer",
+                              "value": 0
+                            }
+                          },
+                          "alias": "value"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "time"
+                        },
+                        {
+                          "name": "exponentialTimeDecayedCount",
+                          "parameters": [
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "parts": [
+                                "time"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "frame": {
+                              "type": "ROWS",
+                              "start": {
+                                "type": "UNBOUNDED_PRECEDING"
+                              },
+                              "end": {
+                                "type": "CURRENT_ROW"
+                              }
+                            }
+                          },
+                          "alias": "exp_smooth"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

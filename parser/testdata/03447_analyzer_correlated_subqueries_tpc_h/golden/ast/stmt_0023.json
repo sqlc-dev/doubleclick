@@ -1,0 +1,286 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "s_name"
+          ]
+        },
+        {
+          "parts": [
+            "s_address"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "supplier"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "nation"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "parts": [
+                "s_suppkey"
+              ]
+            },
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "ps_suppkey"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "partsupp"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "expr": {
+                        "parts": [
+                          "ps_partkey"
+                        ]
+                      },
+                      "query": {
+                        "selects": [
+                          {
+                            "columns": [
+                              {
+                                "parts": [
+                                  "p_partkey"
+                                ]
+                              }
+                            ],
+                            "from": {
+                              "tables": [
+                                {
+                                  "table": {
+                                    "table": {
+                                      "table": "part"
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            "where": {
+                              "expr": {
+                                "parts": [
+                                  "p_name"
+                                ]
+                              },
+                              "pattern": {
+                                "type": "String",
+                                "value": "forest%"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "ps_availqty"
+                        ]
+                      },
+                      "op": "\u003e",
+                      "right": {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {
+                                  "left": {
+                                    "type": "Float",
+                                    "value": 0.5,
+                                    "source": "0.5"
+                                  },
+                                  "op": "*",
+                                  "right": {
+                                    "name": "sum",
+                                    "arguments": [
+                                      {
+                                        "parts": [
+                                          "l_quantity"
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              ],
+                              "from": {
+                                "tables": [
+                                  {
+                                    "table": {
+                                      "table": {
+                                        "table": "lineitem"
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "where": {
+                                "left": {
+                                  "left": {
+                                    "left": {
+                                      "left": {
+                                        "parts": [
+                                          "l_partkey"
+                                        ]
+                                      },
+                                      "op": "=",
+                                      "right": {
+                                        "parts": [
+                                          "ps_partkey"
+                                        ]
+                                      }
+                                    },
+                                    "op": "AND",
+                                    "right": {
+                                      "left": {
+                                        "parts": [
+                                          "l_suppkey"
+                                        ]
+                                      },
+                                      "op": "=",
+                                      "right": {
+                                        "parts": [
+                                          "ps_suppkey"
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  "op": "AND",
+                                  "right": {
+                                    "left": {
+                                      "parts": [
+                                        "l_shipdate"
+                                      ]
+                                    },
+                                    "op": "\u003e=",
+                                    "right": {
+                                      "name": "toDate",
+                                      "arguments": [
+                                        {
+                                          "type": "String",
+                                          "value": "1994-01-01"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                },
+                                "op": "AND",
+                                "right": {
+                                  "left": {
+                                    "parts": [
+                                      "l_shipdate"
+                                    ]
+                                  },
+                                  "op": "\u003c",
+                                  "right": {
+                                    "left": {
+                                      "name": "toDate",
+                                      "arguments": [
+                                        {
+                                          "type": "String",
+                                          "value": "1994-01-01"
+                                        }
+                                      ]
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                      "value": {
+                                        "type": "String",
+                                        "value": "1"
+                                      },
+                                      "unit": "YEAR"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "s_nationkey"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "n_nationkey"
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "n_name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "CANADA"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "s_name"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

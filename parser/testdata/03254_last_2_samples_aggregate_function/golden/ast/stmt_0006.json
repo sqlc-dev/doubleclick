@@ -1,0 +1,417 @@
+{
+  "view": "mv_resampled_timeseries_delta",
+  "materialized": true,
+  "to": "t_resampled_timeseries_delta",
+  "columns": [
+    {
+      "name": "step",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "metric_id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "grid_timestamp",
+      "type": {
+        "name": "DateTime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "DoubleDelta"
+          },
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    },
+    {
+      "name": "samples",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "timeSeriesLastTwoSamples"
+            ]
+          },
+          {
+            "name": "Int16"
+          },
+          {
+            "name": "Float64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 10
+                            },
+                            "alias": "step"
+                          },
+                          {
+                            "parts": [
+                              "metric_id"
+                            ]
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "name": "ceil",
+                                "arguments": [
+                                  {
+                                    "left": {
+                                      "name": "toUnixTimestamp",
+                                      "arguments": [
+                                        {
+                                          "left": {
+                                            "parts": [
+                                              "timestamp"
+                                            ]
+                                          },
+                                          "op": "+",
+                                          "right": {
+                                            "value": {
+                                              "type": "Integer",
+                                              "value": 999
+                                            },
+                                            "unit": "MILLISECOND"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "op": "/",
+                                    "right": {
+                                      "parts": [
+                                        "step"
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 0
+                                  }
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "parts": [
+                                  "step"
+                                ]
+                              }
+                            },
+                            "alias": "grid_timestamp"
+                          },
+                          {
+                            "name": "initializeAggregation",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "timeSeriesLastTwoSamplesState"
+                              },
+                              {
+                                "expr": {
+                                  "name": "dateDiff",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "ms"
+                                    },
+                                    {
+                                      "expr": {
+                                        "parts": [
+                                          "grid_timestamp"
+                                        ]
+                                      },
+                                      "type": {
+                                        "name": "DateTime64",
+                                        "parameters": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 3
+                                          },
+                                          {
+                                            "type": "String",
+                                            "value": "UTC"
+                                          }
+                                        ],
+                                        "has_parentheses": true
+                                      },
+                                      "operator_syntax": true
+                                    },
+                                    {
+                                      "parts": [
+                                        "timestamp"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "type": {
+                                  "name": "Int16"
+                                },
+                                "operator_syntax": true
+                              },
+                              {
+                                "parts": [
+                                  "value"
+                                ]
+                              }
+                            ],
+                            "alias": "samples"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t_raw_timeseries"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "metric_id"
+                              ]
+                            }
+                          },
+                          {
+                            "expression": {
+                              "parts": [
+                                "grid_timestamp"
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 30
+                            },
+                            "alias": "step"
+                          },
+                          {
+                            "parts": [
+                              "metric_id"
+                            ]
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "name": "ceil",
+                                "arguments": [
+                                  {
+                                    "left": {
+                                      "name": "toUnixTimestamp",
+                                      "arguments": [
+                                        {
+                                          "left": {
+                                            "parts": [
+                                              "timestamp"
+                                            ]
+                                          },
+                                          "op": "+",
+                                          "right": {
+                                            "value": {
+                                              "type": "Integer",
+                                              "value": 999
+                                            },
+                                            "unit": "MILLISECOND"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "op": "/",
+                                    "right": {
+                                      "parts": [
+                                        "step"
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 0
+                                  }
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "parts": [
+                                  "step"
+                                ]
+                              }
+                            },
+                            "alias": "grid_timestamp"
+                          },
+                          {
+                            "name": "initializeAggregation",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "timeSeriesLastTwoSamplesState"
+                              },
+                              {
+                                "expr": {
+                                  "name": "dateDiff",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "ms"
+                                    },
+                                    {
+                                      "expr": {
+                                        "parts": [
+                                          "grid_timestamp"
+                                        ]
+                                      },
+                                      "type": {
+                                        "name": "DateTime64",
+                                        "parameters": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 3
+                                          },
+                                          {
+                                            "type": "String",
+                                            "value": "UTC"
+                                          }
+                                        ],
+                                        "has_parentheses": true
+                                      },
+                                      "operator_syntax": true
+                                    },
+                                    {
+                                      "parts": [
+                                        "timestamp"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "type": {
+                                  "name": "Int16"
+                                },
+                                "operator_syntax": true
+                              },
+                              {
+                                "parts": [
+                                  "value"
+                                ]
+                              }
+                            ],
+                            "alias": "samples"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t_raw_timeseries"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "metric_id"
+                              ]
+                            }
+                          },
+                          {
+                            "expression": {
+                              "parts": [
+                                "grid_timestamp"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "union_all": true,
+                    "union_modes": [
+                      "UNION ALL"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "step"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "metric_id"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "grid_timestamp"
+              ]
+            }
+          }
+        ],
+        "settings": [
+          {
+            "name": "query_plan_remove_redundant_sorting",
+            "value": {
+              "type": "Integer",
+              "value": 0
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

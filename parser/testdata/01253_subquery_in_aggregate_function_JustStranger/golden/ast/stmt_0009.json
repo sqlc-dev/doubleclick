@@ -1,0 +1,92 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "text"
+          ]
+        },
+        {
+          "name": "uniqExactIf",
+          "arguments": [
+            {
+              "parts": [
+                "hash"
+              ]
+            },
+            {
+              "expr": {
+                "parts": [
+                  "hash"
+                ]
+              },
+              "query": {
+                "selects": [
+                  {
+                    "distinct": true,
+                    "columns": [
+                      {
+                        "parts": [
+                          "hash"
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "test_table"
+                            },
+                            "alias": "t1"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "alias": "counter"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_table"
+              },
+              "alias": "t2"
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "text"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "counter"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "text"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

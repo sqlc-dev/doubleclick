@@ -1,0 +1,84 @@
+{
+  "table": "zero_rows_per_granule1",
+  "columns": [
+    {
+      "name": "p",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "v1",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "v2",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_00926/zero_rows_in_granule"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "k"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "p"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "Integer",
+        "value": 20
+      }
+    },
+    {
+      "name": "min_index_granularity_bytes",
+      "value": {
+        "type": "Integer",
+        "value": 10
+      }
+    },
+    {
+      "name": "write_final_mark",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

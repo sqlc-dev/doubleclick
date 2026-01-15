@@ -1,0 +1,59 @@
+{
+  "temporary": true,
+  "table": "t_proj",
+  "columns": [
+    {
+      "name": "t",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "parts": [
+              "t"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "name": "toStartOfDay",
+            "arguments": [
+              {
+                "parts": [
+                  "t"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

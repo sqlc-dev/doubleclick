@@ -1,0 +1,210 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "search_graph",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {},
+                    {
+                      "expr": {
+                        "type": "Boolean",
+                        "value": false
+                      },
+                      "alias": "is_cycle"
+                    },
+                    {
+                      "expr": {
+                        "type": "Array",
+                        "value": [
+                          {
+                            "name": "tuple",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "g",
+                                  "f"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "g",
+                                  "t"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "alias": "path"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "graph"
+                          },
+                          "alias": "g"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columns": [
+                    {
+                      "table": "g"
+                    },
+                    {
+                      "name": "has",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "path"
+                          ]
+                        },
+                        {
+                          "name": "tuple",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "g",
+                                "f"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "g",
+                                "t"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "arrayConcat",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "sg",
+                            "path"
+                          ]
+                        },
+                        {
+                          "type": "Array",
+                          "value": [
+                            {
+                              "name": "tuple",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "g",
+                                    "f"
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "g",
+                                    "t"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "graph"
+                          },
+                          "alias": "g"
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "table": "search_graph"
+                          },
+                          "alias": "sg"
+                        },
+                        "join": {
+                          "type": ""
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "g",
+                          "f"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "parts": [
+                          "sg",
+                          "t"
+                        ]
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "op": "NOT",
+                      "operand": {
+                        "parts": [
+                          "is_cycle"
+                        ]
+                      }
+                    }
+                  }
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "search_graph"
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "query_plan_join_swap_table",
+          "value": {
+            "type": "String",
+            "value": "false"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,442 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "x",
+          "query": {
+            "type": "String",
+            "value": "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "spaces",
+          "query": {
+            "name": "replaceRegexpAll",
+            "arguments": [
+              {
+                "parts": [
+                  "x"
+                ]
+              },
+              {
+                "type": "String",
+                "value": "."
+              },
+              {
+                "type": "String",
+                "value": " "
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "s",
+          "query": {
+            "name": "concat",
+            "arguments": [
+              {
+                "name": "substring",
+                "arguments": [
+                  {
+                    "parts": [
+                      "spaces"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  {
+                    "left": {
+                      "name": "rand",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      ]
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 62
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "substring",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  {
+                    "left": {
+                      "name": "rand",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 2
+                        }
+                      ]
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 62
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "substring",
+                "arguments": [
+                  {
+                    "parts": [
+                      "spaces"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  {
+                    "left": {
+                      "name": "rand",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 3
+                        }
+                      ]
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 62
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "sl",
+          "query": {
+            "name": "trimLeft",
+            "arguments": [
+              {
+                "parts": [
+                  "s"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "sr",
+          "query": {
+            "name": "trimRight",
+            "arguments": [
+              {
+                "parts": [
+                  "s"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "t",
+          "query": {
+            "name": "trimBoth",
+            "arguments": [
+              {
+                "parts": [
+                  "s"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "slr",
+          "query": {
+            "name": "replaceRegexpOne",
+            "arguments": [
+              {
+                "parts": [
+                  "s"
+                ]
+              },
+              {
+                "type": "String",
+                "value": "^ +"
+              },
+              {
+                "type": "String",
+                "value": ""
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "srr",
+          "query": {
+            "name": "replaceRegexpOne",
+            "arguments": [
+              {
+                "parts": [
+                  "s"
+                ]
+              },
+              {
+                "type": "String",
+                "value": " +$"
+              },
+              {
+                "type": "String",
+                "value": ""
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "tr",
+          "query": {
+            "name": "replaceRegexpOne",
+            "arguments": [
+              {
+                "parts": [
+                  "s"
+                ]
+              },
+              {
+                "type": "String",
+                "value": "^ *(.*?) *$"
+              },
+              {
+                "type": "String",
+                "value": "\\1"
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "replaceAll",
+          "arguments": [
+            {
+              "parts": [
+                "s"
+              ]
+            },
+            {
+              "type": "String",
+              "value": " "
+            },
+            {
+              "type": "String",
+              "value": "_"
+            }
+          ]
+        },
+        {
+          "name": "replaceAll",
+          "arguments": [
+            {
+              "parts": [
+                "sl"
+              ]
+            },
+            {
+              "type": "String",
+              "value": " "
+            },
+            {
+              "type": "String",
+              "value": "_"
+            }
+          ]
+        },
+        {
+          "name": "replaceAll",
+          "arguments": [
+            {
+              "parts": [
+                "slr"
+              ]
+            },
+            {
+              "type": "String",
+              "value": " "
+            },
+            {
+              "type": "String",
+              "value": "_"
+            }
+          ]
+        },
+        {
+          "name": "replaceAll",
+          "arguments": [
+            {
+              "parts": [
+                "sr"
+              ]
+            },
+            {
+              "type": "String",
+              "value": " "
+            },
+            {
+              "type": "String",
+              "value": "_"
+            }
+          ]
+        },
+        {
+          "name": "replaceAll",
+          "arguments": [
+            {
+              "parts": [
+                "srr"
+              ]
+            },
+            {
+              "type": "String",
+              "value": " "
+            },
+            {
+              "type": "String",
+              "value": "_"
+            }
+          ]
+        },
+        {
+          "name": "replaceAll",
+          "arguments": [
+            {
+              "parts": [
+                "t"
+              ]
+            },
+            {
+              "type": "String",
+              "value": " "
+            },
+            {
+              "type": "String",
+              "value": "_"
+            }
+          ]
+        },
+        {
+          "name": "replaceAll",
+          "arguments": [
+            {
+              "parts": [
+                "tr"
+              ]
+            },
+            {
+              "type": "String",
+              "value": " "
+            },
+            {
+              "type": "String",
+              "value": "_"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 100000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "op": "NOT",
+        "operand": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "sl"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "parts": [
+                  "slr"
+                ]
+              },
+              "parenthesized": true
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "sr"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "parts": [
+                  "srr"
+                ]
+              },
+              "parenthesized": true
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "t"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "tr"
+              ]
+            },
+            "parenthesized": true
+          },
+          "parenthesized": true
+        }
+      }
+    }
+  ]
+}

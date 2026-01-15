@@ -1,0 +1,87 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "aes-256-gcm"
+          },
+          "alias": "mode"
+        },
+        {
+          "left": {
+            "name": "decrypt",
+            "arguments": [
+              {
+                "parts": [
+                  "mode"
+                ]
+              },
+              {
+                "name": "encrypt",
+                "arguments": [
+                  {
+                    "parts": [
+                      "mode"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "input"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "key32"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "iv"
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "AAD"
+                  }
+                ]
+              },
+              {
+                "parts": [
+                  "key32"
+                ]
+              },
+              {
+                "parts": [
+                  "iv"
+                ]
+              },
+              {
+                "type": "String",
+                "value": "AAD"
+              }
+            ]
+          },
+          "op": "==",
+          "right": {
+            "parts": [
+              "input"
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "encryption_test"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "query"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "query_id"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {}
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "tmp"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "current_database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        }
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "condition": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "name": "hasColumnInTable",
+                        "arguments": [
+                          {
+                            "type": "String",
+                            "value": "system"
+                          },
+                          {
+                            "type": "String",
+                            "value": "numbers"
+                          },
+                          {
+                            "type": "String",
+                            "value": "not_existing"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "then": {
+              "parts": [
+                "not_existing"
+              ]
+            },
+            "else": {
+              "type": "Integer",
+              "value": 42
+            }
+          },
+          "alias": "not_existing"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      },
+      "format": {
+        "parts": [
+          "TSKV"
+        ]
+      }
+    }
+  ]
+}

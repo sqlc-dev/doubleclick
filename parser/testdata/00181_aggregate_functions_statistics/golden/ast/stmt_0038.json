@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "abs",
+              "arguments": [
+                {
+                  "left": {
+                    "name": "corr",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "x_value"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "y_value"
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "-",
+                  "right": {
+                    "left": {
+                      "name": "covarPop",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "x_value"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "y_value"
+                          ]
+                        }
+                      ]
+                    },
+                    "op": "/",
+                    "right": {
+                      "left": {
+                        "name": "stddevPop",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "x_value"
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "*",
+                      "right": {
+                        "name": "stddevPop",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "y_value"
+                            ]
+                          }
+                        ]
+                      },
+                      "parenthesized": true
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 6
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "series"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

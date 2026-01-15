@@ -1,0 +1,165 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "x",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "id"
+                    }
+                  ]
+                },
+                {
+                  "columns": [
+                    {
+                      "left": {
+                        "parts": [
+                          "id"
+                        ]
+                      },
+                      "op": "+",
+                      "right": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "y"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "id"
+                      ]
+                    },
+                    "op": "\u003c",
+                    "right": {
+                      "type": "Integer",
+                      "value": 5
+                    }
+                  }
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "y",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "id"
+                    }
+                  ]
+                },
+                {
+                  "columns": [
+                    {
+                      "left": {
+                        "parts": [
+                          "id"
+                        ]
+                      },
+                      "op": "+",
+                      "right": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "x"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "id"
+                      ]
+                    },
+                    "op": "\u003c",
+                    "right": {
+                      "type": "Integer",
+                      "value": 5
+                    }
+                  }
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "x"
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "max_recursive_cte_evaluation_depth",
+          "value": {
+            "type": "Integer",
+            "value": 5
+          }
+        }
+      ],
+      "settings_after_format": true,
+      "format": {
+        "parts": [
+          "NULL"
+        ]
+      }
+    }
+  ]
+}

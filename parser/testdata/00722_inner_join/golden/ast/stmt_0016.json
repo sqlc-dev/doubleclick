@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "t",
+            "database"
+          ]
+        },
+        {
+          "parts": [
+            "t",
+            "name"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "tables"
+              },
+              "alias": "t"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "system"
+                          },
+                          "alias": "base"
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "one"
+                          },
+                          "alias": "name"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "db"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "name"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "t",
+            "database"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "parts": [
+            "db",
+            "base"
+          ]
+        }
+      },
+      "format": {
+        "parts": [
+          "PrettyCompactNoEscapes"
+        ]
+      }
+    }
+  ]
+}

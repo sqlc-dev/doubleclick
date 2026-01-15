@@ -1,0 +1,97 @@
+{
+  "table": "summing_composite_key",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "FirstMap",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "k1",
+            "type": {
+              "name": "UInt32"
+            }
+          },
+          {
+            "name": "k2ID",
+            "type": {
+              "name": "Int8"
+            }
+          },
+          {
+            "name": "s",
+            "type": {
+              "name": "Float64"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "SecondMap",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "k1ID",
+            "type": {
+              "name": "UInt64"
+            }
+          },
+          {
+            "name": "k2Key",
+            "type": {
+              "name": "String"
+            }
+          },
+          {
+            "name": "k3Type",
+            "type": {
+              "name": "Int32"
+            }
+          },
+          {
+            "name": "s",
+            "type": {
+              "name": "Int64"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "parts": [
+          "k"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 1
+      }
+    ],
+    "has_parentheses": true
+  }
+}

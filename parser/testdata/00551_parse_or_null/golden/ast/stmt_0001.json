@@ -1,0 +1,102 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toUInt64OrZero",
+          "arguments": [
+            {
+              "parts": [
+                "s"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toUInt64OrNull",
+          "arguments": [
+            {
+              "parts": [
+                "s"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "whens": [
+                            {
+                              "condition": {
+                                "left": {
+                                  "left": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  "op": "%",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                },
+                                "op": "=",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              },
+                              "result": {
+                                "name": "toString",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ],
+                          "else": {
+                            "type": "String",
+                            "value": "hello"
+                          },
+                          "alias": "s"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

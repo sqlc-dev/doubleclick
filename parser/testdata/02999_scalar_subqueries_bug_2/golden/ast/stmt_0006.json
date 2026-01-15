@@ -1,0 +1,109 @@
+{
+  "view": "v_heavy",
+  "as_select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "nums",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "number"
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "name": "numbers",
+                              "arguments": [
+                                {
+                                  "type": "Float",
+                                  "value": 100000,
+                                  "source": "1e5"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          }
+        ],
+        "columns": [
+          {
+            "name": "count",
+            "arguments": [
+              {}
+            ],
+            "alias": "n"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "number"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "numbers",
+                                  "arguments": [
+                                    {
+                                      "type": "Float",
+                                      "value": 100000,
+                                      "source": "1e5"
+                                    }
+                                  ]
+                                },
+                                "alias": "n1"
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "nums"
+                                }
+                              },
+                              "join": {
+                                "type": "CROSS"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

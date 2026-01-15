@@ -1,0 +1,70 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {},
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "UserID"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          "alias": "UserIDEquals0"
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "UserID"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            {
+              "type": "String",
+              "value": "delete"
+            },
+            {
+              "type": "String",
+              "value": "leave"
+            }
+          ],
+          "alias": "verdict"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "mutation_delete_null_rows"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "EventDate"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

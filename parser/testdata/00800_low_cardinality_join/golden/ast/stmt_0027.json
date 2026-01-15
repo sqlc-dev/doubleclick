@@ -1,0 +1,135 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toLowCardinality",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "l"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 3
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toLowCardinality",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "r"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 3
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "l"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                },
+                "op": "=",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "r"
+                    ]
+                  },
+                  "op": "*",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "all"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

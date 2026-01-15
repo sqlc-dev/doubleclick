@@ -1,0 +1,136 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "segmented_ctr_cache",
+            "product_id"
+          ]
+        },
+        {
+          "parts": [
+            "segmented_ctr_cache",
+            "segment_id"
+          ]
+        },
+        {
+          "parts": [
+            "count_in_bookmark"
+          ]
+        },
+        {
+          "parts": [
+            "count_in_cart"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "segmented_ctr_cache"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "cart_join"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "cart_join",
+                      "product_id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "segmented_ctr_cache",
+                      "product_id"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "cart_join",
+                      "segment_id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "segmented_ctr_cache",
+                      "segment_id"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "bookmarks_join"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "bookmarks_join",
+                      "product_id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "segmented_ctr_cache",
+                      "product_id"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "bookmarks_join",
+                      "segment_id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "segmented_ctr_cache",
+                      "segment_id"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

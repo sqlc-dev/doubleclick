@@ -1,0 +1,86 @@
+{
+  "table": "pr_1",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "parts": [
+        "a"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 10
+    }
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "left": {
+              "left": {
+                "type": "Integer",
+                "value": 10
+              },
+              "op": "*",
+              "right": {
+                "name": "intDiv",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

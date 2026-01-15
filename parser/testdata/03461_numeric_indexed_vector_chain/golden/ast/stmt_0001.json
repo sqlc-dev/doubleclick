@@ -1,0 +1,108 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "vec1",
+          "query": {
+            "name": "numericIndexedVectorBuild",
+            "arguments": [
+              {
+                "name": "mapFromArrays",
+                "arguments": [
+                  {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 3
+                      }
+                    ],
+                    "spaced_commas": true
+                  },
+                  {
+                    "name": "arrayMap",
+                    "arguments": [
+                      {
+                        "parameters": [
+                          "x"
+                        ],
+                        "body": {
+                          "name": "toFloat64",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "x"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "Array",
+                        "value": [
+                          {
+                            "type": "Integer",
+                            "value": 10
+                          },
+                          {
+                            "type": "Integer",
+                            "value": 20
+                          },
+                          {
+                            "type": "Integer",
+                            "value": 30
+                          }
+                        ],
+                        "spaced_commas": true
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "numericIndexedVectorToMap",
+          "arguments": [
+            {
+              "name": "numericIndexedVectorPointwiseAdd",
+              "arguments": [
+                {
+                  "name": "numericIndexedVectorPointwiseSubtract",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "vec1"
+                      ]
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  ]
+                },
+                {
+                  "type": "Integer",
+                  "value": 3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

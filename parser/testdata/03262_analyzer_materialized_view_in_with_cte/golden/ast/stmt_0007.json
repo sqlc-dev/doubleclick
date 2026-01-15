@@ -1,0 +1,183 @@
+{
+  "view": "mv_test_mv",
+  "materialized": true,
+  "to": "mv_test_target",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "ref_id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "final_id",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "display",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "tester",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "id"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "ref_id"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "final_id"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "display"
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "mv_test"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          },
+          {
+            "name": "id_set",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "display"
+                        ]
+                      },
+                      {
+                        "name": "max",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "id"
+                            ]
+                          }
+                        ],
+                        "alias": "max_id"
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "mv_test"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "group_by": [
+                      {
+                        "parts": [
+                          "display"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          }
+        ],
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "tester"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "expr": {
+            "parts": [
+              "id"
+            ]
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "max_id"
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "id_set"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

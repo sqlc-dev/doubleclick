@@ -1,0 +1,79 @@
+{
+  "table": "pk",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "type": "String",
+        "value": "2000-01-01"
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "z",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "name": "toStartOfMinute",
+            "arguments": [
+              {
+                "parts": [
+                  "x"
+                ]
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ]
+          },
+          {
+            "parts": [
+              "y"
+            ]
+          },
+          {
+            "parts": [
+              "z"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 1
+      }
+    ],
+    "has_parentheses": true
+  }
+}

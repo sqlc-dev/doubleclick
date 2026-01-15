@@ -1,0 +1,123 @@
+{
+  "table": "ttl_group_by_bug",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "ts",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "min_value",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "parts": [
+          "value"
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "max_value",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "parts": [
+          "value"
+        ]
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "key"
+          ]
+        },
+        {
+          "name": "toStartOfInterval",
+          "arguments": [
+            {
+              "parts": [
+                "ts"
+              ]
+            },
+            {
+              "name": "toIntervalMinute",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "ts"
+          ]
+        }
+      ]
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "ts"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "value": {
+          "type": "Integer",
+          "value": 5
+        },
+        "unit": "MINUTE"
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "ts"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 5
+            },
+            "unit": "MINUTE"
+          }
+        }
+      }
+    ]
+  }
+}

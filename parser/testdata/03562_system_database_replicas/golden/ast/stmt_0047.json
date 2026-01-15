@@ -1,0 +1,56 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "database"
+          ]
+        },
+        {
+          "parts": [
+            "max_log_ptr"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "database_replicas"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "database"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "db_%"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "max_log_ptr"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      }
+    }
+  ]
+}

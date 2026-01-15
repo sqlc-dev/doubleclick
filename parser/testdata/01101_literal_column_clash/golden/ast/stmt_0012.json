@@ -1,0 +1,138 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "isConstant",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "UInt8"
+            }
+          ]
+        },
+        {
+          "name": "toFixedString",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "hello"
+            },
+            {
+              "name": "toUInt8",
+              "arguments": [
+                {
+                  "name": "substring",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "UInt8"
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 5
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ],
+                          "alias": "a"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "b"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "b"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "name": "ignore",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "UInt8"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

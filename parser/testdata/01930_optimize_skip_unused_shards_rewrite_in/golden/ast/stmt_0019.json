@@ -1,0 +1,123 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "_shard_num"
+          ]
+        },
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.{1..4}"
+                  },
+                  {
+                    "name": "view",
+                    "arguments": [
+                      {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {
+                                  "name": "toUInt64",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "id"
+                                      ]
+                                    }
+                                  ],
+                                  "alias": "id"
+                                }
+                              ],
+                              "from": {
+                                "tables": [
+                                  {
+                                    "table": {
+                                      "table": {
+                                        "table": "data"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "toInt64",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "id"
+          ]
+        },
+        "list": [
+          {
+            "type": "Integer",
+            "value": 0
+          },
+          {
+            "type": "Integer",
+            "value": 1
+          },
+          {
+            "type": "Integer",
+            "value": 9223372036854775807
+          },
+          {
+            "type": "Integer",
+            "value": 9223372036854775808
+          },
+          {
+            "type": "Integer",
+            "value": 18446744073709551615
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "_shard_num"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

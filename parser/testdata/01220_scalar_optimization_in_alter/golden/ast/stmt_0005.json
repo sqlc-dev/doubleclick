@@ -1,0 +1,79 @@
+{
+  "table": "cdp_segments",
+  "commands": [
+    {
+      "type": "UPDATE",
+      "where": {
+        "left": {
+          "parts": [
+            "seg_id"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "1234567890"
+        }
+      },
+      "assignments": [
+        {
+          "column": "mid_seqs",
+          "value": {
+            "name": "bitmapOr",
+            "arguments": [
+              {
+                "parts": [
+                  "mid_seqs"
+                ]
+              },
+              {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "groupBitmapState",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "mid_seq"
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "cdp_customers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "expr": {
+                          "parts": [
+                            "mid"
+                          ]
+                        },
+                        "list": [
+                          {
+                            "type": "String",
+                            "value": "6bf3c2ee-2b33-3030-9dc2-25c6c618d141"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

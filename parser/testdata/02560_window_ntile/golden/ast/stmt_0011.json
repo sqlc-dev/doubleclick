@@ -1,0 +1,118 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "b"
+          ]
+        },
+        {
+          "name": "ntile",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "b"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          ],
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "a"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "b"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "intDiv",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          ],
+                          "alias": "a"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          },
+                          "alias": "b"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 20
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

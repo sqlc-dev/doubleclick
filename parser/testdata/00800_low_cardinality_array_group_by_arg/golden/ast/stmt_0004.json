@@ -1,0 +1,75 @@
+{
+  "table": "table2",
+  "columns": [
+    {
+      "name": "dt",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "id",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "arr",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "LowCardinality",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "dt"
+          ]
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toMonday",
+    "arguments": [
+      {
+        "parts": [
+          "dt"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,63 @@
+{
+  "table": "default_table",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      },
+      "default": {
+        "type": "Integer",
+        "value": 42
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "value1",
+      "type": {
+        "name": "UInt64"
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "key"
+          ]
+        },
+        "op": "*",
+        "right": {
+          "parts": [
+            "key"
+          ]
+        }
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "value2",
+      "type": null,
+      "default": {
+        "left": {
+          "parts": [
+            "value1"
+          ]
+        },
+        "op": "*",
+        "right": {
+          "parts": [
+            "key"
+          ]
+        }
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

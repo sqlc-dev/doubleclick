@@ -1,0 +1,64 @@
+{
+  "table": "table1__fuzz_19",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "UInt16"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "v",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 3
+          },
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "v"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "parts": [
+        "id"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 200
+    }
+  }
+}

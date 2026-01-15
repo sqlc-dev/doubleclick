@@ -1,0 +1,107 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "substring",
+          "arguments": [
+            {
+              "parts": [
+                "name"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            },
+            {
+              "left": {
+                "name": "length",
+                "arguments": [
+                  {
+                    "parts": [
+                      "name"
+                    ]
+                  }
+                ]
+              },
+              "op": "-",
+              "right": {
+                "type": "Integer",
+                "value": 4
+              }
+            }
+          ]
+        },
+        {
+          "parts": [
+            "recompression_ttl_info",
+            "expression"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "recompression_table"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "active"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "name"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

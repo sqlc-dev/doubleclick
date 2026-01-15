@@ -1,0 +1,138 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "WatchID"
+                          ]
+                        },
+                        {
+                          "name": "arrayDistinct",
+                          "arguments": [
+                            {
+                              "name": "groupArray",
+                              "arguments": [
+                                {
+                                  "name": "dictGetUInt64",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "db_dict.cache_hits"
+                                    },
+                                    {
+                                      "type": "String",
+                                      "value": "UserID"
+                                    },
+                                    {
+                                      "name": "toUInt64",
+                                      "arguments": [
+                                        {
+                                          "parts": [
+                                            "WatchID"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "arr"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "test",
+                                "table": "hits_1m"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "prewhere": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "WatchID"
+                            ]
+                          },
+                          "op": "%",
+                          "right": {
+                            "type": "Integer",
+                            "value": 5
+                          }
+                        },
+                        "op": "==",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "WatchID"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "name": "length",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "arr"
+                                ]
+                              }
+                            ]
+                          },
+                          "descending": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "arr"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Array",
+          "value": [
+            {
+              "type": "Integer",
+              "value": 0
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

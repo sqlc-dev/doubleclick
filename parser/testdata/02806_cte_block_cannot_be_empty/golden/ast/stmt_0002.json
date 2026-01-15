@@ -1,0 +1,173 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "c",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "ID"
+                    },
+                    {
+                      "name": "toDate",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "2023-06-24"
+                        }
+                      ],
+                      "alias": "dt"
+                    },
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 0
+                      },
+                      "alias": "p"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "multiIf",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "t",
+                  "ID"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            {
+              "name": "formatRowNoNewline",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "JSONEachRow"
+                },
+                {
+                  "parts": [
+                    "dd"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": ""
+            }
+          ],
+          "alias": "params"
+        },
+        {
+          "parts": [
+            "dd"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "ID"
+                          ]
+                        },
+                        {
+                          "whens": [
+                            {
+                              "condition": {
+                                "left": {
+                                  "parts": [
+                                    "p"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 0
+                                }
+                              },
+                              "result": {
+                                "name": "toString",
+                                "arguments": [
+                                  {
+                                    "name": "date_add",
+                                    "arguments": [
+                                      {
+                                        "parts": [
+                                          "hour"
+                                        ]
+                                      },
+                                      {
+                                        "parts": [
+                                          "p"
+                                        ]
+                                      },
+                                      {
+                                        "parts": [
+                                          "dt"
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ],
+                          "else": {
+                            "type": "String",
+                            "value": "2022-01-01"
+                          },
+                          "alias": "dd"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "c"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

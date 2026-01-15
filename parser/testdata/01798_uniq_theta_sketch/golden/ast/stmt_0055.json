@@ -1,0 +1,93 @@
+{
+  "table": "stored_aggregates",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "k1",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "k2",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "Uniq",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "uniq"
+            ]
+          },
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "UniqThetaSketch",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "uniqTheta"
+            ]
+          },
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "d"
+            ]
+          },
+          {
+            "parts": [
+              "k1"
+            ]
+          },
+          {
+            "parts": [
+              "k2"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

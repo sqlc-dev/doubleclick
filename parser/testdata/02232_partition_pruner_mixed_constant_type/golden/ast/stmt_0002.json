@@ -1,0 +1,43 @@
+{
+  "table": "broken",
+  "columns": [
+    {
+      "name": "time",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "time"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMMDD",
+    "arguments": [
+      {
+        "name": "toDate",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "time"
+              ]
+            },
+            "op": "/",
+            "right": {
+              "type": "Integer",
+              "value": 1000
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

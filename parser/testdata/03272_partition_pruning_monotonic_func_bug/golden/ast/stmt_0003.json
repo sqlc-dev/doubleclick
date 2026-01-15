@@ -1,0 +1,47 @@
+{
+  "table": "tt",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "ts",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "dateTrunc",
+      "arguments": [
+        {
+          "type": "String",
+          "value": "hour"
+        },
+        {
+          "parts": [
+            "ts"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

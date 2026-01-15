@@ -1,0 +1,60 @@
+{
+  "view": "test_view_filtered",
+  "materialized": true,
+  "populate": true,
+  "columns": [
+    {
+      "name": "EventDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "CounterID",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "CounterID"
+            ]
+          },
+          {
+            "parts": [
+              "EventDate"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "test_table"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "EventDate"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "String",
+            "value": "2013-01-01"
+          }
+        }
+      }
+    ]
+  }
+}

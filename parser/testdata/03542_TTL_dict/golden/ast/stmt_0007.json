@@ -1,0 +1,89 @@
+{
+  "table": "ttl_dict",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "event_date",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "event_date"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "value": {
+          "type": "Integer",
+          "value": 1
+        },
+        "unit": "MONTH"
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "event_date"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 1
+            },
+            "unit": "MONTH"
+          }
+        },
+        "where": {
+          "op": "NOT",
+          "operand": {
+            "name": "dictHas",
+            "arguments": [
+              {
+                "left": {
+                  "name": "CLICKHOUSE_DATABASE",
+                  "type": {
+                    "name": "String"
+                  }
+                },
+                "op": "||",
+                "right": {
+                  "type": "String",
+                  "value": ".always_alive_ids_dict"
+                }
+              },
+              {
+                "parts": [
+                  "id"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

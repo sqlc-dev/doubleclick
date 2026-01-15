@@ -1,0 +1,101 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "concat",
+          "arguments": [
+            {
+              "name": "NULLIF",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "name": "materialize",
+                  "arguments": [
+                    {
+                      "name": "toLowCardinality",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "concat",
+              "arguments": [
+                {
+                  "name": "NULLIF",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "parts": [
+                      "system"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "one"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "name": "concat",
+          "arguments": [
+            {
+              "name": "NULLIF",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "type": "Integer",
+                  "value": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

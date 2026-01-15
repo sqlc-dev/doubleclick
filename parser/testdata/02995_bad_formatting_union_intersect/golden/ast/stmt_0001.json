@@ -1,0 +1,67 @@
+{
+  "temporary": true,
+  "table": "t1",
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "c"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "selects": [
+          {
+            "columns": [
+              {
+                "expr": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "alias": "c"
+              }
+            ]
+          },
+          {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "expr": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "alias": "c"
+                  }
+                ]
+              },
+              {
+                "columns": [
+                  {
+                    "expr": {
+                      "type": "Integer",
+                      "value": 2
+                    },
+                    "alias": "c"
+                  }
+                ]
+              }
+            ],
+            "union_all": true,
+            "union_modes": [
+              "UNION ALL"
+            ]
+          }
+        ],
+        "operators": [
+          "INTERSECT"
+        ]
+      }
+    ]
+  }
+}

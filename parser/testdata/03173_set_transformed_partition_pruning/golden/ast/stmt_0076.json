@@ -1,0 +1,36 @@
+{
+  "table": "03173_base_data_source",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "name": "xxHash32",
+      "arguments": [
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 3
+    }
+  }
+}

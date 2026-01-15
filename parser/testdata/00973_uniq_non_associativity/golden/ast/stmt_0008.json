@@ -1,0 +1,289 @@
+{
+  "table": "part_d",
+  "engine": {
+    "name": "TinyLog"
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "with": [
+                          {
+                            "name": "k1",
+                            "query": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "scalar_with": false
+                          },
+                          {
+                            "name": "k2",
+                            "query": {
+                              "name": "bitXor",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "k1"
+                                  ]
+                                },
+                                {
+                                  "name": "bitShiftRight",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "k1"
+                                      ]
+                                    },
+                                    {
+                                      "type": "Integer",
+                                      "value": 33
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            "scalar_with": true
+                          },
+                          {
+                            "name": "k3",
+                            "query": {
+                              "left": {
+                                "parts": [
+                                  "k2"
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "type": "Integer",
+                                "value": 18397679294719823053
+                              }
+                            },
+                            "scalar_with": true
+                          },
+                          {
+                            "name": "k4",
+                            "query": {
+                              "name": "bitXor",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "k3"
+                                  ]
+                                },
+                                {
+                                  "name": "bitShiftRight",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "k3"
+                                      ]
+                                    },
+                                    {
+                                      "type": "Integer",
+                                      "value": 33
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            "scalar_with": true
+                          },
+                          {
+                            "name": "k5",
+                            "query": {
+                              "left": {
+                                "parts": [
+                                  "k4"
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "type": "Integer",
+                                "value": 14181476777654086739
+                              }
+                            },
+                            "scalar_with": true
+                          },
+                          {
+                            "name": "k6",
+                            "query": {
+                              "name": "bitXor",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "k5"
+                                  ]
+                                },
+                                {
+                                  "name": "bitShiftRight",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "k5"
+                                      ]
+                                    },
+                                    {
+                                      "type": "Integer",
+                                      "value": 33
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            "scalar_with": true
+                          },
+                          {
+                            "name": "hash",
+                            "query": {
+                              "parts": [
+                                "k6"
+                              ]
+                            },
+                            "scalar_with": false
+                          },
+                          {
+                            "name": "place",
+                            "query": {
+                              "left": {
+                                "name": "bitShiftRight",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "hash"
+                                    ]
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 15
+                                  }
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 131072
+                              }
+                            },
+                            "scalar_with": true
+                          },
+                          {
+                            "name": "will_remain",
+                            "query": {
+                              "left": {
+                                "left": {
+                                  "parts": [
+                                    "hash"
+                                  ]
+                                },
+                                "op": "%",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 0
+                              }
+                            },
+                            "scalar_with": true
+                          }
+                        ],
+                        "columns": [
+                          {
+                            "parts": [
+                              "hash"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "place"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "database": "system",
+                                  "table": "numbers"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "place"
+                              ]
+                            },
+                            "op": "\u003e=",
+                            "right": {
+                              "type": "Integer",
+                              "value": 131062
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "parts": [
+                              "will_remain"
+                            ]
+                          }
+                        },
+                        "limit": {
+                          "type": "Integer",
+                          "value": 10
+                        },
+                        "limit_by": [
+                          {
+                            "parts": [
+                              "place"
+                            ]
+                          }
+                        ],
+                        "limit_by_limit": {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        "limit_by_has_limit": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "place"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

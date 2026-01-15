@@ -1,0 +1,77 @@
+{
+  "table": "join_inner_table",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UUID"
+      }
+    },
+    {
+      "name": "key",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "number",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "value1",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value2",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "time",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/join_inner_table"
+      },
+      {
+        "type": "String",
+        "value": "r1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "parts": [
+            "key"
+          ]
+        }
+      ]
+    }
+  ]
+}

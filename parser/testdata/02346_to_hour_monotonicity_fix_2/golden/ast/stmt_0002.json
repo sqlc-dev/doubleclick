@@ -1,0 +1,90 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "stamp",
+      "type": {
+        "name": "DateTime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "name": "toDate",
+    "arguments": [
+      {
+        "parts": [
+          "stamp"
+        ]
+      }
+    ]
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "left": {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2020-01-01"
+                },
+                {
+                  "type": "String",
+                  "value": "UTC"
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 60
+              }
+            }
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Float",
+                      "value": 1000,
+                      "source": "1e3"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

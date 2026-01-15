@@ -1,0 +1,148 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "abs",
+              "arguments": [
+                {
+                  "left": {
+                    "parts": [
+                      "res1"
+                    ]
+                  },
+                  "op": "-",
+                  "right": {
+                    "parts": [
+                      "res2"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 6
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "stddevSamp",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "x_value"
+                              ]
+                            }
+                          ],
+                          "alias": "res1"
+                        },
+                        {
+                          "name": "sqrt",
+                          "arguments": [
+                            {
+                              "left": {
+                                "left": {
+                                  "name": "sum",
+                                  "arguments": [
+                                    {
+                                      "left": {
+                                        "parts": [
+                                          "x_value"
+                                        ]
+                                      },
+                                      "op": "*",
+                                      "right": {
+                                        "parts": [
+                                          "x_value"
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                },
+                                "op": "-",
+                                "right": {
+                                  "left": {
+                                    "left": {
+                                      "name": "sum",
+                                      "arguments": [
+                                        {
+                                          "parts": [
+                                            "x_value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "op": "*",
+                                    "right": {
+                                      "name": "sum",
+                                      "arguments": [
+                                        {
+                                          "parts": [
+                                            "x_value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "parenthesized": true
+                                  },
+                                  "op": "/",
+                                  "right": {
+                                    "name": "count"
+                                  },
+                                  "parenthesized": true
+                                },
+                                "parenthesized": true
+                              },
+                              "op": "/",
+                              "right": {
+                                "left": {
+                                  "name": "count"
+                                },
+                                "op": "-",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 1
+                                },
+                                "parenthesized": true
+                              }
+                            }
+                          ],
+                          "alias": "res2"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "series"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

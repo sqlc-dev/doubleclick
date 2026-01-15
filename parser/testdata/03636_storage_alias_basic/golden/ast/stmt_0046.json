@@ -1,0 +1,58 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "alias": "parts_after"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "source_table"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "parts": [
+            "active"
+          ]
+        }
+      }
+    }
+  ]
+}

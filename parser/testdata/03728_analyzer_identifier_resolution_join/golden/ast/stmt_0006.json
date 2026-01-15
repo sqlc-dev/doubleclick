@@ -1,0 +1,156 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "records",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "address",
+                        "email_address"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "address"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "address",
+                        "email_address"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "stats",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "query": {
+                        "selects": [
+                          {
+                            "columns": [
+                              {
+                                "name": "COUNT",
+                                "arguments": [
+                                  {}
+                                ]
+                              }
+                            ],
+                            "from": {
+                              "tables": [
+                                {
+                                  "table": {
+                                    "table": {
+                                      "table": "fact_click"
+                                    }
+                                  }
+                                },
+                                {
+                                  "table": {
+                                    "table": {
+                                      "table": "records"
+                                    }
+                                  },
+                                  "join": {
+                                    "type": "INNER",
+                                    "on": {
+                                      "left": {
+                                        "parts": [
+                                          "records",
+                                          "email_address"
+                                        ]
+                                      },
+                                      "op": "=",
+                                      "right": {
+                                        "parts": [
+                                          "fact_click",
+                                          "email_address"
+                                        ]
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "alias": "num_clicks"
+                    },
+                    {
+                      "query": {
+                        "selects": [
+                          {
+                            "columns": [
+                              {
+                                "name": "COUNT",
+                                "arguments": [
+                                  {}
+                                ]
+                              }
+                            ],
+                            "from": {
+                              "tables": [
+                                {
+                                  "table": {
+                                    "table": {
+                                      "table": "records"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "alias": "num_records"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "stats"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

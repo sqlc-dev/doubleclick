@@ -1,0 +1,54 @@
+{
+  "if_not_exists": true,
+  "database": "{CLICKHOUSE_DATABASE:Identifier}",
+  "table": "test_dictionary",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "id"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "{CLICKHOUSE_DATABASE:String}.dictionary_table"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 0
+      },
+      "max": {
+        "type": "Integer",
+        "value": 1000
+      }
+    },
+    "layout": {
+      "type": "FLAT"
+    }
+  }
+}

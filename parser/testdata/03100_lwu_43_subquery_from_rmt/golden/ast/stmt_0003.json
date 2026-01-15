@@ -1,0 +1,71 @@
+{
+  "table": "lightweight_test",
+  "columns": [
+    {
+      "name": "ts",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "key",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/lightweight_test"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMMDD",
+    "arguments": [
+      {
+        "parts": [
+          "ts"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "enable_block_number_column",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "enable_block_offset_column",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

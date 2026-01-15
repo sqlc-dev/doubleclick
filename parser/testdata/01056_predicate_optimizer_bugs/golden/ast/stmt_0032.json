@@ -1,0 +1,53 @@
+{
+  "table": "B",
+  "columns": [
+    {
+      "name": "ts",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "id_c",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "ts"
+          ]
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toStartOfHour",
+    "arguments": [
+      {
+        "parts": [
+          "ts"
+        ]
+      }
+    ]
+  }
+}

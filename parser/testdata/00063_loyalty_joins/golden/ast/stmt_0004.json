@@ -1,0 +1,280 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "loyalty"
+          ]
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "UserID"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "test",
+                                "table": "hits"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "UserID"
+                          ]
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "SearchEngineID"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            }
+                          ],
+                          "alias": "yandex"
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "SearchEngineID"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 3
+                              }
+                            }
+                          ],
+                          "alias": "google"
+                        },
+                        {
+                          "name": "toInt8",
+                          "arguments": [
+                            {
+                              "left": {
+                                "name": "if",
+                                "arguments": [
+                                  {
+                                    "left": {
+                                      "parts": [
+                                        "yandex"
+                                      ]
+                                    },
+                                    "op": "\u003e",
+                                    "right": {
+                                      "parts": [
+                                        "google"
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "left": {
+                                      "parts": [
+                                        "yandex"
+                                      ]
+                                    },
+                                    "op": "/",
+                                    "right": {
+                                      "left": {
+                                        "parts": [
+                                          "yandex"
+                                        ]
+                                      },
+                                      "op": "+",
+                                      "right": {
+                                        "parts": [
+                                          "google"
+                                        ]
+                                      },
+                                      "parenthesized": true
+                                    }
+                                  },
+                                  {
+                                    "left": {
+                                      "op": "-",
+                                      "operand": {
+                                        "parts": [
+                                          "google"
+                                        ]
+                                      }
+                                    },
+                                    "op": "/",
+                                    "right": {
+                                      "left": {
+                                        "parts": [
+                                          "yandex"
+                                        ]
+                                      },
+                                      "op": "+",
+                                      "right": {
+                                        "parts": [
+                                          "google"
+                                        ]
+                                      },
+                                      "parenthesized": true
+                                    }
+                                  }
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            }
+                          ],
+                          "alias": "loyalty"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "test",
+                                "table": "hits"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "SearchEngineID"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          "parenthesized": true
+                        },
+                        "op": "OR",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "SearchEngineID"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 3
+                          },
+                          "parenthesized": true
+                        }
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "UserID"
+                          ]
+                        }
+                      ],
+                      "having": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "yandex"
+                            ]
+                          },
+                          "op": "+",
+                          "right": {
+                            "parts": [
+                              "google"
+                            ]
+                          },
+                          "parenthesized": true
+                        },
+                        "op": "\u003e",
+                        "right": {
+                          "type": "Integer",
+                          "value": 10
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "UserID"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "loyalty"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "loyalty"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

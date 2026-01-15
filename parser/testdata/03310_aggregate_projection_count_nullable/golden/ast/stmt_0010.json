@@ -1,0 +1,98 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "formatDateTime",
+          "arguments": [
+            {
+              "name": "toStartOfInterval",
+              "arguments": [
+                {
+                  "parts": [
+                    "collectorReceiptTime"
+                  ]
+                },
+                {
+                  "name": "toIntervalHour",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "%Y-%m-%d %H"
+            }
+          ],
+          "alias": "time"
+        },
+        {
+          "name": "COUNT",
+          "alias": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "collectorReceiptTime"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "String",
+            "value": "2025-01-01 00:00:00"
+          },
+          "parenthesized": true
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "collectorReceiptTime"
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "type": "String",
+            "value": "2025-01-01 23:59:59"
+          },
+          "parenthesized": true
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "time"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "time"
+            ]
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "user_level"
+          ],
+          "alias": "level_alias"
+        },
+        {
+          "name": "uniq",
+          "arguments": [
+            {
+              "parts": [
+                "name"
+              ]
+            }
+          ],
+          "alias": "name_alias"
+        },
+        {
+          "name": "grouping",
+          "arguments": [
+            {
+              "parts": [
+                "level_alias"
+              ]
+            }
+          ],
+          "alias": "_totals"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "users"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "level_alias"
+          ]
+        }
+      ],
+      "grouping_sets": true,
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "name_alias"
+            ]
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

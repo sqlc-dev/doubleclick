@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "table"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "ttl_02265%"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "error"
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "name": "errorCodeToName",
+            "arguments": [
+              {
+                "parts": [
+                  "error"
+                ]
+              }
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "String",
+            "value": "NO_REPLICA_HAS_PART"
+          }
+        }
+      }
+    }
+  ]
+}

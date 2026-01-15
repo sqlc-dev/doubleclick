@@ -1,0 +1,116 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "timezone",
+          "query": {
+            "type": "String",
+            "value": "UTC"
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "dt64",
+          "query": {
+            "name": "toDateTime64",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2019-09-16 19:20:12.345678910"
+              },
+              {
+                "type": "Integer",
+                "value": 3
+              },
+              {
+                "parts": [
+                  "timezone"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "dt64"
+          ]
+        },
+        {
+          "name": "fromUnixTimestamp64Milli",
+          "arguments": [
+            {
+              "name": "toUnixTimestamp64Milli",
+              "arguments": [
+                {
+                  "parts": [
+                    "dt64"
+                  ]
+                }
+              ]
+            },
+            {
+              "parts": [
+                "timezone"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "fromUnixTimestamp64Micro",
+          "arguments": [
+            {
+              "name": "toUnixTimestamp64Micro",
+              "arguments": [
+                {
+                  "parts": [
+                    "dt64"
+                  ]
+                }
+              ]
+            },
+            {
+              "parts": [
+                "timezone"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "fromUnixTimestamp64Nano",
+          "arguments": [
+            {
+              "name": "toUnixTimestamp64Nano",
+              "arguments": [
+                {
+                  "parts": [
+                    "dt64"
+                  ]
+                }
+              ]
+            },
+            {
+              "parts": [
+                "timezone"
+              ]
+            }
+          ],
+          "alias": "v"
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "v"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

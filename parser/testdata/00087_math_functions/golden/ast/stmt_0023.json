@@ -1,0 +1,82 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "name": "abs",
+                  "arguments": [
+                    {
+                      "left": {
+                        "name": "pow",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "x"
+                            ]
+                          },
+                          {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        ]
+                      },
+                      "op": "-",
+                      "right": {
+                        "parts": [
+                          "x"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "op": "\u003c",
+                "right": {
+                  "type": "Float",
+                  "value": 1e-9,
+                  "source": "1.0e-9"
+                }
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "count"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "name": "range",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1000000
+                    }
+                  ],
+                  "alias": "x"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

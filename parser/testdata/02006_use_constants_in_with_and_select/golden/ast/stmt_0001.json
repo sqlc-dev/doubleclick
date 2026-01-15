@@ -1,0 +1,101 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "Integer",
+            "value": 1
+          },
+          "alias": "max_size"
+        },
+        {
+          "name": "groupArray",
+          "parameters": [
+            {
+              "parts": [
+                "max_size"
+              ]
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "col"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "col"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          "alias": "col"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "columns": [
+                                        {
+                                          "type": "Integer",
+                                          "value": 2
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "union_all": true,
+                                  "union_modes": [
+                                    "UNION ALL"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "col"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

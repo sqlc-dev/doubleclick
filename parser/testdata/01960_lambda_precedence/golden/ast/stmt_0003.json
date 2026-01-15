@@ -1,0 +1,101 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "c1"
+              ]
+            }
+          ],
+          "alias": "v"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "c1"
+                        },
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "type": "String",
+                                "value": "v"
+                              }
+                            ]
+                          },
+                          "alias": "c2"
+                        },
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "type": "String",
+                                "value": "d"
+                              }
+                            ]
+                          },
+                          "alias": "d"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "name": "arrayExists",
+        "arguments": [
+          {
+            "parameters": [
+              "i"
+            ],
+            "body": {
+              "left": {
+                "parts": [
+                  "d"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "String",
+                    "value": "d"
+                  }
+                ]
+              },
+              "parenthesized": true
+            }
+          },
+          {
+            "parts": [
+              "c2"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "t",
+          "query": {
+            "left": {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 1509138000
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 300
+              }
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "toHour",
+          "arguments": [
+            {
+              "parts": [
+                "t"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "Asia/Kolkata"
+            }
+          ],
+          "alias": "h"
+        },
+        {
+          "name": "toString",
+          "arguments": [
+            {
+              "name": "toStartOfHour",
+              "arguments": [
+                {
+                  "parts": [
+                    "t"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "Asia/Kolkata"
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "Asia/Kolkata"
+            }
+          ],
+          "alias": "h_start"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 12
+      }
+    }
+  ]
+}

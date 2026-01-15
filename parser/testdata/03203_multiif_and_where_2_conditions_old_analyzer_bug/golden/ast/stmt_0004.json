@@ -1,0 +1,148 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {},
+        {
+          "name": "multiIf",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "column_b"
+                ]
+              },
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "expr": {
+                          "type": "String",
+                          "value": "c2"
+                        },
+                        "alias": "someproduct"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "type": "String",
+              "value": "yes"
+            },
+            {
+              "type": "String",
+              "value": "no"
+            }
+          ],
+          "alias": "condition_1"
+        },
+        {
+          "name": "multiIf",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "column_b"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "c2"
+              }
+            },
+            {
+              "type": "String",
+              "value": "true"
+            },
+            {
+              "type": "String",
+              "value": "false"
+            }
+          ],
+          "alias": "condition_2"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "column_a"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "column_b"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "bugcheck1"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "condition_1"
+            ]
+          },
+          "list": [
+            {
+              "type": "String",
+              "value": "yes"
+            }
+          ]
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "condition_2"
+            ]
+          },
+          "list": [
+            {
+              "type": "String",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

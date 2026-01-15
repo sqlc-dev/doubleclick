@@ -1,0 +1,56 @@
+{
+  "database": "shard_0",
+  "table": "demo_loan_01568",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int64"
+      },
+      "comment": "id"
+    },
+    {
+      "name": "date_stat",
+      "type": {
+        "name": "Date"
+      },
+      "comment": "date of stat"
+    },
+    {
+      "name": "customer_no",
+      "type": {
+        "name": "String"
+      },
+      "comment": "customer no"
+    },
+    {
+      "name": "loan_principal",
+      "type": {
+        "name": "Float64"
+      },
+      "comment": "loan principal"
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "date_stat"
+        ]
+      }
+    ]
+  },
+  "on_cluster": "test_cluster_two_shards_different_databases"
+}

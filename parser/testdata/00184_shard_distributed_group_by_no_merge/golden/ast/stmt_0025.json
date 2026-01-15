@@ -1,0 +1,70 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "uniq",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "alias": "u"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{2,3}"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "data_00184"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "number"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "u"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "settings": [
+        {
+          "name": "distributed_group_by_no_merge",
+          "value": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ]
+    }
+  ]
+}

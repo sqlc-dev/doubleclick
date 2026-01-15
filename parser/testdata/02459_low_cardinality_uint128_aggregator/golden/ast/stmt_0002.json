@@ -1,0 +1,45 @@
+{
+  "table": "group_by_pk_lc_uint128",
+  "columns": [
+    {
+      "name": "k",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "UInt128"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "v",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "k"
+      ]
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "parts": [
+        "v"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 50
+    }
+  }
+}

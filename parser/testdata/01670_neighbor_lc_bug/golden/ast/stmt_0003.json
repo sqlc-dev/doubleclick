@@ -1,0 +1,136 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "neighbor",
+          "arguments": [
+            {
+              "parts": [
+                "n"
+              ]
+            },
+            {
+              "op": "-",
+              "operand": {
+                "type": "Integer",
+                "value": 2
+              }
+            }
+          ],
+          "alias": "int"
+        },
+        {
+          "name": "neighbor",
+          "arguments": [
+            {
+              "parts": [
+                "s"
+              ]
+            },
+            {
+              "op": "-",
+              "operand": {
+                "type": "Integer",
+                "value": 2
+              }
+            }
+          ],
+          "alias": "str"
+        },
+        {
+          "name": "neighbor",
+          "arguments": [
+            {
+              "parts": [
+                "lcs"
+              ]
+            },
+            {
+              "op": "-",
+              "operand": {
+                "type": "Integer",
+                "value": 2
+              }
+            }
+          ],
+          "alias": "lowCstr"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 5
+                            }
+                          },
+                          "alias": "n"
+                        },
+                        {
+                          "name": "toString",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "n"
+                              ]
+                            }
+                          ],
+                          "alias": "s"
+                        },
+                        {
+                          "expr": {
+                            "expr": {
+                              "parts": [
+                                "s"
+                              ]
+                            },
+                            "type": {
+                              "name": "LowCardinality(String)"
+                            }
+                          },
+                          "alias": "lcs"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

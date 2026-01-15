@@ -1,0 +1,124 @@
+{
+  "view": "summing_merge_tree_aggregate_function",
+  "materialized": true,
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "u",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "uniq"
+            ]
+          },
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "parts": [
+          "k"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "d"
+            ]
+          },
+          {
+            "parts": [
+              "k"
+            ]
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "c"
+                ]
+              }
+            ],
+            "alias": "c"
+          },
+          {
+            "name": "uniqState",
+            "arguments": [
+              {
+                "parts": [
+                  "u"
+                ]
+              }
+            ],
+            "alias": "u"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "summing_merge_tree_null"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "d"
+            ]
+          },
+          {
+            "parts": [
+              "k"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "_part"
+                          ]
+                        },
+                        {
+                          "name": "rowNumberInAllBlocks"
+                        },
+                        {
+                          "expr": {
+                            "type": "Tuple",
+                            "value": [
+                              {
+                                "parts": [
+                                  "key"
+                                ]
+                              },
+                              {
+                                "name": "toStartOfInterval",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "ts"
+                                    ]
+                                  },
+                                  {
+                                    "name": "toIntervalMinute",
+                                    "arguments": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 3
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "ts"
+                                ]
+                              }
+                            ],
+                            "spaced_commas": true
+                          },
+                          "alias": "cur"
+                        },
+                        {
+                          "name": "lagInFrame",
+                          "arguments": [
+                            {
+                              "type": "Tuple",
+                              "value": [
+                                {
+                                  "parts": [
+                                    "key"
+                                  ]
+                                },
+                                {
+                                  "name": "toStartOfInterval",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "ts"
+                                      ]
+                                    },
+                                    {
+                                      "name": "toIntervalMinute",
+                                      "arguments": [
+                                        {
+                                          "type": "Integer",
+                                          "value": 3
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "ts"
+                                  ]
+                                }
+                              ],
+                              "spaced_commas": true
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          ],
+                          "over": {},
+                          "alias": "prev"
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "ttl_group_by_bug"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "cur"
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "parts": [
+            "prev"
+          ]
+        }
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 2
+      },
+      "settings": [
+        {
+          "name": "max_threads",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

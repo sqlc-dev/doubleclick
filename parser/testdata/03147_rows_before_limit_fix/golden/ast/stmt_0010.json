@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "service_name"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_rows_count_bug_local"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "id"
+          ]
+        },
+        "global": true,
+        "query": {
+          "selects": [
+            {
+              "columns": [
+                {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              ],
+              "from": {
+                "tables": [
+                  {
+                    "table": {
+                      "table": {
+                        "name": "remote",
+                        "arguments": [
+                          {
+                            "type": "String",
+                            "value": "127.0.0.{2,3}"
+                          },
+                          {
+                            "name": "currentDatabase"
+                          },
+                          {
+                            "parts": [
+                              "test_rows_count_bug_local"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "service_name"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "service_name"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 20
+      },
+      "settings": [
+        {
+          "name": "output_format_write_statistics",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "settings_after_format": true,
+      "format": {
+        "parts": [
+          "JSON"
+        ]
+      }
+    }
+  ]
+}

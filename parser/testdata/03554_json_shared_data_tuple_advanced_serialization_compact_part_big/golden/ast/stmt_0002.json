@@ -1,0 +1,97 @@
+{
+  "table": "test_compact_advanced_tuple",
+  "columns": [
+    {
+      "name": "json",
+      "type": {
+        "name": "Tuple",
+        "parameters": [
+          {
+            "name": "data",
+            "type": {
+              "name": "JSON",
+              "parameters": [
+                {
+                  "expr": {
+                    "left": {
+                      "parts": [
+                        "max_dynamic_paths"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 8
+                    }
+                  }
+                }
+              ],
+              "has_parentheses": true
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "String",
+        "value": "200G"
+      }
+    },
+    {
+      "name": "min_rows_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "write_marks_for_substreams_in_compact_parts",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "object_serialization_version",
+      "value": {
+        "type": "String",
+        "value": "v3"
+      }
+    },
+    {
+      "name": "object_shared_data_serialization_version",
+      "value": {
+        "type": "String",
+        "value": "advanced"
+      }
+    },
+    {
+      "name": "object_shared_data_serialization_version_for_zero_level_parts",
+      "value": {
+        "type": "String",
+        "value": "advanced"
+      }
+    },
+    {
+      "name": "object_shared_data_buckets_for_compact_part",
+      "value": {
+        "type": "Integer",
+        "value": 2
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

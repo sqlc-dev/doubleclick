@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "message"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "event_time_microseconds"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "message"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "text_log"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "logger_name"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "String",
+                            "value": "optimizeDirectReadFromTextIndex"
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "name": "startsWith",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "message"
+                              ]
+                            },
+                            {
+                              "type": "String",
+                              "value": "Added:"
+                            }
+                          ]
+                        }
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "event_time_microseconds"
+                            ]
+                          },
+                          "descending": true
+                        }
+                      ],
+                      "limit": {
+                        "type": "Integer",
+                        "value": 8
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

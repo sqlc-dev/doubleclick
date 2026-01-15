@@ -1,0 +1,55 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "count"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "alias": "assert_exists"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "events"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "name"
+          ]
+        },
+        "list": [
+          {
+            "type": "String",
+            "value": "FilterTransformPassedRows"
+          },
+          {
+            "type": "String",
+            "value": "FilterTransformPassedBytes"
+          }
+        ]
+      },
+      "having": {
+        "parts": [
+          "assert_exists"
+        ]
+      }
+    }
+  ]
+}

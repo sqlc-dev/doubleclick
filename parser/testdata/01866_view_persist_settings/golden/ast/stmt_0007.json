@@ -1,0 +1,169 @@
+{
+  "or_replace": true,
+  "view": "view_nulls_set",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            },
+                            "alias": "a"
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "type": "Integer",
+                                "value": 11
+                              }
+                            },
+                            "alias": "b"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "numbers",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 2
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "t1"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            },
+                            "alias": "a"
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "type": "Integer",
+                                "value": 22
+                              }
+                            },
+                            "alias": "c"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "numbers",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 2
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "t2"
+              },
+              "join": {
+                "type": "FULL",
+                "using": [
+                  {
+                    "parts": [
+                      "a"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "a"
+              ]
+            }
+          }
+        ],
+        "settings": [
+          {
+            "name": "join_use_nulls",
+            "value": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

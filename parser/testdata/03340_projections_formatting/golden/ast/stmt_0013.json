@@ -1,0 +1,53 @@
+{
+  "temporary": true,
+  "table": "test",
+  "columns": [
+    {
+      "name": "user_id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "item_id",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "order_by_item_id",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "_part_offset"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "user_id"
+            ]
+          },
+          {
+            "parts": [
+              "item_id"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": null
+    }
+  ]
+}

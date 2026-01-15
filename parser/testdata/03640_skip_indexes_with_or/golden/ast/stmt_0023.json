@@ -1,0 +1,136 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "explain"
+          ],
+          "alias": "explain"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "id"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "tab"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "id"
+                              ]
+                            },
+                            "op": "\u003e=",
+                            "right": {
+                              "type": "Integer",
+                              "value": 5000
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "left": {
+                                "parts": [
+                                  "v1"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 111
+                              }
+                            },
+                            "op": "OR",
+                            "right": {
+                              "left": {
+                                "parts": [
+                                  "v2"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 111
+                              }
+                            },
+                            "parenthesized": true
+                          },
+                          "parenthesized": true
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "indexes = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%Granules%"
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%PrimaryKey%"
+            }
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Name%"
+          }
+        }
+      }
+    }
+  ]
+}

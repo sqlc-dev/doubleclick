@@ -1,0 +1,86 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "read_rows"
+          ]
+        },
+        {
+          "parts": [
+            "read_bytes"
+          ]
+        },
+        {
+          "parts": [
+            "written_rows"
+          ]
+        },
+        {
+          "parts": [
+            "written_bytes"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "query_kind"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "Insert"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "current_database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        }
+      },
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

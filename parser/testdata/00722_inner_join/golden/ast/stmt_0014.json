@@ -1,0 +1,109 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "db",
+            "name"
+          ]
+        },
+        {
+          "parts": [
+            "t",
+            "name"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "tables"
+              },
+              "alias": "t"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "databases"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "name"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "system"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "db"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t",
+                    "database"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "db",
+                    "name"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "t",
+            "name"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "one"
+        }
+      },
+      "format": {
+        "parts": [
+          "PrettyCompactNoEscapes"
+        ]
+      }
+    }
+  ]
+}

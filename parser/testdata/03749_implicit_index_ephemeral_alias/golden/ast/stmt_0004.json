@@ -1,0 +1,74 @@
+{
+  "or_replace": true,
+  "table": "test_string_alias",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "unhexed",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "type": "String",
+        "value": "abc"
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "hexed",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 4
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "unhex",
+        "arguments": [
+          {
+            "parts": [
+              "unhexed"
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "add_minmax_index_for_numeric_columns",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "add_minmax_index_for_string_columns",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

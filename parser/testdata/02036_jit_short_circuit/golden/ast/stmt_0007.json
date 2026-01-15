@@ -1,0 +1,89 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "if",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "action"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "bonus"
+                }
+              },
+              {
+                "parts": [
+                  "sport_amount"
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 0
+              }
+            ]
+          },
+          "op": "*",
+          "right": {
+            "type": "Integer",
+            "value": 100
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "message"
+                          ],
+                          "alias": "action"
+                        },
+                        {
+                          "expr": {
+                            "expr": {
+                              "parts": [
+                                "message"
+                              ]
+                            },
+                            "type": {
+                              "name": "Float64"
+                            }
+                          },
+                          "alias": "sport_amount"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test_table"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

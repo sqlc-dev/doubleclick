@@ -1,0 +1,139 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "k"
+          ]
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        {
+                          "whens": [
+                            {
+                              "condition": {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "\u003c",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 10
+                                }
+                              },
+                              "result": {
+                                "type": "String",
+                                "value": "hello"
+                              }
+                            },
+                            {
+                              "condition": {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "\u003c",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 50
+                                }
+                              },
+                              "result": {
+                                "type": "String",
+                                "value": "world"
+                              }
+                            }
+                          ],
+                          "else": {
+                            "type": "String",
+                            "value": "goodbye"
+                          },
+                          "alias": "k"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 100
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "with_totals": true,
+      "having": {
+        "left": {
+          "name": "nullIf",
+          "arguments": [
+            {
+              "parts": [
+                "c"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            }
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "type": "Integer",
+          "value": 50
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

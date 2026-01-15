@@ -1,0 +1,54 @@
+{
+  "table": "src",
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ],
+            "alias": "id"
+          },
+          {
+            "name": "toInt32",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ],
+            "alias": "value"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

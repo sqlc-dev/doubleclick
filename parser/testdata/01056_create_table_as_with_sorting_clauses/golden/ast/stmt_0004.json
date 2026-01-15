@@ -1,0 +1,73 @@
+{
+  "table": "x",
+  "columns": [
+    {
+      "name": "CounterID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "EventDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "UserID",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        {
+          "parts": [
+            "EventDate"
+          ]
+        },
+        {
+          "name": "intHash32",
+          "arguments": [
+            {
+              "parts": [
+                "UserID"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "EventDate"
+        ]
+      }
+    ]
+  },
+  "sample_by": {
+    "name": "intHash32",
+    "arguments": [
+      {
+        "parts": [
+          "UserID"
+        ]
+      }
+    ]
+  }
+}

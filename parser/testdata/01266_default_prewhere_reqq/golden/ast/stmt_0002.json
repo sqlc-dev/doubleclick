@@ -1,0 +1,64 @@
+{
+  "table": "t1",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "s1",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "s2",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "date"
+          ]
+        },
+        {
+          "parts": [
+            "s1"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMMDD",
+    "arguments": [
+      {
+        "parts": [
+          "date"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

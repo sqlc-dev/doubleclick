@@ -1,0 +1,115 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "amax",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "argMax"
+            ]
+          },
+          {
+            "name": "String"
+          },
+          {
+            "name": "DateTime"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "ratio_of_defaults_for_sparse_serialization",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true,
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "name": "argMaxState",
+            "arguments": [
+              {
+                "expr": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "type": {
+                  "name": "String"
+                },
+                "operator_syntax": true
+              },
+              {
+                "expr": {
+                  "type": "String",
+                  "value": "2023-04-12 16:23:01"
+                },
+                "type": {
+                  "name": "DateTime"
+                },
+                "operator_syntax": true
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "number"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

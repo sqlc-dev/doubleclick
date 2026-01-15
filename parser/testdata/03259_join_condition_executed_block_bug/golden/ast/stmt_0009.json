@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "table": "t1"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t1"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t2"
+              }
+            },
+            "join": {
+              "type": "FULL",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "key"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "key"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "t1",
+                        "a"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  },
+                  "op": "OR",
+                  "right": {
+                    "name": "indexHint",
+                    "arguments": [
+                      {
+                        "left": {
+                          "parts": [
+                            "t2",
+                            "a"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 2
+                        }
+                      }
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

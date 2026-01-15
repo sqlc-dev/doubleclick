@@ -1,0 +1,116 @@
+{
+  "table": "elements",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "nested.key",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "nested.value",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "nested.key_hashed",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "arrayMap",
+        "arguments": [
+          {
+            "parameters": [
+              "x"
+            ],
+            "body": {
+              "name": "sipHash64",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "parts": [
+              "nested",
+              "key"
+            ]
+          }
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "nested.val_hashed",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "arrayMap",
+        "arguments": [
+          {
+            "parameters": [
+              "x"
+            ],
+            "body": {
+              "name": "sipHash64",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "parts": [
+              "nested",
+              "value"
+            ]
+          }
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "engine": {
+    "name": "Memory"
+  }
+}

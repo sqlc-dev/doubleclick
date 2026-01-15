@@ -1,0 +1,92 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "data_uncompressed_bytes"
+                ]
+              },
+              "op": "\u003c",
+              "right": {
+                "left": {
+                  "left": {
+                    "type": "Integer",
+                    "value": 20
+                  },
+                  "op": "*",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1536
+                  }
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 2
+                },
+                "parenthesized": true
+              }
+            },
+            {
+              "type": "String",
+              "value": "Good"
+            },
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "parts": [
+                    "data_uncompressed_bytes"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "data_skipping_indices"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "vec_idx"
+          }
+        }
+      }
+    }
+  ]
+}

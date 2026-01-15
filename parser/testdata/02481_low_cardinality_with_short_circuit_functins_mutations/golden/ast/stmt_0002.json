@@ -1,0 +1,102 @@
+{
+  "table": "issue_46128",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "Nullable",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "Nullable",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 100
+            }
+          },
+          {
+            "type": "String",
+            "value": "xxxx"
+          },
+          {
+            "type": "String",
+            "value": "yyyy"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

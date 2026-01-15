@@ -1,0 +1,60 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "flush queries"
+        },
+        {
+          "name": "uniqExact",
+          "arguments": [
+            {
+              "parts": [
+                "flush_query_id"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "asynchronous_insert_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "table"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "t_async_insert_skip_settings"
+          }
+        }
+      }
+    }
+  ]
+}

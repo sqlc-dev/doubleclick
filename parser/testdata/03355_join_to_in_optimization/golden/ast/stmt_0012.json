@@ -1,0 +1,99 @@
+{
+  "explain_type": "",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "hostName",
+            "alias": "hostName"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "query_log"
+                },
+                "alias": "a"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "processes"
+                },
+                "alias": "b"
+              },
+              "join": {
+                "type": "INNER",
+                "on": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "a",
+                        "query_id"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "parts": [
+                        "b",
+                        "query_id"
+                      ]
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "type"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": "QueryStart"
+                    },
+                    "parenthesized": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "current_database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "settings": [
+          {
+            "name": "query_plan_use_new_logical_join_step",
+            "value": {
+              "type": "Boolean",
+              "value": true
+            }
+          },
+          {
+            "name": "query_plan_convert_join_to_in",
+            "value": {
+              "type": "Boolean",
+              "value": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

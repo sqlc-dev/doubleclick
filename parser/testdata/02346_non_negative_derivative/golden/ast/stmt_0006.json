@@ -1,0 +1,191 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "ts"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "metric"
+                      ]
+                    },
+                    {
+                      "name": "nonNegativeDerivative",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "metric"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "ts"
+                          ]
+                        }
+                      ],
+                      "over": {
+                        "partition_by": [
+                          {
+                            "parts": [
+                              "metric"
+                            ]
+                          }
+                        ],
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "ts"
+                              ]
+                            }
+                          },
+                          {
+                            "expression": {
+                              "parts": [
+                                "metric"
+                              ]
+                            }
+                          }
+                        ],
+                        "frame": {
+                          "type": "ROWS",
+                          "start": {
+                            "type": "UNBOUNDED_PRECEDING"
+                          },
+                          "end": {
+                            "type": "UNBOUNDED_FOLLOWING"
+                          }
+                        }
+                      },
+                      "alias": "deriv"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "nnd"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "offset": {
+                    "type": "Integer",
+                    "value": 5
+                  }
+                }
+              ]
+            }
+          },
+          "op": "=",
+          "right": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "ts"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "metric"
+                      ]
+                    },
+                    {
+                      "name": "nonNegativeDerivative",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "metric"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "ts"
+                          ]
+                        },
+                        {
+                          "name": "toIntervalSecond",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          ]
+                        }
+                      ],
+                      "over": {
+                        "partition_by": [
+                          {
+                            "parts": [
+                              "metric"
+                            ]
+                          }
+                        ],
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "ts"
+                              ]
+                            }
+                          }
+                        ],
+                        "frame": {
+                          "type": "ROWS",
+                          "start": {
+                            "type": "UNBOUNDED_PRECEDING"
+                          },
+                          "end": {
+                            "type": "UNBOUNDED_FOLLOWING"
+                          }
+                        }
+                      },
+                      "alias": "deriv"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "nnd"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "offset": {
+                    "type": "Integer",
+                    "value": 5
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

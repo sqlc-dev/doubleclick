@@ -1,0 +1,98 @@
+{
+  "table_expr": {
+    "table": {
+      "query": {
+        "selects": [
+          {
+            "columns": [
+              {
+                "table": "test_table_join_1",
+                "transformers": [
+                  {
+                    "type": "apply",
+                    "apply_lambda": {
+                      "parameters": [
+                        "x"
+                      ],
+                      "body": {
+                        "name": "toString",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "x"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "table": "test_table_join_2",
+                "transformers": [
+                  {
+                    "type": "apply",
+                    "apply_lambda": {
+                      "parameters": [
+                        "x"
+                      ],
+                      "body": {
+                        "name": "toString",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "x"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "from": {
+              "tables": [
+                {
+                  "table": {
+                    "table": {
+                      "table": "test_table_join_1"
+                    },
+                    "alias": "t1"
+                  }
+                },
+                {
+                  "table": {
+                    "table": {
+                      "table": "test_table_join_2"
+                    },
+                    "alias": "t2"
+                  },
+                  "join": {
+                    "type": "INNER",
+                    "on": {
+                      "left": {
+                        "parts": [
+                          "t1",
+                          "id"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "parts": [
+                          "t2",
+                          "id"
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

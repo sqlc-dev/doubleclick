@@ -1,0 +1,104 @@
+{
+  "explain_type": "SYNTAX",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "avg",
+            "arguments": [
+              {
+                "left": {
+                  "name": "log",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  ]
+                },
+                "op": "*",
+                "right": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ],
+            "alias": "k"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10000000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "left": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 2
+              },
+              "parenthesized": true
+            },
+            "op": "*",
+            "right": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 3
+              },
+              "parenthesized": true
+            }
+          },
+          {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          }
+        ],
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "k"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "explicit_type": true
+}

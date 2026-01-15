@@ -1,0 +1,134 @@
+{
+  "explain_type": "SYNTAX",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "ts"
+            ]
+          },
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "parts": [
+              "id_b"
+            ]
+          },
+          {
+            "parts": [
+              "b",
+              "ts"
+            ]
+          },
+          {
+            "parts": [
+              "b",
+              "id"
+            ]
+          },
+          {
+            "parts": [
+              "id_c"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "ts"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "id"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "id_b"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "A"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "a"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "B"
+                },
+                "alias": "b"
+              },
+              "join": {
+                "type": "LEFT",
+                "strictness": "ALL",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "b",
+                      "id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "a",
+                      "id_b"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "a",
+              "ts"
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "1970-01-01 03:00:00"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "explicit_type": true
+}

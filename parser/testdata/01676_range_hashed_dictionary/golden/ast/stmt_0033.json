@@ -1,0 +1,113 @@
+{
+  "table": "range_dictionary_nullable",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "CountryID",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "StartDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "EndDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "Tax",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Float64"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "type": "Float",
+        "value": 0.2,
+        "source": "0.2"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "CountryID"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "HOST",
+          "value": {
+            "type": "String",
+            "value": "localhost"
+          }
+        },
+        {
+          "key": "PORT",
+          "value": {
+            "name": "tcpPort"
+          }
+        },
+        {
+          "key": "USER",
+          "value": {
+            "type": "String",
+            "value": "default"
+          }
+        },
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "date_table"
+          }
+        },
+        {
+          "key": "DB",
+          "value": {
+            "name": "currentDatabase"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 1
+      },
+      "max": {
+        "type": "Integer",
+        "value": 1000
+      }
+    },
+    "layout": {
+      "type": "RANGE_HASHED"
+    },
+    "range": {
+      "min": {
+        "parts": [
+          "StartDate"
+        ]
+      },
+      "max": {
+        "parts": [
+          "EndDate"
+        ]
+      }
+    }
+  }
+}

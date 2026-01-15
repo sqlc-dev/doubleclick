@@ -1,0 +1,108 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "whatever"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "ids"
+              },
+              "alias": "l"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "name": "clusterAllReplicas",
+                "arguments": [
+                  {
+                    "parts": [
+                      "test_cluster_two_shards"
+                    ]
+                  },
+                  {
+                    "name": "merge",
+                    "arguments": [
+                      {
+                        "name": "currentDatabase"
+                      },
+                      {
+                        "type": "String",
+                        "value": "data*"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "alias": "s"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "l",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "s",
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "status"
+          ]
+        },
+        "list": [
+          {
+            "type": "Array",
+            "value": [
+              {
+                "type": "String",
+                "value": "CREATED"
+              },
+              {
+                "type": "String",
+                "value": "CREATING"
+              }
+            ],
+            "spaced_commas": true
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time"
+            ]
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

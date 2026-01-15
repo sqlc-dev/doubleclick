@@ -1,0 +1,64 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "{\"a\" : [42, \"hello\", [1, 2, 3]]}"
+          },
+          "type": {
+            "name": "JSON"
+          },
+          "alias": "json",
+          "operator_syntax": true
+        },
+        {
+          "name": "JSONAllPathsWithTypes",
+          "arguments": [
+            {
+              "parts": [
+                "json"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "dynamicType",
+          "arguments": [
+            {
+              "parts": [
+                "json",
+                "a"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "json",
+            "a",
+            ":`Array(Dynamic)`",
+            "Int64"
+          ]
+        },
+        {
+          "parts": [
+            "json",
+            "a",
+            ":`Array(Dynamic)`",
+            "String"
+          ]
+        },
+        {
+          "parts": [
+            "json",
+            "a",
+            ":`Array(Dynamic)`",
+            "Array(Nullable(Int64))"
+          ]
+        }
+      ]
+    }
+  ]
+}

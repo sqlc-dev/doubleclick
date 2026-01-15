@@ -1,0 +1,58 @@
+{
+  "table": "attach_partition_t4",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "differently_named_proj",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "b"
+            ]
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "a"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "b"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ]
+}

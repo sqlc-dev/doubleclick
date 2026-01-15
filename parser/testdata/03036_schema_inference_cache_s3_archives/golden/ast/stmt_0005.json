@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "schema_inference_mode"
+          ]
+        },
+        {
+          "expr": {
+            "array": {
+              "name": "splitByChar",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "/"
+                },
+                {
+                  "parts": [
+                    "source"
+                  ]
+                }
+              ]
+            },
+            "index": {
+              "op": "-",
+              "operand": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          },
+          "alias": "file"
+        },
+        {
+          "parts": [
+            "schema"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "schema_inference_cache"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "name": "startsWith",
+        "arguments": [
+          {
+            "parts": [
+              "file"
+            ]
+          },
+          {
+            "type": "String",
+            "value": "03036_json_archive.zip"
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "file"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

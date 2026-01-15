@@ -1,0 +1,91 @@
+{
+  "table": "const_in_const",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "uid",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "Sign",
+      "type": {
+        "name": "Int8"
+      }
+    }
+  ],
+  "engine": {
+    "name": "CollapsingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "date"
+        ]
+      },
+      {
+        "name": "intHash32",
+        "arguments": [
+          {
+            "parts": [
+              "uid"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "parts": [
+              "date"
+            ]
+          },
+          {
+            "name": "intHash32",
+            "arguments": [
+              {
+                "parts": [
+                  "uid"
+                ]
+              }
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      },
+      {
+        "parts": [
+          "Sign"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  }
+}

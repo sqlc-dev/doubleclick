@@ -1,0 +1,110 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "with": [
+                        {
+                          "name": "n",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {}
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "database": "system",
+                                            "table": "numbers"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "limit": {
+                                    "type": "Integer",
+                                    "value": 1
+                                  },
+                                  "offset": {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": true
+                        },
+                        {
+                          "name": "q",
+                          "query": {
+                            "name": "toUInt64",
+                            "arguments": [
+                              {
+                                "left": {
+                                  "type": "Integer",
+                                  "value": 10
+                                },
+                                "op": "/",
+                                "right": {
+                                  "parts": [
+                                    "n"
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "scalar_with": true
+                        }
+                      ],
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "one"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "q"
+                          ]
+                        },
+                        "op": "\u003e",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

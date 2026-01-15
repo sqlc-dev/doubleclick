@@ -1,0 +1,65 @@
+{
+  "table": "test_complex_dictionary_load_factor",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "key_1",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "key_2",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt16"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "key_1"
+        ]
+      },
+      {
+        "parts": [
+          "key_2"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "TABLE",
+          "value": {
+            "parts": [
+              "test_table_complex"
+            ]
+          }
+        }
+      ]
+    },
+    "lifetime": {},
+    "layout": {
+      "type": "COMPLEX_KEY_HASHED",
+      "args": [
+        {
+          "key": "MAX_LOAD_FACTOR",
+          "value": {
+            "type": "Float",
+            "value": 0.9,
+            "source": "0.90"
+          }
+        }
+      ]
+    }
+  }
+}

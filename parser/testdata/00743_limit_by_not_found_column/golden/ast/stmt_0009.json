@@ -1,0 +1,205 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "concat",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "http://reddit.com/r/"
+            },
+            {
+              "parts": [
+                "subreddit"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "/comments/"
+            },
+            {
+              "name": "replaceRegexpOne",
+              "arguments": [
+                {
+                  "parts": [
+                    "link_id"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "t[0-9]_"
+                },
+                {
+                  "type": "String",
+                  "value": ""
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "y"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "subreddit"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "link_id"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "cnt"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "created_date"
+                                          ],
+                                          "alias": "y"
+                                        },
+                                        {
+                                          "parts": [
+                                            "link_id"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "subreddit"
+                                          ]
+                                        },
+                                        {
+                                          "name": "count",
+                                          "arguments": [
+                                            {}
+                                          ],
+                                          "alias": "cnt"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "commententry1"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "where": {
+                                        "left": {
+                                          "name": "toYear",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "created_date"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "op": "=",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 2016
+                                        }
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "y"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "link_id"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "subreddit"
+                                          ]
+                                        }
+                                      ],
+                                      "order_by": [
+                                        {
+                                          "expression": {
+                                            "parts": [
+                                              "y"
+                                            ]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "y"
+                            ]
+                          }
+                        },
+                        {
+                          "expression": {
+                            "parts": [
+                              "cnt"
+                            ]
+                          },
+                          "descending": true
+                        }
+                      ],
+                      "limit_by": [
+                        {
+                          "parts": [
+                            "y"
+                          ]
+                        }
+                      ],
+                      "limit_by_limit": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

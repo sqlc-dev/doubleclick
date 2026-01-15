@@ -1,0 +1,177 @@
+{
+  "table": "stored_aggregates",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2014-06-01"
+              }
+            ],
+            "alias": "d"
+          },
+          {
+            "name": "intDiv",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 100
+              }
+            ],
+            "alias": "k1"
+          },
+          {
+            "name": "toString",
+            "arguments": [
+              {
+                "name": "intDiv",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            ],
+            "alias": "k2"
+          },
+          {
+            "name": "uniqState",
+            "arguments": [
+              {
+                "name": "toUInt64",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 7
+                    }
+                  }
+                ]
+              }
+            ],
+            "alias": "Uniq"
+          },
+          {
+            "name": "uniqThetaState",
+            "arguments": [
+              {
+                "name": "toUInt64",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 7
+                    }
+                  }
+                ]
+              }
+            ],
+            "alias": "UniqThetaSketch"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "database": "system",
+                                  "table": "numbers"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "limit": {
+                          "type": "Integer",
+                          "value": 1000
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "d"
+            ]
+          },
+          {
+            "parts": [
+              "k1"
+            ]
+          },
+          {
+            "parts": [
+              "k2"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "d"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "k1"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "k2"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

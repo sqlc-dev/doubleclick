@@ -1,0 +1,94 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_distr"
+              },
+              "alias": "left"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test_distr"
+              },
+              "alias": "right"
+            },
+            "join": {
+              "type": "INNER",
+              "global": true,
+              "on": {
+                "left": {
+                  "parts": [
+                    "left",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "right",
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "has",
+          "arguments": [
+            {
+              "parts": [
+                "right",
+                "data",
+                "arr1"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "s3"
+            }
+          ]
+        },
+        "op": "AND",
+        "right": {
+          "name": "has",
+          "arguments": [
+            {
+              "parts": [
+                "right",
+                "data",
+                "arr2"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 42
+            }
+          ]
+        }
+      },
+      "settings": [
+        {
+          "name": "enable_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

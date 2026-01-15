@@ -1,0 +1,118 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "s_suppkey"
+          ]
+        },
+        {
+          "parts": [
+            "s_name"
+          ]
+        },
+        {
+          "parts": [
+            "s_address"
+          ]
+        },
+        {
+          "parts": [
+            "s_phone"
+          ]
+        },
+        {
+          "parts": [
+            "total_revenue"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "supplier"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "revenue0"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "s_suppkey"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "supplier_no"
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "total_revenue"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "max",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "total_revenue"
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "revenue0"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "s_suppkey"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

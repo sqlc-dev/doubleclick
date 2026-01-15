@@ -1,0 +1,102 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "functional_index_mergetree"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "op": "NOT",
+        "operand": {
+          "name": "or",
+          "arguments": [
+            {
+              "op": "NOT",
+              "operand": {
+                "parts": [
+                  "x"
+                ]
+              }
+            },
+            {
+              "left": {
+                "name": "toUInt64",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  }
+                ]
+              },
+              "op": "AND",
+              "right": {
+                "op": "NOT",
+                "operand": {
+                  "left": {
+                    "name": "floor",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "x"
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "\u003e",
+                  "right": {
+                    "type": "Integer",
+                    "value": 6
+                  }
+                }
+              }
+            },
+            {
+              "left": {
+                "left": {
+                  "parts": [
+                    "x"
+                  ]
+                },
+                "op": "\u003e=",
+                "right": {
+                  "type": "Float",
+                  "value": 7.42,
+                  "source": "7.42"
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "name": "round",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "x"
+                      ]
+                    }
+                  ]
+                },
+                "op": "\u003c=",
+                "right": {
+                  "type": "Integer",
+                  "value": 7
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "replaceAll",
+          "arguments": [
+            {
+              "name": "trimLeft",
+              "arguments": [
+                {
+                  "parts": [
+                    "explain"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "__table1."
+            },
+            {
+              "type": "String",
+              "value": ""
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "sum",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "y"
+                                ]
+                              }
+                            ],
+                            "alias": "s"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "remote",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "127.0.0.{1,2}"
+                                    },
+                                    {
+                                      "name": "currentDatabase"
+                                    },
+                                    {
+                                      "parts": [
+                                        "tab"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "group_by": [
+                          {
+                            "parts": [
+                              "x"
+                            ]
+                          }
+                        ],
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "x"
+                              ]
+                            }
+                          },
+                          {
+                            "expression": {
+                              "parts": [
+                                "s"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1, sorting = 1, description = 0"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "case_insensitive": true,
+            "pattern": {
+              "type": "String",
+              "value": "%sort%"
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%ReadFromMergeTree%"
+            }
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Aggregat%"
+          }
+        }
+      }
+    }
+  ]
+}

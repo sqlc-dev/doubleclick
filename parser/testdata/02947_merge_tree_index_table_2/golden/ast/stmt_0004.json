@@ -1,0 +1,179 @@
+{
+  "table": "t_merge_tree_index",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "sp",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "arr",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "LowCardinality",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "n",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "c1",
+            "type": {
+              "name": "String"
+            }
+          },
+          {
+            "name": "c2",
+            "type": {
+              "name": "UInt64"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "t",
+      "type": {
+        "name": "Tuple",
+        "parameters": [
+          {
+            "name": "c1",
+            "type": {
+              "name": "UInt64"
+            }
+          },
+          {
+            "name": "c2",
+            "type": {
+              "name": "UInt64"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "column.with.dots",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "b"
+          ]
+        },
+        {
+          "left": {
+            "name": "sipHash64",
+            "arguments": [
+              {
+                "parts": [
+                  "sp"
+                ]
+              }
+            ]
+          },
+          "op": "%",
+          "right": {
+            "type": "Integer",
+            "value": 100
+          }
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 3
+      }
+    },
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "min_rows_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 6
+      }
+    },
+    {
+      "name": "ratio_of_defaults_for_sparse_serialization",
+      "value": {
+        "type": "Float",
+        "value": 0.9,
+        "source": "0.9"
+      }
+    },
+    {
+      "name": "write_marks_for_substreams_in_compact_parts",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "serialization_info_version",
+      "value": {
+        "type": "String",
+        "value": "basic"
+      }
+    },
+    {
+      "name": "compact_parts_max_granules_to_buffer",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

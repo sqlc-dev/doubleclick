@@ -1,0 +1,149 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "c1",
+            "key"
+          ]
+        },
+        {
+          "parts": [
+            "c1",
+            "name"
+          ]
+        },
+        {
+          "parts": [
+            "c1",
+            "ref_valueF64"
+          ]
+        },
+        {
+          "parts": [
+            "c1",
+            "valueF64"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "c1",
+                "ref_valueF64"
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "c1",
+                "valueF64"
+              ]
+            }
+          },
+          "alias": "dF64"
+        },
+        {
+          "type": "String",
+          "value": ""
+        },
+        {
+          "parts": [
+            "c2",
+            "key"
+          ]
+        },
+        {
+          "parts": [
+            "c2",
+            "ref_valueF64"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "codecTest"
+              },
+              "alias": "c1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "codecTest"
+              },
+              "alias": "c2"
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "dF64"
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            },
+            "parenthesized": true
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "c1",
+                "valueF64"
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "c2",
+              "key"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "left": {
+              "parts": [
+                "c1",
+                "key"
+              ]
+            },
+            "op": "-",
+            "right": {
+              "type": "Integer",
+              "value": 1048576
+            },
+            "parenthesized": true
+          },
+          "parenthesized": true
+        }
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ]
+}

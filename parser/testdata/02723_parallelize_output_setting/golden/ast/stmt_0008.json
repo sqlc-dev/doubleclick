@@ -1,0 +1,110 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "match",
+          "arguments": [
+            {
+              "name": "arrayStringConcat",
+              "arguments": [
+                {
+                  "name": "groupArray",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "explain"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": ""
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": ".*Resize 1 → 2 *URL 0 → 1 *$"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PIPELINE",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "x"
+                            ]
+                          },
+                          {
+                            "name": "count"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "url",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "https://example.com"
+                                    },
+                                    {
+                                      "parts": [
+                                        "Parquet"
+                                      ]
+                                    },
+                                    {
+                                      "type": "String",
+                                      "value": "x Int64"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "group_by": [
+                          {
+                            "parts": [
+                              "x"
+                            ]
+                          }
+                        ],
+                        "order_by": [
+                          {
+                            "expression": {
+                              "name": "count"
+                            }
+                          }
+                        ],
+                        "limit": {
+                          "type": "Integer",
+                          "value": 10
+                        }
+                      }
+                    ]
+                  },
+                  "explicit_type": true
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

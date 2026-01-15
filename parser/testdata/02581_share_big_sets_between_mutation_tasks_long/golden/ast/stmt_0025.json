@@ -1,0 +1,252 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "table_uuid",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "uuid"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "tables"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "database"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "name": "currentDatabase"
+                      },
+                      "parenthesized": true
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "name"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "02581_trips"
+                      },
+                      "parenthesized": true
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "expr": {
+              "array": {
+                "name": "splitByChar",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "_"
+                  },
+                  {
+                    "parts": [
+                      "query_id"
+                    ]
+                  }
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 5
+              }
+            },
+            "type": {
+              "name": "UInt64"
+            }
+          },
+          "alias": "mutation_version"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "expr": {
+                    "parts": [
+                      "message"
+                    ]
+                  },
+                  "pattern": {
+                    "type": "String",
+                    "value": "Created Set with % entries%"
+                  }
+                }
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "has_parts_for_which_set_was_built"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "expr": {
+                    "parts": [
+                      "message"
+                    ]
+                  },
+                  "pattern": {
+                    "type": "String",
+                    "value": "Got set from cache%"
+                  }
+                }
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "has_parts_that_shared_set"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "text_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "parts": [
+                "query_id"
+              ]
+            },
+            "pattern": {
+              "name": "concat",
+              "arguments": [
+                {
+                  "expr": {
+                    "parts": [
+                      "table_uuid"
+                    ]
+                  },
+                  "type": {
+                    "name": "String"
+                  }
+                },
+                {
+                  "type": "String",
+                  "value": "::all\\_%"
+                }
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "yesterday"
+            },
+            "parenthesized": true
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "expr": {
+              "parts": [
+                "message"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "Created Set with % entries%"
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "message"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "Got set from cache%"
+            }
+          },
+          "parenthesized": true
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "mutation_version"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "mutation_version"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "TSVWithNames"
+        ]
+      }
+    }
+  ]
+}

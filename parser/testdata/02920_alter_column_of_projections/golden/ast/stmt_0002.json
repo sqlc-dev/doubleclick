@@ -1,0 +1,112 @@
+{
+  "table": "t",
+  "columns": [
+    {
+      "name": "uid",
+      "type": {
+        "name": "Int16"
+      }
+    },
+    {
+      "name": "name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "age",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Int8"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "i",
+      "type": {
+        "name": "Int16"
+      }
+    },
+    {
+      "name": "j",
+      "type": {
+        "name": "Int16"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p1",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "name"
+            ]
+          },
+          {
+            "parts": [
+              "age"
+            ]
+          },
+          {
+            "name": "uniq",
+            "arguments": [
+              {
+                "parts": [
+                  "i"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "count",
+            "arguments": [
+              {
+                "parts": [
+                  "j"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "name"
+            ]
+          },
+          {
+            "parts": [
+              "age"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "uid"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,87 @@
+{
+  "database": "01765_db",
+  "table": "sparse_hashed_dictionary_simple_key_simple_attributes",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value_first",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "type": "String",
+        "value": "value_first_default"
+      }
+    },
+    {
+      "name": "value_second",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "type": "String",
+        "value": "value_second_default"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "id"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "HOST",
+          "value": {
+            "type": "String",
+            "value": "localhost"
+          }
+        },
+        {
+          "key": "PORT",
+          "value": {
+            "name": "tcpPort"
+          }
+        },
+        {
+          "key": "USER",
+          "value": {
+            "type": "String",
+            "value": "default"
+          }
+        },
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "simple_key_simple_attributes_source_table"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 1
+      },
+      "max": {
+        "type": "Integer",
+        "value": 1000
+      }
+    },
+    "layout": {
+      "type": "SPARSE_HASHED"
+    }
+  }
+}

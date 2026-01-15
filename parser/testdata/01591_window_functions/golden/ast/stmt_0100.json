@@ -1,0 +1,60 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "over": {
+            "order_by": [
+              {
+                "expression": {
+                  "name": "toInt64",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "RANGE",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              },
+              "end": {
+                "type": "PRECEDING",
+                "offset": {
+                  "op": "-",
+                  "operand": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

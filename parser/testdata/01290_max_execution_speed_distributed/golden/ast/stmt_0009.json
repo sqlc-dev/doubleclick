@@ -1,0 +1,126 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "query_duration_ms"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "Integer",
+            "value": 500
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "current_database"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "name": "currentDatabase"
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "event_date"
+                    ]
+                  },
+                  "op": "\u003e=",
+                  "right": {
+                    "name": "yesterday"
+                  }
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "event_time"
+                  ]
+                },
+                "op": "\u003e=",
+                "right": {
+                  "left": {
+                    "name": "now"
+                  },
+                  "op": "-",
+                  "right": {
+                    "value": {
+                      "type": "String",
+                      "value": "5 MINUTES"
+                    },
+                    "unit": ""
+                  }
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "query"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "%special query for 01290_max_execution_speed_distributed%"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "query"
+              ]
+            },
+            "not": true,
+            "pattern": {
+              "type": "String",
+              "value": "%system.query_log%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      }
+    }
+  ]
+}

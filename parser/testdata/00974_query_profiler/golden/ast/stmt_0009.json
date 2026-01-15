@@ -1,0 +1,181 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "symbol",
+          "query": {
+            "left": {
+              "left": {
+                "name": "addressToLine",
+                "arguments": [
+                  {
+                    "name": "arrayJoin",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "trace"
+                        ]
+                      }
+                    ],
+                    "alias": "addr"
+                  }
+                ]
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": "#"
+              }
+            },
+            "op": "||",
+            "right": {
+              "name": "demangle",
+              "arguments": [
+                {
+                  "name": "addressToSymbol",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "addr"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "trace_log"
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "query_id"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "query_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "current_database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "expr": {
+                          "parts": [
+                            "query"
+                          ]
+                        },
+                        "pattern": {
+                          "type": "String",
+                          "value": "%test real time query profiler%"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "expr": {
+                        "parts": [
+                          "query"
+                        ]
+                      },
+                      "not": true,
+                      "pattern": {
+                        "type": "String",
+                        "value": "%system%"
+                      }
+                    }
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "event_time"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "symbol"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%FunctionSleep%"
+          }
+        }
+      }
+    }
+  ]
+}

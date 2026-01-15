@@ -1,0 +1,187 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "yago"
+          ]
+        },
+        {
+          "parts": [
+            "recent"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "item_id"
+                          ],
+                          "alias": "id"
+                        },
+                        {
+                          "name": "SUM",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "price_sold"
+                              ]
+                            }
+                          ],
+                          "alias": "recent"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "expr": {
+                          "parts": [
+                            "date"
+                          ]
+                        },
+                        "low": {
+                          "type": "String",
+                          "value": "2019-12-16"
+                        },
+                        "high": {
+                          "type": "String",
+                          "value": "2020-03-08"
+                        }
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "id"
+                          ]
+                        }
+                      ],
+                      "with_totals": true,
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "id"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "ll"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "item_id"
+                          ],
+                          "alias": "id"
+                        },
+                        {
+                          "name": "SUM",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "price_sold"
+                              ]
+                            }
+                          ],
+                          "alias": "yago"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "expr": {
+                          "parts": [
+                            "date"
+                          ]
+                        },
+                        "low": {
+                          "type": "String",
+                          "value": "2018-12-17"
+                        },
+                        "high": {
+                          "type": "String",
+                          "value": "2019-03-10"
+                        }
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "id"
+                          ]
+                        }
+                      ],
+                      "with_totals": true,
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "id"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "rr"
+            },
+            "join": {
+              "type": "FULL",
+              "using": [
+                {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

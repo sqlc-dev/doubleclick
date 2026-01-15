@@ -1,0 +1,115 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "explain"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "%Algorithm: DirectKeyValueJoin%"
+              }
+            }
+          ]
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "explain"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "%Algorithm: HashJoin%"
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "s"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "query": {
+                                    "selects": [
+                                      {
+                                        "columns": [
+                                          {
+                                            "name": "toUInt64",
+                                            "arguments": [
+                                              {
+                                                "type": "Integer",
+                                                "value": 9911
+                                              }
+                                            ],
+                                            "alias": "id"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                "alias": "t1"
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "dict"
+                                },
+                                "alias": "t2"
+                              },
+                              "join": {
+                                "type": "INNER",
+                                "using": [
+                                  {
+                                    "parts": [
+                                      "id"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

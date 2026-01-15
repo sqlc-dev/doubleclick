@@ -1,0 +1,85 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "Array",
+            "value": [
+              {
+                "op": "-",
+                "operand": {
+                  "type": "Integer",
+                  "value": 100
+                }
+              },
+              {
+                "type": "Integer",
+                "value": 39
+              },
+              {
+                "type": "Integer",
+                "value": 59
+              },
+              {
+                "type": "Integer",
+                "value": 55
+              },
+              {
+                "type": "Integer",
+                "value": 20
+              }
+            ],
+            "spaced_commas": true
+          },
+          "alias": "cf"
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "financialInternalRateOfReturn",
+              "arguments": [
+                {
+                  "parts": [
+                    "cf"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 6
+            }
+          ],
+          "alias": "irr_rate"
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "financialNetPresentValue",
+              "arguments": [
+                {
+                  "parts": [
+                    "irr_rate"
+                  ]
+                },
+                {
+                  "parts": [
+                    "cf"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 6
+            }
+          ],
+          "alias": "financialNetPresentValue_from_irr"
+        }
+      ]
+    }
+  ]
+}

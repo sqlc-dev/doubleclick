@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "parallel right-only"
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "l",
+                  "k"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "l"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "r"
+              }
+            },
+            "join": {
+              "type": "RIGHT",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "l",
+                      "k"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "r",
+                      "k"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "l",
+                      "v"
+                    ]
+                  },
+                  "op": "\u003e",
+                  "right": {
+                    "parts": [
+                      "r",
+                      "v"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

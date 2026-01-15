@@ -1,0 +1,160 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "avg",
+              "arguments": [
+                {
+                  "left": {
+                    "name": "log",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      }
+                    ]
+                  },
+                  "op": "*",
+                  "right": {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 6
+            }
+          ],
+          "alias": "k"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10000000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "left": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            },
+            "parenthesized": true
+          },
+          "op": "*",
+          "right": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            },
+            "parenthesized": true
+          }
+        },
+        {
+          "left": {
+            "parts": [
+              "number"
+            ]
+          },
+          "op": "%",
+          "right": {
+            "type": "Integer",
+            "value": 3
+          }
+        },
+        {
+          "left": {
+            "parts": [
+              "number"
+            ]
+          },
+          "op": "%",
+          "right": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ],
+      "having": {
+        "left": {
+          "name": "avg",
+          "arguments": [
+            {
+              "left": {
+                "name": "log",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                ]
+              },
+              "op": "*",
+              "right": {
+                "parts": [
+                  "number"
+                ]
+              }
+            }
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Float",
+          "value": 3465735.3,
+          "source": "3465735.3"
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

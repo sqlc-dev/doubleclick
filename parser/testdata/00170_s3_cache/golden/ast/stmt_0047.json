@@ -1,0 +1,144 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "WindowClientWidth"
+          ]
+        },
+        {
+          "parts": [
+            "WindowClientHeight"
+          ]
+        },
+        {
+          "name": "count",
+          "alias": "PageViews"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits_s3"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "CounterID"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 62
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "EventDate"
+                    ]
+                  },
+                  "op": "\u003e=",
+                  "right": {
+                    "type": "String",
+                    "value": "2013-07-01"
+                  }
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "EventDate"
+                  ]
+                },
+                "op": "\u003c=",
+                "right": {
+                  "type": "String",
+                  "value": "2013-07-31"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "op": "NOT",
+              "operand": {
+                "parts": [
+                  "Refresh"
+                ]
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "op": "NOT",
+            "operand": {
+              "parts": [
+                "DontCountHits"
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "URLHash"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "halfMD5",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "http://example.ru/"
+              }
+            ]
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "WindowClientWidth"
+          ]
+        },
+        {
+          "parts": [
+            "WindowClientHeight"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "PageViews"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10000
+      }
+    }
+  ]
+}

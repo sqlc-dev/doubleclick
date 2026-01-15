@@ -1,0 +1,82 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "mode",
+          "query": {
+            "type": "String",
+            "value": "aes-256-gcm"
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "ciphertext",
+          "query": {
+            "name": "unhex",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "219E6478A1A3BB5B686DA4BAD70323F192EFEDCCBBD6F49E78A7E2F6"
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "key",
+          "query": {
+            "type": "String",
+            "value": "test_key________________________"
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "iv",
+          "query": {
+            "type": "String",
+            "value": "test_iv_____"
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "mode"
+          ]
+        },
+        {
+          "name": "decrypt",
+          "arguments": [
+            {
+              "parts": [
+                "mode"
+              ]
+            },
+            {
+              "name": "toNullable",
+              "arguments": [
+                {
+                  "parts": [
+                    "ciphertext"
+                  ]
+                }
+              ]
+            },
+            {
+              "parts": [
+                "key"
+              ]
+            },
+            {
+              "parts": [
+                "iv"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

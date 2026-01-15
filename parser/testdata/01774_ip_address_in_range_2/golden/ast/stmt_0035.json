@@ -1,0 +1,101 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "addr",
+          "query": {
+            "name": "arrayJoin",
+            "arguments": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "expr": {
+                      "name": "toIPv4",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "192.168.100.1"
+                        }
+                      ]
+                    },
+                    "type": {
+                      "name": "Nullable(IPv4)"
+                    }
+                  },
+                  {
+                    "expr": {
+                      "name": "toIPv4",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "192.168.103.255"
+                        }
+                      ]
+                    },
+                    "type": {
+                      "name": "Nullable(IPv4)"
+                    }
+                  }
+                ],
+                "spaced_commas": true
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "prefix",
+          "query": {
+            "name": "arrayJoin",
+            "arguments": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "String",
+                    "value": "192.168.100.0/22"
+                  },
+                  {
+                    "type": "String",
+                    "value": "192.168.100.0/24"
+                  }
+                ],
+                "spaced_commas": true
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "addr"
+          ]
+        },
+        {
+          "parts": [
+            "prefix"
+          ]
+        },
+        {
+          "name": "isIPAddressInRange",
+          "arguments": [
+            {
+              "parts": [
+                "addr"
+              ]
+            },
+            {
+              "parts": [
+                "prefix"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

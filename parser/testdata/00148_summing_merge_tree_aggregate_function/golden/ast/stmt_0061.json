@@ -1,0 +1,61 @@
+{
+  "table": "summing_merge_tree_aggregate_function",
+  "columns": [
+    {
+      "name": "d",
+      "type": null,
+      "default": {
+        "name": "today"
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "name": "quantile",
+            "arguments": [
+              {
+                "type": "Float",
+                "value": 0.1,
+                "source": "0.1"
+              }
+            ]
+          },
+          {
+            "name": "Float64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "parts": [
+          "k"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

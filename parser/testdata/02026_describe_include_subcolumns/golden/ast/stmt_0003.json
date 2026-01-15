@@ -1,0 +1,135 @@
+{
+  "table": "t_desc_subcolumns",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "n",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "comment": "It is a nullable column"
+    },
+    {
+      "name": "arr1",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt32"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    },
+    {
+      "name": "arr2",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Array",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      },
+      "ttl": {
+        "left": {
+          "parts": [
+            "d"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "value": {
+            "type": "Integer",
+            "value": 1
+          },
+          "unit": "DAY"
+        }
+      }
+    },
+    {
+      "name": "t",
+      "type": {
+        "name": "Tuple",
+        "parameters": [
+          {
+            "name": "s",
+            "type": {
+              "name": "String"
+            }
+          },
+          {
+            "name": "a",
+            "type": {
+              "name": "Array",
+              "parameters": [
+                {
+                  "name": "Tuple",
+                  "parameters": [
+                    {
+                      "name": "a",
+                      "type": {
+                        "name": "UInt32"
+                      }
+                    },
+                    {
+                      "name": "b",
+                      "type": {
+                        "name": "UInt32"
+                      }
+                    }
+                  ],
+                  "has_parentheses": true
+                }
+              ],
+              "has_parentheses": true
+            }
+          }
+        ],
+        "has_parentheses": true
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "d"
+      ]
+    }
+  ]
+}

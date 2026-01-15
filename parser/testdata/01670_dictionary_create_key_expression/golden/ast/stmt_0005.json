@@ -1,0 +1,90 @@
+{
+  "database": "database_dictionary_test_key_expression",
+  "table": "test_query_log_dictionary_simple",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "value_id",
+      "type": {
+        "name": "UInt64"
+      },
+      "expression": {
+        "name": "cityHash64",
+        "arguments": [
+          {
+            "parts": [
+              "value"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "value_id"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "HOST",
+          "value": {
+            "type": "String",
+            "value": "localhost"
+          }
+        },
+        {
+          "key": "PORT",
+          "value": {
+            "name": "tcpPort"
+          }
+        },
+        {
+          "key": "USER",
+          "value": {
+            "type": "String",
+            "value": "default"
+          }
+        },
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "test_for_dictionary"
+          }
+        },
+        {
+          "key": "DB",
+          "value": {
+            "type": "String",
+            "value": "database_dictionary_test_key_expression"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 1
+      },
+      "max": {
+        "type": "Integer",
+        "value": 10
+      }
+    },
+    "layout": {
+      "type": "HASHED"
+    }
+  }
+}

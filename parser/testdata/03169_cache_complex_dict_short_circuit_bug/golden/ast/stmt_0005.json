@@ -1,0 +1,86 @@
+{
+  "table": "cache_dictionary_complex_key_simple_attributes_short_circuit",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "id_key",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value_first",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "type": "String",
+        "value": "value_first_default"
+      }
+    },
+    {
+      "name": "value_second",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "type": "String",
+        "value": "value_second_default"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "id"
+        ]
+      },
+      {
+        "parts": [
+          "id_key"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "complex_key_simple_attributes_source_short_circuit_table"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 1
+      },
+      "max": {
+        "type": "Integer",
+        "value": 1000
+      }
+    },
+    "layout": {
+      "type": "COMPLEX_KEY_CACHE",
+      "args": [
+        {
+          "key": "SIZE_IN_CELLS",
+          "value": {
+            "type": "Integer",
+            "value": 10
+          }
+        }
+      ]
+    }
+  }
+}

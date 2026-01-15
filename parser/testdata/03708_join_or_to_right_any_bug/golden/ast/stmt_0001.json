@@ -1,0 +1,151 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "a"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "+",
+                            "right": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          },
+                          "alias": "b"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "l"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "a"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "r"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "l",
+                      "a"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "r",
+                      "a"
+                    ]
+                  },
+                  "parenthesized": true
+                },
+                "op": "OR",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "l",
+                      "b"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "r",
+                      "a"
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

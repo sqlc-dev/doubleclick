@@ -1,0 +1,73 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "cte",
+          "query": {
+            "left": {
+              "parts": [
+                "a"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "parts": [
+                "b"
+              ]
+            },
+            "parenthesized": true
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "query",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "test"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "parts": [
+                      "cte"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "query"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

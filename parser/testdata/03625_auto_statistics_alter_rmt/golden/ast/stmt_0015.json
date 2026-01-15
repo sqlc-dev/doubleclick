@@ -1,0 +1,110 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "column"
+          ]
+        },
+        {
+          "parts": [
+            "type"
+          ]
+        },
+        {
+          "parts": [
+            "statistics"
+          ]
+        },
+        {
+          "parts": [
+            "estimates",
+            "cardinality"
+          ]
+        },
+        {
+          "parts": [
+            "estimates",
+            "min"
+          ]
+        },
+        {
+          "parts": [
+            "estimates",
+            "max"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts_columns"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "t_alter_auto_statistics"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "active"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "name"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "column"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

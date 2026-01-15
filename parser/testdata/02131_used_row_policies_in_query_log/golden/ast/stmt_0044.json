@@ -1,0 +1,80 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "query"
+          ]
+        },
+        {
+          "parts": [
+            "used_row_policies"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "==",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "==",
+            "right": {
+              "type": "String",
+              "value": "QueryStart"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "query_kind"
+            ]
+          },
+          "op": "==",
+          "right": {
+            "type": "String",
+            "value": "Select"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

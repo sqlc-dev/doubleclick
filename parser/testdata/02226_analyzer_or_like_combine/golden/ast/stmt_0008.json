@@ -1,0 +1,89 @@
+{
+  "explain_type": "SYNTAX",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "materialize",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "Привет, World"
+              }
+            ],
+            "alias": "s1"
+          },
+          {
+            "name": "materialize",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "Привет, World"
+              }
+            ],
+            "alias": "s2"
+          }
+        ],
+        "where": {
+          "left": {
+            "left": {
+              "expr": {
+                "parts": [
+                  "s1"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "hell%"
+              }
+            },
+            "op": "OR",
+            "right": {
+              "expr": {
+                "parts": [
+                  "s2"
+                ]
+              },
+              "case_insensitive": true,
+              "pattern": {
+                "type": "String",
+                "value": "%привет%"
+              }
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "s1"
+              ]
+            },
+            "case_insensitive": true,
+            "pattern": {
+              "type": "String",
+              "value": "world%"
+            }
+          }
+        },
+        "settings": [
+          {
+            "name": "optimize_or_like_chain",
+            "value": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          {
+            "name": "allow_hyperscan",
+            "value": {
+              "type": "Integer",
+              "value": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "explicit_type": true
+}

@@ -1,0 +1,92 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "SearchEngineID"
+          ]
+        },
+        {
+          "parts": [
+            "ClientIP"
+          ]
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "Refresh"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "parts": [
+                "ResolutionWidth"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits_s3"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "SearchPhrase"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "String",
+          "value": ""
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "SearchEngineID"
+          ]
+        },
+        {
+          "parts": [
+            "ClientIP"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

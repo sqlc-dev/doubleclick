@@ -1,0 +1,122 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "UserID"
+          ]
+        },
+        {
+          "expr": {
+            "parts": [
+              "EventTime"
+            ]
+          },
+          "type": {
+            "name": "DateTime",
+            "parameters": [
+              {
+                "type": "String",
+                "value": "Asia/Dubai"
+              }
+            ],
+            "has_parentheses": true
+          },
+          "operator_syntax": true
+        },
+        {
+          "parts": [
+            "pp",
+            "Key1"
+          ]
+        },
+        {
+          "parts": [
+            "pp",
+            "Key2"
+          ]
+        },
+        {
+          "parts": [
+            "ParsedParams",
+            "Key1"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "left": true,
+              "columns": [
+                {
+                  "parts": [
+                    "ParsedParams"
+                  ],
+                  "alias": "pp"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 1704509
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "UserID"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "EventTime"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "pp",
+              "Key1"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "pp",
+              "Key2"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 100
+      }
+    }
+  ]
+}

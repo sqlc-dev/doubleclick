@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "RegionID"
+          ]
+        },
+        {
+          "name": "uniqCombined",
+          "arguments": [
+            {
+              "parts": [
+                "WatchID"
+              ]
+            }
+          ],
+          "alias": "X"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "parts": [
+                      "test"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "hits"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "RegionID"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "parts": [
+            "X"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 100000
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "RegionID"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

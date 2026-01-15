@@ -1,0 +1,111 @@
+{
+  "table": "t",
+  "columns": [
+    {
+      "name": "tid",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "processed_at",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "created_at",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "amount",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "name": "toStartOfDay",
+          "arguments": [
+            {
+              "parts": [
+                "created_at"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toStartOfDay",
+          "arguments": [
+            {
+              "parts": [
+                "processed_at"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "tid"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toStartOfQuarter",
+    "arguments": [
+      {
+        "parts": [
+          "created_at"
+        ]
+      }
+    ]
+  },
+  "primary_key": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "name": "toStartOfDay",
+          "arguments": [
+            {
+              "parts": [
+                "created_at"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toStartOfDay",
+          "arguments": [
+            {
+              "parts": [
+                "processed_at"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

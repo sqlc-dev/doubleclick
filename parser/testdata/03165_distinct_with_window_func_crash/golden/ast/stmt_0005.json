@@ -1,0 +1,103 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "parts": [
+            "loanx_id"
+          ]
+        },
+        {
+          "parts": [
+            "rating_sp"
+          ]
+        },
+        {
+          "parts": [
+            "cdu_date"
+          ]
+        },
+        {
+          "name": "row_number",
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "cdu_date"
+                ]
+              }
+            ]
+          },
+          "alias": "row_number"
+        },
+        {
+          "name": "last_value",
+          "arguments": [
+            {
+              "parts": [
+                "cdu_date"
+              ]
+            }
+          ],
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "loanx_id"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "cdu_date"
+                  ]
+                }
+              }
+            ]
+          },
+          "alias": "last_cdu_date"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "atable"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "cdu_date"
+          ]
+        },
+        {
+          "parts": [
+            "loanx_id"
+          ]
+        },
+        {
+          "parts": [
+            "rating_sp"
+          ]
+        }
+      ],
+      "settings": [
+        {
+          "name": "query_plan_remove_redundant_distinct",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

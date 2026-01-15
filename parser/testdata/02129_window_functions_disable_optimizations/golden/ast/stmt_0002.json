@@ -1,0 +1,96 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 10
+                }
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            },
+            {
+              "type": "Integer",
+              "value": 0
+            }
+          ],
+          "alias": "dummy"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "dummy"
+              ]
+            }
+          ],
+          "over": {
+            "name": "w"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "window": [
+        {
+          "name": "w",
+          "spec": {
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              },
+              "end": {
+                "type": "CURRENT_ROW"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

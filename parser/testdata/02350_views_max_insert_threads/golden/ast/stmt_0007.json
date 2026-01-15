@@ -1,0 +1,89 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "peak_threads_usage"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "Integer",
+            "value": 10
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "event_date"
+                ]
+              },
+              "op": "\u003e=",
+              "right": {
+                "name": "yesterday"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "current_database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "name": "startsWith",
+          "arguments": [
+            {
+              "parts": [
+                "query"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "insert"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

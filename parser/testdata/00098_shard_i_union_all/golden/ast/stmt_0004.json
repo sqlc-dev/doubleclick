@@ -1,0 +1,80 @@
+{
+  "table": "report1",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "event_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "priority",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "description",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "event_date"
+        ]
+      },
+      {
+        "name": "intHash32",
+        "arguments": [
+          {
+            "parts": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "parts": [
+              "event_date"
+            ]
+          },
+          {
+            "name": "intHash32",
+            "arguments": [
+              {
+                "parts": [
+                  "id"
+                ]
+              }
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

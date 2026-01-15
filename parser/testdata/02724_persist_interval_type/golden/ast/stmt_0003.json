@@ -1,0 +1,150 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "c",
+          "query": {
+            "name": "toDateTime64",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2023-01-01 00:00:00.000000001"
+              },
+              {
+                "type": "Integer",
+                "value": 9
+              },
+              {
+                "type": "String",
+                "value": "US/Eastern"
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "c"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "v1"
+              ]
+            }
+          },
+          "alias": "c_v1"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "c"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "v2"
+              ]
+            }
+          },
+          "alias": "c_v2"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "c"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "v3"
+              ]
+            }
+          },
+          "alias": "c_v3"
+        },
+        {
+          "name": "date_diff",
+          "arguments": [
+            {
+              "parts": [
+                "second"
+              ]
+            },
+            {
+              "parts": [
+                "c"
+              ]
+            },
+            {
+              "parts": [
+                "c_v1"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "date_diff",
+          "arguments": [
+            {
+              "parts": [
+                "hour"
+              ]
+            },
+            {
+              "parts": [
+                "c"
+              ]
+            },
+            {
+              "parts": [
+                "c_v2"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "date_diff",
+          "arguments": [
+            {
+              "parts": [
+                "second"
+              ]
+            },
+            {
+              "parts": [
+                "c"
+              ]
+            },
+            {
+              "parts": [
+                "c_v3"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "saved_intervals_tmp"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

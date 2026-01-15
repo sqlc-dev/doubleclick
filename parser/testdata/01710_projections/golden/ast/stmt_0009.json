@@ -1,0 +1,119 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toStartOfMinute",
+          "arguments": [
+            {
+              "parts": [
+                "datetime"
+              ]
+            }
+          ],
+          "alias": "dt_m"
+        },
+        {
+          "left": {
+            "name": "countIf",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "first_time"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "count"
+          }
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "left": {
+                "left": {
+                  "parts": [
+                    "kbytes"
+                  ]
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 8
+                },
+                "parenthesized": true
+              },
+              "op": "/",
+              "right": {
+                "parts": [
+                  "duration"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "projection_test"
+              }
+            }
+          }
+        ]
+      },
+      "prewhere": {
+        "left": {
+          "parts": [
+            "domain_alias"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 3
+        }
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "domain"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "1"
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "dt_m"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "dt_m"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

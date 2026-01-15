@@ -1,0 +1,309 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "is_initial_query"
+          ]
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        },
+        {
+          "name": "replaceRegexpAll",
+          "arguments": [
+            {
+              "parts": [
+                "query"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "_data_(\\d+)_(\\d+)"
+            },
+            {
+              "type": "String",
+              "value": "_data_"
+            }
+          ],
+          "alias": "query"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "yesterday"
+            },
+            "parenthesized": true
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            },
+            "parenthesized": true
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "name": "ignore",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 54
+              },
+              {
+                "type": "Integer",
+                "value": 0
+              },
+              {
+                "name": "ignore",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "QueryFinish"
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 11
+                  },
+                  {
+                    "name": "toLowCardinality",
+                    "arguments": [
+                      {
+                        "name": "toLowCardinality",
+                        "arguments": [
+                          {
+                            "type": "Integer",
+                            "value": 11
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 11
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 11
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 11
+                  }
+                ]
+              },
+              {
+                "type": "String",
+                "value": "QueryFinish"
+              },
+              {
+                "name": "materialize",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 11
+                  }
+                ]
+              },
+              {
+                "name": "toUInt128",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 11
+                  }
+                ]
+              }
+            ]
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "query_id"
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "database": "system",
+                          "table": "query_log"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "current_database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        },
+                        "parenthesized": true
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "event_date"
+                          ]
+                        },
+                        "op": "\u003e=",
+                        "right": {
+                          "name": "yesterday"
+                        },
+                        "parenthesized": true
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "type"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "QueryFinish"
+                      },
+                      "parenthesized": true
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "expr": {
+                      "parts": [
+                        "query"
+                      ]
+                    },
+                    "pattern": {
+                      "type": "String",
+                      "value": "-- Parallel inner query alone%"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "is_initial_query"
+          ]
+        },
+        {
+          "parts": [
+            "query"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "is_initial_query"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "query"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "allow_experimental_parallel_reading_from_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "max_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 3
+          }
+        },
+        {
+          "name": "cluster_for_parallel_replicas",
+          "value": {
+            "type": "String",
+            "value": "test_cluster_one_shard_three_replicas_localhost"
+          }
+        },
+        {
+          "name": "parallel_replicas_for_non_replicated_merge_tree",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "parallel_replicas_min_number_of_rows_per_replica",
+          "value": {
+            "type": "Integer",
+            "value": 10
+          }
+        }
+      ]
+    }
+  ]
+}

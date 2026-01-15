@@ -1,0 +1,71 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "my_literal",
+          "query": {
+            "expr": {
+              "type": "Integer",
+              "value": 1
+            },
+            "type": {
+              "name": "Nullable",
+              "parameters": [
+                {
+                  "name": "UInt64"
+                }
+              ],
+              "has_parentheses": true
+            },
+            "operator_syntax": true
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ]
+          },
+          "op": "+",
+          "right": {
+            "left": {
+              "parts": [
+                "my_literal"
+              ]
+            },
+            "op": "*",
+            "right": {
+              "name": "count"
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

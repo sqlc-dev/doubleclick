@@ -1,0 +1,142 @@
+{
+  "table": "address",
+  "columns": [
+    {
+      "name": "email_address",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "domain",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "first_name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "last_name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "country",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "esp",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "list_import_sid",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "list_import_sid"
+          ]
+        },
+        {
+          "parts": [
+            "country"
+          ]
+        },
+        {
+          "parts": [
+            "esp"
+          ]
+        },
+        {
+          "parts": [
+            "domain"
+          ]
+        },
+        {
+          "parts": [
+            "email_address"
+          ]
+        }
+      ]
+    }
+  ],
+  "primary_key": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "list_import_sid"
+          ]
+        },
+        {
+          "parts": [
+            "country"
+          ]
+        },
+        {
+          "parts": [
+            "esp"
+          ]
+        },
+        {
+          "parts": [
+            "domain"
+          ]
+        },
+        {
+          "parts": [
+            "email_address"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

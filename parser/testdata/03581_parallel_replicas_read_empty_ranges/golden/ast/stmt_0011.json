@@ -1,0 +1,76 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "read_rows"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "query"
+            ]
+          },
+          "case_insensitive": true,
+          "pattern": {
+            "type": "String",
+            "value": "% from 03581_data where %"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

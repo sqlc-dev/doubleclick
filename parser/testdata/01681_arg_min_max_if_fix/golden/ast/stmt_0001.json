@@ -1,0 +1,161 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "bitAnd",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "name": "toUInt64",
+              "arguments": [
+                {
+                  "left": {
+                    "name": "pow",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 257
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 20
+                      }
+                    ]
+                  },
+                  "op": "-",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1048576
+                  }
+                }
+              ]
+            }
+          ],
+          "alias": "k"
+        },
+        {
+          "name": "argMaxIf",
+          "arguments": [
+            {
+              "parts": [
+                "k"
+              ]
+            },
+            {
+              "name": "if",
+              "arguments": [
+                {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 255
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 256
+                  }
+                },
+                {
+                  "name": "toInt256",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 65535
+                    }
+                  ]
+                },
+                {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              ]
+            },
+            {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 42
+              }
+            }
+          ]
+        },
+        {
+          "name": "uniq",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "alias": "u"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "name": "toInt256",
+          "arguments": [
+            {
+              "op": "-",
+              "operand": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            {
+              "type": "Null",
+              "value": null
+            }
+          ]
+        },
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

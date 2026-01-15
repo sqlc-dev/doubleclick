@@ -1,0 +1,48 @@
+{
+  "database": "imdb_01148",
+  "table": "movie_directors",
+  "columns": [
+    {
+      "name": "director_id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "movie_id",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "director_id"
+          ]
+        },
+        {
+          "parts": [
+            "movie_id"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

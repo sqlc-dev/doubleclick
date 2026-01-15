@@ -1,0 +1,69 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "format_value",
+          "query": {
+            "name": "concat",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "1,2,\"[1,2,3]\","
+              },
+              {
+                "type": "String",
+                "value": "\"[['abc'], [], ['d', 'e']]\""
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "c1"
+          ]
+        },
+        {
+          "parts": [
+            "c2"
+          ]
+        },
+        {
+          "parts": [
+            "c3"
+          ]
+        },
+        {
+          "parts": [
+            "c4"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "format",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "CSV"
+                  },
+                  {
+                    "parts": [
+                      "format_value"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

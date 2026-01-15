@@ -1,0 +1,58 @@
+{
+  "table": "low_cardinality_all",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "Distributed",
+    "parameters": [
+      {
+        "parts": [
+          "test_shard_localhost"
+        ]
+      },
+      {
+        "name": "currentDatabase"
+      },
+      {
+        "parts": [
+          "low_cardinality"
+        ]
+      },
+      {
+        "name": "sipHash64",
+        "arguments": [
+          {
+            "parts": [
+              "s"
+            ]
+          }
+        ]
+      }
+    ],
+    "has_parentheses": true
+  }
+}

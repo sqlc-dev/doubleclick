@@ -1,0 +1,198 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "res1",
+          "query": {
+            "name": "numericIndexedVectorBuild",
+            "arguments": [
+              {
+                "name": "mapFromArrays",
+                "arguments": [
+                  {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 3
+                      }
+                    ],
+                    "spaced_commas": true
+                  },
+                  {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 10
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 20
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 30
+                      }
+                    ],
+                    "spaced_commas": true
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "res2",
+          "query": {
+            "name": "numericIndexedVectorBuild",
+            "arguments": [
+              {
+                "name": "mapFromArrays",
+                "arguments": [
+                  {
+                    "name": "arrayMap",
+                    "arguments": [
+                      {
+                        "parameters": [
+                          "x"
+                        ],
+                        "body": {
+                          "name": "toUInt32",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "x"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type": "Array",
+                        "value": [
+                          {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          {
+                            "type": "Integer",
+                            "value": 3
+                          }
+                        ],
+                        "spaced_commas": true
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Float",
+                        "value": 10.5,
+                        "source": "10.5"
+                      },
+                      {
+                        "type": "Float",
+                        "value": 20.3,
+                        "source": "20.3"
+                      },
+                      {
+                        "type": "Float",
+                        "value": 30.892,
+                        "source": "30.892"
+                      }
+                    ],
+                    "spaced_commas": true
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "tuple",
+          "arguments": [
+            {
+              "name": "numericIndexedVectorAllValueSum",
+              "arguments": [
+                {
+                  "parts": [
+                    "res1"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "numericIndexedVectorCardinality",
+              "arguments": [
+                {
+                  "parts": [
+                    "res1"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "toTypeName",
+              "arguments": [
+                {
+                  "parts": [
+                    "res1"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "numericIndexedVectorAllValueSum",
+              "arguments": [
+                {
+                  "parts": [
+                    "res2"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "numericIndexedVectorCardinality",
+              "arguments": [
+                {
+                  "parts": [
+                    "res2"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "toTypeName",
+              "arguments": [
+                {
+                  "parts": [
+                    "res2"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

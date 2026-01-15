@@ -1,0 +1,135 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Null",
+                            "value": null
+                          },
+                          "alias": "y"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "x"
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "2020-01-01 10:10:10"
+                          },
+                          "type": {
+                            "name": "DateTime64"
+                          },
+                          "alias": "t",
+                          "operator_syntax": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Null",
+                            "value": null
+                          },
+                          "alias": "y"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "x"
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "2020-01-01 10:10:10"
+                          },
+                          "type": {
+                            "name": "DateTime64"
+                          },
+                          "alias": "t",
+                          "operator_syntax": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ASOF",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "t"
+                    ]
+                  },
+                  "op": "\u003c=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "t"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "x"
+                    ]
+                  },
+                  "op": "==",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "x"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

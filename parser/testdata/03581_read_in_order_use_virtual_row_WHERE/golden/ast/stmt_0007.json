@@ -1,0 +1,218 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "id",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "query_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "current_database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "expr": {
+                          "parts": [
+                            "query"
+                          ]
+                        },
+                        "pattern": {
+                          "type": "String",
+                          "value": "select x from tab%"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "event_date"
+                        ]
+                      },
+                      "op": "\u003e=",
+                      "right": {
+                        "left": {
+                          "name": "today"
+                        },
+                        "op": "-",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        "parenthesized": true
+                      }
+                    }
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "event_time"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "replace",
+          "arguments": [
+            {
+              "parts": [
+                "name"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "ReadPoolParallelReplicasInOrder"
+            },
+            {
+              "type": "String",
+              "value": "ReadPoolInOrder"
+            }
+          ],
+          "alias": "name"
+        },
+        {
+          "parts": [
+            "output_rows"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "processors_profile_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "left": {
+                "name": "today"
+              },
+              "op": "-",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              },
+              "parenthesized": true
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "query_id"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "id"
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "expr": {
+              "parts": [
+                "name"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%MergeTreeSelect%"
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "name"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%VirtualRowTransform%"
+            }
+          },
+          "parenthesized": true
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "name"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "output_rows"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

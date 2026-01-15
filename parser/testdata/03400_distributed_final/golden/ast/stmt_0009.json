@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "03400_dist_users"
+              },
+              "alias": "l",
+              "final": true
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "03400_dist_users"
+                              },
+                              "alias": "d",
+                              "final": true
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "r"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "l",
+                    "uid"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "r",
+                    "uid"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "l",
+              "version"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "distributed_product_mode",
+          "value": {
+            "type": "String",
+            "value": "local"
+          }
+        }
+      ]
+    }
+  ]
+}

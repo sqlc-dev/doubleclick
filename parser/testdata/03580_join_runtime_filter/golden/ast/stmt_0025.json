@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "customer"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "nation"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "c_nationkey"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "op": "=",
+          "right": {
+            "left": {
+              "parts": [
+                "n_nationkey"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "n_name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "FRANCE"
+          }
+        }
+      },
+      "settings": [
+        {
+          "name": "enable_join_runtime_filters",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "join_runtime_bloom_filter_hash_functions",
+          "value": {
+            "type": "Integer",
+            "value": 20
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "special query for 01290_max_execution_speed_distributed"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "sleep",
+                          "arguments": [
+                            {
+                              "type": "Float",
+                              "value": 0.001,
+                              "source": "0.001"
+                            }
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.0.0.{2,3}"
+                                  },
+                                  {
+                                    "name": "numbers",
+                                    "arguments": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 100000
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "max_execution_speed",
+          "value": {
+            "type": "Integer",
+            "value": 100000
+          }
+        },
+        {
+          "name": "timeout_before_checking_execution_speed",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "name": "max_block_size",
+          "value": {
+            "type": "Integer",
+            "value": 1000
+          }
+        }
+      ]
+    }
+  ]
+}

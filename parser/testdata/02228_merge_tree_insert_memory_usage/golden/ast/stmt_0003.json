@@ -1,0 +1,63 @@
+{
+  "table": "data_02228",
+  "columns": [
+    {
+      "name": "key1",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "sign",
+      "type": {
+        "name": "Int8"
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "CollapsingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "sign"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key1"
+      ]
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "parts": [
+        "key1"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 100
+    }
+  },
+  "settings": [
+    {
+      "name": "auto_statistics_types",
+      "value": {
+        "type": "String",
+        "value": ""
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

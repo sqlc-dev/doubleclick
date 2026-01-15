@@ -1,0 +1,92 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "array": {
+            "parts": [
+              "ProfileEvents"
+            ]
+          },
+          "index": {
+            "type": "String",
+            "value": "QueryCacheHits"
+          }
+        },
+        {
+          "array": {
+            "parts": [
+              "ProfileEvents"
+            ]
+          },
+          "index": {
+            "type": "String",
+            "value": "QueryCacheMisses"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "query"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "SELECT 1 SETTINGS use_query_cache = true;"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

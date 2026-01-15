@@ -1,0 +1,118 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayFilter",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "notEmpty",
+                "arguments": [
+                  {
+                    "name": "concat",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "x"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "Null",
+                  "value": null
+                },
+                {
+                  "type": "Null",
+                  "value": null
+                }
+              ],
+              "spaced_commas": true
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "expr": {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 1048577
+                      }
+                    ]
+                  },
+                  "alias": "elem"
+                }
+              ]
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "name": "arrayMap",
+                  "arguments": [
+                    {
+                      "parameters": [
+                        "x"
+                      ],
+                      "body": {
+                        "name": "splitByChar",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "x"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "elem"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "type": "String",
+                          "value": ""
+                        }
+                      ]
+                    }
+                  ],
+                  "alias": "unused"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

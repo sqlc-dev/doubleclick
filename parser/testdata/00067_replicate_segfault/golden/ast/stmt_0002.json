@@ -1,0 +1,86 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayFilter",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "materialize",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "type": "Array",
+                  "value": [
+                    {
+                      "type": "String",
+                      "value": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "p"
+        },
+        {
+          "name": "arrayAll",
+          "arguments": [
+            {
+              "parameters": [
+                "y"
+              ],
+              "body": {
+                "name": "arrayExists",
+                "arguments": [
+                  {
+                    "parameters": [
+                      "x"
+                    ],
+                    "body": {
+                      "left": {
+                        "parts": [
+                          "y"
+                        ]
+                      },
+                      "op": "!=",
+                      "right": {
+                        "parts": [
+                          "x"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "parts": [
+                      "p"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "parts": [
+                "p"
+              ]
+            }
+          ],
+          "alias": "test"
+        }
+      ]
+    }
+  ]
+}

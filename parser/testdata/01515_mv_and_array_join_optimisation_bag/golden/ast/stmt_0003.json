@@ -1,0 +1,193 @@
+{
+  "view": "goal_view",
+  "materialized": true,
+  "to": "goal",
+  "columns": [
+    {
+      "name": "CounterID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "StartDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "GoalID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "Visits",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sumIf"
+            ]
+          },
+          {
+            "name": "Int8"
+          },
+          {
+            "name": "UInt8"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "GoalReaches",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sum"
+            ]
+          },
+          {
+            "name": "Int8"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "CounterID"
+            ]
+          },
+          {
+            "parts": [
+              "StartDate"
+            ]
+          },
+          {
+            "parts": [
+              "GoalID"
+            ]
+          },
+          {
+            "name": "sumIfState",
+            "arguments": [
+              {
+                "parts": [
+                  "Sign"
+                ]
+              },
+              {
+                "left": {
+                  "parts": [
+                    "_uniq"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            ],
+            "alias": "Visits"
+          },
+          {
+            "name": "sumState",
+            "arguments": [
+              {
+                "parts": [
+                  "Sign"
+                ]
+              }
+            ],
+            "alias": "GoalReaches"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "visits"
+                }
+              }
+            },
+            {
+              "array_join": {
+                "columns": [
+                  {
+                    "parts": [
+                      "GoalsID"
+                    ],
+                    "alias": "GoalID"
+                  },
+                  {
+                    "name": "arrayEnumerateUniq",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "GoalsID"
+                        ]
+                      }
+                    ],
+                    "alias": "_uniq"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "CounterID"
+            ]
+          },
+          {
+            "parts": [
+              "StartDate"
+            ]
+          },
+          {
+            "parts": [
+              "GoalID"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "CounterID"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "StartDate"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "GoalID"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

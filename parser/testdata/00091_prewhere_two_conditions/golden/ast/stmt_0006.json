@@ -1,0 +1,86 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "uniq",
+          "arguments": [
+            {}
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "name": "toTimeZone",
+              "arguments": [
+                {
+                  "parts": [
+                    "EventTime"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "Asia/Dubai"
+                }
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "type": "String",
+              "value": "2014-03-20 00:00:00"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "name": "toTimeZone",
+              "arguments": [
+                {
+                  "parts": [
+                    "EventTime"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "Asia/Dubai"
+                }
+              ]
+            },
+            "op": "\u003c",
+            "right": {
+              "type": "String",
+              "value": "2014-03-21 00:00:00"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "EventDate"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "2014-03-21"
+          }
+        }
+      }
+    }
+  ]
+}

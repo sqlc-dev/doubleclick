@@ -1,0 +1,49 @@
+{
+  "if_not_exists": true,
+  "table": "replicated_deduplicate_by_columns_r2",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "unique_value",
+      "type": {
+        "name": "UInt64"
+      },
+      "default": {
+        "name": "rowNumberInBlock"
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_01581/replicated_deduplicate"
+      },
+      {
+        "type": "String",
+        "value": "r2"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

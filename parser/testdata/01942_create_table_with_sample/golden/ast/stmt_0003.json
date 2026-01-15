@@ -1,0 +1,42 @@
+{
+  "if_not_exists": true,
+  "table": "sample_correct",
+  "columns": [
+    {
+      "name": "x",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple",
+      "arguments": [
+        {
+          "name": "sipHash64",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sample_by": {
+    "name": "sipHash64",
+    "arguments": [
+      {
+        "parts": [
+          "x"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "table": "with_fill_staleness",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "name": "toDateTime",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "2016-06-15 23:00:00"
+                  }
+                ]
+              },
+              "op": "+",
+              "right": {
+                "parts": [
+                  "number"
+                ]
+              }
+            },
+            "alias": "a"
+          },
+          {
+            "parts": [
+              "a"
+            ],
+            "alias": "b"
+          },
+          {
+            "parts": [
+              "number"
+            ],
+            "alias": "c"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 30
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 5
+            },
+            "parenthesized": true
+          },
+          "op": "==",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      }
+    ]
+  }
+}

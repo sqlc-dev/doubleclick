@@ -1,0 +1,154 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sumIf",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            },
+            {
+              "left": {
+                "name": "if",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  {
+                    "name": "toDateTime",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "2020-01-01 00:00:00"
+                      },
+                      {
+                        "type": "String",
+                        "value": "UTC"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "toDateTime",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "1970-01-01 00:00:00"
+                      },
+                      {
+                        "type": "String",
+                        "value": "UTC"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "parts": [
+                  "t"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "e"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "joinKey"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "da"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "joinKey"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "a"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "t"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2021-07-19T13:00:00"
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "t"
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2021-07-19T13:59:59"
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "dimension_1"
+          ]
+        },
+        {
+          "parts": [
+            "sum_metric_1"
+          ]
+        },
+        {
+          "parts": [
+            "sum_metric_2"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "dimension_1"
+                          ]
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "metric_1"
+                              ]
+                            }
+                          ],
+                          "alias": "sum_metric_1"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "foo"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "dimension_1"
+                          ]
+                        }
+                      ],
+                      "with_totals": true
+                    }
+                  ]
+                }
+              },
+              "alias": "subquery_1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "dimension_1"
+                          ]
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "metric_2"
+                              ]
+                            }
+                          ],
+                          "alias": "sum_metric_2"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "bar"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "dimension_1"
+                          ]
+                        }
+                      ],
+                      "with_totals": true
+                    }
+                  ]
+                }
+              },
+              "alias": "subquery_2"
+            },
+            "join": {
+              "type": "FULL",
+              "strictness": "ALL",
+              "using": [
+                {
+                  "parts": [
+                    "dimension_1"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "sum_metric_2"
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "type": "Integer",
+          "value": 20
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "dimension_1"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "table": "table2",
+  "columns": [
+    {
+      "name": "B",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "ts",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "ts"
+          ]
+        },
+        {
+          "parts": [
+            "B"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toStartOfDay",
+    "arguments": [
+      {
+        "parts": [
+          "ts"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "table": "datetime_table",
+  "columns": [
+    {
+      "name": "t",
+      "type": {
+        "name": "DateTime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "t"
+          ]
+        },
+        {
+          "parts": [
+            "name"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toStartOfDay",
+    "arguments": [
+      {
+        "parts": [
+          "t"
+        ]
+      }
+    ]
+  }
+}

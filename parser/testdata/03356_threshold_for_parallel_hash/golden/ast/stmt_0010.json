@@ -1,0 +1,101 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trimBoth",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "lhs"
+                                },
+                                "alias": "t0"
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "rhs"
+                                },
+                                "alias": "t1"
+                              },
+                              "join": {
+                                "type": "INNER",
+                                "on": {
+                                  "left": {
+                                    "parts": [
+                                      "t0",
+                                      "a"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "parts": [
+                                      "t1",
+                                      "a"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "settings": [
+                          {
+                            "name": "query_plan_join_swap_table",
+                            "value": {
+                              "type": "Boolean",
+                              "value": false
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "explain"
+          ]
+        },
+        "case_insensitive": true,
+        "pattern": {
+          "type": "String",
+          "value": "%Algorithm%"
+        }
+      }
+    }
+  ]
+}

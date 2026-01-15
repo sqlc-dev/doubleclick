@@ -1,0 +1,96 @@
+{
+  "table_expr": {
+    "table": {
+      "query": {
+        "selects": [
+          {
+            "with": [
+              {
+                "name": "test_table_in_cte_1",
+                "query": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "alias": "c1"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "scalar_with": false
+              },
+              {
+                "name": "test_table_in_cte_2",
+                "query": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "alias": "c1"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "scalar_with": false
+              }
+            ],
+            "columns": [
+              {}
+            ],
+            "from": {
+              "tables": [
+                {
+                  "table": {
+                    "table": {
+                      "table": "test_table_in_cte_1"
+                    }
+                  }
+                },
+                {
+                  "table": {
+                    "table": {
+                      "table": "test_table_in_cte_2"
+                    },
+                    "alias": "test_table_in_cte_2"
+                  },
+                  "join": {
+                    "type": "INNER",
+                    "on": {
+                      "left": {
+                        "parts": [
+                          "test_table_in_cte_1",
+                          "c1"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "parts": [
+                          "test_table_in_cte_2",
+                          "c1"
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "ty",
+            "number"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "sipHash64",
+              "arguments": [
+                {
+                  "left": {
+                    "parts": [
+                      "ty",
+                      "number"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 100
+            }
+          },
+          "alias": "a"
+        },
+        {
+          "parts": [
+            "tw",
+            "number"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "sipHash64",
+              "arguments": [
+                {
+                  "parts": [
+                    "tw",
+                    "number"
+                  ]
+                }
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 100
+            }
+          },
+          "alias": "b"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 4
+                  }
+                ]
+              },
+              "alias": "ty"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 4
+                  }
+                ]
+              },
+              "alias": "tw"
+            },
+            "join": {
+              "type": "RIGHT",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "tw",
+                      "number"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "ty",
+                      "number"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "a"
+                    ]
+                  },
+                  "op": "\u003c=",
+                  "right": {
+                    "parts": [
+                      "b"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

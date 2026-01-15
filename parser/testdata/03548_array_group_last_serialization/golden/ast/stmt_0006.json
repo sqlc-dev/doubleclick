@@ -1,0 +1,88 @@
+{
+  "view": "mv0",
+  "materialized": true,
+  "to": "t1",
+  "columns": [
+    {
+      "name": "k0",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "v0",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "name": "groupArrayLast",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "name": "Nullable",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "k0"
+            ]
+          },
+          {
+            "name": "groupArrayLastState",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ],
+            "arguments": [
+              {
+                "parts": [
+                  "v0"
+                ]
+              }
+            ],
+            "alias": "v00"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "t0"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "k0"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "RegionID"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "AdvEngineID"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "parts": [
+                "ResolutionWidth"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "uniq",
+          "arguments": [
+            {
+              "parts": [
+                "UserID"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits_s3"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "RegionID"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

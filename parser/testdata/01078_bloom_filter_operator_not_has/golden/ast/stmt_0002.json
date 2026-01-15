@@ -1,0 +1,75 @@
+{
+  "table": "bloom_filter_not_has",
+  "columns": [
+    {
+      "name": "ary",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "LowCardinality",
+            "parameters": [
+              {
+                "name": "Nullable",
+                "parameters": [
+                  {
+                    "name": "String"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_ary",
+      "expression": {
+        "parts": [
+          "ary"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter",
+        "arguments": [
+          {
+            "type": "Float",
+            "value": 0.01,
+            "source": "0.01"
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1024
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "d"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "d"
+    ]
+  }
+}

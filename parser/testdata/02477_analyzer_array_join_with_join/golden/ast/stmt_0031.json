@@ -1,0 +1,69 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "type": "Integer",
+                                "value": 0
+                              }
+                            ]
+                          },
+                          "alias": "id"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "subquery"
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "id"
+                  ],
+                  "alias": "id"
+                }
+              ]
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test_table"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

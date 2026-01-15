@@ -1,0 +1,130 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "limit w/ GROUP BY"
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "type": "Null",
+              "value": null
+            }
+          ]
+        },
+        {
+          "parts": [
+            "number"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.{1,2}"
+                  },
+                  {
+                    "name": "view",
+                    "arguments": [
+                      {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {
+                                  "name": "intDiv",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "number"
+                                      ]
+                                    },
+                                    {
+                                      "type": "Integer",
+                                      "value": 2147483647
+                                    }
+                                  ],
+                                  "alias": "number"
+                                }
+                              ],
+                              "from": {
+                                "tables": [
+                                  {
+                                    "table": {
+                                      "table": {
+                                        "name": "numbers",
+                                        "arguments": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 10
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "number"
+          ]
+        }
+      ],
+      "with_rollup": true,
+      "order_by": [
+        {
+          "expression": {
+            "name": "count"
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "number"
+            ]
+          },
+          "descending": true,
+          "nulls_first": false
+        }
+      ],
+      "settings": [
+        {
+          "name": "limit",
+          "value": {
+            "type": "Integer",
+            "value": 2
+          }
+        },
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

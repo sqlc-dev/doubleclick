@@ -1,0 +1,45 @@
+{
+  "table": "src_table",
+  "columns": [
+    {
+      "name": "time",
+      "type": {
+        "name": "DateTime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "fromUnixTimestamp",
+        "arguments": [
+          {
+            "parts": [
+              "sipTimestamp"
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "sipTimestamp",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "time"
+      ]
+    }
+  ]
+}

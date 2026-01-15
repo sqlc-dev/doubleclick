@@ -1,0 +1,110 @@
+{
+  "table": "tp",
+  "columns": [
+    {
+      "name": "p",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "v1",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "v2",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p1",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "p"
+            ]
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "k"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "v1"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "v2"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "p"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "k"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "p"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

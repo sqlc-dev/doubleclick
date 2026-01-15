@@ -1,0 +1,105 @@
+{
+  "explain_type": "PLAN",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "parts": [
+              "delete_time"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "t1"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "delete_time"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t2"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "d"
+              },
+              "join": {
+                "type": "CROSS"
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "parts": [
+                "create_time"
+              ]
+            },
+            "op": "\u003c",
+            "right": {
+              "parts": [
+                "delete_time"
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "id"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 101
+            }
+          }
+        },
+        "settings": [
+          {
+            "name": "enable_analyzer",
+            "value": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true,
+  "options_string": "indexes = 1"
+}

@@ -1,0 +1,125 @@
+{
+  "if_not_exists": true,
+  "table": "agg_table",
+  "columns": [
+    {
+      "name": "time",
+      "type": {
+        "name": "DateTime"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "DoubleDelta"
+          },
+          {
+            "name": "LZ4"
+          }
+        ]
+      }
+    },
+    {
+      "name": "xxx",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "two_values",
+      "type": {
+        "name": "Tuple",
+        "parameters": [
+          {
+            "name": "Array",
+            "parameters": [
+              {
+                "name": "UInt16"
+              }
+            ],
+            "has_parentheses": true
+          },
+          {
+            "name": "UInt32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "agg_simple",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sum"
+            ]
+          },
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "agg",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sumMap"
+            ]
+          },
+          {
+            "name": "Tuple",
+            "parameters": [
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "Int16"
+                  }
+                ],
+                "has_parentheses": true
+              },
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "UInt64"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "xxx"
+          ]
+        },
+        {
+          "parts": [
+            "time"
+          ]
+        }
+      ]
+    }
+  ]
+}

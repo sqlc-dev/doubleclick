@@ -1,0 +1,118 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "type": "String",
+          "value": "(forward, head, A-\u003eB)"
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "name": "sequenceNextNodeDistinct",
+          "parameters": [
+            {
+              "type": "String",
+              "value": "forward"
+            },
+            {
+              "type": "String",
+              "value": "head"
+            },
+            {
+              "type": "Integer",
+              "value": 4
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "dt"
+              ]
+            },
+            {
+              "parts": [
+                "action"
+              ]
+            },
+            {
+              "left": {
+                "parts": [
+                  "action"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "A"
+              }
+            },
+            {
+              "left": {
+                "name": "toNullable",
+                "arguments": [
+                  {
+                    "expr": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "not": true
+                  }
+                ]
+              },
+              "op": "AND",
+              "right": {
+                "op": "NOT",
+                "operand": {
+                  "name": "toNullable",
+                  "arguments": [
+                    {
+                      "name": "isNullable",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "alias": "next_node"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "events_demo"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {}
+      ],
+      "with_rollup": true,
+      "with_totals": true,
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          },
+          "nulls_first": false
+        }
+      ]
+    }
+  ]
+}

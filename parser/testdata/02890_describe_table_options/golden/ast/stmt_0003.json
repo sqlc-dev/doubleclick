@@ -1,0 +1,99 @@
+{
+  "table": "t_describe_options",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      },
+      "comment": "index column"
+    },
+    {
+      "name": "arr",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "type": "Array",
+        "value": [
+          {
+            "type": "Integer",
+            "value": 10
+          },
+          {
+            "type": "Integer",
+            "value": 20
+          }
+        ],
+        "spaced_commas": true
+      },
+      "default_kind": "DEFAULT",
+      "codec": {
+        "codecs": [
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    },
+    {
+      "name": "t",
+      "type": {
+        "name": "Tuple",
+        "parameters": [
+          {
+            "name": "a",
+            "type": {
+              "name": "String"
+            }
+          },
+          {
+            "name": "b",
+            "type": {
+              "name": "UInt64"
+            }
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "type": "Tuple",
+        "value": [
+          {
+            "type": "String",
+            "value": "foo"
+          },
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ],
+        "spaced_commas": true
+      },
+      "default_kind": "DEFAULT",
+      "codec": {
+        "codecs": [
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

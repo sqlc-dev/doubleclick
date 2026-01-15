@@ -1,0 +1,94 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "ntile",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ],
+          "over": {
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              },
+              "end": {
+                "type": "UNBOUNDED_FOLLOWING"
+              }
+            }
+          },
+          "alias": "a"
+        },
+        {
+          "name": "ntile",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ],
+          "over": {
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              },
+              "end": {
+                "type": "UNBOUNDED_FOLLOWING"
+              }
+            }
+          },
+          "alias": "b"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "id"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

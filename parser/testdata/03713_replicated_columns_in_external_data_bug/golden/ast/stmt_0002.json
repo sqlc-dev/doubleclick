@@ -1,0 +1,121 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2,3}"
+                  },
+                  {
+                    "name": "numbers",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 100
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "number"
+          ]
+        },
+        "global": true,
+        "query": {
+          "selects": [
+            {
+              "columns": [
+                {
+                  "expr": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "type": {
+                    "name": "Dynamic"
+                  },
+                  "operator_syntax": true
+                }
+              ],
+              "from": {
+                "tables": [
+                  {
+                    "table": {
+                      "table": {
+                        "name": "numbers",
+                        "arguments": [
+                          {
+                            "type": "Integer",
+                            "value": 100
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "array_join": {
+                      "columns": [
+                        {
+                          "name": "range",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 100
+      },
+      "settings": [
+        {
+          "name": "enable_lazy_columns_replication",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ],
+      "settings_after_format": true,
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

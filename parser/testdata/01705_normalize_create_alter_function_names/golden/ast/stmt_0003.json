@@ -1,0 +1,57 @@
+{
+  "table": "x",
+  "commands": [
+    {
+      "type": "ADD_INDEX",
+      "index": "nn",
+      "index_expr": {
+        "name": "LOG2",
+        "arguments": [
+          {
+            "parts": [
+              "i"
+            ]
+          }
+        ]
+      },
+      "index_type": "minmax",
+      "index_def": {
+        "name": "nn",
+        "expression": {
+          "name": "LOG2",
+          "arguments": [
+            {
+              "parts": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "type": {
+          "name": "minmax"
+        }
+      },
+      "granularity": 1
+    },
+    {
+      "type": "ADD_PROJECTION",
+      "projection": {
+        "name": "p2",
+        "select": {
+          "columns": [
+            {
+              "name": "MIN",
+              "arguments": [
+                {
+                  "parts": [
+                    "i"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

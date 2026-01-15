@@ -1,0 +1,94 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 10
+            }
+          },
+          "alias": "k"
+        },
+        {
+          "name": "boundingRatio",
+          "arguments": [
+            {
+              "left": {
+                "type": "Integer",
+                "value": 1000
+              },
+              "op": "+",
+              "right": {
+                "parts": [
+                  "number"
+                ]
+              }
+            },
+            {
+              "left": {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "*",
+                "right": {
+                  "type": "Float",
+                  "value": 1.5,
+                  "source": "1.5"
+                }
+              },
+              "op": "-",
+              "right": {
+                "type": "Integer",
+                "value": 111
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 100
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "with_totals": true,
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

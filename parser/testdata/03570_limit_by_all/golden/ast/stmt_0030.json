@@ -1,0 +1,97 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "t",
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "tag"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_limit_by_all"
+              },
+              "alias": "t"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test_limit_by_all_tags"
+              },
+              "alias": "g"
+            },
+            "join": {
+              "type": "LEFT",
+              "using": [
+                {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "g",
+                    "tags"
+                  ],
+                  "alias": "tag"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "t",
+              "id"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "tag"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "value"
+            ]
+          }
+        }
+      ],
+      "limit_by": [
+        {
+          "parts": [
+            "ALL"
+          ]
+        }
+      ],
+      "limit_by_limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

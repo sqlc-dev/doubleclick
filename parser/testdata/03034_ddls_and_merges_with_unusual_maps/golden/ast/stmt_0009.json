@@ -1,0 +1,61 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "m1",
+      "type": {
+        "name": "Map",
+        "parameters": [
+          {
+            "name": "Float32"
+          },
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "m2",
+      "type": {
+        "name": "Map",
+        "parameters": [
+          {
+            "name": "LowCardinality",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          },
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "m1"
+          ]
+        },
+        {
+          "parts": [
+            "m2"
+          ]
+        }
+      ]
+    }
+  ]
+}

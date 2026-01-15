@@ -1,0 +1,124 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "shardNum"
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "key"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "key"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "03731_data"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "key"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "left": {
+              "name": "shardNum"
+            },
+            "op": "*",
+            "right": {
+              "type": "Integer",
+              "value": 10000
+            },
+            "parenthesized": true
+          },
+          "parenthesized": true
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "key"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "left": {
+              "left": {
+                "name": "shardNum"
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 10000
+              },
+              "parenthesized": true
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 10000
+            },
+            "parenthesized": true
+          },
+          "parenthesized": true
+        }
+      },
+      "group_by": [
+        {
+          "type": "Integer",
+          "value": 1
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

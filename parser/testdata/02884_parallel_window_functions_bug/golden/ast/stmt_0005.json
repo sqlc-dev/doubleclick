@@ -1,0 +1,392 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "host_id"
+          ]
+        },
+        {
+          "parts": [
+            "path_id"
+          ]
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "rank"
+              ]
+            }
+          ],
+          "alias": "rank"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "with": [
+                        {
+                          "name": "as_of_posts",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {},
+                                    {
+                                      "name": "row_number",
+                                      "over": {
+                                        "partition_by": [
+                                          {
+                                            "type": "Tuple",
+                                            "value": [
+                                              {
+                                                "parts": [
+                                                  "page_id"
+                                                ]
+                                              },
+                                              {
+                                                "parts": [
+                                                  "post_id"
+                                                ]
+                                              }
+                                            ],
+                                            "spaced_commas": true
+                                          }
+                                        ],
+                                        "order_by": [
+                                          {
+                                            "expression": {
+                                              "parts": [
+                                                "as_of"
+                                              ]
+                                            },
+                                            "descending": true
+                                          }
+                                        ]
+                                      },
+                                      "alias": "row_num"
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "table": "posts"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "where": {
+                                    "left": {
+                                      "left": {
+                                        "parts": [
+                                          "created"
+                                        ]
+                                      },
+                                      "op": "\u003e=",
+                                      "right": {
+                                        "name": "subtractHours",
+                                        "arguments": [
+                                          {
+                                            "name": "now"
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 24
+                                          }
+                                        ]
+                                      },
+                                      "parenthesized": true
+                                    },
+                                    "op": "AND",
+                                    "right": {
+                                      "left": {
+                                        "parts": [
+                                          "host_id"
+                                        ]
+                                      },
+                                      "op": "\u003e",
+                                      "right": {
+                                        "type": "Integer",
+                                        "value": 0
+                                      },
+                                      "parenthesized": true
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": false
+                        },
+                        {
+                          "name": "as_of_post_metrics",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {},
+                                    {
+                                      "name": "row_number",
+                                      "over": {
+                                        "partition_by": [
+                                          {
+                                            "type": "Tuple",
+                                            "value": [
+                                              {
+                                                "parts": [
+                                                  "page_id"
+                                                ]
+                                              },
+                                              {
+                                                "parts": [
+                                                  "post_id"
+                                                ]
+                                              }
+                                            ],
+                                            "spaced_commas": true
+                                          }
+                                        ],
+                                        "order_by": [
+                                          {
+                                            "expression": {
+                                              "parts": [
+                                                "as_of"
+                                              ]
+                                            },
+                                            "descending": true
+                                          }
+                                        ]
+                                      },
+                                      "alias": "row_num"
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "table": "post_metrics"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "where": {
+                                    "left": {
+                                      "parts": [
+                                        "created"
+                                      ]
+                                    },
+                                    "op": "\u003e=",
+                                    "right": {
+                                      "name": "subtractHours",
+                                      "arguments": [
+                                        {
+                                          "name": "now"
+                                        },
+                                        {
+                                          "type": "Integer",
+                                          "value": 24
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": false
+                        }
+                      ],
+                      "columns": [
+                        {
+                          "parts": [
+                            "page_id"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "post_id"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "host_id"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "path_id"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "impressions"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "clicks"
+                          ]
+                        },
+                        {
+                          "name": "ntile",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 20
+                            }
+                          ],
+                          "over": {
+                            "partition_by": [
+                              {
+                                "parts": [
+                                  "page_id"
+                                ]
+                              }
+                            ],
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "clicks"
+                                  ]
+                                }
+                              }
+                            ],
+                            "frame": {
+                              "type": "ROWS",
+                              "start": {
+                                "type": "UNBOUNDED_PRECEDING"
+                              },
+                              "end": {
+                                "type": "UNBOUNDED_FOLLOWING"
+                              }
+                            }
+                          },
+                          "alias": "rank"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "as_of_posts"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "as_of_post_metrics"
+                              }
+                            },
+                            "join": {
+                              "type": "LEFT",
+                              "global": true,
+                              "using": [
+                                {
+                                  "parts": [
+                                    "page_id"
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "post_id"
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "row_num"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "row_num"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "parenthesized": true
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "impressions"
+                            ]
+                          },
+                          "op": "\u003e",
+                          "right": {
+                            "type": "Integer",
+                            "value": 0
+                          },
+                          "parenthesized": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "t",
+            "rank"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 18
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "host_id"
+          ]
+        },
+        {
+          "parts": [
+            "path_id"
+          ]
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

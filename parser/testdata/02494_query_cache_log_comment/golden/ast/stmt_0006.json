@@ -1,0 +1,117 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "log_comment"
+          ]
+        },
+        {
+          "array": {
+            "parts": [
+              "ProfileEvents"
+            ]
+          },
+          "index": {
+            "type": "String",
+            "value": "QueryCacheHits"
+          }
+        },
+        {
+          "array": {
+            "parts": [
+              "ProfileEvents"
+            ]
+          },
+          "index": {
+            "type": "String",
+            "value": "QueryCacheMisses"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "QueryFinish"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "event_time"
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "left": {
+                  "name": "now"
+                },
+                "op": "-",
+                "right": {
+                  "type": "Integer",
+                  "value": 600
+                }
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "query"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "SELECT 1 SETTINGS use_query_cache%"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

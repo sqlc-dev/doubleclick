@@ -1,0 +1,127 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "dummy"
+                          ],
+                          "alias": "val"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "one"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toLowCardinality",
+                          "arguments": [
+                            {
+                              "name": "toNullable",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "dummy"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "rval"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "one"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "val"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                },
+                "op": "=",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "rval"
+                    ]
+                  },
+                  "op": "*",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "all"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

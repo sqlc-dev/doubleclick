@@ -1,0 +1,69 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "CounterID"
+          ],
+          "alias": "k"
+        },
+        {
+          "name": "quantileTiming",
+          "parameters": [
+            {
+              "type": "Float",
+              "value": 0.5,
+              "source": "0.5"
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "ResolutionWidth"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "name": "count"
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "CounterID"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

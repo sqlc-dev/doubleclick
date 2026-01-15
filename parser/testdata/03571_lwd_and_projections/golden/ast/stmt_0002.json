@@ -1,0 +1,87 @@
+{
+  "table": "weird_projections",
+  "columns": [
+    {
+      "name": "account_id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "user_id",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "events_by_day_proj",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "account_id"
+            ]
+          },
+          {
+            "name": "countDistinct",
+            "arguments": [
+              {
+                "parts": [
+                  "user_id"
+                ]
+              }
+            ],
+            "alias": "total_users"
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "account_id"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/{database}/tables/test"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "account_id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "lightweight_mutation_projection_mode",
+      "value": {
+        "type": "String",
+        "value": "rebuild"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

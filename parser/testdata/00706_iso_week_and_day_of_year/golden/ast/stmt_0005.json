@@ -1,0 +1,58 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "name": "toDayOfWeek",
+          "arguments": [
+            {
+              "name": "toStartOfISOYear",
+              "arguments": [
+                {
+                  "name": "toDateTime",
+                  "arguments": [
+                    {
+                      "left": {
+                        "type": "Integer",
+                        "value": 1000000000
+                      },
+                      "op": "+",
+                      "right": {
+                        "left": {
+                          "name": "rand64"
+                        },
+                        "op": "%",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1000000000
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

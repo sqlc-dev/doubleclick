@@ -1,0 +1,74 @@
+{
+  "table": "summing_mt_aggregating_column",
+  "columns": [
+    {
+      "name": "Key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "Value",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "ConcatArraySimple",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "groupArrayArray"
+            ]
+          },
+          {
+            "name": "Array",
+            "parameters": [
+              {
+                "name": "UInt64"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "ConcatArrayComplex",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "groupArrayArray"
+            ]
+          },
+          {
+            "name": "Array",
+            "parameters": [
+              {
+                "name": "UInt64"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "Key"
+      ]
+    }
+  ]
+}

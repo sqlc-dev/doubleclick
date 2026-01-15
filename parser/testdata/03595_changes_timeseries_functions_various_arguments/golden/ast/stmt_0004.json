@@ -1,0 +1,74 @@
+{
+  "table": "ts_data_nullable",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "parts": [
+              "timestamp"
+            ]
+          },
+          {
+            "parts": [
+              "value"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "ts_data"
+                }
+              }
+            },
+            {
+              "array_join": {
+                "columns": [
+                  {
+                    "parts": [
+                      "timestamps"
+                    ],
+                    "alias": "timestamp"
+                  },
+                  {
+                    "name": "arrayResize",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "values"
+                        ]
+                      },
+                      {
+                        "name": "length",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "timestamps"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Null",
+                        "value": null
+                      }
+                    ],
+                    "alias": "value"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

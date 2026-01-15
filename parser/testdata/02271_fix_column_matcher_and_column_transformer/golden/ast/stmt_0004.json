@@ -1,0 +1,806 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "top_repos",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "github_events"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "event_type"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "WatchEvent"
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "name": "toDate",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "created_at"
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "left": {
+                          "name": "today"
+                        },
+                        "op": "-",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    }
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    }
+                  ],
+                  "order_by": [
+                    {
+                      "expression": {
+                        "name": "count"
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 100
+                  }
+                },
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "github_events"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "event_type"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "WatchEvent"
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "name": "toMonday",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "created_at"
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "name": "toMonday",
+                        "arguments": [
+                          {
+                            "left": {
+                              "name": "today"
+                            },
+                            "op": "-",
+                            "right": {
+                              "value": {
+                                "type": "Integer",
+                                "value": 1
+                              },
+                              "unit": "WEEK"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    }
+                  ],
+                  "order_by": [
+                    {
+                      "expression": {
+                        "name": "count"
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 100
+                  }
+                },
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "github_events"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "event_type"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "WatchEvent"
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "name": "toStartOfMonth",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "created_at"
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "left": {
+                          "name": "toStartOfMonth",
+                          "arguments": [
+                            {
+                              "name": "today"
+                            }
+                          ]
+                        },
+                        "op": "-",
+                        "right": {
+                          "value": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "unit": "MONTH"
+                        }
+                      }
+                    }
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    }
+                  ],
+                  "order_by": [
+                    {
+                      "expression": {
+                        "name": "count"
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 100
+                  }
+                },
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "github_events"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "event_type"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "WatchEvent"
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "name": "toYear",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "created_at"
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "left": {
+                          "name": "toYear",
+                          "arguments": [
+                            {
+                              "name": "today"
+                            }
+                          ]
+                        },
+                        "op": "-",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    }
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    }
+                  ],
+                  "order_by": [
+                    {
+                      "expression": {
+                        "name": "count"
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 100
+                  }
+                }
+              ],
+              "union_modes": [
+                "UNION DISTINCT",
+                "UNION DISTINCT",
+                "UNION DISTINCT"
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "last_day",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    },
+                    {
+                      "name": "count",
+                      "alias": "count_last_day"
+                    },
+                    {
+                      "expr": {
+                        "left": {
+                          "name": "rowNumberInAllBlocks"
+                        },
+                        "op": "+",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      },
+                      "alias": "position_last_day"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "github_events"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "expr": {
+                        "parts": [
+                          "repo_name"
+                        ]
+                      },
+                      "query": {
+                        "selects": [
+                          {
+                            "columns": [
+                              {
+                                "parts": [
+                                  "repo_name"
+                                ]
+                              }
+                            ],
+                            "from": {
+                              "tables": [
+                                {
+                                  "table": {
+                                    "table": {
+                                      "table": "top_repos"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "name": "toDate",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "created_at"
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "left": {
+                          "name": "today"
+                        },
+                        "op": "-",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    }
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    }
+                  ],
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "count_last_day"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "last_week",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    },
+                    {
+                      "name": "count",
+                      "alias": "count_last_week"
+                    },
+                    {
+                      "expr": {
+                        "left": {
+                          "name": "rowNumberInAllBlocks"
+                        },
+                        "op": "+",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      },
+                      "alias": "position_last_week"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "github_events"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "expr": {
+                        "parts": [
+                          "repo_name"
+                        ]
+                      },
+                      "query": {
+                        "selects": [
+                          {
+                            "columns": [
+                              {
+                                "parts": [
+                                  "repo_name"
+                                ]
+                              }
+                            ],
+                            "from": {
+                              "tables": [
+                                {
+                                  "table": {
+                                    "table": {
+                                      "table": "top_repos"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "name": "toMonday",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "created_at"
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "left": {
+                          "name": "toMonday",
+                          "arguments": [
+                            {
+                              "name": "today"
+                            }
+                          ]
+                        },
+                        "op": "-",
+                        "right": {
+                          "value": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "unit": "WEEK"
+                        }
+                      }
+                    }
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    }
+                  ],
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "count_last_week"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "last_month",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    },
+                    {
+                      "name": "count",
+                      "alias": "count_last_month"
+                    },
+                    {
+                      "expr": {
+                        "left": {
+                          "name": "rowNumberInAllBlocks"
+                        },
+                        "op": "+",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      },
+                      "alias": "position_last_month"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "github_events"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "expr": {
+                        "parts": [
+                          "repo_name"
+                        ]
+                      },
+                      "query": {
+                        "selects": [
+                          {
+                            "columns": [
+                              {
+                                "parts": [
+                                  "repo_name"
+                                ]
+                              }
+                            ],
+                            "from": {
+                              "tables": [
+                                {
+                                  "table": {
+                                    "table": {
+                                      "table": "top_repos"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "name": "toStartOfMonth",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "created_at"
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "left": {
+                          "name": "toStartOfMonth",
+                          "arguments": [
+                            {
+                              "name": "today"
+                            }
+                          ]
+                        },
+                        "op": "-",
+                        "right": {
+                          "value": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "unit": "MONTH"
+                        }
+                      }
+                    }
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "repo_name"
+                      ]
+                    }
+                  ],
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "count_last_month"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "d",
+            "repo_name"
+          ]
+        },
+        {
+          "pattern": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "last_day"
+              },
+              "alias": "d"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "last_week"
+              },
+              "alias": "w"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "d",
+                    "repo_name"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "w",
+                    "repo_name"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "last_month"
+              },
+              "alias": "m"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "d",
+                    "repo_name"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "m",
+                    "repo_name"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

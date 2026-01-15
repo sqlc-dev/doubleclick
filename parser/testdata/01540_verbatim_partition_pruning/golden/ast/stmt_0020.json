@@ -1,0 +1,55 @@
+{
+  "table": "myTable",
+  "columns": [
+    {
+      "name": "myDay",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "myOrder",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "someData",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "myOrder"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "floor",
+    "arguments": [
+      {
+        "name": "toYYYYMMDD",
+        "arguments": [
+          {
+            "parts": [
+              "myDay"
+            ]
+          }
+        ]
+      },
+      {
+        "op": "-",
+        "operand": {
+          "type": "Integer",
+          "value": 1
+        }
+      }
+    ]
+  }
+}

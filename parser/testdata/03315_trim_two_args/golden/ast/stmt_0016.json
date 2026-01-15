@@ -1,0 +1,326 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "long_str",
+          "query": {
+            "name": "repeat",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "x"
+              },
+              {
+                "type": "Integer",
+                "value": 1000
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "long_fixed_str",
+          "query": {
+            "name": "toFixedString",
+            "arguments": [
+              {
+                "parts": [
+                  "long_str"
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 1000
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "trim_chars",
+          "query": {
+            "name": "repeat",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "#@"
+              },
+              {
+                "type": "Integer",
+                "value": 50
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "length",
+              "arguments": [
+                {
+                  "name": "trimLeft",
+                  "arguments": [
+                    {
+                      "name": "concat",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "trim_chars"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "long_str"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "trim_chars"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "String",
+                      "value": "#@"
+                    }
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1100
+            }
+          },
+          "alias": "left_long_ok"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "length",
+              "arguments": [
+                {
+                  "name": "trimRight",
+                  "arguments": [
+                    {
+                      "name": "concat",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "trim_chars"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "long_str"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "trim_chars"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "String",
+                      "value": "#@"
+                    }
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1100
+            }
+          },
+          "alias": "right_long_ok"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "length",
+              "arguments": [
+                {
+                  "name": "trimBoth",
+                  "arguments": [
+                    {
+                      "name": "concat",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "trim_chars"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "long_str"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "trim_chars"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "String",
+                      "value": "#@"
+                    }
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1000
+            }
+          },
+          "alias": "both_long_ok"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "length",
+              "arguments": [
+                {
+                  "name": "trimLeft",
+                  "arguments": [
+                    {
+                      "name": "concat",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "trim_chars"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "long_fixed_str"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "trim_chars"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "String",
+                      "value": "#@"
+                    }
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1100
+            }
+          },
+          "alias": "left_fixed_long_ok"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "length",
+              "arguments": [
+                {
+                  "name": "trimRight",
+                  "arguments": [
+                    {
+                      "name": "concat",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "trim_chars"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "long_fixed_str"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "trim_chars"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "String",
+                      "value": "#@"
+                    }
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1100
+            }
+          },
+          "alias": "right_fixed_long_ok"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "length",
+              "arguments": [
+                {
+                  "name": "trimBoth",
+                  "arguments": [
+                    {
+                      "name": "concat",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "trim_chars"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "long_fixed_str"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "trim_chars"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "String",
+                      "value": "#@"
+                    }
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1000
+            }
+          },
+          "alias": "both_fixed_long_ok"
+        }
+      ]
+    }
+  ]
+}

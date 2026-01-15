@@ -1,0 +1,103 @@
+{
+  "table": "aggregating_00191",
+  "columns": [
+    {
+      "parts": [
+        "k"
+      ]
+    },
+    {
+      "parts": [
+        "u"
+      ]
+    }
+  ],
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "intDiv",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 100
+              }
+            ],
+            "alias": "k"
+          },
+          {
+            "name": "uniqState",
+            "arguments": [
+              {
+                "name": "toUInt64",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 100
+                    }
+                  }
+                ]
+              }
+            ],
+            "alias": "u"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "database": "system",
+                                  "table": "numbers"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "limit": {
+                          "type": "Integer",
+                          "value": 1000
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "k"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

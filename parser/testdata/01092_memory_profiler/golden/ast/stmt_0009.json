@@ -1,0 +1,201 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "symbol",
+          "query": {
+            "name": "addressToSymbol",
+            "arguments": [
+              {
+                "name": "arrayJoin",
+                "arguments": [
+                  {
+                    "parts": [
+                      "trace"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "trace_log"
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "yesterday"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "trace_type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "MemorySample"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "query_id"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "query_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "current_database"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "name": "currentDatabase"
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "event_date"
+                              ]
+                            },
+                            "op": "\u003e=",
+                            "right": {
+                              "name": "yesterday"
+                            }
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "expr": {
+                            "parts": [
+                              "query"
+                            ]
+                          },
+                          "pattern": {
+                            "type": "String",
+                            "value": "%test memory profiler%"
+                          }
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "name": "has",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "used_table_functions"
+                            ]
+                          },
+                          {
+                            "type": "String",
+                            "value": "numbers"
+                          }
+                        ]
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "log_comment"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "01092_memory_profiler"
+                      }
+                    }
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "event_time"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

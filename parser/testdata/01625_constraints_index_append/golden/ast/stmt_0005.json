@@ -1,0 +1,82 @@
+{
+  "table": "index_append_test_test",
+  "columns": [
+    {
+      "name": "i",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "name": "c1",
+      "expression": {
+        "left": {
+          "left": {
+            "parts": [
+              "i"
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "left": {
+              "type": "Integer",
+              "value": 2
+            },
+            "op": "*",
+            "right": {
+              "parts": [
+                "b"
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "left": {
+              "parts": [
+                "i"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 40
+            }
+          },
+          "op": "\u003e",
+          "right": {
+            "parts": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "i"
+      ]
+    }
+  ]
+}

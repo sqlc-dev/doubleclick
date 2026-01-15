@@ -1,0 +1,186 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "type": "Float",
+                    "value": 0.29,
+                    "source": "0.29"
+                  },
+                  "op": "*",
+                  "right": {
+                    "type": "Integer",
+                    "value": 8
+                  }
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 10000
+                }
+              },
+              "op": "\u003c",
+              "right": {
+                "parts": [
+                  "sum"
+                ]
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "sum"
+                ]
+              },
+              "op": "\u003c",
+              "right": {
+                "left": {
+                  "left": {
+                    "type": "Float",
+                    "value": 0.31,
+                    "source": "0.31"
+                  },
+                  "op": "*",
+                  "right": {
+                    "type": "Integer",
+                    "value": 8
+                  }
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 10000
+                }
+              }
+            },
+            "parenthesized": true
+          },
+          "alias": "res"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arraySum",
+                          "arguments": [
+                            {
+                              "parameters": [
+                                "id"
+                              ],
+                              "body": {
+                                "name": "bitCount",
+                                "arguments": [
+                                  {
+                                    "name": "reinterpretAsUInt8",
+                                    "arguments": [
+                                      {
+                                        "name": "substring",
+                                        "arguments": [
+                                          {
+                                            "name": "fuzzBits",
+                                            "arguments": [
+                                              {
+                                                "name": "materialize",
+                                                "arguments": [
+                                                  {
+                                                    "name": "arrayStringConcat",
+                                                    "arguments": [
+                                                      {
+                                                        "name": "arrayMap",
+                                                        "arguments": [
+                                                          {
+                                                            "parameters": [
+                                                              "x"
+                                                            ],
+                                                            "body": {
+                                                              "name": "toString",
+                                                              "arguments": [
+                                                                {
+                                                                  "type": "String",
+                                                                  "value": "\u0000"
+                                                                }
+                                                              ]
+                                                            }
+                                                          },
+                                                          {
+                                                            "name": "range",
+                                                            "arguments": [
+                                                              {
+                                                                "type": "Integer",
+                                                                "value": 10000
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "type": "Float",
+                                                "value": 0.3,
+                                                "source": "0.3"
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "left": {
+                                              "parts": [
+                                                "id"
+                                              ]
+                                            },
+                                            "op": "+",
+                                            "right": {
+                                              "type": "Integer",
+                                              "value": 1
+                                            }
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "name": "range",
+                              "arguments": [
+                                {
+                                  "type": "Integer",
+                                  "value": 10000
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "sum"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

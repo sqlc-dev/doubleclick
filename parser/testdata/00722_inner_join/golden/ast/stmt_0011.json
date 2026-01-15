@@ -1,0 +1,133 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "database"
+          ]
+        },
+        {
+          "parts": [
+            "t",
+            "name"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "tables"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "name"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "name"
+                          ],
+                          "alias": "database"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "databases"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "db"
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "database"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "db",
+              "name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "system"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "t",
+              "name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "one"
+          }
+        }
+      },
+      "format": {
+        "parts": [
+          "PrettyCompactNoEscapes"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "function": {
+    "name": "s3",
+    "arguments": [
+      {
+        "parts": [
+          "s3_conn"
+        ]
+      },
+      {
+        "left": {
+          "parts": [
+            "filename"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "left": {
+            "name": "currentDatabase"
+          },
+          "op": "||",
+          "right": {
+            "type": "String",
+            "value": "/{_partition_id}/test.parquet"
+          }
+        }
+      },
+      {
+        "left": {
+          "parts": [
+            "format"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "parts": [
+            "Parquet"
+          ]
+        }
+      }
+    ]
+  },
+  "partition_by": {
+    "type": "Integer",
+    "value": 2
+  },
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "numbers"
+                }
+              }
+            }
+          ]
+        },
+        "limit": {
+          "type": "Integer",
+          "value": 10
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "positionCaseInsensitiveUTF8",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "name": "concat",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "   test a1ßAa test"
+                    },
+                    {
+                      "name": "arrayStringConcat",
+                      "arguments": [
+                        {
+                          "name": "arrayMap",
+                          "arguments": [
+                            {
+                              "parameters": [
+                                "x"
+                              ],
+                              "body": {
+                                "type": "String",
+                                "value": " "
+                              }
+                            },
+                            {
+                              "name": "range",
+                              "arguments": [
+                                {
+                                  "type": "Integer",
+                                  "value": 20000
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "a1ẞaa"
+            }
+          ],
+          "alias": "res"
+        }
+      ]
+    }
+  ]
+}

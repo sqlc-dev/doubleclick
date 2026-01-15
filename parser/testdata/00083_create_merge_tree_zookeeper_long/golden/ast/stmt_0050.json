@@ -1,0 +1,111 @@
+{
+  "table": "replicated_aggregating_merge_tree_with_sampling",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "Int8"
+      }
+    },
+    {
+      "name": "z",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedAggregatingMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_00083/01/replicated_aggregating_merge_tree_with_sampling/"
+      },
+      {
+        "type": "String",
+        "value": "r1"
+      },
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "left": {
+          "name": "sipHash64",
+          "arguments": [
+            {
+              "parts": [
+                "a"
+              ]
+            }
+          ]
+        },
+        "op": "+",
+        "right": {
+          "parts": [
+            "b"
+          ]
+        }
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "a"
+            ]
+          },
+          {
+            "left": {
+              "name": "sipHash64",
+              "arguments": [
+                {
+                  "parts": [
+                    "a"
+                  ]
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "b"
+              ]
+            }
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 111
+      }
+    ],
+    "has_parentheses": true
+  }
+}

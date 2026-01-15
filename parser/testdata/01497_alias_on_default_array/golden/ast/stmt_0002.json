@@ -1,0 +1,82 @@
+{
+  "table": "test_new_col",
+  "columns": [
+    {
+      "name": "_csv",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "csv_as_array",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "splitByChar",
+        "arguments": [
+          {
+            "type": "String",
+            "value": ";"
+          },
+          {
+            "parts": [
+              "_csv"
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "csv_col1",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "array": {
+          "parts": [
+            "csv_as_array"
+          ]
+        },
+        "index": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "csv_col2",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "array": {
+          "parts": [
+            "csv_as_array"
+          ]
+        },
+        "index": {
+          "type": "Integer",
+          "value": 2
+        }
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

@@ -1,0 +1,362 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "total_count"
+                              ]
+                            }
+                          ],
+                          "alias": "total"
+                        },
+                        {
+                          "parts": [
+                            "domain"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "COUNT",
+                                          "arguments": [
+                                            {}
+                                          ],
+                                          "alias": "total_count"
+                                        },
+                                        {
+                                          "name": "toUInt64",
+                                          "arguments": [
+                                            {
+                                              "type": "Integer",
+                                              "value": 0
+                                            }
+                                          ],
+                                          "alias": "facebookHits"
+                                        },
+                                        {
+                                          "parts": [
+                                            "domain"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "transactions"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "domain"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "COUNT",
+                                          "arguments": [
+                                            {}
+                                          ],
+                                          "alias": "total_count"
+                                        },
+                                        {
+                                          "name": "SUM",
+                                          "arguments": [
+                                            {
+                                              "name": "if",
+                                              "arguments": [
+                                                {
+                                                  "left": {
+                                                    "parts": [
+                                                      "domain"
+                                                    ]
+                                                  },
+                                                  "op": "=",
+                                                  "right": {
+                                                    "type": "String",
+                                                    "value": "facebook.com"
+                                                  }
+                                                },
+                                                {
+                                                  "type": "Integer",
+                                                  "value": 1
+                                                },
+                                                {
+                                                  "type": "Integer",
+                                                  "value": 0
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "facebookHits"
+                                        },
+                                        {
+                                          "parts": [
+                                            "domain"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "clicks"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "domain"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "union_all": true,
+                                  "union_modes": [
+                                    "UNION ALL"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "domain"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "domain"
+                            ]
+                          }
+                        }
+                      ],
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    },
+                    {
+                      "columns": [
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "total_count"
+                              ]
+                            }
+                          ],
+                          "alias": "total"
+                        },
+                        {
+                          "parts": [
+                            "domain"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "COUNT",
+                                          "arguments": [
+                                            {}
+                                          ],
+                                          "alias": "total_count"
+                                        },
+                                        {
+                                          "name": "SUM",
+                                          "arguments": [
+                                            {
+                                              "name": "if",
+                                              "arguments": [
+                                                {
+                                                  "left": {
+                                                    "parts": [
+                                                      "domain"
+                                                    ]
+                                                  },
+                                                  "op": "=",
+                                                  "right": {
+                                                    "type": "String",
+                                                    "value": "facebook.com"
+                                                  }
+                                                },
+                                                {
+                                                  "type": "Integer",
+                                                  "value": 1
+                                                },
+                                                {
+                                                  "type": "Integer",
+                                                  "value": 0
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "facebookHits"
+                                        },
+                                        {
+                                          "parts": [
+                                            "domain"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "clicks"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "domain"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "COUNT",
+                                          "arguments": [
+                                            {}
+                                          ],
+                                          "alias": "total_count"
+                                        },
+                                        {
+                                          "name": "toUInt64",
+                                          "arguments": [
+                                            {
+                                              "type": "Integer",
+                                              "value": 0
+                                            }
+                                          ],
+                                          "alias": "facebookHits"
+                                        },
+                                        {
+                                          "parts": [
+                                            "domain"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "transactions"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "domain"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "union_all": true,
+                                  "union_modes": [
+                                    "UNION ALL"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "domain"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "domain"
+                            ]
+                          }
+                        }
+                      ],
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

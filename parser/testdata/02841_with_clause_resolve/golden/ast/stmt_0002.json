@@ -1,0 +1,162 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "sample_frequency",
+          "query": {
+            "type": "Integer",
+            "value": 44100
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "tick",
+          "query": {
+            "parts": [
+              "number"
+            ]
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "time",
+          "query": {
+            "left": {
+              "parts": [
+                "tick"
+              ]
+            },
+            "op": "/",
+            "right": {
+              "parts": [
+                "sample_frequency"
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "delay",
+          "query": {
+            "parameters": [
+              "time",
+              "wave",
+              "delay_",
+              "decay",
+              "count"
+            ],
+            "body": {
+              "name": "arraySum",
+              "arguments": [
+                {
+                  "parameters": [
+                    "n1"
+                  ],
+                  "body": {
+                    "name": "wave",
+                    "arguments": [
+                      {
+                        "left": {
+                          "parts": [
+                            "time"
+                          ]
+                        },
+                        "op": "-",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "delay_"
+                            ]
+                          },
+                          "op": "*",
+                          "right": {
+                            "parts": [
+                              "n1"
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "range",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "count"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "kick",
+          "query": {
+            "name": "delay",
+            "arguments": [
+              {
+                "parts": [
+                  "time"
+                ]
+              },
+              {
+                "parameters": [
+                  "time"
+                ],
+                "body": {
+                  "type": "Float",
+                  "value": 0.5,
+                  "source": "0.5"
+                }
+              },
+              {
+                "type": "Float",
+                "value": 0.2,
+                "source": "0.2"
+              },
+              {
+                "type": "Float",
+                "value": 0.5,
+                "source": "0.5"
+              },
+              {
+                "type": "Integer",
+                "value": 5
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "kick"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 5
+      }
+    }
+  ]
+}

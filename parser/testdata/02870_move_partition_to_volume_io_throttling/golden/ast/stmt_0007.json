@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "query_kind"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "query_duration_ms"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Float",
+            "value": 4000,
+            "source": "4e3"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "query_kind"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "Alter"
+          }
+        }
+      }
+    }
+  ]
+}

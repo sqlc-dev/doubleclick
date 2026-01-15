@@ -1,0 +1,174 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "log_comment"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "QueryFinish"
+          }
+        },
+        {
+          "name": "intDiv",
+          "arguments": [
+            {
+              "parts": [
+                "query_duration_ms"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 2000
+            }
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "exception_code"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "expr": {
+            "left": {
+              "left": {
+                "name": "position",
+                "arguments": [
+                  {
+                    "expr": {
+                      "type": "String",
+                      "value": "selectPartsToRead"
+                    },
+                    "list": [
+                      {
+                        "parts": [
+                          "stack_trace"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            "op": "OR",
+            "right": {
+              "left": {
+                "name": "position",
+                "arguments": [
+                  {
+                    "expr": {
+                      "type": "String",
+                      "value": "filterPartsByPartition"
+                    },
+                    "list": [
+                      {
+                        "parts": [
+                          "stack_trace"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            "parenthesized": true
+          },
+          "alias": "has_selectPartsToRead"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "log_comment"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "03176_q_"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "type"
+            ]
+          },
+          "list": [
+            {
+              "type": "String",
+              "value": "QueryFinish"
+            },
+            {
+              "type": "String",
+              "value": "ExceptionBeforeStart"
+            }
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "log_comment"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

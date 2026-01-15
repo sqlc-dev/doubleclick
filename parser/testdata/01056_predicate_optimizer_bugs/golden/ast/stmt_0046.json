@@ -1,0 +1,135 @@
+{
+  "explain_type": "SYNTAX",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "alias": "id"
+                          },
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 2
+                            },
+                            "alias": "value"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "alias": "id"
+                          },
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 3
+                            },
+                            "alias": "value_1"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              "join": {
+                "type": "INNER",
+                "using": [
+                  {
+                    "parts": [
+                      "id"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "name": "arrayMap",
+            "arguments": [
+              {
+                "parameters": [
+                  "x"
+                ],
+                "body": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "x"
+                      ]
+                    },
+                    "op": "+",
+                    "right": {
+                      "parts": [
+                        "value"
+                      ]
+                    }
+                  },
+                  "op": "+",
+                  "right": {
+                    "parts": [
+                      "value_1"
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Array",
+            "value": [
+              {
+                "type": "Integer",
+                "value": 6
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "explicit_type": true
+}

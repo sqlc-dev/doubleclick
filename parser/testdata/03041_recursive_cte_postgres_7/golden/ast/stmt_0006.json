@@ -1,0 +1,165 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "t",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "with": [
+                    {
+                      "name": "s",
+                      "query": {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {
+                                  "name": "toUInt64",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 1
+                                    }
+                                  ],
+                                  "alias": "i"
+                                }
+                              ]
+                            },
+                            {
+                              "columns": [
+                                {
+                                  "left": {
+                                    "parts": [
+                                      "i"
+                                    ]
+                                  },
+                                  "op": "+",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                }
+                              ],
+                              "from": {
+                                "tables": [
+                                  {
+                                    "table": {
+                                      "table": {
+                                        "table": "s"
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "where": {
+                                "left": {
+                                  "parts": [
+                                    "i"
+                                  ]
+                                },
+                                "op": "\u003c",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 10
+                                }
+                              }
+                            }
+                          ],
+                          "union_all": true,
+                          "union_modes": [
+                            "UNION ALL"
+                          ]
+                        }
+                      },
+                      "scalar_with": false
+                    }
+                  ],
+                  "columns": [
+                    {
+                      "parts": [
+                        "i"
+                      ],
+                      "alias": "j"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "s"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columns": [
+                    {
+                      "left": {
+                        "parts": [
+                          "j"
+                        ]
+                      },
+                      "op": "+",
+                      "right": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "t"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "j"
+                      ]
+                    },
+                    "op": "\u003c",
+                    "right": {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  }
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

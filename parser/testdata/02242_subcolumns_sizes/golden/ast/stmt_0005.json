@@ -1,0 +1,176 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "any",
+            "arguments": [
+              {
+                "parts": [
+                  "column_bytes_on_disk"
+                ]
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "subcolumns",
+                  "bytes_on_disk"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "left": {
+            "name": "any",
+            "arguments": [
+              {
+                "parts": [
+                  "column_data_compressed_bytes"
+                ]
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "subcolumns",
+                  "data_compressed_bytes"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "left": {
+            "name": "any",
+            "arguments": [
+              {
+                "parts": [
+                  "column_data_uncompressed_bytes"
+                ]
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "subcolumns",
+                  "data_uncompressed_bytes"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "left": {
+            "name": "any",
+            "arguments": [
+              {
+                "parts": [
+                  "column_marks_bytes"
+                ]
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "subcolumns",
+                  "marks_bytes"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts_columns"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "subcolumns"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "table"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "t_subcolumns_sizes"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "parts": [
+              "active"
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "column"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "d"
+          }
+        }
+      }
+    }
+  ]
+}

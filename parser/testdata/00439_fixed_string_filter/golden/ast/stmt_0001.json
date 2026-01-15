@@ -1,0 +1,92 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "parts": [
+            "x"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toFixedString",
+                          "arguments": [
+                            {
+                              "condition": {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "\u003c",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 20
+                                }
+                              },
+                              "then": {
+                                "type": "String",
+                                "value": ""
+                              },
+                              "else": {
+                                "type": "String",
+                                "value": "Hello"
+                              }
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 5
+                            }
+                          ],
+                          "alias": "x"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 50
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "x"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "String",
+          "value": "\u0000\u0000\u0000\u0000\u0000"
+        }
+      }
+    }
+  ]
+}

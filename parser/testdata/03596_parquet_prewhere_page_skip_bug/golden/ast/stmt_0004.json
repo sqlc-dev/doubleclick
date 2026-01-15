@@ -1,0 +1,88 @@
+{
+  "function": {
+    "name": "file",
+    "arguments": [
+      {
+        "type": "String",
+        "value": "03596_parquet_prewhere_page_skip_bug.parquet"
+      }
+    ]
+  },
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ],
+            "alias": "n"
+          },
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 10
+              }
+            },
+            "alias": "n10"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 200
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "settings": [
+          {
+            "name": "output_format_parquet_data_page_size",
+            "value": {
+              "type": "Integer",
+              "value": 100
+            }
+          },
+          {
+            "name": "output_format_parquet_batch_size",
+            "value": {
+              "type": "Integer",
+              "value": 10
+            }
+          },
+          {
+            "name": "output_format_parquet_row_group_size",
+            "value": {
+              "type": "Integer",
+              "value": 100
+            }
+          },
+          {
+            "name": "output_format_parquet_write_page_index",
+            "value": {
+              "type": "Integer",
+              "value": 0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true
+}

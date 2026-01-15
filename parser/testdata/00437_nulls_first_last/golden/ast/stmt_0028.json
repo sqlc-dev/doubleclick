@@ -1,0 +1,140 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "x"
+          ]
+        },
+        {
+          "parts": [
+            "y"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "condition": {
+                              "left": {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "%",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 5
+                                }
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 0
+                              }
+                            },
+                            "then": {
+                              "type": "Null",
+                              "value": null
+                            },
+                            "else": {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          },
+                          "alias": "x"
+                        },
+                        {
+                          "expr": {
+                            "condition": {
+                              "left": {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "%",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 3
+                                }
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 0
+                              }
+                            },
+                            "then": {
+                              "type": "Float",
+                              "value": "NaN"
+                            },
+                            "else": {
+                              "name": "toFloat64",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "alias": "y"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "x"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "y"
+            ]
+          },
+          "nulls_first": true
+        }
+      ]
+    }
+  ]
+}

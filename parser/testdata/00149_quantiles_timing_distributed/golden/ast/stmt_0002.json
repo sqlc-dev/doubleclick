@@ -1,0 +1,107 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "name": "cityHash64",
+              "arguments": [
+                {}
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "CounterID"
+                          ]
+                        },
+                        {
+                          "name": "quantileTiming",
+                          "parameters": [
+                            {
+                              "type": "Float",
+                              "value": 0.5,
+                              "source": "0.5"
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "parts": [
+                                "SendTiming"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "count"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.0.0.{1,2,3,4,5,6,7,8,9,10}"
+                                  },
+                                  {
+                                    "parts": [
+                                      "test",
+                                      "hits"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "SendTiming"
+                          ]
+                        },
+                        "op": "!=",
+                        "right": {
+                          "op": "-",
+                          "operand": {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        }
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "CounterID"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

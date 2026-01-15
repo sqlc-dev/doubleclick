@@ -1,0 +1,101 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "sf",
+          "query": {
+            "type": "Integer",
+            "value": 7204436857747984384
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "epoch",
+          "query": {
+            "type": "Integer",
+            "value": 0
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "tz",
+          "query": {
+            "name": "materialize",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "Asia/Shanghai"
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "sf"
+          ]
+        },
+        {
+          "name": "snowflakeIDToDateTime",
+          "arguments": [
+            {
+              "parts": [
+                "sf"
+              ]
+            },
+            {
+              "parts": [
+                "epoch"
+              ]
+            },
+            {
+              "parts": [
+                "tz"
+              ]
+            }
+          ],
+          "alias": "dt"
+        },
+        {
+          "name": "snowflakeIDToDateTime64",
+          "arguments": [
+            {
+              "parts": [
+                "sf"
+              ]
+            },
+            {
+              "parts": [
+                "epoch"
+              ]
+            },
+            {
+              "parts": [
+                "tz"
+              ]
+            }
+          ],
+          "alias": "dt64"
+        }
+      ],
+      "settings": [
+        {
+          "name": "allow_nonconst_timezone_arguments",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ],
+      "settings_after_format": true,
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

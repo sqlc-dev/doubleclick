@@ -1,0 +1,91 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "t",
+          "query": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "1970-01-01 00:00:01"
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "x",
+          "query": {
+            "name": "arrayJoin",
+            "arguments": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "Null",
+                    "value": null
+                  },
+                  {
+                    "left": {
+                      "name": "toDateTime64",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "t"
+                          ]
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 3
+                        }
+                      ]
+                    },
+                    "op": "+",
+                    "right": {
+                      "value": {
+                        "type": "Integer",
+                        "value": 100
+                      },
+                      "unit": "MILLISECONDS"
+                    }
+                  }
+                ],
+                "spaced_commas": true
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "parts": [
+              "x"
+            ]
+          },
+          "list": [
+            {
+              "name": "now"
+            },
+            {
+              "type": "Null",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "settings": [
+        {
+          "name": "transform_null_in",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

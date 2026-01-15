@@ -1,0 +1,76 @@
+{
+  "table": "t_sample_final",
+  "columns": [
+    {
+      "name": "CounterID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "UserID",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "Version",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "Version"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        {
+          "name": "intHash32",
+          "arguments": [
+            {
+              "parts": [
+                "UserID"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sample_by": {
+    "name": "intHash32",
+    "arguments": [
+      {
+        "parts": [
+          "UserID"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

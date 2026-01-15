@@ -1,0 +1,214 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "with_table",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "p",
+                        "a_id"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "p",
+                        "b_id"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "p",
+                        "c_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "parent"
+                          },
+                          "alias": "p"
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "table": "join_table_1"
+                          },
+                          "alias": "jt1"
+                        },
+                        "join": {
+                          "type": "LEFT",
+                          "on": {
+                            "left": {
+                              "left": {
+                                "parts": [
+                                  "jt1",
+                                  "a_id"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "parts": [
+                                  "p",
+                                  "a_id"
+                                ]
+                              }
+                            },
+                            "op": "AND",
+                            "right": {
+                              "left": {
+                                "parts": [
+                                  "jt1",
+                                  "b_id"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "parts": [
+                                  "p",
+                                  "b_id"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "table": "join_table_2"
+                          },
+                          "alias": "jt2"
+                        },
+                        "join": {
+                          "type": "LEFT",
+                          "on": {
+                            "left": {
+                              "parts": [
+                                "jt2",
+                                "c_id"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "p",
+                                "c_id"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "p",
+                          "a_id"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "Integer",
+                        "value": 0
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "jt2",
+                            "c_id"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      },
+                      "op": "OR",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "p",
+                            "created_at"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      },
+                      "parenthesized": true
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "p",
+            "a_id"
+          ]
+        },
+        {
+          "parts": [
+            "p",
+            "b_id"
+          ]
+        },
+        {
+          "name": "COUNT",
+          "arguments": [
+            {}
+          ],
+          "alias": "f_count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "with_table"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "p",
+            "a_id"
+          ]
+        },
+        {
+          "parts": [
+            "p",
+            "b_id"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 1
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t0"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 0
+                          },
+                          "alias": "c0"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "tx"
+            },
+            "join": {
+              "type": "FULL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t0",
+                    "c0"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "tx",
+                    "c0"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 0
+                          },
+                          "alias": "c0"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "c1"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "ty"
+            },
+            "join": {
+              "type": "PASTE"
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ty",
+              "c0"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "ty",
+              "c1"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "query_plan_join_swap_table",
+          "value": {
+            "type": "String",
+            "value": "true"
+          }
+        }
+      ]
+    }
+  ]
+}

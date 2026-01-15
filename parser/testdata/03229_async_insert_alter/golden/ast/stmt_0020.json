@@ -1,0 +1,70 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "query"
+          ]
+        },
+        {
+          "parts": [
+            "data_kind"
+          ]
+        },
+        {
+          "parts": [
+            "status"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "asynchronous_insert_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "table"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "t_async_insert_alter"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

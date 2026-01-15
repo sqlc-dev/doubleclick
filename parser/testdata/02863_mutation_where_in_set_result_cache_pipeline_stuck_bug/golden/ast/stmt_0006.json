@@ -1,0 +1,88 @@
+{
+  "table": "tab",
+  "commands": [
+    {
+      "type": "DELETE_WHERE",
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "x"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 1000
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "y"
+            ]
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "name": "sum",
+                    "arguments": [
+                      {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "+",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "name": "numbers_mt",
+                          "arguments": [
+                            {
+                              "type": "Float",
+                              "value": 10000000,
+                              "source": "1e7"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "group_by": [
+                  {
+                    "left": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  }
+                ],
+                "with_totals": true
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

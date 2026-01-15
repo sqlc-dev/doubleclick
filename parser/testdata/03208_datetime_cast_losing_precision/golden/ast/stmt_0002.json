@@ -1,0 +1,71 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "t",
+          "query": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2024-10-16 18:00:30"
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "toDateTime64",
+              "arguments": [
+                {
+                  "parts": [
+                    "t"
+                  ]
+                },
+                {
+                  "type": "Integer",
+                  "value": 3
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 100
+              },
+              "unit": "MILLISECONDS"
+            }
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "t"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "transform_null_in",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

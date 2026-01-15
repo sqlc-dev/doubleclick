@@ -1,0 +1,322 @@
+{
+  "table": "simple",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "nullable_str",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "anyLast"
+            ]
+          },
+          {
+            "name": "Nullable",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "nullable_str_respect_nulls",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "anyLastRespectNulls"
+            ]
+          },
+          {
+            "name": "Nullable",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "low_str",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "anyLast"
+            ]
+          },
+          {
+            "name": "LowCardinality",
+            "parameters": [
+              {
+                "name": "Nullable",
+                "parameters": [
+                  {
+                    "name": "String"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "ip",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "anyLast"
+            ]
+          },
+          {
+            "name": "IPv4"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "status",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "groupBitOr"
+            ]
+          },
+          {
+            "name": "UInt32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "tup",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sumMap"
+            ]
+          },
+          {
+            "name": "Tuple",
+            "parameters": [
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "Int32"
+                  }
+                ],
+                "has_parentheses": true
+              },
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "Int64"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "tup_min",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "minMap"
+            ]
+          },
+          {
+            "name": "Tuple",
+            "parameters": [
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "Int32"
+                  }
+                ],
+                "has_parentheses": true
+              },
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "Int64"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "tup_max",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "maxMap"
+            ]
+          },
+          {
+            "name": "Tuple",
+            "parameters": [
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "Int32"
+                  }
+                ],
+                "has_parentheses": true
+              },
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "Int64"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "arr",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "groupArrayArray"
+            ]
+          },
+          {
+            "name": "Array",
+            "parameters": [
+              {
+                "name": "Int32"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "uniq_arr",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "groupUniqArrayArray"
+            ]
+          },
+          {
+            "name": "Array",
+            "parameters": [
+              {
+                "name": "Int32"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "map_uniq_arr",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "groupUniqArrayArrayMap"
+            ]
+          },
+          {
+            "name": "Map",
+            "parameters": [
+              {
+                "name": "Int32"
+              },
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "Int64"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

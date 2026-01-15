@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "y"
+          ]
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "cluster",
+                "arguments": [
+                  {
+                    "parts": [
+                      "test_cluster_1_shard_3_replicas_1_unavailable"
+                    ]
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "02918_parallel_replicas"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "y"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "y"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "max_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 3
+          }
+        },
+        {
+          "name": "enable_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "parallel_replicas_custom_key",
+          "value": {
+            "type": "String",
+            "value": "cityHash64(y)"
+          }
+        },
+        {
+          "name": "parallel_replicas_mode",
+          "value": {
+            "type": "String",
+            "value": "custom_key_range"
+          }
+        }
+      ]
+    }
+  ]
+}

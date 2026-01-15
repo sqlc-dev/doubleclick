@@ -1,0 +1,102 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "name": "if",
+              "arguments": [
+                {
+                  "expr": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "op": "%",
+                      "right": {
+                        "type": "Integer",
+                        "value": 2
+                      }
+                    },
+                    "op": "==",
+                    "right": {
+                      "type": "Integer",
+                      "value": 0
+                    }
+                  },
+                  "alias": "cond_expr"
+                },
+                {
+                  "expr": {
+                    "type": "Integer",
+                    "value": 0
+                  },
+                  "alias": "zero_expr"
+                },
+                {
+                  "expr": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "alias": "one_expr"
+                }
+              ],
+              "alias": "if_expr"
+            }
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "cond_expr"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "if_expr"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "one_expr"
+          ]
+        },
+        {
+          "parts": [
+            "zero_expr"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 100
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

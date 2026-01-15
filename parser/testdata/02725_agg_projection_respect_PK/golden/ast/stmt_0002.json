@@ -1,0 +1,101 @@
+{
+  "table": "t0",
+  "columns": [
+    {
+      "name": "c1",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "c2",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "c3",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p1",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "c1"
+            ]
+          },
+          {
+            "parts": [
+              "c2"
+            ]
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "c3"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "c2"
+            ]
+          },
+          {
+            "parts": [
+              "c1"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "c1"
+          ]
+        },
+        {
+          "parts": [
+            "c2"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 10485760
+      }
+    },
+    {
+      "name": "min_rows_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

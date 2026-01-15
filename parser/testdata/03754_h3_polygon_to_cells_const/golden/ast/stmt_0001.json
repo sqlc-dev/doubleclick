@@ -1,0 +1,186 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "resolution",
+          "query": {
+            "type": "Integer",
+            "value": 7
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "ring",
+          "query": {
+            "type": "Array",
+            "value": [
+              {
+                "type": "Tuple",
+                "value": [
+                  {
+                    "op": "-",
+                    "operand": {
+                      "type": "Float",
+                      "value": 122.40898669999721,
+                      "source": "122.40898669999721"
+                    }
+                  },
+                  {
+                    "type": "Float",
+                    "value": 37.81331899998324,
+                    "source": "37.81331899998324"
+                  }
+                ],
+                "spaced_commas": true
+              },
+              {
+                "type": "Tuple",
+                "value": [
+                  {
+                    "op": "-",
+                    "operand": {
+                      "type": "Float",
+                      "value": 122.35447369999936,
+                      "source": "122.35447369999936"
+                    }
+                  },
+                  {
+                    "type": "Float",
+                    "value": 37.71980619999785,
+                    "source": "37.71980619999785"
+                  }
+                ],
+                "spaced_commas": true
+              },
+              {
+                "type": "Tuple",
+                "value": [
+                  {
+                    "op": "-",
+                    "operand": {
+                      "type": "Float",
+                      "value": 122.4798767000009,
+                      "source": "122.4798767000009"
+                    }
+                  },
+                  {
+                    "type": "Float",
+                    "value": 37.815157199999845,
+                    "source": "37.815157199999845"
+                  }
+                ],
+                "spaced_commas": true
+              }
+            ],
+            "spaced_commas": true
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "reference",
+          "query": {
+            "type": "Array",
+            "value": [
+              {
+                "type": "String",
+                "value": "872830820ffffff"
+              },
+              {
+                "type": "String",
+                "value": "872830828ffffff"
+              },
+              {
+                "type": "String",
+                "value": "87283082affffff"
+              },
+              {
+                "type": "String",
+                "value": "87283082bffffff"
+              },
+              {
+                "type": "String",
+                "value": "87283082effffff"
+              },
+              {
+                "type": "String",
+                "value": "872830870ffffff"
+              },
+              {
+                "type": "String",
+                "value": "872830876ffffff"
+              }
+            ],
+            "spaced_commas": true
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "h3PolygonToCells",
+          "arguments": [
+            {
+              "parts": [
+                "ring"
+              ]
+            },
+            {
+              "parts": [
+                "resolution"
+              ]
+            }
+          ]
+        },
+        {
+          "left": {
+            "name": "arraySort",
+            "arguments": [
+              {
+                "name": "arrayMap",
+                "arguments": [
+                  {
+                    "parameters": [
+                      "x"
+                    ],
+                    "body": {
+                      "name": "h3ToString",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "x"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "h3PolygonToCells",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "ring"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "resolution"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "reference"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

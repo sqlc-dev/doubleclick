@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "ReadBufferFromFileDescriptorReadBytes"
+            }
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "Integer",
+            "value": 1500000000
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "query"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "SELECT sum(cityHash64(*)) FROM test.hits SETTINGS max_threads=40;"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "QueryFinish"
+          }
+        }
+      }
+    }
+  ]
+}

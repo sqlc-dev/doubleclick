@@ -1,0 +1,66 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "parts": [
+              "total_bytes"
+            ]
+          },
+          "low": {
+            "type": "Integer",
+            "value": 5000
+          },
+          "high": {
+            "type": "Integer",
+            "value": 15000
+          }
+        },
+        {
+          "parts": [
+            "total_rows"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "tables"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "check_system_tables"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        }
+      }
+    }
+  ]
+}

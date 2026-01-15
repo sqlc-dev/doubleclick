@@ -1,0 +1,124 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "value2"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "x"
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "table": "tableB"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "tableA"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "tableB"
+                              }
+                            },
+                            "join": {
+                              "type": "LEFT",
+                              "on": {
+                                "left": {
+                                  "parts": [
+                                    "tableB",
+                                    "key"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "parts": [
+                                    "tableA",
+                                    "key"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "tableC"
+                              },
+                              "alias": "t"
+                            },
+                            "join": {
+                              "type": "LEFT",
+                              "on": {
+                                "left": {
+                                  "parts": [
+                                    "tableB",
+                                    "key"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "parts": [
+                                    "t",
+                                    "key"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

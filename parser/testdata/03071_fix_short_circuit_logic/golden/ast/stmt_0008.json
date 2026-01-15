@@ -1,0 +1,64 @@
+{
+  "table": "token_data_map",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "token_address_hex",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "chain",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "is_blacklisted",
+      "type": {
+        "name": "Bool"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "token_address_hex"
+        ]
+      },
+      {
+        "parts": [
+          "chain"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "table",
+          "value": {
+            "parts": [
+              "token_data"
+            ]
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 200
+      },
+      "max": {
+        "type": "Integer",
+        "value": 300
+      }
+    },
+    "layout": {
+      "type": "COMPLEX_KEY_HASHED_ARRAY"
+    }
+  }
+}

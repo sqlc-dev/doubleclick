@@ -1,0 +1,122 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "query"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "array": {
+                "parts": [
+                  "ProfileEvents"
+                ]
+              },
+              "index": {
+                "type": "String",
+                "value": "BackgroundLoadingMarksTasks"
+              }
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          "alias": "async"
+        },
+        {
+          "expr": {
+            "left": {
+              "array": {
+                "parts": [
+                  "ProfileEvents"
+                ]
+              },
+              "index": {
+                "type": "String",
+                "value": "MarksTasksFromCache"
+              }
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          "alias": "sync"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "query_kind"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "Select"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "String",
+            "value": "QueryStart"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

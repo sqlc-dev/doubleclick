@@ -1,0 +1,157 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "r"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "type": "Tuple",
+                                "value": [
+                                  {
+                                    "type": "String",
+                                    "value": "y"
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 0
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Tuple",
+                                "value": [
+                                  {
+                                    "type": "String",
+                                    "value": "n"
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          "alias": "cg"
+                        },
+                        {
+                          "name": "if",
+                          "arguments": [
+                            {
+                              "left": {
+                                "name": "arrayMap",
+                                "arguments": [
+                                  {
+                                    "parameters": [
+                                      "x"
+                                    ],
+                                    "body": {
+                                      "tuple": {
+                                        "parts": [
+                                          "x"
+                                        ]
+                                      },
+                                      "index": {
+                                        "type": "Integer",
+                                        "value": 1
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "parts": [
+                                      "cg"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "op": "!=",
+                              "right": {
+                                "type": "Array",
+                                "value": [
+                                  {
+                                    "type": "String",
+                                    "value": "y"
+                                  },
+                                  {
+                                    "type": "String",
+                                    "value": "n"
+                                  }
+                                ],
+                                "spaced_commas": true
+                              }
+                            },
+                            {
+                              "type": "String",
+                              "value": "y"
+                            },
+                            {
+                              "type": "String",
+                              "value": "n"
+                            }
+                          ],
+                          "alias": "so"
+                        },
+                        {
+                          "name": "arrayFilter",
+                          "arguments": [
+                            {
+                              "parameters": [
+                                "x"
+                              ],
+                              "body": {
+                                "left": {
+                                  "tuple": {
+                                    "parts": [
+                                      "x"
+                                    ]
+                                  },
+                                  "index": {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                },
+                                "op": "=",
+                                "right": {
+                                  "parts": [
+                                    "so"
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "parts": [
+                                "cg"
+                              ]
+                            }
+                          ],
+                          "alias": "r"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

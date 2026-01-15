@@ -1,0 +1,78 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "any",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "2020-01-01 00:00:00"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "e"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "joinKey"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "da"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "joinKey"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "a"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "prewhere": {
+        "left": {
+          "parts": [
+            "t"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "2020-01-01 00:00:00"
+        }
+      }
+    }
+  ]
+}

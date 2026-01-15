@@ -1,0 +1,130 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "text_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "parts": [
+                "query_id"
+              ]
+            },
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "query_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "current_database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "log_comment"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "02898_inorder_190aed82-2423-413b-ad4c-24dcca50f65b"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "event_date"
+                        ]
+                      },
+                      "op": "\u003e=",
+                      "right": {
+                        "name": "yesterday"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "message"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%Updated total rows to read: added % rows, total 3000 rows%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_date"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "name": "yesterday"
+          }
+        }
+      }
+    }
+  ]
+}

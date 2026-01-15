@@ -1,0 +1,65 @@
+{
+  "table": "local_t_l5ydey",
+  "columns": [
+    {
+      "name": "c_qv5rv",
+      "type": {
+        "name": "INTEGER"
+      }
+    },
+    {
+      "name": "c_rutjs4",
+      "type": {
+        "name": "INTEGER"
+      }
+    },
+    {
+      "name": "c_wmj",
+      "type": {
+        "name": "INTEGER"
+      }
+    },
+    {
+      "name": "c_m3",
+      "type": {
+        "name": "TEXT"
+      },
+      "nullable": false
+    }
+  ],
+  "columns_primary_key": [
+    {
+      "parts": [
+        "c_qv5rv"
+      ]
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "left": {
+          "left": {
+            "type": "String",
+            "value": "/clickhouse/tables/test_"
+          },
+          "op": "||",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "||",
+        "right": {
+          "type": "String",
+          "value": "/{shard}/local_t_l5ydey"
+        }
+      },
+      {
+        "type": "String",
+        "value": "{replica}"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "on_cluster": "test_shard_localhost"
+}

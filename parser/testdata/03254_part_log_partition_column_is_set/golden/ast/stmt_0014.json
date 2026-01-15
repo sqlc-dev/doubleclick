@@ -1,0 +1,47 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "name": "throwIf",
+          "arguments": [
+            {
+              "name": "empty",
+              "arguments": [
+                {
+                  "parts": [
+                    "partition"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "database"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "name": "currentDatabase"
+        }
+      }
+    }
+  ]
+}

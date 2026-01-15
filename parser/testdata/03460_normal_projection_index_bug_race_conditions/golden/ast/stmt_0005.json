@@ -1,0 +1,76 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "i",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "text",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "by_text",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "_part_offset"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "text"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "parts": [
+        "i"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 4
+    }
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

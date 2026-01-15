@@ -1,0 +1,155 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "t",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "+",
+                        "right": {
+                          "parts": [
+                            "a"
+                          ]
+                        }
+                      },
+                      "alias": "x"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 5
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 0
+                          },
+                          "alias": "a"
+                        },
+                        {
+                          "parts": [
+                            "x"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 5
+                          },
+                          "alias": "a"
+                        },
+                        {
+                          "parts": [
+                            "x"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "a"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "x"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

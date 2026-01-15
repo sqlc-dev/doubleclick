@@ -1,0 +1,117 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "length",
+            "arguments": [
+              {
+                "parts": [
+                  "thread_ids"
+                ]
+              }
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "current_database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "event_date"
+                ]
+              },
+              "op": "\u003e=",
+              "right": {
+                "left": {
+                  "name": "today"
+                },
+                "op": "-",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "name": "lower",
+              "arguments": [
+                {
+                  "parts": [
+                    "query"
+                  ]
+                }
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%select g % 2 as gg, sum(s) from table_01356_view_threads group by gg order by gg%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "QueryFinish"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "query_start_time"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "x"
+          ]
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "over": {
+            "name": "w"
+          }
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "over": {
+            "name": "w"
+          }
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "over": {
+            "name": "w"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toUInt8",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "x"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 11
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      },
+      "window": [
+        {
+          "name": "w",
+          "spec": {
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "x"
+                  ]
+                },
+                "descending": true
+              }
+            ],
+            "frame": {
+              "type": "RANGE",
+              "start": {
+                "type": "PRECEDING",
+                "offset": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              "end": {
+                "type": "FOLLOWING",
+                "offset": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              }
+            }
+          }
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "x"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "max_block_size",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

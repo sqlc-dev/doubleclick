@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "over": {
+            "name": "w",
+            "frame": {
+              "type": "RANGE",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              }
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "window": [
+        {
+          "name": "w",
+          "spec": {
+            "partition_by": [
+              {
+                "name": "intDiv",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 5
+                  }
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "name": "mod",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 3
+                    }
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

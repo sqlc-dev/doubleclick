@@ -1,0 +1,46 @@
+{
+  "table": "userid_test",
+  "columns": [
+    {
+      "name": "userid",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "userid"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "intDiv",
+    "arguments": [
+      {
+        "parts": [
+          "userid"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 500
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

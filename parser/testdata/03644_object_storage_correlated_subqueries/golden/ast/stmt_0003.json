@@ -1,0 +1,130 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "n1",
+            "c1"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "s3",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "http://localhost:11111/test/test-data-03644_object_storage.csv"
+                  },
+                  {
+                    "type": "String",
+                    "value": "test"
+                  },
+                  {
+                    "type": "String",
+                    "value": "testtest"
+                  }
+                ]
+              },
+              "alias": "n1"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "n1",
+            "c1"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "name": "AVG",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "n2",
+                          "c1"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "name": "s3",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "http://localhost:11111/test/test-data-03644_object_storage.csv"
+                            },
+                            {
+                              "type": "String",
+                              "value": "test"
+                            },
+                            {
+                              "type": "String",
+                              "value": "testtest"
+                            }
+                          ]
+                        },
+                        "alias": "n2"
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "left": {
+                    "parts": [
+                      "n2",
+                      "c1"
+                    ]
+                  },
+                  "op": "\u003c",
+                  "right": {
+                    "parts": [
+                      "n1",
+                      "c1"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "n1",
+              "c1"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "allow_experimental_correlated_subqueries",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

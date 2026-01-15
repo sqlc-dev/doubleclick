@@ -1,0 +1,128 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "group_id"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "intDiv",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "open_time"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          ],
+                          "alias": "group_id"
+                        },
+                        {
+                          "name": "toFloat64",
+                          "arguments": [
+                            {
+                              "name": "argMin",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "open_price"
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "open_time"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "open"
+                        },
+                        {
+                          "name": "toFloat64",
+                          "arguments": [
+                            {
+                              "name": "argMax",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "close_price"
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "open_time"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "close"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "foo"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "group_id"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "group_id"
+                            ]
+                          },
+                          "with_fill": true,
+                          "fill_step": {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        }
+                      ],
+                      "interpolate": [
+                        {
+                          "column": "open"
+                        },
+                        {
+                          "column": "close"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

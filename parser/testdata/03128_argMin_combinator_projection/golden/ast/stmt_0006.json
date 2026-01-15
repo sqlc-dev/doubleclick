@@ -1,0 +1,95 @@
+{
+  "table": "combinator_argMin_table_r2",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "agg_time",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "first_items",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "name": "minArgMin",
+            "arguments": [
+              {
+                "parts": [
+                  "agg_time"
+                ]
+              },
+              {
+                "parts": [
+                  "value"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "maxArgMax",
+            "arguments": [
+              {
+                "parts": [
+                  "agg_time"
+                ]
+              },
+              {
+                "parts": [
+                  "value"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "id"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_03128/combinator_argMin_table"
+      },
+      {
+        "type": "String",
+        "value": "r2"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

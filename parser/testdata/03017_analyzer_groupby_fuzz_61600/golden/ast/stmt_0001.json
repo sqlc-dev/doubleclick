@@ -1,0 +1,85 @@
+{
+  "table": "set_index_not__fuzz_0",
+  "columns": [
+    {
+      "name": "name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "status",
+      "type": {
+        "name": "Enum8",
+        "parameters": [
+          {
+            "left": {
+              "type": "String",
+              "value": "alive"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "rip"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_status",
+      "expression": {
+        "parts": [
+          "status"
+        ]
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 2
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "name"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

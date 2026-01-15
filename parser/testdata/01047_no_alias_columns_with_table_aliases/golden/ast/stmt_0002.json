@@ -1,0 +1,50 @@
+{
+  "table": "requests",
+  "columns": [
+    {
+      "name": "event_time",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "event_date",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "name": "toDate",
+        "arguments": [
+          {
+            "parts": [
+              "event_time"
+            ]
+          }
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "event_tm",
+      "type": {
+        "name": "DateTime"
+      },
+      "default": {
+        "parts": [
+          "event_time"
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "event_time"
+      ]
+    }
+  ]
+}

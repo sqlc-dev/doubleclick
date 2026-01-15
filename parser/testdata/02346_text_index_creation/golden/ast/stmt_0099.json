@@ -1,0 +1,77 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_1",
+      "expression": {
+        "parts": [
+          "s"
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "splitByNonAlpha"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "idx_2",
+      "expression": {
+        "parts": [
+          "s"
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "ngrams",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 3
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

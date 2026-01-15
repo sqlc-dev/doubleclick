@@ -1,0 +1,74 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "materialize",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 42
+            }
+          ],
+          "alias": "last_element"
+        },
+        {
+          "name": "cityHash64",
+          "arguments": [
+            {
+              "name": "map"
+            },
+            {
+              "expr": {
+                "name": "materialize",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": ""
+                  }
+                ]
+              },
+              "type": {
+                "name": "LowCardinality",
+                "parameters": [
+                  {
+                    "name": "Nullable",
+                    "parameters": [
+                      {
+                        "name": "String"
+                      }
+                    ],
+                    "has_parentheses": true
+                  }
+                ],
+                "has_parentheses": true
+              }
+            },
+            {
+              "parts": [
+                "last_element"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

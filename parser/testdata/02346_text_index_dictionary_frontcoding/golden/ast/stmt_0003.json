@@ -1,0 +1,134 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "text_fc",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "text_raw",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_raw",
+      "expression": {
+        "parts": [
+          "text_raw"
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "splitByNonAlpha"
+            }
+          },
+          {
+            "left": {
+              "parts": [
+                "dictionary_block_size"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 6
+            }
+          },
+          {
+            "left": {
+              "parts": [
+                "dictionary_block_frontcoding_compression"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "idx_fc",
+      "expression": {
+        "parts": [
+          "text_fc"
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "splitByNonAlpha"
+            }
+          },
+          {
+            "left": {
+              "parts": [
+                "dictionary_block_size"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 6
+            }
+          },
+          {
+            "left": {
+              "parts": [
+                "dictionary_block_frontcoding_compression"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

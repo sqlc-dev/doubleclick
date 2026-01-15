@@ -1,0 +1,84 @@
+{
+  "table": "mt",
+  "commands": [
+    {
+      "type": "UPDATE",
+      "where": {
+        "left": {
+          "parts": [
+            "n"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "assignments": [
+        {
+          "column": "s",
+          "value": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "toString",
+                      "arguments": [
+                        {
+                          "name": "groupArray",
+                          "arguments": [
+                            {
+                              "type": "Tuple",
+                              "value": [
+                                {}
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "zookeeper"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "path"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": "/"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "mutations_sync",
+      "value": {
+        "type": "Integer",
+        "value": 2
+      }
+    }
+  ]
+}

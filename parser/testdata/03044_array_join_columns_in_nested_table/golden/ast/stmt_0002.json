@@ -1,0 +1,102 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 1
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "x"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "l"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "y"
+                        },
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            ]
+                          },
+                          "alias": "a"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "r"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "l",
+                    "x"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "r",
+                    "y"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "r",
+                    "a"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

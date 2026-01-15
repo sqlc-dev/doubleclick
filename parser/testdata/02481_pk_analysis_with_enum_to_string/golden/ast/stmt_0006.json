@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "github_events"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "repo_name"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "apache/pulsar"
+              },
+              "parenthesized": true
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "event_type"
+                    ]
+                  }
+                ]
+              },
+              "list": [
+                {
+                  "type": "String",
+                  "value": "PullRequestEvent"
+                },
+                {
+                  "type": "String",
+                  "value": "PullRequestReviewCommentEvent"
+                },
+                {
+                  "type": "String",
+                  "value": "PullRequestReviewEvent"
+                },
+                {
+                  "type": "String",
+                  "value": "IssueCommentEvent"
+                }
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "actor_login"
+              ]
+            },
+            "not": true,
+            "list": [
+              {
+                "type": "String",
+                "value": "github-actions[bot]"
+              },
+              {
+                "type": "String",
+                "value": "codecov-commenter"
+              }
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "number"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 9276
+          },
+          "parenthesized": true
+        }
+      }
+    }
+  ]
+}

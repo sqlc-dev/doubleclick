@@ -1,0 +1,110 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "database"
+          ]
+        },
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "parts": [
+            "type"
+          ]
+        },
+        {
+          "parts": [
+            "type_full"
+          ]
+        },
+        {
+          "parts": [
+            "granularity"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "data_compressed_bytes"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 100
+          }
+        },
+        {
+          "left": {
+            "parts": [
+              "data_uncompressed_bytes"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 75
+          }
+        },
+        {
+          "parts": [
+            "marks_bytes"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "data_skipping_indices"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "text"
+          }
+        }
+      },
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

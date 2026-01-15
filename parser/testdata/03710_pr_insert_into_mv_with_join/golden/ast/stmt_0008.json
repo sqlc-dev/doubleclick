@@ -1,0 +1,80 @@
+{
+  "view": "mv",
+  "materialized": true,
+  "to": "n1_n2_join",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "n1",
+              "key"
+            ],
+            "alias": "k"
+          },
+          {
+            "parts": [
+              "n1",
+              "value"
+            ],
+            "alias": "v1"
+          },
+          {
+            "parts": [
+              "n2",
+              "value"
+            ],
+            "alias": "v2"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "n1"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "n2"
+                }
+              },
+              "join": {
+                "type": "INNER",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "n1",
+                      "key"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "n2",
+                      "key"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "n1",
+                "key"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

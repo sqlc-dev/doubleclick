@@ -1,0 +1,133 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arraySort",
+          "arguments": [
+            {
+              "name": "groupUniqArray",
+              "arguments": [
+                {
+                  "type": "Tuple",
+                  "value": [
+                    {
+                      "parts": [
+                        "partition_mod"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "max_val"
+                      ]
+                    }
+                  ],
+                  "spaced_commas": true
+                }
+              ]
+            }
+          ],
+          "alias": "max_strings_per_partition"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          },
+                          "alias": "partition_mod"
+                        },
+                        {
+                          "name": "maxDistinct",
+                          "arguments": [
+                            {
+                              "name": "toString",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  "op": "%",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 5
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "partition_by": [
+                              {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "%",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 7
+                                }
+                              }
+                            ]
+                          },
+                          "alias": "max_val"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.0.0.{1,2,3}"
+                                  },
+                                  {
+                                    "name": "numbers_mt",
+                                    "arguments": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 100000
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

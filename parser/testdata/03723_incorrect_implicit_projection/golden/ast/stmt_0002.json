@@ -1,0 +1,68 @@
+{
+  "table": "prd_bid_events_simple_no_partition",
+  "columns": [
+    {
+      "name": "type",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 9
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "timestamp"
+          ]
+        },
+        {
+          "parts": [
+            "type"
+          ]
+        }
+      ]
+    }
+  ],
+  "primary_key": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "timestamp"
+          ]
+        },
+        {
+          "parts": [
+            "type"
+          ]
+        }
+      ]
+    }
+  ]
+}

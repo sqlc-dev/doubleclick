@@ -1,0 +1,61 @@
+{
+  "table": "agg_over_nullable",
+  "columns": [
+    {
+      "name": "partition",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "user_id",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "UInt32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "description",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "partition"
+        ]
+      },
+      {
+        "parts": [
+          "timestamp"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

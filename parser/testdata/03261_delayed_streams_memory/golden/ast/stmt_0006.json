@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "memory_usage"
+                ]
+              },
+              "op": "\u003c",
+              "right": {
+                "type": "Integer",
+                "value": 300000000
+              }
+            },
+            {
+              "type": "String",
+              "value": "Ok"
+            },
+            {
+              "name": "format",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "Fail: memory usage {}"
+                },
+                {
+                  "name": "formatReadableSize",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "memory_usage"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "query"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "INSERT INTO t_100_columns%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "QueryFinish"
+          }
+        }
+      }
+    }
+  ]
+}

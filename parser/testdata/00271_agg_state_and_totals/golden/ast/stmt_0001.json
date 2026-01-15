@@ -1,0 +1,120 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "k"
+          ]
+        },
+        {
+          "name": "finalizeAggregation",
+          "arguments": [
+            {
+              "name": "quantilesTimingState",
+              "parameters": [
+                {
+                  "type": "Float",
+                  "value": 0.5,
+                  "source": "0.5"
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "intDiv",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "expr": {
+                                "type": "Integer",
+                                "value": 30000
+                              },
+                              "alias": "d"
+                            }
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "parts": [
+                                "d"
+                              ]
+                            }
+                          },
+                          "alias": "x"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 100000
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "with_totals": true,
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

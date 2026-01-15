@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "value"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "corr",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "value_1"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "value_1"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "name": "test_window"
+                          },
+                          "alias": "value"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test_table"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "window": [
+                        {
+                          "name": "test_window",
+                          "spec": {
+                            "partition_by": [
+                              {
+                                "parts": [
+                                  "value_2"
+                                ]
+                              }
+                            ],
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "id"
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "subquery"
+            }
+          }
+        ]
+      },
+      "where": {
+        "op": "NOT",
+        "operand": {
+          "op": "NOT",
+          "operand": {
+            "left": {
+              "parts": [
+                "value"
+              ]
+            },
+            "op": "\u003c\u003e",
+            "right": {
+              "parts": [
+                "value"
+              ]
+            },
+            "parenthesized": true
+          }
+        }
+      }
+    }
+  ]
+}

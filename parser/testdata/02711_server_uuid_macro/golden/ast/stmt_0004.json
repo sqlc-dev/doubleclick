@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "zookeeper"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "path"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "left": {
+              "left": {
+                "type": "String",
+                "value": "/clickhouse/tables/"
+              },
+              "op": "||",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "||",
+            "right": {
+              "type": "String",
+              "value": "/test/s1/replicas/"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "name"
+            ]
+          },
+          "pattern": {
+            "left": {
+              "left": {
+                "type": "String",
+                "value": "replica-"
+              },
+              "op": "||",
+              "right": {
+                "expr": {
+                  "name": "serverUUID"
+                },
+                "type": {
+                  "name": "String"
+                },
+                "operator_syntax": true
+              }
+            },
+            "op": "||",
+            "right": {
+              "type": "String",
+              "value": "%"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

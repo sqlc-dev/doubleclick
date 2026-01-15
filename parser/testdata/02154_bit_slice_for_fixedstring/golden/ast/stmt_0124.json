@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "op": "-",
+            "operand": {
+              "type": "Integer",
+              "value": 4
+            }
+          },
+          "alias": "offset"
+        },
+        {
+          "parts": [
+            "number"
+          ],
+          "alias": "length"
+        },
+        {
+          "name": "toFixedString",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "Hello"
+            },
+            {
+              "type": "Integer",
+              "value": 6
+            }
+          ],
+          "alias": "s"
+        },
+        {
+          "name": "subString",
+          "arguments": [
+            {
+              "name": "bin",
+              "arguments": [
+                {
+                  "parts": [
+                    "s"
+                  ]
+                }
+              ]
+            },
+            {
+              "parts": [
+                "offset"
+              ]
+            },
+            {
+              "parts": [
+                "length"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "bin",
+          "arguments": [
+            {
+              "name": "bitSlice",
+              "arguments": [
+                {
+                  "parts": [
+                    "s"
+                  ]
+                },
+                {
+                  "parts": [
+                    "offset"
+                  ]
+                },
+                {
+                  "parts": [
+                    "length"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 9
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

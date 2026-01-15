@@ -1,0 +1,65 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "normalized_query_hash"
+          ],
+          "alias": "a"
+        },
+        {
+          "name": "normalizedQueryHash",
+          "arguments": [
+            {
+              "parts": [
+                "query"
+              ]
+            }
+          ],
+          "alias": "b"
+        },
+        {
+          "left": {
+            "parts": [
+              "a"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "b"
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "processes"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "query"
+          ]
+        },
+        "pattern": {
+          "type": "String",
+          "value": "SELECT normalized_query_hash AS a, normalizedQueryHash(query) AS b, a = b FROM system.processes WHERE query LIKE%"
+        }
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

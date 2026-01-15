@@ -1,0 +1,74 @@
+{
+  "table": "bloom_filter_null_array",
+  "columns": [
+    {
+      "name": "v",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "LowCardinality",
+            "parameters": [
+              {
+                "name": "Nullable",
+                "parameters": [
+                  {
+                    "name": "String"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx",
+      "expression": {
+        "parts": [
+          "v"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter",
+        "arguments": [
+          {
+            "type": "Float",
+            "value": 0.1,
+            "source": "0.1"
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "v"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "allow_nullable_key",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,121 @@
+{
+  "table": "ds",
+  "columns": [
+    {
+      "name": "pk1",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "pk2",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "pk3",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "pk4",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "occurences",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "count"
+            ]
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedAggregatingMergeTree",
+    "parameters": [
+      {
+        "left": {
+          "left": {
+            "type": "String",
+            "value": "/clickhouse/"
+          },
+          "op": "||",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "||",
+        "right": {
+          "type": "String",
+          "value": "/ds/{shard}/"
+        }
+      },
+      {
+        "type": "String",
+        "value": "{replica}"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "pk1"
+          ]
+        },
+        {
+          "parts": [
+            "pk2"
+          ]
+        },
+        {
+          "parts": [
+            "pk3"
+          ]
+        },
+        {
+          "parts": [
+            "pk4"
+          ]
+        }
+      ]
+    }
+  ]
+}

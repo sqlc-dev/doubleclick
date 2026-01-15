@@ -1,0 +1,73 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayFirstIndex",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "materialize",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            {
+              "name": "arrayMap",
+              "arguments": [
+                {
+                  "parameters": [
+                    "x"
+                  ],
+                  "body": {
+                    "name": "toString",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "x"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "name": "range",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

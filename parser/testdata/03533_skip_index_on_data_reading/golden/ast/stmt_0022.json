@@ -1,0 +1,86 @@
+{
+  "table": "test_partial_index",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "event_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "user_id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "url",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "region",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "event_date"
+          ]
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "min_bytes_for_full_part_storage",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "max_bytes_to_merge_at_max_space_in_pool",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

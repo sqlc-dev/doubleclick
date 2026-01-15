@@ -1,0 +1,80 @@
+{
+  "table": "t1",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "left": {
+                  "name": "sipHash64",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    {
+                      "type": "String",
+                      "value": "x"
+                    }
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 10000000
+                },
+                "parenthesized": true
+              },
+              "op": "+",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            "alias": "key"
+          },
+          {
+            "name": "concat",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "val"
+              },
+              {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "s"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers_mt",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10000000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

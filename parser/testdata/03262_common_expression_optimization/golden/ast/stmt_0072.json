@@ -1,0 +1,142 @@
+{
+  "explain_type": "QUERY TREE",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "x"
+            ]
+          },
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "A"
+                ]
+              }
+            ],
+            "over": {
+              "partition_by": [
+                {
+                  "left": {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1000
+                  }
+                }
+              ]
+            },
+            "alias": "mA"
+          },
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "B"
+                ]
+              }
+            ],
+            "over": {
+              "partition_by": [
+                {
+                  "left": {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1000
+                  }
+                }
+              ]
+            },
+            "alias": "mB"
+          },
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "C"
+                ]
+              }
+            ],
+            "over": {
+              "partition_by": [
+                {
+                  "left": {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1000
+                  }
+                }
+              ]
+            },
+            "alias": "mC"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "x"
+                }
+              }
+            }
+          ]
+        },
+        "qualify": {
+          "left": {
+            "left": {
+              "parts": [
+                "mA"
+              ]
+            },
+            "op": "AND",
+            "right": {
+              "parts": [
+                "mB"
+              ]
+            },
+            "parenthesized": true
+          },
+          "op": "OR",
+          "right": {
+            "left": {
+              "parts": [
+                "mA"
+              ]
+            },
+            "op": "AND",
+            "right": {
+              "parts": [
+                "mC"
+              ]
+            },
+            "parenthesized": true
+          }
+        }
+      }
+    ]
+  },
+  "has_settings": true,
+  "explicit_type": true,
+  "options_string": "dump_ast = 1"
+}

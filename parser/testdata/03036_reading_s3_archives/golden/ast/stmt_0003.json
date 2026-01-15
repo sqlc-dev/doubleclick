@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "data"
+          ]
+        },
+        {
+          "parts": [
+            "_size"
+          ]
+        },
+        {
+          "parts": [
+            "_file"
+          ]
+        },
+        {
+          "parts": [
+            "_path"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "s3",
+                "arguments": [
+                  {
+                    "parts": [
+                      "s3_conn"
+                    ]
+                  },
+                  {
+                    "left": {
+                      "parts": [
+                        "filename"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": "03036_archive*.zip :: example2.csv"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "id"
+                ]
+              },
+              {
+                "parts": [
+                  "_file"
+                ]
+              },
+              {
+                "parts": [
+                  "_path"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "arr"
+          ]
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayMap",
+                          "arguments": [
+                            {
+                              "parameters": [
+                                "x"
+                              ],
+                              "body": {
+                                "left": {
+                                  "parts": [
+                                    "x"
+                                  ]
+                                },
+                                "op": "%",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              }
+                            },
+                            {
+                              "name": "arraySort",
+                              "arguments": [
+                                {
+                                  "name": "groupArray",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "number"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "arr"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "number"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "database": "system",
+                                                "table": "numbers"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "limit": {
+                                        "type": "Integer",
+                                        "value": 10000
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "left": {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          "op": "%",
+                          "right": {
+                            "left": {
+                              "left": {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "*",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 12379813738877118345
+                                }
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1234
+                              },
+                              "parenthesized": true
+                            },
+                            "op": "+",
+                            "right": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "parenthesized": true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "arr"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "arr"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

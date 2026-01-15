@@ -1,0 +1,82 @@
+{
+  "table": "test_index",
+  "columns": [
+    {
+      "name": "key_string",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "key_uint32",
+      "type": null,
+      "default": {
+        "name": "toUInt32",
+        "arguments": [
+          {
+            "parts": [
+              "key_string"
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx",
+      "expression": {
+        "name": "toUInt32",
+        "arguments": [
+          {
+            "parts": [
+              "key_string"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key_string"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "tuple"
+  },
+  "primary_key": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

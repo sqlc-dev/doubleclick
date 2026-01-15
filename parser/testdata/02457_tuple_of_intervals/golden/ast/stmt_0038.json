@@ -1,0 +1,220 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "e1",
+          "query": {
+            "left": {
+              "left": {
+                "left": {
+                  "expr": {
+                    "type": "String",
+                    "value": "2022-10-11"
+                  },
+                  "type": {
+                    "name": "DateTime64"
+                  },
+                  "operator_syntax": true
+                },
+                "op": "-",
+                "right": {
+                  "value": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "unit": "YEAR"
+                }
+              },
+              "op": "-",
+              "right": {
+                "value": {
+                  "type": "Integer",
+                  "value": 4
+                },
+                "unit": "MONTH"
+              }
+            },
+            "op": "-",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 1
+              },
+              "unit": "SECOND"
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "e2",
+          "query": {
+            "left": {
+              "expr": {
+                "type": "String",
+                "value": "2022-10-11"
+              },
+              "type": {
+                "name": "DateTime64"
+              },
+              "operator_syntax": true
+            },
+            "op": "+",
+            "right": {
+              "left": {
+                "left": {
+                  "op": "-",
+                  "operand": {
+                    "value": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "unit": "YEAR"
+                  }
+                },
+                "op": "-",
+                "right": {
+                  "value": {
+                    "type": "Integer",
+                    "value": 4
+                  },
+                  "unit": "MONTH"
+                }
+              },
+              "op": "-",
+              "right": {
+                "value": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "unit": "SECOND"
+              },
+              "parenthesized": true
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "e3",
+          "query": {
+            "left": {
+              "expr": {
+                "type": "String",
+                "value": "2022-10-11"
+              },
+              "type": {
+                "name": "DateTime64"
+              },
+              "operator_syntax": true
+            },
+            "op": "-",
+            "right": {
+              "type": "Tuple",
+              "value": [
+                {
+                  "value": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "unit": "YEAR"
+                },
+                {
+                  "value": {
+                    "type": "Integer",
+                    "value": 4
+                  },
+                  "unit": "MONTH"
+                },
+                {
+                  "value": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "unit": "SECOND"
+                }
+              ],
+              "spaced_commas": true
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "e4",
+          "query": {
+            "left": {
+              "expr": {
+                "type": "String",
+                "value": "2022-10-11"
+              },
+              "type": {
+                "name": "DateTime64"
+              },
+              "operator_syntax": true
+            },
+            "op": "-",
+            "right": {
+              "value": {
+                "type": "String",
+                "value": "1 YEAR 4 MONTH 1 SECOND"
+              },
+              "unit": ""
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "e1"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "parts": [
+                  "e2"
+                ]
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "e2"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "parts": [
+                  "e3"
+                ]
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "e3"
+              ]
+            },
+            "op": "==",
+            "right": {
+              "parts": [
+                "e4"
+              ]
+            }
+          }
+        },
+        {
+          "parts": [
+            "e1"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "explain_type": "PLAN",
+  "statement": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "view_1",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "key"
+                        ]
+                      },
+                      {
+                        "name": "ROW_NUMBER",
+                        "over": {
+                          "partition_by": [
+                            {
+                              "parts": [
+                                "key"
+                              ]
+                            }
+                          ]
+                        },
+                        "alias": "rn"
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "test"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          },
+          {
+            "name": "view_2",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "key"
+                        ]
+                      },
+                      {
+                        "expr": {
+                          "left": {
+                            "name": "count"
+                          },
+                          "op": "\u003e",
+                          "right": {
+                            "type": "Integer",
+                            "value": 0
+                          }
+                        },
+                        "alias": "has_any"
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "test"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "group_by": [
+                      {
+                        "parts": [
+                          "key"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          },
+          {
+            "name": "events",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {}
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "view_1"
+                            },
+                            "alias": "v1"
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "view_2"
+                            },
+                            "alias": "v2_1"
+                          },
+                          "join": {
+                            "type": "INNER",
+                            "using": [
+                              {
+                                "parts": [
+                                  "key"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "view_2"
+                            },
+                            "alias": "v2_2"
+                          },
+                          "join": {
+                            "type": "LEFT",
+                            "using": [
+                              {
+                                "parts": [
+                                  "key"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "left": {
+                        "parts": [
+                          "v1",
+                          "rn"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          }
+        ],
+        "columns": [
+          {
+            "name": "count"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "events"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "parts": [
+            "v2_1",
+            "has_any"
+          ]
+        }
+      }
+    ]
+  },
+  "explicit_type": true
+}

@@ -1,0 +1,74 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "concat",
+          "arguments": [
+            {
+              "parts": [
+                "database"
+              ]
+            },
+            {
+              "parts": [
+                "table"
+              ]
+            }
+          ],
+          "alias": "name"
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "clusterAllReplicas",
+                "arguments": [
+                  {
+                    "parts": [
+                      "test_shard_localhost"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "system",
+                      "tables"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "database"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "name": "currentDatabase"
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "name"
+          ]
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

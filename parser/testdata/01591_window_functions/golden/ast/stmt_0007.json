@@ -1,0 +1,83 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "over": {
+            "partition_by": [
+              {
+                "name": "intDiv",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "descending": true
+              }
+            ],
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              }
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "max_block_size",
+          "value": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ]
+    }
+  ]
+}

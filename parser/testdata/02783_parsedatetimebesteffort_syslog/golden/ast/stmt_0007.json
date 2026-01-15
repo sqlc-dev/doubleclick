@@ -1,0 +1,375 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "dt_ref",
+          "query": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2023-06-30 23:59:30"
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "dt_now",
+          "query": {
+            "name": "now"
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "dt_before",
+          "query": {
+            "name": "date_sub",
+            "arguments": [
+              {
+                "parts": [
+                  "DAY"
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "parts": [
+                  "dt_now"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "time_shift",
+          "query": {
+            "name": "dateDiff",
+            "arguments": [
+              {
+                "parts": [
+                  "SECOND"
+                ]
+              },
+              {
+                "parts": [
+                  "dt_ref"
+                ]
+              },
+              {
+                "parts": [
+                  "dt_now"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "syslog_before",
+          "query": {
+            "name": "formatDateTime",
+            "arguments": [
+              {
+                "parts": [
+                  "dt_before"
+                ]
+              },
+              {
+                "type": "String",
+                "value": "%b %e %T"
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "formatDateTime",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "dt_before"
+                ]
+              },
+              "op": "-",
+              "right": {
+                "parts": [
+                  "time_shift"
+                ]
+              }
+            },
+            {
+              "type": "String",
+              "value": "%b %e %T"
+            }
+          ],
+          "alias": "syslog_arg"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "parseDateTimeBestEffort",
+              "arguments": [
+                {
+                  "parts": [
+                    "syslog_before"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "time_shift"
+              ]
+            }
+          },
+          "alias": "res"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "parseDateTimeBestEffortOrNull",
+              "arguments": [
+                {
+                  "parts": [
+                    "syslog_before"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "time_shift"
+              ]
+            }
+          },
+          "alias": "res_null"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "parseDateTimeBestEffortOrZero",
+              "arguments": [
+                {
+                  "parts": [
+                    "syslog_before"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "time_shift"
+              ]
+            }
+          },
+          "alias": "res_zero"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "parseDateTimeBestEffortUS",
+              "arguments": [
+                {
+                  "parts": [
+                    "syslog_before"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "time_shift"
+              ]
+            }
+          },
+          "alias": "res_us"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "parseDateTimeBestEffortUSOrNull",
+              "arguments": [
+                {
+                  "parts": [
+                    "syslog_before"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "time_shift"
+              ]
+            }
+          },
+          "alias": "res_us_null"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "parseDateTimeBestEffortUSOrZero",
+              "arguments": [
+                {
+                  "parts": [
+                    "syslog_before"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "time_shift"
+              ]
+            }
+          },
+          "alias": "res_us_zero"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "parseDateTime64BestEffort",
+              "arguments": [
+                {
+                  "parts": [
+                    "syslog_before"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "time_shift"
+              ]
+            }
+          },
+          "alias": "res64"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "parseDateTime64BestEffortOrNull",
+              "arguments": [
+                {
+                  "parts": [
+                    "syslog_before"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "time_shift"
+              ]
+            }
+          },
+          "alias": "res64_null"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "parseDateTime64BestEffortOrZero",
+              "arguments": [
+                {
+                  "parts": [
+                    "syslog_before"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "time_shift"
+              ]
+            }
+          },
+          "alias": "res64_zero"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "parseDateTime64BestEffortUS",
+              "arguments": [
+                {
+                  "parts": [
+                    "syslog_before"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "time_shift"
+              ]
+            }
+          },
+          "alias": "res64_us"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "parseDateTime64BestEffortUSOrNull",
+              "arguments": [
+                {
+                  "parts": [
+                    "syslog_before"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "time_shift"
+              ]
+            }
+          },
+          "alias": "res64_us_null"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "parseDateTime64BestEffortUSOrZero",
+              "arguments": [
+                {
+                  "parts": [
+                    "syslog_before"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "time_shift"
+              ]
+            }
+          },
+          "alias": "res64_us_zero"
+        }
+      ],
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

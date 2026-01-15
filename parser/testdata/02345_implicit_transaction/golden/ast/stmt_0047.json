@@ -1,0 +1,107 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "implicit_True"
+        },
+        {
+          "name": "count",
+          "alias": "all"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "transaction_id"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Tuple",
+              "value": [
+                {
+                  "type": "Integer",
+                  "value": 0
+                },
+                {
+                  "type": "Integer",
+                  "value": 0
+                },
+                {
+                  "type": "String",
+                  "value": "00000000-0000-0000-0000-000000000000"
+                }
+              ]
+            }
+          },
+          "alias": "is_empty"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "yesterday"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "query"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "-- Verify that the transaction_id column is populated correctly%"
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "transaction_id"
+          ]
+        }
+      ],
+      "format": {
+        "parts": [
+          "JSONEachRow"
+        ]
+      }
+    }
+  ]
+}

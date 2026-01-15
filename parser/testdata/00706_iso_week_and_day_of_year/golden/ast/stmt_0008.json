@@ -1,0 +1,74 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "time",
+          "query": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "left": {
+                  "type": "Integer",
+                  "value": 1000000000
+                },
+                "op": "+",
+                "right": {
+                  "left": {
+                    "name": "rand64"
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1000000000
+                  }
+                }
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "distinct": true,
+      "columns": [
+        {
+          "expr": {
+            "name": "toISOWeek",
+            "arguments": [
+              {
+                "parts": [
+                  "time"
+                ]
+              }
+            ]
+          },
+          "low": {
+            "type": "Integer",
+            "value": 1
+          },
+          "high": {
+            "type": "Integer",
+            "value": 53
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1000000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "subquery1",
+            "period"
+          ],
+          "alias": "period"
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "type": "Integer",
+                "value": 1
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 0
+            },
+            {
+              "parts": [
+                "subquery1",
+                "data1"
+              ]
+            }
+          ],
+          "alias": "data"
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "type": "Integer",
+                "value": 1
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 0
+            },
+            {
+              "parts": [
+                "subquery2",
+                "data"
+              ]
+            }
+          ],
+          "alias": "other_data"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "date"
+                          ],
+                          "alias": "period"
+                        },
+                        {
+                          "parts": [
+                            "data"
+                          ],
+                          "alias": "data1"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "hits"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "subquery1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "date"
+                          ],
+                          "alias": "period"
+                        },
+                        {
+                          "parts": [
+                            "data"
+                          ],
+                          "alias": "data"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "hits"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "subquery2"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "subquery1",
+                    "period"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "subquery2",
+                    "period"
+                  ]
+                },
+                "parenthesized": true
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,267 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "r1",
+          "query": {
+            "name": "sum",
+            "arguments": [
+              {
+                "name": "if",
+                "arguments": [
+                  {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "a"
+                          ]
+                        },
+                        "op": "\u003e=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        },
+                        "parenthesized": true
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "b"
+                          ]
+                        },
+                        "op": "!=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 100
+                        },
+                        "parenthesized": true
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "c"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "Integer",
+                        "value": 0
+                      },
+                      "parenthesized": true
+                    }
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "r2",
+          "query": {
+            "name": "sum",
+            "arguments": [
+              {
+                "name": "if",
+                "arguments": [
+                  {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "a"
+                          ]
+                        },
+                        "op": "\u003e=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        },
+                        "parenthesized": true
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "b"
+                          ]
+                        },
+                        "op": "!=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 100
+                        },
+                        "parenthesized": true
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "c"
+                        ]
+                      },
+                      "op": "\u003e",
+                      "right": {
+                        "type": "Integer",
+                        "value": 220
+                      },
+                      "parenthesized": true
+                    }
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "left": {
+                "name": "intDiv",
+                "arguments": [
+                  {
+                    "name": "toUInt32",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "rtime"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 20
+                  }
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 20
+              },
+              "parenthesized": true
+            },
+            "op": "*",
+            "right": {
+              "type": "Integer",
+              "value": 1000
+            }
+          },
+          "alias": "t"
+        },
+        {
+          "expr": {
+            "left": {
+              "left": {
+                "parts": [
+                  "r1"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 100
+              },
+              "parenthesized": true
+            },
+            "op": "/",
+            "right": {
+              "left": {
+                "parts": [
+                  "r1"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "parts": [
+                  "r2"
+                ]
+              },
+              "parenthesized": true
+            }
+          },
+          "alias": "m"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "cluster",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "test_cluster_two_shards"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "test_alias"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "day"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "2022-01-01"
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "t"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "t"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

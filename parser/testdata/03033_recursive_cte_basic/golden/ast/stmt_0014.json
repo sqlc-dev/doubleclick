@@ -1,0 +1,82 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "recursive_cte",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "n"
+                    }
+                  ]
+                },
+                {
+                  "columns": [
+                    {
+                      "left": {
+                        "parts": [
+                          "n"
+                        ]
+                      },
+                      "op": "+",
+                      "right": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "recursive_cte"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "n"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "recursive_cte"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 5
+      }
+    }
+  ]
+}

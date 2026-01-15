@@ -1,0 +1,70 @@
+{
+  "table": "compress_table",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value1",
+      "type": {
+        "name": "String"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "Default"
+          }
+        ]
+      }
+    },
+    {
+      "name": "value2",
+      "type": {
+        "name": "UInt64"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "Delta"
+          },
+          {
+            "name": "Default"
+          }
+        ]
+      }
+    },
+    {
+      "name": "value3",
+      "type": {
+        "name": "String"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "ZSTD",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 10
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ]
+}

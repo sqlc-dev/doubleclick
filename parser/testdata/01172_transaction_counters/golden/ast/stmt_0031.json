@@ -1,0 +1,333 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "indexOf",
+          "arguments": [
+            {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "name": "arraySort",
+                        "arguments": [
+                          {
+                            "name": "groupUniqArray",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "tid"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "database": "system",
+                              "table": "transactions_info_log"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "table"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "txn_counters"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "parts": [
+                "tid"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "type"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "thread_id"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "left": {
+            "left": {
+              "name": "length",
+              "arguments": [
+                {
+                  "parts": [
+                    "query_id"
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "length",
+              "arguments": [
+                {
+                  "name": "queryID"
+                }
+              ]
+            }
+          },
+          "op": "OR",
+          "right": {
+            "left": {
+              "left": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "Commit"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "query_id"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": ""
+              }
+            }
+          }
+        },
+        {
+          "left": {
+            "parts": [
+              "tid_hash"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "left": {
+            "parts": [
+              "csn"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "parts": [
+            "part"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "transactions_info_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "tid"
+            ]
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "tid"
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "database": "system",
+                          "table": "transactions_info_log"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "database"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "name": "currentDatabase"
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "table"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "txn_counters"
+                      }
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "op": "NOT",
+                    "operand": {
+                      "left": {
+                        "left": {
+                          "tuple": {
+                            "parts": [
+                              "tid"
+                            ]
+                          },
+                          "index": {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "tuple": {
+                            "parts": [
+                              "tid"
+                            ]
+                          },
+                          "index": {
+                            "type": "Integer",
+                            "value": 2
+                          }
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      },
+                      "parenthesized": true
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "op": "OR",
+        "right": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "txn_counters"
+            }
+          },
+          "parenthesized": true
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

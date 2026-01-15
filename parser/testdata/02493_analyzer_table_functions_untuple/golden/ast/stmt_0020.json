@@ -1,0 +1,66 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "expr": {
+              "name": "tuple",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "1"
+                }
+              ]
+            },
+            "type": {
+              "name": "Tuple(value String)"
+            }
+          },
+          "alias": "value"
+        },
+        {
+          "parts": [
+            "number"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "table": "value",
+                    "transformers": [
+                      {
+                        "type": "apply",
+                        "apply_lambda": {
+                          "parameters": [
+                            "x"
+                          ],
+                          "body": {
+                            "name": "toUInt64",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "x"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

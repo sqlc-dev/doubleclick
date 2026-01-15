@@ -1,0 +1,76 @@
+{
+  "table": "fact_click",
+  "columns": [
+    {
+      "name": "sid",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "campaign_sid",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "campaign_batch_sid",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "email_address",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "campaign_sid"
+          ]
+        },
+        {
+          "parts": [
+            "campaign_batch_sid"
+          ]
+        },
+        {
+          "parts": [
+            "sid"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

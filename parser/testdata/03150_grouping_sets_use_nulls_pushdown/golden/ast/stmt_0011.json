@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "table": "t2"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "table": "t1"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test_grouping_sets_predicate"
+                              },
+                              "alias": "t1"
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "type": "Tuple",
+                          "value": [
+                            {
+                              "parts": [
+                                "day_"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "type_1"
+                              ]
+                            }
+                          ],
+                          "spaced_commas": true
+                        },
+                        {
+                          "parts": [
+                            "day_"
+                          ]
+                        }
+                      ],
+                      "grouping_sets": true
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "day_"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "2023-01-05"
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

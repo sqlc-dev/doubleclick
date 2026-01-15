@@ -1,0 +1,114 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "1947 #3 CHECK - FALSE"
+          },
+          "alias": "test"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "SleepFunctionCalls"
+            }
+          },
+          "alias": "sleep_calls"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "SleepFunctionMicroseconds"
+            }
+          },
+          "alias": "sleep_microseconds"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "expr": {
+                "parts": [
+                  "query"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "%DESCRIBE ( SELECT '1947 #3 QUERY - FALSE',%"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_date"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "name": "yesterday"
+          }
+        }
+      },
+      "format": {
+        "parts": [
+          "JSONEachRow"
+        ]
+      }
+    }
+  ]
+}

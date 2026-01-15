@@ -1,0 +1,111 @@
+{
+  "table": "A",
+  "columns": [
+    {
+      "name": "A",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "B",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "S",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "A"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "name": "toString",
+            "arguments": [
+              {
+                "name": "arrayMap",
+                "arguments": [
+                  {
+                    "parameters": [
+                      "i"
+                    ],
+                    "body": {
+                      "name": "cityHash64",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "i"
+                            ]
+                          },
+                          "op": "*",
+                          "right": {
+                            "parts": [
+                              "number"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "range",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Float",
+                      "value": 1000000,
+                      "source": "1e6"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

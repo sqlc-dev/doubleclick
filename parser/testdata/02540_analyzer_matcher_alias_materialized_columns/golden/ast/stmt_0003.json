@@ -1,0 +1,69 @@
+{
+  "table": "test_table",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value_alias",
+      "type": null,
+      "default": {
+        "name": "concat",
+        "arguments": [
+          {
+            "type": "String",
+            "value": "AliasValue_"
+          },
+          {
+            "name": "toString",
+            "arguments": [
+              {
+                "parts": [
+                  "id"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "value_materialized",
+      "type": null,
+      "default": {
+        "name": "concat",
+        "arguments": [
+          {
+            "type": "String",
+            "value": "MaterializedValue_"
+          },
+          {
+            "name": "toString",
+            "arguments": [
+              {
+                "parts": [
+                  "id"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

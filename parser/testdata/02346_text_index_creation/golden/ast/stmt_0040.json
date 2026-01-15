@@ -1,0 +1,61 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "str",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx",
+      "expression": {
+        "parts": [
+          "str"
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "splitByString",
+              "arguments": [
+                {
+                  "type": "Array",
+                  "value": [
+                    {
+                      "type": "String",
+                      "value": "\n"
+                    },
+                    {
+                      "type": "String",
+                      "value": "\\"
+                    }
+                  ],
+                  "spaced_commas": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

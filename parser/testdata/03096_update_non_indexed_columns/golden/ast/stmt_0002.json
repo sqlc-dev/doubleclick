@@ -1,0 +1,111 @@
+{
+  "table": "test_03096",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "type": "Integer",
+        "value": 0
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "sum",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "left": {
+          "left": {
+            "parts": [
+              "a"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "parts": [
+              "b"
+            ]
+          },
+          "parenthesized": true
+        },
+        "op": "+",
+        "right": {
+          "parts": [
+            "c"
+          ]
+        }
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx",
+      "expression": {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "c"
+            ]
+          },
+          {
+            "parts": [
+              "d"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,87 @@
+{
+  "table": "03581_data",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "val_minmax",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "val_set",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "skip_minmax",
+      "expression": {
+        "parts": [
+          "val_minmax"
+        ]
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "skip_set",
+      "expression": {
+        "parts": [
+          "val_set"
+        ]
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

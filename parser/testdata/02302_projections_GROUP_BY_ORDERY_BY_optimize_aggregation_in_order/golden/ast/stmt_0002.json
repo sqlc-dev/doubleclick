@@ -1,0 +1,92 @@
+{
+  "table": "test_agg_proj_02302",
+  "columns": [
+    {
+      "name": "x",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "Int32"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "x_plus_y",
+      "select": {
+        "columns": [
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "x"
+                  ]
+                },
+                "op": "-",
+                "right": {
+                  "parts": [
+                    "y"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "argMax",
+            "arguments": [
+              {
+                "parts": [
+                  "x"
+                ]
+              },
+              {
+                "parts": [
+                  "y"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "left": {
+              "parts": [
+                "x"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "y"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

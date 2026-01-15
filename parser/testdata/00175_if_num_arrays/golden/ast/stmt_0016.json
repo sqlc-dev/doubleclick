@@ -1,0 +1,86 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "condition": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            "then": {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "Integer",
+                  "value": 256
+                },
+                {
+                  "type": "Integer",
+                  "value": 257
+                }
+              ],
+              "spaced_commas": true
+            },
+            "else": {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "type": "Array",
+                  "value": [
+                    {
+                      "type": "Integer",
+                      "value": 300
+                    },
+                    {
+                      "op": "-",
+                      "operand": {
+                        "type": "Integer",
+                        "value": 500000
+                      }
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 500
+                    }
+                  ],
+                  "spaced_commas": true
+                }
+              ]
+            }
+          },
+          "alias": "res"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      },
+      "format": {
+        "parts": [
+          "TabSeparatedWithNamesAndTypes"
+        ]
+      }
+    }
+  ]
+}

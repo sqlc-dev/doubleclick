@@ -1,0 +1,125 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "my.tuple",
+      "type": {
+        "name": "Tuple",
+        "parameters": [
+          {
+            "name": "a",
+            "type": {
+              "name": "UInt32"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "a1",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "parts": [
+          "my",
+          "tuple",
+          "a"
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "a2",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "parts": [
+          "my",
+          "tuple",
+          "a"
+        ]
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx1",
+      "expression": {
+        "parts": [
+          "my",
+          "tuple",
+          "a"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "prj1",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "my",
+              "tuple"
+            ]
+          },
+          {
+            "parts": [
+              "my",
+              "tuple",
+              "a"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "my",
+              "tuple",
+              "a"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "my",
+            "tuple",
+            "a"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "my",
+              "tuple",
+              "a"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "type": "Integer",
+            "value": 42
+          }
+        }
+      ]
+    }
+  ]
+}

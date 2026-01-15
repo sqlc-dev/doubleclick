@@ -1,0 +1,141 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "name": "isNull",
+              "arguments": [
+                {
+                  "parts": [
+                    "l",
+                    "id"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "name": "isNull",
+              "arguments": [
+                {
+                  "parts": [
+                    "r",
+                    "id"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "id"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 15000
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "l"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "id"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 15500
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "r"
+            },
+            "join": {
+              "type": "FULL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "l",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "r",
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

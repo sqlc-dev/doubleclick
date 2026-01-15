@@ -1,0 +1,126 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "parts": [
+                "s0",
+                "number"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "s1",
+            "half"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              },
+              "alias": "s0"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "/",
+                            "right": {
+                              "type": "Integer",
+                              "value": 2
+                            }
+                          },
+                          "alias": "half"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "s1"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "s0",
+                    "number"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "s1",
+                    "number"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "left": {
+            "parts": [
+              "s0",
+              "number"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 5
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "p",
+          "query": {
+            "name": "h3ToGeo",
+            "arguments": [
+              {
+                "parts": [
+                  "h3_index"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "tuple": {
+                "parts": [
+                  "p"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "tuple": {
+                "parts": [
+                  "p"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 3
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "h3_indexes"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "h3_index"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

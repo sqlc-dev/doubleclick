@@ -1,0 +1,42 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "data",
+          "query": {
+            "type": "String",
+            "value": "{\"1\":{\"key\":\"value\"}}"
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "parsed_json",
+          "query": {
+            "name": "JSONExtract",
+            "arguments": [
+              {
+                "parts": [
+                  "data"
+                ]
+              },
+              {
+                "type": "String",
+                "value": "Tuple(\"1\" Tuple(key String))"
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "parsed_json"
+          ],
+          "alias": "ssid"
+        }
+      ]
+    }
+  ]
+}

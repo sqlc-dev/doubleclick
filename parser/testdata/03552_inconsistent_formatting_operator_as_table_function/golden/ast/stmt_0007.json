@@ -1,0 +1,143 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "array": {
+            "parts": [
+              "ProfileEvents"
+            ]
+          },
+          "index": {
+            "type": "String",
+            "value": "LoadedMarksCount"
+          }
+        },
+        {
+          "left": {
+            "type": "Integer",
+            "value": 1
+          },
+          "op": "OR",
+          "right": {
+            "name": "toLowCardinality",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "nonexistent"
+              }
+            }
+          }
+        ]
+      },
+      "prewhere": {
+        "left": {
+          "left": {
+            "name": "tupleElement",
+            "arguments": [
+              {},
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ]
+          },
+          "op": "AND",
+          "right": {
+            "name": "match",
+            "arguments": [
+              {
+                "parts": [
+                  "query"
+                ]
+              },
+              {
+                "type": "String",
+                "value": "SELECT * FROM t_prewarm_add_column%"
+              }
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "name": "currentDatabase"
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "current_database"
+            ]
+          },
+          "parenthesized": true
+        }
+      },
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "type": "String",
+              "value": "SELECT * FROM t_prewarm_add_column%"
+            },
+            "not": true,
+            "pattern": {
+              "parts": [
+                "query"
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            },
+            "parenthesized": true
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "current_database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          },
+          "parenthesized": true
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          },
+          "descending": true,
+          "nulls_first": true
+        }
+      ]
+    }
+  ]
+}

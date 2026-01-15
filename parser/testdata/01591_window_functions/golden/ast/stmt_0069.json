@@ -1,0 +1,262 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "parts": [
+            "p"
+          ]
+        },
+        {
+          "parts": [
+            "pp"
+          ]
+        },
+        {
+          "name": "lagInFrame",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "over": {
+            "name": "w"
+          },
+          "alias": "lag1"
+        },
+        {
+          "name": "lagInFrame",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "-",
+              "right": {
+                "parts": [
+                  "pp"
+                ]
+              }
+            }
+          ],
+          "over": {
+            "name": "w"
+          },
+          "alias": "lag2"
+        },
+        {
+          "name": "lagInFrame",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "-",
+              "right": {
+                "parts": [
+                  "pp"
+                ]
+              }
+            },
+            {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 11
+              }
+            }
+          ],
+          "over": {
+            "name": "w"
+          },
+          "alias": "lag"
+        },
+        {
+          "name": "leadInFrame",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "-",
+              "right": {
+                "parts": [
+                  "pp"
+                ]
+              }
+            },
+            {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 11
+              }
+            }
+          ],
+          "over": {
+            "name": "w"
+          },
+          "alias": "lead"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        {
+                          "name": "intDiv",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 5
+                            }
+                          ],
+                          "alias": "p"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "p"
+                              ]
+                            },
+                            "op": "*",
+                            "right": {
+                              "type": "Integer",
+                              "value": 5
+                            }
+                          },
+                          "alias": "pp"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 16
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "window": [
+        {
+          "name": "w",
+          "spec": {
+            "partition_by": [
+              {
+                "parts": [
+                  "p"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              },
+              "end": {
+                "type": "UNBOUNDED_FOLLOWING"
+              }
+            }
+          }
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "number"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "max_block_size",
+          "value": {
+            "type": "Integer",
+            "value": 3
+          }
+        }
+      ]
+    }
+  ]
+}

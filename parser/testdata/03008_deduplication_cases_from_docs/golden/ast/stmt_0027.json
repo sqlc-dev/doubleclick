@@ -1,0 +1,68 @@
+{
+  "view": "mv_dst",
+  "materialized": true,
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "settings": [
+    {
+      "name": "non_replicated_deduplication_window",
+      "value": {
+        "type": "Integer",
+        "value": 1000
+      }
+    }
+  ],
+  "settings_before_comment": true,
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "type": "Integer",
+              "value": 0
+            },
+            "alias": "key"
+          },
+          {
+            "parts": [
+              "value"
+            ],
+            "alias": "value"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "dst"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "d_ids"
+          ]
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "name"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "f"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "left": true,
+              "columns": [
+                {
+                  "parts": [
+                    "d_ids"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "d"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "d",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "d_ids"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

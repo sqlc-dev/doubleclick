@@ -1,0 +1,78 @@
+{
+  "database": "test",
+  "table": "hits_1m",
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        {
+          "parts": [
+            "EventDate"
+          ]
+        },
+        {
+          "name": "intHash32",
+          "arguments": [
+            {
+              "parts": [
+                "UserID"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "EventDate"
+        ]
+      }
+    ]
+  },
+  "sample_by": {
+    "name": "intHash32",
+    "arguments": [
+      {
+        "parts": [
+          "UserID"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "storage_policy",
+      "value": {
+        "type": "String",
+        "value": "default"
+      }
+    },
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "Integer",
+        "value": 10485760
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

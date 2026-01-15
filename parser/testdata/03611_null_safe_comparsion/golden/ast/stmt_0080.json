@@ -1,0 +1,83 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "a"
+              ]
+            }
+          ],
+          "alias": "max_a"
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "b"
+              ]
+            }
+          ],
+          "alias": "max_b"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "03611_t_nullsafe"
+              }
+            }
+          }
+        ]
+      },
+      "having": {
+        "left": {
+          "left": {
+            "parts": [
+              "max_a"
+            ]
+          },
+          "op": "\u003c=\u003e",
+          "right": {
+            "parts": [
+              "max_b"
+            ]
+          },
+          "parenthesized": true
+        },
+        "op": "OR",
+        "right": {
+          "op": "NOT",
+          "operand": {
+            "left": {
+              "parts": [
+                "max_a"
+              ]
+            },
+            "op": "\u003c=\u003e",
+            "right": {
+              "parts": [
+                "max_b"
+              ]
+            }
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "max_a"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

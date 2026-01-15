@@ -1,0 +1,85 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "parts": [
+                "primary_key_bytes_in_memory"
+              ]
+            },
+            {
+              "op": "-",
+              "operand": {
+                "type": "Integer",
+                "value": 7
+              }
+            }
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "parts": [
+                "primary_key_bytes_in_memory_allocated"
+              ]
+            },
+            {
+              "op": "-",
+              "operand": {
+                "type": "Integer",
+                "value": 7
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "table"
+            ]
+          },
+          "list": [
+            {
+              "type": "String",
+              "value": "test"
+            },
+            {
+              "type": "String",
+              "value": "test2"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

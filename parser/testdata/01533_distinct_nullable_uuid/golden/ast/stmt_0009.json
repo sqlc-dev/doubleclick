@@ -1,0 +1,71 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "COUNT"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "distinct": true,
+                      "columns": [
+                        {
+                          "parts": [
+                            "meta_source_req_uuid"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "bug_14144"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "meta_source_type"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "missing"
+                        }
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "meta_source_req_uuid"
+                            ]
+                          }
+                        }
+                      ],
+                      "limit": {
+                        "type": "Integer",
+                        "value": 100000
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

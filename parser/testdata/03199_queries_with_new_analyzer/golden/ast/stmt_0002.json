@@ -1,0 +1,91 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {},
+        {
+          "name": "ngramMinHash",
+          "arguments": [
+            {}
+          ],
+          "alias": "minhash"
+        },
+        {
+          "name": "mortonEncode",
+          "arguments": [
+            {
+              "name": "untuple",
+              "arguments": [
+                {
+                  "name": "ngramMinHash",
+                  "arguments": [
+                    {}
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "z"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toString",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "z"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 100
+      }
+    }
+  ]
+}

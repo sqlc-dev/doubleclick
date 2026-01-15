@@ -1,0 +1,91 @@
+{
+  "table": "table_for_rename_pk",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "key1",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "key2",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "key3",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value1",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value2",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_01213/table_for_rename_pk1"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "key1"
+          ]
+        },
+        {
+          "name": "pow",
+          "arguments": [
+            {
+              "parts": [
+                "key2"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "parts": [
+            "key3"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "date"
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "table": "a",
+          "replace": [
+            {
+              "expr": {
+                "left": {
+                  "parts": [
+                    "i"
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              "name": "i"
+            }
+          ],
+          "apply": [
+            "toDate",
+            "any"
+          ],
+          "transformers": [
+            {
+              "type": "apply",
+              "apply": "toDate"
+            },
+            {
+              "type": "replace",
+              "replaces": [
+                {
+                  "expr": {
+                    "left": {
+                      "parts": [
+                        "i"
+                      ]
+                    },
+                    "op": "+",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  },
+                  "name": "i"
+                }
+              ]
+            },
+            {
+              "type": "apply",
+              "apply": "any"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "columns_transformers"
+              },
+              "alias": "a"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

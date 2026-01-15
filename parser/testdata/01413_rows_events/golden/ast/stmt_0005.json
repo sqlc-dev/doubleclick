@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "written_rows"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "current_database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "query"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "INSERT INTO /* test 01413, query 1 */ rows_events_test%"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_date"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "name": "yesterday"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "table": "prewhere_alias",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "UInt8"
+      },
+      "default": {
+        "parts": [
+          "a"
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "Int64"
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "b"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "e",
+      "type": {
+        "name": "Int32"
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "a"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "parts": [
+            "b"
+          ]
+        }
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

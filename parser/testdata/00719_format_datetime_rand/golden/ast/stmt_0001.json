@@ -1,0 +1,83 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "t",
+          "query": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "left": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "op": "+",
+                "right": {
+                  "left": {
+                    "name": "rand"
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 4294967295
+                  }
+                }
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1000000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "formatDateTime",
+          "arguments": [
+            {
+              "parts": [
+                "t"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "%F %T"
+            }
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "name": "toString",
+          "arguments": [
+            {
+              "parts": [
+                "t"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "table": "test_smt",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "sMap",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sumMap"
+            ]
+          },
+          {
+            "name": "Tuple",
+            "parameters": [
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "UInt8"
+                  }
+                ],
+                "has_parentheses": true
+              },
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "Int64"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "aMap",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sumMap"
+            ]
+          },
+          {
+            "name": "Tuple",
+            "parameters": [
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "UInt8"
+                  }
+                ],
+                "has_parentheses": true
+              },
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "Int64"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "tuple"
+  }
+}

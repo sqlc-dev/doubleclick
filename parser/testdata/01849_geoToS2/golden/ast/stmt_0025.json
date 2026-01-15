@@ -1,0 +1,189 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "first"
+          ]
+        },
+        {
+          "parts": [
+            "second"
+          ]
+        },
+        {
+          "parts": [
+            "result"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "s2ToGeo",
+                          "arguments": [
+                            {
+                              "name": "geoToS2",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "longitude"
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "latitude"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "output_geo"
+                        },
+                        {
+                          "name": "tuple",
+                          "arguments": [
+                            {
+                              "name": "roundBankers",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "longitude"
+                                  ]
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 5
+                                }
+                              ]
+                            },
+                            {
+                              "name": "roundBankers",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "latitude"
+                                  ]
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 5
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "first"
+                        },
+                        {
+                          "name": "tuple",
+                          "arguments": [
+                            {
+                              "name": "roundBankers",
+                              "arguments": [
+                                {
+                                  "tuple": {
+                                    "parts": [
+                                      "output_geo"
+                                    ]
+                                  },
+                                  "index": {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 5
+                                }
+                              ]
+                            },
+                            {
+                              "name": "roundBankers",
+                              "arguments": [
+                                {
+                                  "tuple": {
+                                    "parts": [
+                                      "output_geo"
+                                    ]
+                                  },
+                                  "index": {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 5
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "second"
+                        },
+                        {
+                          "name": "if",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "first"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "parts": [
+                                  "second"
+                                ]
+                              }
+                            },
+                            {
+                              "type": "String",
+                              "value": "ok"
+                            },
+                            {
+                              "type": "String",
+                              "value": "fail"
+                            }
+                          ],
+                          "alias": "result"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "s2_indexes"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "s2_index"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

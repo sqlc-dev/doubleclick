@@ -1,0 +1,141 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "date",
+          "query": {
+            "name": "arrayJoin",
+            "arguments": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "name": "toDate",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "1970-01-01"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "toDate",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "1970-01-02"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "toDate",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "2149-06-05"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "toDate",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "2149-06-06"
+                      }
+                    ]
+                  }
+                ],
+                "spaced_commas": true
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "date"
+          ]
+        },
+        {
+          "name": "toUInt16",
+          "arguments": [
+            {
+              "parts": [
+                "date"
+              ]
+            }
+          ],
+          "alias": "d16"
+        },
+        {
+          "name": "toDateTime64",
+          "arguments": [
+            {
+              "parts": [
+                "date"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 9
+            }
+          ],
+          "alias": "dir_cast"
+        },
+        {
+          "expr": {
+            "expr": {
+              "parts": [
+                "date"
+              ]
+            },
+            "type": {
+              "name": "DateTime64(9)"
+            }
+          },
+          "alias": "cast_direct"
+        },
+        {
+          "expr": {
+            "expr": {
+              "name": "toDate32",
+              "arguments": [
+                {
+                  "parts": [
+                    "date"
+                  ]
+                }
+              ]
+            },
+            "type": {
+              "name": "DateTime64(9)"
+            }
+          },
+          "alias": "cast_via_date32"
+        },
+        {
+          "expr": {
+            "expr": {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "parts": [
+                    "date"
+                  ]
+                }
+              ]
+            },
+            "type": {
+              "name": "DateTime64(9)"
+            }
+          },
+          "alias": "cast_via_datetime"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "table": "projection_test",
+  "select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "id",
+            "query": {
+              "name": "rowNumberInAllBlocks"
+            },
+            "scalar_with": true
+          }
+        ],
+        "columns": [
+          {
+            "left": {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2020-10-24 00:00:00"
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "left": {
+                "parts": [
+                  "id"
+                ]
+              },
+              "op": "/",
+              "right": {
+                "type": "Integer",
+                "value": 20
+              },
+              "parenthesized": true
+            }
+          },
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "generateRandom",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "cost Int64"
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "limit": {
+          "type": "Integer",
+          "value": 1000
+        },
+        "settings": [
+          {
+            "name": "max_threads",
+            "value": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true
+}

@@ -1,0 +1,64 @@
+{
+  "explain_type": "PIPELINE",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "toStartOfDay",
+            "arguments": [
+              {
+                "parts": [
+                  "dt"
+                ]
+              }
+            ],
+            "alias": "date"
+          },
+          {
+            "parts": [
+              "d"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "t_read_in_order"
+                }
+              }
+            }
+          ]
+        },
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "date"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "name": "round",
+              "arguments": [
+                {
+                  "parts": [
+                    "d"
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "limit": {
+          "type": "Integer",
+          "value": 5
+        }
+      }
+    ]
+  },
+  "explicit_type": true
+}

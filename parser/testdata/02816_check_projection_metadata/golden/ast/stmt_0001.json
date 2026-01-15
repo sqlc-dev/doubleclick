@@ -1,0 +1,93 @@
+{
+  "table": "kek",
+  "columns": [
+    {
+      "name": "uuid",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 16
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "id",
+      "type": {
+        "name": "int"
+      }
+    },
+    {
+      "name": "ns",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "dt",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 6
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "null_pk",
+      "select": {
+        "columns": [
+          {}
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "ns"
+            ]
+          },
+          {
+            "type": "Integer",
+            "value": 1
+          },
+          {
+            "type": "Integer",
+            "value": 4
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "dt"
+          ]
+        },
+        {
+          "parts": [
+            "uuid"
+          ]
+        }
+      ]
+    }
+  ]
+}

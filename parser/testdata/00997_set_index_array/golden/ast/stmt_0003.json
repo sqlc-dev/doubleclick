@@ -1,0 +1,57 @@
+{
+  "table": "set_array",
+  "columns": [
+    {
+      "name": "primary_key",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "index_array",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "additional_index_array",
+      "expression": {
+        "parts": [
+          "index_array"
+        ]
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 10000
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "primary_key"
+      ]
+    }
+  ]
+}

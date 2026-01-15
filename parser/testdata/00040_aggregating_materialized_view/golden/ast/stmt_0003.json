@@ -1,0 +1,100 @@
+{
+  "view": "basic_00040",
+  "materialized": true,
+  "populate": true,
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "StartDate"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "CounterID"
+            ]
+          },
+          {
+            "parts": [
+              "StartDate"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "CounterID"
+            ]
+          },
+          {
+            "parts": [
+              "StartDate"
+            ]
+          },
+          {
+            "name": "sumState",
+            "arguments": [
+              {
+                "parts": [
+                  "Sign"
+                ]
+              }
+            ],
+            "alias": "Visits"
+          },
+          {
+            "name": "uniqState",
+            "arguments": [
+              {
+                "parts": [
+                  "UserID"
+                ]
+              }
+            ],
+            "alias": "Users"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "test",
+                  "table": "visits"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "CounterID"
+            ]
+          },
+          {
+            "parts": [
+              "StartDate"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

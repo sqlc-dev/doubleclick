@@ -1,0 +1,102 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trim",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            }
+          ],
+          "sql_standard": true
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "type": "String",
+                            "value": "Test NOT hasAllTokens:"
+                          },
+                          {
+                            "name": "count"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "tab"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "op": "NOT",
+                          "operand": {
+                            "name": "hasAllTokens",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "text"
+                                ]
+                              },
+                              {
+                                "type": "Array",
+                                "value": [
+                                  {
+                                    "type": "String",
+                                    "value": "Blick"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "settings": [
+                          {
+                            "name": "use_skip_indexes_on_data_read",
+                            "value": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "explain"
+          ]
+        },
+        "pattern": {
+          "type": "String",
+          "value": "%Filter column:%"
+        }
+      }
+    }
+  ]
+}

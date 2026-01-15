@@ -1,0 +1,70 @@
+{
+  "database": "{CLICKHOUSE_DATABASE:Identifier}",
+  "table": "restricted_dict",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "key"
+        ]
+      }
+    ],
+    "source": {
+      "type": "EXECUTABLE",
+      "args": [
+        {
+          "key": "COMMAND",
+          "value": {
+            "type": "String",
+            "value": "echo -E \"1\thello\""
+          }
+        },
+        {
+          "key": "FORMAT",
+          "value": {
+            "parts": [
+              "TabSeparated"
+            ]
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 0
+      },
+      "max": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    "layout": {
+      "type": "CACHE",
+      "args": [
+        {
+          "key": "SIZE_IN_CELLS",
+          "value": {
+            "type": "Integer",
+            "value": 10
+          }
+        }
+      ]
+    }
+  }
+}

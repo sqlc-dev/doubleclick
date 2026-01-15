@@ -1,0 +1,60 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx",
+      "expression": {
+        "parts": [
+          "s"
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "ngrams",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 2
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "k"
+      ]
+    }
+  ]
+}

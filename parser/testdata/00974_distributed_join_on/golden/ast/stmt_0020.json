@@ -1,0 +1,63 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "t1",
+            "a"
+          ],
+          "alias": "t1_a"
+        },
+        {
+          "parts": [
+            "t2",
+            "a"
+          ],
+          "alias": "t2_a"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "distributed_table1"
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "distributed_table1"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "global": true,
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1_a"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2_a"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "expr": {
+                "left": {
+                  "name": "toDateTime",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "2011-01-01 00:00:00"
+                    },
+                    {
+                      "type": "String",
+                      "value": "Europe/Moscow"
+                    }
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "value": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "unit": "DAY"
+                },
+                "parenthesized": true
+              },
+              "alias": "day"
+            }
+          ],
+          "alias": "start"
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "day"
+              ]
+            }
+          ],
+          "alias": "end"
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "name": "concat",
+          "arguments": [
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "name": "toYear",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "day"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "_"
+            },
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "name": "timezoneOffset",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "day"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "DST"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "left": {
+                      "left": {
+                        "type": "Integer",
+                        "value": 365
+                      },
+                      "op": "*",
+                      "right": {
+                        "type": "Integer",
+                        "value": 4
+                      }
+                    },
+                    "op": "+",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "DST"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "start"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

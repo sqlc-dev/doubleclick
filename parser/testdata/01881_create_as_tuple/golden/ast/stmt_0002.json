@@ -1,0 +1,66 @@
+{
+  "table": "t_create_as_tuple",
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "number"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "expr": {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "Tuple",
+                  "value": [
+                    {
+                      "type": "String",
+                      "value": "string"
+                    },
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "alias": "array"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 3
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

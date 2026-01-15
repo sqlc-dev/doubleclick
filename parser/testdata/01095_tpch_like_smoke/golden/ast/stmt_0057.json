@@ -1,0 +1,209 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "c_name"
+          ]
+        },
+        {
+          "parts": [
+            "c_custkey"
+          ]
+        },
+        {
+          "parts": [
+            "o_orderkey"
+          ]
+        },
+        {
+          "parts": [
+            "o_orderdate"
+          ]
+        },
+        {
+          "parts": [
+            "o_totalprice"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "l_quantity"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "customer"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "orders"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "lineitem"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "parts": [
+                "o_orderkey"
+              ]
+            },
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "l_orderkey"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "lineitem"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "l_orderkey"
+                      ]
+                    }
+                  ],
+                  "having": {
+                    "left": {
+                      "name": "sum",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "l_quantity"
+                          ]
+                        }
+                      ]
+                    },
+                    "op": "\u003e",
+                    "right": {
+                      "type": "Integer",
+                      "value": 300
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "c_custkey"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "o_custkey"
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "o_orderkey"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "l_orderkey"
+            ]
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "c_name"
+          ]
+        },
+        {
+          "parts": [
+            "c_custkey"
+          ]
+        },
+        {
+          "parts": [
+            "o_orderkey"
+          ]
+        },
+        {
+          "parts": [
+            "o_orderdate"
+          ]
+        },
+        {
+          "parts": [
+            "o_totalprice"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "o_totalprice"
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "o_orderdate"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 100
+      }
+    }
+  ]
+}

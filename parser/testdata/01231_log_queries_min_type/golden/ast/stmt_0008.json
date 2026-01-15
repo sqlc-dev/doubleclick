@@ -1,0 +1,62 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "query"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "select '01231_log_queries_min_type/EXCEPTION_BEFORE_START%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_date"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "name": "yesterday"
+          }
+        }
+      }
+    }
+  ]
+}

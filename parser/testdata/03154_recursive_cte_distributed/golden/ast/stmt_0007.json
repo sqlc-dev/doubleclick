@@ -1,0 +1,195 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "search_tree",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "id"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "parent_id"
+                      ]
+                    },
+                    {
+                      "expr": {
+                        "type": "Array",
+                        "value": [
+                          {
+                            "parts": [
+                              "parent_id"
+                            ]
+                          }
+                        ]
+                      },
+                      "alias": "path"
+                    },
+                    {
+                      "name": "toUInt64",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      ],
+                      "alias": "depth"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "test_table"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "t",
+                        "id"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "t",
+                        "parent_id"
+                      ]
+                    },
+                    {
+                      "name": "arrayConcat",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "path"
+                          ]
+                        },
+                        {
+                          "type": "Array",
+                          "value": [
+                            {
+                              "parts": [
+                                "t",
+                                "id"
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "alias": "path"
+                    },
+                    {
+                      "left": {
+                        "parts": [
+                          "depth"
+                        ]
+                      },
+                      "op": "+",
+                      "right": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "test_table"
+                          },
+                          "alias": "t"
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "table": "search_tree"
+                          },
+                          "alias": "st"
+                        },
+                        "join": {
+                          "type": ""
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "t",
+                        "parent_id"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "parts": [
+                        "st",
+                        "id"
+                      ]
+                    }
+                  }
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "search_tree"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "depth"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "parent_id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

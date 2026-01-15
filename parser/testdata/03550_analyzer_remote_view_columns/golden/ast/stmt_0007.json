@@ -1,0 +1,116 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "columns"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "initial_query_id"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "query_id"
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "database": "system",
+                              "table": "query_log"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "current_database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "log_comment"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "THIS IS A COMMENT TO MARK THE INITIAL QUERY"
+                        }
+                      }
+                    },
+                    "limit": {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "op": "NOT",
+          "operand": {
+            "parts": [
+              "is_initial_query"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

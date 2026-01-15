@@ -1,0 +1,70 @@
+{
+  "table": "test_table_string",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt16"
+      }
+    }
+  ],
+  "engine": {
+    "name": "Memory",
+    "has_parentheses": true
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "left": {
+              "type": "String",
+              "value": "foo"
+            },
+            "op": "||",
+            "right": {
+              "expr": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "type": {
+                "name": "String"
+              },
+              "operator_syntax": true
+            }
+          },
+          {
+            "parts": [
+              "number"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Float",
+                      "value": 100000,
+                      "source": "1e5"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

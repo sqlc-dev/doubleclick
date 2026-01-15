@@ -1,0 +1,145 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trimLeft",
+          "arguments": [
+            {
+              "name": "replaceRegexpAll",
+              "arguments": [
+                {
+                  "parts": [
+                    "explain"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "__set_String_\\d+_\\d+"
+                },
+                {
+                  "type": "String",
+                  "value": "__set_String"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "test_improve_prewhere"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "left": {
+                              "left": {
+                                "left": {
+                                  "parts": [
+                                    "date"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "type": "String",
+                                  "value": "2025-08-05"
+                                }
+                              },
+                              "op": "AND",
+                              "right": {
+                                "expr": {
+                                  "name": "lower",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "primary_key"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "list": [
+                                  {
+                                    "type": "String",
+                                    "value": "00"
+                                  },
+                                  {
+                                    "type": "String",
+                                    "value": "01"
+                                  }
+                                ]
+                              }
+                            },
+                            "op": "AND",
+                            "right": {
+                              "left": {
+                                "parts": [
+                                  "normal_column"
+                                ]
+                              },
+                              "op": "!=",
+                              "right": {
+                                "type": "String",
+                                "value": "hello"
+                              }
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "value"
+                              ]
+                            },
+                            "op": "\u003c",
+                            "right": {
+                              "type": "Integer",
+                              "value": 100
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "explain"
+          ]
+        },
+        "case_insensitive": true,
+        "pattern": {
+          "type": "String",
+          "value": "%Prewhere filter column%"
+        }
+      }
+    }
+  ]
+}

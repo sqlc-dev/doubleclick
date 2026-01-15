@@ -1,0 +1,146 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "left": {
+                "expr": {
+                  "parts": [
+                    "explain"
+                  ]
+                },
+                "pattern": {
+                  "type": "String",
+                  "value": "%COMMA%"
+                }
+              },
+              "op": "OR",
+              "right": {
+                "expr": {
+                  "parts": [
+                    "explain"
+                  ]
+                },
+                "pattern": {
+                  "type": "String",
+                  "value": "%CROSS%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "explain"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "%INNER%"
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "SYNTAX",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "t1",
+                              "a"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t1"
+                                }
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t2"
+                                }
+                              },
+                              "join": {
+                                "type": ""
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t3"
+                                }
+                              },
+                              "join": {
+                                "type": ""
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "t1",
+                                "b"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "t2",
+                                "b"
+                              ]
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "t1",
+                                "b"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "t3",
+                                "b"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "explicit_type": true
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

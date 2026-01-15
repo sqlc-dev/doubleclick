@@ -1,0 +1,187 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "map",
+      "type": {
+        "name": "Map",
+        "parameters": [
+          {
+            "name": "String"
+          },
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "map_fixed",
+      "type": {
+        "name": "Map",
+        "parameters": [
+          {
+            "name": "FixedString",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 3
+              }
+            ],
+            "has_parentheses": true
+          },
+          {
+            "name": "FixedString",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 3
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_keys",
+      "expression": {
+        "name": "mapKeys",
+        "arguments": [
+          {
+            "parts": [
+              "map"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "splitByNonAlpha"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "idx_keys_fixed",
+      "expression": {
+        "name": "mapKeys",
+        "arguments": [
+          {
+            "parts": [
+              "map_fixed"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "splitByNonAlpha"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "idx_values",
+      "expression": {
+        "name": "mapValues",
+        "arguments": [
+          {
+            "parts": [
+              "map"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "splitByNonAlpha"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "idx_values_fixed",
+      "expression": {
+        "name": "mapValues",
+        "arguments": [
+          {
+            "parts": [
+              "map_fixed"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "splitByNonAlpha"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "name": "dynamicType",
+          "arguments": [
+            {
+              "name": "arrayJoin",
+              "arguments": [
+                {
+                  "parts": [
+                    "json",
+                    "a",
+                    ":`Array(JSON)`",
+                    "d"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "type"
+        },
+        {
+          "name": "isDynamicElementInSharedData",
+          "arguments": [
+            {
+              "name": "arrayJoin",
+              "arguments": [
+                {
+                  "parts": [
+                    "json",
+                    "a",
+                    ":`Array(JSON)`",
+                    "d"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "type"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "FilterTransformPassedRows"
+            }
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "left": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "FilterTransformPassedBytes"
+            }
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            },
+            "parenthesized": true
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            },
+            "parenthesized": true
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "query"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "SELECT * FROM system.numbers WHERE number % 2 = 0 LIMIT 100 FORMAT Null;"
+          },
+          "parenthesized": true
+        }
+      }
+    }
+  ]
+}

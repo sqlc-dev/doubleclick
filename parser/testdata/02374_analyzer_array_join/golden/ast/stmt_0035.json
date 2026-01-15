@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "x"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "x"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "parts": [
+                                  "number"
+                                ]
+                              }
+                            ]
+                          },
+                          "alias": "arr"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "s"
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "arr"
+                  ],
+                  "alias": "x"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

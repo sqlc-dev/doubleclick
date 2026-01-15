@@ -1,0 +1,64 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "mode",
+          "query": {
+            "type": "String",
+            "value": "aes-256-ecb"
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "plaintext",
+          "query": {
+            "type": "String",
+            "value": "Hello World!"
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "key",
+          "query": {
+            "type": "String",
+            "value": "test_key________________________"
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "hex",
+          "arguments": [
+            {
+              "name": "aes_encrypt_mysql",
+              "arguments": [
+                {
+                  "parts": [
+                    "mode"
+                  ]
+                },
+                {
+                  "name": "toNullable",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "plaintext"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "parts": [
+                    "key"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "part_type"
+          ]
+        },
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "t_parts_profile_events"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "MergeParts"
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "part_type"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "part_type"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

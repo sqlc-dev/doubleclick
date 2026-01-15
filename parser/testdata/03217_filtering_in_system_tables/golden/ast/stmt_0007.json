@@ -1,0 +1,82 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "argMax",
+          "arguments": [
+            {
+              "parts": [
+                "read_rows"
+              ]
+            },
+            {
+              "parts": [
+                "event_time_microseconds"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "type": "Integer",
+              "value": 1
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "current_database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "query"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%SELECT database, table FROM system.tables WHERE database = 'information_schema' AND table = 'tables';"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "QueryFinish"
+          }
+        }
+      }
+    }
+  ]
+}

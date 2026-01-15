@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "timeSeriesInstantRateToGridIf",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 10
+            },
+            {
+              "type": "Integer",
+              "value": 120
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            },
+            {
+              "type": "Integer",
+              "value": 60
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "timestamps"
+              ]
+            },
+            {
+              "parts": [
+                "values"
+              ]
+            },
+            {
+              "name": "if",
+              "arguments": [
+                {
+                  "left": {
+                    "name": "length",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "timestamps"
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "name": "length",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "values"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "Boolean",
+                  "value": true
+                },
+                {
+                  "type": "Null",
+                  "value": null
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "ts_data"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

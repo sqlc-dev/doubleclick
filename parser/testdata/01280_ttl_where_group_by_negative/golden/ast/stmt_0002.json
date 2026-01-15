@@ -1,0 +1,91 @@
+{
+  "table": "ttl_01280_error",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "b"
+          ]
+        }
+      ]
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "d"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "value": {
+          "type": "Integer",
+          "value": 1
+        },
+        "unit": "SECOND"
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "d"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 1
+            },
+            "unit": "SECOND"
+          }
+        }
+      }
+    ]
+  }
+}

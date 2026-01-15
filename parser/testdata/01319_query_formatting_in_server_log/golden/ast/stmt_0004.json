@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "extract",
+          "arguments": [
+            {
+              "parts": [
+                "message"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "SeL.+?;"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "text_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "yesterday"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "message"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%SeLeCt 'ab\n%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "logger_name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "executeQuery"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      },
+      "format": {
+        "parts": [
+          "TSVRaw"
+        ]
+      }
+    }
+  ]
+}

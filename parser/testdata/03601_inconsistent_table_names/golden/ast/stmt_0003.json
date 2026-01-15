@@ -1,0 +1,87 @@
+{
+  "explain_type": "SYNTAX",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "type": "Integer",
+            "value": 1
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "v0"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "alias": "y"
+              },
+              "join": {
+                "type": "CROSS"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "alias": "x"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "alias": "x"
+              },
+              "join": {
+                "type": "CROSS"
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "x",
+              "x"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      }
+    ]
+  },
+  "explicit_type": true
+}

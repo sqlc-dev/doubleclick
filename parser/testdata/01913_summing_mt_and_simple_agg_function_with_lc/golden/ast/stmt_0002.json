@@ -1,0 +1,61 @@
+{
+  "table": "smta",
+  "columns": [
+    {
+      "name": "k",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "max"
+            ]
+          },
+          {
+            "name": "Int64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "city",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "max"
+            ]
+          },
+          {
+            "name": "LowCardinality",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "k"
+      ]
+    }
+  ]
+}

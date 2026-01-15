@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "value",
+          "query": {
+            "left": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 10
+              }
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "time",
+          "query": {
+            "parts": [
+              "number"
+            ]
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "exponentialMovingAverage",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "value"
+              ]
+            },
+            {
+              "parts": [
+                "time"
+              ]
+            }
+          ],
+          "alias": "exp_smooth"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers_mt",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1000000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

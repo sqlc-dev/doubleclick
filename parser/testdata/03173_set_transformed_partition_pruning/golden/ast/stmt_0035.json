@@ -1,0 +1,52 @@
+{
+  "table": "03173_nested_function_null",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Int32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "name": "xxHash32",
+      "arguments": [
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 3
+    }
+  },
+  "settings": [
+    {
+      "name": "allow_nullable_key",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

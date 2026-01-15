@@ -1,0 +1,72 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "parts": [
+                "db",
+                "name"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "tables"
+              },
+              "alias": "t"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "databases"
+              },
+              "alias": "db"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t",
+                    "database"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "db",
+                    "name"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "t",
+            "name"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "one"
+        }
+      }
+    }
+  ]
+}

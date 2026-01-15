@@ -1,0 +1,89 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "ignore",
+          "arguments": [
+            {
+              "name": "finalizeAggregation",
+              "arguments": [
+                {
+                  "parts": [
+                    "Users"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "FlightDate"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "Carrier"
+                          ]
+                        },
+                        {
+                          "name": "uniqState",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "FlightNum"
+                              ]
+                            }
+                          ],
+                          "alias": "Users"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "ontime"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "FlightDate"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "Carrier"
+                          ]
+                        }
+                      ],
+                      "limit": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

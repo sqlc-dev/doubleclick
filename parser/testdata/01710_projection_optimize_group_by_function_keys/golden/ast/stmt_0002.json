@@ -1,0 +1,145 @@
+{
+  "table": "proj",
+  "columns": [
+    {
+      "name": "bool_value",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "zero_integer_value",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "integer_value",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "float_value",
+      "type": {
+        "name": "Float32"
+      }
+    },
+    {
+      "name": "datetime_value",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "string_value",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "test_projection",
+      "select": {
+        "columns": [
+          {
+            "name": "toStartOfDay",
+            "arguments": [
+              {
+                "name": "toDateTime",
+                "arguments": [
+                  {
+                    "parts": [
+                      "datetime_value"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "Day"
+          },
+          {
+            "parts": [
+              "datetime_value"
+            ]
+          },
+          {
+            "parts": [
+              "float_value"
+            ]
+          },
+          {
+            "name": "count",
+            "arguments": [
+              {
+                "name": "if",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "zero_integer_value"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  },
+                  {
+                    "parts": [
+                      "string_value"
+                    ]
+                  },
+                  {
+                    "type": "Null",
+                    "value": null
+                  }
+                ]
+              }
+            ],
+            "distinct": true
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "Day"
+            ]
+          },
+          {
+            "parts": [
+              "datetime_value"
+            ]
+          },
+          {
+            "parts": [
+              "float_value"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "bool_value"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDate",
+    "arguments": [
+      {
+        "parts": [
+          "datetime_value"
+        ]
+      }
+    ]
+  }
+}

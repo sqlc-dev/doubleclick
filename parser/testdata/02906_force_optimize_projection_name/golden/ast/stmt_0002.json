@@ -1,0 +1,69 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "name",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "projection_name",
+      "select": {
+        "columns": [
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "id"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "parts": [
+              "name"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "Integer",
+        "value": 10000
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

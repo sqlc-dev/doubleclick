@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "aes-192-ecb"
+          },
+          "alias": "mode"
+        },
+        {
+          "left": {
+            "name": "aes_decrypt_mysql",
+            "arguments": [
+              {
+                "parts": [
+                  "mode"
+                ]
+              },
+              {
+                "name": "aes_encrypt_mysql",
+                "arguments": [
+                  {
+                    "parts": [
+                      "mode"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "input"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "key"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "iv"
+                    ]
+                  }
+                ]
+              },
+              {
+                "parts": [
+                  "key"
+                ]
+              },
+              {
+                "parts": [
+                  "iv"
+                ]
+              }
+            ]
+          },
+          "op": "==",
+          "right": {
+            "parts": [
+              "input"
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "encryption_test"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

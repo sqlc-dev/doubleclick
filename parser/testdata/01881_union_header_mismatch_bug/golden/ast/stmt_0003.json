@@ -1,0 +1,98 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Null",
+          "value": null
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "type": "Integer",
+                                "value": 1048575
+                              },
+                              {
+                                "type": "Null",
+                                "value": null
+                              }
+                            ],
+                            "spaced_commas": true
+                          },
+                          "alias": "ax"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 2147483648
+                          },
+                          "alias": "c"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "ax"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Null",
+                            "value": null
+                          },
+                          "alias": "c"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "c"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

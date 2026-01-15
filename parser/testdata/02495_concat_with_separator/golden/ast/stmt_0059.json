@@ -1,0 +1,61 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "concatWithSeparator",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "|"
+              },
+              {
+                "type": "String",
+                "value": "a"
+              },
+              {
+                "name": "materialize",
+                "arguments": [
+                  {
+                    "expr": {
+                      "name": "map",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 42
+                        },
+                        {
+                          "type": "String",
+                          "value": "foo"
+                        }
+                      ]
+                    },
+                    "type": {
+                      "name": "Map",
+                      "parameters": [
+                        {
+                          "name": "Int32"
+                        },
+                        {
+                          "name": "String"
+                        }
+                      ],
+                      "has_parentheses": true
+                    },
+                    "operator_syntax": true
+                  }
+                ]
+              }
+            ]
+          },
+          "op": "==",
+          "right": {
+            "type": "String",
+            "value": "a|{42:'foo'}"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayJoin",
+          "arguments": [
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "name": "tuple",
+                  "arguments": [
+                    {
+                      "left": {
+                        "left": {
+                          "name": "toNullable",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          ]
+                        },
+                        "op": "*",
+                        "right": {
+                          "name": "toLowCardinality",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 20
+                            }
+                          ]
+                        },
+                        "parenthesized": true
+                      },
+                      "op": "\u003c",
+                      "right": {
+                        "name": "materialize",
+                        "arguments": [
+                          {
+                            "type": "Integer",
+                            "value": 30
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "row"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "tuple": {
+            "parts": [
+              "row"
+            ]
+          },
+          "index": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      }
+    }
+  ]
+}

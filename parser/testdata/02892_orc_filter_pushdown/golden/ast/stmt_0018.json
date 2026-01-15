@@ -1,0 +1,73 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "file",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "02892.orc"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "name": "indexHint",
+        "arguments": [
+          {
+            "left": {
+              "expr": {
+                "parts": [
+                  "i16"
+                ]
+              },
+              "low": {
+                "type": "Integer",
+                "value": 4000
+              },
+              "high": {
+                "type": "Integer",
+                "value": 61000
+              }
+            },
+            "op": "OR",
+            "right": {
+              "left": {
+                "parts": [
+                  "i16"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "type": "Integer",
+                "value": 42
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

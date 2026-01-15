@@ -1,0 +1,82 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "NewColumn"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_a"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "OldColumn"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "NewColumn"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test_b"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "s"
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "OldColumn"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "prewhere": {
+        "left": {
+          "parts": [
+            "NewColumn"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "String",
+          "value": ""
+        }
+      }
+    }
+  ]
+}

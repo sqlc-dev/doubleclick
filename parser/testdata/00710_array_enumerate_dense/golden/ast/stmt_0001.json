@@ -1,0 +1,155 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "a"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "groupArray",
+                          "arguments": [
+                            {
+                              "name": "intDiv",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 54321
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "a"
+                        },
+                        {
+                          "name": "arrayUniq",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "a"
+                              ]
+                            }
+                          ],
+                          "alias": "u"
+                        },
+                        {
+                          "name": "arrayEnumerateDense",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "a"
+                              ]
+                            }
+                          ],
+                          "alias": "arr"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "number"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "database": "system",
+                                                "table": "numbers"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "limit": {
+                                        "type": "Integer",
+                                        "value": 1000000
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "left": {
+                            "name": "intHash32",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "number"
+                                ]
+                              }
+                            ]
+                          },
+                          "op": "%",
+                          "right": {
+                            "type": "Integer",
+                            "value": 100000
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "u"
+          ]
+        },
+        "op": "\u003c\u003e",
+        "right": {
+          "array": {
+            "name": "arrayReverseSort",
+            "arguments": [
+              {
+                "parts": [
+                  "arr"
+                ]
+              }
+            ]
+          },
+          "index": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      }
+    }
+  ]
+}

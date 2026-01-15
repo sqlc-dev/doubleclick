@@ -1,0 +1,32 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "getSubcolumn",
+          "arguments": [
+            {
+              "expr": {
+                "name": "materialize",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "{\"a\" : [{\"b\" : 42}]}"
+                  }
+                ]
+              },
+              "type": {
+                "name": "JSON"
+              },
+              "operator_syntax": true
+            },
+            {
+              "type": "String",
+              "value": "a.:`Array(Nullable(JSON(max_dynamic_types=16, max_dynamic_paths=256)))`"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

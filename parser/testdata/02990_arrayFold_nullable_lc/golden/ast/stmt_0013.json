@@ -1,0 +1,74 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayFold",
+          "arguments": [
+            {
+              "parameters": [
+                "acc",
+                "x"
+              ],
+              "body": {
+                "left": {
+                  "parts": [
+                    "acc"
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "expr": {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      },
+                      {
+                        "type": "Null",
+                        "value": null
+                      }
+                    ],
+                    "spaced_commas": true
+                  },
+                  "type": {
+                    "name": "Array(Nullable(UInt8))"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "toUInt64",
+              "arguments": [
+                {
+                  "name": "toNullable",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 0
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

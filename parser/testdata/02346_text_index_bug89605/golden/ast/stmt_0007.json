@@ -1,0 +1,64 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "msg",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "id_msg",
+      "expression": {
+        "parts": [
+          "msg"
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "sparseGrams"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 128
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

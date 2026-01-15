@@ -1,0 +1,55 @@
+{
+  "if_not_exists": true,
+  "table": "cool_table",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "n",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "n",
+            "type": {
+              "name": "UInt64"
+            }
+          },
+          {
+            "name": "lc1",
+            "type": {
+              "name": "Array",
+              "parameters": [
+                {
+                  "name": "LowCardinality",
+                  "parameters": [
+                    {
+                      "name": "String"
+                    }
+                  ],
+                  "has_parentheses": true
+                }
+              ],
+              "has_parentheses": true
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

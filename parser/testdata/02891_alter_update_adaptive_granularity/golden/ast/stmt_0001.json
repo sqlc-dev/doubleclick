@@ -1,0 +1,67 @@
+{
+  "table": "kv",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "value_idx",
+      "expression": {
+        "parts": [
+          "value"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 32
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "Integer",
+        "value": 1024
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

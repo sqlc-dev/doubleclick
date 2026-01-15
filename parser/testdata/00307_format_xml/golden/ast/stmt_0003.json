@@ -1,0 +1,99 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "Hello \u0026 world"
+          },
+          "alias": "s"
+        },
+        {
+          "type": "String",
+          "value": "Hello\n\u003cWorld\u003e"
+        },
+        {
+          "name": "toDateTime",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "2001-02-03 04:05:06"
+            }
+          ],
+          "alias": "time"
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "name": "range",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 10
+                }
+              ]
+            }
+          ],
+          "alias": "arr"
+        },
+        {
+          "expr": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "s"
+                ]
+              },
+              {
+                "parts": [
+                  "time"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          },
+          "alias": "tpl"
+        }
+      ],
+      "settings": [
+        {
+          "name": "extremes",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "enable_named_columns_in_function_tuple",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "XML"
+        ]
+      }
+    }
+  ]
+}

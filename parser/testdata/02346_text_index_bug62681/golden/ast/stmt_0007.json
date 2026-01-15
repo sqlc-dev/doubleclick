@@ -1,0 +1,120 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "partition"
+          ]
+        },
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "secondary_indices_compressed_bytes"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 150
+          }
+        },
+        {
+          "left": {
+            "parts": [
+              "secondary_indices_uncompressed_bytes"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 100
+          }
+        },
+        {
+          "parts": [
+            "secondary_indices_marks_bytes"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "table"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "tab"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "active"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "partition"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "tuple()"
+          }
+        }
+      },
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

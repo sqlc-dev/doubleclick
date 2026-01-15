@@ -1,0 +1,68 @@
+{
+  "table": "partition_by_ignore",
+  "columns": [
+    {
+      "name": "ts",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "ts_2",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "name": "toYYYYMM",
+        "arguments": [
+          {
+            "parts": [
+              "ts"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ignore",
+        "arguments": [
+          {
+            "parts": [
+              "ts_2"
+            ]
+          }
+        ]
+      }
+    ],
+    "spaced_commas": true
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

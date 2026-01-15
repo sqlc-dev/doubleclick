@@ -1,0 +1,36 @@
+{
+  "if_not_exists": true,
+  "table": "alias_column_should_not_allow_compression",
+  "columns": [
+    {
+      "name": "user_id",
+      "type": {
+        "name": "UUID"
+      }
+    },
+    {
+      "name": "user_id_hashed",
+      "type": null,
+      "default": {
+        "name": "cityHash64",
+        "arguments": [
+          {
+            "parts": [
+              "user_id"
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

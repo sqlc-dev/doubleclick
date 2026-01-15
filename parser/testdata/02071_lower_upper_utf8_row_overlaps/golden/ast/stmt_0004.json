@@ -1,0 +1,139 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "l_",
+          "query": {
+            "name": "lowerUTF8",
+            "arguments": [
+              {
+                "parts": [
+                  "str"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "u_",
+          "query": {
+            "name": "upperUTF8",
+            "arguments": [
+              {
+                "parts": [
+                  "str"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "h_",
+          "query": {
+            "left": {
+              "type": "String",
+              "value": "0x"
+            },
+            "op": "||",
+            "right": {
+              "name": "hex",
+              "arguments": [
+                {
+                  "parts": [
+                    "str"
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "str"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "l_"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "type": "String",
+                "value": "\ufffd"
+              }
+            },
+            {
+              "parts": [
+                "h_"
+              ]
+            },
+            {
+              "parts": [
+                "l_"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "u_"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "type": "String",
+                "value": "\ufffd"
+              }
+            },
+            {
+              "parts": [
+                "h_"
+              ]
+            },
+            {
+              "parts": [
+                "u_"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "utf8_overlap"
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "CSV"
+        ]
+      }
+    }
+  ]
+}

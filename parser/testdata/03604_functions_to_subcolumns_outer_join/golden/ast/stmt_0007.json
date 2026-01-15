@@ -1,0 +1,52 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "parts": [
+              "nullableStringCol"
+            ]
+          },
+          "not": true
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "users"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "users_ext"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "users_ext",
+                    "uid"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "users",
+                    "uid"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

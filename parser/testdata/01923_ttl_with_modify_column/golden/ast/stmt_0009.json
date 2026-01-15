@@ -1,0 +1,65 @@
+{
+  "table": "t_ttl_modify_column",
+  "columns": [
+    {
+      "name": "InsertionDateTime",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "InsertionDateTime"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "value": {
+          "type": "Integer",
+          "value": 3
+        },
+        "unit": "DAY"
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "InsertionDateTime"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 3
+            },
+            "unit": "DAY"
+          }
+        }
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

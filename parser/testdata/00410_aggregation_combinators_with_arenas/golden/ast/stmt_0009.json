@@ -1,0 +1,120 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "length",
+                          "arguments": [
+                            {
+                              "name": "arrayReduce",
+                              "arguments": [
+                                {
+                                  "type": "String",
+                                  "value": "groupUniqArray"
+                                },
+                                {
+                                  "type": "Array",
+                                  "value": [
+                                    {
+                                      "name": "hex",
+                                      "arguments": [
+                                        {
+                                          "parts": [
+                                            "number"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "hex",
+                                      "arguments": [
+                                        {
+                                          "left": {
+                                            "parts": [
+                                              "number"
+                                            ]
+                                          },
+                                          "op": "+",
+                                          "right": {
+                                            "type": "Integer",
+                                            "value": 1
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "name": "hex",
+                                      "arguments": [
+                                        {
+                                          "parts": [
+                                            "number"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "spaced_commas": true
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "x"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 100000
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

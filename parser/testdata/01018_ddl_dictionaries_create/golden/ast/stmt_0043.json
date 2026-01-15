@@ -1,0 +1,121 @@
+{
+  "database": "lazy_db",
+  "table": "dict3",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "key_column",
+      "type": {
+        "name": "UInt64"
+      },
+      "default": {
+        "type": "Integer",
+        "value": 0
+      },
+      "injective": true
+    },
+    {
+      "name": "second_column",
+      "type": {
+        "name": "UInt8"
+      },
+      "default": {
+        "type": "Integer",
+        "value": 1
+      },
+      "expression": {
+        "left": {
+          "name": "rand"
+        },
+        "op": "%",
+        "right": {
+          "type": "Integer",
+          "value": 222
+        }
+      }
+    },
+    {
+      "name": "third_column",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "type": "String",
+        "value": "qqq"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "key_column"
+        ]
+      },
+      {
+        "parts": [
+          "second_column"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "HOST",
+          "value": {
+            "type": "String",
+            "value": "localhost"
+          }
+        },
+        {
+          "key": "PORT",
+          "value": {
+            "name": "tcpPort"
+          }
+        },
+        {
+          "key": "USER",
+          "value": {
+            "type": "String",
+            "value": "default"
+          }
+        },
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "table_for_dict"
+          }
+        },
+        {
+          "key": "PASSWORD",
+          "value": {
+            "type": "String",
+            "value": ""
+          }
+        },
+        {
+          "key": "DB",
+          "value": {
+            "type": "String",
+            "value": "database_for_dict_01018"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 1
+      },
+      "max": {
+        "type": "Integer",
+        "value": 10
+      }
+    },
+    "layout": {
+      "type": "COMPLEX_KEY_HASHED"
+    }
+  }
+}

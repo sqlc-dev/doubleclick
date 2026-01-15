@@ -1,0 +1,95 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "a1"
+          ]
+        },
+        {
+          "parts": [
+            "s",
+            "a1"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "tab1"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "tab1_copy"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "s"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "tab1",
+                      "b1"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                },
+                "op": "=",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "s",
+                      "b1"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "JSONEachRow"
+        ]
+      }
+    }
+  ]
+}

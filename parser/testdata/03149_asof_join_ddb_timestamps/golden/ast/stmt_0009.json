@@ -1,0 +1,79 @@
+{
+  "table": "probe0",
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "COALESCE",
+      "arguments": [
+        {
+          "parts": [
+            "begin"
+          ]
+        },
+        {
+          "name": "toDateTime",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "9999-12-31 23:59:59"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "toNullable",
+            "arguments": [
+              {
+                "left": {
+                  "name": "toDateTime",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "2023-03-21 12:00:00"
+                    }
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "value": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "unit": "HOUR"
+                }
+              }
+            ],
+            "alias": "begin"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

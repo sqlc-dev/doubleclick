@@ -1,0 +1,149 @@
+{
+  "table": "lineorder",
+  "columns": [
+    {
+      "name": "LO_ORDERKEY",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "LO_LINENUMBER",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "LO_CUSTKEY",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "LO_PARTKEY",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "LO_SUPPKEY",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "LO_ORDERDATE",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "LO_ORDERPRIORITY",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "LO_SHIPPRIORITY",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "LO_QUANTITY",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "LO_EXTENDEDPRICE",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "LO_ORDTOTALPRICE",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "LO_DISCOUNT",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "LO_REVENUE",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "LO_SUPPLYCOST",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "LO_TAX",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "LO_COMMITDATE",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "LO_SHIPMODE",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "LO_ORDERDATE"
+          ]
+        },
+        {
+          "parts": [
+            "LO_ORDERKEY"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYear",
+    "arguments": [
+      {
+        "parts": [
+          "LO_ORDERDATE"
+        ]
+      }
+    ]
+  }
+}

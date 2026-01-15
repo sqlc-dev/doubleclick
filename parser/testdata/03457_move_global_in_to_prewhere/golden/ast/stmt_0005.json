@@ -1,0 +1,66 @@
+{
+  "table": "03457_data",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "name": "randomString",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 2048
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 100
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

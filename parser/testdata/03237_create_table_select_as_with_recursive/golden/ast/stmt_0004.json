@@ -1,0 +1,160 @@
+{
+  "view": "t",
+  "as_select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "ttt",
+            "query": {
+              "type": "Integer",
+              "value": 42
+            },
+            "scalar_with": true
+          },
+          {
+            "name": "start_date",
+            "query": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "parts": [
+                    "s"
+                  ]
+                }
+              ]
+            },
+            "scalar_with": true
+          },
+          {
+            "name": "_table",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "expr": {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        "alias": "number"
+                      }
+                    ]
+                  },
+                  {
+                    "columns": [
+                      {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "+",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "_table"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "left": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "op": "\u003c",
+                      "right": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  }
+                ],
+                "union_all": true,
+                "union_modes": [
+                  "UNION ALL"
+                ]
+              }
+            },
+            "scalar_with": false
+          }
+        ],
+        "columns": [
+          {
+            "parts": [
+              "a"
+            ]
+          },
+          {
+            "parts": [
+              "ttt"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "t1"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "_table"
+                }
+              },
+              "join": {
+                "type": "INNER",
+                "on": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "t1",
+                        "a"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "parts": [
+                        "_table",
+                        "number"
+                      ]
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "start_date"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": "2024-09-23"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

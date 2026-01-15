@@ -1,0 +1,94 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "ignore",
+          "arguments": [
+            {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 370641600
+                },
+                {
+                  "type": "String",
+                  "value": "Asia/Istanbul"
+                }
+              ],
+              "alias": "t"
+            }
+          ]
+        },
+        {
+          "name": "replaceRegexpAll",
+          "arguments": [
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "parts": [
+                    "t"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "\\d"
+            },
+            {
+              "type": "String",
+              "value": "x"
+            }
+          ]
+        },
+        {
+          "left": {
+            "name": "toHour",
+            "arguments": [
+              {
+                "parts": [
+                  "t"
+                ]
+              }
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "Integer",
+            "value": 24
+          }
+        },
+        {
+          "name": "replaceRegexpAll",
+          "arguments": [
+            {
+              "name": "formatDateTime",
+              "arguments": [
+                {
+                  "parts": [
+                    "t"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "%Y-%m-%d %H:%i:%S; %R:%S; %F %T"
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "\\d"
+            },
+            {
+              "type": "String",
+              "value": "x"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

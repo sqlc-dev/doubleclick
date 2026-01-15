@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "distinct_on": [
+        {
+          "parts": [
+            "counter"
+          ]
+        }
+      ],
+      "columns": [
+        {
+          "name": "replaceRegexpAll",
+          "arguments": [
+            {
+              "parts": [
+                "_path"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "/[0-9]+\\.parquet"
+            },
+            {
+              "type": "String",
+              "value": "/\u003csnowflakeid\u003e.parquet"
+            }
+          ],
+          "alias": "_path"
+        },
+        {
+          "parts": [
+            "counter"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "s3",
+                "arguments": [
+                  {
+                    "parts": [
+                      "s3_conn"
+                    ]
+                  },
+                  {
+                    "left": {
+                      "parts": [
+                        "filename"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": "t_03363_function/**.parquet"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "counter"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,433 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "mul"
+                  ]
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "name": "sqrt",
+              "arguments": [
+                {
+                  "left": {
+                    "name": "sum",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "sqr_dif_1"
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "*",
+                  "right": {
+                    "name": "sum",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "sqr_dif_2"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "alias": "z_r"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "query": {
+                            "selects": [
+                              {
+                                "columns": [
+                                  {
+                                    "name": "avg",
+                                    "arguments": [
+                                      {
+                                        "parts": [
+                                          "z_1"
+                                        ]
+                                      }
+                                    ],
+                                    "alias": "z_1_avg"
+                                  },
+                                  {
+                                    "name": "avg",
+                                    "arguments": [
+                                      {
+                                        "parts": [
+                                          "z_2"
+                                        ]
+                                      }
+                                    ],
+                                    "alias": "z_2_avg"
+                                  }
+                                ],
+                                "from": {
+                                  "tables": [
+                                    {
+                                      "table": {
+                                        "table": {
+                                          "query": {
+                                            "selects": [
+                                              {
+                                                "columns": [
+                                                  {
+                                                    "parts": [
+                                                      "perf_1",
+                                                      "site"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "parts": [
+                                                      "perf_1",
+                                                      "z"
+                                                    ],
+                                                    "alias": "z_1"
+                                                  }
+                                                ],
+                                                "from": {
+                                                  "tables": [
+                                                    {
+                                                      "table": {
+                                                        "table": {
+                                                          "table": "perf"
+                                                        },
+                                                        "alias": "perf_1"
+                                                      }
+                                                    }
+                                                  ]
+                                                },
+                                                "where": {
+                                                  "left": {
+                                                    "parts": [
+                                                      "user_id"
+                                                    ]
+                                                  },
+                                                  "op": "=",
+                                                  "right": {
+                                                    "type": "Integer",
+                                                    "value": 0
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        "alias": "jss1"
+                                      }
+                                    },
+                                    {
+                                      "table": {
+                                        "table": {
+                                          "query": {
+                                            "selects": [
+                                              {
+                                                "columns": [
+                                                  {
+                                                    "parts": [
+                                                      "perf_2",
+                                                      "site"
+                                                    ]
+                                                  },
+                                                  {
+                                                    "parts": [
+                                                      "perf_2",
+                                                      "z"
+                                                    ],
+                                                    "alias": "z_2"
+                                                  }
+                                                ],
+                                                "from": {
+                                                  "tables": [
+                                                    {
+                                                      "table": {
+                                                        "table": {
+                                                          "table": "perf"
+                                                        },
+                                                        "alias": "perf_2"
+                                                      }
+                                                    }
+                                                  ]
+                                                },
+                                                "where": {
+                                                  "left": {
+                                                    "parts": [
+                                                      "user_id"
+                                                    ]
+                                                  },
+                                                  "op": "=",
+                                                  "right": {
+                                                    "type": "Integer",
+                                                    "value": 999
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        "alias": "jss2"
+                                      },
+                                      "join": {
+                                        "type": "INNER",
+                                        "strictness": "ALL",
+                                        "using": [
+                                          {
+                                            "parts": [
+                                              "site"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "alias": "avg_values"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "z_1"
+                              ]
+                            },
+                            "op": "-",
+                            "right": {
+                              "tuple": {
+                                "parts": [
+                                  "avg_values"
+                                ]
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            }
+                          },
+                          "alias": "dif_1"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "z_2"
+                              ]
+                            },
+                            "op": "-",
+                            "right": {
+                              "tuple": {
+                                "parts": [
+                                  "avg_values"
+                                ]
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            }
+                          },
+                          "alias": "dif_2"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "dif_1"
+                              ]
+                            },
+                            "op": "*",
+                            "right": {
+                              "parts": [
+                                "dif_2"
+                              ]
+                            }
+                          },
+                          "alias": "mul"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "dif_1"
+                              ]
+                            },
+                            "op": "*",
+                            "right": {
+                              "parts": [
+                                "dif_1"
+                              ]
+                            }
+                          },
+                          "alias": "sqr_dif_1"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "dif_2"
+                              ]
+                            },
+                            "op": "*",
+                            "right": {
+                              "parts": [
+                                "dif_2"
+                              ]
+                            }
+                          },
+                          "alias": "sqr_dif_2"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "perf_1",
+                                            "site"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "perf_1",
+                                            "z"
+                                          ],
+                                          "alias": "z_1"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "perf"
+                                              },
+                                              "alias": "perf_1"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "where": {
+                                        "left": {
+                                          "parts": [
+                                            "user_id"
+                                          ]
+                                        },
+                                        "op": "=",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 0
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "js1"
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "perf_2",
+                                            "site"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "perf_2",
+                                            "z"
+                                          ],
+                                          "alias": "z_2"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "perf"
+                                              },
+                                              "alias": "perf_2"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "where": {
+                                        "left": {
+                                          "parts": [
+                                            "user_id"
+                                          ]
+                                        },
+                                        "op": "=",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 999
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "js2"
+                            },
+                            "join": {
+                              "type": "INNER",
+                              "strictness": "ALL",
+                              "using": [
+                                {
+                                  "parts": [
+                                    "site"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 1
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "c0"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "tx"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test"
+              }
+            },
+            "join": {
+              "type": "FULL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "test",
+                    "json",
+                    "Float32"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "tx",
+                    "c0"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

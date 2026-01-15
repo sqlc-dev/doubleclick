@@ -1,0 +1,148 @@
+{
+  "table": "t_raw_timeseries",
+  "columns": [
+    {
+      "parts": [
+        "metric_id"
+      ]
+    },
+    {
+      "parts": [
+        "timestamp"
+      ]
+    },
+    {
+      "parts": [
+        "value"
+      ]
+    }
+  ],
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 10
+              }
+            },
+            "alias": "metric_id"
+          },
+          {
+            "expr": {
+              "left": {
+                "expr": {
+                  "type": "String",
+                  "value": "2024-12-12 12:00:00"
+                },
+                "type": {
+                  "name": "DateTime64",
+                  "parameters": [
+                    {
+                      "type": "Integer",
+                      "value": 3
+                    },
+                    {
+                      "type": "String",
+                      "value": "UTC"
+                    }
+                  ],
+                  "has_parentheses": true
+                },
+                "operator_syntax": true
+              },
+              "op": "+",
+              "right": {
+                "value": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "op": "/",
+                      "right": {
+                        "type": "Integer",
+                        "value": 10
+                      },
+                      "parenthesized": true
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 100
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "*",
+                  "right": {
+                    "type": "Integer",
+                    "value": 900
+                  }
+                },
+                "unit": "MILLISECOND"
+              }
+            },
+            "alias": "timestamp"
+          },
+          {
+            "expr": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 3
+                }
+              },
+              "op": "+",
+              "right": {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 29
+                }
+              }
+            },
+            "alias": "value"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

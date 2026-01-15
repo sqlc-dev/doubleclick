@@ -1,0 +1,67 @@
+{
+  "table": "versioned_collapsing_merge_tree",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "sign",
+      "type": {
+        "name": "Int8"
+      }
+    },
+    {
+      "name": "version",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "date",
+      "type": {
+        "name": "Datetime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "VersionedCollapsingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "sign"
+        ]
+      },
+      {
+        "parts": [
+          "version"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "key"
+          ]
+        },
+        {
+          "parts": [
+            "version"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "date"
+    ]
+  }
+}

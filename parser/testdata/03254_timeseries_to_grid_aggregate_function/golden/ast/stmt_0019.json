@@ -1,0 +1,70 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "timeSeriesResampleToGridWithStaleness",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 100
+            },
+            {
+              "type": "Integer",
+              "value": 150
+            },
+            {
+              "type": "Integer",
+              "value": 15
+            },
+            {
+              "type": "Integer",
+              "value": 50
+            }
+          ],
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "timestamp"
+                ]
+              },
+              "type": {
+                "name": "DateTime64",
+                "parameters": [
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  },
+                  {
+                    "type": "String",
+                    "value": "UTC"
+                  }
+                ],
+                "has_parentheses": true
+              },
+              "operator_syntax": true
+            },
+            {
+              "parts": [
+                "value"
+              ]
+            }
+          ],
+          "alias": "res"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "ts_data"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

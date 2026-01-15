@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          "alias": "x"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "name": "count",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "x"
+                              }
+                            ]
+                          },
+                          "type": {
+                            "name": "Nullable",
+                            "parameters": [
+                              {
+                                "name": "Int32"
+                              }
+                            ],
+                            "has_parentheses": true
+                          },
+                          "operator_syntax": true
+                        },
+                        {
+                          "name": "count",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "y"
+                            }
+                          ]
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 0
+                          },
+                          "alias": "x"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "RIGHT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "x"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "x"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,212 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "symbol",
+          "query": {
+            "name": "concat",
+            "arguments": [
+              {
+                "name": "addressToLine",
+                "arguments": [
+                  {
+                    "name": "arrayJoin",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "trace"
+                        ]
+                      }
+                    ],
+                    "alias": "addr"
+                  }
+                ]
+              },
+              {
+                "type": "String",
+                "value": "#"
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 7
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "trace_log"
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "query_id"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "type": "Null",
+                          "value": null
+                        },
+                        {
+                          "type": "Null",
+                          "value": null
+                        },
+                        {
+                          "type": "Null",
+                          "value": null
+                        },
+                        {
+                          "type": "Null",
+                          "value": null
+                        },
+                        {
+                          "type": "Float",
+                          "value": 0.00009999999747378752,
+                          "source": "0.00009999999747378752"
+                        },
+                        {
+                          "type": "Null",
+                          "value": null
+                        },
+                        {
+                          "type": "Null",
+                          "value": null
+                        },
+                        {
+                          "type": "Null",
+                          "value": null
+                        },
+                        {
+                          "type": "Null",
+                          "value": null
+                        },
+                        {
+                          "type": "Null",
+                          "value": null
+                        }
+                      ],
+                      "spaced_commas": true
+                    },
+                    {
+                      "parts": [
+                        "query_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "current_database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "expr": {
+                          "parts": [
+                            "query"
+                          ]
+                        },
+                        "pattern": {
+                          "type": "String",
+                          "value": "%test cpu time query profiler%"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "expr": {
+                        "parts": [
+                          "query"
+                        ]
+                      },
+                      "not": true,
+                      "pattern": {
+                        "type": "String",
+                        "value": "%system%"
+                      }
+                    }
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "event_time"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          },
+          "parenthesized": true
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "symbol"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Source%"
+          }
+        }
+      }
+    }
+  ]
+}

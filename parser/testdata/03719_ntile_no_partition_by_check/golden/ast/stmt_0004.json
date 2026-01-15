@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "exp",
+              "arguments": [
+                {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 3
+            }
+          ],
+          "alias": "x"
+        },
+        {
+          "name": "percent_rank",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "over": {
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ]
+          },
+          "alias": "rank"
+        },
+        {
+          "name": "ntile",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 10
+            }
+          ],
+          "over": {
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ]
+          },
+          "alias": "bucket"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 11
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "table": "proj",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "maxdate",
+      "select": {
+        "columns": [
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "date"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "date"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "left": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2012-10-24"
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 100
+              }
+            }
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Float",
+                      "value": 100,
+                      "source": "1e2"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

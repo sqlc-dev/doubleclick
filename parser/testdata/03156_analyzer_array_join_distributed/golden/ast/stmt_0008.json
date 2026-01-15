@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toDate",
+          "arguments": [
+            {
+              "parts": [
+                "hour"
+              ]
+            }
+          ],
+          "alias": "day"
+        },
+        {
+          "parts": [
+            "metric.names"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "metric.values"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "hourly"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "metric"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "day"
+          ]
+        },
+        {
+          "parts": [
+            "metric",
+            "names"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "metric",
+              "names"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "file",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "02841.parquet"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "name": "indexHint",
+        "arguments": [
+          {
+            "expr": {
+              "parts": [
+                "dt64_s"
+              ]
+            },
+            "low": {
+              "name": "toDateTime64",
+              "arguments": [
+                {
+                  "expr": {
+                    "type": "String",
+                    "value": "-2.01e8"
+                  },
+                  "type": {
+                    "name": "Decimal64",
+                    "parameters": [
+                      {
+                        "type": "Integer",
+                        "value": 0
+                      }
+                    ],
+                    "has_parentheses": true
+                  },
+                  "operator_syntax": true
+                },
+                {
+                  "type": "Integer",
+                  "value": 0
+                }
+              ]
+            },
+            "high": {
+              "name": "toDateTime64",
+              "arguments": [
+                {
+                  "expr": {
+                    "type": "Float",
+                    "value": 150000000,
+                    "source": "1.5e8"
+                  },
+                  "type": {
+                    "name": "Decimal64",
+                    "parameters": [
+                      {
+                        "type": "Integer",
+                        "value": 0
+                      }
+                    ],
+                    "has_parentheses": true
+                  },
+                  "operator_syntax": true
+                },
+                {
+                  "type": "Integer",
+                  "value": 0
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

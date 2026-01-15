@@ -1,0 +1,91 @@
+{
+  "table": "t_projection_sparse",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sum"
+            ]
+          },
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "projection_traces_by_id",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "name": "finalizeAggregation",
+            "arguments": [
+              {
+                "parts": [
+                  "val"
+                ]
+              }
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "name": "finalizeAggregation",
+            "arguments": [
+              {
+                "parts": [
+                  "val"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "deduplicate_merge_projection_mode",
+      "value": {
+        "type": "String",
+        "value": "rebuild"
+      }
+    },
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,201 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "over": {
+            "name": "wa"
+          }
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "over": {
+            "name": "wo"
+          }
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "over": {
+            "name": "wa"
+          }
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "over": {
+            "name": "wo"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        {
+                          "name": "intDiv",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 3
+                            }
+                          ],
+                          "alias": "p"
+                        },
+                        {
+                          "name": "mod",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 5
+                            }
+                          ],
+                          "alias": "o"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 31
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "window": [
+        {
+          "name": "wa",
+          "spec": {
+            "partition_by": [
+              {
+                "parts": [
+                  "p"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "o"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "RANGE",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              },
+              "end": {
+                "type": "UNBOUNDED_FOLLOWING"
+              }
+            }
+          }
+        },
+        {
+          "name": "wo",
+          "spec": {
+            "partition_by": [
+              {
+                "parts": [
+                  "p"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "o"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              },
+              "end": {
+                "type": "UNBOUNDED_FOLLOWING"
+              }
+            }
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "max_block_size",
+          "value": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ]
+    }
+  ]
+}

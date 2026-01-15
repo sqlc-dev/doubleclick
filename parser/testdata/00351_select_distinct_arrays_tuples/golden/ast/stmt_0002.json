@@ -1,0 +1,95 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            },
+            {
+              "parts": [
+                "y"
+              ]
+            }
+          ],
+          "distinct": true
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "distinct": true,
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "type": "String",
+                                            "value": "a\u0000b"
+                                          },
+                                          "alias": "x"
+                                        },
+                                        {
+                                          "expr": {
+                                            "type": "String",
+                                            "value": "c"
+                                          },
+                                          "alias": "y"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "columns": [
+                                        {
+                                          "type": "String",
+                                          "value": "a"
+                                        },
+                                        {
+                                          "type": "String",
+                                          "value": "b\u0000c"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "union_all": true,
+                                  "union_modes": [
+                                    "UNION ALL"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,329 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "tuple": {
+              "parts": [
+                "t"
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "cnt"
+        },
+        {
+          "expr": {
+            "tuple": {
+              "parts": [
+                "t"
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "alias": "name"
+        },
+        {
+          "expr": {
+            "tuple": {
+              "parts": [
+                "t"
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 3
+            }
+          },
+          "alias": "percent"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "result"
+                              ]
+                            }
+                          ],
+                          "alias": "t"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "type": "Array",
+                                            "value": [
+                                              {
+                                                "type": "Tuple",
+                                                "value": [
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 79
+                                                  },
+                                                  {
+                                                    "type": "String",
+                                                    "value": "name1"
+                                                  }
+                                                ],
+                                                "spaced_commas": true
+                                              },
+                                              {
+                                                "type": "Tuple",
+                                                "value": [
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 62
+                                                  },
+                                                  {
+                                                    "type": "String",
+                                                    "value": "name2"
+                                                  }
+                                                ],
+                                                "spaced_commas": true
+                                              },
+                                              {
+                                                "type": "Tuple",
+                                                "value": [
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 44
+                                                  },
+                                                  {
+                                                    "type": "String",
+                                                    "value": "name3"
+                                                  }
+                                                ],
+                                                "spaced_commas": true
+                                              }
+                                            ],
+                                            "spaced_commas": true,
+                                            "spaced_brackets": true
+                                          },
+                                          "alias": "data"
+                                        },
+                                        {
+                                          "name": "arraySum",
+                                          "arguments": [
+                                            {
+                                              "name": "arrayMap",
+                                              "arguments": [
+                                                {
+                                                  "parameters": [
+                                                    "t"
+                                                  ],
+                                                  "body": {
+                                                    "tuple": {
+                                                      "parts": [
+                                                        "t"
+                                                      ]
+                                                    },
+                                                    "index": {
+                                                      "type": "Integer",
+                                                      "value": 1
+                                                    }
+                                                  }
+                                                },
+                                                {
+                                                  "parts": [
+                                                    "data"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "total"
+                                        },
+                                        {
+                                          "name": "arrayMap",
+                                          "arguments": [
+                                            {
+                                              "parameters": [
+                                                "t"
+                                              ],
+                                              "body": {
+                                                "name": "tuple",
+                                                "arguments": [
+                                                  {
+                                                    "tuple": {
+                                                      "parts": [
+                                                        "t"
+                                                      ]
+                                                    },
+                                                    "index": {
+                                                      "type": "Integer",
+                                                      "value": 1
+                                                    }
+                                                  },
+                                                  {
+                                                    "tuple": {
+                                                      "parts": [
+                                                        "t"
+                                                      ]
+                                                    },
+                                                    "index": {
+                                                      "type": "Integer",
+                                                      "value": 2
+                                                    }
+                                                  },
+                                                  {
+                                                    "name": "multiIf",
+                                                    "arguments": [
+                                                      {
+                                                        "left": {
+                                                          "parts": [
+                                                            "total"
+                                                          ]
+                                                        },
+                                                        "op": "=",
+                                                        "right": {
+                                                          "type": "Integer",
+                                                          "value": 0
+                                                        }
+                                                      },
+                                                      {
+                                                        "type": "Integer",
+                                                        "value": 0
+                                                      },
+                                                      {
+                                                        "left": {
+                                                          "left": {
+                                                            "tuple": {
+                                                              "parts": [
+                                                                "t"
+                                                              ]
+                                                            },
+                                                            "index": {
+                                                              "type": "Integer",
+                                                              "value": 1
+                                                            }
+                                                          },
+                                                          "op": "\u003e",
+                                                          "right": {
+                                                            "type": "Integer",
+                                                            "value": 0
+                                                          }
+                                                        },
+                                                        "op": "AND",
+                                                        "right": {
+                                                          "left": {
+                                                            "tuple": {
+                                                              "parts": [
+                                                                "t"
+                                                              ]
+                                                            },
+                                                            "index": {
+                                                              "type": "Integer",
+                                                              "value": 1
+                                                            }
+                                                          },
+                                                          "op": "\u003c",
+                                                          "right": {
+                                                            "type": "Integer",
+                                                            "value": 10
+                                                          }
+                                                        }
+                                                      },
+                                                      {
+                                                        "op": "-",
+                                                        "operand": {
+                                                          "type": "Float",
+                                                          "value": 1,
+                                                          "source": "1.0"
+                                                        }
+                                                      },
+                                                      {
+                                                        "left": {
+                                                          "left": {
+                                                            "name": "toFloat32",
+                                                            "arguments": [
+                                                              {
+                                                                "tuple": {
+                                                                  "parts": [
+                                                                    "t"
+                                                                  ]
+                                                                },
+                                                                "index": {
+                                                                  "type": "Integer",
+                                                                  "value": 1
+                                                                }
+                                                              }
+                                                            ]
+                                                          },
+                                                          "op": "/",
+                                                          "right": {
+                                                            "name": "toFloat32",
+                                                            "arguments": [
+                                                              {
+                                                                "parts": [
+                                                                  "total"
+                                                                ]
+                                                              }
+                                                            ]
+                                                          },
+                                                          "parenthesized": true
+                                                        },
+                                                        "op": "*",
+                                                        "right": {
+                                                          "type": "Integer",
+                                                          "value": 100
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            },
+                                            {
+                                              "parts": [
+                                                "data"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "result"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

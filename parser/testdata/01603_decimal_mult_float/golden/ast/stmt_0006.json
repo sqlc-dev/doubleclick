@@ -1,0 +1,63 @@
+{
+  "if_not_exists": true,
+  "table": "test01603",
+  "columns": [
+    {
+      "name": "f64",
+      "type": {
+        "name": "Float64"
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "Decimal64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 3
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "toDecimal32",
+        "arguments": [
+          {
+            "parts": [
+              "f64"
+            ]
+          },
+          {
+            "type": "Integer",
+            "value": 3
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "f32",
+      "type": {
+        "name": "Float32"
+      },
+      "default": {
+        "parts": [
+          "f64"
+        ]
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "f32"
+      ]
+    }
+  ]
+}

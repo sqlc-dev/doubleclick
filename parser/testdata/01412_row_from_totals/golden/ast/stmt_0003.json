@@ -1,0 +1,47 @@
+{
+  "table": "tracking_events_tmp",
+  "columns": [
+    {
+      "name": "APIKey",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "EventDate",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "APIKey"
+          ]
+        },
+        {
+          "parts": [
+            "EventDate"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "EventDate"
+        ]
+      }
+    ]
+  }
+}

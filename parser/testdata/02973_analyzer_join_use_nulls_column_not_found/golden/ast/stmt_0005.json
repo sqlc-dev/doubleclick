@@ -1,0 +1,142 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "d1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "a"
+                    },
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 2
+                      },
+                      "alias": "b"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "d2",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "a"
+                    },
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 3
+                      },
+                      "alias": "c"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "joined",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "table": "d1"
+                    },
+                    {
+                      "parts": [
+                        "d2",
+                        "c"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "d1"
+                          }
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "table": "d2"
+                          }
+                        },
+                        "join": {
+                          "type": "INNER",
+                          "on": {
+                            "left": {
+                              "parts": [
+                                "d1",
+                                "a"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "d2",
+                                "a"
+                              ]
+                            },
+                            "parenthesized": true
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "c"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "joined"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

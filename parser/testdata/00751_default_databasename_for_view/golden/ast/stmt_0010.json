@@ -1,0 +1,139 @@
+{
+  "view": "t_mv_00751",
+  "materialized": true,
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "date"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "date"
+            ]
+          },
+          {
+            "parts": [
+              "platform"
+            ]
+          },
+          {
+            "parts": [
+              "app"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "t_00751"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "parts": [
+                "app"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "name": "min",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "app"
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "u_00751"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "platform"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {
+                                  "name": "min",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "platform"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ],
+                              "from": {
+                                "tables": [
+                                  {
+                                    "table": {
+                                      "table": {
+                                        "table": "v_00751"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "click_country_id"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              },
+              "alias": "cc"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "d"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "d",
+                      "country_id"
+                    ]
+                  },
+                  "op": "\u003c",
+                  "right": {
+                    "type": "Integer",
+                    "value": 99
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "d",
+                      "id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "cc",
+                      "click_city_id"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

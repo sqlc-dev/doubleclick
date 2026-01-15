@@ -1,0 +1,70 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "engine_full"
+          ]
+        },
+        {
+          "parts": [
+            "total_rows"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "total_bytes"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "left": {
+              "type": "Integer",
+              "value": 2
+            },
+            "op": "*",
+            "right": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "total_bytes"
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "initial_table_size"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "one_row_table_size"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

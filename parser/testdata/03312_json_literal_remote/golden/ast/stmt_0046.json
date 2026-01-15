@@ -1,0 +1,67 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "{\"a\" : [1, 2, 3]}"
+          },
+          "type": {
+            "name": "JSON",
+            "parameters": [
+              {
+                "expr": {
+                  "left": {
+                    "parts": [
+                      "max_dynamic_types"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                }
+              }
+            ],
+            "has_parentheses": true
+          },
+          "alias": "json",
+          "operator_syntax": true
+        },
+        {
+          "name": "JSONAllPathsWithTypes",
+          "arguments": [
+            {
+              "parts": [
+                "json"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.2"
+                  },
+                  {
+                    "type": "String",
+                    "value": "system.one"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

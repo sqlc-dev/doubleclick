@@ -1,0 +1,69 @@
+{
+  "table": "lwu_on_fly",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "u",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "parts": [
+        "id"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 2
+    }
+  },
+  "settings": [
+    {
+      "name": "enable_block_number_column",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "enable_block_offset_column",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "apply_patches_on_merge",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

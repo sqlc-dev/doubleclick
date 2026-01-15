@@ -1,0 +1,83 @@
+{
+  "table": "ttl_00933_1",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "Int"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDayOfMonth",
+    "arguments": [
+      {
+        "parts": [
+          "d"
+        ]
+      }
+    ]
+  },
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "d"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "value": {
+          "type": "Integer",
+          "value": 1
+        },
+        "unit": "DAY"
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "d"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 1
+            },
+            "unit": "DAY"
+          }
+        }
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "remove_empty_parts",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,96 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ],
+          "alias": "hello"
+        },
+        {
+          "name": "toString",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "alias": "world"
+        },
+        {
+          "expr": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "hello"
+                ]
+              },
+              {
+                "parts": [
+                  "world"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          },
+          "alias": "tuple"
+        },
+        {
+          "name": "nullIf",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "hello"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 3
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 0
+            }
+          ],
+          "alias": "sometimes_nulls"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      },
+      "settings": [
+        {
+          "name": "max_block_size",
+          "value": {
+            "type": "Integer",
+            "value": 5
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "PrettyCompactMonoBlock"
+        ]
+      }
+    }
+  ]
+}

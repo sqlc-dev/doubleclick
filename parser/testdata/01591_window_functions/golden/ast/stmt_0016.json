@@ -1,0 +1,78 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 5
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "name": "rand"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "name": "count",
+            "over": {
+              "order_by": [
+                {
+                  "expression": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "descending": true
+                }
+              ],
+              "frame": {
+                "type": "ROWS",
+                "start": {
+                  "type": "UNBOUNDED_PRECEDING"
+                }
+              }
+            }
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

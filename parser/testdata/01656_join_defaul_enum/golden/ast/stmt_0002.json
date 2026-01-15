@@ -1,0 +1,106 @@
+{
+  "table": "table_with_enum",
+  "columns": [
+    {
+      "name": "keycol",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "enum_col",
+      "type": {
+        "name": "Enum8",
+        "parameters": [
+          {
+            "left": {
+              "type": "String",
+              "value": "First"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "Second"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "keycol"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "tuple"
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "VALUES",
+                  "arguments": [
+                    {
+                      "type": "Tuple",
+                      "value": [
+                        {
+                          "type": "Integer",
+                          "value": 2
+                        },
+                        {
+                          "type": "String",
+                          "value": "Second"
+                        }
+                      ],
+                      "spaced_commas": true
+                    },
+                    {
+                      "type": "Tuple",
+                      "value": [
+                        {
+                          "type": "Integer",
+                          "value": 4
+                        },
+                        {
+                          "type": "String",
+                          "value": "Second"
+                        }
+                      ],
+                      "spaced_commas": true
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

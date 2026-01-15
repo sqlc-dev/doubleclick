@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "time",
+          "query": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "left": {
+                  "type": "Integer",
+                  "value": 1000000000
+                },
+                "op": "+",
+                "right": {
+                  "left": {
+                    "name": "rand64"
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1000000000
+                  }
+                }
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "name": "max",
+            "arguments": [
+              {
+                "name": "abs",
+                "arguments": [
+                  {
+                    "left": {
+                      "name": "toYear",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "time"
+                          ]
+                        }
+                      ]
+                    },
+                    "op": "-",
+                    "right": {
+                      "name": "toISOYear",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "time"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

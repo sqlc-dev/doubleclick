@@ -1,0 +1,153 @@
+{
+  "table": "tvs",
+  "columns": [
+    {
+      "parts": [
+        "k"
+      ]
+    },
+    {
+      "parts": [
+        "t"
+      ]
+    },
+    {
+      "parts": [
+        "tv"
+      ]
+    }
+  ],
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "k"
+            ]
+          },
+          {
+            "parts": [
+              "t"
+            ]
+          },
+          {
+            "parts": [
+              "t"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "toUInt32",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "number"
+                                ]
+                              }
+                            ],
+                            "alias": "k"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "numbers",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 1000
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "keys"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "toUInt32",
+                            "arguments": [
+                              {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "*",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 3
+                                }
+                              }
+                            ],
+                            "alias": "t"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "numbers",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 10000
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "tv_times"
+              },
+              "join": {
+                "type": "CROSS"
+              }
+            }
+          ]
+        },
+        "settings": [
+          {
+            "name": "join_algorithm",
+            "value": {
+              "type": "String",
+              "value": "hash"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true
+}

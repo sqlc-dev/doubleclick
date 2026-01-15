@@ -1,0 +1,133 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "grouping",
+              "arguments": [
+                {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          },
+          "alias": "gr"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{2,3}"
+                  },
+                  {
+                    "name": "numbers",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "number"
+            ]
+          },
+          "op": "%",
+          "right": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ],
+      "with_cube": true,
+      "having": {
+        "left": {
+          "name": "grouping",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "number"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "gr"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "force_grouping_standard_compatibility",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

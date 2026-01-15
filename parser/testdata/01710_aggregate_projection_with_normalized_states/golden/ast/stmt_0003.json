@@ -1,0 +1,149 @@
+{
+  "table": "r",
+  "columns": [
+    {
+      "name": "x",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "q",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "name": "quantilesTiming",
+            "arguments": [
+              {
+                "type": "Float",
+                "value": 0.5,
+                "source": "0.5"
+              },
+              {
+                "type": "Float",
+                "value": 0.95,
+                "source": "0.95"
+              },
+              {
+                "type": "Float",
+                "value": 0.99,
+                "source": "0.99"
+              }
+            ]
+          },
+          {
+            "name": "Int64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "a"
+            ]
+          },
+          {
+            "name": "quantilesTimingMerge",
+            "parameters": [
+              {
+                "type": "Float",
+                "value": 0.5,
+                "source": "0.5"
+              },
+              {
+                "type": "Float",
+                "value": 0.95,
+                "source": "0.95"
+              },
+              {
+                "type": "Float",
+                "value": 0.99,
+                "source": "0.99"
+              }
+            ],
+            "arguments": [
+              {
+                "parts": [
+                  "q"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "s"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "a"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "x"
+          ]
+        },
+        {
+          "parts": [
+            "a"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "deduplicate_merge_projection_mode",
+      "value": {
+        "type": "String",
+        "value": "drop"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,118 @@
+{
+  "if_not_exists": true,
+  "table": "test",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "track",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "codec",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "content",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "rdate",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "type": "String",
+        "value": "2018-02-03"
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "track_id",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "name": "concat",
+        "arguments": [
+          {
+            "name": "concat",
+            "arguments": [
+              {
+                "name": "concat",
+                "arguments": [
+                  {
+                    "name": "toString",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "track"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "-"
+                  }
+                ]
+              },
+              {
+                "parts": [
+                  "codec"
+                ]
+              }
+            ]
+          },
+          {
+            "parts": [
+              "content"
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "rdate"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "parts": [
+              "track_id"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "{\"a\":\"1\",\"b\":\"2\",\"c\":\"\",\"d\":\"4\"}{\"a\":\"1\",\"b\":\"2\",\"c\":\"\",\"d\":\"4\"}{\"a\":\"1\",\"b\":\"2\",\"c\":\"\",\"d\":\"4\"}{\"a\":\"1\",\"b\":\"2\",\"c\":\"\",\"d\":\"4\"}"
+          },
+          "alias": "json"
+        },
+        {
+          "name": "extractAll",
+          "arguments": [
+            {
+              "parts": [
+                "json"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "\"([^\"]*)\":"
+            }
+          ],
+          "alias": "keys"
+        },
+        {
+          "name": "extractAll",
+          "arguments": [
+            {
+              "parts": [
+                "json"
+              ]
+            },
+            {
+              "type": "String",
+              "value": ":\"\u0000[^\"]*)\""
+            }
+          ],
+          "alias": "values"
+        }
+      ]
+    }
+  ]
+}

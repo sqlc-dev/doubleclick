@@ -1,0 +1,92 @@
+{
+  "explain_type": "SYNTAX",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "parts": [
+              "square_number"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "with": [
+                          {
+                            "name": "square_number",
+                            "query": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            },
+                            "scalar_with": true
+                          }
+                        ],
+                        "columns": [
+                          {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "square_number"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "numbers_indexed"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "squares"
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "number"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 999
+          }
+        }
+      }
+    ]
+  },
+  "explicit_type": true
+}

@@ -1,0 +1,309 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "cntrycode"
+          ]
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ],
+          "alias": "numcust"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "c_acctbal"
+              ]
+            }
+          ],
+          "alias": "totacctbal"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "substring",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "c_phone"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 2
+                            }
+                          ],
+                          "alias": "cntrycode"
+                        },
+                        {
+                          "parts": [
+                            "c_acctbal"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "customer"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "expr": {
+                              "name": "substring",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "c_phone"
+                                  ]
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              ]
+                            },
+                            "list": [
+                              {
+                                "type": "String",
+                                "value": "13"
+                              },
+                              {
+                                "type": "String",
+                                "value": "31"
+                              },
+                              {
+                                "type": "String",
+                                "value": "23"
+                              },
+                              {
+                                "type": "String",
+                                "value": "29"
+                              },
+                              {
+                                "type": "String",
+                                "value": "30"
+                              },
+                              {
+                                "type": "String",
+                                "value": "18"
+                              },
+                              {
+                                "type": "String",
+                                "value": "17"
+                              }
+                            ]
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "c_acctbal"
+                              ]
+                            },
+                            "op": "\u003e",
+                            "right": {
+                              "query": {
+                                "selects": [
+                                  {
+                                    "columns": [
+                                      {
+                                        "name": "avg",
+                                        "arguments": [
+                                          {
+                                            "parts": [
+                                              "c_acctbal"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "from": {
+                                      "tables": [
+                                        {
+                                          "table": {
+                                            "table": {
+                                              "table": "customer"
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "where": {
+                                      "left": {
+                                        "left": {
+                                          "parts": [
+                                            "c_acctbal"
+                                          ]
+                                        },
+                                        "op": "\u003e",
+                                        "right": {
+                                          "type": "Float",
+                                          "value": 0,
+                                          "source": "0.00"
+                                        }
+                                      },
+                                      "op": "AND",
+                                      "right": {
+                                        "expr": {
+                                          "name": "substring",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "c_phone"
+                                              ]
+                                            },
+                                            {
+                                              "type": "Integer",
+                                              "value": 1
+                                            },
+                                            {
+                                              "type": "Integer",
+                                              "value": 2
+                                            }
+                                          ]
+                                        },
+                                        "list": [
+                                          {
+                                            "type": "String",
+                                            "value": "13"
+                                          },
+                                          {
+                                            "type": "String",
+                                            "value": "31"
+                                          },
+                                          {
+                                            "type": "String",
+                                            "value": "23"
+                                          },
+                                          {
+                                            "type": "String",
+                                            "value": "29"
+                                          },
+                                          {
+                                            "type": "String",
+                                            "value": "30"
+                                          },
+                                          {
+                                            "type": "String",
+                                            "value": "18"
+                                          },
+                                          {
+                                            "type": "String",
+                                            "value": "17"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "op": "NOT",
+                          "operand": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {}
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "table": "orders"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "where": {
+                                    "left": {
+                                      "parts": [
+                                        "o_custkey"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "parts": [
+                                        "c_custkey"
+                                      ]
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "custsale"
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "cntrycode"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "cntrycode"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

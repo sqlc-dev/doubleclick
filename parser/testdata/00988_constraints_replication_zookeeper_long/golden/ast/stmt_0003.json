@@ -1,0 +1,55 @@
+{
+  "table": "replicated_constraints1",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "name": "a_constraint",
+      "expression": {
+        "left": {
+          "parts": [
+            "a"
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "type": "Integer",
+          "value": 10
+        }
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_00988/alter_constraints"
+      },
+      {
+        "type": "String",
+        "value": "r1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "max_merge_delayed_streams_for_parallel_write=1000"
+          },
+          "alias": "test"
+        },
+        {
+          "name": "count",
+          "alias": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "table"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "metric_log"
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "database"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "name": "currentDatabase"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "event_date"
+                ]
+              },
+              "op": "\u003e=",
+              "right": {
+                "name": "yesterday"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "event_type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "MergeParts"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "peak_memory_usage"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 1000000000
+          }
+        }
+      }
+    }
+  ]
+}

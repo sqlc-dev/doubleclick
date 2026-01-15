@@ -1,0 +1,77 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "_file"
+          ]
+        },
+        {
+          "parts": [
+            "_path"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "s3",
+                "arguments": [
+                  {
+                    "parts": [
+                      "s3_conn"
+                    ]
+                  },
+                  {
+                    "left": {
+                      "parts": [
+                        "filename"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": "test.zip::03215_archive.csv"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "_file"
+                ]
+              },
+              {
+                "parts": [
+                  "_path"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "allow_archive_path_syntax",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

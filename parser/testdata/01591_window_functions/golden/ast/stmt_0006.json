@@ -1,0 +1,66 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "name": "count",
+          "over": {
+            "partition_by": [
+              {
+                "name": "intDiv",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              }
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

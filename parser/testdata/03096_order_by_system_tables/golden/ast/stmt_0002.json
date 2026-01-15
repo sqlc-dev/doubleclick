@@ -1,0 +1,185 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "known_tables",
+          "query": {
+            "type": "Array",
+            "value": [
+              {
+                "type": "String",
+                "value": "asynchronous_metric_log"
+              },
+              {
+                "type": "String",
+                "value": "asynchronous_insert_log"
+              },
+              {
+                "type": "String",
+                "value": "opentelemetry_span_log"
+              },
+              {
+                "type": "String",
+                "value": "coverage_log"
+              }
+            ],
+            "spaced_commas": true
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "default_sorting_key",
+          "query": {
+            "type": "String",
+            "value": "event_date, event_time"
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "left": {
+              "left": {
+                "type": "String",
+                "value": "Table "
+              },
+              "op": "||",
+              "right": {
+                "parts": [
+                  "name"
+                ]
+              }
+            },
+            "op": "||",
+            "right": {
+              "type": "String",
+              "value": " has non-default sorting key: "
+            }
+          },
+          "op": "||",
+          "right": {
+            "parts": [
+              "sorting_key"
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "tables"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "database"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "system"
+                },
+                "parenthesized": true
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "engine"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "MergeTree"
+                },
+                "parenthesized": true
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "name"
+                ]
+              },
+              "not": true,
+              "pattern": {
+                "type": "String",
+                "value": "minio%"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "op": "NOT",
+            "operand": {
+              "name": "arraySum",
+              "arguments": [
+                {
+                  "name": "arrayMap",
+                  "arguments": [
+                    {
+                      "parameters": [
+                        "x"
+                      ],
+                      "body": {
+                        "name": "position",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "name"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "x"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "parts": [
+                        "known_tables"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "sorting_key"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "parts": [
+              "default_sorting_key"
+            ]
+          },
+          "parenthesized": true
+        }
+      }
+    }
+  ]
+}

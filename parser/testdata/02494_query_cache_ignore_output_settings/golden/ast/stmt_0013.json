@@ -1,0 +1,168 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "array": {
+            "parts": [
+              "Settings"
+            ]
+          },
+          "index": {
+            "type": "String",
+            "value": "output_format_tsv_crlf_end_of_line"
+          }
+        },
+        {
+          "array": {
+            "parts": [
+              "Settings"
+            ]
+          },
+          "index": {
+            "type": "String",
+            "value": "max_block_size"
+          }
+        },
+        {
+          "condition": {
+            "left": {
+              "array": {
+                "parts": [
+                  "ProfileEvents"
+                ]
+              },
+              "index": {
+                "type": "String",
+                "value": "QueryCacheHits"
+              }
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          "then": {
+            "type": "String",
+            "value": "hit"
+          },
+          "else": {
+            "type": "String",
+            "value": ""
+          }
+        },
+        {
+          "condition": {
+            "left": {
+              "array": {
+                "parts": [
+                  "ProfileEvents"
+                ]
+              },
+              "index": {
+                "type": "String",
+                "value": "QueryCacheMisses"
+              }
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          "then": {
+            "type": "String",
+            "value": "miss"
+          },
+          "else": {
+            "type": "String",
+            "value": ""
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "QueryFinish"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "event_time"
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "left": {
+                  "name": "now"
+                },
+                "op": "-",
+                "right": {
+                  "type": "Integer",
+                  "value": 600
+                }
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "query"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "SELECT '03710', %"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

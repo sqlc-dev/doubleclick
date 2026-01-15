@@ -1,0 +1,104 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "url",
+          "query": {
+            "type": "String",
+            "value": "https://www3.botinok.co.edu.il/~kozlevich/CGI-BIN/WEBSIT~0.DLL?longptr=0xFFFFFFFF\u0026ONERR=CONTINUE#!PGNUM=99"
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "cityHash64",
+          "arguments": [
+            {
+              "condition": {
+                "expr": {
+                  "name": "substring",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "x"
+                      ]
+                    },
+                    {
+                      "op": "-",
+                      "operand": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  ]
+                },
+                "list": [
+                  {
+                    "type": "String",
+                    "value": "/"
+                  },
+                  {
+                    "type": "String",
+                    "value": "?"
+                  },
+                  {
+                    "type": "String",
+                    "value": "#"
+                  }
+                ]
+              },
+              "then": {
+                "name": "substring",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  {
+                    "op": "-",
+                    "operand": {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  }
+                ]
+              },
+              "else": {
+                "parts": [
+                  "x"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "arrayJoin",
+          "arguments": [
+            {
+              "name": "URLHierarchy",
+              "arguments": [
+                {
+                  "parts": [
+                    "url"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "x"
+        }
+      ]
+    }
+  ]
+}

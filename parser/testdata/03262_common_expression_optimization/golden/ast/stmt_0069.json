@@ -1,0 +1,101 @@
+{
+  "explain_type": "QUERY TREE",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "x"
+            ]
+          },
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "A"
+                ]
+              }
+            ],
+            "alias": "mA"
+          },
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "B"
+                ]
+              }
+            ],
+            "alias": "mB"
+          },
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "C"
+                ]
+              }
+            ],
+            "alias": "mC"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "x"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "x"
+            ]
+          }
+        ],
+        "having": {
+          "left": {
+            "left": {
+              "parts": [
+                "mA"
+              ]
+            },
+            "op": "AND",
+            "right": {
+              "parts": [
+                "mB"
+              ]
+            },
+            "parenthesized": true
+          },
+          "op": "OR",
+          "right": {
+            "left": {
+              "parts": [
+                "mA"
+              ]
+            },
+            "op": "AND",
+            "right": {
+              "parts": [
+                "mC"
+              ]
+            },
+            "parenthesized": true
+          }
+        }
+      }
+    ]
+  },
+  "has_settings": true,
+  "explicit_type": true,
+  "options_string": "dump_ast = 1"
+}

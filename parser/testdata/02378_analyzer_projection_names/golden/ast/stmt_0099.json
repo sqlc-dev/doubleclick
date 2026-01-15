@@ -1,0 +1,70 @@
+{
+  "table_expr": {
+    "table": {
+      "query": {
+        "selects": [
+          {
+            "columns": [
+              {
+                "expr": {
+                  "expr": {
+                    "name": "tuple",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  "type": {
+                    "name": "Tuple (id UInt64)"
+                  }
+                },
+                "alias": "compound_value"
+              },
+              {
+                "name": "arrayMap",
+                "arguments": [
+                  {
+                    "parameters": [
+                      "x"
+                    ],
+                    "body": {
+                      "table": "compound_value",
+                      "apply": [
+                        "toString"
+                      ],
+                      "transformers": [
+                        {
+                          "type": "apply",
+                          "apply": "toString"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 3
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "table": "users",
+  "columns": [
+    {
+      "name": "name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "score",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "user_level",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "name": "multiIf",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "score"
+              ]
+            },
+            "op": "\u003c=",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          },
+          {
+            "type": "String",
+            "value": "LOW"
+          },
+          {
+            "left": {
+              "parts": [
+                "score"
+              ]
+            },
+            "op": "\u003c=",
+            "right": {
+              "type": "Integer",
+              "value": 6
+            }
+          },
+          {
+            "type": "String",
+            "value": "MEDIUM"
+          },
+          {
+            "type": "String",
+            "value": "HIGH"
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "name"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "view": "03094_grouparrysorted_mv",
+  "materialized": true,
+  "to": "03094_grouparrysorted_dest",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "ServiceName"
+            ]
+          },
+          {
+            "name": "groupArraySortedState",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 100
+              }
+            ],
+            "arguments": [
+              {
+                "expr": {
+                  "name": "tuple",
+                  "arguments": [
+                    {
+                      "op": "-",
+                      "operand": {
+                        "parts": [
+                          "Duration"
+                        ]
+                      }
+                    },
+                    {
+                      "parts": [
+                        "Timestamp"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "TraceId"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "SpanId"
+                      ]
+                    }
+                  ]
+                },
+                "type": {
+                  "name": "Tuple(NegativeDurationNs Int64, Timestamp DateTime64(9), TraceId String, SpanId String)"
+                }
+              }
+            ],
+            "alias": "SlowSpans"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "03094_grouparrysorted_src"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "ServiceName"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

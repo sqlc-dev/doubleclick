@@ -1,0 +1,98 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "type": "Integer",
+                                "value": 5
+                              }
+                            ]
+                          },
+                          "alias": "id"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "subquery_1"
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "expr": {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 3
+                      }
+                    ]
+                  },
+                  "alias": "id"
+                }
+              ]
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "id"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "subquery_2"
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

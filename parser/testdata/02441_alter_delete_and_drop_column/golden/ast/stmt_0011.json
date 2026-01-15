@@ -1,0 +1,76 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "type"
+          ]
+        },
+        {
+          "parts": [
+            "new_part_name"
+          ]
+        },
+        {
+          "parts": [
+            "parts_to_merge"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "replication_queue"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "mut"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "String",
+            "value": "GET_PART"
+          }
+        }
+      }
+    }
+  ]
+}

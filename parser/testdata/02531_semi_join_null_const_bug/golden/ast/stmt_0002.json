@@ -1,0 +1,97 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "b",
+            "id"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toLowCardinality",
+                          "arguments": [
+                            {
+                              "expr": {
+                                "type": "Integer",
+                                "value": 0
+                              },
+                              "type": {
+                                "name": "UInt32"
+                              },
+                              "operator_syntax": true
+                            }
+                          ],
+                          "alias": "id"
+                        }
+                      ],
+                      "group_by": [
+                        {
+                          "type": "Array",
+                          "value": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "a"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toLowCardinality",
+                          "arguments": [
+                            {
+                              "expr": {
+                                "type": "Integer",
+                                "value": 1
+                              },
+                              "type": {
+                                "name": "UInt64"
+                              },
+                              "operator_syntax": true
+                            }
+                          ],
+                          "alias": "id"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "b"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "SEMI",
+              "using": [
+                {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

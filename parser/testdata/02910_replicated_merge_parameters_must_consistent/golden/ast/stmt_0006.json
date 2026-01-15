@@ -1,0 +1,60 @@
+{
+  "table": "t2_r_error",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "legacy_ver",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "deleted",
+      "type": {
+        "name": "UInt8"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedReplacingMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/tables/{database}/t2/"
+      },
+      {
+        "type": "String",
+        "value": "r3"
+      },
+      {
+        "parts": [
+          "legacy_ver"
+        ]
+      },
+      {
+        "parts": [
+          "deleted"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

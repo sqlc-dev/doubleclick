@@ -1,0 +1,77 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "substring",
+          "arguments": [
+            {
+              "parts": [
+                "name"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            },
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "parts": [
+            "value"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "zookeeper"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "path"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "left": {
+            "left": {
+              "type": "String",
+              "value": "/clickhouse/"
+            },
+            "op": "||",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "||",
+          "right": {
+            "type": "String",
+            "value": "/01650_drop_part_and_deduplication_partitioned_table/blocks/"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "value"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

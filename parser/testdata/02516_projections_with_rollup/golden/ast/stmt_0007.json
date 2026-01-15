@@ -1,0 +1,131 @@
+{
+  "table": "video_log",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "left": {
+              "name": "toUnixTimestamp",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2022-07-22 01:00:00"
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "left": {
+                "name": "rowNumberInAllBlocks"
+              },
+              "op": "/",
+              "right": {
+                "type": "Integer",
+                "value": 20000
+              },
+              "parenthesized": true
+            }
+          },
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "user_id_raw"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 100000000
+              }
+            },
+            "alias": "user_id"
+          },
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "device_id_raw"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 200000000
+              }
+            },
+            "alias": "device_id"
+          },
+          {
+            "left": {
+              "parts": [
+                "domain_raw"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 100
+            }
+          },
+          {
+            "left": {
+              "left": {
+                "parts": [
+                  "bytes_raw"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 1024
+              },
+              "parenthesized": true
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 128
+            }
+          },
+          {
+            "left": {
+              "left": {
+                "parts": [
+                  "duration_raw"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 300
+              },
+              "parenthesized": true
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 100
+            }
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "rng"
+                }
+              }
+            }
+          ]
+        },
+        "limit": {
+          "type": "Integer",
+          "value": 1728000
+        }
+      }
+    ]
+  }
+}

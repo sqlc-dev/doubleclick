@@ -1,0 +1,54 @@
+{
+  "table": "test_table",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "alias_value",
+      "type": null,
+      "default": {
+        "left": {
+          "expr": {
+            "left": {
+              "parts": [
+                "id"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            },
+            "parenthesized": true
+          },
+          "alias": "inside_value"
+        },
+        "op": "+",
+        "right": {
+          "parts": [
+            "inside_value"
+          ]
+        }
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "table": "test_foo_#",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "town",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "partition_by": {
+    "name": "toYear",
+    "arguments": [
+      {
+        "parts": [
+          "date"
+        ]
+      }
+    ]
+  },
+  "primary_key": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "town"
+          ]
+        },
+        {
+          "parts": [
+            "date"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "enforce_strict_identifier_format",
+      "value": {
+        "type": "Boolean",
+        "value": true
+      }
+    }
+  ],
+  "comment": "test"
+}

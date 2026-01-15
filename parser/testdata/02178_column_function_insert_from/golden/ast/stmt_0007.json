@@ -1,0 +1,96 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "attr"
+          ]
+        },
+        {
+          "parts": [
+            "_id"
+          ]
+        },
+        {
+          "name": "arrayFilter",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "expr": {
+                  "parts": [
+                    "x"
+                  ]
+                },
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "type": "String",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "parts": [
+                "attr_list"
+              ]
+            }
+          ],
+          "alias": "z"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "TESTTABLE"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "z"
+                  ],
+                  "alias": "attr"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "_id"
+            ]
+          }
+        }
+      ],
+      "limit_by": [
+        {
+          "parts": [
+            "attr"
+          ]
+        }
+      ],
+      "limit_by_limit": {
+        "type": "Integer",
+        "value": 3
+      }
+    }
+  ]
+}

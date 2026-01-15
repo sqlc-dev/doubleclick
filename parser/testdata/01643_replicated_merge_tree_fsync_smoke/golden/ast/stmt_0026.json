@@ -1,0 +1,56 @@
+{
+  "table": "rep_fsync_r1",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "Int"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/rep_fsync"
+      },
+      {
+        "type": "String",
+        "value": "r1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "min_rows_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 2
+      }
+    },
+    {
+      "name": "fsync_after_insert",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "fsync_part_directory",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

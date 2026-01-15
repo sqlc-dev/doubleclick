@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "product_name"
+          ]
+        },
+        {
+          "parts": [
+            "price"
+          ]
+        },
+        {
+          "parts": [
+            "group_name"
+          ]
+        },
+        {
+          "name": "AVG",
+          "arguments": [
+            {
+              "parts": [
+                "price"
+              ]
+            }
+          ],
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "group_name"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "products"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "product_groups"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "group_id"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "group_name"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "product_name"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "price"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

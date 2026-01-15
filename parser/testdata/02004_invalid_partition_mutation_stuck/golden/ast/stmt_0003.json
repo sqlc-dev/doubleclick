@@ -1,0 +1,70 @@
+{
+  "table": "rep_data",
+  "columns": [
+    {
+      "name": "p",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "t",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx",
+      "expression": {
+        "parts": [
+          "t"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/rep_data"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "t"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "p"
+    ]
+  },
+  "settings": [
+    {
+      "name": "number_of_free_entries_in_pool_to_execute_mutation",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

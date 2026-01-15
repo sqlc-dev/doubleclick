@@ -1,0 +1,190 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "name"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "zookeeper"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "path"
+          ]
+        },
+        "query": {
+          "selects": [
+            {
+              "columns": [
+                {
+                  "name": "concat",
+                  "arguments": [
+                    {
+                      "left": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "type": "String",
+                              "value": "/clickhouse/"
+                            },
+                            "op": "||",
+                            "right": {
+                              "name": "currentDatabase"
+                            }
+                          },
+                          "op": "||",
+                          "right": {
+                            "type": "String",
+                            "value": "/01700_system_zookeeper_path_in/"
+                          }
+                        },
+                        "op": "||",
+                        "right": {
+                          "name": "getMacro",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "shard"
+                            }
+                          ]
+                        }
+                      },
+                      "op": "||",
+                      "right": {
+                        "type": "String",
+                        "value": "/"
+                      }
+                    },
+                    {
+                      "parts": [
+                        "name"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "from": {
+                "tables": [
+                  {
+                    "table": {
+                      "table": {
+                        "database": "system",
+                        "table": "zookeeper"
+                      }
+                    }
+                  }
+                ]
+              },
+              "where": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "name"
+                        ]
+                      },
+                      "op": "!=",
+                      "right": {
+                        "type": "String",
+                        "value": "replicas"
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "expr": {
+                        "parts": [
+                          "name"
+                        ]
+                      },
+                      "not": true,
+                      "pattern": {
+                        "type": "String",
+                        "value": "leader_election%"
+                      }
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "expr": {
+                      "parts": [
+                        "name"
+                      ]
+                    },
+                    "not": true,
+                    "pattern": {
+                      "type": "String",
+                      "value": "zero_copy_%"
+                    }
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "path"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "type": "String",
+                          "value": "/clickhouse/"
+                        },
+                        "op": "||",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "||",
+                      "right": {
+                        "type": "String",
+                        "value": "/01700_system_zookeeper_path_in/"
+                      }
+                    },
+                    "op": "||",
+                    "right": {
+                      "name": "getMacro",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "shard"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "parenthesized": true
+              }
+            }
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "name"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

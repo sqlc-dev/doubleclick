@@ -1,0 +1,163 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "t1",
+            "a"
+          ],
+          "alias": "t1_a"
+        },
+        {
+          "parts": [
+            "t2",
+            "a"
+          ],
+          "alias": "t2_a"
+        },
+        {
+          "parts": [
+            "t2",
+            "b"
+          ],
+          "alias": "t2_b"
+        },
+        {
+          "parts": [
+            "t3",
+            "b"
+          ],
+          "alias": "t3_b"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "t1",
+                "a"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "table2",
+                "b"
+              ]
+            },
+            "parenthesized": true
+          },
+          "alias": "t1_t2_x"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "table1",
+                "a"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "table3",
+                "b"
+              ]
+            },
+            "parenthesized": true
+          },
+          "alias": "t1_t3_x"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "t2",
+                "b"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "t3",
+                "b"
+              ]
+            },
+            "parenthesized": true
+          },
+          "alias": "t2_t3_x"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "table1"
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "table2"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1_a"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2_a"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "table3"
+              },
+              "alias": "t3"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t2_b"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t3_b"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "t1",
+              "a"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "uniqExact",
+          "arguments": [
+            {
+              "parts": [
+                "partition_id"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "rows"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts_columns"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "database"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "name": "currentDatabase"
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "table"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "t_lwu_deletes_3"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "column"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "_row_exists"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "parts": [
+              "active"
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "name": "startsWith",
+          "arguments": [
+            {
+              "parts": [
+                "name"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "patch"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

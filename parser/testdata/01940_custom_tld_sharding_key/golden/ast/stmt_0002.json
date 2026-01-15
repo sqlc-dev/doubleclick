@@ -1,0 +1,95 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.{1,2}"
+                  },
+                  {
+                    "name": "view",
+                    "arguments": [
+                      {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {
+                                  "expr": {
+                                    "type": "String",
+                                    "value": "foo.com"
+                                  },
+                                  "alias": "key"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "cityHash64",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "key"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "key"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "name": "cutToFirstSignificantSubdomainCustom",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "bar.com"
+            },
+            {
+              "type": "String",
+              "value": "public_suffix_list"
+            }
+          ]
+        }
+      },
+      "settings": [
+        {
+          "name": "optimize_skip_unused_shards",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "force_optimize_skip_unused_shards",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

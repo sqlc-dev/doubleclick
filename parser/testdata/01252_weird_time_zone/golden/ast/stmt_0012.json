@@ -1,0 +1,116 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "Pacific/Apia"
+        },
+        {
+          "name": "rand",
+          "alias": "r"
+        },
+        {
+          "name": "toHour",
+          "arguments": [
+            {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "parts": [
+                    "r"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "Pacific/Apia"
+                }
+              ],
+              "alias": "t"
+            }
+          ],
+          "alias": "h"
+        },
+        {
+          "parts": [
+            "t"
+          ]
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "t"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1000000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "h"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "op": "OR",
+        "right": {
+          "left": {
+            "parts": [
+              "h"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 23
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "h"
+            ]
+          }
+        }
+      ],
+      "limit_by": [
+        {
+          "parts": [
+            "h"
+          ]
+        }
+      ],
+      "limit_by_limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

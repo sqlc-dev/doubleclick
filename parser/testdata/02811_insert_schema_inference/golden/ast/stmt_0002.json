@@ -1,0 +1,57 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "n1",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "n2",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "name": "murmurHash3_32",
+        "arguments": [
+          {
+            "parts": [
+              "n1"
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "n3",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "n2"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "n1"
+      ]
+    }
+  ]
+}

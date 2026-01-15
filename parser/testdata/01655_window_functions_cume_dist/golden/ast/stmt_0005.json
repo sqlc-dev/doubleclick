@@ -1,0 +1,66 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "name": "intDiv",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 3
+            }
+          ],
+          "alias": "p"
+        },
+        {
+          "name": "cume_dist",
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "p"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

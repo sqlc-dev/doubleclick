@@ -1,0 +1,246 @@
+{
+  "table": "video_views",
+  "columns": [
+    {
+      "name": "entityIri",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "courseId",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "learnerId",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "actorId",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "duration",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "fullWatched",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "fullWatchedDate",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "fullWatchedDuration",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "fullWatchedTime",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "fullWatchedViews",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "views.viewId",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "views.startedAt",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "DateTime"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "views.endedAt",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "DateTime"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "views.viewDuration",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt16"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "views.watchedPart",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Float32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "views.fullWatched",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt8"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "views.progress",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Float32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "views.reject",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt8"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "views.viewNumber",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt16"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "views.repeatingView",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt8"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "views.ranges",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "version",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "version"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "learnerId"
+          ]
+        },
+        {
+          "parts": [
+            "entityIri"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "entityIri"
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

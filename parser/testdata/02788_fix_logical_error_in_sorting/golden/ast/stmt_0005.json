@@ -1,0 +1,55 @@
+{
+  "table": "event_types",
+  "columns": [
+    {
+      "name": "type",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "active",
+      "type": {
+        "name": "Int16"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "type"
+          ]
+        },
+        {
+          "parts": [
+            "active"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "substring",
+    "arguments": [
+      {
+        "parts": [
+          "type"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 1
+      },
+      {
+        "type": "Integer",
+        "value": 1
+      }
+    ]
+  }
+}

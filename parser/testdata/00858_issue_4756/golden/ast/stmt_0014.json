@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "parts": [
+            "d0",
+            "id"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "distr1"
+              },
+              "alias": "d0"
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "d0",
+            "id"
+          ]
+        },
+        "query": {
+          "selects": [
+            {
+              "columns": [
+                {
+                  "parts": [
+                    "d1",
+                    "id"
+                  ]
+                }
+              ],
+              "from": {
+                "tables": [
+                  {
+                    "table": {
+                      "table": {
+                        "table": "distr1"
+                      },
+                      "alias": "d1"
+                    }
+                  },
+                  {
+                    "table": {
+                      "table": {
+                        "table": "distr2"
+                      },
+                      "alias": "d2"
+                    },
+                    "join": {
+                      "type": "INNER",
+                      "on": {
+                        "left": {
+                          "parts": [
+                            "d1",
+                            "id"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "parts": [
+                            "d2",
+                            "id"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "where": {
+                "left": {
+                  "parts": [
+                    "d1",
+                    "id"
+                  ]
+                },
+                "op": "\u003e",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "table": "source",
+  "columns": [
+    {
+      "name": "dt",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "ts",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "dt_32",
+      "type": {
+        "name": "Date32"
+      }
+    },
+    {
+      "name": "ts_64",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 3
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "n",
+      "type": {
+        "name": "Int32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "ts"
+        ]
+      }
+    ]
+  }
+}

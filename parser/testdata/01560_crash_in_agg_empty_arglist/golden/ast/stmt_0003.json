@@ -1,0 +1,214 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "any",
+          "alias": "t"
+        },
+        {
+          "name": "substring",
+          "arguments": [
+            {
+              "parts": [
+                "query"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            },
+            {
+              "type": "Integer",
+              "value": 70
+            }
+          ],
+          "alias": "query"
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "parts": [
+                "memory_usage"
+              ]
+            }
+          ],
+          "alias": "usage"
+        },
+        {
+          "name": "count",
+          "alias": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "current_database"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "name": "currentDatabase"
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "event_date"
+                    ]
+                  },
+                  "op": "\u003e=",
+                  "right": {
+                    "name": "toDate",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 1604295323
+                      }
+                    ]
+                  }
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "event_time"
+                  ]
+                },
+                "op": "\u003e=",
+                "right": {
+                  "name": "toDateTime",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1604295323
+                    }
+                  ]
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "list": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "type": "Integer",
+                  "value": 2
+                },
+                {
+                  "type": "Integer",
+                  "value": 3
+                },
+                {
+                  "type": "Integer",
+                  "value": 4
+                }
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "initial_user"
+              ]
+            },
+            "list": [
+              {
+                "type": "String",
+                "value": ""
+              }
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "left": {
+              "type": "String",
+              "value": "all"
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "all"
+            }
+          },
+          "op": "OR",
+          "right": {
+            "left": {
+              "name": "positionCaseInsensitive",
+              "arguments": [
+                {
+                  "parts": [
+                    "query"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "all"
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            },
+            "parenthesized": true
+          },
+          "parenthesized": true
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "query"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "usage"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 5
+      }
+    }
+  ]
+}

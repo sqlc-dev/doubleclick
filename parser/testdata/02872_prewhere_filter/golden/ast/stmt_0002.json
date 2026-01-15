@@ -1,0 +1,62 @@
+{
+  "table": "data",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "val1",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "max"
+            ]
+          },
+          {
+            "name": "Nullable",
+            "parameters": [
+              {
+                "name": "Int"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "val2",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "min"
+            ]
+          },
+          {
+            "name": "Int"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ]
+}

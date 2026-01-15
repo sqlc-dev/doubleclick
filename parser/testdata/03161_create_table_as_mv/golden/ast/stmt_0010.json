@@ -1,0 +1,56 @@
+{
+  "view": "mv_with_storage",
+  "materialized": true,
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "name": "sumState",
+            "arguments": [
+              {
+                "parts": [
+                  "cost"
+                ]
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "base_table"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

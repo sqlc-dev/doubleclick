@@ -1,0 +1,560 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "cityHash64",
+          "arguments": [
+            {
+              "name": "groupArray",
+              "arguments": [
+                {
+                  "name": "cityHash64",
+                  "arguments": [
+                    {}
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "a"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 31
+                            }
+                          },
+                          "alias": "g"
+                        },
+                        {
+                          "name": "minMerge",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "min_aggreg"
+                              ]
+                            }
+                          ],
+                          "alias": "minagg"
+                        },
+                        {
+                          "name": "min",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "min_simple"
+                              ]
+                            }
+                          ],
+                          "alias": "mins"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "minagg"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "mins"
+                              ]
+                            }
+                          },
+                          "alias": "M"
+                        },
+                        {
+                          "name": "maxMerge",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "max_aggreg"
+                              ]
+                            }
+                          ],
+                          "alias": "maxagg"
+                        },
+                        {
+                          "name": "max",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "max_simple"
+                              ]
+                            }
+                          ],
+                          "alias": "maxs"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "maxagg"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "maxs"
+                              ]
+                            }
+                          },
+                          "alias": "MX"
+                        },
+                        {
+                          "name": "sumMerge",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "sum_aggreg"
+                              ]
+                            }
+                          ],
+                          "alias": "sumagg"
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "sum_simple"
+                              ]
+                            }
+                          ],
+                          "alias": "sums"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "sumagg"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "sums"
+                              ]
+                            }
+                          },
+                          "alias": "S"
+                        },
+                        {
+                          "name": "sumWithOverflowMerge",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "sumov_aggreg"
+                              ]
+                            }
+                          ],
+                          "alias": "sumaggov"
+                        },
+                        {
+                          "name": "sumWithOverflow",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "sumov_simple"
+                              ]
+                            }
+                          ],
+                          "alias": "sumsov"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "sumaggov"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "sumsov"
+                              ]
+                            }
+                          },
+                          "alias": "SO"
+                        },
+                        {
+                          "name": "groupBitAndMerge",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "gbitand_aggreg"
+                              ]
+                            }
+                          ],
+                          "alias": "gbitandaggreg"
+                        },
+                        {
+                          "name": "groupBitAnd",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "gbitand_simple"
+                              ]
+                            }
+                          ],
+                          "alias": "gbitandsimple"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "gbitandaggreg"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "gbitandsimple"
+                              ]
+                            }
+                          },
+                          "alias": "BIT_AND"
+                        },
+                        {
+                          "name": "groupBitOrMerge",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "gbitor_aggreg"
+                              ]
+                            }
+                          ],
+                          "alias": "gbitoraggreg"
+                        },
+                        {
+                          "name": "groupBitOr",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "gbitor_simple"
+                              ]
+                            }
+                          ],
+                          "alias": "gbitorsimple"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "gbitoraggreg"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "gbitorsimple"
+                              ]
+                            }
+                          },
+                          "alias": "BIT_OR"
+                        },
+                        {
+                          "name": "groupBitXorMerge",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "gbitxor_aggreg"
+                              ]
+                            }
+                          ],
+                          "alias": "gbitxoraggreg"
+                        },
+                        {
+                          "name": "groupBitXor",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "gbitxor_simple"
+                              ]
+                            }
+                          ],
+                          "alias": "gbitxorsimple"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "gbitxoraggreg"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "gbitxorsimple"
+                              ]
+                            }
+                          },
+                          "alias": "BITXOR"
+                        },
+                        {
+                          "name": "arraySort",
+                          "arguments": [
+                            {
+                              "name": "groupArrayArrayMerge",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "gra_aggreg"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "graa"
+                        },
+                        {
+                          "name": "arraySort",
+                          "arguments": [
+                            {
+                              "name": "groupArrayArray",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "gra_simple"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "gras"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "graa"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "gras"
+                              ]
+                            }
+                          },
+                          "alias": "GAA"
+                        },
+                        {
+                          "name": "arraySort",
+                          "arguments": [
+                            {
+                              "name": "groupUniqArrayArrayMerge",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "grp_aggreg"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "gra"
+                        },
+                        {
+                          "name": "arraySort",
+                          "arguments": [
+                            {
+                              "name": "groupUniqArrayArray",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "grp_simple"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "grs"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "gra"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "grs"
+                              ]
+                            }
+                          },
+                          "alias": "T"
+                        },
+                        {
+                          "name": "sumMapMerge",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "aggreg_map"
+                              ]
+                            }
+                          ],
+                          "alias": "smmapagg"
+                        },
+                        {
+                          "name": "sumMap",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "simple_map"
+                              ]
+                            }
+                          ],
+                          "alias": "smmaps"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "smmapagg"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "smmaps"
+                              ]
+                            }
+                          },
+                          "alias": "SM"
+                        },
+                        {
+                          "name": "minMapMerge",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "aggreg_map_min"
+                              ]
+                            }
+                          ],
+                          "alias": "minmapapagg"
+                        },
+                        {
+                          "name": "minMap",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "simple_map_min"
+                              ]
+                            }
+                          ],
+                          "alias": "minmaps"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "minmapapagg"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "minmaps"
+                              ]
+                            }
+                          },
+                          "alias": "SMIN"
+                        },
+                        {
+                          "name": "maxMapMerge",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "aggreg_map_max"
+                              ]
+                            }
+                          ],
+                          "alias": "maxmapapagg"
+                        },
+                        {
+                          "name": "maxMap",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "simple_map_max"
+                              ]
+                            }
+                          ],
+                          "alias": "maxmaps"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "maxmapapagg"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "maxmaps"
+                              ]
+                            }
+                          },
+                          "alias": "SMAX"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "simple_agf_summing_mt"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "g"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "g"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

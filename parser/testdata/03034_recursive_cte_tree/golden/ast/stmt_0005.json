@@ -1,0 +1,140 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "search_tree",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "id"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "link"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "data"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "tree"
+                          },
+                          "alias": "t"
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "t",
+                        "id"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 0
+                    }
+                  }
+                },
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "t",
+                        "id"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "t",
+                        "link"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "t",
+                        "data"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "tree"
+                          },
+                          "alias": "t"
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "table": "search_tree"
+                          },
+                          "alias": "st"
+                        },
+                        "join": {
+                          "type": ""
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "t",
+                        "link"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "parts": [
+                        "st",
+                        "id"
+                      ]
+                    }
+                  }
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "search_tree"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

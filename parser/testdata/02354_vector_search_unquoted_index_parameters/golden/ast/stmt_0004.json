@@ -1,0 +1,59 @@
+{
+  "table": "tab2",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "vec",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Float32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "vec_idx",
+      "expression": {
+        "parts": [
+          "vec"
+        ]
+      },
+      "type": {
+        "name": "vector_similarity",
+        "arguments": [
+          {
+            "parts": [
+              "hnsw"
+            ]
+          },
+          {
+            "parts": [
+              "L2Distance"
+            ]
+          },
+          {
+            "type": "Integer",
+            "value": 1
+          }
+        ]
+      }
+    }
+  ],
+  "columns_primary_key": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

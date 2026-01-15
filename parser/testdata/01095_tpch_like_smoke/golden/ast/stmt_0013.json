@@ -1,0 +1,114 @@
+{
+  "table": "partsupp",
+  "columns": [
+    {
+      "name": "ps_partkey",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "ps_suppkey",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "ps_availqty",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "ps_supplycost",
+      "type": {
+        "name": "Decimal",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 18
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "ps_comment",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "name": "pk",
+      "expression": {
+        "left": {
+          "parts": [
+            "ps_partkey"
+          ]
+        },
+        "op": "\u003e=",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      }
+    },
+    {
+      "name": "c1",
+      "expression": {
+        "left": {
+          "left": {
+            "parts": [
+              "ps_availqty"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "ps_supplycost"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "parenthesized": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "ps_partkey"
+          ]
+        },
+        {
+          "parts": [
+            "ps_suppkey"
+          ]
+        }
+      ]
+    }
+  ]
+}

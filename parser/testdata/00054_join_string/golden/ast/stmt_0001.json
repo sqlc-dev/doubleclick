@@ -1,0 +1,163 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "reinterpretAsString",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "name": "reinterpretAsUInt8",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "A"
+                                  }
+                                ]
+                              }
+                            }
+                          ],
+                          "alias": "k"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "js1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "reinterpretAsString",
+                          "arguments": [
+                            {
+                              "left": {
+                                "name": "intDiv",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "name": "reinterpretAsUInt8",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "A"
+                                  }
+                                ]
+                              }
+                            }
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "joined"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "js2"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ALL",
+              "using": [
+                {
+                  "parts": [
+                    "k"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "joined"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

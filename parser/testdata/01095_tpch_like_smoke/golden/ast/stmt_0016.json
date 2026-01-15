@@ -1,0 +1,267 @@
+{
+  "table": "lineitem",
+  "columns": [
+    {
+      "name": "l_orderkey",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "l_partkey",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "l_suppkey",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "l_linenumber",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "l_quantity",
+      "type": {
+        "name": "Decimal",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 18
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "l_extendedprice",
+      "type": {
+        "name": "Decimal",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 18
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "l_discount",
+      "type": {
+        "name": "Decimal",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 18
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "l_tax",
+      "type": {
+        "name": "Decimal",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 18
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "l_returnflag",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 1
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "l_linestatus",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 1
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "l_shipdate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "l_commitdate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "l_receiptdate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "l_shipinstruct",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 25
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "l_shipmode",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 10
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "l_comment",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "name": "c1",
+      "expression": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "l_quantity"
+                ]
+              },
+              "op": "\u003e=",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "l_extendedprice"
+                ]
+              },
+              "op": "\u003e=",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "l_tax"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "l_shipdate"
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "parts": [
+              "l_receiptdate"
+            ]
+          }
+        },
+        "parenthesized": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "l_shipdate"
+          ]
+        },
+        {
+          "parts": [
+            "l_receiptdate"
+          ]
+        },
+        {
+          "parts": [
+            "l_orderkey"
+          ]
+        },
+        {
+          "parts": [
+            "l_linenumber"
+          ]
+        }
+      ]
+    }
+  ]
+}

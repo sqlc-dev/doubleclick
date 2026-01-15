@@ -1,0 +1,181 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "rows"
+              ]
+            }
+          ],
+          "alias": "rows"
+        },
+        {
+          "name": "floor",
+          "arguments": [
+            {
+              "left": {
+                "name": "sum",
+                "arguments": [
+                  {
+                    "parts": [
+                      "data_uncompressed_bytes"
+                    ]
+                  }
+                ]
+              },
+              "op": "/",
+              "right": {
+                "left": {
+                  "type": "Integer",
+                  "value": 1024
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 1024
+                },
+                "parenthesized": true
+              }
+            }
+          ],
+          "alias": "data_size_uncompressed"
+        },
+        {
+          "name": "floor",
+          "arguments": [
+            {
+              "left": {
+                "name": "sum",
+                "arguments": [
+                  {
+                    "parts": [
+                      "data_compressed_bytes"
+                    ]
+                  }
+                ]
+              },
+              "op": "/",
+              "right": {
+                "left": {
+                  "type": "Integer",
+                  "value": 1024
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 1024
+                },
+                "parenthesized": true
+              }
+            }
+          ],
+          "alias": "data_size_compressed"
+        },
+        {
+          "name": "floor",
+          "arguments": [
+            {
+              "left": {
+                "name": "sum",
+                "arguments": [
+                  {
+                    "parts": [
+                      "bytes_on_disk"
+                    ]
+                  }
+                ]
+              },
+              "op": "/",
+              "right": {
+                "left": {
+                  "type": "Integer",
+                  "value": 1024
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 1024
+                },
+                "parenthesized": true
+              }
+            }
+          ],
+          "alias": "total_size_on_disk"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "active"
+            ]
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            },
+            "parenthesized": true
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "table"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "test"
+          },
+          "parenthesized": true
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "table"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "table"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

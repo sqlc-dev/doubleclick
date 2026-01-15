@@ -1,0 +1,150 @@
+{
+  "view": "text_index_cache_stats",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "concat",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "cache_hits = "
+              },
+              {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "array": {
+                      "parts": [
+                        "ProfileEvents"
+                      ]
+                    },
+                    "index": {
+                      "type": "String",
+                      "value": "TextIndexDictionaryBlockCacheHits"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "String",
+                "value": ", cache_misses = "
+              },
+              {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "array": {
+                      "parts": [
+                        "ProfileEvents"
+                      ]
+                    },
+                    "index": {
+                      "type": "String",
+                      "value": "TextIndexDictionaryBlockCacheMisses"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "query_log"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "query_kind"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "Select"
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "current_database"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "name": "currentDatabase"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "name": "endsWith",
+              "arguments": [
+                {
+                  "name": "trimRight",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "query"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "concat",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "hasAnyTokens(message, '"
+                    },
+                    {
+                      "name": "filter",
+                      "type": {
+                        "name": "String"
+                      }
+                    },
+                    {
+                      "type": "String",
+                      "value": "');"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          }
+        },
+        "limit": {
+          "type": "Integer",
+          "value": 1
+        }
+      }
+    ]
+  }
+}

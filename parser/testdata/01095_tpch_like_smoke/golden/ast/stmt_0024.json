@@ -1,0 +1,203 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "l_orderkey"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "l_extendedprice"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "left": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "op": "-",
+                "right": {
+                  "parts": [
+                    "l_discount"
+                  ]
+                },
+                "parenthesized": true
+              }
+            }
+          ],
+          "alias": "revenue"
+        },
+        {
+          "parts": [
+            "o_orderdate"
+          ]
+        },
+        {
+          "parts": [
+            "o_shippriority"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "customer"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "orders"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "lineitem"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "c_mktsegment"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "BUILDING"
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "c_custkey"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "o_custkey"
+                  ]
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "l_orderkey"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "parts": [
+                  "o_orderkey"
+                ]
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "o_orderdate"
+              ]
+            },
+            "op": "\u003c",
+            "right": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "1995-03-15"
+                }
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "l_shipdate"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "1995-03-15"
+              }
+            ]
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "l_orderkey"
+          ]
+        },
+        {
+          "parts": [
+            "o_orderdate"
+          ]
+        },
+        {
+          "parts": [
+            "o_shippriority"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "revenue"
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "o_orderdate"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

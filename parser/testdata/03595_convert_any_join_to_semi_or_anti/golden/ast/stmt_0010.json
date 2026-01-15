@@ -1,0 +1,69 @@
+{
+  "explain_type": "PLAN",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "count"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "users1"
+                },
+                "alias": "u1"
+              }
+            }
+          ]
+        },
+        "where": {
+          "op": "NOT",
+          "operand": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {}
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "users2"
+                          },
+                          "alias": "u2"
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "u1",
+                        "uid"
+                      ]
+                    },
+                    "op": "!=",
+                    "right": {
+                      "parts": [
+                        "u2",
+                        "uid"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "has_settings": true,
+  "options_string": "actions = 1"
+}

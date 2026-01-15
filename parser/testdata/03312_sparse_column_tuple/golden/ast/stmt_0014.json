@@ -1,0 +1,60 @@
+{
+  "table": "mytable_sparse",
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "ratio_of_defaults_for_sparse_serialization",
+      "value": {
+        "type": "Float",
+        "value": 0.9,
+        "source": "0.9"
+      }
+    },
+    {
+      "name": "serialization_info_version",
+      "value": {
+        "type": "String",
+        "value": "basic"
+      }
+    }
+  ],
+  "settings_before_comment": true,
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "parts": [
+              "budget"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "dst_sparse"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

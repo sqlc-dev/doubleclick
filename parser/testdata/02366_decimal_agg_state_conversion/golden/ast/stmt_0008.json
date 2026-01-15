@@ -1,0 +1,90 @@
+{
+  "view": "mv_02366",
+  "materialized": true,
+  "to": "consumer_02366",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "name": "argMinState",
+            "arguments": [
+              {
+                "parts": [
+                  "dec"
+                ]
+              },
+              {
+                "parts": [
+                  "id"
+                ]
+              }
+            ],
+            "alias": "dec"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "id"
+                            ]
+                          },
+                          {
+                            "name": "toDecimal128",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "dec"
+                                ]
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            ],
+                            "alias": "dec"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "producer_02366"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

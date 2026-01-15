@@ -1,0 +1,74 @@
+{
+  "table": "dict",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "id"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "NAME",
+          "value": {
+            "parts": [
+              "clickhouse_dictionary"
+            ]
+          }
+        },
+        {
+          "key": "PORT",
+          "value": {
+            "name": "tcpPort"
+          }
+        },
+        {
+          "key": "DB",
+          "value": {
+            "name": "currentDatabase"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 1
+      },
+      "max": {
+        "type": "Integer",
+        "value": 1000
+      }
+    },
+    "layout": {
+      "type": "CACHE",
+      "args": [
+        {
+          "key": "SIZE_IN_CELLS",
+          "value": {
+            "type": "Integer",
+            "value": 10
+          }
+        }
+      ]
+    }
+  }
+}

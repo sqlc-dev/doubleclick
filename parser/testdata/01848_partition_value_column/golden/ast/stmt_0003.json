@@ -1,0 +1,87 @@
+{
+  "table": "tbl",
+  "columns": [
+    {
+      "name": "dt",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "i",
+      "type": {
+        "name": "int"
+      }
+    },
+    {
+      "name": "j",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "v",
+      "type": {
+        "name": "Float64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "i"
+      ]
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "name": "toDate",
+        "arguments": [
+          {
+            "parts": [
+              "dt"
+            ]
+          }
+        ]
+      },
+      {
+        "left": {
+          "parts": [
+            "i"
+          ]
+        },
+        "op": "%",
+        "right": {
+          "type": "Integer",
+          "value": 2
+        }
+      },
+      {
+        "name": "length",
+        "arguments": [
+          {
+            "parts": [
+              "j"
+            ]
+          }
+        ]
+      }
+    ],
+    "spaced_commas": true
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

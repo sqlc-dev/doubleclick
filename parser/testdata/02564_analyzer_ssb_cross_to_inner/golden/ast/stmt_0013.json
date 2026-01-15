@@ -1,0 +1,276 @@
+{
+  "explain_type": "QUERY TREE",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "D_YEARMONTHNUM"
+            ]
+          },
+          {
+            "parts": [
+              "S_CITY"
+            ]
+          },
+          {
+            "parts": [
+              "P_BRAND"
+            ]
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "LO_REVENUE"
+                  ]
+                },
+                "op": "-",
+                "right": {
+                  "parts": [
+                    "LO_SUPPLYCOST"
+                  ]
+                }
+              }
+            ],
+            "alias": "profit"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "date"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "customer"
+                }
+              },
+              "join": {
+                "type": ""
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "supplier"
+                }
+              },
+              "join": {
+                "type": ""
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "part"
+                }
+              },
+              "join": {
+                "type": ""
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "lineorder"
+                }
+              },
+              "join": {
+                "type": ""
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "LO_CUSTKEY"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "parts": [
+                            "C_CUSTKEY"
+                          ]
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "LO_SUPPKEY"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "parts": [
+                            "S_SUPPKEY"
+                          ]
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "LO_PARTKEY"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "parts": [
+                          "P_PARTKEY"
+                        ]
+                      }
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "LO_ORDERDATE"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "parts": [
+                        "D_DATEKEY"
+                      ]
+                    }
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "S_NATION"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "String",
+                    "value": "UNITED KINGDOM"
+                  }
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "P_CATEGORY"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "MFGR#21"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "LO_QUANTITY"
+                ]
+              },
+              "low": {
+                "type": "Integer",
+                "value": 34
+              },
+              "high": {
+                "type": "Integer",
+                "value": 44
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "LO_ORDERDATE"
+              ]
+            },
+            "low": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "1996-01-01"
+                }
+              ]
+            },
+            "high": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "1996-12-31"
+                }
+              ]
+            }
+          }
+        },
+        "group_by": [
+          {
+            "parts": [
+              "D_YEARMONTHNUM"
+            ]
+          },
+          {
+            "parts": [
+              "S_CITY"
+            ]
+          },
+          {
+            "parts": [
+              "P_BRAND"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "D_YEARMONTHNUM"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "S_CITY"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "P_BRAND"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true,
+  "explicit_type": true,
+  "options_string": "dump_ast = 1"
+}

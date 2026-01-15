@@ -1,0 +1,76 @@
+{
+  "table": "t_invalid_expression",
+  "columns": [
+    {
+      "name": "year",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "country",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "counter",
+      "type": {
+        "name": "Float64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "S3",
+    "parameters": [
+      {
+        "parts": [
+          "s3_conn"
+        ]
+      },
+      {
+        "left": {
+          "parts": [
+            "filename"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "invalid"
+        }
+      },
+      {
+        "left": {
+          "parts": [
+            "format"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "parts": [
+            "Parquet"
+          ]
+        }
+      },
+      {
+        "left": {
+          "parts": [
+            "partition_strategy"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "hive"
+        }
+      }
+    ],
+    "has_parentheses": true
+  },
+  "partition_by": {
+    "parts": [
+      "counter"
+    ]
+  }
+}

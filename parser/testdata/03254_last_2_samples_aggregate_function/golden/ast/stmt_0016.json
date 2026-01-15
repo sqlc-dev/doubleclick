@@ -1,0 +1,216 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "step"
+          ]
+        },
+        {
+          "name": "count"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "ts1"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "parts": [
+                  "ts2"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "t",
+                            "step"
+                          ],
+                          "alias": "step"
+                        },
+                        {
+                          "expr": {
+                            "tuple": {
+                              "name": "finalizeAggregation",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "t",
+                                    "samples"
+                                  ]
+                                }
+                              ]
+                            },
+                            "index": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          },
+                          "alias": "ts1"
+                        },
+                        {
+                          "name": "arrayMap",
+                          "arguments": [
+                            {
+                              "parameters": [
+                                "x"
+                              ],
+                              "body": {
+                                "left": {
+                                  "parts": [
+                                    "t_delta",
+                                    "grid_timestamp"
+                                  ]
+                                },
+                                "op": "+",
+                                "right": {
+                                  "value": {
+                                    "parts": [
+                                      "x"
+                                    ]
+                                  },
+                                  "unit": "MILLISECOND"
+                                }
+                              }
+                            },
+                            {
+                              "tuple": {
+                                "name": "finalizeAggregation",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "t_delta",
+                                      "samples"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            }
+                          ],
+                          "alias": "ts2"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t_resampled_timeseries"
+                              },
+                              "alias": "t",
+                              "final": true
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t_resampled_timeseries_delta"
+                              },
+                              "alias": "t_delta",
+                              "final": true
+                            },
+                            "join": {
+                              "type": "INNER",
+                              "on": {
+                                "left": {
+                                  "left": {
+                                    "left": {
+                                      "parts": [
+                                        "t",
+                                        "step"
+                                      ]
+                                    },
+                                    "op": "==",
+                                    "right": {
+                                      "parts": [
+                                        "t_delta",
+                                        "step"
+                                      ]
+                                    }
+                                  },
+                                  "op": "AND",
+                                  "right": {
+                                    "left": {
+                                      "parts": [
+                                        "t",
+                                        "metric_id"
+                                      ]
+                                    },
+                                    "op": "==",
+                                    "right": {
+                                      "parts": [
+                                        "t_delta",
+                                        "metric_id"
+                                      ]
+                                    }
+                                  }
+                                },
+                                "op": "AND",
+                                "right": {
+                                  "left": {
+                                    "parts": [
+                                      "t",
+                                      "grid_timestamp"
+                                    ]
+                                  },
+                                  "op": "==",
+                                  "right": {
+                                    "parts": [
+                                      "t_delta",
+                                      "grid_timestamp"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "step"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "step"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

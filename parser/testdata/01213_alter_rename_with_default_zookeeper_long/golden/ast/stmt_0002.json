@@ -1,0 +1,81 @@
+{
+  "table": "table_rename_with_default",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value1",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value2",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "name": "concat",
+        "arguments": [
+          {
+            "type": "String",
+            "value": "Hello "
+          },
+          {
+            "parts": [
+              "value1"
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "value3",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "name": "concat",
+        "arguments": [
+          {
+            "type": "String",
+            "value": "Word "
+          },
+          {
+            "parts": [
+              "value1"
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "date"
+    ]
+  }
+}

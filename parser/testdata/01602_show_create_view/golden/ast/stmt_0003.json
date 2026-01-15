@@ -1,0 +1,75 @@
+{
+  "database": "test_1602",
+  "table": "tbl",
+  "columns": [
+    {
+      "name": "EventDate",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "CounterID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "UserID",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        {
+          "parts": [
+            "EventDate"
+          ]
+        },
+        {
+          "name": "intHash32",
+          "arguments": [
+            {
+              "parts": [
+                "UserID"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "EventDate"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -18,9 +18,9 @@ import (
 // Use with: go test ./parser -check-explain -v
 var checkExplain = flag.Bool("check-explain", false, "Run skipped explain_todo tests to see which ones now pass")
 
-// checkAST enables AST golden file verification.
-// Use with: go test ./parser -check-ast -v
-var checkAST = flag.Bool("check-ast", false, "Verify AST output matches golden files")
+// skipAST disables AST golden file verification.
+// Use with: go test ./parser -skip-ast to skip AST verification
+var skipAST = flag.Bool("skip-ast", false, "Skip AST golden file verification")
 
 // testMetadata holds optional metadata for a test case
 type testMetadata struct {
@@ -336,8 +336,8 @@ func TestParser(t *testing.T) {
 						}
 					}
 
-					// Check AST golden file if -check-ast is enabled
-					if *checkAST {
+					// Check AST golden file unless -skip-ast is set
+					if !*skipAST {
 						astGoldenPath := filepath.Join(testDir, "golden", "ast", fmt.Sprintf("stmt_%04d.json", stmtIndex))
 						if expectedASTBytes, err := os.ReadFile(astGoldenPath); err == nil {
 							// Marshal actual AST to JSON

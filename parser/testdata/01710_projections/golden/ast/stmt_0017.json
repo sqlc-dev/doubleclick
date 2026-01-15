@@ -1,0 +1,71 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toStartOfHour",
+          "arguments": [
+            {
+              "name": "toStartOfMinute",
+              "arguments": [
+                {
+                  "parts": [
+                    "datetime"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "dt_h"
+        },
+        {
+          "name": "uniqHLL12",
+          "arguments": [
+            {
+              "parts": [
+                "x_id"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "uniqHLL12",
+          "arguments": [
+            {
+              "parts": [
+                "y_id"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "projection_test"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "dt_h"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "dt_h"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

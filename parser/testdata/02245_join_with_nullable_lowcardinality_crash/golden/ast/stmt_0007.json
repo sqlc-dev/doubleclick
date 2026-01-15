@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "t0",
+                  "country"
+                ]
+              }
+            },
+            {
+              "parts": [
+                "t2",
+                "country"
+              ]
+            },
+            {
+              "parts": [
+                "t0",
+                "country"
+              ]
+            }
+          ],
+          "alias": "country"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "without_nullable"
+              },
+              "alias": "t0"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "with_nullable"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "RIGHT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t0",
+                    "country"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "country"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 1
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

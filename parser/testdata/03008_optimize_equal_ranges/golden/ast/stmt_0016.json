@@ -1,0 +1,122 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "used_aggregate_functions"
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "func"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "Settings"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "max_threads"
+            }
+          },
+          "alias": "threads"
+        },
+        {
+          "left": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "AggregationOptimizedEqualRangesOfKeys"
+            }
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "query"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%SELECT%FROM%t_optimize_equal_ranges%"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "func"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "threads"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

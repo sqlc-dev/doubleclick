@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "array": {
+            "parts": [
+              "ProfileEvents"
+            ]
+          },
+          "index": {
+            "type": "String",
+            "value": "Merge"
+          }
+        },
+        {
+          "array": {
+            "parts": [
+              "ProfileEvents"
+            ]
+          },
+          "index": {
+            "type": "String",
+            "value": "MergeSourceParts"
+          }
+        },
+        {
+          "array": {
+            "parts": [
+              "ProfileEvents"
+            ]
+          },
+          "index": {
+            "type": "String",
+            "value": "MergedRows"
+          }
+        },
+        {
+          "array": {
+            "parts": [
+              "ProfileEvents"
+            ]
+          },
+          "index": {
+            "type": "String",
+            "value": "MergedColumns"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "test"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "MergeParts"
+          }
+        }
+      }
+    }
+  ]
+}

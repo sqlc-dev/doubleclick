@@ -1,0 +1,108 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "table": "test_table_join_1",
+          "apply": [
+            "toString"
+          ],
+          "transformers": [
+            {
+              "type": "apply",
+              "apply": "toString"
+            }
+          ]
+        },
+        {
+          "table": "test_table_join_2",
+          "apply": [
+            "toString"
+          ],
+          "transformers": [
+            {
+              "type": "apply",
+              "apply": "toString"
+            }
+          ]
+        },
+        {
+          "table": "test_table_join_3",
+          "apply": [
+            "toString"
+          ],
+          "transformers": [
+            {
+              "type": "apply",
+              "apply": "toString"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_table_join_1"
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test_table_join_2"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "id"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test_table_join_3"
+              },
+              "alias": "t3"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t2",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t3",
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

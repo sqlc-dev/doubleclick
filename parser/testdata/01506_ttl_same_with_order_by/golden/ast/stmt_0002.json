@@ -1,0 +1,99 @@
+{
+  "table": "derived_metrics_local",
+  "columns": [
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "bytes",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "name": "toStartOfHour",
+          "arguments": [
+            {
+              "parts": [
+                "timestamp"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "timestamp"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMMDD",
+    "arguments": [
+      {
+        "parts": [
+          "timestamp"
+        ]
+      }
+    ]
+  },
+  "ttl": {
+    "expression": {
+      "left": {
+        "name": "toStartOfHour",
+        "arguments": [
+          {
+            "parts": [
+              "timestamp"
+            ]
+          }
+        ]
+      },
+      "op": "+",
+      "right": {
+        "value": {
+          "type": "Integer",
+          "value": 1
+        },
+        "unit": "HOUR"
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "name": "toStartOfHour",
+            "arguments": [
+              {
+                "parts": [
+                  "timestamp"
+                ]
+              }
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 1
+            },
+            "unit": "HOUR"
+          }
+        }
+      }
+    ]
+  }
+}

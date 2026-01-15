@@ -1,0 +1,108 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "with": [
+                        {
+                          "name": "test1",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "name": "toInt32",
+                                      "arguments": [
+                                        {}
+                                      ],
+                                      "alias": "i"
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "name": "numbers",
+                                            "arguments": [
+                                              {
+                                                "type": "Integer",
+                                                "value": 5
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": false
+                        }
+                      ],
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test1"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "l"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test1"
+              },
+              "alias": "r"
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "parts": [
+                    "l",
+                    "i"
+                  ]
+                },
+                "op": "==",
+                "right": {
+                  "parts": [
+                    "r",
+                    "i"
+                  ]
+                },
+                "parenthesized": true
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

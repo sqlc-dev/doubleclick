@@ -1,0 +1,99 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "timeSeriesInstantDeltaToGridMerge",
+          "parameters": [
+            {
+              "name": "toNullable",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 60
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 100
+            },
+            {
+              "type": "Integer",
+              "value": 200
+            },
+            {
+              "type": "Integer",
+              "value": 20
+            }
+          ],
+          "arguments": [
+            {
+              "name": "initializeAggregation",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "timeSeriesInstantDeltaToGridState(100, 200, 20, 60)"
+                },
+                {
+                  "expr": {
+                    "left": {
+                      "type": "Integer",
+                      "value": 100
+                    },
+                    "op": "+",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "op": "*",
+                      "right": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    },
+                    "parenthesized": true
+                  },
+                  "type": {
+                    "name": "DateTime32"
+                  },
+                  "operator_syntax": true
+                },
+                {
+                  "expr": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "type": {
+                    "name": "Float64"
+                  },
+                  "operator_syntax": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 5
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

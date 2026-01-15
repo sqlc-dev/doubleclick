@@ -1,0 +1,60 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ],
+          "over": {
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              }
+            }
+          }
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          ],
+          "over": {}
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

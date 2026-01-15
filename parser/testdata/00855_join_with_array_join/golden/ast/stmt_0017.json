@@ -1,0 +1,80 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "did"
+          ]
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "name"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "f"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "left": true,
+              "columns": [
+                {
+                  "parts": [
+                    "d_ids"
+                  ],
+                  "alias": "did"
+                }
+              ]
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "d"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "d",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "did"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

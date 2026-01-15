@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "Integer",
+            "value": 1
+          },
+          "alias": "x"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t_str"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "type": "String",
+            "value": "1970-01-01"
+          },
+          "type": {
+            "name": "date"
+          }
+        },
+        "op": "\u003c=",
+        "right": {
+          "expr": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "max",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "1970-01-01"
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "type": {
+            "name": "date"
+          }
+        }
+      }
+    }
+  ]
+}

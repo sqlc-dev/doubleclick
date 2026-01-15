@@ -1,0 +1,69 @@
+{
+  "table": "skip_table",
+  "columns": [
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "v",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "mm_fine",
+      "expression": {
+        "parts": [
+          "v"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "mm_coarse",
+      "expression": {
+        "parts": [
+          "v"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1024
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "primary_key": [
+    {
+      "parts": [
+        "k"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,94 @@
+{
+  "table": "join_inner_table__fuzz_1",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UUID"
+      }
+    },
+    {
+      "name": "key",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Date"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "number",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "value1",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "value2",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "time",
+      "type": {
+        "name": "Int128"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "parts": [
+            "key"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "allow_nullable_key",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

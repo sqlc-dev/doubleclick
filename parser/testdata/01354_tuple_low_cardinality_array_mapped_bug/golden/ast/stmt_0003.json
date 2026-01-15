@@ -1,0 +1,75 @@
+{
+  "table": "table",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "values",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Tuple",
+            "parameters": [
+              {
+                "name": "LowCardinality",
+                "parameters": [
+                  {
+                    "name": "String"
+                  }
+                ],
+                "has_parentheses": true
+              },
+              {
+                "name": "Int32"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "date"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "date"
+        ]
+      }
+    ]
+  }
+}

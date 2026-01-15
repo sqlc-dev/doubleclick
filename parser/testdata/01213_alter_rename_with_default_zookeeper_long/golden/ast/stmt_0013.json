@@ -1,0 +1,99 @@
+{
+  "table": "table_rename_with_ttl",
+  "columns": [
+    {
+      "name": "date1",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "date2",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "value1",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value2",
+      "type": {
+        "name": "String"
+      },
+      "ttl": {
+        "left": {
+          "parts": [
+            "date1"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "value": {
+            "type": "Integer",
+            "value": 500
+          },
+          "unit": "MONTH"
+        }
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/{database}/test_01213/table_rename_with_ttl"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "date2"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "value": {
+          "type": "Integer",
+          "value": 500
+        },
+        "unit": "MONTH"
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "date2"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 500
+            },
+            "unit": "MONTH"
+          }
+        }
+      }
+    ]
+  }
+}

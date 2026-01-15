@@ -1,0 +1,244 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "c"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 20
+                }
+              }
+            ]
+          },
+          "list": [
+            {
+              "type": "Integer",
+              "value": 5
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "expr": {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "c"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 10
+                }
+              }
+            ]
+          },
+          "list": [
+            {
+              "type": "Integer",
+              "value": 0
+            },
+            {
+              "type": "Integer",
+              "value": 5
+            }
+          ]
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "u"
+                  ]
+                },
+                "op": "!=",
+                "right": {
+                  "type": "Integer",
+                  "value": 10
+                }
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "intDiv",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          ],
+                          "alias": "k1"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "k1"
+                              ]
+                            },
+                            "op": "+",
+                            "right": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          },
+                          "alias": "k2"
+                        },
+                        {
+                          "name": "count",
+                          "alias": "c"
+                        },
+                        {
+                          "name": "uniq",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "u"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.0.0.{2,3}"
+                                  },
+                                  {
+                                    "name": "currentDatabase"
+                                  },
+                                  {
+                                    "parts": [
+                                      "numbers_10_00223"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "\u003c",
+                        "right": {
+                          "condition": {
+                            "left": {
+                              "name": "randConstant"
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 2
+                            }
+                          },
+                          "then": {
+                            "type": "Integer",
+                            "value": 50
+                          },
+                          "else": {
+                            "type": "Integer",
+                            "value": 100
+                          }
+                        }
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "k1"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "k2"
+                          ]
+                        }
+                      ],
+                      "having": {
+                        "left": {
+                          "name": "count"
+                        },
+                        "op": "\u003e",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "k1"
+                            ]
+                          }
+                        },
+                        {
+                          "expression": {
+                            "parts": [
+                              "k2"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

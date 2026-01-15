@@ -1,0 +1,101 @@
+{
+  "table": "range_key_dictionary",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "start_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "end_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value_nullable",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "key"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "HOST",
+          "value": {
+            "type": "String",
+            "value": "localhost"
+          }
+        },
+        {
+          "key": "PORT",
+          "value": {
+            "name": "tcpPort"
+          }
+        },
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "range_key_dictionary_source_table"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 1
+      },
+      "max": {
+        "type": "Integer",
+        "value": 1000
+      }
+    },
+    "layout": {
+      "type": "RANGE_HASHED"
+    },
+    "range": {
+      "min": {
+        "parts": [
+          "start_date"
+        ]
+      },
+      "max": {
+        "parts": [
+          "end_date"
+        ]
+      }
+    }
+  }
+}

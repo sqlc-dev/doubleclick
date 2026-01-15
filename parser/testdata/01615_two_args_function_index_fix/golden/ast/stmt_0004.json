@@ -1,0 +1,110 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toDate",
+          "arguments": [
+            {
+              "parts": [
+                "time"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "UTC"
+            }
+          ],
+          "alias": "dt"
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "parts": [
+                    "time"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "UTC"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "parts": [
+                    "time"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "UTC"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "count"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "bad_date_time"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "toDate",
+          "arguments": [
+            {
+              "parts": [
+                "time"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "UTC"
+            }
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "2020-12-19"
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "dt"
+          ]
+        }
+      ]
+    }
+  ]
+}

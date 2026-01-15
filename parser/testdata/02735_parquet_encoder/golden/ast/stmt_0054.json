@@ -1,0 +1,73 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "tupleElement",
+          "arguments": [
+            {
+              "parts": [
+                "c"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "statistics"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "file",
+                "arguments": [
+                  {
+                    "parts": [
+                      "statistics_02735",
+                      "parquet"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "ParquetMetadata"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "name": "tupleElement",
+                  "arguments": [
+                    {
+                      "array": {
+                        "parts": [
+                          "row_groups"
+                        ]
+                      },
+                      "index": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    },
+                    {
+                      "type": "String",
+                      "value": "columns"
+                    }
+                  ],
+                  "alias": "c"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

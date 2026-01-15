@@ -1,0 +1,131 @@
+{
+  "table": "recompression_table",
+  "columns": [
+    {
+      "name": "dt",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "key"
+    ]
+  },
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "dt"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "value": {
+          "type": "Integer",
+          "value": 1
+        },
+        "unit": "MONTH"
+      }
+    },
+    "expressions": [
+      {
+        "left": {
+          "parts": [
+            "dt"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "value": {
+            "type": "Integer",
+            "value": 1
+          },
+          "unit": "YEAR"
+        }
+      }
+    ],
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "dt"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 1
+            },
+            "unit": "MONTH"
+          }
+        }
+      },
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "dt"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 1
+            },
+            "unit": "YEAR"
+          }
+        }
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "min_rows_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "min_bytes_for_full_part_storage",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,60 @@
+{
+  "table": "test_map_contains_values",
+  "columns": [
+    {
+      "name": "ResourceAttributes",
+      "type": {
+        "name": "Map",
+        "parameters": [
+          {
+            "name": "LowCardinality",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          },
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_res_attr_value",
+      "expression": {
+        "name": "mapValues",
+        "arguments": [
+          {
+            "parts": [
+              "ResourceAttributes"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "bloom_filter",
+        "arguments": [
+          {
+            "type": "Float",
+            "value": 0.01,
+            "source": "0.01"
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

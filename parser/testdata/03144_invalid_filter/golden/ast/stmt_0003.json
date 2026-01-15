@@ -1,0 +1,132 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "compound_value",
+          "query": {
+            "expr": {
+              "name": "tuple",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                }
+              ]
+            },
+            "type": {
+              "name": "Tuple (value UInt64)"
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "table": "test_table",
+          "transformers": [
+            {
+              "type": "apply",
+              "apply_lambda": {
+                "parameters": [
+                  "x"
+                ],
+                "body": {
+                  "table": "compound_value"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_table"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "name": "arrayMap",
+        "arguments": [
+          {
+            "expr": {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  }
+                ]
+              }
+            },
+            "alias": "lambda"
+          },
+          {
+            "type": "Array",
+            "value": [
+              {
+                "type": "Null",
+                "value": null
+              },
+              {
+                "type": "Integer",
+                "value": 256
+              },
+              {
+                "type": "Integer",
+                "value": 257
+              },
+              {
+                "type": "Null",
+                "value": null
+              },
+              {
+                "type": "Null",
+                "value": null
+              }
+            ],
+            "spaced_commas": true
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "convert_query_to_cnf",
+          "value": {
+            "type": "Boolean",
+            "value": true
+          }
+        },
+        {
+          "name": "optimize_using_constraints",
+          "value": {
+            "type": "Boolean",
+            "value": true
+          }
+        },
+        {
+          "name": "optimize_substitute_columns",
+          "value": {
+            "type": "Boolean",
+            "value": true
+          }
+        }
+      ]
+    }
+  ]
+}

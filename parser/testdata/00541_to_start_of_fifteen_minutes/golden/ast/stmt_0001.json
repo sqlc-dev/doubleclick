@@ -1,0 +1,87 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "parts": [
+            "result"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toStartOfFifteenMinutes",
+                          "arguments": [
+                            {
+                              "left": {
+                                "name": "toDateTime",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "2017-12-25 00:00:00"
+                                  }
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "*",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 60
+                                }
+                              }
+                            }
+                          ],
+                          "alias": "result"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 120
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "result"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

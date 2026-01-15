@@ -1,0 +1,175 @@
+{
+  "table": "sensor_value",
+  "columns": [
+    {
+      "name": "received_at",
+      "type": {
+        "name": "DateTime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "Asia/Istanbul"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "device_id",
+      "type": {
+        "name": "UUID"
+      }
+    },
+    {
+      "name": "sensor_id",
+      "type": {
+        "name": "UUID"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Decimal",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 18
+              },
+              {
+                "type": "Integer",
+                "value": 4
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "low_warning",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Decimal",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 18
+              },
+              {
+                "type": "Integer",
+                "value": 4
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "low_critical",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Decimal",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 18
+              },
+              {
+                "type": "Integer",
+                "value": 4
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "high_warning",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Decimal",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 18
+              },
+              {
+                "type": "Integer",
+                "value": 4
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "high_critical",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Decimal",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 18
+              },
+              {
+                "type": "Integer",
+                "value": 4
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "device_id"
+          ]
+        },
+        {
+          "parts": [
+            "sensor_id"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDate",
+    "arguments": [
+      {
+        "parts": [
+          "received_at"
+        ]
+      }
+    ]
+  }
+}

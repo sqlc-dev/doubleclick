@@ -1,0 +1,85 @@
+{
+  "table": "test_projection_granule_edge_cases",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "region",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "user_id",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "region_proj",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "_part_offset"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "region"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 16
+      }
+    },
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "min_bytes_for_full_part_storage",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "enable_vertical_merge_algorithm",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

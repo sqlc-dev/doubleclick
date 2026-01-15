@@ -1,0 +1,81 @@
+{
+  "table": "ttl_00933_1",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "Int"
+      },
+      "ttl": {
+        "left": {
+          "parts": [
+            "d"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "value": {
+            "type": "Integer",
+            "value": 1
+          },
+          "unit": "SECOND"
+        }
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "Int"
+      },
+      "ttl": {
+        "left": {
+          "parts": [
+            "d"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "value": {
+            "type": "Integer",
+            "value": 1
+          },
+          "unit": "SECOND"
+        }
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "name": "toMinute",
+    "arguments": [
+      {
+        "parts": [
+          "d"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

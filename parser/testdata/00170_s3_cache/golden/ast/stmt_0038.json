@@ -1,0 +1,87 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "WatchID"
+          ]
+        },
+        {
+          "parts": [
+            "ClientIP"
+          ]
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "Refresh"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "parts": [
+                "ResolutionWidth"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits_s3"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "WatchID"
+          ]
+        },
+        {
+          "parts": [
+            "ClientIP"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "WatchID"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "table": "bitmap_state_test",
+  "columns": [
+    {
+      "name": "pickup_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "city_id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "uv",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "groupBitmap"
+            ]
+          },
+          {
+            "name": "UInt32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "pickup_date"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "pickup_date"
+            ]
+          },
+          {
+            "parts": [
+              "city_id"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

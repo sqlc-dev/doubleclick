@@ -1,0 +1,146 @@
+{
+  "table": "test",
+  "engine": {
+    "name": "Null"
+  },
+  "as_select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "all_metrics",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "name": "arrayReduce",
+                        "arguments": [
+                          {
+                            "type": "String",
+                            "value": "sumMapState"
+                          },
+                          {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "type": "Tuple",
+                                "value": [
+                                  {
+                                    "type": "Array",
+                                    "value": [
+                                      {
+                                        "type": "String",
+                                        "value": "foo"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "name": "arrayMap",
+                                    "arguments": [
+                                      {
+                                        "parameters": [
+                                          "x"
+                                        ],
+                                        "body": {
+                                          "op": "-",
+                                          "operand": {
+                                            "type": "Float",
+                                            "value": 0,
+                                            "source": "0."
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "type": "Array",
+                                        "value": [
+                                          {
+                                            "type": "String",
+                                            "value": "foo"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ],
+                                "spaced_commas": true
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "scalar_with": true
+          }
+        ],
+        "columns": [
+          {
+            "expr": {
+              "tuple": {
+                "name": "finalizeAggregation",
+                "arguments": [
+                  {
+                    "name": "arrayReduce",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "sumMapMergeState"
+                      },
+                      {
+                        "type": "Array",
+                        "value": [
+                          {
+                            "parts": [
+                              "all_metrics"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "alias": "metrics_tuple"
+              },
+              "index": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            "alias": "metric_names"
+          },
+          {
+            "expr": {
+              "tuple": {
+                "parts": [
+                  "metrics_tuple"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            "alias": "metric_values"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "one"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

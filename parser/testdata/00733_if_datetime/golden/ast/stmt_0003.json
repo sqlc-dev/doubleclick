@@ -1,0 +1,62 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "condition": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "then": {
+            "name": "materialize",
+            "arguments": [
+              {
+                "name": "toDateTime",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "2000-01-01 00:00:00"
+                  }
+                ]
+              }
+            ]
+          },
+          "else": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2001-02-03 04:05:06"
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

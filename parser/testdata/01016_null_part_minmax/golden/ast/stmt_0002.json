@@ -1,0 +1,51 @@
+{
+  "if_not_exists": true,
+  "table": "null_01016",
+  "columns": [
+    {
+      "name": "x",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "ifNull",
+      "arguments": [
+        {
+          "parts": [
+            "x"
+          ]
+        },
+        {
+          "type": "String",
+          "value": "order-null"
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "ifNull",
+    "arguments": [
+      {
+        "parts": [
+          "x"
+        ]
+      },
+      {
+        "type": "String",
+        "value": "partition-null"
+      }
+    ]
+  }
+}

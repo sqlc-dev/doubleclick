@@ -1,0 +1,126 @@
+{
+  "table": "test_simple_projection",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "event_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "user_id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "url",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "region",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "region_proj",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "_part_offset"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "region"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "user_id_proj",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "_part_offset"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "user_id"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "event_date"
+          ]
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "min_bytes_for_full_part_storage",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "enable_vertical_merge_algorithm",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

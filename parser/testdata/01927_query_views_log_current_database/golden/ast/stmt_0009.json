@@ -1,0 +1,56 @@
+{
+  "view": "matview_a_to_b",
+  "materialized": true,
+  "to": "table_b",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "toFloat64",
+            "arguments": [
+              {
+                "parts": [
+                  "a"
+                ]
+              }
+            ],
+            "alias": "a"
+          },
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "b"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "name": "sleepEachRow",
+                "arguments": [
+                  {
+                    "type": "Float",
+                    "value": 0.000001,
+                    "source": "0.000001"
+                  }
+                ]
+              }
+            },
+            "alias": "count"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "table_a"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

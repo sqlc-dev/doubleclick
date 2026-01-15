@@ -1,0 +1,199 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "parts": [
+            "p"
+          ]
+        },
+        {
+          "parts": [
+            "o"
+          ]
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ],
+          "over": {
+            "name": "w"
+          }
+        },
+        {
+          "name": "rank",
+          "over": {
+            "name": "w"
+          }
+        },
+        {
+          "name": "denseRank",
+          "over": {
+            "name": "w"
+          }
+        },
+        {
+          "name": "row_number",
+          "over": {
+            "name": "w"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        {
+                          "name": "intDiv",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 5
+                            }
+                          ],
+                          "alias": "p"
+                        },
+                        {
+                          "name": "mod",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 3
+                            }
+                          ],
+                          "alias": "o"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 31
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "o"
+                            ]
+                          }
+                        },
+                        {
+                          "expression": {
+                            "parts": [
+                              "number"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      },
+      "window": [
+        {
+          "name": "w",
+          "spec": {
+            "partition_by": [
+              {
+                "parts": [
+                  "p"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "o"
+                  ]
+                }
+              },
+              {
+                "expression": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "p"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "o"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "number"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "max_block_size",
+          "value": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ]
+    }
+  ]
+}

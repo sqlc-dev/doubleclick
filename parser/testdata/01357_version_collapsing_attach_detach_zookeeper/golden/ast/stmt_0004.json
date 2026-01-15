@@ -1,0 +1,65 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "value"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "zookeeper"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "path"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "left": {
+              "left": {
+                "type": "String",
+                "value": "/clickhouse/"
+              },
+              "op": "||",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "||",
+            "right": {
+              "type": "String",
+              "value": "/versioned_collapsing_table/s1"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "metadata"
+          }
+        }
+      }
+    }
+  ]
+}

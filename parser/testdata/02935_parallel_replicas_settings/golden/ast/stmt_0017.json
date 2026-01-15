@@ -1,0 +1,141 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "text_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "name": "yesterday"
+              },
+              "op": "\u003c=",
+              "right": {
+                "parts": [
+                  "event_date"
+                ]
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "query_id"
+                ]
+              },
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "query_id"
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "database": "system",
+                              "table": "query_log"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "current_database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "log_comment"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "1_f621c4f2-4da7-4a7c-bb6d-052c442d0f7f"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "level"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "Warning"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "message"
+            ]
+          },
+          "case_insensitive": true,
+          "pattern": {
+            "type": "String",
+            "value": "%Setting 'use_hedged_requests' explicitly with enabled 'enable_parallel_replicas' has no effect%"
+          }
+        }
+      },
+      "settings": [
+        {
+          "name": "enable_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

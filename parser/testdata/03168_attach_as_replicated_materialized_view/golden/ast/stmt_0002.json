@@ -1,0 +1,54 @@
+{
+  "table": "monthly_aggregated_data",
+  "columns": [
+    {
+      "name": "domain_name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "month",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "sumCountViews",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sum"
+            ]
+          },
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "domain_name"
+          ]
+        },
+        {
+          "parts": [
+            "month"
+          ]
+        }
+      ]
+    }
+  ]
+}

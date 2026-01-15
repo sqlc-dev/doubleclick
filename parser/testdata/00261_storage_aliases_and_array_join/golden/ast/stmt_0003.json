@@ -1,0 +1,247 @@
+{
+  "table": "aliases_test",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "array",
+      "type": null,
+      "default": {
+        "type": "Array",
+        "value": [
+          {
+            "type": "String",
+            "value": "zero"
+          },
+          {
+            "type": "String",
+            "value": "one"
+          },
+          {
+            "type": "String",
+            "value": "two"
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "d1",
+      "type": null,
+      "default": {
+        "parts": [
+          "array"
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "a1",
+      "type": null,
+      "default": {
+        "parts": [
+          "array"
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "a2",
+      "type": null,
+      "default": {
+        "parts": [
+          "a1"
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "a3",
+      "type": null,
+      "default": {
+        "parts": [
+          "a2"
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "a4",
+      "type": null,
+      "default": {
+        "name": "arrayMap",
+        "arguments": [
+          {
+            "parameters": [
+              "x"
+            ],
+            "body": {
+              "name": "toString",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "range",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 3
+              }
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "a5",
+      "type": null,
+      "default": {
+        "parts": [
+          "a4"
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "a6",
+      "type": null,
+      "default": {
+        "parts": [
+          "a5"
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "struct.d1",
+      "type": null,
+      "default": {
+        "parts": [
+          "array"
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "struct.a1",
+      "type": null,
+      "default": {
+        "parts": [
+          "array"
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "struct.a2",
+      "type": null,
+      "default": {
+        "parts": [
+          "struct.a1"
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "struct.a3",
+      "type": null,
+      "default": {
+        "parts": [
+          "struct.a2"
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "struct.a4",
+      "type": null,
+      "default": {
+        "name": "arrayMap",
+        "arguments": [
+          {
+            "parameters": [
+              "x"
+            ],
+            "body": {
+              "name": "toString",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "range",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 3
+              }
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "struct.a5",
+      "type": null,
+      "default": {
+        "parts": [
+          "struct.a4"
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "struct.a6",
+      "type": null,
+      "default": {
+        "parts": [
+          "struct.a5"
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "date"
+        ]
+      },
+      {
+        "parts": [
+          "id"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 1
+      }
+    ],
+    "has_parentheses": true
+  }
+}

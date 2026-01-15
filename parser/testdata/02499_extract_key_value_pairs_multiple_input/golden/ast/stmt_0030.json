@@ -1,0 +1,97 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "s_map",
+          "query": {
+            "name": "extractKeyValuePairs",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "not_important"
+              },
+              {
+                "type": "String",
+                "value": ":"
+              },
+              {
+                "type": "String",
+                "value": "123456789"
+              },
+              {
+                "type": "String",
+                "value": "'"
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "x",
+          "query": {
+            "expr": {
+              "name": "arrayMap",
+              "arguments": [
+                {
+                  "parameters": [
+                    "x"
+                  ],
+                  "body": {
+                    "type": "Tuple",
+                    "value": [
+                      {
+                        "parts": [
+                          "x"
+                        ]
+                      },
+                      {
+                        "array": {
+                          "parts": [
+                            "s_map"
+                          ]
+                        },
+                        "index": {
+                          "parts": [
+                            "x"
+                          ]
+                        }
+                      }
+                    ],
+                    "spaced_commas": true
+                  }
+                },
+                {
+                  "name": "arraySort",
+                  "arguments": [
+                    {
+                      "name": "mapKeys",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "s_map"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "type": {
+              "name": "Map(String,String)"
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "x"
+          ]
+        }
+      ]
+    }
+  ]
+}

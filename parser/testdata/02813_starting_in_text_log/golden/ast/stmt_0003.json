@@ -1,0 +1,55 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "text_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "event_date"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "name": "yesterday"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "message"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Starting ClickHouse%"
+          }
+        }
+      }
+    }
+  ]
+}

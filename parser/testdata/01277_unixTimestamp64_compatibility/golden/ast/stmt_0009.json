@@ -1,0 +1,107 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "timezone",
+          "query": {
+            "type": "String",
+            "value": "UTC"
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "val",
+          "query": {
+            "expr": {
+              "type": "Integer",
+              "value": 1234567891011
+            },
+            "type": {
+              "name": "Int64"
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "val"
+          ]
+        },
+        {
+          "name": "toUnixTimestamp64Milli",
+          "arguments": [
+            {
+              "name": "fromUnixTimestamp64Milli",
+              "arguments": [
+                {
+                  "parts": [
+                    "val"
+                  ]
+                },
+                {
+                  "parts": [
+                    "timezone"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toUnixTimestamp64Micro",
+          "arguments": [
+            {
+              "name": "fromUnixTimestamp64Micro",
+              "arguments": [
+                {
+                  "parts": [
+                    "val"
+                  ]
+                },
+                {
+                  "parts": [
+                    "timezone"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toUnixTimestamp64Nano",
+          "arguments": [
+            {
+              "name": "fromUnixTimestamp64Nano",
+              "arguments": [
+                {
+                  "parts": [
+                    "val"
+                  ]
+                },
+                {
+                  "parts": [
+                    "timezone"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "v"
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "v"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

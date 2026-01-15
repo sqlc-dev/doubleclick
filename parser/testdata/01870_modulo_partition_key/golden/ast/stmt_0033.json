@@ -1,0 +1,81 @@
+{
+  "table": "table4",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "v",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "a",
+      "expression": {
+        "type": "Tuple",
+        "value": [
+          {
+            "left": {
+              "parts": [
+                "id"
+              ]
+            },
+            "op": "*",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          {
+            "parts": [
+              "s"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 3
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "v"
+      ]
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "parts": [
+        "id"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 10
+    }
+  }
+}

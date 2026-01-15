@@ -1,0 +1,92 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayFold",
+          "arguments": [
+            {
+              "parameters": [
+                "acc",
+                "x"
+              ],
+              "body": {
+                "condition": {
+                  "left": {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                },
+                "then": {
+                  "name": "arrayPushFront",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "acc"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "x"
+                      ]
+                    }
+                  ]
+                },
+                "else": {
+                  "name": "arrayPushBack",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "acc"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "x"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "range",
+              "arguments": [
+                {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "emptyArrayUInt64"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 5
+      }
+    }
+  ]
+}

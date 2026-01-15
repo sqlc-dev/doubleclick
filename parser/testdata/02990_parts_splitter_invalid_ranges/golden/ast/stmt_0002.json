@@ -1,0 +1,75 @@
+{
+  "table": "test_table",
+  "columns": [
+    {
+      "name": "eventType",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "eventType"
+          ]
+        },
+        {
+          "parts": [
+            "timestamp"
+          ]
+        },
+        {
+          "parts": [
+            "key"
+          ]
+        }
+      ]
+    }
+  ],
+  "primary_key": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "eventType"
+          ]
+        },
+        {
+          "parts": [
+            "timestamp"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

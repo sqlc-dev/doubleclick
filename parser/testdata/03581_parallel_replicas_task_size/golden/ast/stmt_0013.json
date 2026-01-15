@@ -1,0 +1,98 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "throwIf",
+          "arguments": [
+            {
+              "left": {
+                "array": {
+                  "parts": [
+                    "ProfileEvents"
+                  ]
+                },
+                "index": {
+                  "type": "String",
+                  "value": "ParallelReplicasNumRequests"
+                }
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 25
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "log_comment"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "parallel_replicas_task_size_82982938"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "QueryFinish"
+          }
+        }
+      },
+      "settings": [
+        {
+          "name": "enable_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

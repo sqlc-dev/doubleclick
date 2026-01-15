@@ -1,0 +1,55 @@
+{
+  "view": "tt_mv",
+  "materialized": true,
+  "to": "tt",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "p"
+            ]
+          },
+          {
+            "name": "minState",
+            "arguments": [
+              {
+                "left": {
+                  "name": "now"
+                },
+                "op": "-",
+                "right": {
+                  "value": {
+                    "type": "Integer",
+                    "value": 30
+                  },
+                  "unit": "MINUTE"
+                }
+              }
+            ],
+            "alias": "tmin"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "tt_null"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "p"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

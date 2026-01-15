@@ -1,0 +1,118 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "A",
+            "k"
+          ]
+        },
+        {
+          "name": "toString",
+          "arguments": [
+            {
+              "parts": [
+                "A",
+                "t"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "UTC"
+            }
+          ]
+        },
+        {
+          "parts": [
+            "A",
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "B",
+            "b"
+          ]
+        },
+        {
+          "name": "toString",
+          "arguments": [
+            {
+              "parts": [
+                "B",
+                "t"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "UTC"
+            }
+          ]
+        },
+        {
+          "parts": [
+            "B",
+            "k"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "A"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "B"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ASOF",
+              "using": [
+                {
+                  "parts": [
+                    "k"
+                  ]
+                },
+                {
+                  "parts": [
+                    "t"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "A",
+                  "k"
+                ]
+              },
+              {
+                "parts": [
+                  "A",
+                  "t"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        }
+      ]
+    }
+  ]
+}

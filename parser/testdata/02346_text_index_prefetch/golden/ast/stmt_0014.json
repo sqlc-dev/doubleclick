@@ -1,0 +1,78 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "RemoteFSPrefetchedReads"
+            }
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "query"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%SELECT count(), sum(id) FROM tab%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "QueryFinish"
+          }
+        }
+      }
+    }
+  ]
+}

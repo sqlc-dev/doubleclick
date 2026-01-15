@@ -1,0 +1,138 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "parts": [
+            "x"
+          ]
+        },
+        {
+          "parts": [
+            "y"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 5
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "f"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "x"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "y"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "table_1"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "s"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "parts": [
+                    "f",
+                    "number"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "s",
+                    "x"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "all"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "additional_table_filters",
+          "value": {
+            "name": "'system.numbers'",
+            "type": {
+              "name": "'number != 3', 'table_1' : 'x != 2'"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

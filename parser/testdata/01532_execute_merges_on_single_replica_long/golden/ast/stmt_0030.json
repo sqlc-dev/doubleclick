@@ -1,0 +1,94 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "parts": [
+            "type"
+          ]
+        },
+        {
+          "parts": [
+            "new_part_name"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "num_postponed"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          "alias": "has_postpones"
+        },
+        {
+          "parts": [
+            "postpone_reason"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "replication_queue"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "table"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "execute\\_on\\_single\\_replica\\_r%"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "table"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

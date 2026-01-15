@@ -1,0 +1,97 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "parts": [
+            "distr1",
+            "id"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "distr1"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "distr1",
+            "id"
+          ]
+        },
+        "query": {
+          "selects": [
+            {
+              "columns": [
+                {
+                  "parts": [
+                    "distr1",
+                    "id"
+                  ]
+                }
+              ],
+              "from": {
+                "tables": [
+                  {
+                    "table": {
+                      "table": {
+                        "table": "distr1"
+                      }
+                    }
+                  },
+                  {
+                    "table": {
+                      "table": {
+                        "table": "distr2"
+                      }
+                    },
+                    "join": {
+                      "type": "INNER",
+                      "on": {
+                        "left": {
+                          "parts": [
+                            "distr1",
+                            "id"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "parts": [
+                            "distr2",
+                            "id"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "where": {
+                "left": {
+                  "parts": [
+                    "distr1",
+                    "id"
+                  ]
+                },
+                "op": "\u003e",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

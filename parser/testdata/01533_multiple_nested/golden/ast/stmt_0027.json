@@ -1,0 +1,67 @@
+{
+  "table": "nested",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "col1",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "a",
+            "type": {
+              "name": "UInt32"
+            }
+          },
+          {
+            "name": "n",
+            "type": {
+              "name": "Nested",
+              "parameters": [
+                {
+                  "name": "s",
+                  "type": {
+                    "name": "String"
+                  }
+                },
+                {
+                  "name": "b",
+                  "type": {
+                    "name": "UInt32"
+                  }
+                }
+              ],
+              "has_parentheses": true
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

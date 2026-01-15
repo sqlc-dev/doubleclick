@@ -1,0 +1,256 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "e1",
+          "query": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "expr": {
+                      "type": "String",
+                      "value": "2022-10-11"
+                    },
+                    "type": {
+                      "name": "DateTime"
+                    },
+                    "operator_syntax": true
+                  },
+                  "op": "-",
+                  "right": {
+                    "value": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "unit": "QUARTER"
+                  }
+                },
+                "op": "-",
+                "right": {
+                  "value": {
+                    "op": "-",
+                    "operand": {
+                      "type": "Integer",
+                      "value": 3
+                    }
+                  },
+                  "unit": "WEEK"
+                }
+              },
+              "op": "-",
+              "right": {
+                "value": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "unit": "YEAR"
+              }
+            },
+            "op": "-",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 1
+              },
+              "unit": "HOUR"
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "e2",
+          "query": {
+            "left": {
+              "expr": {
+                "type": "String",
+                "value": "2022-10-11"
+              },
+              "type": {
+                "name": "DateTime"
+              },
+              "operator_syntax": true
+            },
+            "op": "+",
+            "right": {
+              "left": {
+                "left": {
+                  "left": {
+                    "op": "-",
+                    "operand": {
+                      "value": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "unit": "QUARTER"
+                    }
+                  },
+                  "op": "-",
+                  "right": {
+                    "value": {
+                      "op": "-",
+                      "operand": {
+                        "type": "Integer",
+                        "value": 3
+                      }
+                    },
+                    "unit": "WEEK"
+                  }
+                },
+                "op": "-",
+                "right": {
+                  "value": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "unit": "YEAR"
+                }
+              },
+              "op": "-",
+              "right": {
+                "value": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "unit": "HOUR"
+              },
+              "parenthesized": true
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "e3",
+          "query": {
+            "left": {
+              "expr": {
+                "type": "String",
+                "value": "2022-10-11"
+              },
+              "type": {
+                "name": "DateTime"
+              },
+              "operator_syntax": true
+            },
+            "op": "-",
+            "right": {
+              "type": "Tuple",
+              "value": [
+                {
+                  "value": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "unit": "QUARTER"
+                },
+                {
+                  "value": {
+                    "op": "-",
+                    "operand": {
+                      "type": "Integer",
+                      "value": 3
+                    }
+                  },
+                  "unit": "WEEK"
+                },
+                {
+                  "value": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "unit": "YEAR"
+                },
+                {
+                  "value": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "unit": "HOUR"
+                }
+              ],
+              "spaced_commas": true
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "e4",
+          "query": {
+            "left": {
+              "expr": {
+                "type": "String",
+                "value": "2022-10-11"
+              },
+              "type": {
+                "name": "DateTime"
+              },
+              "operator_syntax": true
+            },
+            "op": "-",
+            "right": {
+              "value": {
+                "type": "String",
+                "value": "1 QUARTER -3 WEEK 1 YEAR 1 HOUR"
+              },
+              "unit": ""
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "e1"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "parts": [
+                  "e2"
+                ]
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "e2"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "parts": [
+                  "e3"
+                ]
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "e3"
+              ]
+            },
+            "op": "==",
+            "right": {
+              "parts": [
+                "e4"
+              ]
+            }
+          }
+        },
+        {
+          "parts": [
+            "e1"
+          ]
+        }
+      ]
+    }
+  ]
+}

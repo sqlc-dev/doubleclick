@@ -1,0 +1,112 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "key1",
+          "query": {
+            "left": {
+              "left": {
+                "name": "currentDatabase"
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": "_test1_"
+              }
+            },
+            "op": "||",
+            "right": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "MOD",
+              "right": {
+                "type": "Integer",
+                "value": 3
+              },
+              "parenthesized": true
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "key2",
+          "query": {
+            "left": {
+              "left": {
+                "name": "currentDatabase"
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": "_test2_"
+              }
+            },
+            "op": "||",
+            "right": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "DIV",
+              "right": {
+                "type": "Integer",
+                "value": 3
+              },
+              "parenthesized": true
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "name": "generateSerialID",
+          "arguments": [
+            {
+              "parts": [
+                "key1"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "generateSerialID",
+          "arguments": [
+            {
+              "parts": [
+                "key2"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

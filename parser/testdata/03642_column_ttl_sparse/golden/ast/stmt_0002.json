@@ -1,0 +1,65 @@
+{
+  "table": "ttl_sparse_repro",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "dt",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt64"
+      },
+      "ttl": {
+        "left": {
+          "parts": [
+            "dt"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "value": {
+            "type": "Integer",
+            "value": 2
+          },
+          "unit": "SECOND"
+        }
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "ratio_of_defaults_for_sparse_serialization",
+      "value": {
+        "type": "Float",
+        "value": 0.9,
+        "source": "0.9"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

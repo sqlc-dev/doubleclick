@@ -1,0 +1,178 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trimBoth",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "SearchPhrase"
+                            ]
+                          },
+                          {
+                            "name": "MIN",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "URL"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "name": "MIN",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "Title"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "name": "COUNT",
+                            "arguments": [
+                              {}
+                            ],
+                            "alias": "c"
+                          },
+                          {
+                            "name": "COUNT",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "UserID"
+                                ]
+                              }
+                            ],
+                            "distinct": true
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "database": "test",
+                                  "table": "hits"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "left": {
+                              "expr": {
+                                "parts": [
+                                  "Title"
+                                ]
+                              },
+                              "pattern": {
+                                "type": "String",
+                                "value": "%Google%"
+                              }
+                            },
+                            "op": "AND",
+                            "right": {
+                              "expr": {
+                                "parts": [
+                                  "URL"
+                                ]
+                              },
+                              "not": true,
+                              "pattern": {
+                                "type": "String",
+                                "value": "%.google.%"
+                              }
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "SearchPhrase"
+                              ]
+                            },
+                            "op": "\u003c\u003e",
+                            "right": {
+                              "type": "String",
+                              "value": ""
+                            }
+                          }
+                        },
+                        "group_by": [
+                          {
+                            "parts": [
+                              "SearchPhrase"
+                            ]
+                          }
+                        ],
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "c"
+                              ]
+                            },
+                            "descending": true
+                          }
+                        ],
+                        "limit": {
+                          "type": "Integer",
+                          "value": 10
+                        },
+                        "settings": [
+                          {
+                            "name": "allow_reorder_prewhere_conditions",
+                            "value": {
+                              "type": "Integer",
+                              "value": 0
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "explain"
+          ]
+        },
+        "pattern": {
+          "type": "String",
+          "value": "%Prewhere filter column%"
+        }
+      }
+    }
+  ]
+}

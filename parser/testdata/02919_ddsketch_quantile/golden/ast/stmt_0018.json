@@ -1,0 +1,112 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "quantileDD",
+              "parameters": [
+                {
+                  "type": "Float",
+                  "value": 0.01,
+                  "source": "0.01"
+                },
+                {
+                  "type": "Float",
+                  "value": 0.5,
+                  "source": "0.5"
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "name": "toFloat32",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "number"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "left": {
+                                    "type": "Float",
+                                    "value": "NaN"
+                                  },
+                                  "op": "*",
+                                  "right": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  }
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ],
+                          "alias": "number"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 0
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

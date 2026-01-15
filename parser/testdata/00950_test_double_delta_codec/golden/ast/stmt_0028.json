@@ -1,0 +1,154 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "parts": [
+            "type"
+          ]
+        },
+        {
+          "parts": [
+            "compression_codec"
+          ]
+        },
+        {
+          "parts": [
+            "data_uncompressed_bytes"
+          ],
+          "alias": "u"
+        },
+        {
+          "parts": [
+            "data_compressed_bytes"
+          ],
+          "alias": "c"
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "u"
+                ]
+              },
+              "op": "/",
+              "right": {
+                "parts": [
+                  "c"
+                ]
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 3
+            }
+          ],
+          "alias": "ratio"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "columns"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "table"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "codecTest"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "compression_codec"
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "type": "String",
+              "value": ""
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "ratio"
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "table"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "name"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "type"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

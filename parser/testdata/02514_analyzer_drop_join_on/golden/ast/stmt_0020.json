@@ -1,0 +1,199 @@
+{
+  "explain_type": "PLAN",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "b",
+              "bx"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "a"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "b1"
+                            ]
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "parts": [
+                                  "b2"
+                                ]
+                              },
+                              "op": "||",
+                              "right": {
+                                "type": "String",
+                                "value": "x"
+                              }
+                            },
+                            "alias": "bx"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "b"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "b"
+              },
+              "join": {
+                "type": "INNER",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "b",
+                      "b1"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "a",
+                      "a1"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "c"
+                }
+              },
+              "join": {
+                "type": "INNER",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "c",
+                      "c1"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "b",
+                      "b1"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "number"
+                            ],
+                            "alias": "d1"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "numbers",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 10
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "d"
+              },
+              "join": {
+                "type": "INNER",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "d",
+                      "d1"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "c",
+                      "c1"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "c",
+              "c2"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "String",
+            "value": ""
+          }
+        },
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "a",
+                "a2"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true,
+  "explicit_type": true,
+  "options_string": "header = 1"
+}

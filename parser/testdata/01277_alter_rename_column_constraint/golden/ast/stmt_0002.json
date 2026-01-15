@@ -1,0 +1,105 @@
+{
+  "table": "table_for_rename",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value1",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value2",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value3",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "name": "cs_value1",
+      "expression": {
+        "left": {
+          "name": "toInt64",
+          "arguments": [
+            {
+              "parts": [
+                "value1"
+              ]
+            }
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "name": "toInt64",
+          "arguments": [
+            {
+              "parts": [
+                "value2"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "cs_value2",
+      "expression": {
+        "left": {
+          "name": "toInt64",
+          "arguments": [
+            {
+              "parts": [
+                "value2"
+              ]
+            }
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "name": "toInt64",
+          "arguments": [
+            {
+              "parts": [
+                "value3"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "date"
+    ]
+  }
+}

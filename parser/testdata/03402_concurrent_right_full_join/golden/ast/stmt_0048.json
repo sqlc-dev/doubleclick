@@ -1,0 +1,108 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "l",
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "l",
+            "grp"
+          ]
+        },
+        {
+          "parts": [
+            "l",
+            "val"
+          ]
+        },
+        {
+          "parts": [
+            "r",
+            "descr"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t_l_cmp"
+              },
+              "alias": "l"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t_r_cmp"
+              },
+              "alias": "r"
+            },
+            "join": {
+              "type": "RIGHT",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "l",
+                      "id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "r",
+                      "id"
+                    ]
+                  },
+                  "parenthesized": true
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "l",
+                      "grp"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "r",
+                      "grp"
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "r",
+              "id"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "r",
+              "grp"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

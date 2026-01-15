@@ -1,0 +1,54 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "left": {
+                "type": "Integer",
+                "value": 1000
+              },
+              "op": "*",
+              "right": {
+                "name": "ngramSearchCaseInsensitiveUTF8",
+                "arguments": [
+                  {
+                    "name": "materialize",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "абвгдеёжз"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "ЁЁЁЁЁЁЁЁ"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 5
+      }
+    }
+  ]
+}

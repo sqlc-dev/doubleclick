@@ -1,0 +1,69 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "customer"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "op": "NOT",
+        "operand": {
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {}
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "nation"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "left": {
+                    "parts": [
+                      "c_nationkey"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "n_nationkey"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "settings": [
+        {
+          "name": "correlated_subqueries_default_join_kind",
+          "value": {
+            "type": "String",
+            "value": "left"
+          }
+        }
+      ]
+    }
+  ]
+}

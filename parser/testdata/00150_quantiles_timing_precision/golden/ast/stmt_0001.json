@@ -1,0 +1,167 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        {
+          "name": "quantileTiming",
+          "parameters": [
+            {
+              "type": "Float",
+              "value": 0.5,
+              "source": "0.5"
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "SendTiming"
+              ]
+            }
+          ],
+          "alias": "qt"
+        },
+        {
+          "name": "least",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 30000
+            },
+            {
+              "name": "quantileExact",
+              "parameters": [
+                {
+                  "type": "Float",
+                  "value": 0.5,
+                  "source": "0.5"
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "SendTiming"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "qe"
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "expr": {
+                "left": {
+                  "name": "abs",
+                  "arguments": [
+                    {
+                      "left": {
+                        "parts": [
+                          "qt"
+                        ]
+                      },
+                      "op": "-",
+                      "right": {
+                        "parts": [
+                          "qe"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "op": "/",
+                "right": {
+                  "name": "greatest",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "qt"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "qe"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "diff"
+            },
+            {
+              "type": "Integer",
+              "value": 3
+            }
+          ],
+          "alias": "rounded_diff"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "SendTiming"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "op": "-",
+          "operand": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "parts": [
+            "diff"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "diff"
+            ]
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,282 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "arraySum",
+              "arguments": [
+                {
+                  "parameters": [
+                    "x"
+                  ],
+                  "body": {
+                    "left": {
+                      "tuple": {
+                        "parts": [
+                          "x"
+                        ]
+                      },
+                      "index": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    },
+                    "op": "/",
+                    "right": {
+                      "left": {
+                        "tuple": {
+                          "parts": [
+                            "x"
+                          ]
+                        },
+                        "index": {
+                          "type": "Integer",
+                          "value": 2
+                        }
+                      },
+                      "op": "*",
+                      "right": {
+                        "tuple": {
+                          "parts": [
+                            "x"
+                          ]
+                        },
+                        "index": {
+                          "type": "Integer",
+                          "value": 2
+                        }
+                      },
+                      "parenthesized": true
+                    },
+                    "parenthesized": true
+                  }
+                },
+                {
+                  "name": "arrayZip",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "mag"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "magerr"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "name": "arraySum",
+              "arguments": [
+                {
+                  "parameters": [
+                    "x"
+                  ],
+                  "body": {
+                    "left": {
+                      "type": "Float",
+                      "value": 1,
+                      "source": "1."
+                    },
+                    "op": "/",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "x"
+                        ]
+                      },
+                      "op": "*",
+                      "right": {
+                        "parts": [
+                          "x"
+                        ]
+                      },
+                      "parenthesized": true
+                    },
+                    "parenthesized": true
+                  }
+                },
+                {
+                  "parts": [
+                    "magerr"
+                  ]
+                }
+              ]
+            }
+          },
+          "alias": "weightedmeanmag"
+        },
+        {
+          "name": "arraySum",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "tuple": {
+                        "parts": [
+                          "x"
+                        ]
+                      },
+                      "index": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    },
+                    "op": "-",
+                    "right": {
+                      "parts": [
+                        "weightedmeanmag"
+                      ]
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "*",
+                  "right": {
+                    "left": {
+                      "tuple": {
+                        "parts": [
+                          "x"
+                        ]
+                      },
+                      "index": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    },
+                    "op": "-",
+                    "right": {
+                      "parts": [
+                        "weightedmeanmag"
+                      ]
+                    },
+                    "parenthesized": true
+                  },
+                  "parenthesized": true
+                },
+                "op": "/",
+                "right": {
+                  "left": {
+                    "tuple": {
+                      "parts": [
+                        "x"
+                      ]
+                    },
+                    "index": {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  },
+                  "op": "*",
+                  "right": {
+                    "tuple": {
+                      "parts": [
+                        "x"
+                      ]
+                    },
+                    "index": {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  },
+                  "parenthesized": true
+                },
+                "parenthesized": true
+              }
+            },
+            {
+              "name": "arrayZip",
+              "arguments": [
+                {
+                  "parts": [
+                    "mag"
+                  ]
+                },
+                {
+                  "parts": [
+                    "magerr"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "chi2"
+        },
+        {
+          "expr": {
+            "type": "Array",
+            "value": [
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "type": "Integer",
+                "value": 2
+              },
+              {
+                "type": "Integer",
+                "value": 3
+              },
+              {
+                "type": "Integer",
+                "value": 4
+              }
+            ],
+            "spaced_commas": true
+          },
+          "alias": "mag"
+        },
+        {
+          "expr": {
+            "type": "Array",
+            "value": [
+              {
+                "type": "Float",
+                "value": 0.1,
+                "source": "0.1"
+              },
+              {
+                "type": "Float",
+                "value": 0.2,
+                "source": "0.2"
+              },
+              {
+                "type": "Float",
+                "value": 0.1,
+                "source": "0.1"
+              },
+              {
+                "type": "Float",
+                "value": 0.2,
+                "source": "0.2"
+              }
+            ],
+            "spaced_commas": true
+          },
+          "alias": "magerr"
+        }
+      ],
+      "where": {
+        "name": "isFinite",
+        "arguments": [
+          {
+            "parts": [
+              "chi2"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

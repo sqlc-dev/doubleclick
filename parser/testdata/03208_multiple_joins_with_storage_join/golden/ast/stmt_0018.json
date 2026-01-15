@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "tab"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "mem"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "parts": [
+                    "k1"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "mem",
+                    "k"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "mem"
+              },
+              "alias": "t"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "parts": [
+                    "k2"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t",
+                    "k"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "tab",
+              "v"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

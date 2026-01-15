@@ -1,0 +1,56 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "concatWithSeparator",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "|"
+              },
+              {
+                "type": "String",
+                "value": "a"
+              },
+              {
+                "name": "materialize",
+                "arguments": [
+                  {
+                    "expr": {
+                      "type": "String",
+                      "value": "bar"
+                    },
+                    "type": {
+                      "name": "LowCardinality",
+                      "parameters": [
+                        {
+                          "name": "FixedString",
+                          "parameters": [
+                            {
+                              "type": "Integer",
+                              "value": 3
+                            }
+                          ],
+                          "has_parentheses": true
+                        }
+                      ],
+                      "has_parentheses": true
+                    },
+                    "operator_syntax": true
+                  }
+                ]
+              }
+            ]
+          },
+          "op": "==",
+          "right": {
+            "type": "String",
+            "value": "a|bar"
+          }
+        }
+      ]
+    }
+  ]
+}

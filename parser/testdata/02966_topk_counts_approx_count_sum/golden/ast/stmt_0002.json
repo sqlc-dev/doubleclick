@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "topKMerge",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 4
+            },
+            {
+              "type": "Integer",
+              "value": 2
+            },
+            {
+              "type": "String",
+              "value": "counts"
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "state"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "topKState",
+                          "parameters": [
+                            {
+                              "type": "Integer",
+                              "value": 4
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 2
+                            },
+                            {
+                              "type": "String",
+                              "value": "counts"
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "name": "countDigits",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  "op": "*",
+                                  "right": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "state"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 1000
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

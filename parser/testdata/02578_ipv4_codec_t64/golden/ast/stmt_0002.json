@@ -1,0 +1,51 @@
+{
+  "table": "ipv4_t64",
+  "columns": [
+    {
+      "name": "uid",
+      "type": {
+        "name": "Int16"
+      }
+    },
+    {
+      "name": "ip",
+      "type": {
+        "name": "IPv4"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "T64"
+          }
+        ]
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "ip_idx",
+      "expression": {
+        "parts": [
+          "ip"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 4
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "uid"
+      ]
+    }
+  ]
+}

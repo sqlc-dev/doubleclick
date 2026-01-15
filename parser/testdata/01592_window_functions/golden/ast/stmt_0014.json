@@ -1,0 +1,148 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "product_name"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "group_name"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "price"
+                          ]
+                        },
+                        {
+                          "name": "min",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "price"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "partition_by": [
+                              {
+                                "parts": [
+                                  "group_name"
+                                ]
+                              }
+                            ]
+                          },
+                          "alias": "min_price"
+                        },
+                        {
+                          "name": "dense_rank",
+                          "over": {
+                            "partition_by": [
+                              {
+                                "parts": [
+                                  "group_name"
+                                ]
+                              }
+                            ],
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "price"
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "alias": "r"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "products"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "product_groups"
+                              }
+                            },
+                            "join": {
+                              "type": "INNER",
+                              "using": [
+                                {
+                                  "parts": [
+                                    "group_id"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "min_price"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 160
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "group_name"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "r"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "product_name"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

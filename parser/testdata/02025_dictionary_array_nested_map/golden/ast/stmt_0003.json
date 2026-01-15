@@ -1,0 +1,90 @@
+{
+  "table": "dict_nested_map_dictionary",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "test_id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "type",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "test_config",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Map",
+            "parameters": [
+              {
+                "name": "String"
+              },
+              {
+                "name": "Decimal",
+                "parameters": [
+                  {
+                    "type": "Integer",
+                    "value": 28
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 12
+                  }
+                ],
+                "has_parentheses": true
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "ncp",
+      "type": {
+        "name": "UInt8"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "test_id"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "dict_nested_map_test_table"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 1
+      },
+      "max": {
+        "type": "Integer",
+        "value": 1000000
+      }
+    },
+    "layout": {
+      "type": "HASHED"
+    }
+  }
+}

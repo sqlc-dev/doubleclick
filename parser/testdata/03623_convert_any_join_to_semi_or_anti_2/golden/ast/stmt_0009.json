@@ -1,0 +1,94 @@
+{
+  "explain_type": "PLAN",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "count"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "alias": "x"
+                          },
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "users1"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "u1"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "users2"
+                },
+                "alias": "u2"
+              },
+              "join": {
+                "type": "LEFT",
+                "strictness": "ANY",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "u1",
+                      "uid"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "u2",
+                      "uid"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "u2",
+              "age"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      }
+    ]
+  },
+  "has_settings": true,
+  "options_string": "actions = 1, keep_logical_steps = 1"
+}

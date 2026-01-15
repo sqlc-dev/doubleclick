@@ -1,0 +1,114 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "name": "empty",
+              "arguments": [
+                {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "parts": [
+                    "device"
+                  ]
+                }
+              ]
+            },
+            {
+              "parts": [
+                "id"
+              ]
+            }
+          ],
+          "alias": "device"
+        },
+        {
+          "name": "multiIf",
+          "arguments": [
+            {
+              "name": "notEmpty",
+              "arguments": [
+                {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "a"
+            },
+            {
+              "left": {
+                "parts": [
+                  "device"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "type": "String",
+                "value": "00000000-0000-0000-0000-000000000000"
+              }
+            },
+            {
+              "type": "String",
+              "value": "b"
+            },
+            {
+              "type": "String",
+              "value": "c"
+            }
+          ],
+          "alias": "device_id_type"
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "table1"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "device"
+          ]
+        },
+        {
+          "parts": [
+            "device_id_type"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "device"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "table": "01504_test",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 77
+              }
+            },
+            "alias": "k"
+          },
+          {
+            "name": "SUM",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ],
+            "alias": "value"
+          },
+          {
+            "type": "Tuple",
+            "value": [
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "type": "Float",
+                "value": 1.2,
+                "source": "1.2"
+              }
+            ],
+            "spaced_commas": true
+          },
+          {
+            "name": "bitmapBuild",
+            "arguments": [
+              {
+                "name": "groupArray",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10000000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "k"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

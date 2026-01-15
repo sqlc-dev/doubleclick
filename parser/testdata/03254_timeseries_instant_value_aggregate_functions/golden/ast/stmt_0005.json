@@ -1,0 +1,591 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "start_ts",
+          "query": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2024-12-12 12:00:10"
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "end_ts",
+          "query": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2024-12-12 12:01:00"
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "step_sec",
+          "query": {
+            "type": "Integer",
+            "value": 10
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "window_sec",
+          "query": {
+            "type": "Integer",
+            "value": 50
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "grid",
+          "query": {
+            "name": "range",
+            "arguments": [
+              {
+                "name": "toUnixTimestamp",
+                "arguments": [
+                  {
+                    "parts": [
+                      "start_ts"
+                    ]
+                  }
+                ]
+              },
+              {
+                "left": {
+                  "name": "toUnixTimestamp",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "end_ts"
+                      ]
+                    }
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              {
+                "parts": [
+                  "step_sec"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "metric_id"
+          ]
+        },
+        {
+          "name": "arrayJoin",
+          "arguments": [
+            {
+              "name": "arrayZip",
+              "arguments": [
+                {
+                  "parts": [
+                    "grid"
+                  ]
+                },
+                {
+                  "parts": [
+                    "irate_values"
+                  ]
+                },
+                {
+                  "parts": [
+                    "irate_values_scale_3"
+                  ]
+                },
+                {
+                  "parts": [
+                    "idelta_values"
+                  ]
+                },
+                {
+                  "parts": [
+                    "rate_values"
+                  ]
+                },
+                {
+                  "parts": [
+                    "rate_values_scale_5"
+                  ]
+                },
+                {
+                  "parts": [
+                    "delta_values"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "metric_id"
+                          ]
+                        },
+                        {
+                          "name": "timeSeriesInstantRateToGrid",
+                          "parameters": [
+                            {
+                              "parts": [
+                                "start_ts"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "end_ts"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "step_sec"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "window_sec"
+                              ]
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "tuple": {
+                                "parts": [
+                                  "samples"
+                                ]
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            },
+                            {
+                              "tuple": {
+                                "parts": [
+                                  "samples"
+                                ]
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            }
+                          ],
+                          "alias": "irate_values"
+                        },
+                        {
+                          "name": "timeSeriesInstantRateToGrid",
+                          "parameters": [
+                            {
+                              "parts": [
+                                "start_ts"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "end_ts"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "step_sec"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "window_sec"
+                              ]
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "expr": {
+                                "tuple": {
+                                  "parts": [
+                                    "samples"
+                                  ]
+                                },
+                                "index": {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              },
+                              "type": {
+                                "name": "Array",
+                                "parameters": [
+                                  {
+                                    "name": "DateTime64",
+                                    "parameters": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 3
+                                      },
+                                      {
+                                        "type": "String",
+                                        "value": "UTC"
+                                      }
+                                    ],
+                                    "has_parentheses": true
+                                  }
+                                ],
+                                "has_parentheses": true
+                              },
+                              "operator_syntax": true
+                            },
+                            {
+                              "tuple": {
+                                "parts": [
+                                  "samples"
+                                ]
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            }
+                          ],
+                          "alias": "irate_values_scale_3"
+                        },
+                        {
+                          "name": "timeSeriesInstantDeltaToGrid",
+                          "parameters": [
+                            {
+                              "parts": [
+                                "start_ts"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "end_ts"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "step_sec"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "window_sec"
+                              ]
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "tuple": {
+                                "parts": [
+                                  "samples"
+                                ]
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            },
+                            {
+                              "tuple": {
+                                "parts": [
+                                  "samples"
+                                ]
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            }
+                          ],
+                          "alias": "idelta_values"
+                        },
+                        {
+                          "name": "timeSeriesRateToGrid",
+                          "parameters": [
+                            {
+                              "parts": [
+                                "start_ts"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "end_ts"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "step_sec"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "window_sec"
+                              ]
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "tuple": {
+                                "parts": [
+                                  "samples"
+                                ]
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            },
+                            {
+                              "tuple": {
+                                "parts": [
+                                  "samples"
+                                ]
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            }
+                          ],
+                          "alias": "rate_values"
+                        },
+                        {
+                          "name": "timeSeriesRateToGrid",
+                          "parameters": [
+                            {
+                              "parts": [
+                                "start_ts"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "end_ts"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "step_sec"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "window_sec"
+                              ]
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "expr": {
+                                "tuple": {
+                                  "parts": [
+                                    "samples"
+                                  ]
+                                },
+                                "index": {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              },
+                              "type": {
+                                "name": "Array",
+                                "parameters": [
+                                  {
+                                    "name": "DateTime64",
+                                    "parameters": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 5
+                                      },
+                                      {
+                                        "type": "String",
+                                        "value": "UTC"
+                                      }
+                                    ],
+                                    "has_parentheses": true
+                                  }
+                                ],
+                                "has_parentheses": true
+                              },
+                              "operator_syntax": true
+                            },
+                            {
+                              "tuple": {
+                                "parts": [
+                                  "samples"
+                                ]
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            }
+                          ],
+                          "alias": "rate_values_scale_5"
+                        },
+                        {
+                          "name": "timeSeriesDeltaToGrid",
+                          "parameters": [
+                            {
+                              "parts": [
+                                "start_ts"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "end_ts"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "step_sec"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "window_sec"
+                              ]
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "tuple": {
+                                "parts": [
+                                  "samples"
+                                ]
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            },
+                            {
+                              "tuple": {
+                                "parts": [
+                                  "samples"
+                                ]
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            }
+                          ],
+                          "alias": "delta_values"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "clusterAllReplicas",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "test_shard_localhost"
+                                  },
+                                  {
+                                    "name": "currentDatabase"
+                                  },
+                                  {
+                                    "parts": [
+                                      "t_resampled_timeseries"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "metric_id"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "metric_id"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "enable_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "max_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 3
+          }
+        },
+        {
+          "name": "parallel_replicas_for_non_replicated_merge_tree",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

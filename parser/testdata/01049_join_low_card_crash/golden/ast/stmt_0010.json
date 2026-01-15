@@ -1,0 +1,133 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "materialize",
+          "arguments": [
+            {
+              "parts": [
+                "js2",
+                "k"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toLowCardinality",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "k"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "js1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "+",
+                            "right": {
+                              "type": "Integer",
+                              "value": 7
+                            }
+                          },
+                          "alias": "k"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "js2"
+            },
+            "join": {
+              "type": "FULL",
+              "using": [
+                {
+                  "parts": [
+                    "k"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "js2",
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "table": "empty1",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "date",
+      "type": {
+        "name": "Datetime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedSummingMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_01560_optimize_on_insert"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      },
+      {
+        "parts": [
+          "val"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "date"
+    ]
+  }
+}

@@ -1,0 +1,209 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "q0",
+            "dt"
+          ]
+        },
+        {
+          "parts": [
+            "q0",
+            "cnt"
+          ]
+        },
+        {
+          "parts": [
+            "q1",
+            "cnt2"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toDate",
+                          "arguments": [
+                            {
+                              "name": "addDays",
+                              "arguments": [
+                                {
+                                  "name": "toDate",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "2015-12-01"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "dt"
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "cnt"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "dt"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "q0"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toDate",
+                          "arguments": [
+                            {
+                              "name": "addDays",
+                              "arguments": [
+                                {
+                                  "name": "toDate",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "2015-12-01"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "dt"
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "cnt2"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 5
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "dt"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "q1"
+            },
+            "join": {
+              "type": "FULL",
+              "strictness": "ALL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "q0",
+                    "dt"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "q1",
+                    "dt"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "q1",
+              "cnt2"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

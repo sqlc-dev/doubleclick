@@ -1,0 +1,157 @@
+{
+  "table": "tbl",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "e",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "mm1_idx",
+      "expression": {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "a"
+            ]
+          },
+          {
+            "parts": [
+              "c"
+            ]
+          },
+          {
+            "parts": [
+              "d"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      "type": {
+        "name": "minmax"
+      }
+    },
+    {
+      "name": "mm2_idx",
+      "expression": {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "c"
+            ]
+          },
+          {
+            "parts": [
+              "d"
+            ]
+          },
+          {
+            "parts": [
+              "e"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      "type": {
+        "name": "minmax"
+      }
+    },
+    {
+      "name": "set_idx",
+      "expression": {
+        "parts": [
+          "e"
+        ]
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 100
+          }
+        ]
+      }
+    },
+    {
+      "name": "blf_idx",
+      "expression": {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "d"
+            ]
+          },
+          {
+            "parts": [
+              "b"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      "type": {
+        "name": "bloom_filter",
+        "arguments": [
+          {
+            "type": "Float",
+            "value": 0.8,
+            "source": "0.8"
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "primary_key": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "c"
+          ]
+        },
+        {
+          "parts": [
+            "a"
+          ]
+        }
+      ]
+    }
+  ]
+}

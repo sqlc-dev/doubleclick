@@ -1,0 +1,178 @@
+{
+  "table": "events",
+  "columns": [
+    {
+      "name": "organisation_id",
+      "type": {
+        "name": "UUID"
+      }
+    },
+    {
+      "name": "session_id",
+      "type": {
+        "name": "UUID"
+      }
+    },
+    {
+      "name": "id",
+      "type": {
+        "name": "UUID"
+      },
+      "default": {
+        "name": "generateUUIDv4"
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "payload",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "name": "UUID"
+      }
+    },
+    {
+      "name": "call_id",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "events_by_session_and_org",
+      "select": {
+        "columns": [
+          {}
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "organisation_id"
+            ]
+          },
+          {
+            "parts": [
+              "session_id"
+            ]
+          },
+          {
+            "parts": [
+              "timestamp"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "events_by_session",
+      "select": {
+        "columns": [
+          {}
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "session_id"
+            ]
+          },
+          {
+            "parts": [
+              "timestamp"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "events_by_session_and_customer",
+      "select": {
+        "columns": [
+          {}
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "customer_id"
+            ]
+          },
+          {
+            "parts": [
+              "session_id"
+            ]
+          },
+          {
+            "parts": [
+              "timestamp"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "events_by_call_id",
+      "select": {
+        "columns": [
+          {}
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "call_id"
+            ]
+          },
+          {
+            "parts": [
+              "timestamp"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "organisation_id"
+          ]
+        },
+        {
+          "parts": [
+            "session_id"
+          ]
+        },
+        {
+          "parts": [
+            "timestamp"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 3
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

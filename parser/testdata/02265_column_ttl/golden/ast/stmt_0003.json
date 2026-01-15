@@ -1,0 +1,81 @@
+{
+  "table": "ttl_02265",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "key",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      },
+      "ttl": {
+        "left": {
+          "parts": [
+            "date"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "value": {
+            "type": "Integer",
+            "value": 1
+          },
+          "unit": "MONTH"
+        }
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/ttl_02265"
+      },
+      {
+        "type": "String",
+        "value": "r1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "date"
+    ]
+  },
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "min_bytes_for_full_part_storage",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,41 @@
+{
+  "table": "hits_text",
+  "commands": [
+    {
+      "type": "ADD_INDEX",
+      "index": "idx_search_phrase",
+      "index_expr": {
+        "parts": [
+          "SearchPhrase"
+        ]
+      },
+      "index_type": "text",
+      "index_def": {
+        "name": "idx_search_phrase",
+        "expression": {
+          "parts": [
+            "SearchPhrase"
+          ]
+        },
+        "type": {
+          "name": "text",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "tokenizer"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "splitByNonAlpha"
+              }
+            }
+          ]
+        }
+      },
+      "granularity": 8
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "table": "bloom_filter_sizing_pk",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "key_bf",
+      "expression": {
+        "parts": [
+          "key"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter",
+        "arguments": [
+          {
+            "type": "Float",
+            "value": 0.01,
+            "source": "0.01"
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 2147483648
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ]
+}

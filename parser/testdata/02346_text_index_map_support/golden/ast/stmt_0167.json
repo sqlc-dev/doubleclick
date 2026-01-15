@@ -1,0 +1,120 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "map",
+      "type": {
+        "name": "Map",
+        "parameters": [
+          {
+            "name": "String"
+          },
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "map_fixed",
+      "type": {
+        "name": "Map",
+        "parameters": [
+          {
+            "name": "String"
+          },
+          {
+            "name": "FixedString",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 2
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "map_values_idx",
+      "expression": {
+        "name": "mapValues",
+        "arguments": [
+          {
+            "parts": [
+              "map"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "splitByNonAlpha"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "map_fixed_values_idx",
+      "expression": {
+        "name": "mapValues",
+        "arguments": [
+          {
+            "parts": [
+              "map_fixed"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "splitByNonAlpha"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

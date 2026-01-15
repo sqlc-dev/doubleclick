@@ -1,0 +1,84 @@
+{
+  "function": {
+    "name": "file",
+    "arguments": [
+      {
+        "type": "String",
+        "value": "03259.orc"
+      },
+      {
+        "type": "String",
+        "value": "ORC"
+      }
+    ]
+  },
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "name": "if",
+            "arguments": [
+              {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              {
+                "type": "Null",
+                "value": null
+              },
+              {
+                "name": "toDate32",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "date_field"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

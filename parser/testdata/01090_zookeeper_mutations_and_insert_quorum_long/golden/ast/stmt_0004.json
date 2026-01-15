@@ -1,0 +1,58 @@
+{
+  "table": "mutations_and_quorum2",
+  "columns": [
+    {
+      "name": "server_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "something",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_01090/mutations_and_quorum"
+      },
+      {
+        "type": "String",
+        "value": "2"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "server_date"
+          ]
+        },
+        {
+          "parts": [
+            "something"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "server_date"
+        ]
+      }
+    ]
+  }
+}

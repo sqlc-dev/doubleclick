@@ -1,0 +1,113 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ],
+            "over": {
+              "partition_by": [
+                {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                }
+              ]
+            }
+          },
+          "op": "/",
+          "right": {
+            "name": "count",
+            "over": {
+              "partition_by": [
+                {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "over": {
+            "partition_by": [
+              {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 10
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 100
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "number"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

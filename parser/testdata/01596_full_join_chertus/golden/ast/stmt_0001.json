@@ -1,0 +1,234 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "parts": [
+                    "js1",
+                    "k"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "parts": [
+                    "js2",
+                    "k"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "parts": [
+                    "js1",
+                    "s"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "parts": [
+                    "js2",
+                    "s"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "name": "toLowCardinality",
+                          "arguments": [
+                            {
+                              "name": "toString",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "s"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "js1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toLowCardinality",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            }
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "name": "toString",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            }
+                          ],
+                          "alias": "s"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "js2"
+            },
+            "join": {
+              "type": "FULL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "js1",
+                    "k"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "js2",
+                    "k"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "js1",
+              "k"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "js2",
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

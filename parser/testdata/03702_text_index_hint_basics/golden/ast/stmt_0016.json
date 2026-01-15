@@ -1,0 +1,51 @@
+{
+  "table": "t_text_index_hint",
+  "columns": [
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_s",
+      "expression": {
+        "parts": [
+          "s"
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "array"
+              ]
+            }
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 4
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

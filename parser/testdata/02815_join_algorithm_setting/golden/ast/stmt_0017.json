@@ -1,0 +1,205 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "explain"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "%Algorithm: GraceHashJoin%"
+              }
+            }
+          ]
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "explain"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "%Algorithm: HashJoin%"
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "query": {
+                                    "selects": [
+                                      {
+                                        "columns": [
+                                          {
+                                            "parts": [
+                                              "number"
+                                            ],
+                                            "alias": "key"
+                                          },
+                                          {
+                                            "expr": {
+                                              "left": {
+                                                "parts": [
+                                                  "number"
+                                                ]
+                                              },
+                                              "op": "*",
+                                              "right": {
+                                                "type": "Integer",
+                                                "value": 10
+                                              }
+                                            },
+                                            "alias": "key2"
+                                          }
+                                        ],
+                                        "from": {
+                                          "tables": [
+                                            {
+                                              "table": {
+                                                "table": {
+                                                  "name": "numbers_mt",
+                                                  "arguments": [
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 10
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                "alias": "t1"
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "query": {
+                                    "selects": [
+                                      {
+                                        "columns": [
+                                          {
+                                            "parts": [
+                                              "k"
+                                            ],
+                                            "alias": "key"
+                                          },
+                                          {
+                                            "expr": {
+                                              "left": {
+                                                "parts": [
+                                                  "k"
+                                                ]
+                                              },
+                                              "op": "+",
+                                              "right": {
+                                                "type": "Integer",
+                                                "value": 100
+                                              }
+                                            },
+                                            "alias": "key2"
+                                          }
+                                        ],
+                                        "from": {
+                                          "tables": [
+                                            {
+                                              "table": {
+                                                "table": {
+                                                  "table": "t2"
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                "alias": "t2"
+                              },
+                              "join": {
+                                "type": "INNER",
+                                "on": {
+                                  "left": {
+                                    "left": {
+                                      "parts": [
+                                        "t1",
+                                        "key"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "parts": [
+                                        "t2",
+                                        "key"
+                                      ]
+                                    }
+                                  },
+                                  "op": "OR",
+                                  "right": {
+                                    "left": {
+                                      "parts": [
+                                        "t1",
+                                        "key2"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "parts": [
+                                        "t2",
+                                        "key2"
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "explicit_type": true,
+                  "options_string": "actions = 1"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

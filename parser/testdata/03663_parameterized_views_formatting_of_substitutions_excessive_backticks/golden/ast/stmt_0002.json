@@ -1,0 +1,159 @@
+{
+  "view": "audit_size_column",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "formatReadableSize",
+            "arguments": [
+              {
+                "parts": [
+                  "size"
+                ]
+              }
+            ],
+            "alias": "formatted"
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "column_bytes_on_disk"
+                ]
+              }
+            ],
+            "alias": "size"
+          },
+          {
+            "parts": [
+              "column"
+            ]
+          },
+          {
+            "parts": [
+              "table"
+            ]
+          },
+          {
+            "parts": [
+              "database"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "parts_columns"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "active"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "database"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "name": "db",
+                    "type": {
+                      "name": "String"
+                    }
+                  }
+                },
+                "op": "OR",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "database"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "name": "currentDatabase"
+                  }
+                },
+                "parenthesized": true
+              }
+            },
+            "op": "AND",
+            "right": {
+              "name": "match",
+              "arguments": [
+                {
+                  "parts": [
+                    "table"
+                  ]
+                },
+                {
+                  "name": "table",
+                  "type": {
+                    "name": "String"
+                  }
+                }
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "name": "match",
+            "arguments": [
+              {
+                "parts": [
+                  "column"
+                ]
+              },
+              {
+                "name": "column",
+                "type": {
+                  "name": "String"
+                }
+              }
+            ]
+          }
+        },
+        "group_by": [
+          {
+            "parts": [
+              "database"
+            ]
+          },
+          {
+            "parts": [
+              "table"
+            ]
+          },
+          {
+            "parts": [
+              "column"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

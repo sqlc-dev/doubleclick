@@ -1,0 +1,54 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "QUERY_GROUP_ID"
+          ]
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "slow_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "current_database"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "name": "currentDatabase"
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "QUERY_GROUP_ID"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "QUERY_GROUP_ID"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

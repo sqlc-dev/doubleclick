@@ -1,0 +1,238 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "zookeeper_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "expr": {
+                    "parts": [
+                      "path"
+                    ]
+                  },
+                  "pattern": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "left": {
+                            "type": "String",
+                            "value": "/test/02439/"
+                          },
+                          "op": "||",
+                          "right": {
+                            "name": "getMacro",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "shard"
+                              }
+                            ]
+                          }
+                        },
+                        "op": "||",
+                        "right": {
+                          "type": "String",
+                          "value": "/"
+                        }
+                      },
+                      "op": "||",
+                      "right": {
+                        "name": "currentDatabase"
+                      }
+                    },
+                    "op": "||",
+                    "right": {
+                      "type": "String",
+                      "value": "/block_numbers/%"
+                    }
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "expr": {
+                    "parts": [
+                      "op_num"
+                    ]
+                  },
+                  "list": [
+                    {
+                      "type": "String",
+                      "value": "List"
+                    },
+                    {
+                      "type": "String",
+                      "value": "SimpleList"
+                    },
+                    {
+                      "type": "String",
+                      "value": "FilteredList"
+                    }
+                  ]
+                }
+              },
+              "op": "AND",
+              "right": {
+                "expr": {
+                  "parts": [
+                    "path"
+                  ]
+                },
+                "not": true,
+                "pattern": {
+                  "type": "String",
+                  "value": "%/block_numbers/1"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "path"
+                ]
+              },
+              "not": true,
+              "pattern": {
+                "type": "String",
+                "value": "%/block_numbers/123"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "event_time"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "left": {
+                "name": "now"
+              },
+              "op": "-",
+              "right": {
+                "value": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "unit": "MINUTE"
+              }
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "left": {
+              "expr": {
+                "parts": [
+                  "query_id"
+                ]
+              }
+            },
+            "op": "OR",
+            "right": {
+              "left": {
+                "parts": [
+                  "query_id"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": ""
+              }
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "query_id"
+              ]
+            },
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "query_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "event_time"
+                        ]
+                      },
+                      "op": "\u003e=",
+                      "right": {
+                        "left": {
+                          "name": "now"
+                        },
+                        "op": "-",
+                        "right": {
+                          "value": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "unit": "MINUTE"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "current_database"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "name": "currentDatabase"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "parenthesized": true
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "eventType"
+          ]
+        },
+        {
+          "parts": [
+            "timestamp"
+          ]
+        },
+        {
+          "parts": [
+            "key"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_table"
+              },
+              "final": true
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "eventType"
+            ]
+          },
+          "list": [
+            {
+              "type": "String",
+              "value": "2"
+            },
+            {
+              "type": "String",
+              "value": "4"
+            }
+          ]
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "left": {
+              "parts": [
+                "timestamp"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "max2",
+              "arguments": [
+                {
+                  "name": "toInt64",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "1698938519999"
+                    }
+                  ]
+                },
+                {
+                  "name": "toUnixTimestamp64Milli",
+                  "arguments": [
+                    {
+                      "left": {
+                        "name": "now64"
+                      },
+                      "op": "-",
+                      "right": {
+                        "name": "toIntervalDay",
+                        "arguments": [
+                          {
+                            "type": "Integer",
+                            "value": 90
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "parenthesized": true
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "timestamp"
+              ]
+            },
+            "op": "\u003c=",
+            "right": {
+              "left": {
+                "name": "toInt64",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "1707143315452"
+                  }
+                ]
+              },
+              "op": "-",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              },
+              "parenthesized": true
+            },
+            "parenthesized": true
+          },
+          "parenthesized": true
+        }
+      }
+    }
+  ]
+}

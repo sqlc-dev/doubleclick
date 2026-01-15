@@ -1,0 +1,87 @@
+{
+  "table": "t_03363_csv",
+  "columns": [
+    {
+      "name": "year",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "country",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "counter",
+      "type": {
+        "name": "UInt8"
+      }
+    }
+  ],
+  "engine": {
+    "name": "S3",
+    "parameters": [
+      {
+        "parts": [
+          "s3_conn"
+        ]
+      },
+      {
+        "left": {
+          "parts": [
+            "filename"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "t_03363_csv"
+        }
+      },
+      {
+        "left": {
+          "parts": [
+            "format"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "parts": [
+            "CSV"
+          ]
+        }
+      },
+      {
+        "left": {
+          "parts": [
+            "partition_strategy"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "hive"
+        }
+      }
+    ],
+    "has_parentheses": true
+  },
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "parts": [
+          "year"
+        ]
+      },
+      {
+        "parts": [
+          "country"
+        ]
+      }
+    ],
+    "spaced_commas": true
+  }
+}

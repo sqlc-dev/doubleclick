@@ -1,0 +1,54 @@
+{
+  "table": "test_duplicate_partition_keys",
+  "columns": [
+    {
+      "name": "c0",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "c1",
+      "type": {
+        "name": "Int32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "c0"
+      ]
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "parts": [
+          "c1"
+        ]
+      },
+      {
+        "parts": [
+          "c1"
+        ]
+      },
+      {
+        "name": "sipHash64",
+        "arguments": [
+          {
+            "parts": [
+              "c0"
+            ]
+          }
+        ]
+      }
+    ],
+    "spaced_commas": true
+  }
+}

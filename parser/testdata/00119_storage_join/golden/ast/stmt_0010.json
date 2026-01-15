@@ -1,0 +1,111 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "t1",
+            "k"
+          ]
+        },
+        {
+          "parts": [
+            "t1",
+            "s"
+          ]
+        },
+        {
+          "parts": [
+            "t2",
+            "x"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "a"
+                          },
+                          "alias": "s"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        }
+                      ],
+                      "with_totals": true,
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "number"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t2"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "k"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

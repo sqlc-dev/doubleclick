@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "merge_algorithm"
+          ]
+        },
+        {
+          "parts": [
+            "read_rows"
+          ]
+        },
+        {
+          "parts": [
+            "read_bytes"
+          ]
+        },
+        {
+          "parts": [
+            "rows"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "t_lwd_vertical"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "MergeParts"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

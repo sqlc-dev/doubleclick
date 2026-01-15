@@ -1,0 +1,198 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "id",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "query_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "current_database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "name": "normalizeQuery",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "query"
+                              ]
+                            }
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "normalizeQuery",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "with 01091 as id select sum(number) from numbers(1000000);"
+                            }
+                          ]
+                        },
+                        "parenthesized": true
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "event_date"
+                        ]
+                      },
+                      "op": "\u003e=",
+                      "right": {
+                        "left": {
+                          "name": "today"
+                        },
+                        "op": "-",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        "parenthesized": true
+                      },
+                      "parenthesized": true
+                    }
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "event_time"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "name": "uniqExact",
+            "arguments": [
+              {
+                "parts": [
+                  "thread_id"
+                ]
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_thread_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "left": {
+                "name": "today"
+              },
+              "op": "-",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              },
+              "parenthesized": true
+            },
+            "parenthesized": true
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "query_id"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "id"
+              ]
+            },
+            "parenthesized": true
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "thread_id"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "parts": [
+              "master_thread_id"
+            ]
+          },
+          "parenthesized": true
+        }
+      }
+    }
+  ]
+}

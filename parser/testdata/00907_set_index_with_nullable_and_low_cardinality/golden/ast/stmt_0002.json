@@ -1,0 +1,56 @@
+{
+  "table": "nullable_set_index",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "b_index",
+      "expression": {
+        "parts": [
+          "b"
+        ]
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ]
+}

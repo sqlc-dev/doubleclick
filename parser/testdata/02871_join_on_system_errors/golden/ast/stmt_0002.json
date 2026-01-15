@@ -1,0 +1,68 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "errors"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "name"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "UNKNOWN_IDENTIFIER"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "last_error_time"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "left": {
+                "name": "now"
+              },
+              "op": "-",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "last_error_message"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Missing columns%89467d35-77c2-4f82-ae7a-f093ff40f4cd%"
+          }
+        }
+      }
+    }
+  ]
+}

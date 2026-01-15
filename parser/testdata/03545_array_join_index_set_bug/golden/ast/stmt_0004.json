@@ -1,0 +1,89 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "COUNT",
+          "alias": "x"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "array_in_index"
+                          ]
+                        },
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "array_not_in_index"
+                              ]
+                            }
+                          ],
+                          "alias": "array_not_in_index_joined"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "right"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "T00J0"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "T00J0",
+              "array_not_in_index_joined"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": ""
+          }
+        },
+        "op": "AND",
+        "right": {
+          "name": "has",
+          "arguments": [
+            {
+              "parts": [
+                "T00J0",
+                "array_in_index"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "abc"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

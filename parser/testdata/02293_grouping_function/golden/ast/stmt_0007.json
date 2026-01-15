@@ -1,0 +1,120 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "name": "count"
+        },
+        {
+          "name": "grouping",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 2
+              }
+            }
+          ],
+          "alias": "gr"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "type": "Tuple",
+          "value": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 2
+              }
+            }
+          ],
+          "spaced_commas": true
+        },
+        {
+          "type": "Tuple",
+          "value": []
+        }
+      ],
+      "grouping_sets": true,
+      "order_by": [
+        {
+          "expression": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "gr"
+                ]
+              },
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "force_grouping_standard_compatibility",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

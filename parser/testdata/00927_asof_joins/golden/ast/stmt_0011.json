@@ -1,0 +1,112 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "tv",
+            "key"
+          ]
+        },
+        {
+          "name": "toString",
+          "arguments": [
+            {
+              "parts": [
+                "tv",
+                "t"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "UTC"
+            }
+          ]
+        },
+        {
+          "parts": [
+            "md",
+            "bid"
+          ]
+        },
+        {
+          "parts": [
+            "tv",
+            "tv"
+          ]
+        },
+        {
+          "parts": [
+            "md",
+            "ask"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "tv"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "md"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ASOF",
+              "using": [
+                {
+                  "parts": [
+                    "key"
+                  ]
+                },
+                {
+                  "parts": [
+                    "t"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "tv",
+                  "key"
+                ]
+              },
+              {
+                "parts": [
+                  "tv",
+                  "t"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "join_algorithm",
+          "value": {
+            "type": "String",
+            "value": "full_sorting_merge"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "view": "mv_traffic_by_tadig15min",
+  "materialized": true,
+  "populate": true,
+  "engine": {
+    "name": "AggregatingMergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "ts"
+          ]
+        },
+        {
+          "parts": [
+            "tadig"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "tadig"
+    ]
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "toStartOfFifteenMinutes",
+            "arguments": [
+              {
+                "parts": [
+                  "timestamp"
+                ]
+              }
+            ],
+            "alias": "ts"
+          },
+          {
+            "name": "toDayOfWeek",
+            "arguments": [
+              {
+                "parts": [
+                  "timestamp"
+                ]
+              }
+            ],
+            "alias": "dow"
+          },
+          {
+            "parts": [
+              "tadig"
+            ]
+          },
+          {
+            "name": "sumState",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "acctinputoctets"
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "parts": [
+                    "acctoutputoctets"
+                  ]
+                }
+              }
+            ],
+            "alias": "traffic_bytes"
+          },
+          {
+            "name": "maxState",
+            "arguments": [
+              {
+                "parts": [
+                  "timestamp"
+                ]
+              }
+            ],
+            "alias": "last_stop"
+          },
+          {
+            "name": "minState",
+            "arguments": [
+              {
+                "parts": [
+                  "radacctid"
+                ]
+              }
+            ],
+            "alias": "min_radacctid"
+          },
+          {
+            "name": "maxState",
+            "arguments": [
+              {
+                "parts": [
+                  "radacctid"
+                ]
+              }
+            ],
+            "alias": "max_radacctid"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "radacct"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "parts": [
+                "acctstatustype"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "Stop"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "left": {
+                "parts": [
+                  "acctinputoctets"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "parts": [
+                  "acctoutputoctets"
+                ]
+              }
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          }
+        },
+        "group_by": [
+          {
+            "parts": [
+              "tadig"
+            ]
+          },
+          {
+            "parts": [
+              "ts"
+            ]
+          },
+          {
+            "parts": [
+              "dow"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

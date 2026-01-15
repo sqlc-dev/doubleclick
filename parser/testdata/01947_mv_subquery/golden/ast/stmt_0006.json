@@ -1,0 +1,149 @@
+{
+  "view": "src2dst_true",
+  "materialized": true,
+  "to": "dst",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "src",
+                  "value"
+                ]
+              },
+              "op": "-",
+              "right": {
+                "parts": [
+                  "deltas_sum"
+                ]
+              }
+            },
+            "alias": "delta"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "src"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "id"
+                            ]
+                          },
+                          {
+                            "name": "sum",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "delta"
+                                ]
+                              }
+                            ],
+                            "alias": "deltas_sum"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "dst"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "expr": {
+                            "parts": [
+                              "id"
+                            ]
+                          },
+                          "query": {
+                            "selects": [
+                              {
+                                "columns": [
+                                  {
+                                    "parts": [
+                                      "id"
+                                    ]
+                                  }
+                                ],
+                                "from": {
+                                  "tables": [
+                                    {
+                                      "table": {
+                                        "table": {
+                                          "table": "src"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                },
+                                "where": {
+                                  "op": "NOT",
+                                  "operand": {
+                                    "name": "sleepEachRow",
+                                    "arguments": [
+                                      {
+                                        "type": "Float",
+                                        "value": 0.001,
+                                        "source": "0.001"
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        "group_by": [
+                          {
+                            "parts": [
+                              "id"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "alias": "_a"
+              },
+              "join": {
+                "type": "LEFT",
+                "using": [
+                  {
+                    "parts": [
+                      "id"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

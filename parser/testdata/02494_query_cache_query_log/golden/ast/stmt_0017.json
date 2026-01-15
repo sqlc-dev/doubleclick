@@ -1,0 +1,71 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "query"
+          ]
+        },
+        {
+          "parts": [
+            "query_cache_usage"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "query"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "SELECT 124437995, throwIf(1) SETTINGS use_query_cache = 1;"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "ExceptionWhileProcessing"
+          }
+        }
+      }
+    }
+  ]
+}

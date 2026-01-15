@@ -1,0 +1,122 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "toString",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "alias": "k"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{3,2}"
+                  },
+                  {
+                    "name": "numbers",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "number"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "left": {
+            "name": "queryID"
+          },
+          "op": "=",
+          "right": {
+            "name": "initialQueryID"
+          },
+          "parenthesized": true
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        },
+        {
+          "type": "Tuple",
+          "value": [
+            {
+              "parts": [
+                "k"
+              ]
+            },
+            {
+              "parts": [
+                "k"
+              ]
+            }
+          ],
+          "spaced_commas": true
+        }
+      ],
+      "grouping_sets": true,
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "group_by_two_level_threshold",
+          "value": {
+            "type": "Integer",
+            "value": 9
+          }
+        },
+        {
+          "name": "max_bytes_before_external_group_by",
+          "value": {
+            "type": "Integer",
+            "value": 10000000000
+          }
+        },
+        {
+          "name": "max_bytes_ratio_before_external_group_by",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

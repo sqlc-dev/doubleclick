@@ -1,0 +1,66 @@
+{
+  "view": "v",
+  "columns": [
+    {
+      "name": "s",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "n",
+      "type": {
+        "name": "UInt8"
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "type": "String",
+              "value": "test"
+            },
+            "alias": "s"
+          },
+          {
+            "name": "toUInt8",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ],
+            "alias": "n"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10000000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

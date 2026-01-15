@@ -1,0 +1,252 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {},
+        {
+          "name": "ROW_NUMBER",
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "c2"
+                ]
+              },
+              {
+                "parts": [
+                  "c4"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "c5"
+                  ]
+                },
+                "descending": true
+              },
+              {
+                "expression": {
+                  "parts": [
+                    "c3"
+                  ]
+                },
+                "descending": true
+              }
+            ]
+          },
+          "alias": "row_n"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "t1",
+                            "c1"
+                          ],
+                          "alias": "account_id"
+                        },
+                        {
+                          "parts": [
+                            "t1",
+                            "c2"
+                          ],
+                          "alias": "c2"
+                        },
+                        {
+                          "parts": [
+                            "t1",
+                            "c3"
+                          ],
+                          "alias": "c3"
+                        },
+                        {
+                          "parts": [
+                            "t1",
+                            "c4"
+                          ],
+                          "alias": "c4"
+                        },
+                        {
+                          "parts": [
+                            "t1",
+                            "c5"
+                          ],
+                          "alias": "c5"
+                        },
+                        {
+                          "name": "ROW_NUMBER",
+                          "over": {
+                            "partition_by": [
+                              {
+                                "parts": [
+                                  "t1",
+                                  "c2"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "t1",
+                                  "c3"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "t1",
+                                  "c4"
+                                ]
+                              }
+                            ],
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "t1",
+                                    "c5"
+                                  ]
+                                },
+                                "descending": true
+                              }
+                            ]
+                          },
+                          "alias": "rn"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "table_test"
+                              },
+                              "alias": "t1"
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "t1",
+                            "c1"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "t1",
+                            "c2"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "t1",
+                            "c3"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "t1",
+                            "c4"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "t1",
+                            "c5"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "t1",
+                              "c2"
+                            ]
+                          }
+                        },
+                        {
+                          "expression": {
+                            "parts": [
+                              "t1",
+                              "c4"
+                            ]
+                          }
+                        },
+                        {
+                          "expression": {
+                            "parts": [
+                              "t1",
+                              "c5"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "rn"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "c2"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "c4"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "c5"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "c3"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

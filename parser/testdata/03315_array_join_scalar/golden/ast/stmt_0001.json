@@ -1,0 +1,170 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "table_x",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "col_a"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "col_b"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "expr": {
+                                        "type": "String",
+                                        "value": "a"
+                                      },
+                                      "alias": "col_a"
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "Array",
+                                        "value": [
+                                          {
+                                            "type": "String",
+                                            "value": "b"
+                                          },
+                                          {
+                                            "type": "String",
+                                            "value": "c"
+                                          }
+                                        ],
+                                        "spaced_commas": true
+                                      },
+                                      "alias": "col_b"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "array_join": {
+                          "columns": [
+                            {
+                              "parts": [
+                                "col_b"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "group_a",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "groupArray",
+                      "arguments": [
+                        {
+                          "type": "Tuple",
+                          "value": [
+                            {
+                              "parts": [
+                                "col_a"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "col_b"
+                              ]
+                            }
+                          ],
+                          "spaced_commas": true
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "table_x"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "group_a"
+          ]
+        },
+        {
+          "name": "groupArray",
+          "arguments": [
+            {
+              "type": "Tuple",
+              "value": [
+                {
+                  "parts": [
+                    "col_a"
+                  ]
+                },
+                {
+                  "parts": [
+                    "col_b"
+                  ]
+                }
+              ],
+              "spaced_commas": true
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "table_x"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "name": "ignore",
+              "arguments": [
+                {},
+                {
+                  "parts": [
+                    "metadata_modification_time"
+                  ]
+                },
+                {
+                  "parts": [
+                    "engine_full"
+                  ]
+                },
+                {
+                  "parts": [
+                    "create_table_query"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "tables"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "database"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "{CLICKHOUSE_DATABASE:String}"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "table": "test_mixed_duplicates",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "create_date",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "name"
+      ]
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "parts": [
+          "id"
+        ]
+      },
+      {
+        "name": "toYYYYMM",
+        "arguments": [
+          {
+            "parts": [
+              "create_date"
+            ]
+          }
+        ]
+      },
+      {
+        "parts": [
+          "id"
+        ]
+      },
+      {
+        "name": "sipHash64",
+        "arguments": [
+          {
+            "parts": [
+              "name"
+            ]
+          }
+        ]
+      }
+    ],
+    "spaced_commas": true
+  }
+}

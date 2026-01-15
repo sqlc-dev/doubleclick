@@ -1,0 +1,215 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "Values",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "id UInt64, t UInt64"
+                                  },
+                                  {
+                                    "type": "Tuple",
+                                    "value": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 1
+                                      },
+                                      {
+                                        "type": "Integer",
+                                        "value": 3
+                                      }
+                                    ],
+                                    "spaced_commas": true
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "Values",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "id UInt64, t UInt64"
+                                  },
+                                  {
+                                    "type": "Tuple",
+                                    "value": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 1
+                                      },
+                                      {
+                                        "type": "Integer",
+                                        "value": 1
+                                      }
+                                    ],
+                                    "spaced_commas": true
+                                  },
+                                  {
+                                    "type": "Tuple",
+                                    "value": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 1
+                                      },
+                                      {
+                                        "type": "Integer",
+                                        "value": 2
+                                      }
+                                    ],
+                                    "spaced_commas": true
+                                  },
+                                  {
+                                    "type": "Tuple",
+                                    "value": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 1
+                                      },
+                                      {
+                                        "type": "Integer",
+                                        "value": 3
+                                      }
+                                    ],
+                                    "spaced_commas": true
+                                  },
+                                  {
+                                    "type": "Tuple",
+                                    "value": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 1
+                                      },
+                                      {
+                                        "type": "Integer",
+                                        "value": 4
+                                      }
+                                    ],
+                                    "spaced_commas": true
+                                  },
+                                  {
+                                    "type": "Tuple",
+                                    "value": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 1
+                                      },
+                                      {
+                                        "type": "Integer",
+                                        "value": 5
+                                      }
+                                    ],
+                                    "spaced_commas": true
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ASOF",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "id"
+                    ]
+                  },
+                  "parenthesized": true
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "t"
+                    ]
+                  },
+                  "op": "\u003c",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "t"
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "t2",
+            "t"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "Integer",
+          "value": 4
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "haystack"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "matches"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "length",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "parts": [
+                "matches"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "repeat",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "abcdefghijklmnopqrstuvwxyz"
+                            },
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            }
+                          ],
+                          "alias": "haystack"
+                        },
+                        {
+                          "name": "extractGroups",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "haystack"
+                              ]
+                            },
+                            {
+                              "name": "repeat",
+                              "arguments": [
+                                {
+                                  "type": "String",
+                                  "value": "(\\w)"
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 100
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "matches"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 3
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

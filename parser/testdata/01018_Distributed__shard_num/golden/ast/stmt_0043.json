@@ -1,0 +1,126 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "a",
+            "_shard_num"
+          ]
+        },
+        {
+          "parts": [
+            "a",
+            "key"
+          ]
+        },
+        {
+          "parts": [
+            "b",
+            "host_name"
+          ]
+        },
+        {
+          "expr": {
+            "parts": [
+              "b",
+              "host_address"
+            ]
+          },
+          "list": [
+            {
+              "type": "String",
+              "value": "::1"
+            },
+            {
+              "type": "String",
+              "value": "127.0.0.1"
+            }
+          ]
+        },
+        {
+          "parts": [
+            "b",
+            "port"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {},
+                        {
+                          "parts": [
+                            "_shard_num"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "dist_1"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "a"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "clusters"
+              },
+              "alias": "b"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "a",
+                    "_shard_num"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "b",
+                    "shard_num"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "b",
+            "cluster"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "test_cluster_two_shards_localhost"
+        }
+      }
+    }
+  ]
+}

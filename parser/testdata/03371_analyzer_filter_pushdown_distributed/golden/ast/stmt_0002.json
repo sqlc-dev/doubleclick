@@ -1,0 +1,53 @@
+{
+  "table": "bug_table",
+  "columns": [
+    {
+      "name": "date_column",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "c1",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "c2",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "c1"
+          ]
+        },
+        {
+          "parts": [
+            "c2"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "date_column"
+        ]
+      }
+    ]
+  }
+}

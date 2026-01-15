@@ -1,0 +1,109 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "table": "left_table"
+        },
+        {
+          "table": "middle_table"
+        },
+        {
+          "table": "right_table"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "left_table"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "middle_table"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "left_table",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "middle_table",
+                    "id"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "right_table"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "middle_table",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "right_table",
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "left_table",
+              "id"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "val_left"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "val_middle"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "val_right"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

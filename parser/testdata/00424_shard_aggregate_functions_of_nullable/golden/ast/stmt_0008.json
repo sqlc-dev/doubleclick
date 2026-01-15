@@ -1,0 +1,109 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "left": {
+                "type": "Integer",
+                "value": 1
+              },
+              "op": "+",
+              "right": {
+                "expr": {
+                  "parts": [
+                    "dummy"
+                  ]
+                },
+                "type": {
+                  "name": "Nullable",
+                  "parameters": [
+                    {
+                      "name": "UInt8"
+                    }
+                  ],
+                  "has_parentheses": true
+                }
+              }
+            }
+          ],
+          "alias": "res1"
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "res1"
+              ]
+            }
+          ],
+          "alias": "t1"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "left": {
+                "type": "Integer",
+                "value": 1
+              },
+              "op": "+",
+              "right": {
+                "name": "nullIf",
+                "arguments": [
+                  {
+                    "parts": [
+                      "dummy"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                ]
+              }
+            }
+          ],
+          "alias": "res2"
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "res2"
+              ]
+            }
+          ],
+          "alias": "t2"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{2,3}"
+                  },
+                  {
+                    "parts": [
+                      "system",
+                      "one"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

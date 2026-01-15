@@ -1,0 +1,61 @@
+{
+  "table": "data_02201",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "value_max",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "max"
+            ]
+          },
+          {
+            "name": "Int"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx",
+      "expression": {
+        "parts": [
+          "value_max"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "key"
+    ]
+  }
+}

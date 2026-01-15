@@ -1,0 +1,100 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "json",
+      "type": {
+        "name": "JSON",
+        "parameters": [
+          {
+            "expr": {
+              "name": "a",
+              "type": {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "UInt32"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            }
+          },
+          {
+            "expr": {
+              "name": "b",
+              "type": {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "UInt32"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            }
+          },
+          {
+            "expr": {
+              "name": "c",
+              "type": {
+                "name": "UInt32"
+              }
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx1",
+      "expression": {
+        "parts": [
+          "json",
+          "a"
+        ]
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "idx2",
+      "expression": {
+        "parts": [
+          "json",
+          "c"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,73 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "name": "lower",
+                  "arguments": [
+                    {
+                      "name": "materialize",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "AaAaAaAaAaAaAaA012345789,.!aAaA"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "name": "materialize",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "aaaaaaaaaaaaaaa012345789,.!aaaa"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "count"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "name": "range",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 16384
+                    }
+                  ],
+                  "alias": "n"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

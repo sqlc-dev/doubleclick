@@ -1,0 +1,231 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "",
+          "query": {
+            "type": "Tuple",
+            "value": [
+              {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "query_start_time_microseconds"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "query_log"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "current_database"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "name": "currentDatabase"
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "expr": {
+                              "parts": [
+                                "query"
+                              ]
+                            },
+                            "pattern": {
+                              "type": "String",
+                              "value": "SELECT '01461_query%"
+                            }
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "event_date"
+                            ]
+                          },
+                          "op": "\u003e=",
+                          "right": {
+                            "name": "yesterday"
+                          }
+                        }
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "query_start_time"
+                            ]
+                          },
+                          "descending": true
+                        }
+                      ],
+                      "limit": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  ]
+                },
+                "alias": "time_with_microseconds"
+              },
+              {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "query_start_time"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "query_log"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "current_database"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "name": "currentDatabase"
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "expr": {
+                              "parts": [
+                                "query"
+                              ]
+                            },
+                            "pattern": {
+                              "type": "String",
+                              "value": "SELECT '01461_query%"
+                            }
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "event_date"
+                            ]
+                          },
+                          "op": "\u003e=",
+                          "right": {
+                            "name": "yesterday"
+                          }
+                        }
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "query_start_time"
+                            ]
+                          },
+                          "descending": true
+                        }
+                      ],
+                      "limit": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  ]
+                },
+                "alias": "t"
+              }
+            ],
+            "spaced_commas": true
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "name": "dateDiff",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "second"
+                  },
+                  {
+                    "name": "toDateTime",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "time_with_microseconds"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "toDateTime",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "t"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            {
+              "type": "String",
+              "value": "ok"
+            },
+            {
+              "type": "String",
+              "value": "fail"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

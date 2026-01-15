@@ -1,0 +1,32 @@
+{
+  "table": "t_hardware_error",
+  "columns": [
+    {
+      "name": "KeyID",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{shard}/{database}/t_async_insert_dedup"
+      },
+      {
+        "type": "String",
+        "value": "{replica}"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "KeyID"
+      ]
+    }
+  ]
+}

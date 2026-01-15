@@ -1,0 +1,88 @@
+{
+  "table": "partitions",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "EventDate"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "left": {
+                  "parts": [
+                    "UserID"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 365
+                }
+              }
+            },
+            "alias": "EventDate"
+          },
+          {
+            "parts": [
+              "CounterID"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "test",
+                  "table": "hits"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "parts": [
+                "CounterID"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1704509
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "name": "toStartOfMonth",
+              "arguments": [
+                {
+                  "parts": [
+                    "EventDate"
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2014-03-01"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

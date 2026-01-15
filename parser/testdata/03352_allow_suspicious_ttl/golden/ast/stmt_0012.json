@@ -1,0 +1,51 @@
+{
+  "table": "replicated_ttl_00933",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "Int32"
+      },
+      "ttl": {
+        "left": {
+          "name": "now"
+        },
+        "op": "+",
+        "right": {
+          "value": {
+            "type": "Integer",
+            "value": 1
+          },
+          "unit": "SECOND"
+        }
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_ttl_00933"
+      },
+      {
+        "type": "String",
+        "value": "r1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "d"
+      ]
+    }
+  ]
+}

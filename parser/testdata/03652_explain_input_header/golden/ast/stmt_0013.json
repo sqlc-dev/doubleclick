@@ -1,0 +1,150 @@
+{
+  "explain_type": "PLAN",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "t1"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "t2"
+                }
+              },
+              "join": {
+                "type": "INNER",
+                "using": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "parts": [
+                "t1",
+                "x"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "op": "OR",
+          "right": {
+            "left": {
+              "parts": [
+                "t2",
+                "y"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "a"
+            }
+          }
+        },
+        "limit": {
+          "type": "Integer",
+          "value": 10
+        }
+      },
+      {
+        "selects": [
+          {
+            "columns": [
+              {}
+            ],
+            "from": {
+              "tables": [
+                {
+                  "table": {
+                    "table": {
+                      "table": "t2"
+                    }
+                  }
+                },
+                {
+                  "table": {
+                    "table": {
+                      "table": "t1"
+                    }
+                  },
+                  "join": {
+                    "type": "LEFT",
+                    "using": [
+                      {
+                        "parts": [
+                          "x"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "where": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "t2",
+                    "x"
+                  ]
+                },
+                "op": "\u003c",
+                "right": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              },
+              "op": "OR",
+              "right": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "y"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "c"
+                }
+              }
+            },
+            "limit": {
+              "type": "Integer",
+              "value": 10
+            }
+          }
+        ]
+      }
+    ],
+    "union_all": true,
+    "union_modes": [
+      "ALL"
+    ]
+  },
+  "has_settings": true,
+  "explicit_type": true,
+  "options_string": "header = 1, input_headers = 1"
+}

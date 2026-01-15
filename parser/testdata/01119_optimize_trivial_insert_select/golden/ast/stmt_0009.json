@@ -1,0 +1,77 @@
+{
+  "table": "t",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "type": "Integer",
+            "value": 4
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ],
+            "alias": "c"
+          },
+          {
+            "name": "getSetting",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "max_threads"
+              }
+            ],
+            "alias": "mt"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers_mt",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10000000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "mt"
+            ]
+          }
+        ],
+        "settings": [
+          {
+            "name": "max_insert_threads",
+            "value": {
+              "type": "Integer",
+              "value": 4
+            }
+          },
+          {
+            "name": "max_threads",
+            "value": {
+              "type": "Integer",
+              "value": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true
+}

@@ -1,0 +1,59 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "partitions"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "EventDate"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2015-01-01"
+              }
+            ]
+          }
+        },
+        "op": "OR",
+        "right": {
+          "left": {
+            "parts": [
+              "EventDate"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2015-02-01"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

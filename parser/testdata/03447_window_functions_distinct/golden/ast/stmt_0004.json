@@ -1,0 +1,115 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "x",
+          "query": {
+            "left": {
+              "name": "intHash64",
+              "arguments": [
+                {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 10
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "x"
+          ]
+        },
+        {
+          "name": "sumDistinct",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "over": {
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              },
+              "end": {
+                "type": "CURRENT_ROW"
+              }
+            }
+          },
+          "alias": "a"
+        },
+        {
+          "name": "sumDistinct",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "over": {
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "CURRENT_ROW"
+              },
+              "end": {
+                "type": "UNBOUNDED_FOLLOWING"
+              }
+            }
+          },
+          "alias": "b"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

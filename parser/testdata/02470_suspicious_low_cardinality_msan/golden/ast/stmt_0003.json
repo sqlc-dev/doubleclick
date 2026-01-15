@@ -1,0 +1,160 @@
+{
+  "table": "alias_2__fuzz_25",
+  "columns": [
+    {
+      "name": "dt",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "Date"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "col",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "col2",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Int256"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "colAlias0",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "DateTime64",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 3
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "parts": [
+          "col"
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "colAlias3",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Int32"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "col3"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "parts": [
+            "colAlias0"
+          ]
+        }
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "colAlias1",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "UInt16"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "colAlias0"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "parts": [
+            "col2"
+          ]
+        }
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "colAlias2",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "Int32"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "colAlias0"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "parts": [
+            "colAlias1"
+          ]
+        }
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "col3",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "UInt8"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "dt"
+      ]
+    }
+  ]
+}

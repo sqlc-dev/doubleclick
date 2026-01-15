@@ -1,0 +1,110 @@
+{
+  "view": "agg_view01747",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "summing_table01747",
+              "some_name"
+            ],
+            "alias": "some_name"
+          },
+          {
+            "name": "dictGet",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "default.dict01747"
+              },
+              {
+                "type": "String",
+                "value": "field1"
+              },
+              {
+                "name": "tuple",
+                "arguments": [
+                  {
+                    "parts": [
+                      "some_name"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "field1"
+          },
+          {
+            "name": "dictGet",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "default.dict01747"
+              },
+              {
+                "type": "String",
+                "value": "field2"
+              },
+              {
+                "name": "tuple",
+                "arguments": [
+                  {
+                    "parts": [
+                      "some_name"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "field2"
+          },
+          {
+            "parts": [
+              "rates01747",
+              "rates01747"
+            ],
+            "alias": "rates01747"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "summing_table01747"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "rates01747"
+                }
+              },
+              "join": {
+                "type": "LEFT",
+                "strictness": "ANY",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "rates01747",
+                      "from_currency"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "summing_table01747",
+                      "currency"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

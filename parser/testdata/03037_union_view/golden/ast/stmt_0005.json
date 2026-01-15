@@ -1,0 +1,96 @@
+{
+  "view": "broken_view",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "t",
+              "start"
+            ],
+            "alias": "start"
+          },
+          {
+            "parts": [
+              "t",
+              "end"
+            ],
+            "alias": "end"
+          },
+          {
+            "expr": {
+              "expr": {
+                "name": "datediff",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "second"
+                  },
+                  {
+                    "parts": [
+                      "t",
+                      "start"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "t",
+                      "end"
+                    ]
+                  }
+                ]
+              },
+              "type": {
+                "name": "float"
+              }
+            },
+            "alias": "total_sec"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "broken_table"
+                },
+                "alias": "t",
+                "final": true
+              }
+            }
+          ]
+        }
+      },
+      {
+        "columns": [
+          {
+            "expr": {
+              "type": "Null",
+              "value": null
+            },
+            "alias": "start"
+          },
+          {
+            "expr": {
+              "type": "Null",
+              "value": null
+            },
+            "alias": "end"
+          },
+          {
+            "expr": {
+              "type": "Null",
+              "value": null
+            },
+            "alias": "total_sec"
+          }
+        ]
+      }
+    ],
+    "union_all": true,
+    "union_modes": [
+      "UNION ALL"
+    ]
+  }
+}

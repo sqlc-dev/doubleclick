@@ -1,0 +1,192 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "event_type"
+          ]
+        },
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "parts": [
+            "part_name"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "bytes_uncompressed"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "condition": {
+            "left": {
+              "parts": [
+                "bytes_uncompressed"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          "then": {
+            "condition": {
+              "left": {
+                "parts": [
+                  "size_in_bytes"
+                ]
+              },
+              "op": "\u003c",
+              "right": {
+                "parts": [
+                  "bytes_uncompressed"
+                ]
+              }
+            },
+            "then": {
+              "type": "String",
+              "value": "1"
+            },
+            "else": {
+              "name": "toString",
+              "arguments": [
+                {
+                  "type": "Tuple",
+                  "value": [
+                    {
+                      "parts": [
+                        "size_in_bytes"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "bytes_uncompressed"
+                      ]
+                    }
+                  ],
+                  "spaced_commas": true
+                }
+              ]
+            }
+          },
+          "else": {
+            "type": "String",
+            "value": "0"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "event_date"
+                ]
+              },
+              "op": "\u003e=",
+              "right": {
+                "name": "yesterday"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "part_log_bytes_uncompressed"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "left": {
+              "parts": [
+                "event_type"
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "type": "String",
+              "value": "RemovePart"
+            }
+          },
+          "op": "OR",
+          "right": {
+            "left": {
+              "parts": [
+                "part_name"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "all_4_4_0"
+            }
+          },
+          "parenthesized": true
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "part_name"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "event_type"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

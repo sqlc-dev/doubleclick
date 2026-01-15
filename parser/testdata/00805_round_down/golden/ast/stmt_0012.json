@@ -1,0 +1,94 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 10
+            }
+          },
+          "alias": "x"
+        },
+        {
+          "name": "roundDown",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            },
+            {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "name": "groupArray",
+                        "arguments": [
+                          {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "*",
+                            "right": {
+                              "type": "Float",
+                              "value": 1.25,
+                              "source": "1.25"
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "name": "numbers",
+                              "arguments": [
+                                {
+                                  "type": "Integer",
+                                  "value": 100000
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

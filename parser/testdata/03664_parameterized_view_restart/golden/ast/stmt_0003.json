@@ -1,0 +1,214 @@
+{
+  "table": "order_attribution",
+  "columns": [
+    {
+      "name": "order_product_event_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "brand_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "user_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "gmv",
+      "type": {
+        "name": "Float64"
+      }
+    },
+    {
+      "name": "gsv",
+      "type": {
+        "name": "Float64"
+      }
+    },
+    {
+      "name": "po_created_at",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 9
+          },
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "event_brand_id",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "campaign_id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "event_bid_type",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "event_bid_value",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Float64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "event_inventory_id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "event_user_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "ad_event_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "latest_ad_created_at",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 9
+          },
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "event_type",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "attribution_window",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "_version",
+      "type": {
+        "name": "DateTime"
+      },
+      "default": {
+        "name": "now"
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "_version"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "brand_id"
+          ]
+        },
+        {
+          "parts": [
+            "campaign_id"
+          ]
+        },
+        {
+          "parts": [
+            "event_type"
+          ]
+        },
+        {
+          "parts": [
+            "latest_ad_created_at"
+          ]
+        },
+        {
+          "parts": [
+            "user_id"
+          ]
+        },
+        {
+          "parts": [
+            "order_product_event_id"
+          ]
+        },
+        {
+          "parts": [
+            "ad_event_id"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

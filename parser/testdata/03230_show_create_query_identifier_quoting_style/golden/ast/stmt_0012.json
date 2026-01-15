@@ -1,0 +1,96 @@
+{
+  "view": "uk_prices_aggs_view",
+  "materialized": true,
+  "to": "uk_prices_aggs_dest",
+  "as_select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "month",
+            "query": {
+              "name": "toStartOfMonth",
+              "arguments": [
+                {
+                  "parts": [
+                    "date"
+                  ]
+                }
+              ]
+            },
+            "scalar_with": true
+          }
+        ],
+        "columns": [
+          {
+            "parts": [
+              "month"
+            ]
+          },
+          {
+            "name": "minSimpleState",
+            "arguments": [
+              {
+                "parts": [
+                  "price"
+                ]
+              }
+            ],
+            "alias": "min_price"
+          },
+          {
+            "name": "maxSimpleState",
+            "arguments": [
+              {
+                "parts": [
+                  "price"
+                ]
+              }
+            ],
+            "alias": "max_price"
+          },
+          {
+            "name": "countState",
+            "arguments": [
+              {
+                "parts": [
+                  "price"
+                ]
+              }
+            ],
+            "alias": "volume"
+          },
+          {
+            "name": "avgState",
+            "arguments": [
+              {
+                "parts": [
+                  "price"
+                ]
+              }
+            ],
+            "alias": "avg_price"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "uk_price_paid"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "month"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

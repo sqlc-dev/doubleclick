@@ -1,0 +1,74 @@
+{
+  "table": "nested_map_multiple_values",
+  "columns": [
+    {
+      "name": "d",
+      "type": null,
+      "default": {
+        "name": "today"
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "payload",
+      "type": null,
+      "default": {
+        "name": "rand"
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "SomeMap",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": {
+              "name": "UInt32"
+            }
+          },
+          {
+            "name": "Num1",
+            "type": {
+              "name": "Int64"
+            }
+          },
+          {
+            "name": "Num2",
+            "type": {
+              "name": "Float64"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "parts": [
+          "k"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

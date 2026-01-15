@@ -1,0 +1,84 @@
+{
+  "table": "t",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "created_at",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "xxx",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "key"
+            ]
+          },
+          {
+            "parts": [
+              "created_at"
+            ]
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "value"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "key"
+            ]
+          },
+          {
+            "parts": [
+              "created_at"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "created_at"
+        ]
+      }
+    ]
+  }
+}

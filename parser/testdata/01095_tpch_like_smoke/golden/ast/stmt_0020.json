@@ -1,0 +1,216 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "l_returnflag"
+          ]
+        },
+        {
+          "parts": [
+            "l_linestatus"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "l_quantity"
+              ]
+            }
+          ],
+          "alias": "sum_qty"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "l_extendedprice"
+              ]
+            }
+          ],
+          "alias": "sum_base_price"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "l_extendedprice"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "left": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "op": "-",
+                "right": {
+                  "parts": [
+                    "l_discount"
+                  ]
+                },
+                "parenthesized": true
+              }
+            }
+          ],
+          "alias": "sum_disc_price"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "left": {
+                "left": {
+                  "parts": [
+                    "l_extendedprice"
+                  ]
+                },
+                "op": "*",
+                "right": {
+                  "left": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "op": "-",
+                  "right": {
+                    "parts": [
+                      "l_discount"
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              },
+              "op": "*",
+              "right": {
+                "left": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "op": "+",
+                "right": {
+                  "parts": [
+                    "l_tax"
+                  ]
+                },
+                "parenthesized": true
+              }
+            }
+          ],
+          "alias": "sum_charge"
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "parts": [
+                "l_quantity"
+              ]
+            }
+          ],
+          "alias": "avg_qty"
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "parts": [
+                "l_extendedprice"
+              ]
+            }
+          ],
+          "alias": "avg_price"
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "parts": [
+                "l_discount"
+              ]
+            }
+          ],
+          "alias": "avg_disc"
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ],
+          "alias": "count_order"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "lineitem"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "l_shipdate"
+          ]
+        },
+        "op": "\u003c=",
+        "right": {
+          "left": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "1998-12-01"
+              }
+            ]
+          },
+          "op": "-",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 90
+            },
+            "unit": "DAY"
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "l_returnflag"
+          ]
+        },
+        {
+          "parts": [
+            "l_linestatus"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "l_returnflag"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "l_linestatus"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

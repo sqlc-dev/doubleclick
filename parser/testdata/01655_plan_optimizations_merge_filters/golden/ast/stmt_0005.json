@@ -1,0 +1,155 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "explain"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "query": {
+                                    "selects": [
+                                      {
+                                        "columns": [
+                                          {
+                                            "name": "sum",
+                                            "arguments": [
+                                              {
+                                                "parts": [
+                                                  "number"
+                                                ]
+                                              }
+                                            ],
+                                            "alias": "v"
+                                          },
+                                          {
+                                            "name": "bitAnd",
+                                            "arguments": [
+                                              {
+                                                "parts": [
+                                                  "number"
+                                                ]
+                                              },
+                                              {
+                                                "type": "Integer",
+                                                "value": 15
+                                              }
+                                            ],
+                                            "alias": "key"
+                                          }
+                                        ],
+                                        "from": {
+                                          "tables": [
+                                            {
+                                              "table": {
+                                                "table": {
+                                                  "name": "numbers",
+                                                  "arguments": [
+                                                    {
+                                                      "type": "Float",
+                                                      "value": 100000000,
+                                                      "source": "1e8"
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        },
+                                        "group_by": [
+                                          {
+                                            "parts": [
+                                              "key"
+                                            ]
+                                          }
+                                        ],
+                                        "having": {
+                                          "left": {
+                                            "parts": [
+                                              "v"
+                                            ]
+                                          },
+                                          "op": "!=",
+                                          "right": {
+                                            "type": "Integer",
+                                            "value": 0
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "parts": [
+                              "key"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 7
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Filter%"
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Aggregating%"
+          }
+        }
+      }
+    }
+  ]
+}

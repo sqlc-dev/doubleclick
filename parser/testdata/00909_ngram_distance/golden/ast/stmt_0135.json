@@ -1,0 +1,87 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "round",
+            "arguments": [
+              {
+                "left": {
+                  "type": "Integer",
+                  "value": 1000
+                },
+                "op": "*",
+                "right": {
+                  "name": "ngramDistanceCaseInsensitive",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "abcdefgh"
+                    },
+                    {
+                      "name": "materialize",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "abcdeFG"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "round",
+            "arguments": [
+              {
+                "left": {
+                  "type": "Integer",
+                  "value": 1000
+                },
+                "op": "*",
+                "right": {
+                  "name": "ngramDistanceCaseInsensitive",
+                  "arguments": [
+                    {
+                      "name": "materialize",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "abcdefgh"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "String",
+                      "value": "abcdeFG"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 5
+      }
+    }
+  ]
+}

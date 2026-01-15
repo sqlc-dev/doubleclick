@@ -1,0 +1,118 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "t1",
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "t2",
+            "b"
+          ]
+        },
+        {
+          "parts": [
+            "t5",
+            "c"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "table1"
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "table2"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "a"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "a"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "table5"
+              },
+              "alias": "t5"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "a"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t5",
+                      "a"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "t2",
+                      "b"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t5",
+                      "b"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "t1",
+              "a"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

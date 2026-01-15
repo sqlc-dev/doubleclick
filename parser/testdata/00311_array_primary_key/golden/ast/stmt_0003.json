@@ -1,0 +1,76 @@
+{
+  "table": "array_pk",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt8"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "n",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "type": "String",
+        "value": "2000-01-01"
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "key"
+            ]
+          },
+          {
+            "parts": [
+              "s"
+            ]
+          },
+          {
+            "parts": [
+              "n"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 1
+      }
+    ],
+    "has_parentheses": true
+  }
+}

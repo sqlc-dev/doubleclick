@@ -1,0 +1,97 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayJoin",
+          "arguments": [
+            {
+              "name": "lttb",
+              "parameters": [
+                {
+                  "type": "Integer",
+                  "value": 1000
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                },
+                {
+                  "parts": [
+                    "y"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "point"
+        },
+        {
+          "name": "tupleElement",
+          "arguments": [
+            {
+              "parts": [
+                "point"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ],
+          "alias": "point_x"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "point_x"
+              ]
+            },
+            "op": "-",
+            "right": {
+              "name": "neighbor",
+              "arguments": [
+                {
+                  "parts": [
+                    "point_x"
+                  ]
+                },
+                {
+                  "op": "-",
+                  "operand": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          },
+          "alias": "point_x_diff_with_previous_row"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "largestTriangleTreeBucketsBucketSizeTest"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      },
+      "offset": {
+        "type": "Integer",
+        "value": 990
+      }
+    }
+  ]
+}

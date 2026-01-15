@@ -1,0 +1,105 @@
+{
+  "table": "session_events",
+  "columns": [
+    {
+      "name": "clientId",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "sessionId",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "pageId",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "eventNumber",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "type",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "data",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "clientId"
+          ]
+        },
+        {
+          "parts": [
+            "sessionId"
+          ]
+        },
+        {
+          "parts": [
+            "pageId"
+          ]
+        },
+        {
+          "parts": [
+            "timestamp"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "name": "toDate",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "pageId"
+              ]
+            },
+            "op": "/",
+            "right": {
+              "type": "Integer",
+              "value": 1000
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "parts": [
+            "X"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "foo_merge"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t2"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "Val"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "Val"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "Id"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "t2",
+              "X"
+            ]
+          },
+          "op": "==",
+          "right": {
+            "type": "Integer",
+            "value": 4
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "X"
+          ]
+        }
+      ]
+    }
+  ]
+}

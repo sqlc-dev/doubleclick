@@ -1,0 +1,156 @@
+{
+  "view": "mv_a",
+  "materialized": true,
+  "to": "dest_a",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "count",
+            "alias": "count"
+          },
+          {
+            "name": "min",
+            "arguments": [
+              {
+                "parts": [
+                  "a"
+                ]
+              }
+            ],
+            "alias": "min"
+          },
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "a"
+                ]
+              }
+            ],
+            "alias": "max"
+          },
+          {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "source_null"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "alias": "count_subquery"
+          },
+          {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "min",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "a"
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "source_null"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "alias": "min_subquery"
+          },
+          {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "max",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "a"
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "source_null"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "alias": "max_subquery"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "source_null"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "count_subquery"
+            ]
+          },
+          {
+            "parts": [
+              "min_subquery"
+            ]
+          },
+          {
+            "parts": [
+              "max_subquery"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

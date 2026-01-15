@@ -1,0 +1,54 @@
+{
+  "view": "myview",
+  "materialized": true,
+  "to": "mydestination",
+  "as_select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "objects",
+            "query": {
+              "type": "Tuple",
+              "value": [
+                {
+                  "type": "String",
+                  "value": "foo"
+                },
+                {
+                  "type": "String",
+                  "value": "bar"
+                }
+              ],
+              "spaced_commas": true
+            },
+            "scalar_with": true
+          }
+        ],
+        "columns": [
+          {
+            "expr": {
+              "type": "String",
+              "value": "foo"
+            },
+            "alias": "object"
+          }
+        ],
+        "where": {
+          "expr": {
+            "parts": [
+              "object"
+            ]
+          },
+          "list": [
+            {
+              "parts": [
+                "objects"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

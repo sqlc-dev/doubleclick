@@ -1,0 +1,121 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "max",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "selects": [
+                                    {
+                                      "selects": [
+                                        {
+                                          "columns": [
+                                            {
+                                              "type": "Integer",
+                                              "value": 1
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "columns": [
+                                            {
+                                              "type": "Integer",
+                                              "value": 2
+                                            }
+                                          ]
+                                        }
+                                      ],
+                                      "union_modes": [
+                                        "UNION DISTINCT"
+                                      ]
+                                    },
+                                    {
+                                      "columns": [
+                                        {
+                                          "type": "Integer",
+                                          "value": 1
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "operators": [
+                                    "EXCEPT"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      ]
+                    },
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "max"
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 100
+      }
+    }
+  ]
+}

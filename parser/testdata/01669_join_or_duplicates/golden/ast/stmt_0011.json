@@ -1,0 +1,157 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "a"
+                          },
+                          "alias": "a"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "c"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "a"
+                          },
+                          "alias": "a"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "c"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "c"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "c"
+                    ]
+                  }
+                },
+                "op": "OR",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "a"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "a"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "t1",
+              "c"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "t2",
+              "c"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

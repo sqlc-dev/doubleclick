@@ -1,0 +1,150 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "name": "uniqExact",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "k"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          "alias": "k"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "name": "numbers",
+                                                "arguments": [
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 1
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "nums"
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "materialize",
+                                          "arguments": [
+                                            {
+                                              "type": "Integer",
+                                              "value": 1
+                                            }
+                                          ],
+                                          "alias": "k"
+                                        },
+                                        {
+                                          "parts": [
+                                            "number"
+                                          ],
+                                          "alias": "n"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "name": "numbers",
+                                                "arguments": [
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 100000
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "j"
+                            },
+                            "join": {
+                              "type": "INNER",
+                              "using": [
+                                {
+                                  "parts": [
+                                    "k"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

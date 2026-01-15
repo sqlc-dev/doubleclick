@@ -1,0 +1,226 @@
+{
+  "function": {
+    "name": "file",
+    "arguments": [
+      {
+        "type": "String",
+        "value": "02841.parquet"
+      }
+    ]
+  },
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "name": "if",
+            "arguments": [
+              {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 234
+                  }
+                },
+                "op": "==",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              {
+                "type": "Null",
+                "value": null
+              },
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ],
+            "alias": "sometimes_null"
+          },
+          {
+            "name": "toNullable",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ],
+            "alias": "never_null"
+          },
+          {
+            "name": "if",
+            "arguments": [
+              {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 345
+                  }
+                },
+                "op": "==",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              {
+                "expr": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "type": {
+                  "name": "String"
+                },
+                "operator_syntax": true
+              },
+              {
+                "type": "Null",
+                "value": null
+              }
+            ],
+            "alias": "mostly_null"
+          },
+          {
+            "name": "toLowCardinality",
+            "arguments": [
+              {
+                "name": "if",
+                "arguments": [
+                  {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "op": "%",
+                      "right": {
+                        "type": "Integer",
+                        "value": 234
+                      }
+                    },
+                    "op": "==",
+                    "right": {
+                      "type": "Integer",
+                      "value": 0
+                    }
+                  },
+                  {
+                    "type": "Null",
+                    "value": null
+                  },
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "sometimes_null_lc"
+          },
+          {
+            "name": "toLowCardinality",
+            "arguments": [
+              {
+                "name": "toNullable",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "never_null_lc"
+          },
+          {
+            "name": "toLowCardinality",
+            "arguments": [
+              {
+                "name": "if",
+                "arguments": [
+                  {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "op": "%",
+                      "right": {
+                        "type": "Integer",
+                        "value": 345
+                      }
+                    },
+                    "op": "==",
+                    "right": {
+                      "type": "Integer",
+                      "value": 0
+                    }
+                  },
+                  {
+                    "expr": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "type": {
+                      "name": "String"
+                    },
+                    "operator_syntax": true
+                  },
+                  {
+                    "type": "Null",
+                    "value": null
+                  }
+                ]
+              }
+            ],
+            "alias": "mostly_null_lc"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "both"
+        },
+        {
+          "parts": [
+            "database"
+          ]
+        },
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "name": "left",
+          "arguments": [
+            {
+              "parts": [
+                "replica_name"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "replicas"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "database"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "name": "currentDatabase"
+        }
+      }
+    }
+  ]
+}

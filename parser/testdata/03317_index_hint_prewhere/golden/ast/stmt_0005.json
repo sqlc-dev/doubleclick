@@ -1,0 +1,167 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "test_indexHint_prewhere"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "expr": {
+                              "parts": [
+                                "id"
+                              ]
+                            },
+                            "list": [
+                              {
+                                "type": "Integer",
+                                "value": 62
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 88
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 89
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 67
+                              }
+                            ]
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "left": {
+                                "name": "indexHint",
+                                "arguments": [
+                                  {
+                                    "name": "has",
+                                    "arguments": [
+                                      {
+                                        "name": "tokens",
+                                        "arguments": [
+                                          {
+                                            "parts": [
+                                              "colA"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "String",
+                                        "value": "ymo82"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              "op": "AND",
+                              "right": {
+                                "expr": {
+                                  "parts": [
+                                    "colA"
+                                  ]
+                                },
+                                "pattern": {
+                                  "type": "String",
+                                  "value": "%ymo82%"
+                                }
+                              },
+                              "parenthesized": true
+                            },
+                            "op": "OR",
+                            "right": {
+                              "left": {
+                                "name": "indexHint",
+                                "arguments": [
+                                  {
+                                    "name": "has",
+                                    "arguments": [
+                                      {
+                                        "name": "tokens",
+                                        "arguments": [
+                                          {
+                                            "parts": [
+                                              "colB"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "String",
+                                        "value": "dKappNQY6I"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              "op": "AND",
+                              "right": {
+                                "expr": {
+                                  "parts": [
+                                    "colB"
+                                  ]
+                                },
+                                "pattern": {
+                                  "type": "String",
+                                  "value": "%dKappNQY6I%"
+                                }
+                              },
+                              "parenthesized": true
+                            },
+                            "parenthesized": true
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "explain"
+          ]
+        },
+        "pattern": {
+          "type": "String",
+          "value": "%Prewhere filter column%colA%colB%"
+        }
+      }
+    }
+  ]
+}

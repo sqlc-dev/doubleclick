@@ -1,0 +1,58 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "parts": [
+              "engine_full"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%replica-{server_uuid}%",
+            "parenthesized": true
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "tables"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "test"
+          }
+        }
+      }
+    }
+  ]
+}

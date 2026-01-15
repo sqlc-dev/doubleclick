@@ -1,0 +1,76 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "t2",
+            "name"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.2"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "type": "String",
+                    "value": "local_table"
+                  }
+                ]
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "other_table"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "LEFT",
+              "global": true,
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "oth_id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "t2",
+              "name"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

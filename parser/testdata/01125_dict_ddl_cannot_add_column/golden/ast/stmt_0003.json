@@ -1,0 +1,102 @@
+{
+  "table": "somedict",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "start",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "end",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "id"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "HOST",
+          "value": {
+            "type": "String",
+            "value": "localhost"
+          }
+        },
+        {
+          "key": "PORT",
+          "value": {
+            "name": "tcpPort"
+          }
+        },
+        {
+          "key": "USER",
+          "value": {
+            "type": "String",
+            "value": "default"
+          }
+        },
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "date_table"
+          }
+        },
+        {
+          "key": "DB",
+          "value": {
+            "name": "currentDatabase"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 300
+      },
+      "max": {
+        "type": "Integer",
+        "value": 360
+      }
+    },
+    "layout": {
+      "type": "RANGE_HASHED"
+    },
+    "range": {
+      "min": {
+        "parts": [
+          "start"
+        ]
+      },
+      "max": {
+        "parts": [
+          "end"
+        ]
+      }
+    }
+  }
+}

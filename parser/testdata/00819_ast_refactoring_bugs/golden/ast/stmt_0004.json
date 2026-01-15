@@ -1,0 +1,97 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "PP",
+            "Key2"
+          ],
+          "alias": "ym:s:pl2"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "visits1"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "ParsedParams.Key2"
+                  ],
+                  "alias": "PP.Key2"
+                },
+                {
+                  "parts": [
+                    "ParsedParams.Key1"
+                  ],
+                  "alias": "PP.Key1"
+                },
+                {
+                  "name": "arrayEnumerateUniq",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "ParsedParams.Key2"
+                      ]
+                    },
+                    {
+                      "name": "arrayMap",
+                      "arguments": [
+                        {
+                          "parameters": [
+                            "x_0"
+                          ],
+                          "body": {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        },
+                        {
+                          "parts": [
+                            "ParsedParams.Key1"
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "alias": "upp_==_yes_"
+                },
+                {
+                  "name": "arrayEnumerateUniq",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "ParsedParams.Key2"
+                      ]
+                    }
+                  ],
+                  "alias": "_uniq_ParsedParams"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 100500
+        }
+      }
+    }
+  ]
+}

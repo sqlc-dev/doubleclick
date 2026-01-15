@@ -1,0 +1,48 @@
+{
+  "table": "fill_ex",
+  "columns": [
+    {
+      "name": "eventDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "storeId",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "storeId"
+          ]
+        },
+        {
+          "parts": [
+            "eventDate"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "eventDate"
+        ]
+      }
+    ]
+  }
+}

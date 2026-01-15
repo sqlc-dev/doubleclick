@@ -1,0 +1,95 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "any",
+          "arguments": [
+            {
+              "name": "toTypeName",
+              "arguments": [
+                {
+                  "parts": [
+                    "s"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "a"
+                          },
+                          "type": {
+                            "name": "String"
+                          },
+                          "alias": "s",
+                          "operator_syntax": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "b"
+                          },
+                          "type": {
+                            "name": "LowCardinality",
+                            "parameters": [
+                              {
+                                "name": "String"
+                              }
+                            ],
+                            "has_parentheses": true
+                          },
+                          "alias": "s",
+                          "operator_syntax": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "FULL",
+              "using": [
+                {
+                  "parts": [
+                    "s"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

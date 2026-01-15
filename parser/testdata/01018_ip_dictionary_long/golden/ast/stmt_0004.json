@@ -1,0 +1,110 @@
+{
+  "database": "{CLICKHOUSE_DATABASE:Identifier}",
+  "table": "table_ipv4_trie",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "type": "String",
+                "value": "255.255.255.255/"
+              },
+              "op": "||",
+              "right": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "+",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        "parenthesized": true
+                      },
+                      "op": "*",
+                      "right": {
+                        "type": "Integer",
+                        "value": 13
+                      }
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 33
+                    }
+                  }
+                ]
+              }
+            },
+            "alias": "prefix"
+          },
+          {
+            "name": "toUInt32",
+            "arguments": [
+              {
+                "left": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "op": "+",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "*",
+                  "right": {
+                    "type": "Integer",
+                    "value": 13
+                  }
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 33
+                }
+              }
+            ],
+            "alias": "asn"
+          },
+          {
+            "expr": {
+              "type": "String",
+              "value": "NA"
+            },
+            "alias": "cca2"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "numbers"
+                }
+              }
+            }
+          ]
+        },
+        "limit": {
+          "type": "Integer",
+          "value": 33
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "name",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 2
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "Float32"
+      }
+    },
+    {
+      "name": "money",
+      "type": {
+        "name": "Float64"
+      }
+    },
+    {
+      "name": "flag",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Int32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "flag"
+          ]
+        },
+        {
+          "parts": [
+            "money"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "optimize_row_order",
+      "value": {
+        "type": "Boolean",
+        "value": true
+      }
+    },
+    {
+      "name": "allow_nullable_key",
+      "value": {
+        "type": "Boolean",
+        "value": true
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

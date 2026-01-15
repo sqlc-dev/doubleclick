@@ -1,0 +1,120 @@
+{
+  "explain_type": "SYNTAX",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "count"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              ]
+                            },
+                            "alias": "a"
+                          },
+                          {
+                            "expr": {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "left": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  "op": "*",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                }
+                              ]
+                            },
+                            "alias": "b"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "database": "system",
+                                  "table": "numbers"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "limit": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "t"
+              }
+            },
+            {
+              "array_join": {
+                "columns": [
+                  {
+                    "parts": [
+                      "a"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "b"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "where": {
+          "op": "NOT",
+          "operand": {
+            "name": "ignore",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "a"
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "parts": [
+                    "b"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "explicit_type": true
+}

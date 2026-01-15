@@ -1,0 +1,112 @@
+{
+  "table": "test_simple_projection",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "event_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "user_id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "url",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "region",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "region_proj",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "_part_offset"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "region"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "user_id_proj",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "_part_offset"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "user_id"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "event_date"
+          ]
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "max_bytes_to_merge_at_max_space_in_pool",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

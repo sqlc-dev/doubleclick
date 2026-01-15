@@ -1,0 +1,136 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "name": "length",
+                "arguments": [
+                  {
+                    "name": "topK",
+                    "parameters": [
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      }
+                    ],
+                    "arguments": [
+                      {
+                        "name": "length",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "merged_from"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "op": "==",
+              "right": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            {
+              "left": {
+                "name": "arrayMin",
+                "arguments": [
+                  {
+                    "name": "topK",
+                    "parameters": [
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      }
+                    ],
+                    "arguments": [
+                      {
+                        "name": "length",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "merged_from"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "op": "\u003c=",
+              "right": {
+                "type": "Integer",
+                "value": 3
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "limited_merge_table"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "MergeParts"
+          }
+        }
+      }
+    }
+  ]
+}

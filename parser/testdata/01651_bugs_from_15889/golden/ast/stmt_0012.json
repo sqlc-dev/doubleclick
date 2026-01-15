@@ -1,0 +1,165 @@
+{
+  "table": "trace_log",
+  "columns": [
+    {
+      "name": "event_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "event_time",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "event_time_microseconds",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 6
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "timestamp_ns",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "revision",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "trace_type",
+      "type": {
+        "name": "Enum8",
+        "parameters": [
+          {
+            "left": {
+              "type": "String",
+              "value": "Real"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "CPU"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "Memory"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "MemorySample"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "thread_id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "query_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "trace",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "size",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "event_date"
+          ]
+        },
+        {
+          "parts": [
+            "event_time"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "event_date"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

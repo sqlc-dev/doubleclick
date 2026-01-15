@@ -1,0 +1,166 @@
+{
+  "database": "test_01109_other_atomic",
+  "table": "t3",
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "left": {
+              "name": "rowNumberInAllBlocks"
+            },
+            "op": "+",
+            "right": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "left": {
+                          "name": "max",
+                          "arguments": [
+                            {
+                              "tuple": {
+                                "tuple": {
+                                  "type": "Tuple",
+                                  "value": [
+                                    {},
+                                    {}
+                                  ]
+                                },
+                                "index": {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              },
+                              "index": {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            }
+                          ]
+                        },
+                        "op": "+",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "query": {
+                                "selects": [
+                                  {
+                                    "columns": [
+                                      {
+                                        "type": "Tuple",
+                                        "value": [
+                                          {}
+                                        ]
+                                      }
+                                    ],
+                                    "from": {
+                                      "tables": [
+                                        {
+                                          "table": {
+                                            "table": {
+                                              "table": "t1"
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "columns": [
+                                      {
+                                        "type": "Tuple",
+                                        "value": [
+                                          {}
+                                        ]
+                                      }
+                                    ],
+                                    "from": {
+                                      "tables": [
+                                        {
+                                          "table": {
+                                            "table": {
+                                              "table": "t2"
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ],
+                                "union_all": true,
+                                "union_modes": [
+                                  "UNION ALL"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "arrayJoin",
+                            "arguments": [
+                              {
+                                "type": "Array",
+                                "value": [
+                                  {
+                                    "type": "String",
+                                    "value": "another"
+                                  },
+                                  {
+                                    "type": "String",
+                                    "value": "db"
+                                  }
+                                ],
+                                "spaced_commas": true
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,174 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "time"
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "parts": [
+                "exp_smooth"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "name": "bar",
+          "arguments": [
+            {
+              "parts": [
+                "exp_smooth"
+              ]
+            },
+            {
+              "op": "-",
+              "operand": {
+                "type": "Integer",
+                "value": 9223372036854775807
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 1048575
+            },
+            {
+              "type": "Integer",
+              "value": 50
+            }
+          ],
+          "alias": "bar"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "left": {
+                                "type": "Integer",
+                                "value": 2
+                              },
+                              "op": "OR",
+                              "right": {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 0
+                                },
+                                "parenthesized": true
+                              }
+                            },
+                            "op": "OR",
+                            "right": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "\u003e=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1
+                              },
+                              "parenthesized": true
+                            }
+                          },
+                          "alias": "value"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "time"
+                        },
+                        {
+                          "name": "exponentialTimeDecayedSum",
+                          "parameters": [
+                            {
+                              "type": "Integer",
+                              "value": 2147483646
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "parts": [
+                                "value"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "time"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "frame": {
+                              "type": "RANGE",
+                              "start": {
+                                "type": "CURRENT_ROW"
+                              },
+                              "end": {
+                                "type": "CURRENT_ROW"
+                              }
+                            }
+                          },
+                          "alias": "exp_smooth"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "type": "Integer",
+        "value": 25
+      }
+    }
+  ]
+}

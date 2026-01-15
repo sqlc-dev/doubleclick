@@ -1,0 +1,63 @@
+{
+  "view": "t_mv",
+  "materialized": true,
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "uniq",
+            "arguments": [
+              {
+                "parts": [
+                  "x"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "bitAnd",
+            "arguments": [
+              {
+                "parts": [
+                  "x"
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 255
+              }
+            ],
+            "alias": "y"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "t"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "y"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

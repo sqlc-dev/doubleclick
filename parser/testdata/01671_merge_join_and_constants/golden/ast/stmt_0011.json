@@ -1,0 +1,235 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "pow",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "0.0000000257"
+            },
+            {
+              "type": "Null",
+              "value": null
+            }
+          ]
+        },
+        {
+          "left": {
+            "name": "pow",
+            "arguments": [
+              {
+                "name": "pow",
+                "arguments": [
+                  {
+                    "type": "Null",
+                    "value": null
+                  },
+                  {
+                    "type": "Null",
+                    "value": null
+                  }
+                ]
+              },
+              {
+                "type": "Null",
+                "value": null
+              }
+            ]
+          },
+          "op": "-",
+          "right": {
+            "type": "Null",
+            "value": null
+          }
+        },
+        {
+          "left": {
+            "left": {
+              "parts": [
+                "val"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Null",
+              "value": null
+            },
+            "parenthesized": true
+          },
+          "op": "=",
+          "right": {
+            "left": {
+              "parts": [
+                "rval"
+              ]
+            },
+            "op": "*",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            },
+            "parenthesized": true
+          }
+        },
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "val"
+                              ]
+                            },
+                            "op": "+",
+                            "right": {
+                              "type": "Integer",
+                              "value": 256
+                            },
+                            "parenthesized": true
+                          },
+                          "op": "=",
+                          "right": {
+                            "left": {
+                              "type": "Null",
+                              "value": null
+                            },
+                            "op": "*",
+                            "right": {
+                              "type": "Null",
+                              "value": null
+                            },
+                            "parenthesized": true
+                          }
+                        },
+                        {
+                          "name": "toLowCardinality",
+                          "arguments": [
+                            {
+                              "name": "toNullable",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "dummy"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "val"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "one"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "s1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toLowCardinality",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "dummy"
+                              ]
+                            }
+                          ],
+                          "alias": "rval"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "one"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "s2"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "val"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 0
+                  },
+                  "parenthesized": true
+                },
+                "op": "=",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "rval"
+                    ]
+                  },
+                  "op": "*",
+                  "right": {
+                    "type": "Integer",
+                    "value": 255
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "max_rows_in_join",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

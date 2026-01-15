@@ -1,0 +1,63 @@
+{
+  "table": "t_01906",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "update_ts",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "update_ts"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "update_ts"
+          ]
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "type": "Integer",
+      "value": 0
+    },
+    "op": "*",
+    "right": {
+      "parts": [
+        "id"
+      ]
+    }
+  }
+}

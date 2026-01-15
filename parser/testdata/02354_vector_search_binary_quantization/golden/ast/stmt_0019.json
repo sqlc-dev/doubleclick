@@ -1,0 +1,82 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "vec",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Float32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "vec_idx",
+      "expression": {
+        "parts": [
+          "vec"
+        ]
+      },
+      "type": {
+        "name": "vector_similarity",
+        "arguments": [
+          {
+            "type": "String",
+            "value": "hnsw"
+          },
+          {
+            "type": "String",
+            "value": "cosineDistance"
+          },
+          {
+            "type": "Integer",
+            "value": 8
+          },
+          {
+            "type": "String",
+            "value": "b1"
+          },
+          {
+            "type": "Integer",
+            "value": 64
+          },
+          {
+            "type": "Integer",
+            "value": 128
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

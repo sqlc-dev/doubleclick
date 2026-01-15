@@ -1,0 +1,289 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "data",
+          "query": {
+            "name": "arrayMap",
+            "arguments": [
+              {
+                "parameters": [
+                  "x"
+                ],
+                "body": {
+                  "left": {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              },
+              {
+                "name": "range",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 50
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "name": "arrayReduceInRanges",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "groupArray"
+              },
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "Tuple",
+                    "value": [
+                      {
+                        "parts": [
+                          "a"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "c"
+                        ]
+                      }
+                    ],
+                    "spaced_commas": true
+                  },
+                  {
+                    "type": "Tuple",
+                    "value": [
+                      {
+                        "parts": [
+                          "b"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "d"
+                        ]
+                      }
+                    ],
+                    "spaced_commas": true
+                  }
+                ],
+                "spaced_commas": true
+              },
+              {
+                "parts": [
+                  "data"
+                ]
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Array",
+            "value": [
+              {
+                "name": "arraySlice",
+                "arguments": [
+                  {
+                    "parts": [
+                      "data"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "a"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "c"
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "arraySlice",
+                "arguments": [
+                  {
+                    "parts": [
+                      "data"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "b"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "d"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "name": "cityHash64",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  "op": "+",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 100
+                                  }
+                                }
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 40
+                            }
+                          },
+                          "alias": "a"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "name": "cityHash64",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  "op": "+",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 200
+                                  }
+                                }
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 60
+                            }
+                          },
+                          "alias": "b"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "name": "cityHash64",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  "op": "+",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 300
+                                  }
+                                }
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 20
+                            }
+                          },
+                          "alias": "c"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "name": "cityHash64",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  "op": "+",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 400
+                                  }
+                                }
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 30
+                            }
+                          },
+                          "alias": "d"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 20
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

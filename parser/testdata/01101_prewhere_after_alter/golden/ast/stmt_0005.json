@@ -1,0 +1,70 @@
+{
+  "table": "test_b",
+  "columns": [
+    {
+      "name": "OldColumn",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "type": "String",
+        "value": ""
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "NewColumn",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "type": "String",
+        "value": ""
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "EventDate",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "name": "toDate",
+        "arguments": [
+          {
+            "parts": [
+              "EventTime"
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "EventTime",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "EventDate"
+        ]
+      },
+      {
+        "parts": [
+          "EventTime"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

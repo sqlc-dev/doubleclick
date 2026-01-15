@@ -1,0 +1,75 @@
+{
+  "view": "HASH_MV",
+  "materialized": true,
+  "columns": [
+    {
+      "name": "HASH_VAL",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "STR_VAL",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "HASH_VAL"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "xxHash64",
+            "arguments": [
+              {
+                "parts": [
+                  "STR_VAL"
+                ]
+              }
+            ],
+            "alias": "HASH_VAL"
+          },
+          {
+            "name": "toLowCardinality",
+            "arguments": [
+              {
+                "parts": [
+                  "STR_VAL"
+                ]
+              }
+            ],
+            "alias": "STR_VAL"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "HASH_TEST_INSERT"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

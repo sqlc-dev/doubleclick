@@ -1,0 +1,163 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "data_compressed_bytes"
+                ]
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "data_uncompressed_bytes"
+                ]
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "marks_bytes"
+                ]
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "columns"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "type": "Tuple",
+          "value": [
+            {
+              "parts": [
+                "database"
+              ]
+            },
+            {
+              "parts": [
+                "table"
+              ]
+            }
+          ],
+          "spaced_commas": true
+        },
+        "query": {
+          "selects": [
+            {
+              "columns": [
+                {
+                  "parts": [
+                    "database"
+                  ]
+                },
+                {
+                  "parts": [
+                    "table"
+                  ]
+                }
+              ],
+              "from": {
+                "tables": [
+                  {
+                    "table": {
+                      "table": {
+                        "database": "system",
+                        "table": "tables"
+                      }
+                    }
+                  }
+                ]
+              },
+              "where": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "engine"
+                    ]
+                  },
+                  "op": "!=",
+                  "right": {
+                    "type": "String",
+                    "value": "Merge"
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "engine"
+                      ]
+                    },
+                    "op": "!=",
+                    "right": {
+                      "type": "String",
+                      "value": "StorageProxy"
+                    }
+                  },
+                  "op": "OR",
+                  "right": {
+                    "expr": {
+                      "parts": [
+                        "create_table_query"
+                      ]
+                    },
+                    "not": true,
+                    "case_insensitive": true,
+                    "pattern": {
+                      "type": "String",
+                      "value": "%merge%"
+                    }
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

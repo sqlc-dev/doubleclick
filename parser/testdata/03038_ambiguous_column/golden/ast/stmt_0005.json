@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "subquery",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "toUInt64",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "time"
+                          ]
+                        }
+                      ],
+                      "alias": "time"
+                    },
+                    {
+                      "name": "toHour",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "03038_table",
+                            "time"
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "03038_table"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "subquery"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "subquery",
+              "time"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

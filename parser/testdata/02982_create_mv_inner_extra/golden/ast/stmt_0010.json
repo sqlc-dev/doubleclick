@@ -1,0 +1,61 @@
+{
+  "view": "mv_projections",
+  "materialized": true,
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p",
+      "select": {
+        "columns": [
+          {
+            "name": "uniqCombined",
+            "arguments": [
+              {
+                "parts": [
+                  "key"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "data"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

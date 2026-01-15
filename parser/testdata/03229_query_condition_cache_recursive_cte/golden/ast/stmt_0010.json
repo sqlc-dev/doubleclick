@@ -1,0 +1,142 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "recursive",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "tab"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "id"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": "uuid3"
+                    }
+                  }
+                },
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "parent"
+                      ],
+                      "alias": "id"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "tab"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "expr": {
+                        "parts": [
+                          "tab",
+                          "id"
+                        ]
+                      },
+                      "list": [
+                        {
+                          "parts": [
+                            "recursive"
+                          ]
+                        }
+                      ]
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "parent"
+                        ]
+                      },
+                      "op": "!=",
+                      "right": {
+                        "type": "String",
+                        "value": "empty"
+                      }
+                    }
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "parent"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "recursive"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

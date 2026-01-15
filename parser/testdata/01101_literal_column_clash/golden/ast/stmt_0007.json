@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 1
+        },
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          "alias": "x"
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "a"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 3
+                          },
+                          "alias": "y"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "b"
+            },
+            "join": {
+              "type": "RIGHT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "y"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

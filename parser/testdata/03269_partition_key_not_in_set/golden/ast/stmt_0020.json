@@ -1,0 +1,52 @@
+{
+  "table": "03269_multiple_part_cols",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "dt",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "parts": [
+          "dt"
+        ]
+      },
+      {
+        "name": "intDiv",
+        "arguments": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "type": "Integer",
+            "value": 10
+          }
+        ]
+      }
+    ],
+    "spaced_commas": true
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "rows"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "bytes_on_disk"
+              ]
+            }
+          ],
+          "alias": "sum_bytes"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "marks_bytes"
+              ]
+            }
+          ],
+          "alias": "sum_marks_bytes"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "sum_bytes"
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "sum_marks_bytes"
+              ]
+            },
+            "parenthesized": true
+          },
+          "alias": "exclude_marks"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts_columns"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "active"
+            ]
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "table"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "test_02381%"
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "table"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "table"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,218 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "cte",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "id2"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "tbl"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "name": "joinGet",
+                      "arguments": [
+                        {
+                          "left": {
+                            "name": "currentDatabase"
+                          },
+                          "op": "||",
+                          "right": {
+                            "type": "String",
+                            "value": ".join_engine"
+                          }
+                        },
+                        {
+                          "type": "String",
+                          "value": "v"
+                        },
+                        {
+                          "parts": [
+                            "id1"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "id2"
+                          ]
+                        }
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "parts": [
+                        "tbl",
+                        "v"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "uniq",
+          "arguments": [
+            {
+              "parts": [
+                "id2"
+              ]
+            }
+          ],
+          "alias": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "tbl"
+                              },
+                              "alias": "e"
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "name": "joinGet",
+                          "arguments": [
+                            {
+                              "left": {
+                                "name": "currentDatabase"
+                              },
+                              "op": "||",
+                              "right": {
+                                "type": "String",
+                                "value": ".join_engine"
+                              }
+                            },
+                            {
+                              "type": "String",
+                              "value": "v"
+                            },
+                            {
+                              "parts": [
+                                "id1"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "id2"
+                              ]
+                            }
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "parts": [
+                            "e",
+                            "v"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "id2"
+          ]
+        },
+        "query": {
+          "selects": [
+            {
+              "columns": [
+                {
+                  "parts": [
+                    "id2"
+                  ]
+                }
+              ],
+              "from": {
+                "tables": [
+                  {
+                    "table": {
+                      "table": {
+                        "table": "cte"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "columns": [
+        {
+          "name": "uniq",
+          "arguments": [
+            {
+              "parts": [
+                "id2"
+              ]
+            }
+          ],
+          "alias": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "cte"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "union_modes": [
+    "ALL"
+  ]
+}

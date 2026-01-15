@@ -1,0 +1,94 @@
+{
+  "table": "parallel_replicas",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "name": "today"
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "u",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "name": "cityHash64",
+        "arguments": [
+          {
+            "parts": [
+              "u"
+            ]
+          },
+          {
+            "parts": [
+              "s"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "x"
+            ]
+          },
+          {
+            "parts": [
+              "d"
+            ]
+          },
+          {
+            "name": "cityHash64",
+            "arguments": [
+              {
+                "parts": [
+                  "u"
+                ]
+              },
+              {
+                "parts": [
+                  "s"
+                ]
+              }
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

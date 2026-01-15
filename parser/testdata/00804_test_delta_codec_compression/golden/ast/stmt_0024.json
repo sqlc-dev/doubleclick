@@ -1,0 +1,197 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "floor",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "big_size"
+                ]
+              },
+              "op": "/",
+              "right": {
+                "parts": [
+                  "small_size"
+                ]
+              }
+            }
+          ],
+          "alias": "ratio"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "key"
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "bytes_on_disk"
+                              ]
+                            }
+                          ],
+                          "alias": "small_size"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "parts"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "database"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "name": "currentDatabase"
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "table"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "type": "String",
+                              "value": "delta_codec_float"
+                            }
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "parts": [
+                            "active"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "key"
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "bytes_on_disk"
+                              ]
+                            }
+                          ],
+                          "alias": "big_size"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "parts"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "database"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "name": "currentDatabase"
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "table"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "type": "String",
+                              "value": "default_codec_float"
+                            }
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "parts": [
+                            "active"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "key"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

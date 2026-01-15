@@ -1,0 +1,70 @@
+{
+  "table": "x_as",
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        {
+          "parts": [
+            "EventDate"
+          ]
+        },
+        {
+          "name": "intHash32",
+          "arguments": [
+            {
+              "parts": [
+                "UserID"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "EventDate"
+        ]
+      }
+    ]
+  },
+  "sample_by": {
+    "name": "intHash32",
+    "arguments": [
+      {
+        "parts": [
+          "UserID"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "enable_block_number_column",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "enable_block_offset_column",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

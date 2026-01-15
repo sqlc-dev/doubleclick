@@ -1,0 +1,107 @@
+{
+  "view": "revenue0",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "l_suppkey"
+            ]
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "l_extendedprice"
+                  ]
+                },
+                "op": "*",
+                "right": {
+                  "left": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "op": "-",
+                  "right": {
+                    "parts": [
+                      "l_discount"
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "lineitem"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "parts": [
+                "l_shipdate"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "1996-01-01"
+                }
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "l_shipdate"
+              ]
+            },
+            "op": "\u003c",
+            "right": {
+              "left": {
+                "name": "toDate",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "1996-01-01"
+                  }
+                ]
+              },
+              "op": "+",
+              "right": {
+                "value": {
+                  "type": "String",
+                  "value": "3"
+                },
+                "unit": "MONTH"
+              }
+            }
+          }
+        },
+        "group_by": [
+          {
+            "parts": [
+              "l_suppkey"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

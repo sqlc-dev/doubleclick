@@ -1,0 +1,128 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "order",
+      "type": {
+        "name": "int"
+      }
+    },
+    {
+      "name": "indexed",
+      "type": {
+        "name": "int"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "proj",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "_part_offset"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "indexed"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "order"
+      ]
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "name": "if",
+      "arguments": [
+        {
+          "left": {
+            "parts": [
+              "order"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "expr": {
+            "type": "String",
+            "value": "1970-01-02T00:00:00"
+          },
+          "type": {
+            "name": "DateTime"
+          },
+          "operator_syntax": true
+        },
+        {
+          "expr": {
+            "type": "String",
+            "value": "2030-01-01T00:00:00"
+          },
+          "type": {
+            "name": "DateTime"
+          },
+          "operator_syntax": true
+        }
+      ]
+    },
+    "elements": [
+      {
+        "expr": {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "order"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            {
+              "expr": {
+                "type": "String",
+                "value": "1970-01-02T00:00:00"
+              },
+              "type": {
+                "name": "DateTime"
+              },
+              "operator_syntax": true
+            },
+            {
+              "expr": {
+                "type": "String",
+                "value": "2030-01-01T00:00:00"
+              },
+              "type": {
+                "name": "DateTime"
+              },
+              "operator_syntax": true
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

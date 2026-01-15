@@ -1,0 +1,127 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "table": "a"
+        },
+        {
+          "table": "b"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "k"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "a"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "*",
+                            "right": {
+                              "type": "Integer",
+                              "value": 2
+                            }
+                          },
+                          "alias": "k"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "joined"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "b"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "k"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

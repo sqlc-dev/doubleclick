@@ -1,0 +1,50 @@
+{
+  "table": "aggregating_merge_tree",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "max"
+            ]
+          },
+          {
+            "name": "UInt32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "date",
+      "type": {
+        "name": "Datetime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "date"
+    ]
+  }
+}

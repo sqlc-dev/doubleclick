@@ -1,0 +1,180 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "d"
+          ]
+        },
+        {
+          "parts": [
+            "k1"
+          ]
+        },
+        {
+          "parts": [
+            "k2"
+          ]
+        },
+        {
+          "name": "sumMerge",
+          "arguments": [
+            {
+              "parts": [
+                "Sum"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "avgMerge",
+          "arguments": [
+            {
+              "parts": [
+                "Avg"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "uniqMerge",
+          "arguments": [
+            {
+              "parts": [
+                "Uniq"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "anyMerge",
+          "arguments": [
+            {
+              "parts": [
+                "Any"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "anyIfMerge",
+          "arguments": [
+            {
+              "parts": [
+                "AnyIf"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "round",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 6
+                  }
+                ]
+              }
+            },
+            {
+              "name": "quantilesMerge",
+              "parameters": [
+                {
+                  "type": "Float",
+                  "value": 0.5,
+                  "source": "0.5"
+                },
+                {
+                  "type": "Float",
+                  "value": 0.9,
+                  "source": "0.9"
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "Quantiles"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "groupArrayMerge",
+          "arguments": [
+            {
+              "parts": [
+                "GroupArray"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "stored_aggregates"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "d"
+          ]
+        },
+        {
+          "parts": [
+            "k1"
+          ]
+        },
+        {
+          "parts": [
+            "k2"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "d"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "k1"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "k2"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "length",
+            "arguments": [
+              {
+                "parts": [
+                  "thread_ids"
+                ]
+              }
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "current_database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "event_date"
+                ]
+              },
+              "op": "\u003e=",
+              "right": {
+                "left": {
+                  "name": "today"
+                },
+                "op": "-",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "name": "lower",
+              "arguments": [
+                {
+                  "parts": [
+                    "query"
+                  ]
+                }
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%select sum(number) from remote(_127.0.0.{1|2}_, numbers_mt(1000000)) group by number %"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "QueryFinish"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "query_start_time"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

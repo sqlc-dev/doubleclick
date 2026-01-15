@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "snapshot3"
+        },
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "=",
+          "right": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "parts"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "table"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "mt1"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "expr": {
+                        "parts": [
+                          "_state"
+                        ]
+                      },
+                      "list": [
+                        {
+                          "type": "String",
+                          "value": "Active"
+                        },
+                        {
+                          "type": "String",
+                          "value": "Outdated"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "mt1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

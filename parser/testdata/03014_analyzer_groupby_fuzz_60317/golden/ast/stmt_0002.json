@@ -1,0 +1,193 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toNullable",
+          "arguments": [
+            {
+              "name": "toNullable",
+              "arguments": [
+                {
+                  "name": "materialize",
+                  "arguments": [
+                    {
+                      "name": "_CAST",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 30
+                        },
+                        {
+                          "type": "String",
+                          "value": "LowCardinality(UInt8)"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "toNullable(toNullable(materialize(toLowCardinality(30))))"
+        },
+        {
+          "name": "_CAST",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 0
+            },
+            {
+              "type": "String",
+              "value": "Date"
+            }
+          ],
+          "alias": "makeDate(-1980.1, -1980.1, 10)"
+        },
+        {
+          "name": "_CAST",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 30
+            },
+            {
+              "type": "String",
+              "value": "LowCardinality(UInt8)"
+            }
+          ],
+          "alias": "toLowCardinality(30)"
+        },
+        {
+          "expr": {
+            "type": "Integer",
+            "value": 30
+          },
+          "alias": "30"
+        },
+        {
+          "name": "makeDate",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "name": "_CAST",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 30
+                    },
+                    {
+                      "type": "String",
+                      "value": "LowCardinality(UInt8)"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            },
+            {
+              "name": "_CAST",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 30
+                },
+                {
+                  "type": "String",
+                  "value": "Nullable(UInt8)"
+                }
+              ]
+            }
+          ],
+          "alias": "makeDate(materialize(toLowCardinality(30)), 10, toNullable(toNullable(30)))"
+        },
+        {
+          "expr": {
+            "op": "-",
+            "operand": {
+              "type": "Float",
+              "value": 1980.1,
+              "source": "1980.1"
+            }
+          },
+          "alias": "-1980.1"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              },
+              "alias": "__table1"
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "name": "_CAST",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 30
+            },
+            {
+              "type": "String",
+              "value": "Nullable(UInt8)"
+            }
+          ]
+        },
+        {
+          "op": "-",
+          "operand": {
+            "type": "Float",
+            "value": 1980.1,
+            "source": "1980.1"
+          }
+        },
+        {
+          "name": "materialize",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 30
+            }
+          ]
+        },
+        {
+          "name": "_CAST",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 30
+            },
+            {
+              "type": "String",
+              "value": "Nullable(UInt8)"
+            }
+          ]
+        }
+      ],
+      "with_cube": true,
+      "with_totals": true,
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

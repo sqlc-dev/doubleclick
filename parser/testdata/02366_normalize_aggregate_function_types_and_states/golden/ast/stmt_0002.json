@@ -1,0 +1,75 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "quantileMerge",
+          "arguments": [
+            {}
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "quantilesState",
+                          "parameters": [
+                            {
+                              "type": "Float",
+                              "value": 0.5,
+                              "source": "0.5"
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          ],
+                          "alias": "a"
+                        }
+                      ]
+                    },
+                    {
+                      "columns": [
+                        {
+                          "name": "quantileStateIf",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 2
+                            },
+                            {
+                              "name": "identity",
+                              "arguments": [
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

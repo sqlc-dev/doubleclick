@@ -1,0 +1,71 @@
+{
+  "table": "t_03363_s3_err",
+  "columns": [
+    {
+      "name": "year",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "country",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "counter",
+      "type": {
+        "name": "UInt8"
+      }
+    }
+  ],
+  "engine": {
+    "name": "S3",
+    "parameters": [
+      {
+        "parts": [
+          "s3_conn"
+        ]
+      },
+      {
+        "left": {
+          "parts": [
+            "filename"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "t_03363_parquet/**"
+        }
+      },
+      {
+        "left": {
+          "parts": [
+            "partition_strategy"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "hive"
+        }
+      },
+      {
+        "left": {
+          "parts": [
+            "format"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "parts": [
+            "Parquet"
+          ]
+        }
+      }
+    ],
+    "has_parentheses": true
+  }
+}

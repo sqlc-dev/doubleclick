@@ -1,0 +1,59 @@
+{
+  "table": "video_log_result__fuzz_0",
+  "columns": [
+    {
+      "name": "hour",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "DateTime"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "sum_bytes",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "avg_duration",
+      "type": {
+        "name": "Float64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "sum_bytes"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDate",
+    "arguments": [
+      {
+        "parts": [
+          "hour"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "allow_nullable_key",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

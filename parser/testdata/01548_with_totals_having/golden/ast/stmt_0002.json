@@ -1,0 +1,83 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 4
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "number"
+          ]
+        }
+      ],
+      "with_totals": true,
+      "having": {
+        "left": {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ]
+        },
+        "op": "\u003c=",
+        "right": {
+          "name": "arrayJoin",
+          "arguments": [
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "Integer",
+                  "value": 3
+                },
+                {
+                  "type": "Integer",
+                  "value": 2
+                },
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "type": "Integer",
+                  "value": 0
+                }
+              ],
+              "spaced_commas": true
+            }
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "number"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

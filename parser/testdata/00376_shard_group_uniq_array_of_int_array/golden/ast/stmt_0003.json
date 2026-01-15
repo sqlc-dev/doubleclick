@@ -1,0 +1,189 @@
+{
+  "table": "group_uniq_arr_int",
+  "engine": {
+    "name": "Memory"
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "g"
+            ],
+            "alias": "id"
+          },
+          {
+            "name": "if",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "c"
+                  ]
+                },
+                "op": "==",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "parts": [
+                      "v"
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "if",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "c"
+                      ]
+                    },
+                    "op": "==",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  },
+                  {
+                    "name": "emptyArrayInt64"
+                  },
+                  {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "parts": [
+                          "v"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "v"
+                        ]
+                      }
+                    ],
+                    "spaced_commas": true
+                  }
+                ]
+              }
+            ],
+            "alias": "v"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "intDiv",
+                            "arguments": [
+                              {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "%",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 1000000
+                                }
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 100
+                              }
+                            ],
+                            "alias": "v"
+                          },
+                          {
+                            "name": "intDiv",
+                            "arguments": [
+                              {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "%",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 100
+                                }
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            ],
+                            "alias": "g"
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            },
+                            "alias": "c"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "database": "system",
+                                  "table": "numbers"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "parts": [
+                              "c"
+                            ]
+                          },
+                          "op": "\u003c",
+                          "right": {
+                            "type": "Integer",
+                            "value": 3
+                          }
+                        },
+                        "limit": {
+                          "type": "Integer",
+                          "value": 10000000
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

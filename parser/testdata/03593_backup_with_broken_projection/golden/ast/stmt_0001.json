@@ -1,0 +1,94 @@
+{
+  "table": "03593_backup_with_broken_projection",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "string",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "time1",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 6
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "time2",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 6
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "max_time",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "string"
+            ]
+          },
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "time1"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "time2"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "string"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "time1"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "intDiv",
+              "arguments": [
+                {
+                  "name": "toUnixTimestamp",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "timestamp"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "Integer",
+                  "value": 130
+                }
+              ]
+            },
+            "op": "*",
+            "right": {
+              "type": "Integer",
+              "value": 130
+            }
+          },
+          "alias": "fake_key"
+        },
+        {
+          "name": "timeSeriesResampleToGridWithStaleness",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 100
+            },
+            {
+              "type": "Integer",
+              "value": 200
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            },
+            {
+              "type": "Integer",
+              "value": 15
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "timestamp"
+              ]
+            },
+            {
+              "parts": [
+                "value"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "ts_data"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "fake_key"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "fake_key"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

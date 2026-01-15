@@ -1,0 +1,134 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "equals",
+          "arguments": [
+            {
+              "parts": [
+                "sum_bytes1"
+              ]
+            },
+            {
+              "parts": [
+                "sum_bytes2"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "equals",
+          "arguments": [
+            {
+              "parts": [
+                "avg_duration1"
+              ]
+            },
+            {
+              "parts": [
+                "avg_duration2"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toStartOfHour",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "datetime"
+                              ]
+                            }
+                          ],
+                          "alias": "hour"
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "bytes"
+                              ]
+                            }
+                          ],
+                          "alias": "sum_bytes1"
+                        },
+                        {
+                          "name": "avg",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "duration"
+                              ]
+                            }
+                          ],
+                          "alias": "avg_duration1"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "video_log"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "name": "toDate",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "hour"
+                                ]
+                              }
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "String",
+                            "value": "2022-07-22"
+                          },
+                          "parenthesized": true
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "device_id"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "String",
+                            "value": "100"
+                          },
+                          "parenthesized": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

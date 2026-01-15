@@ -1,0 +1,118 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "fixed_str",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 6
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "event_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "vector_array",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Float32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "nullable_int",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Int128"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "low_card_string",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "map_column",
+      "type": {
+        "name": "Map",
+        "parameters": [
+          {
+            "name": "String"
+          },
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "tuple_column",
+      "type": {
+        "name": "Tuple",
+        "parameters": [
+          {
+            "name": "UInt256"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "fixed_str"
+          ]
+        },
+        {
+          "parts": [
+            "event_date"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "optimize_row_order",
+      "value": {
+        "type": "Boolean",
+        "value": true
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

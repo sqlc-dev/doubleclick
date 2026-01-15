@@ -1,0 +1,130 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "cluster",
+                "arguments": [
+                  {
+                    "parts": [
+                      "test_shard_localhost"
+                    ]
+                  },
+                  {
+                    "name": "view",
+                    "arguments": [
+                      {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {
+                                  "name": "toDate",
+                                  "arguments": [
+                                    {
+                                      "name": "CurrentStart",
+                                      "type": {
+                                        "name": "String"
+                                      }
+                                    }
+                                  ]
+                                },
+                                {
+                                  "expr": {
+                                    "parts": [
+                                      "dummy"
+                                    ]
+                                  },
+                                  "type": {
+                                    "name": "Date"
+                                  },
+                                  "alias": "x",
+                                  "operator_syntax": true
+                                }
+                              ],
+                              "from": {
+                                "tables": [
+                                  {
+                                    "table": {
+                                      "table": {
+                                        "database": "system",
+                                        "table": "one"
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "order_by": [
+                                {
+                                  "expression": {
+                                    "parts": [
+                                      "x"
+                                    ]
+                                  },
+                                  "with_fill": true,
+                                  "fill_from": {
+                                    "name": "toDate",
+                                    "arguments": [
+                                      {
+                                        "name": "CurrentStart",
+                                        "type": {
+                                          "name": "String"
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "fill_to": {
+                                    "left": {
+                                      "name": "toDate",
+                                      "arguments": [
+                                        {
+                                          "name": "CurrentEnd",
+                                          "type": {
+                                            "name": "String"
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                      "name": "toIntervalDay",
+                                      "arguments": [
+                                        {
+                                          "type": "Integer",
+                                          "value": 1
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "fill_step": {
+                                    "name": "toIntervalDay",
+                                    "arguments": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 1
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

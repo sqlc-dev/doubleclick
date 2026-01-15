@@ -1,0 +1,87 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "1981-09-30 23:00:00"
+                },
+                {
+                  "type": "String",
+                  "value": "Europe/Moscow"
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 600
+                }
+              },
+              "unit": "SECOND"
+            },
+            "parenthesized": true
+          },
+          "alias": "k"
+        },
+        {
+          "name": "timezoneOffset",
+          "arguments": [
+            {
+              "parts": [
+                "k"
+              ]
+            }
+          ],
+          "alias": "t"
+        },
+        {
+          "name": "toUnixTimestamp",
+          "arguments": [
+            {
+              "parts": [
+                "k"
+              ]
+            }
+          ],
+          "alias": "s"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 18
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

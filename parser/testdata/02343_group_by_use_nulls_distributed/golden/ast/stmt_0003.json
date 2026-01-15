@@ -1,0 +1,123 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "number"
+            ]
+          },
+          "op": "%",
+          "right": {
+            "type": "Integer",
+            "value": 2
+          }
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "alias": "val"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{2,3}"
+                  },
+                  {
+                    "name": "numbers",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "number"
+            ]
+          },
+          "op": "%",
+          "right": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ],
+      "with_rollup": true,
+      "order_by": [
+        {
+          "expression": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "number"
+                ]
+              },
+              {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              },
+              {
+                "parts": [
+                  "val"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "group_by_use_nulls",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

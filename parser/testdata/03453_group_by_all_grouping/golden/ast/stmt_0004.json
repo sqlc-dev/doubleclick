@@ -1,0 +1,121 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "l",
+            "number"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "r",
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          },
+          "alias": "mod3"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "r",
+                "number"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "grouping",
+          "arguments": [
+            {
+              "parts": [
+                "l",
+                "number"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "grouping",
+          "arguments": [
+            {
+              "parts": [
+                "mod3"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                ]
+              },
+              "alias": "l"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                ]
+              },
+              "alias": "r"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "l",
+                    "number"
+                  ]
+                },
+                "op": "\u003c",
+                "right": {
+                  "parts": [
+                    "r",
+                    "number"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "ALL"
+          ]
+        }
+      ],
+      "group_by_all": true,
+      "with_cube": true
+    }
+  ]
+}

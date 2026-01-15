@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "b"
+          ]
+        },
+        {
+          "parts": [
+            "c"
+          ]
+        },
+        {
+          "expr": {
+            "type": "String",
+            "value": "original"
+          },
+          "alias": "original"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "with_fill_staleness"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "a"
+            ]
+          },
+          "with_fill": true,
+          "fill_staleness": {
+            "value": {
+              "type": "Integer",
+              "value": 2
+            },
+            "unit": "SECOND"
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "b"
+            ]
+          },
+          "with_fill": true,
+          "fill_to": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2016-06-15 23:01:00"
+              }
+            ]
+          },
+          "fill_step": {
+            "type": "Integer",
+            "value": 2
+          },
+          "fill_staleness": {
+            "type": "Integer",
+            "value": 5
+          }
+        }
+      ],
+      "interpolate": [
+        {
+          "column": "c"
+        }
+      ]
+    }
+  ]
+}

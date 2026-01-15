@@ -1,0 +1,124 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "emptyArrayToSingle",
+          "arguments": [
+            {
+              "parts": [
+                "arr"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayMap",
+                          "arguments": [
+                            {
+                              "parameters": [
+                                "x"
+                              ],
+                              "body": {
+                                "type": "Tuple",
+                                "value": [
+                                  {
+                                    "parts": [
+                                      "x"
+                                    ]
+                                  },
+                                  {
+                                    "name": "toString",
+                                    "arguments": [
+                                      {
+                                        "parts": [
+                                          "x"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "condition": {
+                                      "left": {
+                                        "parts": [
+                                          "x"
+                                        ]
+                                      },
+                                      "op": "=",
+                                      "right": {
+                                        "type": "Integer",
+                                        "value": 1
+                                      }
+                                    },
+                                    "then": {
+                                      "type": "Null",
+                                      "value": null
+                                    },
+                                    "else": {
+                                      "parts": [
+                                        "x"
+                                      ]
+                                    }
+                                  }
+                                ],
+                                "spaced_commas": true
+                              }
+                            },
+                            {
+                              "name": "range",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  "op": "%",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 3
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "arr"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

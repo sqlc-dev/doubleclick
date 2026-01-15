@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trimLeft",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "test_projection_granule_edge_cases"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "parts": [
+                              "region"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "String",
+                            "value": "bol_region"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "projections = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%ReadFromMergeTree%"
+          }
+        },
+        "op": "OR",
+        "right": {
+          "name": "match",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "^\\s+[A-Z][a-z]+(\\s+[A-Z][a-z]+)*:"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

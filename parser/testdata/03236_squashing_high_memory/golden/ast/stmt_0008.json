@@ -1,0 +1,124 @@
+{
+  "table": "test_table",
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "id_values",
+              "id1"
+            ],
+            "alias": "id"
+          },
+          {
+            "parts": [
+              "string_values",
+              "string_val1"
+            ],
+            "alias": "string_val1"
+          },
+          {
+            "parts": [
+              "string_values",
+              "string_val2"
+            ],
+            "alias": "string_val2"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "id_values"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "arrayJoin",
+                            "arguments": [
+                              {
+                                "name": "range",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            ],
+                            "alias": "id1"
+                          },
+                          {
+                            "expr": {
+                              "type": "String",
+                              "value": "qwe"
+                            },
+                            "alias": "string_val1"
+                          },
+                          {
+                            "expr": {
+                              "type": "String",
+                              "value": "asd"
+                            },
+                            "alias": "string_val2"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "alias": "string_values"
+              },
+              "join": {
+                "type": "INNER",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "id_values",
+                      "id1"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "string_values",
+                      "id1"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "settings": [
+          {
+            "name": "join_algorithm",
+            "value": {
+              "type": "String",
+              "value": "hash"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

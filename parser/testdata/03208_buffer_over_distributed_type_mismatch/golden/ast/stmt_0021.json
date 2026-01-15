@@ -1,0 +1,96 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "t2",
+              "amount"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          "type": {
+                            "name": "UInt32"
+                          },
+                          "alias": "amount",
+                          "operator_syntax": true
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 300
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "realtimebuff__fuzz_19"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "amount"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

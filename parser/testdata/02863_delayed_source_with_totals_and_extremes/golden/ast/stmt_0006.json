@@ -1,0 +1,92 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "explain"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "%Delayed%"
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PIPELINE",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "sum",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "a"
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "remote",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "127.0.0.4"
+                                    },
+                                    {
+                                      "name": "currentDatabase"
+                                    },
+                                    {
+                                      "type": "String",
+                                      "value": "02863_delayed_source"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "with_totals": true,
+                        "settings": [
+                          {
+                            "name": "extremes",
+                            "value": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "explicit_type": true,
+                  "options_string": "graph = 1"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

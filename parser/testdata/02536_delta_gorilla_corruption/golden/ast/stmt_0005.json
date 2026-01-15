@@ -1,0 +1,75 @@
+{
+  "table": "bug_delta_gorilla",
+  "columns": [
+    {
+      "name": "value_bug",
+      "type": {
+        "name": "UInt64"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "Delta"
+          },
+          {
+            "name": "Gorilla"
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true,
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 20000000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

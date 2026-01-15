@@ -1,0 +1,82 @@
+{
+  "table": "weird_partitions_02245",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "d1",
+      "type": {
+        "name": "DateTime"
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "d"
+          ]
+        },
+        "op": "-",
+        "right": {
+          "name": "toIntervalHour",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 8
+            }
+          ]
+        }
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "id",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "name": "toYYYYMM",
+        "arguments": [
+          {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "parts": [
+                  "d"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ignore",
+        "arguments": [
+          {
+            "parts": [
+              "d1"
+            ]
+          }
+        ]
+      }
+    ],
+    "spaced_commas": true
+  }
+}

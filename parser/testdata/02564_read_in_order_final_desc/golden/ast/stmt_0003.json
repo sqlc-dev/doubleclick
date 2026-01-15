@@ -1,0 +1,74 @@
+{
+  "table": "mytable",
+  "columns": [
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "insert_timestamp",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "Float64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "insert_timestamp"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "key"
+          ]
+        },
+        {
+          "parts": [
+            "timestamp"
+          ]
+        }
+      ]
+    }
+  ],
+  "primary_key": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "key"
+          ]
+        },
+        {
+          "parts": [
+            "timestamp"
+          ]
+        }
+      ]
+    }
+  ]
+}

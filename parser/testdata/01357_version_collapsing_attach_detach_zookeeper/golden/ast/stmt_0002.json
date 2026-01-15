@@ -1,0 +1,87 @@
+{
+  "table": "versioned_collapsing_table",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "key1",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "key2",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "sign",
+      "type": {
+        "name": "Int8"
+      }
+    },
+    {
+      "name": "version",
+      "type": {
+        "name": "UInt16"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedVersionedCollapsingMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/{database}/versioned_collapsing_table/{shard}"
+      },
+      {
+        "type": "String",
+        "value": "{replica}"
+      },
+      {
+        "parts": [
+          "sign"
+        ]
+      },
+      {
+        "parts": [
+          "version"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "key1"
+          ]
+        },
+        {
+          "parts": [
+            "key2"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "d"
+    ]
+  }
+}

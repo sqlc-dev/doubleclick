@@ -1,0 +1,97 @@
+{
+  "table": "alias_local10",
+  "columns": [
+    {
+      "name": "Id",
+      "type": {
+        "name": "Int8"
+      }
+    },
+    {
+      "name": "EventDate",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "type": "String",
+        "value": "2000-01-01"
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "field1",
+      "type": {
+        "name": "Int8"
+      }
+    },
+    {
+      "name": "field2",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "field3",
+      "type": null,
+      "default": {
+        "whens": [
+          {
+            "condition": {
+              "left": {
+                "parts": [
+                  "field1"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            "result": {
+              "parts": [
+                "field2"
+              ]
+            }
+          }
+        ],
+        "else": {
+          "type": "String",
+          "value": "0"
+        }
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "EventDate"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "Id"
+            ]
+          },
+          {
+            "parts": [
+              "EventDate"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

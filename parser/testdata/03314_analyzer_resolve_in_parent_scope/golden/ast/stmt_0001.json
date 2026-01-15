@@ -1,0 +1,200 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "ws_wh",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "ws1",
+                        "ws_order_number"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "expr": {
+                                        "type": "Integer",
+                                        "value": 1
+                                      },
+                                      "alias": "ws_order_number"
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "Integer",
+                                        "value": 1
+                                      },
+                                      "alias": "ws_warehouse_sk"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "alias": "ws1"
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "expr": {
+                                        "type": "Integer",
+                                        "value": 1
+                                      },
+                                      "alias": "ws_order_number"
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "Integer",
+                                        "value": 2
+                                      },
+                                      "alias": "ws_warehouse_sk"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "alias": "ws2"
+                        },
+                        "join": {
+                          "type": ""
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "ws1",
+                          "ws_order_number"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "parts": [
+                          "ws2",
+                          "ws_order_number"
+                        ]
+                      },
+                      "parenthesized": true
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "ws1",
+                          "ws_warehouse_sk"
+                        ]
+                      },
+                      "op": "!=",
+                      "right": {
+                        "parts": [
+                          "ws2",
+                          "ws_warehouse_sk"
+                        ]
+                      },
+                      "parenthesized": true
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "COUNT"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "ws_order_number"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "ws1"
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "ws1",
+            "ws_order_number"
+          ]
+        },
+        "query": {
+          "selects": [
+            {
+              "columns": [
+                {
+                  "parts": [
+                    "ws_order_number"
+                  ]
+                }
+              ],
+              "from": {
+                "tables": [
+                  {
+                    "table": {
+                      "table": {
+                        "table": "ws_wh"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "settings": [
+        {
+          "name": "join_use_nulls",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

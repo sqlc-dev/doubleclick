@@ -1,0 +1,106 @@
+{
+  "table": "mytable_local",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "name": "toDateTime",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "2020-06-01 00:00:00"
+                  }
+                ]
+              },
+              "op": "+",
+              "right": {
+                "name": "toIntervalMinute",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            },
+            "alias": "created"
+          },
+          {
+            "name": "toDate",
+            "arguments": [
+              {
+                "parts": [
+                  "created"
+                ]
+              }
+            ],
+            "alias": "eventday"
+          },
+          {
+            "name": "if",
+            "arguments": [
+              {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 100
+                  },
+                  "parenthesized": true
+                },
+                "op": "\u003e",
+                "right": {
+                  "type": "Integer",
+                  "value": 50
+                }
+              },
+              {
+                "type": "Integer",
+                "value": 742522
+              },
+              {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 32141
+                }
+              }
+            ],
+            "alias": "user_id"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 100000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

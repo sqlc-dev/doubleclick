@@ -1,0 +1,40 @@
+{
+  "table": "projection_without_key",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "x",
+      "select": {
+        "columns": [
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "key"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ]
+}

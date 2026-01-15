@@ -1,0 +1,91 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "rightUTF8",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "Привет"
+            },
+            {
+              "condition": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              "then": {
+                "type": "Null",
+                "value": null
+              },
+              "else": {
+                "condition": {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                },
+                "then": {
+                  "name": "toInt64",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    }
+                  ]
+                },
+                "else": {
+                  "op": "-",
+                  "operand": {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

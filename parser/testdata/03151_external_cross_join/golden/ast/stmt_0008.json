@@ -1,0 +1,114 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "x"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "t1",
+                            "x"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "t2",
+                            "number"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t1"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers_mt",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10000000
+                                  }
+                                ]
+                              },
+                              "alias": "t2"
+                            },
+                            "join": {
+                              "type": "CROSS"
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "\u003c=",
+                        "right": {
+                          "parts": [
+                            "x"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "ALL"
+          ]
+        }
+      ],
+      "group_by_all": true,
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "x"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

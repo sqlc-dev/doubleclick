@@ -1,0 +1,56 @@
+{
+  "table": "t1",
+  "engine": {
+    "name": "Log",
+    "has_parentheses": true
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "tables"
+                },
+                "alias": "t"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "databases"
+                },
+                "alias": "d"
+              },
+              "join": {
+                "type": "INNER",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "t",
+                      "database"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "d",
+                      "name"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "key",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_key",
+      "expression": {
+        "parts": [
+          "key"
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "splitByNonAlpha"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

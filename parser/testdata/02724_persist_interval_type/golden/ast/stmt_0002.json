@@ -1,0 +1,91 @@
+{
+  "table": "saved_intervals_tmp",
+  "engine": {
+    "name": "Memory"
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ],
+            "alias": "EventID"
+          },
+          {
+            "name": "toIntervalSecond",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            ],
+            "alias": "v1"
+          },
+          {
+            "name": "toIntervalHour",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              }
+            ],
+            "alias": "v2"
+          },
+          {
+            "name": "toIntervalNanosecond",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "type": "Integer",
+                  "value": 3
+                }
+              }
+            ],
+            "alias": "v3"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

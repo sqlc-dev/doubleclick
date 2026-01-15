@@ -1,0 +1,137 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "k"
+          ]
+        },
+        {
+          "parts": [
+            "js1",
+            "s"
+          ]
+        },
+        {
+          "parts": [
+            "t2",
+            "s"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toUInt64",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "/",
+                              "right": {
+                                "type": "Integer",
+                                "value": 3
+                              }
+                            }
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "s"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "name": "toUInt64",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "/",
+                              "right": {
+                                "type": "Integer",
+                                "value": 3
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "with_totals": true
+                    }
+                  ]
+                }
+              },
+              "alias": "js1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t2"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "k"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

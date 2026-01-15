@@ -1,0 +1,126 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "name": "splitByChar",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "*"
+                },
+                {
+                  "parts": [
+                    "data_path"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "replaceRegexpOne",
+          "arguments": [
+            {
+              "parts": [
+                "data_path"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "^.*/([^/]*)/"
+            },
+            {
+              "type": "String",
+              "value": "\\1"
+            }
+          ]
+        },
+        {
+          "name": "extract",
+          "arguments": [
+            {
+              "parts": [
+                "last_exception"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "AUTHENTICATION_FAILED"
+            }
+          ]
+        },
+        {
+          "left": {
+            "name": "dateDiff",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "s"
+              },
+              {
+                "parts": [
+                  "last_exception_time"
+                ]
+              },
+              {
+                "name": "now"
+              }
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "Integer",
+            "value": 3600
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "distribution_queue"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "table"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "dist_01555"
+          }
+        }
+      },
+      "format": {
+        "parts": [
+          "CSV"
+        ]
+      }
+    }
+  ]
+}

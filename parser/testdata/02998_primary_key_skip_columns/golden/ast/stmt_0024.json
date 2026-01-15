@@ -1,0 +1,72 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "Key size: "
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "primary_key_bytes_in_memory"
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "-",
+              "operand": {
+                "type": "Integer",
+                "value": 5
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "table"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "test"
+          }
+        }
+      }
+    }
+  ]
+}

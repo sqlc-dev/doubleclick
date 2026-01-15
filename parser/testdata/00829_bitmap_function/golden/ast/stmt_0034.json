@@ -1,0 +1,48 @@
+{
+  "table": "bitmap_column_expr_test",
+  "columns": [
+    {
+      "name": "t",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "z",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "groupBitmap"
+            ]
+          },
+          {
+            "name": "UInt32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "t"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMMDD",
+    "arguments": [
+      {
+        "parts": [
+          "t"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "with": [
+                        {
+                          "name": "TUNING",
+                          "query": {
+                            "name": "assumeNotNull",
+                            "arguments": [
+                              {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "type": "Float",
+                                          "value": 0.9,
+                                          "source": "0.9"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "scalar_with": true
+                        },
+                        {
+                          "name": "ELEMENT_QUERY",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "name": "quantiles",
+                                      "parameters": [
+                                        {
+                                          "parts": [
+                                            "TUNING"
+                                          ]
+                                        }
+                                      ],
+                                      "arguments": [
+                                        {
+                                          "type": "Integer",
+                                          "value": 1
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": false
+                        }
+                      ],
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "ELEMENT_QUERY"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

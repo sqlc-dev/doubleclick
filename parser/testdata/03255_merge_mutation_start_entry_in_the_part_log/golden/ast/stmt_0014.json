@@ -1,0 +1,113 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "event_type"
+          ]
+        },
+        {
+          "parts": [
+            "merge_reason"
+          ]
+        },
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "parts": [
+            "part_name"
+          ]
+        },
+        {
+          "parts": [
+            "partition_id"
+          ]
+        },
+        {
+          "parts": [
+            "partition"
+          ]
+        },
+        {
+          "parts": [
+            "rows"
+          ]
+        },
+        {
+          "parts": [
+            "merged_from"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "event_type"
+            ]
+          },
+          "list": [
+            {
+              "type": "String",
+              "value": "MergePartsStart"
+            },
+            {
+              "type": "String",
+              "value": "MergeParts"
+            },
+            {
+              "type": "String",
+              "value": "MutatePartStart"
+            },
+            {
+              "type": "String",
+              "value": "MutatePart"
+            }
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "result"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Tuple",
+                            "value": [
+                              {
+                                "parts": [
+                                  "lon"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "lat"
+                                ]
+                              }
+                            ],
+                            "spaced_commas": true
+                          },
+                          "alias": "input_geo"
+                        },
+                        {
+                          "name": "h3ToGeo",
+                          "arguments": [
+                            {
+                              "name": "geoToH3",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "lon"
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "lat"
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "res"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "output_geo"
+                        },
+                        {
+                          "name": "if",
+                          "arguments": [
+                            {
+                              "left": {
+                                "left": {
+                                  "name": "abs",
+                                  "arguments": [
+                                    {
+                                      "left": {
+                                        "tuple": {
+                                          "parts": [
+                                            "input_geo"
+                                          ]
+                                        },
+                                        "index": {
+                                          "type": "Integer",
+                                          "value": 1
+                                        }
+                                      },
+                                      "op": "-",
+                                      "right": {
+                                        "tuple": {
+                                          "parts": [
+                                            "output_geo"
+                                          ]
+                                        },
+                                        "index": {
+                                          "type": "Integer",
+                                          "value": 1
+                                        }
+                                      }
+                                    }
+                                  ]
+                                },
+                                "op": "\u003c",
+                                "right": {
+                                  "type": "Float",
+                                  "value": 0.001,
+                                  "source": "0.001"
+                                }
+                              },
+                              "op": "AND",
+                              "right": {
+                                "left": {
+                                  "name": "abs",
+                                  "arguments": [
+                                    {
+                                      "left": {
+                                        "tuple": {
+                                          "parts": [
+                                            "input_geo"
+                                          ]
+                                        },
+                                        "index": {
+                                          "type": "Integer",
+                                          "value": 2
+                                        }
+                                      },
+                                      "op": "-",
+                                      "right": {
+                                        "tuple": {
+                                          "parts": [
+                                            "output_geo"
+                                          ]
+                                        },
+                                        "index": {
+                                          "type": "Integer",
+                                          "value": 2
+                                        }
+                                      }
+                                    }
+                                  ]
+                                },
+                                "op": "\u003c",
+                                "right": {
+                                  "type": "Float",
+                                  "value": 0.001,
+                                  "source": "0.001"
+                                }
+                              }
+                            },
+                            {
+                              "type": "String",
+                              "value": "ok"
+                            },
+                            {
+                              "type": "String",
+                              "value": "fail"
+                            }
+                          ],
+                          "alias": "result"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "h3_geo"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

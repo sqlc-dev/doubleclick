@@ -1,0 +1,93 @@
+{
+  "table": "stack",
+  "columns": [
+    {
+      "name": "item_id",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "brand_id",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "rack_id",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "dt",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "expiration_dt",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "quantity",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "brand_id"
+          ]
+        },
+        {
+          "name": "toStartOfHour",
+          "arguments": [
+            {
+              "parts": [
+                "dt"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "dt"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "avg",
+              "arguments": [
+                {
+                  "parts": [
+                    "bytes"
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "-",
+              "operand": {
+                "type": "Integer",
+                "value": 6
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "test"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "parts": [
+            "active"
+          ]
+        }
+      }
+    }
+  ]
+}

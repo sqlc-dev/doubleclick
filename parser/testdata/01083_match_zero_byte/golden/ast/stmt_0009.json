@@ -1,0 +1,61 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ],
+          "alias": "char_code"
+        },
+        {
+          "name": "extract",
+          "arguments": [
+            {
+              "expr": {
+                "left": {
+                  "name": "char",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "char_code"
+                      ]
+                    }
+                  ]
+                },
+                "op": "||",
+                "right": {
+                  "type": "String",
+                  "value": " key=\"v\" "
+                }
+              },
+              "alias": "haystack"
+            },
+            {
+              "type": "String",
+              "value": "key=\"(.*?)\""
+            }
+          ],
+          "alias": "needle"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 256
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

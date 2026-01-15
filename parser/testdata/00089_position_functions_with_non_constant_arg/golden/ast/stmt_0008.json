@@ -1,0 +1,98 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "parts": [
+            "URL"
+          ]
+        },
+        {
+          "parts": [
+            "URLDomain"
+          ]
+        },
+        {
+          "name": "position",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "http://yandex.ru/"
+            },
+            {
+              "name": "domain",
+              "arguments": [
+                {
+                  "parts": [
+                    "URL"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "x"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "x"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 8
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "name": "position",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "http://yandex.ru/"
+              },
+              {
+                "name": "domain",
+                "arguments": [
+                  {
+                    "parts": [
+                      "URL"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "URL"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 3
+      }
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "p",
+            "key"
+          ]
+        },
+        {
+          "parts": [
+            "p",
+            "ts"
+          ]
+        },
+        {
+          "parts": [
+            "e",
+            "value"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "probes"
+              },
+              "alias": "p"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "events"
+              },
+              "alias": "e"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ASOF",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "p",
+                      "key"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "e",
+                      "key"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "p",
+                      "ts"
+                    ]
+                  },
+                  "op": "\u003e=",
+                  "right": {
+                    "parts": [
+                      "e",
+                      "begin"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "p",
+              "key"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "p",
+              "ts"
+            ]
+          },
+          "nulls_first": true
+        }
+      ]
+    }
+  ]
+}

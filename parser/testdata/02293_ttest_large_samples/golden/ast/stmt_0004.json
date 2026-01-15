@@ -1,0 +1,182 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "roundBankers",
+          "arguments": [
+            {
+              "tuple": {
+                "parts": [
+                  "result"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 1025
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "studentTTest",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "sample"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "variant"
+                              ]
+                            }
+                          ],
+                          "alias": "result"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "left": {
+                                              "name": "toFloat64",
+                                              "arguments": [
+                                                {
+                                                  "parts": [
+                                                    "number"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "op": "%",
+                                            "right": {
+                                              "type": "Integer",
+                                              "value": 30
+                                            }
+                                          },
+                                          "alias": "sample"
+                                        },
+                                        {
+                                          "expr": {
+                                            "type": "Integer",
+                                            "value": 1048576
+                                          },
+                                          "alias": "variant"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "database": "system",
+                                                "table": "numbers"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "limit": {
+                                        "type": "Integer",
+                                        "value": 1
+                                      }
+                                    },
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "left": {
+                                              "left": {
+                                                "name": "toFloat64",
+                                                "arguments": [
+                                                  {
+                                                    "parts": [
+                                                      "number"
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              "op": "%",
+                                              "right": {
+                                                "type": "Integer",
+                                                "value": 7
+                                              },
+                                              "parenthesized": true
+                                            },
+                                            "op": "+",
+                                            "right": {
+                                              "type": "Float",
+                                              "value": "+Inf"
+                                            }
+                                          },
+                                          "alias": "sample"
+                                        },
+                                        {
+                                          "expr": {
+                                            "type": "Integer",
+                                            "value": 255
+                                          },
+                                          "alias": "variant"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "database": "system",
+                                                "table": "numbers"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "limit": {
+                                        "type": "Integer",
+                                        "value": 1023
+                                      }
+                                    }
+                                  ],
+                                  "union_all": true,
+                                  "union_modes": [
+                                    "UNION ALL"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

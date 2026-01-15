@@ -1,0 +1,66 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "condition": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "then": {
+            "name": "materialize",
+            "arguments": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "String",
+                    "value": "Hello"
+                  },
+                  {
+                    "type": "String",
+                    "value": "World"
+                  }
+                ],
+                "spaced_commas": true
+              }
+            ]
+          },
+          "else": {
+            "type": "Array",
+            "value": [
+              {
+                "type": "String",
+                "value": "abc"
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

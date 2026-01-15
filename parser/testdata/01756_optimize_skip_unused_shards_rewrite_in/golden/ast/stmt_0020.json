@@ -1,0 +1,154 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "array": {
+            "name": "splitByString",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "IN"
+              },
+              {
+                "parts": [
+                  "query"
+                ]
+              }
+            ]
+          },
+          "index": {
+            "op": "-",
+            "operand": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "event_date"
+                    ]
+                  },
+                  "op": "\u003e=",
+                  "right": {
+                    "name": "yesterday"
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "event_time"
+                    ]
+                  },
+                  "op": "\u003e",
+                  "right": {
+                    "left": {
+                      "name": "now"
+                    },
+                    "op": "-",
+                    "right": {
+                      "value": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "unit": "HOUR"
+                    }
+                  }
+                }
+              },
+              "op": "AND",
+              "right": {
+                "op": "NOT",
+                "operand": {
+                  "parts": [
+                    "is_initial_query"
+                  ]
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "query"
+                ]
+              },
+              "not": true,
+              "pattern": {
+                "type": "String",
+                "value": "%system%query_log%"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "query"
+              ]
+            },
+            "pattern": {
+              "name": "concat",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "%"
+                },
+                {
+                  "name": "currentDatabase"
+                },
+                {
+                  "type": "String",
+                  "value": "%AS%id_02%"
+                }
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "QueryFinish"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "query"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "category"
+          ]
+        },
+        {
+          "parts": [
+            "value"
+          ]
+        },
+        {
+          "name": "row_number",
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "category"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "value"
+                  ]
+                }
+              }
+            ]
+          },
+          "alias": "rn"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_limit_by_all"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "category"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "value"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "rn"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 3
+      },
+      "limit_by": [
+        {
+          "parts": [
+            "ALL"
+          ]
+        }
+      ],
+      "limit_by_limit": {
+        "type": "Integer",
+        "value": 1
+      },
+      "limit_by_has_limit": true
+    }
+  ]
+}

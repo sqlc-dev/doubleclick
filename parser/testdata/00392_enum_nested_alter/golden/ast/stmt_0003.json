@@ -1,0 +1,83 @@
+{
+  "table": "enum_nested_alter",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "type": "String",
+        "value": "2000-01-01"
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "n",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "a",
+            "type": {
+              "name": "String"
+            }
+          },
+          {
+            "name": "e",
+            "type": {
+              "name": "Enum8",
+              "parameters": [
+                {
+                  "left": {
+                    "type": "String",
+                    "value": "Hello"
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ],
+              "has_parentheses": true
+            }
+          },
+          {
+            "name": "b",
+            "type": {
+              "name": "UInt8"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "parts": [
+          "x"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 1
+      }
+    ],
+    "has_parentheses": true
+  }
+}

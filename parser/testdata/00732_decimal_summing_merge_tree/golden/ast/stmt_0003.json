@@ -1,0 +1,70 @@
+{
+  "table": "decimal_sum",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "sum32",
+      "type": {
+        "name": "Decimal32",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 4
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "sum64",
+      "type": {
+        "name": "Decimal64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 8
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "sum128",
+      "type": {
+        "name": "Decimal128",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 10
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "date"
+        ]
+      },
+      {
+        "parts": [
+          "date"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "s"
+          ]
+        },
+        {
+          "parts": [
+            "arr"
+          ]
+        },
+        {
+          "parts": [
+            "a"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "arrays_test"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "arr"
+                  ],
+                  "alias": "a"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "a"
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "type": "Integer",
+          "value": 3
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "a"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

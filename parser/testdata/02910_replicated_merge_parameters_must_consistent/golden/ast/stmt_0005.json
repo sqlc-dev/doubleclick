@@ -1,0 +1,55 @@
+{
+  "table": "t2_r_ok",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "legacy_ver",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "deleted",
+      "type": {
+        "name": "UInt8"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedReplacingMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/tables/{database}/t2/"
+      },
+      {
+        "type": "String",
+        "value": "r2"
+      },
+      {
+        "parts": [
+          "legacy_ver"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

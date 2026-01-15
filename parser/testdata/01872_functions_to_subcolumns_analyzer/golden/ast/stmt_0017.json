@@ -1,0 +1,105 @@
+{
+  "explain_type": "QUERY TREE",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "expr": {
+              "parts": [
+                "left",
+                "n"
+              ]
+            }
+          },
+          {
+            "expr": {
+              "parts": [
+                "right",
+                "n"
+              ]
+            }
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "t_func_to_subcolumns"
+                },
+                "alias": "left"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "alias": "id"
+                          },
+                          {
+                            "expr": {
+                              "type": "String",
+                              "value": "qqq"
+                            },
+                            "alias": "n"
+                          }
+                        ]
+                      },
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 3
+                            },
+                            "alias": "id"
+                          },
+                          {
+                            "type": "String",
+                            "value": "www"
+                          }
+                        ]
+                      }
+                    ],
+                    "union_all": true,
+                    "union_modes": [
+                      "UNION ALL"
+                    ]
+                  }
+                },
+                "alias": "right"
+              },
+              "join": {
+                "type": "FULL",
+                "using": [
+                  {
+                    "parts": [
+                      "id"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "has_settings": true,
+  "explicit_type": true,
+  "options_string": "dump_tree = 1, dump_ast = 1"
+}

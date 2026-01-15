@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "view_name"
+          ]
+        },
+        {
+          "parts": [
+            "read_rows"
+          ]
+        },
+        {
+          "parts": [
+            "read_bytes"
+          ]
+        },
+        {
+          "parts": [
+            "written_rows"
+          ]
+        },
+        {
+          "parts": [
+            "written_bytes"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_views_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "name": "startsWith",
+        "arguments": [
+          {
+            "parts": [
+              "view_name"
+            ]
+          },
+          {
+            "left": {
+              "name": "currentDatabase"
+            },
+            "op": "||",
+            "right": {
+              "type": "String",
+              "value": ".mv"
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "view_name"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

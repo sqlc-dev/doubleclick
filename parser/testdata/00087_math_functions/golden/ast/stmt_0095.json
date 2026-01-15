@@ -1,0 +1,108 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "name": "abs",
+                  "arguments": [
+                    {
+                      "left": {
+                        "name": "sinh",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "x"
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "-",
+                      "right": {
+                        "left": {
+                          "type": "Float",
+                          "value": 0.5,
+                          "source": "0.5"
+                        },
+                        "op": "*",
+                        "right": {
+                          "left": {
+                            "name": "exp",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "x"
+                                ]
+                              }
+                            ]
+                          },
+                          "op": "-",
+                          "right": {
+                            "name": "exp",
+                            "arguments": [
+                              {
+                                "op": "-",
+                                "operand": {
+                                  "parts": [
+                                    "x"
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "parenthesized": true
+                        }
+                      }
+                    }
+                  ]
+                },
+                "op": "\u003c",
+                "right": {
+                  "type": "Float",
+                  "value": 0.000001,
+                  "source": "1e-6"
+                }
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "count"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "name": "range",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  ],
+                  "alias": "x"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

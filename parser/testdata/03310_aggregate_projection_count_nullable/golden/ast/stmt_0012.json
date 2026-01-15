@@ -1,0 +1,94 @@
+{
+  "table": "log",
+  "columns": [
+    {
+      "name": "collectorReceiptTime",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "eventId",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "ruleId",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "ailog_rule_count",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "collectorReceiptTime"
+            ]
+          },
+          {
+            "parts": [
+              "ruleId"
+            ]
+          },
+          {
+            "name": "count",
+            "arguments": [
+              {
+                "parts": [
+                  "ruleId"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "collectorReceiptTime"
+            ]
+          },
+          {
+            "parts": [
+              "ruleId"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "collectorReceiptTime"
+          ]
+        },
+        {
+          "parts": [
+            "eventId"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMMDD",
+    "arguments": [
+      {
+        "parts": [
+          "collectorReceiptTime"
+        ]
+      }
+    ]
+  }
+}

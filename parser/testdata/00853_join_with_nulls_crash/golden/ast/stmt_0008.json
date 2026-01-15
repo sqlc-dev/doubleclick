@@ -1,0 +1,185 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "s1",
+            "other"
+          ]
+        },
+        {
+          "parts": [
+            "s2",
+            "other"
+          ]
+        },
+        {
+          "parts": [
+            "count_a"
+          ]
+        },
+        {
+          "parts": [
+            "count_b"
+          ]
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "s1",
+                "other"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "s2",
+                "other"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "other"
+                          ]
+                        },
+                        {
+                          "name": "count",
+                          "alias": "count_a"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "table_a"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "other"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "s1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "other"
+                          ]
+                        },
+                        {
+                          "name": "count",
+                          "alias": "count_b"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "table_b"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "other"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "s2"
+            },
+            "join": {
+              "type": "FULL",
+              "strictness": "ALL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "s1",
+                    "other"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "s2",
+                    "other"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "s2",
+              "other"
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "count_a"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "s1",
+              "other"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

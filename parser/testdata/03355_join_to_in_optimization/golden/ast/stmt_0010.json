@@ -1,0 +1,111 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "t1",
+            "key"
+          ]
+        },
+        {
+          "parts": [
+            "t1",
+            "key2"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t1"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t2"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ALL",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "id"
+                    ]
+                  },
+                  "parenthesized": true
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "t2",
+                      "key"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "key2"
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "t1",
+              "key"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "t1",
+              "key2"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "query_plan_use_new_logical_join_step",
+          "value": {
+            "type": "Boolean",
+            "value": true
+          }
+        },
+        {
+          "name": "query_plan_convert_join_to_in",
+          "value": {
+            "type": "Boolean",
+            "value": true
+          }
+        }
+      ]
+    }
+  ]
+}

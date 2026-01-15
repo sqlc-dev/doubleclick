@@ -1,0 +1,170 @@
+{
+  "view": "v",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt8"
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "data",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "expr": {
+                          "type": "String",
+                          "value": ""
+                        },
+                        "alias": "id"
+                      }
+                    ],
+                    "limit": {
+                      "type": "Integer",
+                      "value": 0
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          },
+          {
+            "name": "r",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "expr": {
+                          "type": "String",
+                          "value": ""
+                        },
+                        "alias": "id"
+                      },
+                      {
+                        "expr": {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        "type": {
+                          "name": "UInt8"
+                        },
+                        "alias": "value",
+                        "operator_syntax": true
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          }
+        ],
+        "columns": [
+          {
+            "name": "now",
+            "alias": "date"
+          },
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "value"
+                ]
+              },
+              "op": "AND",
+              "right": {
+                "expr": {
+                  "parts": [
+                    "data",
+                    "id"
+                  ]
+                },
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": ""
+                          },
+                          "alias": "d"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "one"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "alias": "value"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "data"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "r"
+                }
+              },
+              "join": {
+                "type": "LEFT",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "data",
+                      "id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "r",
+                      "id"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

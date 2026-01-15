@@ -1,0 +1,74 @@
+{
+  "table": "check_system_tables",
+  "columns": [
+    {
+      "name": "Event",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "UserId",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "Counter",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "Event"
+        ]
+      },
+      {
+        "name": "intHash32",
+        "arguments": [
+          {
+            "parts": [
+              "UserId"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "Counter"
+            ]
+          },
+          {
+            "parts": [
+              "Event"
+            ]
+          },
+          {
+            "name": "intHash32",
+            "arguments": [
+              {
+                "parts": [
+                  "UserId"
+                ]
+              }
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

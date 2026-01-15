@@ -1,0 +1,149 @@
+{
+  "table": "target_table",
+  "engine": {
+    "name": "SummingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 128
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true,
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ],
+            "alias": "id"
+          },
+          {
+            "name": "maxState",
+            "arguments": [
+              {
+                "name": "toDateTime",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  },
+                  {
+                    "type": "String",
+                    "value": "UTC"
+                  }
+                ]
+              }
+            ],
+            "alias": "latest_login_time"
+          },
+          {
+            "name": "maxState",
+            "arguments": [
+              {
+                "name": "toDateTime",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  },
+                  {
+                    "type": "String",
+                    "value": "UTC"
+                  }
+                ]
+              }
+            ],
+            "alias": "latest_checkout_time"
+          },
+          {
+            "name": "minState",
+            "arguments": [
+              {
+                "name": "toUInt64",
+                "arguments": [
+                  {
+                    "op": "-",
+                    "operand": {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  }
+                ]
+              }
+            ],
+            "alias": "fastest_session"
+          },
+          {
+            "name": "maxState",
+            "arguments": [
+              {
+                "name": "toUInt64",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                ]
+              }
+            ],
+            "alias": "biggest_inactivity_period"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 50000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "id"
+            ]
+          }
+        ],
+        "settings": [
+          {
+            "name": "max_insert_threads",
+            "value": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

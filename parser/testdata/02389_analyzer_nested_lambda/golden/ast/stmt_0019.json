@@ -1,0 +1,99 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "type": "Integer",
+                    "value": 5
+                  }
+                ]
+              },
+              {
+                "columns": [
+                  {
+                    "type": "Integer",
+                    "value": 5
+                  }
+                ]
+              }
+            ],
+            "union_modes": [
+              "UNION DISTINCT"
+            ]
+          },
+          "alias": "subquery"
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "left": {
+                  "parts": [
+                    "x"
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "array": {
+                    "name": "arrayMap",
+                    "arguments": [
+                      {
+                        "parameters": [
+                          "x"
+                        ],
+                        "body": {
+                          "parts": [
+                            "subquery"
+                          ]
+                        }
+                      },
+                      {
+                        "type": "Array",
+                        "value": [
+                          {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "index": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              }
+            },
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "type": "Integer",
+                  "value": 2
+                },
+                {
+                  "type": "Integer",
+                  "value": 3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "name": "abs",
+                  "arguments": [
+                    {
+                      "left": {
+                        "name": "lgamma",
+                        "arguments": [
+                          {
+                            "left": {
+                              "parts": [
+                                "x"
+                              ]
+                            },
+                            "op": "+",
+                            "right": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          }
+                        ]
+                      },
+                      "op": "-",
+                      "right": {
+                        "name": "log",
+                        "arguments": [
+                          {
+                            "name": "tgamma",
+                            "arguments": [
+                              {
+                                "left": {
+                                  "parts": [
+                                    "x"
+                                  ]
+                                },
+                                "op": "+",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "op": "\u003c",
+                "right": {
+                  "type": "Float",
+                  "value": 1e-8,
+                  "source": "1.0e-8"
+                }
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "count"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "name": "range",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  ],
+                  "alias": "x"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

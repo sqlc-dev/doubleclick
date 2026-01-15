@@ -1,0 +1,87 @@
+{
+  "table": "tp_1",
+  "columns": [
+    {
+      "name": "x",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "Int32"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "x"
+            ]
+          },
+          {
+            "parts": [
+              "y"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "x"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "left": {
+          "type": "String",
+          "value": "/clickhouse/tables/{shard}/01710_projection_fetch_"
+        },
+        "op": "||",
+        "right": {
+          "name": "currentDatabase"
+        }
+      },
+      {
+        "type": "String",
+        "value": "1_{replica}"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "y"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "min_rows_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 4
+      }
+    },
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 32
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

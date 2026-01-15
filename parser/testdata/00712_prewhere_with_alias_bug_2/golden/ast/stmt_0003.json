@@ -1,0 +1,127 @@
+{
+  "table": "table",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "str",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "Int8"
+      }
+    },
+    {
+      "name": "arr",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "arr_alias",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "parts": [
+          "arr"
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "date"
+        ]
+      },
+      {
+        "name": "intHash32",
+        "arguments": [
+          {
+            "parts": [
+              "c"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "a"
+            ]
+          },
+          {
+            "parts": [
+              "date"
+            ]
+          },
+          {
+            "name": "intHash32",
+            "arguments": [
+              {
+                "parts": [
+                  "c"
+                ]
+              }
+            ]
+          },
+          {
+            "parts": [
+              "b"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

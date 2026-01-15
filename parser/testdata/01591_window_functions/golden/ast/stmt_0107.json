@@ -1,0 +1,121 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "name": "count",
+          "over": {
+            "name": "w1",
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              }
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "window": [
+        {
+          "name": "w0",
+          "spec": {
+            "partition_by": [
+              {
+                "name": "intDiv",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 5
+                  }
+                ],
+                "alias": "p"
+              }
+            ]
+          }
+        },
+        {
+          "name": "w1",
+          "spec": {
+            "name": "w0",
+            "order_by": [
+              {
+                "expression": {
+                  "name": "mod",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 3
+                    }
+                  ],
+                  "alias": "o"
+                }
+              },
+              {
+                "expression": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "p"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "o"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "number"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

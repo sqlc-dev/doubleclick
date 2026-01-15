@@ -1,0 +1,153 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "t1",
+                            "k"
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "parts": [
+                            "t1",
+                            "x"
+                          ],
+                          "alias": "x1"
+                        },
+                        {
+                          "parts": [
+                            "t2",
+                            "x"
+                          ],
+                          "alias": "x2"
+                        },
+                        {
+                          "parts": [
+                            "t3",
+                            "x"
+                          ],
+                          "alias": "x3"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "adaptive_spill_03277_1"
+                              },
+                              "alias": "t1"
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "adaptive_spill_03277_2"
+                              },
+                              "alias": "t2"
+                            },
+                            "join": {
+                              "type": "LEFT",
+                              "on": {
+                                "left": {
+                                  "parts": [
+                                    "t1",
+                                    "k"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "parts": [
+                                    "t2",
+                                    "k"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "adaptive_spill_03277_3"
+                              },
+                              "alias": "t3"
+                            },
+                            "join": {
+                              "type": "LEFT",
+                              "on": {
+                                "left": {
+                                  "parts": [
+                                    "t1",
+                                    "k"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "parts": [
+                                    "t3",
+                                    "k"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "x1"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "x2"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "x3"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 100
+      }
+    }
+  ]
+}

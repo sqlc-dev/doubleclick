@@ -1,0 +1,95 @@
+{
+  "table": "x",
+  "columns": [
+    {
+      "name": "dt",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "i",
+      "type": {
+        "name": "Int32"
+      },
+      "default": {
+        "type": "Integer",
+        "value": 42
+      },
+      "default_kind": "DEFAULT",
+      "ttl": {
+        "left": {
+          "parts": [
+            "dt"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "name": "toIntervalDay",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx",
+      "expression": {
+        "parts": [
+          "i"
+        ]
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 100
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "dt"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "indexHint",
+    "arguments": [
+      {
+        "parts": [
+          "dt"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

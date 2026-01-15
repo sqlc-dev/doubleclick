@@ -1,0 +1,469 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "input_1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "type": {
+                        "name": "String"
+                      },
+                      "alias": "parent_id",
+                      "operator_syntax": true
+                    },
+                    {
+                      "expr": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "type": {
+                        "name": "String"
+                      },
+                      "alias": "id",
+                      "operator_syntax": true
+                    },
+                    {
+                      "expr": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "type": {
+                        "name": "String"
+                      },
+                      "alias": "value",
+                      "operator_syntax": true
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers_mt",
+                            "arguments": [
+                              {
+                                "type": "Float",
+                                "value": 1000000,
+                                "source": "1e6"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "dimensions_1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "type": {
+                        "name": "String"
+                      },
+                      "alias": "value_id",
+                      "operator_syntax": true
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers_mt",
+                            "arguments": [
+                              {
+                                "type": "Float",
+                                "value": 1000000,
+                                "source": "1e6"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "dimensions_2",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "type": {
+                        "name": "String"
+                      },
+                      "alias": "value_id",
+                      "operator_syntax": true
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers_mt",
+                            "arguments": [
+                              {
+                                "type": "Float",
+                                "value": 1000000,
+                                "source": "1e6"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "parents",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "String",
+                        "value": "foo"
+                      },
+                      "alias": "type"
+                    },
+                    {
+                      "parts": [
+                        "parent_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "input_1"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "parent_id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "parents_with_value",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "type"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "parent_id"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "t",
+                        "value"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "parents"
+                          }
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "table": "input_1"
+                          },
+                          "alias": "t"
+                        },
+                        "join": {
+                          "type": "LEFT",
+                          "on": {
+                            "left": {
+                              "parts": [
+                                "t",
+                                "id"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "parents",
+                                "parent_id"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "values",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "String",
+                        "value": "foo"
+                      },
+                      "alias": "type"
+                    },
+                    {
+                      "expr": {
+                        "type": "String",
+                        "value": ""
+                      },
+                      "alias": "parent_id"
+                    },
+                    {
+                      "parts": [
+                        "value"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "input_1"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "all",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {}
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "parents_with_value"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "columns": [
+                    {}
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "values"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "type"
+          ]
+        },
+        {
+          "parts": [
+            "value"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "all"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "dimensions_1"
+              },
+              "alias": "dim1"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "all",
+                    "value"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "dim1",
+                    "value_id"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "dimensions_2"
+              },
+              "alias": "dim2"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "all",
+                    "value"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "dim2",
+                    "value_id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "max_block_size",
+          "value": {
+            "type": "Integer",
+            "value": 65535
+          }
+        },
+        {
+          "name": "max_joined_block_size_rows",
+          "value": {
+            "type": "Integer",
+            "value": 65535
+          }
+        },
+        {
+          "name": "max_threads",
+          "value": {
+            "type": "Integer",
+            "value": 32
+          }
+        }
+      ],
+      "settings_after_format": true,
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "local:"
+        },
+        {
+          "name": "regexpExtract",
+          "arguments": [
+            {
+              "parts": [
+                "create_table_query"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "(`k`.+?)(\n|\\))"
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "tables"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "table"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "03655_keepermap"
+          }
+        }
+      }
+    }
+  ]
+}

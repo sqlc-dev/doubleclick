@@ -1,0 +1,109 @@
+{
+  "database": "db_dict",
+  "table": "cache_hits",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "WatchID",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "UserID",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "SearchPhrase",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "WatchID"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "HOST",
+          "value": {
+            "type": "String",
+            "value": "localhost"
+          }
+        },
+        {
+          "key": "PORT",
+          "value": {
+            "name": "tcpPort"
+          }
+        },
+        {
+          "key": "USER",
+          "value": {
+            "type": "String",
+            "value": "default"
+          }
+        },
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "hits_1m"
+          }
+        },
+        {
+          "key": "PASSWORD",
+          "value": {
+            "type": "String",
+            "value": ""
+          }
+        },
+        {
+          "key": "DB",
+          "value": {
+            "type": "String",
+            "value": "test"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 1
+      },
+      "max": {
+        "type": "Integer",
+        "value": 10
+      }
+    },
+    "layout": {
+      "type": "CACHE",
+      "args": [
+        {
+          "key": "SIZE_IN_CELLS",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "key": "QUERY_WAIT_TIMEOUT_MILLISECONDS",
+          "value": {
+            "type": "Integer",
+            "value": 60000
+          }
+        }
+      ]
+    }
+  }
+}

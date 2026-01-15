@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "name": "length",
+              "arguments": [
+                {
+                  "parts": [
+                    "URL"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "l"
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits_s3"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "URL"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "String",
+          "value": ""
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "parts": [
+            "c"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 100000
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "l"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 25
+      }
+    }
+  ]
+}

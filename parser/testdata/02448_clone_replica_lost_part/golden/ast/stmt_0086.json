@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sleepEachRow",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "url",
+                "arguments": [
+                  {
+                    "left": {
+                      "type": "String",
+                      "value": "http://localhost:8123/?param_tries={1..10}\u0026query="
+                    },
+                    "op": "||",
+                    "right": {
+                      "name": "encodeURLComponent",
+                      "arguments": [
+                        {
+                          "left": {
+                            "left": {
+                              "type": "String",
+                              "value": "select value from system.zookeeper where path='/test/02448/"
+                            },
+                            "op": "||",
+                            "right": {
+                              "name": "currentDatabase"
+                            }
+                          },
+                          "op": "||",
+                          "right": {
+                            "type": "String",
+                            "value": "/rmt/replicas/1' and name='is_lost' and value='0'"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "String",
+                    "value": "LineAsString"
+                  },
+                  {
+                    "type": "String",
+                    "value": "s String"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "max_threads",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "http_make_head_request",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

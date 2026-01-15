@@ -1,0 +1,70 @@
+{
+  "table": "optimize_lazy_materialization_with_compact_mt",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "n",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "x",
+            "type": {
+              "name": "String"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "b"
+    ]
+  },
+  "settings": [
+    {
+      "name": "min_rows_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 10000
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

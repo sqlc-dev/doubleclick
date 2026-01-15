@@ -1,0 +1,108 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "attr1",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "attr2",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "vec",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Float32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_attr1",
+      "expression": {
+        "parts": [
+          "attr1"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      }
+    },
+    {
+      "name": "idx_vec",
+      "expression": {
+        "parts": [
+          "vec"
+        ]
+      },
+      "type": {
+        "name": "vector_similarity",
+        "arguments": [
+          {
+            "type": "String",
+            "value": "hnsw"
+          },
+          {
+            "type": "String",
+            "value": "L2Distance"
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 10000
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "date"
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 3
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

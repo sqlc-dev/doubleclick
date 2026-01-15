@@ -1,0 +1,110 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayJoin",
+          "arguments": [
+            {
+              "name": "arrayMap",
+              "arguments": [
+                {
+                  "parameters": [
+                    "tag"
+                  ],
+                  "body": {
+                    "array": {
+                      "name": "map",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "a"
+                        },
+                        {
+                          "type": "String",
+                          "value": "value1"
+                        },
+                        {
+                          "type": "String",
+                          "value": "b"
+                        },
+                        {
+                          "type": "String",
+                          "value": "value2"
+                        }
+                      ]
+                    },
+                    "index": {
+                      "parts": [
+                        "tag"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type": "Array",
+                  "value": [
+                    {
+                      "type": "String",
+                      "value": "a"
+                    },
+                    {
+                      "type": "String",
+                      "value": "b"
+                    }
+                  ],
+                  "spaced_commas": true
+                }
+              ]
+            }
+          ],
+          "alias": "path"
+        },
+        {
+          "expr": {
+            "expr": {
+              "parts": [
+                "path"
+              ]
+            },
+            "list": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "String",
+                    "value": "Uncategorized"
+                  }
+                ]
+              }
+            ]
+          },
+          "alias": "in_category"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "parts": [
+                      "system",
+                      "one"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

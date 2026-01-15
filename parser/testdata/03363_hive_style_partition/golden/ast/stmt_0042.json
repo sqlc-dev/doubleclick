@@ -1,0 +1,56 @@
+{
+  "table": "t_03363_hive_only_partition_columns",
+  "columns": [
+    {
+      "name": "country",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "year",
+      "type": {
+        "name": "UInt16"
+      }
+    }
+  ],
+  "engine": {
+    "name": "S3",
+    "parameters": [
+      {
+        "parts": [
+          "s3_conn"
+        ]
+      },
+      {
+        "left": {
+          "parts": [
+            "partition_strategy"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "hive"
+        }
+      }
+    ],
+    "has_parentheses": true
+  },
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "parts": [
+          "year"
+        ]
+      },
+      {
+        "parts": [
+          "country"
+        ]
+      }
+    ],
+    "spaced_commas": true
+  }
+}

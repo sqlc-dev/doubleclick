@@ -1,0 +1,233 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "apply": [
+            "finalizeAggregation"
+          ],
+          "transformers": [
+            {
+              "type": "apply",
+              "apply": "finalizeAggregation"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "with": [
+                        {
+                          "name": "nt",
+                          "query": {
+                            "expr": {
+                              "type": "Tuple",
+                              "value": [
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              ],
+                              "spaced_commas": true
+                            },
+                            "type": {
+                              "name": "Tuple",
+                              "parameters": [
+                                {
+                                  "name": "a",
+                                  "type": {
+                                    "name": "int"
+                                  }
+                                },
+                                {
+                                  "name": "b",
+                                  "type": {
+                                    "name": "int"
+                                  }
+                                }
+                              ],
+                              "has_parentheses": true
+                            },
+                            "operator_syntax": true
+                          },
+                          "scalar_with": true
+                        }
+                      ],
+                      "columns": [
+                        {
+                          "expr": {
+                            "name": "uniqState",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "nt"
+                                ]
+                              }
+                            ]
+                          },
+                          "type": {
+                            "name": "AggregateFunction",
+                            "parameters": [
+                              {
+                                "parts": [
+                                  "uniq"
+                                ]
+                              },
+                              {
+                                "name": "Tuple",
+                                "parameters": [
+                                  {
+                                    "name": "int"
+                                  },
+                                  {
+                                    "name": "int"
+                                  }
+                                ],
+                                "has_parentheses": true
+                              }
+                            ],
+                            "has_parentheses": true
+                          },
+                          "alias": "x",
+                          "operator_syntax": true
+                        },
+                        {
+                          "expr": {
+                            "name": "uniqState",
+                            "arguments": [
+                              {
+                                "type": "Array",
+                                "value": [
+                                  {
+                                    "parts": [
+                                      "nt"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          "type": {
+                            "name": "AggregateFunction",
+                            "parameters": [
+                              {
+                                "parts": [
+                                  "uniq"
+                                ]
+                              },
+                              {
+                                "name": "Array",
+                                "parameters": [
+                                  {
+                                    "name": "Tuple",
+                                    "parameters": [
+                                      {
+                                        "name": "int"
+                                      },
+                                      {
+                                        "name": "int"
+                                      }
+                                    ],
+                                    "has_parentheses": true
+                                  }
+                                ],
+                                "has_parentheses": true
+                              }
+                            ],
+                            "has_parentheses": true
+                          },
+                          "alias": "y",
+                          "operator_syntax": true
+                        },
+                        {
+                          "expr": {
+                            "name": "uniqState",
+                            "arguments": [
+                              {
+                                "name": "map",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "nt"
+                                    ]
+                                  },
+                                  {
+                                    "parts": [
+                                      "nt"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          "type": {
+                            "name": "AggregateFunction",
+                            "parameters": [
+                              {
+                                "parts": [
+                                  "uniq"
+                                ]
+                              },
+                              {
+                                "name": "Map",
+                                "parameters": [
+                                  {
+                                    "name": "Tuple",
+                                    "parameters": [
+                                      {
+                                        "name": "int"
+                                      },
+                                      {
+                                        "name": "int"
+                                      }
+                                    ],
+                                    "has_parentheses": true
+                                  },
+                                  {
+                                    "name": "Tuple",
+                                    "parameters": [
+                                      {
+                                        "name": "int"
+                                      },
+                                      {
+                                        "name": "int"
+                                      }
+                                    ],
+                                    "has_parentheses": true
+                                  }
+                                ],
+                                "has_parentheses": true
+                              }
+                            ],
+                            "has_parentheses": true
+                          },
+                          "alias": "z",
+                          "operator_syntax": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "JSONEachRow"
+        ]
+      }
+    }
+  ]
+}

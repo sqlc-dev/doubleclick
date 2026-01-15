@@ -1,0 +1,72 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "name": "abs",
+              "arguments": [
+                {
+                  "left": {
+                    "name": "toUnixTimestamp",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "ts"
+                        ]
+                      },
+                      {
+                        "type": "String",
+                        "value": "UTC"
+                      }
+                    ]
+                  },
+                  "op": "-",
+                  "right": {
+                    "name": "toUnixTimestamp",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "2023-05-04 22:17:23"
+                      },
+                      {
+                        "type": "String",
+                        "value": "UTC"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "alias": "error"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "error"
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "type": "Integer",
+          "value": 3600
+        }
+      }
+    }
+  ]
+}

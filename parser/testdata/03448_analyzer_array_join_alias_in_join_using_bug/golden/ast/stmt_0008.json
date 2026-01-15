@@ -1,0 +1,113 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "arr"
+          ]
+        },
+        {
+          "parts": [
+            "arr_item"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "local_table"
+                    ]
+                  }
+                ]
+              },
+              "alias": "r"
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "arr"
+                  ],
+                  "alias": "arr_item"
+                }
+              ]
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "op": "+",
+                            "right": {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          },
+                          "alias": "arr_item"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "foo"
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "arr_item"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

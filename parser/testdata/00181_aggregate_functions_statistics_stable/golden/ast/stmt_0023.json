@@ -1,0 +1,368 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "abs",
+              "arguments": [
+                {
+                  "left": {
+                    "parts": [
+                      "COVAR1"
+                    ]
+                  },
+                  "op": "-",
+                  "right": {
+                    "parts": [
+                      "COVAR2"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 6
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "ID2"
+                        },
+                        {
+                          "name": "covarPopStable",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "x_value"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "y_value"
+                              ]
+                            }
+                          ],
+                          "alias": "COVAR1"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "series"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "ID2"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "name": "sum",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "VAL"
+                                  ]
+                                }
+                              ]
+                            },
+                            "op": "/",
+                            "right": {
+                              "name": "count"
+                            }
+                          },
+                          "alias": "COVAR2"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "left": {
+                                              "left": {
+                                                "parts": [
+                                                  "X"
+                                                ]
+                                              },
+                                              "op": "-",
+                                              "right": {
+                                                "parts": [
+                                                  "AVG_X"
+                                                ]
+                                              },
+                                              "parenthesized": true
+                                            },
+                                            "op": "*",
+                                            "right": {
+                                              "left": {
+                                                "parts": [
+                                                  "Y"
+                                                ]
+                                              },
+                                              "op": "-",
+                                              "right": {
+                                                "parts": [
+                                                  "AVG_Y"
+                                                ]
+                                              },
+                                              "parenthesized": true
+                                            }
+                                          },
+                                          "alias": "VAL"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "query": {
+                                                  "selects": [
+                                                    {
+                                                      "columns": [
+                                                        {
+                                                          "name": "toUInt32",
+                                                          "arguments": [
+                                                            {
+                                                              "name": "arrayJoin",
+                                                              "arguments": [
+                                                                {
+                                                                  "type": "Array",
+                                                                  "value": [
+                                                                    {
+                                                                      "type": "Integer",
+                                                                      "value": 1
+                                                                    },
+                                                                    {
+                                                                      "type": "Integer",
+                                                                      "value": 2
+                                                                    },
+                                                                    {
+                                                                      "type": "Integer",
+                                                                      "value": 3
+                                                                    },
+                                                                    {
+                                                                      "type": "Integer",
+                                                                      "value": 4
+                                                                    },
+                                                                    {
+                                                                      "type": "Integer",
+                                                                      "value": 5
+                                                                    },
+                                                                    {
+                                                                      "type": "Integer",
+                                                                      "value": 6
+                                                                    },
+                                                                    {
+                                                                      "type": "Integer",
+                                                                      "value": 7
+                                                                    },
+                                                                    {
+                                                                      "type": "Integer",
+                                                                      "value": 8
+                                                                    },
+                                                                    {
+                                                                      "type": "Integer",
+                                                                      "value": 9
+                                                                    },
+                                                                    {
+                                                                      "type": "Integer",
+                                                                      "value": 10
+                                                                    }
+                                                                  ],
+                                                                  "spaced_commas": true
+                                                                }
+                                                              ]
+                                                            }
+                                                          ],
+                                                          "alias": "ID"
+                                                        },
+                                                        {
+                                                          "name": "avg",
+                                                          "arguments": [
+                                                            {
+                                                              "parts": [
+                                                                "x_value"
+                                                              ]
+                                                            }
+                                                          ],
+                                                          "alias": "AVG_X"
+                                                        },
+                                                        {
+                                                          "name": "avg",
+                                                          "arguments": [
+                                                            {
+                                                              "parts": [
+                                                                "y_value"
+                                                              ]
+                                                            }
+                                                          ],
+                                                          "alias": "AVG_Y"
+                                                        }
+                                                      ],
+                                                      "from": {
+                                                        "tables": [
+                                                          {
+                                                            "table": {
+                                                              "table": {
+                                                                "table": "series"
+                                                              }
+                                                            }
+                                                          }
+                                                        ]
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "query": {
+                                                  "selects": [
+                                                    {
+                                                      "columns": [
+                                                        {
+                                                          "parts": [
+                                                            "i"
+                                                          ],
+                                                          "alias": "ID"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "x_value"
+                                                          ],
+                                                          "alias": "X"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "y_value"
+                                                          ],
+                                                          "alias": "Y"
+                                                        }
+                                                      ],
+                                                      "from": {
+                                                        "tables": [
+                                                          {
+                                                            "table": {
+                                                              "table": {
+                                                                "table": "series"
+                                                              }
+                                                            }
+                                                          }
+                                                        ]
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            },
+                                            "join": {
+                                              "type": "INNER",
+                                              "strictness": "ANY",
+                                              "using": [
+                                                {
+                                                  "parts": [
+                                                    "ID"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "ID2"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

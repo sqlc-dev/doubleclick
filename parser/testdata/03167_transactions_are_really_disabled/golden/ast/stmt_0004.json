@@ -1,0 +1,58 @@
+{
+  "view": "mv_table",
+  "materialized": true,
+  "columns": [
+    {
+      "name": "str",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/transactions_disabled_rmt"
+      },
+      {
+        "type": "String",
+        "value": "{replica}"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "str"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "str"
+            ],
+            "alias": "str"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "null_table"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

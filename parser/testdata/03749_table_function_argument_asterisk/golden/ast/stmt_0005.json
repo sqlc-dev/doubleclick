@@ -1,0 +1,148 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "type": "String",
+          "value": "/01650_drop_part_and_deduplication_partitioned_table/blocks/"
+        },
+        {
+          "type": "Integer",
+          "value": 60
+        },
+        {
+          "parts": [
+            "k1"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {},
+                  {
+                    "type": "String",
+                    "value": "127.{1,2}"
+                  },
+                  {
+                    "name": "view",
+                    "arguments": [
+                      {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {
+                                  "expr": {
+                                    "type": "Integer",
+                                    "value": 1
+                                  },
+                                  "alias": "k1"
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 65535
+                                },
+                                {
+                                  "expr": {
+                                    "type": "Integer",
+                                    "value": 2
+                                  },
+                                  "alias": "k2"
+                                },
+                                {
+                                  "expr": {
+                                    "type": "Integer",
+                                    "value": 3
+                                  },
+                                  "alias": "v"
+                                }
+                              ],
+                              "from": {
+                                "tables": [
+                                  {
+                                    "table": {
+                                      "table": {
+                                        "name": "numbers",
+                                        "arguments": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 2
+                                          },
+                                          {
+                                            "name": "cityHash64",
+                                            "arguments": [
+                                              {
+                                                "parts": [
+                                                  "k1"
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "where": {
+                                "name": "toLowCardinality",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 60
+                                  }
+                                ]
+                              },
+                              "group_by": [
+                                {
+                                  "name": "toLowCardinality",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 2
+                                    }
+                                  ]
+                                }
+                              ],
+                              "grouping_sets": true,
+                              "having": {
+                                "name": "equals",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "k1"
+                                    ]
+                                  },
+                                  {
+                                    "name": "toNullable",
+                                    "arguments": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 60
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "final": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

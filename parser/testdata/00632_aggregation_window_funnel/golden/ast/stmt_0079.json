@@ -1,0 +1,132 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "uid"
+          ]
+        },
+        {
+          "name": "windowFunnel",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 200
+            },
+            {
+              "type": "String",
+              "value": "strict_once"
+            },
+            {
+              "type": "String",
+              "value": "strict_increase"
+            }
+          ],
+          "arguments": [
+            {
+              "name": "toUInt32",
+              "arguments": [
+                {
+                  "parts": [
+                    "event_ts"
+                  ]
+                }
+              ]
+            },
+            {
+              "left": {
+                "parts": [
+                  "result"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "failure"
+              }
+            },
+            {
+              "left": {
+                "parts": [
+                  "result"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "failure"
+              }
+            },
+            {
+              "left": {
+                "parts": [
+                  "result"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "success"
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "funnel_test2"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "event_ts"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_ts"
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "type": "Integer",
+            "value": 300
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "uid"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "uid"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "cte1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {}
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "with": [
+                                    {
+                                      "name": "cte2",
+                                      "query": {
+                                        "query": {
+                                          "selects": [
+                                            {
+                                              "columns": [
+                                                {
+                                                  "parts": [
+                                                    "id"
+                                                  ]
+                                                },
+                                                {
+                                                  "parts": [
+                                                    "key"
+                                                  ]
+                                                },
+                                                {
+                                                  "parts": [
+                                                    "values"
+                                                  ]
+                                                }
+                                              ],
+                                              "from": {
+                                                "tables": [
+                                                  {
+                                                    "table": {
+                                                      "table": {
+                                                        "table": "cte1"
+                                                      }
+                                                    }
+                                                  },
+                                                  {
+                                                    "array_join": {
+                                                      "left": true,
+                                                      "columns": [
+                                                        {
+                                                          "name": "mapKeys",
+                                                          "arguments": [
+                                                            {
+                                                              "parts": [
+                                                                "key_values"
+                                                              ]
+                                                            }
+                                                          ],
+                                                          "alias": "key"
+                                                        },
+                                                        {
+                                                          "name": "mapValues",
+                                                          "arguments": [
+                                                            {
+                                                              "parts": [
+                                                                "key_values"
+                                                              ]
+                                                            }
+                                                          ],
+                                                          "alias": "values"
+                                                        }
+                                                      ]
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "scalar_with": false
+                                    }
+                                  ],
+                                  "columns": [
+                                    {
+                                      "parts": [
+                                        "id"
+                                      ]
+                                    },
+                                    {
+                                      "parts": [
+                                        "key"
+                                      ]
+                                    },
+                                    {
+                                      "parts": [
+                                        "value"
+                                      ]
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "table": "cte2"
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "array_join": {
+                                          "left": true,
+                                          "columns": [
+                                            {
+                                              "parts": [
+                                                "values"
+                                              ],
+                                              "alias": "value"
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "cte1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

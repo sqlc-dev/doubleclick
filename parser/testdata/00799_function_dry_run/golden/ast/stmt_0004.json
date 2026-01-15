@@ -1,0 +1,238 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "arr",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "arrayCumSum",
+                      "arguments": [
+                        {
+                          "name": "groupArray",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "amount"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "parts": [
+                                        "amount"
+                                      ]
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "table": "bm"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "order_by": [
+                                    {
+                                      "expression": {
+                                        "parts": [
+                                          "business_dttm"
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "id",
+          "query": {
+            "left": {
+              "type": "Integer",
+              "value": 1
+            },
+            "op": "+",
+            "right": {
+              "name": "rowNumberInAllBlocks"
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "window_size",
+          "query": {
+            "type": "Integer",
+            "value": 3
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "amount"
+          ]
+        },
+        {
+          "parts": [
+            "business_dttm"
+          ]
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "id"
+                ]
+              },
+              "op": "\u003c",
+              "right": {
+                "parts": [
+                  "window_size"
+                ]
+              }
+            },
+            {
+              "type": "Null",
+              "value": null
+            },
+            {
+              "name": "round",
+              "arguments": [
+                {
+                  "left": {
+                    "array": {
+                      "parts": [
+                        "arr"
+                      ]
+                    },
+                    "index": {
+                      "parts": [
+                        "id"
+                      ]
+                    }
+                  },
+                  "op": "-",
+                  "right": {
+                    "array": {
+                      "parts": [
+                        "arr"
+                      ]
+                    },
+                    "index": {
+                      "left": {
+                        "parts": [
+                          "id"
+                        ]
+                      },
+                      "op": "-",
+                      "right": {
+                        "parts": [
+                          "window_size"
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "Integer",
+                  "value": 4
+                }
+              ]
+            }
+          ],
+          "alias": "moving_sum"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "amount"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "business_dttm"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "bm"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "business_dttm"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "business_dttm"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

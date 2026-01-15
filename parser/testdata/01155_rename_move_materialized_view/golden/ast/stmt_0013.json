@@ -1,0 +1,65 @@
+{
+  "view": "mv2",
+  "materialized": true,
+  "to": "dst",
+  "columns": [
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "type": "String",
+        "value": "d"
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "tuple": {
+                  "type": "Tuple",
+                  "value": [
+                    {}
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": "mv2"
+              }
+            },
+            "alias": "s"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "src"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

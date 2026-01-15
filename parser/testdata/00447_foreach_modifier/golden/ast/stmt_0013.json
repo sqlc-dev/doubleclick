@@ -1,0 +1,144 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "k"
+          ]
+        },
+        {
+          "name": "groupArrayForEach",
+          "arguments": [
+            {
+              "parts": [
+                "arr"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "quantilesExactForEach",
+          "parameters": [
+            {
+              "type": "Float",
+              "value": 0.5,
+              "source": "0.5"
+            },
+            {
+              "type": "Float",
+              "value": 0.9,
+              "source": "0.9"
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "arr"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "intDiv",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 3
+                            }
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "name": "arrayMap",
+                          "arguments": [
+                            {
+                              "parameters": [
+                                "x"
+                              ],
+                              "body": {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "+",
+                                "right": {
+                                  "parts": [
+                                    "x"
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "name": "range",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "arr"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

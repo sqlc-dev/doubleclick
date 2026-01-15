@@ -1,0 +1,91 @@
+{
+  "table": "json_test",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "json",
+      "type": {
+        "name": "JSON",
+        "parameters": [
+          {
+            "expr": {
+              "name": "foo",
+              "type": {
+                "name": "Variant",
+                "parameters": [
+                  {
+                    "name": "String"
+                  },
+                  {
+                    "name": "Array",
+                    "parameters": [
+                      {
+                        "name": "String"
+                      }
+                    ],
+                    "has_parentheses": true
+                  }
+                ],
+                "has_parentheses": true
+              }
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/json_test"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "tuple"
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "min_rows_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,75 @@
+{
+  "table": "ttl",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "Int"
+      },
+      "default": {
+        "type": "Integer",
+        "value": 42
+      },
+      "default_kind": "DEFAULT",
+      "ttl": {
+        "parts": [
+          "d"
+        ]
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "ind",
+      "expression": {
+        "left": {
+          "parts": [
+            "b"
+          ]
+        },
+        "op": "*",
+        "right": {
+          "parts": [
+            "c"
+          ]
+        },
+        "parenthesized": true
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ]
+}

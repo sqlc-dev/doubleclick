@@ -1,0 +1,86 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "ParsedParams",
+            "Key1"
+          ],
+          "alias": "k1"
+        },
+        {
+          "parts": [
+            "GeneralInterests"
+          ],
+          "alias": "k2"
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "notEmpty",
+          "arguments": [
+            {
+              "parts": [
+                "k1"
+              ]
+            }
+          ]
+        },
+        "op": "AND",
+        "right": {
+          "name": "notEmpty",
+          "arguments": [
+            {
+              "parts": [
+                "k2"
+              ]
+            }
+          ]
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k1"
+          ]
+        },
+        {
+          "parts": [
+            "k2"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

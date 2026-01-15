@@ -1,0 +1,36 @@
+{
+  "table": "03173_nonsafe_cast",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "name": "xxHash32",
+      "arguments": [
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 3
+    }
+  }
+}

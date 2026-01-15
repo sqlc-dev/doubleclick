@@ -1,0 +1,99 @@
+{
+  "table": "ts_data",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "parts": [
+                "ts"
+              ]
+            },
+            "type": {
+              "name": "DateTime64"
+            },
+            "alias": "timestamp",
+            "operator_syntax": true
+          },
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "ts"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "type": "Integer",
+                "value": 10000
+              }
+            },
+            "alias": "value"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "arrayJoin",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "timestamps"
+                                ]
+                              }
+                            ],
+                            "alias": "ts"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "with": [
+    {
+      "name": "timestamps",
+      "query": {
+        "type": "Array",
+        "value": [
+          {
+            "type": "Integer",
+            "value": 102
+          },
+          {
+            "type": "Integer",
+            "value": 104
+          },
+          {
+            "type": "Integer",
+            "value": 112
+          },
+          {
+            "type": "Integer",
+            "value": 113
+          },
+          {
+            "type": "Integer",
+            "value": 120
+          }
+        ],
+        "spaced_commas": true
+      },
+      "scalar_with": true
+    }
+  ]
+}

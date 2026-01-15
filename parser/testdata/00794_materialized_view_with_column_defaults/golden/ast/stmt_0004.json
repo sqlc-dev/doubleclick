@@ -1,0 +1,105 @@
+{
+  "table": "source_table",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "datetime",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "zoneId",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "test1",
+      "type": null,
+      "default": {
+        "left": {
+          "parts": [
+            "zoneId"
+          ]
+        },
+        "op": "==",
+        "right": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "test2",
+      "type": null,
+      "default": {
+        "left": {
+          "parts": [
+            "zoneId"
+          ]
+        },
+        "op": "*",
+        "right": {
+          "type": "Integer",
+          "value": 3
+        }
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "test3",
+      "type": null,
+      "default": {
+        "left": {
+          "parts": [
+            "zoneId"
+          ]
+        },
+        "op": "*",
+        "right": {
+          "type": "Integer",
+          "value": 5
+        }
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "date"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "date"
+            ]
+          },
+          {
+            "parts": [
+              "zoneId"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

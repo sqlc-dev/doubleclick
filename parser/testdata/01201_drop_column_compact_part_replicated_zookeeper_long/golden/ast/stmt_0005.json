@@ -1,0 +1,120 @@
+{
+  "table": "mt_compact",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt64"
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "a"
+          ]
+        },
+        "op": "*",
+        "right": {
+          "parts": [
+            "a"
+          ]
+        }
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "n",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "x",
+            "type": {
+              "name": "UInt32"
+            }
+          },
+          {
+            "name": "y",
+            "type": {
+              "name": "String"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "lc",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/{database}/test_01201/mt_compact_replicated"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "parts": [
+        "a"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 10
+    }
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8
+      }
+    },
+    {
+      "name": "min_rows_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

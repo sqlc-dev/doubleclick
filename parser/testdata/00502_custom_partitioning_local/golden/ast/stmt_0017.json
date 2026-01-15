@@ -1,0 +1,66 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "table": "system.detached_parts",
+          "except": [
+            "bytes_on_disk",
+            "path",
+            "disk",
+            "modification_time"
+          ],
+          "transformers": [
+            {
+              "type": "except",
+              "except": [
+                "bytes_on_disk",
+                "path",
+                "disk",
+                "modification_time"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "detached_parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "table"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "not_partitioned"
+          }
+        }
+      }
+    }
+  ]
+}

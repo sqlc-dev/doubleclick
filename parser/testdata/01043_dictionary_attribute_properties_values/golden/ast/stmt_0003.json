@@ -1,0 +1,95 @@
+{
+  "database": "{CLICKHOUSE_DATABASE:Identifier}",
+  "table": "dict",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "key",
+      "type": {
+        "name": "Int64"
+      },
+      "default": {
+        "op": "-",
+        "operand": {
+          "type": "Integer",
+          "value": 1
+        }
+      }
+    },
+    {
+      "name": "value_default",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "type": "String",
+        "value": "world"
+      }
+    },
+    {
+      "name": "value_expression",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "type": "String",
+        "value": "xxx"
+      },
+      "expression": {
+        "type": "String",
+        "value": "toString(127 * 172)"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "key"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "HOST",
+          "value": {
+            "type": "String",
+            "value": "localhost"
+          }
+        },
+        {
+          "key": "PORT",
+          "value": {
+            "name": "tcpPort"
+          }
+        },
+        {
+          "key": "USER",
+          "value": {
+            "type": "String",
+            "value": "default"
+          }
+        },
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "dicttbl"
+          }
+        },
+        {
+          "key": "DB",
+          "value": {
+            "name": "currentDatabase"
+          }
+        }
+      ]
+    },
+    "lifetime": {},
+    "layout": {
+      "type": "FLAT"
+    }
+  }
+}

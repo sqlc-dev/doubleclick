@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "k2"
+          ]
+        },
+        {
+          "name": "SUM",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "alias": "sum_value"
+        },
+        {
+          "name": "count",
+          "alias": "count_value"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{2,3}"
+                  },
+                  {
+                    "name": "numbers",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 6
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          },
+          "alias": "k2"
+        }
+      ],
+      "grouping_sets": true,
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "sum_value"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "count_value"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

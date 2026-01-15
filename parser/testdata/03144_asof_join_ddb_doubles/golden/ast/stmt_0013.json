@@ -1,0 +1,105 @@
+{
+  "table": "probes",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "ts",
+      "type": {
+        "name": "Float64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "key"
+          ]
+        },
+        {
+          "parts": [
+            "ts"
+          ]
+        }
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "key",
+              "number"
+            ]
+          },
+          {
+            "parts": [
+              "ts",
+              "number"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  ]
+                },
+                "alias": "key"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  ]
+                },
+                "alias": "ts"
+              },
+              "join": {
+                "type": ""
+              }
+            }
+          ]
+        },
+        "settings": [
+          {
+            "name": "join_algorithm",
+            "value": {
+              "type": "String",
+              "value": "hash"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

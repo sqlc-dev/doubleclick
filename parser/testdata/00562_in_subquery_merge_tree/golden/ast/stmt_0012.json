@@ -1,0 +1,108 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ],
+          "alias": "id2"
+        },
+        {
+          "parts": [
+            "name"
+          ],
+          "alias": "value"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "merge_tree_in_subqueries"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "type": "Tuple",
+          "value": [
+            {
+              "parts": [
+                "value"
+              ]
+            },
+            {
+              "parts": [
+                "id2"
+              ]
+            }
+          ],
+          "spaced_commas": true
+        },
+        "query": {
+          "selects": [
+            {
+              "columns": [
+                {
+                  "left": {
+                    "type": "String",
+                    "value": "test"
+                  },
+                  "op": "||",
+                  "right": {
+                    "name": "toString",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "number"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              ],
+              "from": {
+                "tables": [
+                  {
+                    "table": {
+                      "table": {
+                        "database": "system",
+                        "table": "numbers"
+                      }
+                    }
+                  }
+                ]
+              },
+              "limit": {
+                "type": "Integer",
+                "value": 3
+              },
+              "offset": {
+                "type": "Integer",
+                "value": 2
+              }
+            }
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

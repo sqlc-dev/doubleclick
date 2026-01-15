@@ -1,0 +1,72 @@
+{
+  "table": "t_read_in_order",
+  "columns": [
+    {
+      "name": "dt",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "Decimal64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 5
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "v",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "name": "toStartOfDay",
+          "arguments": [
+            {
+              "parts": [
+                "dt"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "d"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

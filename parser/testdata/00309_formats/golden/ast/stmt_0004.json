@@ -1,0 +1,132 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 246
+              }
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 10
+            }
+          },
+          "alias": "n"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2000-01-01"
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "n"
+              ]
+            }
+          },
+          "alias": "d"
+        },
+        {
+          "name": "range",
+          "arguments": [
+            {
+              "parts": [
+                "n"
+              ]
+            }
+          ],
+          "alias": "arr"
+        },
+        {
+          "name": "arrayStringConcat",
+          "arguments": [
+            {
+              "name": "arrayMap",
+              "arguments": [
+                {
+                  "parameters": [
+                    "x"
+                  ],
+                  "body": {
+                    "name": "reinterpretAsString",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "x"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "parts": [
+                    "arr"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "s"
+        },
+        {
+          "expr": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "n"
+                ]
+              },
+              {
+                "parts": [
+                  "d"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          },
+          "alias": "tuple"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 2
+      },
+      "format": {
+        "parts": [
+          "RowBinary"
+        ]
+      }
+    }
+  ]
+}

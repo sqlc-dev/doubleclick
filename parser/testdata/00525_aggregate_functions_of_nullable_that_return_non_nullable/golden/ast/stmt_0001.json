@@ -1,0 +1,168 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "k"
+          ]
+        },
+        {
+          "name": "groupArray",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "alias": "res1"
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "res1"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "alias": "res2"
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "res2"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "k"
+                        },
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                },
+                                {
+                                  "type": "Null",
+                                  "value": null
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ],
+                          "alias": "x"
+                        }
+                      ]
+                    },
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          "alias": "k"
+                        },
+                        {
+                          "expr": {
+                            "expr": {
+                              "name": "arrayJoin",
+                              "arguments": [
+                                {
+                                  "type": "Array",
+                                  "value": [
+                                    {
+                                      "type": "Null",
+                                      "value": null
+                                    },
+                                    {
+                                      "type": "Null",
+                                      "value": null
+                                    }
+                                  ],
+                                  "spaced_commas": true
+                                }
+                              ]
+                            },
+                            "type": {
+                              "name": "Nullable",
+                              "parameters": [
+                                {
+                                  "name": "UInt8"
+                                }
+                              ],
+                              "has_parentheses": true
+                            }
+                          },
+                          "alias": "x"
+                        }
+                      ]
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

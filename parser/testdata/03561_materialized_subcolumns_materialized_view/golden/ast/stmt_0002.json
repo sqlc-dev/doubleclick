@@ -1,0 +1,45 @@
+{
+  "or_replace": true,
+  "table": "destination",
+  "columns": [
+    {
+      "name": "some_data",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "JSON"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "a_val",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "array": {
+          "parts": [
+            "some_data",
+            "a"
+          ]
+        },
+        "index": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

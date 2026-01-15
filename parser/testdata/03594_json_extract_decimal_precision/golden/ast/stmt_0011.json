@@ -1,0 +1,117 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "Test 8: Negative numbers"
+          },
+          "alias": "test_name"
+        },
+        {
+          "name": "JSONExtract",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "{\"dec\": -111244542.003}"
+            },
+            {
+              "type": "String",
+              "value": "dec"
+            },
+            {
+              "type": "String",
+              "value": "Decimal(32,16)"
+            }
+          ],
+          "alias": "negative_extraction"
+        },
+        {
+          "expr": {
+            "name": "JSONExtractString",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "{\"dec\": -111244542.003}"
+              },
+              {
+                "type": "String",
+                "value": "dec"
+              }
+            ]
+          },
+          "type": {
+            "name": "Decimal",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 32
+              },
+              {
+                "type": "Integer",
+                "value": 16
+              }
+            ],
+            "has_parentheses": true
+          },
+          "alias": "negative_string_cast",
+          "operator_syntax": true
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "JSONExtract",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "{\"dec\": -111244542.003}"
+                },
+                {
+                  "type": "String",
+                  "value": "dec"
+                },
+                {
+                  "type": "String",
+                  "value": "Decimal(32,16)"
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "expr": {
+                "name": "JSONExtractString",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "{\"dec\": -111244542.003}"
+                  },
+                  {
+                    "type": "String",
+                    "value": "dec"
+                  }
+                ]
+              },
+              "type": {
+                "name": "Decimal",
+                "parameters": [
+                  {
+                    "type": "Integer",
+                    "value": 32
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 16
+                  }
+                ],
+                "has_parentheses": true
+              },
+              "operator_syntax": true
+            }
+          },
+          "alias": "negative_precision_preserved"
+        }
+      ]
+    }
+  ]
+}

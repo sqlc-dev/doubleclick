@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "data_uncompressed_bytes"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "columns"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "table"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "clear_column_"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "left": {
+              "parts": [
+                "name"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "i"
+            }
+          },
+          "op": "OR",
+          "right": {
+            "left": {
+              "parts": [
+                "name"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "s"
+            }
+          },
+          "parenthesized": true
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "table"
+          ]
+        }
+      ]
+    }
+  ]
+}

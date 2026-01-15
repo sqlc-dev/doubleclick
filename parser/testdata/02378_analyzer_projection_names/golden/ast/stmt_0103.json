@@ -1,0 +1,76 @@
+{
+  "table_expr": {
+    "table": {
+      "query": {
+        "selects": [
+          {
+            "columns": [
+              {
+                "expr": {
+                  "expr": {
+                    "name": "tuple",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "type": "String",
+                        "value": "Value"
+                      }
+                    ]
+                  },
+                  "type": {
+                    "name": "Tuple (id UInt64, value String)"
+                  }
+                },
+                "alias": "compound_value"
+              },
+              {
+                "name": "arrayMap",
+                "arguments": [
+                  {
+                    "parameters": [
+                      "x"
+                    ],
+                    "body": {
+                      "table": "compound_value",
+                      "except": [
+                        "value"
+                      ],
+                      "transformers": [
+                        {
+                          "type": "except",
+                          "except": [
+                            "value"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 3
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "goals_alias",
+            "ID"
+          ],
+          "alias": "ym:s:goalDimension"
+        },
+        {
+          "name": "uniqIf",
+          "arguments": [
+            {
+              "parts": [
+                "UserID"
+              ]
+            },
+            {
+              "left": {
+                "left": {
+                  "parts": [
+                    "UserID"
+                  ]
+                },
+                "op": "!=",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                },
+                "parenthesized": true
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "_uniq_Goals"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "parenthesized": true
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "visits"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "Goals"
+                  ],
+                  "alias": "goals_alias"
+                },
+                {
+                  "name": "arrayEnumerateUniq",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "Goals",
+                        "ID"
+                      ]
+                    }
+                  ],
+                  "alias": "_uniq_Goals"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 842440
+        },
+        "parenthesized": true
+      },
+      "group_by": [
+        {
+          "parts": [
+            "ym:s:goalDimension"
+          ]
+        }
+      ],
+      "with_totals": true,
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ym:s:goalDimension"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      },
+      "offset": {
+        "type": "Integer",
+        "value": 0
+      },
+      "format": {
+        "parts": [
+          "JSONCompact"
+        ]
+      }
+    }
+  ]
+}

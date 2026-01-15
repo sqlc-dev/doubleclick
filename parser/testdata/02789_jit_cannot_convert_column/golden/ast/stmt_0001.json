@@ -1,0 +1,188 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "c"
+              ]
+            }
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "toInt32",
+              "arguments": [
+                {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "h"
+                      ]
+                    },
+                    "op": "-",
+                    "right": {
+                      "expr": {
+                        "type": "Null",
+                        "value": null
+                      },
+                      "type": {
+                        "name": "Nullable",
+                        "parameters": [
+                          {
+                            "name": "DateTime"
+                          }
+                        ],
+                        "has_parentheses": true
+                      },
+                      "operator_syntax": true
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "/",
+                  "right": {
+                    "type": "Integer",
+                    "value": 3600
+                  }
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "a"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "count",
+                          "alias": "c"
+                        },
+                        {
+                          "parts": [
+                            "h"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "now",
+                                          "alias": "h"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "name": "toInt32",
+                            "arguments": [
+                              {
+                                "left": {
+                                  "left": {
+                                    "parts": [
+                                      "h"
+                                    ]
+                                  },
+                                  "op": "-",
+                                  "right": {
+                                    "expr": {
+                                      "type": "Null",
+                                      "value": null
+                                    },
+                                    "type": {
+                                      "name": "Nullable",
+                                      "parameters": [
+                                        {
+                                          "name": "DateTime"
+                                        }
+                                      ],
+                                      "has_parentheses": true
+                                    },
+                                    "operator_syntax": true
+                                  },
+                                  "parenthesized": true
+                                },
+                                "op": "/",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 3600
+                                }
+                              }
+                            ]
+                          },
+                          "op": "+",
+                          "right": {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "h"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "a"
+          ]
+        }
+      ],
+      "settings": [
+        {
+          "name": "min_count_to_compile_expression",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

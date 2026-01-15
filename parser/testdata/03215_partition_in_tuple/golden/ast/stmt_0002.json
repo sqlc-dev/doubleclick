@@ -1,0 +1,77 @@
+{
+  "table": "t1",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 3
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 6
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "b"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toStartOfDay",
+    "arguments": [
+      {
+        "parts": [
+          "a"
+        ]
+      }
+    ]
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "type": "String",
+            "value": "2023-01-01 00:00:00.000"
+          },
+          {
+            "type": "String",
+            "value": "fd4c03"
+          }
+        ]
+      }
+    ]
+  }
+}

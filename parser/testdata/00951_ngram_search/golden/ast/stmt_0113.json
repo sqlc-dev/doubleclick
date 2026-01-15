@@ -1,0 +1,67 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "Title"
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "left": {
+                "type": "Integer",
+                "value": 1000
+              },
+              "op": "*",
+              "right": {
+                "parts": [
+                  "distance"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_entry_distance"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "name": "ngramSearch",
+            "arguments": [
+              {
+                "parts": [
+                  "Title"
+                ]
+              },
+              {
+                "type": "String",
+                "value": "metrica"
+              }
+            ],
+            "alias": "distance"
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "Title"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

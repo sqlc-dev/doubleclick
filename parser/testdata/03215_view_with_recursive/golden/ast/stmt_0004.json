@@ -1,0 +1,186 @@
+{
+  "view": "03215_multi_v",
+  "as_select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "task",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "number"
+                        ],
+                        "alias": "task_id"
+                      },
+                      {
+                        "expr": {
+                          "left": {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          "op": "-",
+                          "right": {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        },
+                        "alias": "parent_id"
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "name": "numbers",
+                              "arguments": [
+                                {
+                                  "type": "Integer",
+                                  "value": 10
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          },
+          {
+            "name": "rtq",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "task_id"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "parent_id"
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "task"
+                            },
+                            "alias": "t"
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "left": {
+                        "parts": [
+                          "t",
+                          "parent_id"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  },
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "t",
+                          "task_id"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "t",
+                          "parent_id"
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "task"
+                            },
+                            "alias": "t"
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "rtq"
+                            },
+                            "alias": "r"
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "left": {
+                        "parts": [
+                          "t",
+                          "parent_id"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "parts": [
+                          "r",
+                          "task_id"
+                        ]
+                      }
+                    }
+                  }
+                ],
+                "union_all": true,
+                "union_modes": [
+                  "UNION ALL"
+                ]
+              }
+            },
+            "scalar_with": false
+          }
+        ],
+        "columns": [
+          {
+            "name": "count"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "rtq"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

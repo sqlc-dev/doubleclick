@@ -1,0 +1,87 @@
+{
+  "table": "joinbug",
+  "columns": [
+    {
+      "name": "event_date",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "name": "toDate",
+        "arguments": [
+          {
+            "parts": [
+              "created"
+            ]
+          },
+          {
+            "type": "String",
+            "value": "Asia/Istanbul"
+          }
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "id2",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "val2",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "created",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "event_date"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "parts": [
+              "id2"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "issue",
+          "query": {
+            "expr": {
+              "parts": [
+                "t"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%_1%"
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "raw_id"
+          ]
+        },
+        {
+          "name": "arrayFilter",
+          "arguments": [
+            {
+              "parameters": [
+                "t",
+                "t2"
+              ],
+              "body": {
+                "op": "NOT",
+                "operand": {
+                  "parts": [
+                    "issue"
+                  ]
+                }
+              }
+            },
+            {
+              "parts": [
+                "columns_n",
+                "col_1"
+              ]
+            },
+            {
+              "parts": [
+                "columns_n",
+                "col_2"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "raw_id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

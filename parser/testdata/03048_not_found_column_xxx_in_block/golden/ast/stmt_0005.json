@@ -1,0 +1,202 @@
+{
+  "table": "ab_12_bbb",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "sales_type",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "date",
+      "type": {
+        "name": "Date32"
+      }
+    },
+    {
+      "name": "o1",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "o2",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "o3",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "o4",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "o5",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "short",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "a1",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "a2",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "a3",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "idx",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "a4",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "ctx",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "_year",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "theyear",
+      "type": {
+        "name": "UInt16"
+      },
+      "default": {
+        "name": "toYear",
+        "arguments": [
+          {
+            "parts": [
+              "date"
+            ]
+          }
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "themonth",
+      "type": {
+        "name": "UInt8"
+      },
+      "default": {
+        "name": "toMonth",
+        "arguments": [
+          {
+            "parts": [
+              "date"
+            ]
+          }
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "theweek",
+      "type": {
+        "name": "UInt8"
+      },
+      "default": {
+        "name": "toISOWeek",
+        "arguments": [
+          {
+            "parts": [
+              "date"
+            ]
+          }
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "theyear"
+          ]
+        },
+        {
+          "parts": [
+            "themonth"
+          ]
+        },
+        {
+          "parts": [
+            "_year"
+          ]
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "sales_type"
+          ]
+        },
+        {
+          "parts": [
+            "date"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

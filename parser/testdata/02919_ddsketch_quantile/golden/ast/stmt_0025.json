@@ -1,0 +1,65 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "a"
+              ],
+              "body": {
+                "name": "round",
+                "arguments": [
+                  {
+                    "parts": [
+                      "a"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                ]
+              }
+            },
+            {
+              "name": "quantilesDDMerge",
+              "parameters": [
+                {
+                  "type": "Float",
+                  "value": 0.001,
+                  "source": "0.001"
+                },
+                {
+                  "type": "Float",
+                  "value": 0.9,
+                  "source": "0.9"
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "sketch"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "02919_ddsketch_quantile"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "constant_1"
+          },
+          "alias": "constant_value"
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ],
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "constant_value"
+                ]
+              },
+              {
+                "parts": [
+                  "string_value"
+                ]
+              }
+            ]
+          },
+          "alias": "value_cnt"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "string_value"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test_table"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "all"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

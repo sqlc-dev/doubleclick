@@ -1,0 +1,151 @@
+{
+  "view": "dest_table_mv",
+  "materialized": true,
+  "to": "dest_table",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "Date"
+            ]
+          },
+          {
+            "parts": [
+              "Id"
+            ]
+          },
+          {
+            "parts": [
+              "Units"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "left_table"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "t1"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "with": [
+                          {
+                            "name": "dt",
+                            "query": {
+                              "query": {
+                                "selects": [
+                                  {
+                                    "distinct": true,
+                                    "columns": [
+                                      {
+                                        "parts": [
+                                          "Date"
+                                        ]
+                                      }
+                                    ],
+                                    "from": {
+                                      "tables": [
+                                        {
+                                          "table": {
+                                            "table": {
+                                              "table": "left_table"
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "limit": {
+                                      "type": "Integer",
+                                      "value": 1
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "scalar_with": true
+                          }
+                        ],
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "right_table"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "parts": [
+                              "Date"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "parts": [
+                              "dt"
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "t2"
+              },
+              "join": {
+                "type": "INNER",
+                "using": [
+                  {
+                    "parts": [
+                      "Date"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "Id"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

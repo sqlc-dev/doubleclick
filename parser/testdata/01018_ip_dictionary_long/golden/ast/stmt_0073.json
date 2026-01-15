@@ -1,0 +1,76 @@
+{
+  "database": "{CLICKHOUSE_DATABASE:Identifier}",
+  "table": "table_ipv4_trie",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "type": "String",
+                "value": "255.255.255.255/"
+              },
+              "op": "||",
+              "right": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            },
+            "alias": "prefix"
+          },
+          {
+            "name": "toUInt32",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ],
+            "alias": "val"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "VALUES",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "number UInt32"
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 5
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 13
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 24
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 30
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

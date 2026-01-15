@@ -1,0 +1,170 @@
+{
+  "table": "Test",
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "String1"
+          ]
+        },
+        {
+          "parts": [
+            "String2"
+          ]
+        }
+      ]
+    }
+  ],
+  "primary_key": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "String1"
+          ]
+        },
+        {
+          "parts": [
+            "String2"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true,
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "type": "String",
+                "value": "String1_"
+              },
+              "op": "||",
+              "right": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            },
+            "alias": "String1"
+          },
+          {
+            "expr": {
+              "left": {
+                "type": "String",
+                "value": "String2_"
+              },
+              "op": "||",
+              "right": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            },
+            "alias": "String2"
+          },
+          {
+            "expr": {
+              "left": {
+                "type": "String",
+                "value": "String3_"
+              },
+              "op": "||",
+              "right": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            },
+            "alias": "String3"
+          },
+          {
+            "expr": {
+              "left": {
+                "type": "String",
+                "value": "String4_"
+              },
+              "op": "||",
+              "right": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 4
+                    }
+                  }
+                ]
+              }
+            },
+            "alias": "String4"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

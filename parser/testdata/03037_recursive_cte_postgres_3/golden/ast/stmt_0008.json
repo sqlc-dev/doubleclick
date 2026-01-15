@@ -1,0 +1,180 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "t",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "id"
+                    },
+                    {
+                      "expr": {
+                        "type": "Array",
+                        "value": null
+                      },
+                      "type": {
+                        "name": "Array",
+                        "parameters": [
+                          {
+                            "name": "UInt64"
+                          }
+                        ],
+                        "has_parentheses": true
+                      },
+                      "alias": "path",
+                      "operator_syntax": true
+                    }
+                  ]
+                },
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "tree",
+                        "id"
+                      ]
+                    },
+                    {
+                      "name": "arrayConcat",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "t",
+                            "path"
+                          ]
+                        },
+                        {
+                          "type": "Array",
+                          "value": [
+                            {
+                              "parts": [
+                                "tree",
+                                "id"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "tree"
+                          }
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "table": "t"
+                          }
+                        },
+                        "join": {
+                          "type": "INNER",
+                          "on": {
+                            "left": {
+                              "parts": [
+                                "tree",
+                                "parent_id"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "t",
+                                "id"
+                              ]
+                            },
+                            "parenthesized": true
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "t1",
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "t2",
+            "path"
+          ]
+        },
+        {
+          "name": "tuple",
+          "arguments": [
+            {
+              "table": "t2"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "id"
+                  ]
+                },
+                "parenthesized": true
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "zookeeper_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "path"
+            ]
+          },
+          "pattern": {
+            "left": {
+              "left": {
+                "type": "String",
+                "value": "/test/01158/"
+              },
+              "op": "||",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "||",
+            "right": {
+              "type": "String",
+              "value": "/rmt%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "duration_microseconds"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      }
+    }
+  ]
+}

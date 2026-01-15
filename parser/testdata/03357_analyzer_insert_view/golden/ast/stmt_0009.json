@@ -1,0 +1,143 @@
+{
+  "view": "deduplicate_mv",
+  "materialized": true,
+  "to": "deduplicate",
+  "as_select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "event",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "name": "JSONExtract",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "json_message"
+                            ]
+                          },
+                          {
+                            "type": "String",
+                            "value": "id"
+                          },
+                          {
+                            "type": "String",
+                            "value": "Nullable(UInt64)"
+                          }
+                        ],
+                        "alias": "id"
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "input"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "expr": {
+                        "parts": [
+                          "id"
+                        ]
+                      },
+                      "not": true
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          }
+        ],
+        "distinct": true,
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "event"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "expr": {
+            "parts": [
+              "id"
+            ]
+          },
+          "not": true,
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "id"
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "deduplicate"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "expr": {
+                    "parts": [
+                      "id"
+                    ]
+                  },
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "id"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "event"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

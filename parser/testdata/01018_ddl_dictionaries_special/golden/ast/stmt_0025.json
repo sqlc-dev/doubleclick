@@ -1,0 +1,86 @@
+{
+  "database": "{CLICKHOUSE_DATABASE:Identifier}",
+  "table": "dictionary_with_hierarchy",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "RegionID",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "ParentRegionID",
+      "type": {
+        "name": "UInt64"
+      },
+      "hierarchical": true
+    },
+    {
+      "name": "RegionName",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "RegionID"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "host",
+          "value": {
+            "type": "String",
+            "value": "localhost"
+          }
+        },
+        {
+          "key": "port",
+          "value": {
+            "name": "tcpPort"
+          }
+        },
+        {
+          "key": "user",
+          "value": {
+            "type": "String",
+            "value": "default"
+          }
+        },
+        {
+          "key": "db",
+          "value": {
+            "name": "currentDatabase"
+          }
+        },
+        {
+          "key": "table",
+          "value": {
+            "type": "String",
+            "value": "table_with_hierarchy"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 1
+      },
+      "max": {
+        "type": "Integer",
+        "value": 1000
+      }
+    },
+    "layout": {
+      "type": "HASHED"
+    }
+  }
+}

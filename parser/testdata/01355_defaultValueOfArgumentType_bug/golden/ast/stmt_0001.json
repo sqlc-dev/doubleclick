@@ -1,0 +1,51 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "materialize",
+          "arguments": [
+            {
+              "name": "toLowCardinality",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": ""
+                }
+              ]
+            }
+          ],
+          "alias": "lc"
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "lc"
+              ]
+            }
+          ]
+        }
+      ],
+      "where": {
+        "left": {
+          "parts": [
+            "lc"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "name": "defaultValueOfArgumentType",
+          "arguments": [
+            {
+              "parts": [
+                "lc"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

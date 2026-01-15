@@ -1,0 +1,146 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "Test 6: Performance test with multiple values"
+          },
+          "alias": "test_name"
+        },
+        {
+          "name": "count",
+          "alias": "total_rows"
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "left": {
+                "name": "JSONExtract",
+                "arguments": [
+                  {
+                    "parts": [
+                      "json_data"
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "dec"
+                  },
+                  {
+                    "type": "String",
+                    "value": "Decimal(32,16)"
+                  }
+                ]
+              },
+              "op": "=",
+              "right": {
+                "expr": {
+                  "name": "JSONExtractString",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "json_data"
+                      ]
+                    },
+                    {
+                      "type": "String",
+                      "value": "dec"
+                    }
+                  ]
+                },
+                "type": {
+                  "name": "Decimal",
+                  "parameters": [
+                    {
+                      "type": "Integer",
+                      "value": 32
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 16
+                    }
+                  ],
+                  "has_parentheses": true
+                },
+                "operator_syntax": true
+              }
+            }
+          ],
+          "alias": "precision_preserved_count"
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "left": {
+                "name": "JSONExtract",
+                "arguments": [
+                  {
+                    "parts": [
+                      "json_data"
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "dec"
+                  },
+                  {
+                    "type": "String",
+                    "value": "Decimal(32,16)"
+                  }
+                ]
+              },
+              "op": "!=",
+              "right": {
+                "expr": {
+                  "name": "JSONExtractString",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "json_data"
+                      ]
+                    },
+                    {
+                      "type": "String",
+                      "value": "dec"
+                    }
+                  ]
+                },
+                "type": {
+                  "name": "Decimal",
+                  "parameters": [
+                    {
+                      "type": "Integer",
+                      "value": 32
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 16
+                    }
+                  ],
+                  "has_parentheses": true
+                },
+                "operator_syntax": true
+              }
+            }
+          ],
+          "alias": "precision_lost_count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_json_decimal_precision"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

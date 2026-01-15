@@ -1,0 +1,172 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "name_parts",
+          "query": {
+            "name": "splitByChar",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "_"
+              },
+              {
+                "parts": [
+                  "part_name"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "min_block",
+          "query": {
+            "expr": {
+              "array": {
+                "parts": [
+                  "name_parts"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            "type": {
+              "name": "UInt64"
+            },
+            "operator_syntax": true
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "max_block",
+          "query": {
+            "expr": {
+              "array": {
+                "parts": [
+                  "name_parts"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 3
+              }
+            },
+            "type": {
+              "name": "UInt64"
+            },
+            "operator_syntax": true
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "min_block"
+          ]
+        },
+        {
+          "parts": [
+            "max_block"
+          ]
+        },
+        {
+          "parts": [
+            "event_type"
+          ]
+        },
+        {
+          "parts": [
+            "merge_algorithm"
+          ]
+        },
+        {
+          "parts": [
+            "part_type"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "table"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "t_compact_vertical_merge"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "min_block"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "max_block"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

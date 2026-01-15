@@ -1,0 +1,87 @@
+{
+  "table": "t_ttl_modify_column",
+  "columns": [
+    {
+      "name": "InsertionDateTime",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "TTLDays",
+      "type": {
+        "name": "Int32"
+      },
+      "default": {
+        "expr": {
+          "type": "Integer",
+          "value": 365
+        },
+        "type": {
+          "name": "Int32"
+        }
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "InsertionDateTime"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "name": "toIntervalDay",
+        "arguments": [
+          {
+            "parts": [
+              "TTLDays"
+            ]
+          }
+        ]
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "InsertionDateTime"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "name": "toIntervalDay",
+            "arguments": [
+              {
+                "parts": [
+                  "TTLDays"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

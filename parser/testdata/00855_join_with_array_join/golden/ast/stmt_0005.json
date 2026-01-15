@@ -1,0 +1,98 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "ax"
+          ]
+        },
+        {
+          "parts": [
+            "c"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "type": "Integer",
+                                "value": 5
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 6
+                              }
+                            ]
+                          },
+                          "alias": "ax"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 0
+                          },
+                          "alias": "c"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "s1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              },
+              "alias": "s2"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "s1",
+                    "c"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "s2",
+                    "dummy"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "ax"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

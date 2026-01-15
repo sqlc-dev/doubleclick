@@ -1,0 +1,125 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "k"
+          ]
+        },
+        {
+          "parts": [
+            "js1",
+            "s"
+          ]
+        },
+        {
+          "parts": [
+            "t2",
+            "s"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "s"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "js1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t2"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "js1",
+                      "k"
+                    ]
+                  },
+                  "op": "==",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "k"
+                    ]
+                  }
+                },
+                "op": "OR",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "js1",
+                      "s"
+                    ]
+                  },
+                  "op": "==",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "k"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

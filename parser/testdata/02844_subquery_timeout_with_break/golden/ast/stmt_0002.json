@@ -1,0 +1,45 @@
+{
+  "table": "t",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "value_idx",
+      "expression": {
+        "parts": [
+          "value"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ]
+}

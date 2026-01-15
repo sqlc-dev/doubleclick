@@ -1,0 +1,430 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {},
+        {
+          "apply": [
+            "toTypeName"
+          ],
+          "transformers": [
+            {
+              "type": "apply",
+              "apply": "toTypeName"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "bl"
+                          ]
+                        },
+                        {
+                          "name": "anyIf",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "n"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "cond"
+                              ]
+                            }
+                          ],
+                          "alias": "any_ignore"
+                        },
+                        {
+                          "name": "anyIf",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "n"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "cond"
+                              ]
+                            }
+                          ],
+                          "alias": "any_respect"
+                        },
+                        {
+                          "name": "anyLastIf",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "n"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "cond"
+                              ]
+                            }
+                          ],
+                          "alias": "last_ignore"
+                        },
+                        {
+                          "name": "anyLastIf",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "n"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "cond"
+                              ]
+                            }
+                          ],
+                          "alias": "last_respect"
+                        },
+                        {
+                          "name": "anyIf",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "nullable_n"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "cond"
+                              ]
+                            }
+                          ],
+                          "alias": "any_nullable_ignore"
+                        },
+                        {
+                          "name": "anyIf",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "nullable_n"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "cond"
+                              ]
+                            }
+                          ],
+                          "alias": "any_nullable_respect"
+                        },
+                        {
+                          "name": "anyLastIf",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "nullable_n"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "cond"
+                              ]
+                            }
+                          ],
+                          "alias": "last_nullable_ignore"
+                        },
+                        {
+                          "name": "anyLastIf",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "nullable_n"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "cond"
+                              ]
+                            }
+                          ],
+                          "alias": "last_nullable_respect"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "number"
+                                          ],
+                                          "alias": "n"
+                                        },
+                                        {
+                                          "expr": {
+                                            "left": {
+                                              "name": "rand"
+                                            },
+                                            "op": "\u003e",
+                                            "right": {
+                                              "name": "pow",
+                                              "arguments": [
+                                                {
+                                                  "type": "Integer",
+                                                  "value": 2
+                                                },
+                                                {
+                                                  "type": "Integer",
+                                                  "value": 31
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "alias": "cond"
+                                        },
+                                        {
+                                          "name": "if",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "cond"
+                                              ]
+                                            },
+                                            {
+                                              "type": "Null",
+                                              "value": null
+                                            },
+                                            {
+                                              "parts": [
+                                                "n"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "nullable_n"
+                                        },
+                                        {
+                                          "name": "blockNumber",
+                                          "alias": "bl"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "name": "numbers",
+                                                "arguments": [
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 10000
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "bl"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "any_ignore"
+                        ]
+                      },
+                      "op": "!=",
+                      "right": {
+                        "parts": [
+                          "any_respect"
+                        ]
+                      }
+                    },
+                    "op": "OR",
+                    "right": {
+                      "left": {
+                        "name": "toTypeName",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "any_ignore"
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "!=",
+                      "right": {
+                        "name": "toTypeName",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "any_respect"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "op": "OR",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "last_ignore"
+                      ]
+                    },
+                    "op": "!=",
+                    "right": {
+                      "parts": [
+                        "last_respect"
+                      ]
+                    }
+                  }
+                },
+                "op": "OR",
+                "right": {
+                  "left": {
+                    "name": "toTypeName",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "last_ignore"
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "!=",
+                  "right": {
+                    "name": "toTypeName",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "last_respect"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              "op": "OR",
+              "right": {
+                "left": {
+                  "parts": [
+                    "any_nullable_ignore"
+                  ]
+                },
+                "op": "!=",
+                "right": {
+                  "parts": [
+                    "any_nullable_respect"
+                  ]
+                }
+              }
+            },
+            "op": "OR",
+            "right": {
+              "left": {
+                "name": "toTypeName",
+                "arguments": [
+                  {
+                    "parts": [
+                      "any_nullable_ignore"
+                    ]
+                  }
+                ]
+              },
+              "op": "!=",
+              "right": {
+                "name": "toTypeName",
+                "arguments": [
+                  {
+                    "parts": [
+                      "any_nullable_respect"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "op": "OR",
+          "right": {
+            "left": {
+              "parts": [
+                "last_nullable_ignore"
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "parts": [
+                "last_nullable_respect"
+              ]
+            }
+          }
+        },
+        "op": "OR",
+        "right": {
+          "left": {
+            "name": "toTypeName",
+            "arguments": [
+              {
+                "parts": [
+                  "last_nullable_ignore"
+                ]
+              }
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "name": "toTypeName",
+            "arguments": [
+              {
+                "parts": [
+                  "last_nullable_respect"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

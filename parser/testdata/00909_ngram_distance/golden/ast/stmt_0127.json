@@ -1,0 +1,92 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "round",
+            "arguments": [
+              {
+                "left": {
+                  "type": "Integer",
+                  "value": 1000
+                },
+                "op": "*",
+                "right": {
+                  "name": "ngramDistanceCaseInsensitive",
+                  "arguments": [
+                    {
+                      "name": "materialize",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "abCdefgH"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "materialize",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "Abcdefgh"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "round",
+            "arguments": [
+              {
+                "left": {
+                  "type": "Integer",
+                  "value": 1000
+                },
+                "op": "*",
+                "right": {
+                  "name": "ngramDistanceCaseInsensitive",
+                  "arguments": [
+                    {
+                      "name": "materialize",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "abCdefgH"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "String",
+                      "value": "Abcdefgh"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 5
+      }
+    }
+  ]
+}

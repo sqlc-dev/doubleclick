@@ -1,0 +1,103 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "number"
+          ]
+        },
+        "query": {
+          "selects": [
+            {
+              "with": [
+                {
+                  "name": "v1",
+                  "query": {
+                    "query": {
+                      "selects": [
+                        {
+                          "columns": [
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "scalar_with": true
+                },
+                {
+                  "name": "v2",
+                  "query": {
+                    "query": {
+                      "selects": [
+                        {
+                          "columns": [
+                            {
+                              "type": "Integer",
+                              "value": 2
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "scalar_with": true
+                }
+              ],
+              "columns": [
+                {
+                  "parts": [
+                    "v1"
+                  ],
+                  "alias": "v"
+                }
+              ]
+            },
+            {
+              "columns": [
+                {
+                  "parts": [
+                    "v2"
+                  ],
+                  "alias": "v"
+                }
+              ]
+            }
+          ],
+          "union_all": true,
+          "union_modes": [
+            "UNION ALL"
+          ]
+        }
+      }
+    }
+  ]
+}

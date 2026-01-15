@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trimLeft",
+          "arguments": [
+            {}
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "visits_order_dst"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "parts": [
+                              "user_name"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "String",
+                            "value": "another_user2"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%ReadFromPreparedSource%"
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%ReadFromMergeTree%"
+          }
+        }
+      }
+    }
+  ]
+}

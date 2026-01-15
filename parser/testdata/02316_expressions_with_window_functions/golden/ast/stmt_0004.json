@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "sum",
+            "arguments": [
+              {
+                "name": "sum",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "over": {
+              "partition_by": [
+                {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 10
+                  },
+                  "parenthesized": true
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "left": {
+            "parts": [
+              "number"
+            ]
+          },
+          "op": "%",
+          "right": {
+            "type": "Integer",
+            "value": 10
+          }
+        }
+      ]
+    }
+  ]
+}

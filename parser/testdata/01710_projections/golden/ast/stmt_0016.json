@@ -1,0 +1,162 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toStartOfMinute",
+          "arguments": [
+            {
+              "parts": [
+                "datetime"
+              ]
+            }
+          ],
+          "alias": "dt_m"
+        },
+        {
+          "parts": [
+            "domain"
+          ]
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "retry_count"
+                ]
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "duration"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "retry_count"
+                ]
+              },
+              "op": "/",
+              "right": {
+                "parts": [
+                  "duration"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "left": {
+            "name": "countIf",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "block_count"
+                  ]
+                },
+                "op": "\u003e",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "count"
+          }
+        },
+        {
+          "left": {
+            "name": "countIf",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "first_time"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "count"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "projection_test"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "dt_m"
+          ]
+        },
+        {
+          "parts": [
+            "domain"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "parts": [
+            "domain"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "19"
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "dt_m"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "domain"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

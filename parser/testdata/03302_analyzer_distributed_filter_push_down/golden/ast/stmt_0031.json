@@ -1,0 +1,87 @@
+{
+  "table": "tab1",
+  "columns": [
+    {
+      "name": "tenant",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "recordTimestamp",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "responseBody",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "colAlias",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "responseBody"
+          ]
+        },
+        "op": "||",
+        "right": {
+          "type": "String",
+          "value": "something else"
+        }
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "ngrams",
+      "expression": {
+        "parts": [
+          "colAlias"
+        ]
+      },
+      "type": {
+        "name": "ngrambf_v1",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 3
+          },
+          {
+            "type": "Integer",
+            "value": 2097152
+          },
+          {
+            "type": "Integer",
+            "value": 3
+          },
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "recordTimestamp"
+      ]
+    }
+  ]
+}

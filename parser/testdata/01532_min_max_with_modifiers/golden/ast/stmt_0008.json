@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "x"
+          ]
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "alias": "lower"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "max",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "upper"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "upper"
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "lower"
+              ]
+            }
+          },
+          "alias": "range"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ],
+                          "alias": "x"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "x"
+          ]
+        }
+      ],
+      "with_rollup": true
+    }
+  ]
+}

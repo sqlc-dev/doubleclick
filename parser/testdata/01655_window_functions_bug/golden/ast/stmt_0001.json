@@ -1,0 +1,143 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "left": {
+                "name": "countIf",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "rating"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 5
+                    }
+                  }
+                ]
+              },
+              "op": "-",
+              "right": {
+                "name": "countIf",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "rating"
+                      ]
+                    },
+                    "op": "\u003c",
+                    "right": {
+                      "type": "Integer",
+                      "value": 5
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 4
+            }
+          ],
+          "alias": "nps"
+        },
+        {
+          "name": "dense_rank",
+          "over": {
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "nps"
+                  ]
+                },
+                "descending": true
+              }
+            ]
+          },
+          "alias": "rank"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "rating"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 3
+                            }
+                          },
+                          "alias": "rest_id"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "rest_id"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "rank"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

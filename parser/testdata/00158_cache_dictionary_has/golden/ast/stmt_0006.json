@@ -1,0 +1,97 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "flag"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "dictHas",
+                          "arguments": [
+                            {
+                              "left": {
+                                "name": "current_database"
+                              },
+                              "op": "||",
+                              "right": {
+                                "type": "String",
+                                "value": ".cache_hits"
+                              }
+                            },
+                            {
+                              "name": "toUInt64",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "WatchID"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "flag"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "test",
+                                "table": "hits"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "prewhere": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "WatchID"
+                            ]
+                          },
+                          "op": "%",
+                          "right": {
+                            "type": "Integer",
+                            "value": 350
+                          }
+                        },
+                        "op": "==",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 100
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "arr"
+              ]
+            }
+          ],
+          "alias": "n"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "v"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t_func_to_subcolumns_use_nulls"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "n"
+          ]
+        }
+      ],
+      "with_rollup": true,
+      "having": {
+        "left": {
+          "left": {
+            "parts": [
+              "n"
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "type": "Integer",
+            "value": 4
+          }
+        },
+        "op": "OR",
+        "right": {
+          "name": "isNull",
+          "arguments": [
+            {
+              "parts": [
+                "n"
+              ]
+            }
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "n"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "group_by_use_nulls",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

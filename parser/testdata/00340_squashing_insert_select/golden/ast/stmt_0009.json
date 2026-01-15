@@ -1,0 +1,52 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "blockSize",
+          "alias": "b"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "count"
+            },
+            "op": "/",
+            "right": {
+              "parts": [
+                "b"
+              ]
+            }
+          },
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "numbers_squashed"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "name": "blockSize"
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

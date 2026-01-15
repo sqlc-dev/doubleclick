@@ -1,0 +1,68 @@
+{
+  "view": "monthly_aggregated_data_mv",
+  "materialized": true,
+  "to": "monthly_aggregated_data",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "toDate",
+            "arguments": [
+              {
+                "name": "toStartOfMonth",
+                "arguments": [
+                  {
+                    "parts": [
+                      "event_time"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "month"
+          },
+          {
+            "parts": [
+              "domain_name"
+            ]
+          },
+          {
+            "name": "sumState",
+            "arguments": [
+              {
+                "parts": [
+                  "count_views"
+                ]
+              }
+            ],
+            "alias": "sumCountViews"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "hourly_data"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "domain_name"
+            ]
+          },
+          {
+            "parts": [
+              "month"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

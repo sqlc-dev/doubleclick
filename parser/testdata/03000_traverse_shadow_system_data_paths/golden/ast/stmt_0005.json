@@ -1,0 +1,65 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "remote_data_paths"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "disk_name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "s3_cache"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "local_path"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%shadow/03000_traverse_shadow_system_data_path_table_backup%"
+          }
+        }
+      },
+      "settings": [
+        {
+          "name": "traverse_shadow_remote_data_paths",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

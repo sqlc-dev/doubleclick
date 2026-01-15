@@ -1,0 +1,190 @@
+{
+  "table": "enum_nested_alter",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "type": "String",
+        "value": "2000-01-01"
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "tasks",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "errcategory",
+            "type": {
+              "name": "Enum8",
+              "parameters": [
+                {
+                  "left": {
+                    "type": "String",
+                    "value": "undefined"
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                },
+                {
+                  "left": {
+                    "type": "String",
+                    "value": "system"
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                },
+                {
+                  "left": {
+                    "type": "String",
+                    "value": "generic"
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                },
+                {
+                  "left": {
+                    "type": "String",
+                    "value": "asio.netdb"
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                },
+                {
+                  "left": {
+                    "type": "String",
+                    "value": "asio.misc"
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 4
+                  }
+                },
+                {
+                  "left": {
+                    "type": "String",
+                    "value": "asio.addrinfo"
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 5
+                  }
+                },
+                {
+                  "left": {
+                    "type": "String",
+                    "value": "rtb.client"
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 6
+                  }
+                },
+                {
+                  "left": {
+                    "type": "String",
+                    "value": "rtb.logic"
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 7
+                  }
+                },
+                {
+                  "left": {
+                    "type": "String",
+                    "value": "http.status"
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 8
+                  }
+                }
+              ],
+              "has_parentheses": true
+            }
+          },
+          {
+            "name": "status",
+            "type": {
+              "name": "Enum16",
+              "parameters": [
+                {
+                  "left": {
+                    "type": "String",
+                    "value": "hello"
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                },
+                {
+                  "left": {
+                    "type": "String",
+                    "value": "world"
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                }
+              ],
+              "has_parentheses": true
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "parts": [
+          "x"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 1
+      }
+    ],
+    "has_parentheses": true
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "table": "test_tolowcardinality_nullable",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "str",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toLowCardinality",
+    "arguments": [
+      {
+        "parts": [
+          "str"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "allow_nullable_key",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

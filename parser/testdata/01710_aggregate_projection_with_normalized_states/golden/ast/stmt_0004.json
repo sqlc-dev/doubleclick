@@ -1,0 +1,106 @@
+{
+  "table": "r",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 100
+              }
+            },
+            "alias": "x"
+          },
+          {
+            "expr": {
+              "type": "String",
+              "value": "x"
+            },
+            "alias": "a"
+          },
+          {
+            "name": "quantilesTimingState",
+            "parameters": [
+              {
+                "type": "Float",
+                "value": 0.5,
+                "source": "0.5"
+              },
+              {
+                "type": "Float",
+                "value": 0.95,
+                "source": "0.95"
+              },
+              {
+                "type": "Float",
+                "value": 0.99,
+                "source": "0.99"
+              }
+            ],
+            "arguments": [
+              {
+                "expr": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "type": {
+                  "name": "Int64"
+                },
+                "operator_syntax": true
+              }
+            ],
+            "alias": "q"
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ],
+            "alias": "s"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "x"
+            ]
+          },
+          {
+            "parts": [
+              "a"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

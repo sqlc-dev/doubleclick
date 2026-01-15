@@ -1,0 +1,191 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "max",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "selects": [
+                                    {
+                                      "selects": [
+                                        {
+                                          "columns": [
+                                            {}
+                                          ],
+                                          "from": {
+                                            "tables": [
+                                              {
+                                                "table": {
+                                                  "table": {
+                                                    "table": "test"
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "columns": [
+                                            {}
+                                          ],
+                                          "from": {
+                                            "tables": [
+                                              {
+                                                "table": {
+                                                  "table": {
+                                                    "table": "test"
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ],
+                                      "union_modes": [
+                                        "UNION DISTINCT"
+                                      ]
+                                    },
+                                    {
+                                      "columns": [
+                                        {}
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "test"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "where": {
+                                        "left": {
+                                          "name": "toUInt8",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "name"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "op": "\u003e",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 3
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "operators": [
+                                    "EXCEPT"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "name": "toUInt8",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "name"
+                              ]
+                            }
+                          ]
+                        },
+                        "op": "\u003c",
+                        "right": {
+                          "parts": [
+                            "max"
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

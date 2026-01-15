@@ -1,0 +1,45 @@
+{
+  "if_not_exists": true,
+  "database": "{CLICKHOUSE_DATABASE:Identifier}",
+  "engine": {
+    "name": "Replicated",
+    "parameters": [
+      {
+        "left": {
+          "left": {
+            "type": "String",
+            "value": "some/path/"
+          },
+          "op": "||",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "||",
+        "right": {
+          "type": "String",
+          "value": "/replicated_database_test"
+        }
+      },
+      {
+        "type": "String",
+        "value": "shard_1"
+      },
+      {
+        "type": "String",
+        "value": "replica_1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "settings": [
+    {
+      "name": "max_broken_tables_ratio",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "create_database": true
+}

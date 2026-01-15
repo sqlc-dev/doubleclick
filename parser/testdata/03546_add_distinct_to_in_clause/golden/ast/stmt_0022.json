@@ -1,0 +1,284 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "q1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "read_rows"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "ProfileEvents"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "current_database"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "name": "currentDatabase"
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "expr": {
+                            "parts": [
+                              "query"
+                            ]
+                          },
+                          "pattern": {
+                            "type": "String",
+                            "value": "%select id from distributed_table_1 where id in (select id from distributed_table_2) settings enable_add_distinct_to_in_subqueries = 1%"
+                          }
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "type"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "QueryFinish"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "parts": [
+                        "is_initial_query"
+                      ]
+                    }
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "event_time"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "q2",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "read_rows"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "ProfileEvents"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "current_database"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "name": "currentDatabase"
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "expr": {
+                            "parts": [
+                              "query"
+                            ]
+                          },
+                          "pattern": {
+                            "type": "String",
+                            "value": "%select id from distributed_table_1 where id in (select id from distributed_table_2) settings enable_add_distinct_to_in_subqueries = 0%"
+                          }
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "type"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "QueryFinish"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "parts": [
+                        "is_initial_query"
+                      ]
+                    }
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "event_time"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "q1",
+                "read_rows"
+              ]
+            },
+            "op": "\u003c",
+            "right": {
+              "parts": [
+                "q2",
+                "read_rows"
+              ]
+            }
+          },
+          "alias": "read_rows_optimization_effective"
+        },
+        {
+          "expr": {
+            "left": {
+              "array": {
+                "parts": [
+                  "q1",
+                  "ProfileEvents"
+                ]
+              },
+              "index": {
+                "type": "String",
+                "value": "NetworkSendBytes"
+              }
+            },
+            "op": "\u003c",
+            "right": {
+              "array": {
+                "parts": [
+                  "q2",
+                  "ProfileEvents"
+                ]
+              },
+              "index": {
+                "type": "String",
+                "value": "NetworkSendBytes"
+              }
+            }
+          },
+          "alias": "send_optimization_effective"
+        },
+        {
+          "expr": {
+            "left": {
+              "array": {
+                "parts": [
+                  "q1",
+                  "ProfileEvents"
+                ]
+              },
+              "index": {
+                "type": "String",
+                "value": "NetworkReceiveBytes"
+              }
+            },
+            "op": "\u003c",
+            "right": {
+              "array": {
+                "parts": [
+                  "q2",
+                  "ProfileEvents"
+                ]
+              },
+              "index": {
+                "type": "String",
+                "value": "NetworkReceiveBytes"
+              }
+            }
+          },
+          "alias": "recv_optimization_effective"
+        }
+      ]
+    }
+  ]
+}

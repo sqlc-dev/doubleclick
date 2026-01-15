@@ -1,0 +1,41 @@
+{
+  "table": "tab_v1",
+  "columns": [
+    {
+      "name": "content",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_content_bloom",
+      "expression": {
+        "parts": [
+          "content"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter",
+        "arguments": [
+          {
+            "type": "Float",
+            "value": 0.01,
+            "source": "0.01"
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "content"
+      ]
+    }
+  ]
+}

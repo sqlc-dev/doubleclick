@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "if",
+                          "arguments": [
+                            {
+                              "name": "isValidUTF8",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "1"
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "Null",
+                              "value": null
+                            },
+                            {
+                              "type": "String",
+                              "value": "error!"
+                            }
+                          ],
+                          "alias": "error_message"
+                        },
+                        {
+                          "name": "if",
+                          "arguments": [
+                            {
+                              "expr": {
+                                "parts": [
+                                  "error_message"
+                                ]
+                              }
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 0
+                            }
+                          ],
+                          "alias": "valid"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "testdata"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "parts": [
+          "valid"
+        ]
+      }
+    }
+  ]
+}

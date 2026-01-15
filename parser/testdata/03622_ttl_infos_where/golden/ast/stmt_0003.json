@@ -1,0 +1,113 @@
+{
+  "table": "users",
+  "columns": [
+    {
+      "name": "uid",
+      "type": {
+        "name": "Int16"
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "DateTime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "uid"
+      ]
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "d"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "value": {
+          "type": "Integer",
+          "value": 1
+        },
+        "unit": "MONTH"
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "d"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 1
+            },
+            "unit": "MONTH"
+          }
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "uid"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "merge_with_ttl_timeout",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "vertical_merge_algorithm_min_rows_to_activate",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "vertical_merge_algorithm_min_columns_to_activate",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

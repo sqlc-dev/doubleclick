@@ -1,0 +1,190 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "left": {
+                  "name": "argMax",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "rows"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "size"
+                      ]
+                    }
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "name": "max",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "size"
+                      ]
+                    }
+                  ]
+                },
+                "op": "\u003c",
+                "right": {
+                  "type": "Integer",
+                  "value": 10000000
+                }
+              }
+            },
+            {
+              "type": "String",
+              "value": "Ok"
+            },
+            {
+              "name": "format",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "Error: max_size={} rows={}"
+                },
+                {
+                  "name": "max",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "size"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "argMax",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "rows"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "size"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "blockNumber",
+                          "alias": "bn"
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "name": "byteSize",
+                              "arguments": [
+                                {}
+                              ]
+                            }
+                          ],
+                          "alias": "size"
+                        },
+                        {
+                          "name": "count",
+                          "alias": "rows"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t1"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t2"
+                              }
+                            },
+                            "join": {
+                              "type": "INNER",
+                              "on": {
+                                "left": {
+                                  "parts": [
+                                    "t1",
+                                    "key"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "parts": [
+                                    "t2",
+                                    "key"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "bn"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "joined_block_split_single_row",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "max_joined_block_size_bytes",
+          "value": {
+            "type": "String",
+            "value": "4M"
+          }
+        }
+      ]
+    }
+  ]
+}

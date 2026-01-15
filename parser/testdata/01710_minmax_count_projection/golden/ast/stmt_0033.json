@@ -1,0 +1,71 @@
+{
+  "table": "d",
+  "columns": [
+    {
+      "name": "dt",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "j",
+      "type": {
+        "name": "int"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "name": "toDate",
+        "arguments": [
+          {
+            "parts": [
+              "dt"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ceiling",
+        "arguments": [
+          {
+            "parts": [
+              "j"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "toDate",
+        "arguments": [
+          {
+            "parts": [
+              "dt"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "CEILING",
+        "arguments": [
+          {
+            "parts": [
+              "j"
+            ]
+          }
+        ]
+      }
+    ],
+    "spaced_commas": true
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "JoinBuildTableRowCount"
+            }
+          },
+          "alias": "build_table_size"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "log_comment"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "03593_any_join_swap_tables"
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "current_database"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "name": "currentDatabase"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "QueryFinish"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "yesterday"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_time"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "left": {
+              "name": "NOW"
+            },
+            "op": "-",
+            "right": {
+              "value": {
+                "type": "String",
+                "value": "10 MINUTE"
+              },
+              "unit": ""
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "database": "shard_1",
+  "table": "from_1",
+  "columns": [
+    {
+      "name": "x",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "left": {
+          "type": "String",
+          "value": "/clickhouse/tables/from_1_"
+        },
+        "op": "||",
+        "right": {
+          "name": "currentDatabase"
+        }
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "x"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "old_parts_lifetime",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "max_cleanup_delay_period",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "cleanup_delay_period",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "shared_merge_tree_disable_merges_and_mutations_assignment",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

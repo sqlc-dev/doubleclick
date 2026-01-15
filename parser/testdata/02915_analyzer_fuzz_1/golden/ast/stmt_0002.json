@@ -1,0 +1,54 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "concat",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "With "
+            },
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "name": "_CAST",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "ba\u0000"
+                    },
+                    {
+                      "type": "String",
+                      "value": "LowCardinality(FixedString(3))"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "concat('With ', materialize(CAST('ba\\0', 'LowCardinality(FixedString(3))')))"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "type": "String",
+          "value": "With "
+        }
+      ]
+    }
+  ]
+}

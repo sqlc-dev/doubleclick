@@ -1,0 +1,205 @@
+{
+  "table": "t_ind_merge_2",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "e",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "f",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_a",
+      "expression": {
+        "parts": [
+          "a"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      }
+    },
+    {
+      "name": "idx_b",
+      "expression": {
+        "parts": [
+          "b"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      }
+    },
+    {
+      "name": "idx_cd",
+      "expression": {
+        "left": {
+          "parts": [
+            "c"
+          ]
+        },
+        "op": "*",
+        "right": {
+          "parts": [
+            "d"
+          ]
+        }
+      },
+      "type": {
+        "name": "minmax"
+      }
+    },
+    {
+      "name": "idx_d1",
+      "expression": {
+        "parts": [
+          "d"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      }
+    },
+    {
+      "name": "idx_d2",
+      "expression": {
+        "left": {
+          "parts": [
+            "d"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "type": "Integer",
+          "value": 7
+        }
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 3
+          }
+        ]
+      }
+    },
+    {
+      "name": "idx_e",
+      "expression": {
+        "left": {
+          "parts": [
+            "e"
+          ]
+        },
+        "op": "*",
+        "right": {
+          "type": "Integer",
+          "value": 3
+        }
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 3
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 64
+      }
+    },
+    {
+      "name": "vertical_merge_algorithm_min_rows_to_activate",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "vertical_merge_algorithm_min_columns_to_activate",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "min_bytes_for_full_part_storage",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "enable_block_number_column",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "enable_block_offset_column",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

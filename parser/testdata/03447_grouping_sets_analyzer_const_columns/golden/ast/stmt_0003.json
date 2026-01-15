@@ -1,0 +1,153 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "grouping",
+          "arguments": [
+            {
+              "parts": [
+                "key_a"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "grouping",
+          "arguments": [
+            {
+              "parts": [
+                "key_b"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "key_a"
+          ]
+        },
+        {
+          "parts": [
+            "key_b"
+          ]
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "value"
+                          },
+                          "alias": "key_a"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "key_b"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 4
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "key_b"
+          ]
+        },
+        {
+          "type": "Tuple",
+          "value": [
+            {
+              "parts": [
+                "key_a"
+              ]
+            },
+            {
+              "parts": [
+                "key_b"
+              ]
+            }
+          ],
+          "spaced_commas": true
+        }
+      ],
+      "grouping_sets": true,
+      "order_by": [
+        {
+          "expression": {
+            "type": "Tuple",
+            "value": [
+              {
+                "name": "grouping",
+                "arguments": [
+                  {
+                    "parts": [
+                      "key_a"
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "grouping",
+                "arguments": [
+                  {
+                    "parts": [
+                      "key_b"
+                    ]
+                  }
+                ]
+              },
+              {
+                "parts": [
+                  "key_a"
+                ]
+              },
+              {
+                "parts": [
+                  "key_b"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "alias": "s"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "name": "numbers",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "intDiv",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ],
+          "alias": "key"
+        },
+        "op": "!=",
+        "right": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "key"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "key"
+            ]
+          },
+          "with_fill": true
+        }
+      ],
+      "interpolate": [
+        {
+          "column": "s",
+          "value": {
+            "type": "Integer",
+            "value": 100500
+          }
+        }
+      ]
+    }
+  ]
+}

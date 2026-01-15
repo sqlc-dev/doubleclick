@@ -1,0 +1,140 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "intDivOrZero",
+          "arguments": [
+            {
+              "left": {
+                "name": "intDivOrZero",
+                "arguments": [
+                  {
+                    "name": "toLowCardinality",
+                    "arguments": [
+                      {
+                        "op": "-",
+                        "operand": {
+                          "type": "Integer",
+                          "value": 128
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "toLowCardinality",
+                    "arguments": [
+                      {
+                        "op": "-",
+                        "operand": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "name": "toLowCardinality",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 4
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "realtimebuff__fuzz_19"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "name": "materialize",
+          "arguments": [
+            {
+              "name": "toLowCardinality",
+              "arguments": [
+                {
+                  "op": "-",
+                  "operand": {
+                    "type": "Integer",
+                    "value": 127
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "left": {
+            "name": "intDivOrZero",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 0
+              },
+              {
+                "type": "Integer",
+                "value": 0
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "toLowCardinality",
+            "arguments": [
+              {
+                "name": "toLowCardinality",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "with_totals": true,
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          },
+          "descending": true,
+          "nulls_first": true
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

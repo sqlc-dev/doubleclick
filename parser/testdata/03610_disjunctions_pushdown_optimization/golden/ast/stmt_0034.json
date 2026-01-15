@@ -1,0 +1,185 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "REGEXP_REPLACE",
+          "arguments": [
+            {
+              "name": "trimLeft",
+              "arguments": [
+                {
+                  "parts": [
+                    "explain"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "__set_Int32_\\d+_\\d+"
+            },
+            {
+              "type": "String",
+              "value": "__set_Int32_UNIQ_ID"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "t1",
+                              "k"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "t1",
+                              "a"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "t2",
+                              "x"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "tp1"
+                                },
+                                "alias": "t1"
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "tp2"
+                                },
+                                "alias": "t2"
+                              },
+                              "join": {
+                                "type": "INNER",
+                                "on": {
+                                  "left": {
+                                    "parts": [
+                                      "t1",
+                                      "k"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "parts": [
+                                      "t2",
+                                      "k"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "expr": {
+                              "parts": [
+                                "t1",
+                                "k"
+                              ]
+                            },
+                            "list": [
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            ]
+                          },
+                          "op": "OR",
+                          "right": {
+                            "expr": {
+                              "parts": [
+                                "t1",
+                                "k"
+                              ]
+                            },
+                            "list": [
+                              {
+                                "type": "Integer",
+                                "value": 3
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 4
+                              }
+                            ]
+                          }
+                        },
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "t1",
+                                "k"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "explain"
+          ]
+        },
+        "case_insensitive": true,
+        "pattern": {
+          "type": "String",
+          "value": "%Filter column: %"
+        }
+      },
+      "settings": [
+        {
+          "name": "enable_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "TSV"
+        ]
+      }
+    }
+  ]
+}

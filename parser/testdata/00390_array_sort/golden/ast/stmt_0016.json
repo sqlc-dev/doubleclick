@@ -1,0 +1,123 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "splitByChar",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "0"
+            },
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "name": "intHash64",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "arr"
+        },
+        {
+          "expr": {
+            "type": "Integer",
+            "value": 3
+          },
+          "alias": "lim"
+        },
+        {
+          "name": "arrayResize",
+          "arguments": [
+            {
+              "name": "arrayPartialSort",
+              "arguments": [
+                {
+                  "parts": [
+                    "lim"
+                  ]
+                },
+                {
+                  "parts": [
+                    "arr"
+                  ]
+                }
+              ]
+            },
+            {
+              "parts": [
+                "lim"
+              ]
+            }
+          ],
+          "alias": "sorted"
+        },
+        {
+          "name": "arrayResize",
+          "arguments": [
+            {
+              "name": "arrayPartialSort",
+              "arguments": [
+                {
+                  "parameters": [
+                    "x"
+                  ],
+                  "body": {
+                    "name": "toUInt64OrZero",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "x"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "parts": [
+                    "lim"
+                  ]
+                },
+                {
+                  "parts": [
+                    "arr"
+                  ]
+                }
+              ]
+            },
+            {
+              "parts": [
+                "lim"
+              ]
+            }
+          ],
+          "alias": "sorted_nums"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

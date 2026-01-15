@@ -1,0 +1,59 @@
+{
+  "view": "test_mv_00609",
+  "materialized": true,
+  "populate": true,
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "date"
+        ]
+      },
+      {
+        "parts": [
+          "a"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "a"
+            ]
+          },
+          {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2000-01-01"
+              }
+            ],
+            "alias": "date"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "test_00609"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

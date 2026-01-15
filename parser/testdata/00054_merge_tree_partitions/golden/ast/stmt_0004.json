@@ -1,0 +1,63 @@
+{
+  "table": "partitions",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "EventDate"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "left": {
+                  "parts": [
+                    "UserID"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 365
+                }
+              }
+            },
+            "alias": "EventDate"
+          },
+          {
+            "parts": [
+              "CounterID"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "test",
+                  "table": "hits"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "CounterID"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 1704509
+          }
+        }
+      }
+    ]
+  }
+}

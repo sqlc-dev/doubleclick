@@ -1,0 +1,73 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "pkey",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "id",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "v",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "version",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "is_deleted",
+      "type": {
+        "name": "UInt8"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "version"
+        ]
+      },
+      {
+        "parts": [
+          "is_deleted"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "pkey"
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 512
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

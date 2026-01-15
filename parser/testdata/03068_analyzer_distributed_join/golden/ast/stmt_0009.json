@@ -1,0 +1,123 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "O_ORDERPRIORITY"
+          ]
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ],
+          "alias": "order_count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "ORDERS"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "L_ORDERKEY"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "LINEITEM_shard"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "L_ORDERKEY"
+                          ]
+                        }
+                      ],
+                      "having": {
+                        "name": "any",
+                        "arguments": [
+                          {
+                            "left": {
+                              "parts": [
+                                "L_COMMITDATE"
+                              ]
+                            },
+                            "op": "\u003c",
+                            "right": {
+                              "parts": [
+                                "L_RECEIPTDATE"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "x"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "O_ORDERKEY"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "L_ORDERKEY"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "O_ORDERPRIORITY"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "O_ORDERPRIORITY"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

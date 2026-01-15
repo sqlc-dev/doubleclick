@@ -1,0 +1,110 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "k"
+          ]
+        },
+        {
+          "name": "anyLast",
+          "arguments": [
+            {
+              "parts": [
+                "s"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 123456789
+                          },
+                          "alias": "k"
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "Hello 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890"
+                          },
+                          "alias": "s"
+                        }
+                      ]
+                    },
+                    {
+                      "columns": [
+                        {
+                          "type": "Integer",
+                          "value": 234567890
+                        },
+                        {
+                          "type": "String",
+                          "value": "World 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890"
+                        }
+                      ]
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "with_totals": true,
+      "having": {
+        "left": {
+          "name": "length",
+          "arguments": [
+            {
+              "name": "anyLast",
+              "arguments": [
+                {
+                  "parts": [
+                    "s"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,383 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "cutoff_time",
+          "query": {
+            "left": {
+              "name": "now"
+            },
+            "op": "-",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 1
+              },
+              "unit": "HOUR"
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "query_ids",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "query_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "current_database"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "name": "currentDatabase"
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "event_time"
+                        ]
+                      },
+                      "op": "\u003e=",
+                      "right": {
+                        "parts": [
+                          "cutoff_time"
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "type"
+          ]
+        },
+        {
+          "parts": [
+            "has_watch"
+          ]
+        },
+        {
+          "parts": [
+            "op_num"
+          ]
+        },
+        {
+          "name": "replace",
+          "arguments": [
+            {
+              "parts": [
+                "path"
+              ]
+            },
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "name": "serverUUID"
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "\u003cuuid\u003e"
+            }
+          ]
+        },
+        {
+          "parts": [
+            "is_ephemeral"
+          ]
+        },
+        {
+          "parts": [
+            "is_sequential"
+          ]
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "name": "startsWith",
+              "arguments": [
+                {
+                  "parts": [
+                    "path"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "/clickhouse/sessions"
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            },
+            {
+              "parts": [
+                "version"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "requests_size"
+          ]
+        },
+        {
+          "parts": [
+            "request_idx"
+          ]
+        },
+        {
+          "parts": [
+            "error"
+          ]
+        },
+        {
+          "parts": [
+            "watch_type"
+          ]
+        },
+        {
+          "parts": [
+            "watch_state"
+          ]
+        },
+        {
+          "parts": [
+            "path_created"
+          ]
+        },
+        {
+          "parts": [
+            "stat_version"
+          ]
+        },
+        {
+          "parts": [
+            "stat_cversion"
+          ]
+        },
+        {
+          "parts": [
+            "stat_dataLength"
+          ]
+        },
+        {
+          "parts": [
+            "stat_numChildren"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "zookeeper_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "event_time"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "parts": [
+              "cutoff_time"
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "session_id"
+                ]
+              },
+              {
+                "parts": [
+                  "xid"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "session_id"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "xid"
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "database": "system",
+                          "table": "zookeeper_log"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "event_time"
+                        ]
+                      },
+                      "op": "\u003e=",
+                      "right": {
+                        "parts": [
+                          "cutoff_time"
+                        ]
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "path"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "left": {
+                          "left": {
+                            "type": "String",
+                            "value": "/test/01158/"
+                          },
+                          "op": "||",
+                          "right": {
+                            "name": "currentDatabase"
+                          }
+                        },
+                        "op": "||",
+                        "right": {
+                          "type": "String",
+                          "value": "/rmt/replicas/1/parts/all_0_0_0"
+                        }
+                      }
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "query_id"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": ""
+                      }
+                    },
+                    "op": "OR",
+                    "right": {
+                      "expr": {
+                        "parts": [
+                          "query_id"
+                        ]
+                      },
+                      "list": [
+                        {
+                          "parts": [
+                            "query_ids"
+                          ]
+                        }
+                      ]
+                    },
+                    "parenthesized": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "xid"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "type"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "request_idx"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

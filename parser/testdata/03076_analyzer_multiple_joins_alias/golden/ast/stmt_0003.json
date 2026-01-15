@@ -1,0 +1,142 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "x"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "a"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "x"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          "alias": "y"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "b"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "a",
+                      "x"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "b",
+                      "x"
+                    ]
+                  },
+                  "parenthesized": true
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "a",
+                      "y"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "b",
+                      "y"
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 3
+                          },
+                          "alias": "x"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "c"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "a",
+                    "x"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "c",
+                    "x"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

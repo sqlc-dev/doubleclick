@@ -1,0 +1,109 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 5
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "name": "rand"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "number"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "name": "sum",
+            "arguments": [
+              {
+                "name": "any",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "op": "+",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  }
+                ]
+              }
+            ],
+            "over": {
+              "order_by": [
+                {
+                  "expression": {
+                    "name": "min",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "number"
+                        ]
+                      }
+                    ]
+                  },
+                  "descending": true
+                }
+              ],
+              "frame": {
+                "type": "ROWS",
+                "start": {
+                  "type": "UNBOUNDED_PRECEDING"
+                }
+              }
+            }
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

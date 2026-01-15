@@ -1,0 +1,250 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "a",
+                "number"
+              ]
+            }
+          ],
+          "alias": "total"
+        },
+        {
+          "parts": [
+            "c",
+            "number"
+          ],
+          "alias": "cn"
+        },
+        {
+          "parts": [
+            "b",
+            "number"
+          ],
+          "alias": "bn"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "grouping",
+              "arguments": [
+                {
+                  "parts": [
+                    "c",
+                    "number"
+                  ]
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "name": "grouping",
+              "arguments": [
+                {
+                  "parts": [
+                    "b",
+                    "number"
+                  ]
+                }
+              ]
+            }
+          },
+          "alias": "l"
+        },
+        {
+          "name": "rank",
+          "over": {
+            "partition_by": [
+              {
+                "left": {
+                  "name": "grouping",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "c",
+                        "number"
+                      ]
+                    }
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "name": "grouping",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "b",
+                        "number"
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "multiIf",
+                "arguments": [
+                  {
+                    "left": {
+                      "name": "grouping",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "c",
+                            "number"
+                          ]
+                        }
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 0
+                    }
+                  },
+                  {
+                    "parts": [
+                      "b",
+                      "number"
+                    ]
+                  },
+                  {
+                    "type": "Null",
+                    "value": null
+                  }
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "name": "sum",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "a",
+                        "number"
+                      ]
+                    }
+                  ]
+                },
+                "descending": true
+              }
+            ]
+          },
+          "alias": "r"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              },
+              "alias": "a"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              },
+              "alias": "b"
+            },
+            "join": {
+              "type": ""
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              },
+              "alias": "c"
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "cn"
+          ]
+        },
+        {
+          "parts": [
+            "bn"
+          ]
+        }
+      ],
+      "with_rollup": true,
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "total"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "cn"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "bn"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "l"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "r"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

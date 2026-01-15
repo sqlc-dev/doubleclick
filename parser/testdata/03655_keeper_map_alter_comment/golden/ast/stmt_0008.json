@@ -1,0 +1,67 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "keeper:"
+        },
+        {
+          "name": "regexpExtract",
+          "arguments": [
+            {
+              "parts": [
+                "value"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "(`k`.+?)(\n|\\))"
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "zookeeper"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "path"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "left": {
+            "left": {
+              "type": "String",
+              "value": "/clickhouse/databases/"
+            },
+            "op": "||",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "||",
+          "right": {
+            "type": "String",
+            "value": "/metadata"
+          }
+        }
+      }
+    }
+  ]
+}

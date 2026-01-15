@@ -1,0 +1,151 @@
+{
+  "if_not_exists": true,
+  "table": "decimal",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "DECIMAL",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 9
+          },
+          {
+            "type": "Integer",
+            "value": 4
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "type": "Integer",
+        "value": 0
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "DECIMAL",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 18
+          },
+          {
+            "type": "Integer",
+            "value": 4
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "a"
+          ]
+        },
+        "op": "/",
+        "right": {
+          "type": "Integer",
+          "value": 2
+        }
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "DECIMAL",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 38
+          },
+          {
+            "type": "Integer",
+            "value": 4
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "b"
+          ]
+        },
+        "op": "/",
+        "right": {
+          "type": "Integer",
+          "value": 3
+        }
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "d",
+      "type": null,
+      "default": {
+        "left": {
+          "parts": [
+            "a"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "name": "toDecimal32",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "0.2"
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ]
+        }
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "e",
+      "type": null,
+      "default": {
+        "left": {
+          "parts": [
+            "b"
+          ]
+        },
+        "op": "*",
+        "right": {
+          "type": "Integer",
+          "value": 2
+        }
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "f",
+      "type": null,
+      "default": {
+        "left": {
+          "parts": [
+            "c"
+          ]
+        },
+        "op": "*",
+        "right": {
+          "type": "Integer",
+          "value": 6
+        }
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "Memory"
+  }
+}

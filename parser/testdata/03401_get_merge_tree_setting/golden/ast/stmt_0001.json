@@ -1,0 +1,116 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toBool",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "t1",
+                  "val"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "parts": [
+                  "t2",
+                  "val"
+                ]
+              }
+            }
+          ],
+          "alias": "should_be_equal"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toString",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "value"
+                              ]
+                            }
+                          ],
+                          "alias": "val"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "merge_tree_settings"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "name"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "index_granularity"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toString",
+                          "arguments": [
+                            {
+                              "name": "getMergeTreeSetting",
+                              "arguments": [
+                                {
+                                  "type": "String",
+                                  "value": "index_granularity"
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "val"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

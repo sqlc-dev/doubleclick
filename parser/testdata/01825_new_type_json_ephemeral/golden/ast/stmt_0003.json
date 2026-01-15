@@ -1,0 +1,118 @@
+{
+  "table": "t_github_json",
+  "columns": [
+    {
+      "name": "event_type",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "JSONExtractString",
+        "arguments": [
+          {
+            "parts": [
+              "message_raw"
+            ]
+          },
+          {
+            "type": "String",
+            "value": "type"
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "repo_name",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "JSONExtractString",
+        "arguments": [
+          {
+            "parts": [
+              "message_raw"
+            ]
+          },
+          {
+            "type": "String",
+            "value": "repo"
+          },
+          {
+            "type": "String",
+            "value": "name"
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "message",
+      "type": {
+        "name": "JSON"
+      },
+      "default": {
+        "condition": {
+          "name": "empty",
+          "arguments": [
+            {
+              "parts": [
+                "message_raw"
+              ]
+            }
+          ]
+        },
+        "then": {
+          "type": "String",
+          "value": "{}"
+        },
+        "else": {
+          "parts": [
+            "message_raw"
+          ]
+        }
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "message_raw",
+      "type": {
+        "name": "String"
+      },
+      "default_kind": "EPHEMERAL"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "event_type"
+          ]
+        },
+        {
+          "parts": [
+            "repo_name"
+          ]
+        }
+      ]
+    }
+  ]
+}

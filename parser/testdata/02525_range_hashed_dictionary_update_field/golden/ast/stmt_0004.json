@@ -1,0 +1,90 @@
+{
+  "table": "test_dictionary",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "start",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "end",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "insert_time",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "uid",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "uid"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "test_table"
+          }
+        },
+        {
+          "key": "UPDATE_FIELD",
+          "value": {
+            "type": "String",
+            "value": "insert_time"
+          }
+        },
+        {
+          "key": "UPDATE_LAG",
+          "value": {
+            "type": "Integer",
+            "value": 10
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 1
+      },
+      "max": {
+        "type": "Integer",
+        "value": 2
+      }
+    },
+    "layout": {
+      "type": "RANGE_HASHED"
+    },
+    "range": {
+      "min": {
+        "parts": [
+          "start"
+        ]
+      },
+      "max": {
+        "parts": [
+          "end"
+        ]
+      }
+    }
+  }
+}

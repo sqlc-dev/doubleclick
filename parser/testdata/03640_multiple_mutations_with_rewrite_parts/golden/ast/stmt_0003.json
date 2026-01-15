@@ -1,0 +1,79 @@
+{
+  "table": "test_materialize",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "intDiv",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 5000
+              }
+            ]
+          },
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "name": "repeat",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "a"
+              },
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Float",
+                      "value": 10000,
+                      "source": "10e3"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "settings": [
+          {
+            "name": "max_block_size",
+            "value": {
+              "type": "Integer",
+              "value": 10
+            }
+          },
+          {
+            "name": "min_insert_block_size_rows",
+            "value": {
+              "type": "Integer",
+              "value": 10000
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true
+}

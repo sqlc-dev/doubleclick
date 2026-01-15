@@ -1,0 +1,161 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "type": "String",
+              "value": "metric"
+            },
+            "op": "||",
+            "right": {
+              "name": "toString",
+              "arguments": [
+                {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              ]
+            }
+          },
+          "alias": "name"
+        },
+        {
+          "parts": [
+            "number"
+          ],
+          "alias": "value"
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              },
+              "op": "==",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            {
+              "left": {
+                "type": "String",
+                "value": "info "
+              },
+              "op": "||",
+              "right": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Null",
+              "value": null
+            }
+          ],
+          "alias": "help"
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 3
+                }
+              },
+              "op": "==",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            {
+              "type": "String",
+              "value": "counter"
+            },
+            {
+              "type": "Null",
+              "value": null
+            }
+          ],
+          "alias": "type"
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 1395066363000
+            },
+            {
+              "type": "Null",
+              "value": null
+            }
+          ],
+          "alias": "timestamp"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 5
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "Prometheus"
+        ]
+      }
+    }
+  ]
+}

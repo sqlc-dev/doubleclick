@@ -1,0 +1,76 @@
+{
+  "if_not_exists": true,
+  "database": "{CLICKHOUSE_DATABASE:Identifier}",
+  "table": "dict_exists",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "key_column",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "Float64"
+      },
+      "default": {
+        "type": "Float",
+        "value": 77.77,
+        "source": "77.77"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "key_column"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "HOST",
+          "value": {
+            "type": "String",
+            "value": "localhost"
+          }
+        },
+        {
+          "key": "PORT",
+          "value": {
+            "name": "tcpPort"
+          }
+        },
+        {
+          "key": "USER",
+          "value": {
+            "type": "String",
+            "value": "default"
+          }
+        },
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "table_for_dict"
+          }
+        },
+        {
+          "key": "DB",
+          "value": {
+            "name": "currentDatabase"
+          }
+        }
+      ]
+    },
+    "lifetime": {},
+    "layout": {
+      "type": "FLAT"
+    }
+  }
+}

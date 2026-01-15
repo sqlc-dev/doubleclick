@@ -1,0 +1,175 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "test1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "n"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "with_test"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "n"
+                      ]
+                    },
+                    "op": "\u003c=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 40
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "max",
+              "arguments": [
+                {
+                  "left": {
+                    "parts": [
+                      "n"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "z"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test1"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test1"
+              },
+              "alias": "x"
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "n"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "having": {
+        "left": {
+          "left": {
+            "parts": [
+              "z"
+            ]
+          },
+          "op": "-",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        "op": "=",
+        "right": {
+          "left": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "left": {
+                        "name": "min",
+                        "arguments": [
+                          {
+                            "left": {
+                              "parts": [
+                                "n"
+                              ]
+                            },
+                            "op": "-",
+                            "right": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          }
+                        ]
+                      },
+                      "op": "+",
+                      "right": {
+                        "type": "Integer",
+                        "value": 41
+                      }
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "test1"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "op": "+",
+          "right": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      }
+    }
+  ]
+}

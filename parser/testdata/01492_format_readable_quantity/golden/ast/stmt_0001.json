@@ -1,0 +1,116 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "x",
+          "query": {
+            "name": "round",
+            "arguments": [
+              {
+                "name": "exp",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 6
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "y",
+          "query": {
+            "name": "toUInt64",
+            "arguments": [
+              {
+                "parts": [
+                  "x"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "z",
+          "query": {
+            "name": "toInt32",
+            "arguments": [
+              {
+                "name": "min2",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 2147483647
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "formatReadableQuantity",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "formatReadableQuantity",
+          "arguments": [
+            {
+              "parts": [
+                "y"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "formatReadableQuantity",
+          "arguments": [
+            {
+              "parts": [
+                "z"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 45
+      }
+    }
+  ]
+}

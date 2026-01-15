@@ -1,0 +1,101 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trimLeft",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            }
+          ],
+          "alias": "explain"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "id"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "tab_compact_full"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "name": "hasToken",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "str"
+                              ]
+                            },
+                            {
+                              "type": "String",
+                              "value": "foo"
+                            }
+                          ]
+                        },
+                        "limit": {
+                          "type": "Integer",
+                          "value": 3
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "indexes = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%text%"
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Granules:%"
+          }
+        }
+      }
+    }
+  ]
+}

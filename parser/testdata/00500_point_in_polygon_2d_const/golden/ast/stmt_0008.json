@@ -1,0 +1,82 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "s"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "name": "pointInPolygon",
+        "arguments": [
+          {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "lng"
+                ]
+              },
+              {
+                "parts": [
+                  "lat"
+                ]
+              }
+            ]
+          },
+          {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "shape"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "p"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "polygon_id"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 8
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

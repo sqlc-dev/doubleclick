@@ -1,0 +1,163 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "bitmapCardinality",
+          "arguments": [
+            {
+              "parts": [
+                "bs"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "groupBitmapMergeState",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "bm"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "k"
+                                  ]
+                                }
+                              }
+                            ],
+                            "frame": {
+                              "type": "ROWS",
+                              "start": {
+                                "type": "UNBOUNDED_PRECEDING"
+                              },
+                              "end": {
+                                "type": "CURRENT_ROW"
+                              }
+                            }
+                          },
+                          "alias": "bs"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "groupBitmapState",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "number"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "bm"
+                                        },
+                                        {
+                                          "parts": [
+                                            "k"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "query": {
+                                                  "selects": [
+                                                    {
+                                                      "columns": [
+                                                        {
+                                                          "parts": [
+                                                            "number"
+                                                          ]
+                                                        },
+                                                        {
+                                                          "expr": {
+                                                            "left": {
+                                                              "parts": [
+                                                                "number"
+                                                              ]
+                                                            },
+                                                            "op": "%",
+                                                            "right": {
+                                                              "type": "Integer",
+                                                              "value": 3
+                                                            }
+                                                          },
+                                                          "alias": "k"
+                                                        }
+                                                      ],
+                                                      "from": {
+                                                        "tables": [
+                                                          {
+                                                            "table": {
+                                                              "table": {
+                                                                "name": "numbers",
+                                                                "arguments": [
+                                                                  {
+                                                                    "type": "Integer",
+                                                                    "value": 3
+                                                                  }
+                                                                ]
+                                                              }
+                                                            }
+                                                          }
+                                                        ]
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "k"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

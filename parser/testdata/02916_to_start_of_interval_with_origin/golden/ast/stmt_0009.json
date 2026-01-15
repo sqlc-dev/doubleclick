@@ -1,0 +1,87 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toStartOfInterval",
+          "arguments": [
+            {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2023-01-02 14:45:50"
+                }
+              ]
+            },
+            {
+              "name": "toIntervalMinute",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "condition": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                },
+                "op": "==",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              "then": {
+                "name": "toDateTime",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "2023-02-01 15:55:00"
+                  }
+                ]
+              },
+              "else": {
+                "name": "toDateTime",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "2023-01-01 15:55:00"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

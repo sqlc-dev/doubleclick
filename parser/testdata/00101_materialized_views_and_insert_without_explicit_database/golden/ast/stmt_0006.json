@@ -1,0 +1,62 @@
+{
+  "view": "test_view",
+  "materialized": true,
+  "columns": [
+    {
+      "name": "Rows",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "MaxHitTime",
+      "type": {
+        "name": "DateTime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "America/Los_Angeles"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "Memory"
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "count",
+            "alias": "Rows"
+          },
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "UTCEventTime"
+                ]
+              }
+            ],
+            "alias": "MaxHitTime"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "test_table"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

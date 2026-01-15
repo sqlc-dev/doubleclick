@@ -1,0 +1,63 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "information_schema",
+                "table": "columns"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "table_schema"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "table_name"
+            ]
+          },
+          "not": true,
+          "pattern": {
+            "type": "String",
+            "value": "%inner%"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "table_name"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "column_name"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

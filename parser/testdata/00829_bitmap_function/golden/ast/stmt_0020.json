@@ -1,0 +1,249 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "bitmapCardinality",
+          "arguments": [
+            {
+              "parts": [
+                "day_today"
+              ]
+            }
+          ],
+          "alias": "today_users"
+        },
+        {
+          "name": "bitmapCardinality",
+          "arguments": [
+            {
+              "parts": [
+                "day_before"
+              ]
+            }
+          ],
+          "alias": "before_users"
+        },
+        {
+          "name": "bitmapOrCardinality",
+          "arguments": [
+            {
+              "parts": [
+                "day_today"
+              ]
+            },
+            {
+              "parts": [
+                "day_before"
+              ]
+            }
+          ],
+          "alias": "all_users"
+        },
+        {
+          "name": "bitmapAndCardinality",
+          "arguments": [
+            {
+              "parts": [
+                "day_today"
+              ]
+            },
+            {
+              "parts": [
+                "day_before"
+              ]
+            }
+          ],
+          "alias": "old_users"
+        },
+        {
+          "name": "bitmapAndnotCardinality",
+          "arguments": [
+            {
+              "parts": [
+                "day_today"
+              ]
+            },
+            {
+              "parts": [
+                "day_before"
+              ]
+            }
+          ],
+          "alias": "new_users"
+        },
+        {
+          "name": "bitmapXorCardinality",
+          "arguments": [
+            {
+              "parts": [
+                "day_today"
+              ]
+            },
+            {
+              "parts": [
+                "day_before"
+              ]
+            }
+          ],
+          "alias": "diff_users"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "city_id"
+                          ]
+                        },
+                        {
+                          "name": "groupBitmapState",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "uid"
+                              ]
+                            }
+                          ],
+                          "alias": "day_today"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "bitmap_test"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "pickup_date"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "2019-01-02"
+                        }
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "city_id"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "city_id"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "js1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "city_id"
+                          ]
+                        },
+                        {
+                          "name": "groupBitmapState",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "uid"
+                              ]
+                            }
+                          ],
+                          "alias": "day_before"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "bitmap_test"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "pickup_date"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "2019-01-01"
+                        }
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "city_id"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "city_id"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "js2"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ALL",
+              "using": [
+                {
+                  "parts": [
+                    "city_id"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

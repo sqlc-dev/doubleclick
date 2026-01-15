@@ -1,0 +1,80 @@
+{
+  "table": "column_swap_test_test",
+  "columns": [
+    {
+      "name": "i",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "name": "c1",
+      "expression": {
+        "left": {
+          "parts": [
+            "a"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "name": "substring",
+          "arguments": [
+            {
+              "name": "reverse",
+              "arguments": [
+                {
+                  "parts": [
+                    "b"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "i"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

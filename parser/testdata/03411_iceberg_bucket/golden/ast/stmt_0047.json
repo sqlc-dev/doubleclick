@@ -1,0 +1,59 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "ts",
+          "query": {
+            "name": "toDateTime64",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "1970-01-01 22:31:08"
+              },
+              {
+                "type": "Integer",
+                "value": 6
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "microseconds_since_day_start",
+          "query": {
+            "name": "toUnixTimestamp64Micro",
+            "arguments": [
+              {
+                "parts": [
+                  "ts"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "icebergBucket",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 5
+            },
+            {
+              "parts": [
+                "microseconds_since_day_start"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

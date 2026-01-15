@@ -1,0 +1,127 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "level"
+          ]
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "user_id"
+                          ]
+                        },
+                        {
+                          "name": "windowFunnel",
+                          "parameters": [
+                            {
+                              "type": "Integer",
+                              "value": 6048000000000000
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "parts": [
+                                "timestamp"
+                              ]
+                            },
+                            {
+                              "left": {
+                                "parts": [
+                                  "eventID"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1004
+                              }
+                            },
+                            {
+                              "left": {
+                                "parts": [
+                                  "eventID"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1003
+                              }
+                            },
+                            {
+                              "left": {
+                                "parts": [
+                                  "eventID"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1002
+                              }
+                            }
+                          ],
+                          "alias": "level"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "trend"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "user_id"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "level"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "level"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

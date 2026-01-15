@@ -1,0 +1,47 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "{\"a.b\" : 42, \"a\" : {\"b\" : \"Hello World!\"}}"
+          },
+          "type": {
+            "name": "JSON",
+            "parameters": [
+              {
+                "expr": {
+                  "name": "a%2Eb",
+                  "type": {
+                    "name": "UInt8"
+                  }
+                }
+              }
+            ],
+            "has_parentheses": true
+          },
+          "alias": "json",
+          "operator_syntax": true
+        },
+        {
+          "parts": [
+            "json",
+            "a%2Eb"
+          ]
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "json",
+                "a%2Eb"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

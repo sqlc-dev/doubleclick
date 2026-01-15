@@ -1,0 +1,111 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "SrcAS"
+                ]
+              },
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "SrcAS"
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "flows"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "group_by": [
+                      {
+                        "parts": [
+                          "SrcAS"
+                        ]
+                      }
+                    ],
+                    "order_by": [
+                      {
+                        "expression": {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "Bytes"
+                              ]
+                            }
+                          ]
+                        },
+                        "descending": true
+                      }
+                    ],
+                    "limit": {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "parts": [
+                "SrcAS"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 33
+            }
+          ],
+          "alias": "SrcAS"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "flows"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "type": "Integer",
+          "value": 2
+        },
+        "op": "==",
+        "right": {
+          "type": "Integer",
+          "value": 2
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "SrcAS"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "table": "prices_by_year_dest",
+  "columns": [
+    {
+      "name": "Table",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "Engine",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "price",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "addr1",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "addr2",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "street",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "town",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "district",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "county",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "partition_by": {
+    "name": "toYear",
+    "arguments": [
+      {
+        "parts": [
+          "date"
+        ]
+      }
+    ]
+  },
+  "primary_key": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "town"
+          ]
+        },
+        {
+          "parts": [
+            "date"
+          ]
+        }
+      ]
+    }
+  ]
+}

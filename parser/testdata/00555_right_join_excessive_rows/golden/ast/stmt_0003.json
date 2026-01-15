@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toUInt64",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          ],
+                          "alias": "s"
+                        }
+                      ],
+                      "limit": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "js1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "s"
+                        },
+                        {
+                          "parts": [
+                            "s"
+                          ],
+                          "alias": "x"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 11
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "js2"
+            },
+            "join": {
+              "type": "RIGHT",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "s"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "s"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "table": "x",
+  "columns": [
+    {
+      "name": "i",
+      "type": {
+        "name": "int"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "mm",
+      "expression": {
+        "name": "LOG2",
+        "arguments": [
+          {
+            "parts": [
+              "i"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p",
+      "select": {
+        "columns": [
+          {
+            "name": "MAX",
+            "arguments": [
+              {
+                "parts": [
+                  "i"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/x"
+      },
+      {
+        "type": "String",
+        "value": "r"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "i"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2020-04-05 00:00:00"
+                },
+                {
+                  "type": "String",
+                  "value": "Australia/Lord_Howe"
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "left": {
+                  "type": "Integer",
+                  "value": 15
+                },
+                "op": "*",
+                "right": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              },
+              "unit": "MINUTE"
+            }
+          },
+          "alias": "src"
+        },
+        {
+          "name": "toStartOfInterval",
+          "arguments": [
+            {
+              "parts": [
+                "src"
+              ]
+            },
+            {
+              "value": {
+                "type": "Integer",
+                "value": 2
+              },
+              "unit": "HOUR"
+            }
+          ],
+          "alias": "rounded"
+        },
+        {
+          "name": "toUnixTimestamp",
+          "arguments": [
+            {
+              "parts": [
+                "src"
+              ]
+            }
+          ],
+          "alias": "t"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 20
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

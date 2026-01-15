@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "name": "hex",
+          "arguments": [
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "name": "uniqState",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "x"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "intDiv",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 3
+                            }
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "name": "toNullable",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          ],
+                          "alias": "x"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "with_totals": true,
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

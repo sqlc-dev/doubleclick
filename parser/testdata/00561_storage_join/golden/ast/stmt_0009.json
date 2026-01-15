@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "id2"
+          ]
+        },
+        {
+          "parts": [
+            "val"
+          ]
+        },
+        {
+          "parts": [
+            "val2"
+          ]
+        },
+        {
+          "parts": [
+            "created"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toUInt64",
+                          "arguments": [
+                            {
+                              "name": "arrayJoin",
+                              "arguments": [
+                                {
+                                  "name": "range",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 50
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "id2"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "js1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "joinbug_join"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "SEMI",
+              "using": [
+                {
+                  "parts": [
+                    "id2"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

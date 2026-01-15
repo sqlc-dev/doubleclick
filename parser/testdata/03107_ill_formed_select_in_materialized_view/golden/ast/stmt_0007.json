@@ -1,0 +1,146 @@
+{
+  "view": "view_4",
+  "materialized": true,
+  "populate": true,
+  "columns": [
+    {
+      "name": "bb",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "cnt",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "bb"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "bb"
+            ]
+          },
+          {
+            "name": "count",
+            "alias": "cnt"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "a"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "b"
+                            ],
+                            "alias": "j"
+                          },
+                          {
+                            "parts": [
+                              "b"
+                            ],
+                            "alias": "bb"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "a"
+                                }
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "query": {
+                                    "selects": [
+                                      {
+                                        "columns": [
+                                          {
+                                            "parts": [
+                                              "b"
+                                            ],
+                                            "alias": "j"
+                                          },
+                                          {
+                                            "parts": [
+                                              "b"
+                                            ],
+                                            "alias": "bb"
+                                          }
+                                        ],
+                                        "from": {
+                                          "tables": [
+                                            {
+                                              "table": {
+                                                "table": {
+                                                  "table": "b"
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              "join": {
+                                "type": "INNER",
+                                "using": [
+                                  {
+                                    "parts": [
+                                      "j"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "bb"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

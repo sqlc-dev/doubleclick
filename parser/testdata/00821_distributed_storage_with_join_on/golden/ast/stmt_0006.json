@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 1
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "cluster",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "test_shard_localhost"
+                  },
+                  {
+                    "parts": [
+                      "system",
+                      "columns"
+                    ]
+                  }
+                ]
+              },
+              "alias": "T1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "name": "cluster",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "test_shard_localhost"
+                  },
+                  {
+                    "parts": [
+                      "system",
+                      "tables"
+                    ]
+                  }
+                ]
+              },
+              "alias": "T2"
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ALL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "T1",
+                    "table"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "T2",
+                    "name"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

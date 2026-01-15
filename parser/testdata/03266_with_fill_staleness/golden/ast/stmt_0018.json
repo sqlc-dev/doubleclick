@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "b"
+          ]
+        },
+        {
+          "parts": [
+            "c"
+          ]
+        },
+        {
+          "expr": {
+            "type": "String",
+            "value": "original"
+          },
+          "alias": "original"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "with_fill_staleness"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "a"
+            ]
+          },
+          "with_fill": true,
+          "fill_staleness": {
+            "value": {
+              "type": "Integer",
+              "value": 2
+            },
+            "unit": "SECOND"
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "b"
+            ]
+          },
+          "with_fill": true,
+          "fill_from": {
+            "type": "Integer",
+            "value": 0
+          },
+          "fill_to": {
+            "type": "Integer",
+            "value": 3
+          }
+        }
+      ],
+      "interpolate": [
+        {
+          "column": "c"
+        }
+      ]
+    }
+  ]
+}

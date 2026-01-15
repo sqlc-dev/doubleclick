@@ -1,0 +1,151 @@
+{
+  "table": "cool_table",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "name": "range",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "arrayMap",
+            "arguments": [
+              {
+                "parameters": [
+                  "x"
+                ],
+                "body": {
+                  "expr": {
+                    "type": "Tuple",
+                    "value": [
+                      {
+                        "name": "arrayMap",
+                        "arguments": [
+                          {
+                            "parameters": [
+                              "y"
+                            ],
+                            "body": {
+                              "left": {
+                                "type": "String",
+                                "value": "k"
+                              },
+                              "op": "||",
+                              "right": {
+                                "name": "toString",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "y"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "name": "range",
+                            "arguments": [
+                              {
+                                "left": {
+                                  "parts": [
+                                    "x"
+                                  ]
+                                },
+                                "op": "%",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 4
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "name": "range",
+                        "arguments": [
+                          {
+                            "left": {
+                              "parts": [
+                                "x"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 4
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "spaced_commas": true
+                  },
+                  "type": {
+                    "name": "Map",
+                    "parameters": [
+                      {
+                        "name": "LowCardinality",
+                        "parameters": [
+                          {
+                            "name": "String"
+                          }
+                        ],
+                        "has_parentheses": true
+                      },
+                      {
+                        "name": "UInt64"
+                      }
+                    ],
+                    "has_parentheses": true
+                  },
+                  "operator_syntax": true
+                }
+              },
+              {
+                "name": "range",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

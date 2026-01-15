@@ -1,0 +1,119 @@
+{
+  "function": {
+    "name": "file",
+    "arguments": [
+      {
+        "name": "concat",
+        "arguments": [
+          {
+            "name": "currentDatabase"
+          },
+          {
+            "type": "String",
+            "value": "_03241_data1_with_dict.orc"
+          }
+        ]
+      }
+    ]
+  },
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "toLowCardinality",
+            "arguments": [
+              {
+                "expr": {
+                  "name": "if",
+                  "arguments": [
+                    {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "%",
+                        "right": {
+                          "type": "Integer",
+                          "value": 10
+                        }
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "Integer",
+                        "value": 0
+                      }
+                    },
+                    {
+                      "type": "Null",
+                      "value": null
+                    },
+                    {
+                      "left": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "op": "%",
+                      "right": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                },
+                "type": {
+                  "name": "Nullable",
+                  "parameters": [
+                    {
+                      "name": "String"
+                    }
+                  ],
+                  "has_parentheses": true
+                }
+              }
+            ],
+            "alias": "c"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 100000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "settings": [
+          {
+            "name": "output_format_orc_dictionary_key_size_threshold",
+            "value": {
+              "type": "Float",
+              "value": 0.1,
+              "source": "0.1"
+            }
+          },
+          {
+            "name": "engine_file_truncate_on_insert",
+            "value": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true
+}

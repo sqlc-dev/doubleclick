@@ -1,0 +1,123 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ],
+          "alias": "num"
+        },
+        {
+          "name": "hostName",
+          "alias": "hostName"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              },
+              "alias": "a"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "processes"
+              },
+              "alias": "b"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "a",
+                          "query_id"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "parts": [
+                          "b",
+                          "query_id"
+                        ]
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "type"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "QueryStart"
+                      }
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "name": "dateDiff",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "second"
+                        },
+                        {
+                          "parts": [
+                            "event_time"
+                          ]
+                        },
+                        {
+                          "name": "now"
+                        }
+                      ]
+                    },
+                    "op": "\u003e",
+                    "right": {
+                      "type": "Integer",
+                      "value": 5
+                    }
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "current_database"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "name": "currentDatabase"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

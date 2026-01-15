@@ -1,0 +1,97 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "level",
+          "query": {
+            "type": "Float",
+            "value": 0.1,
+            "source": "0.1"
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "max_size",
+          "query": {
+            "type": "Integer",
+            "value": 1
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "groupArray",
+          "parameters": [
+            {
+              "parts": [
+                "max_size"
+              ]
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "col"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "quantile",
+                          "parameters": [
+                            {
+                              "parts": [
+                                "level"
+                              ]
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "col"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 1000
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

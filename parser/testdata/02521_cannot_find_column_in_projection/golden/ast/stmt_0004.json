@@ -1,0 +1,73 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "id_with",
+          "query": {
+            "name": "toUInt64",
+            "arguments": [
+              {
+                "parts": [
+                  "id"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "day"
+          ]
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "parts": [
+                "id_with"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "day"
+          ]
+        },
+        "op": "\u003e=",
+        "right": {
+          "type": "String",
+          "value": "2023-01-01"
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "day"
+          ]
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1000
+      }
+    }
+  ]
+}

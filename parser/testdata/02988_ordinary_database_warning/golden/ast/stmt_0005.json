@@ -1,0 +1,52 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "type": "String",
+          "value": "Ok."
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "warnings"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "message"
+            ]
+          },
+          "case_insensitive": true,
+          "pattern": {
+            "type": "String",
+            "value": "%Ordinary%"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "message"
+            ]
+          },
+          "case_insensitive": true,
+          "pattern": {
+            "type": "String",
+            "value": "%deprecated%"
+          }
+        }
+      }
+    }
+  ]
+}

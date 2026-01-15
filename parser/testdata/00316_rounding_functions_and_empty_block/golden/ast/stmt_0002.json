@@ -1,0 +1,140 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "floor",
+          "arguments": [
+            {
+              "left": {
+                "left": {
+                  "parts": [
+                    "ReferrerTimestamp"
+                  ]
+                },
+                "op": "-",
+                "right": {
+                  "parts": [
+                    "InstallTimestamp"
+                  ]
+                },
+                "parenthesized": true
+              },
+              "op": "/",
+              "right": {
+                "type": "Integer",
+                "value": 86400
+              }
+            }
+          ],
+          "alias": "DaysSinceInstallations"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 6534090703218709881
+                          },
+                          "alias": "DeviceIDHash"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1458586663
+                          },
+                          "alias": "InstallTimestamp"
+                        }
+                      ]
+                    },
+                    {
+                      "columns": [
+                        {
+                          "type": "Integer",
+                          "value": 2697418689476658272
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 1458561552
+                        }
+                      ]
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              },
+              "alias": "js1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1034415739529768519
+                          },
+                          "alias": "DeviceIDHash"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1458566664
+                          },
+                          "alias": "ReferrerTimestamp"
+                        }
+                      ]
+                    },
+                    {
+                      "columns": [
+                        {
+                          "type": "Integer",
+                          "value": 2697418689476658272
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 1458561552
+                        }
+                      ]
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              },
+              "alias": "js2"
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "DeviceIDHash"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

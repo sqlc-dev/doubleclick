@@ -1,0 +1,83 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "last_seen"
+                              ]
+                            }
+                          ],
+                          "alias": "dates_seen"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "last_seen"
+                        }
+                      ]
+                    },
+                    {
+                      "columns": [
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "last_seen"
+                              ]
+                            }
+                          ],
+                          "alias": "dates_seen"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 3
+                          },
+                          "alias": "last_seen"
+                        }
+                      ]
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "last_seen"
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "type": "Integer",
+          "value": 2
+        }
+      }
+    }
+  ]
+}

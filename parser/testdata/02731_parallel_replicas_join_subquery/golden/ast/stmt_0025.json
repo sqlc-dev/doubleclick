@@ -1,0 +1,165 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "array": {
+            "parts": [
+              "ProfileEvents"
+            ]
+          },
+          "index": {
+            "type": "String",
+            "value": "ParallelReplicasQueryCount"
+          }
+        },
+        {
+          "name": "replaceRegexpAll",
+          "arguments": [
+            {
+              "parts": [
+                "query"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "_data_(\\d+)_(\\d+)"
+            },
+            {
+              "type": "String",
+              "value": "_data_"
+            }
+          ],
+          "alias": "query"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "yesterday"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "query_id"
+            ]
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "query_id"
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "database": "system",
+                          "table": "query_log"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "current_database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "event_date"
+                          ]
+                        },
+                        "op": "\u003e=",
+                        "right": {
+                          "name": "yesterday"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "type"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "QueryFinish"
+                      }
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "expr": {
+                      "parts": [
+                        "query"
+                      ]
+                    },
+                    "pattern": {
+                      "type": "String",
+                      "value": "-- Parallel full query without analyzer%"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

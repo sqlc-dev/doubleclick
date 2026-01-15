@@ -1,0 +1,107 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "uniq",
+          "arguments": [
+            {
+              "parts": [
+                "SearchPhrase"
+              ]
+            }
+          ],
+          "alias": "u"
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "URL"
+              ]
+            }
+          ],
+          "alias": "m"
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits_s3"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "URL"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%metrika%"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "SearchPhrase"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "String",
+            "value": ""
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "SearchPhrase"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "u"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "m"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

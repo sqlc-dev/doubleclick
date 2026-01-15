@@ -1,0 +1,181 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trimLeft",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "a"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "b"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "c"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "d"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "e"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "test_lazy_read_in_order"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "a"
+                              ]
+                            }
+                          },
+                          {
+                            "expression": {
+                              "left": {
+                                "parts": [
+                                  "a"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            }
+                          }
+                        ],
+                        "limit": {
+                          "type": "Integer",
+                          "value": 5
+                        },
+                        "settings": [
+                          {
+                            "name": "max_threads",
+                            "value": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "explicit_type": true,
+                  "options_string": "actions = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "expr": {
+                  "parts": [
+                    "explain"
+                  ]
+                },
+                "pattern": {
+                  "type": "String",
+                  "value": "%LazilyRead%"
+                }
+              },
+              "op": "OR",
+              "right": {
+                "expr": {
+                  "parts": [
+                    "explain"
+                  ]
+                },
+                "pattern": {
+                  "type": "String",
+                  "value": "%Lazily read columns:%"
+                }
+              }
+            },
+            "op": "OR",
+            "right": {
+              "expr": {
+                "parts": [
+                  "explain"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "%ReadType:%"
+              }
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%Prefix sort description:%"
+            }
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Result sort description:%"
+          }
+        }
+      }
+    }
+  ]
+}

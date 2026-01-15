@@ -1,0 +1,103 @@
+{
+  "table": "ttl",
+  "commands": [
+    {
+      "type": "MODIFY_COLUMN",
+      "column": {
+        "name": "s",
+        "type": {
+          "name": "String"
+        },
+        "ttl": {
+          "condition": {
+            "left": {
+              "left": {
+                "parts": [
+                  "i"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 3
+              }
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          "then": {
+            "left": {
+              "name": "today"
+            },
+            "op": "-",
+            "right": {
+              "type": "Integer",
+              "value": 10
+            }
+          },
+          "else": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2100-01-01"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "MODIFY_COLUMN",
+      "column": {
+        "name": "t",
+        "type": {
+          "name": "String"
+        },
+        "ttl": {
+          "condition": {
+            "left": {
+              "left": {
+                "parts": [
+                  "i"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 3
+              }
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "then": {
+            "left": {
+              "name": "today"
+            },
+            "op": "-",
+            "right": {
+              "type": "Integer",
+              "value": 10
+            }
+          },
+          "else": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2100-01-01"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

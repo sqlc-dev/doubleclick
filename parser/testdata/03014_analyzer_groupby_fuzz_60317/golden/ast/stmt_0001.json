@@ -1,0 +1,123 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toNullable",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "name": "_CAST",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 30
+                    },
+                    {
+                      "type": "String",
+                      "value": "LowCardinality(UInt8)"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "a"
+        },
+        {
+          "name": "_CAST",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 30
+            },
+            {
+              "type": "String",
+              "value": "LowCardinality(UInt8)"
+            }
+          ],
+          "alias": "b"
+        },
+        {
+          "name": "makeDate",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "name": "_CAST",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 30
+                    },
+                    {
+                      "type": "String",
+                      "value": "LowCardinality(UInt8)"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            },
+            {
+              "name": "_CAST",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 30
+                },
+                {
+                  "type": "String",
+                  "value": "Nullable(UInt8)"
+                }
+              ]
+            }
+          ],
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "name": "_CAST",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 30
+            },
+            {
+              "type": "String",
+              "value": "Nullable(UInt8)"
+            }
+          ]
+        }
+      ],
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

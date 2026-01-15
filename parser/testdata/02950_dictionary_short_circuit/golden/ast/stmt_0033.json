@@ -1,0 +1,88 @@
+{
+  "table": "range_hashed_dictionary",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "start",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "end",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Date"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "id"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "range_dictionary_source_table"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 0
+      },
+      "max": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    "layout": {
+      "type": "RANGE_HASHED"
+    },
+    "range": {
+      "min": {
+        "parts": [
+          "start"
+        ]
+      },
+      "max": {
+        "parts": [
+          "end"
+        ]
+      }
+    }
+  }
+}

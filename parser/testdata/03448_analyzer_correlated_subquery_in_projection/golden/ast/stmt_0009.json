@@ -1,0 +1,95 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "A",
+            "id"
+          ],
+          "alias": "a_id"
+        },
+        {
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "name": "groupArraySorted",
+                    "parameters": [
+                      {
+                        "type": "Integer",
+                        "value": 5
+                      }
+                    ],
+                    "arguments": [
+                      {
+                        "parts": [
+                          "B",
+                          "id"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "B"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "name": "has",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "B",
+                        "A_ids"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "A",
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "alias": "b_ids_containing_a_id"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "A"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "a_id"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 20
+      }
+    }
+  ]
+}

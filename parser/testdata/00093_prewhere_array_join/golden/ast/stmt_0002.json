@@ -1,0 +1,113 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayJoin",
+          "arguments": [
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "Integer",
+                  "value": 0
+                }
+              ]
+            }
+          ],
+          "alias": "browser"
+        },
+        {
+          "name": "arrayJoin",
+          "arguments": [
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "parts": [
+                    "SearchEngineID"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "search_engine"
+        },
+        {
+          "parts": [
+            "URL"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "type": "Integer",
+              "value": 1
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "SearchEngineID"
+                ]
+              },
+              "op": "!=",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              },
+              "parenthesized": true
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "browser"
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            },
+            "parenthesized": true
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "search_engine"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          },
+          "parenthesized": true
+        }
+      },
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

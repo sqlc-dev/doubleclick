@@ -1,0 +1,105 @@
+{
+  "table": "sample_final",
+  "columns": [
+    {
+      "name": "CounterID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "EventDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "EventTime",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "UserID",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "Sign",
+      "type": {
+        "name": "Int8"
+      }
+    }
+  ],
+  "engine": {
+    "name": "CollapsingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "Sign"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        {
+          "parts": [
+            "EventDate"
+          ]
+        },
+        {
+          "name": "intHash32",
+          "arguments": [
+            {
+              "parts": [
+                "UserID"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "EventTime"
+          ]
+        }
+      ]
+    }
+  ],
+  "sample_by": {
+    "name": "intHash32",
+    "arguments": [
+      {
+        "parts": [
+          "UserID"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "left": {
+            "type": "String",
+            "value": "Sorted ORDER BY val LIMIT BY key: "
+          },
+          "op": "||",
+          "right": {
+            "name": "trimBoth",
+            "arguments": [
+              {
+                "parts": [
+                  "explain"
+                ]
+              },
+              {
+                "type": "String",
+                "value": " "
+              }
+            ],
+            "sql_standard": true
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PIPELINE",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "key"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "03701_sorted"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "val"
+                              ]
+                            }
+                          }
+                        ],
+                        "limit": {
+                          "type": "Integer",
+                          "value": 10
+                        },
+                        "limit_by": [
+                          {
+                            "parts": [
+                              "key"
+                            ]
+                          }
+                        ],
+                        "limit_by_limit": {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        "limit_by_has_limit": true
+                      }
+                    ]
+                  },
+                  "explicit_type": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "explain"
+          ]
+        },
+        "pattern": {
+          "type": "String",
+          "value": "%LimitByTransform%"
+        }
+      }
+    }
+  ]
+}

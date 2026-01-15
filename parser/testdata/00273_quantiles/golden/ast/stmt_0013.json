@@ -1,0 +1,183 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "left": {
+                "type": "Integer",
+                "value": 1000000
+              },
+              "op": "/",
+              "right": {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "parenthesized": true
+              }
+            }
+          ],
+          "alias": "k"
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "round",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 6
+                  }
+                ]
+              }
+            },
+            {
+              "name": "quantilesDeterministic",
+              "parameters": [
+                {
+                  "type": "Float",
+                  "value": 0.1,
+                  "source": "0.1"
+                },
+                {
+                  "type": "Float",
+                  "value": 0.5,
+                  "source": "0.5"
+                },
+                {
+                  "type": "Float",
+                  "value": 0.9,
+                  "source": "0.9"
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                {
+                  "name": "intHash64",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "q1"
+        },
+        {
+          "name": "quantilesExact",
+          "parameters": [
+            {
+              "type": "Float",
+              "value": 0.1,
+              "source": "0.1"
+            },
+            {
+              "type": "Float",
+              "value": 0.5,
+              "source": "0.5"
+            },
+            {
+              "type": "Float",
+              "value": 0.9,
+              "source": "0.9"
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "alias": "q2"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 1000000
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

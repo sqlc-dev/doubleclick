@@ -1,0 +1,62 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              },
+              "alias": "t"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "join"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t",
+                    "number"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "join",
+                    "n"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "n"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,353 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "deltaSumMerge",
+          "arguments": [
+            {
+              "parts": [
+                "rows"
+              ]
+            }
+          ],
+          "alias": "delta_sum"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          "alias": "x"
+                                        },
+                                        {
+                                          "name": "deltaSumState",
+                                          "arguments": [
+                                            {
+                                              "name": "arrayJoin",
+                                              "arguments": [
+                                                {
+                                                  "type": "Array",
+                                                  "value": [
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 3
+                                                    },
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 5
+                                                    }
+                                                  ],
+                                                  "spaced_commas": true
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "rows"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "columns": [
+                                        {
+                                          "type": "Integer",
+                                          "value": 3
+                                        },
+                                        {
+                                          "name": "deltaSumState",
+                                          "arguments": [
+                                            {
+                                              "name": "arrayJoin",
+                                              "arguments": [
+                                                {
+                                                  "type": "Array",
+                                                  "value": [
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 4
+                                                    },
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 6
+                                                    }
+                                                  ],
+                                                  "spaced_commas": true
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "rows"
+                                        }
+                                      ],
+                                      "with_totals": true
+                                    },
+                                    {
+                                      "distinct": true,
+                                      "columns": [
+                                        {
+                                          "type": "Integer",
+                                          "value": 2
+                                        },
+                                        {
+                                          "name": "deltaSumState",
+                                          "arguments": [
+                                            {}
+                                          ],
+                                          "alias": "rows"
+                                        }
+                                      ],
+                                      "qualify": {
+                                        "left": {
+                                          "parts": [
+                                            "delta_sum"
+                                          ]
+                                        },
+                                        "op": "=",
+                                        "right": {
+                                          "name": "ignore",
+                                          "arguments": [
+                                            {
+                                              "name": "ignore",
+                                              "arguments": [
+                                                {
+                                                  "name": "materialize",
+                                                  "arguments": [
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 1023
+                                                    }
+                                                  ]
+                                                },
+                                                {},
+                                                {},
+                                                {
+                                                  "name": "toUInt256",
+                                                  "arguments": [
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 10
+                                                    }
+                                                  ]
+                                                },
+                                                {},
+                                                {},
+                                                {
+                                                  "type": "Integer",
+                                                  "value": 10
+                                                },
+                                                {},
+                                                {
+                                                  "name": "toUInt256",
+                                                  "arguments": [
+                                                    {
+                                                      "name": "toUInt128",
+                                                      "arguments": [
+                                                        {
+                                                          "type": "Integer",
+                                                          "value": 10
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "expr": {
+                                                    "type": "Integer",
+                                                    "value": 10
+                                                  },
+                                                  "not": true
+                                                },
+                                                {
+                                                  "type": "Integer",
+                                                  "value": 10
+                                                },
+                                                {
+                                                  "type": "Integer",
+                                                  "value": 10
+                                                },
+                                                {
+                                                  "type": "Integer",
+                                                  "value": 10
+                                                },
+                                                {
+                                                  "type": "Integer",
+                                                  "value": 10
+                                                },
+                                                {
+                                                  "name": "materialize",
+                                                  "arguments": [
+                                                    {
+                                                      "name": "toNullable",
+                                                      "arguments": [
+                                                        {
+                                                          "name": "toUInt128",
+                                                          "arguments": [
+                                                            {
+                                                              "type": "Integer",
+                                                              "value": 10
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                },
+                                                {},
+                                                {
+                                                  "name": "isNullable",
+                                                  "arguments": [
+                                                    {
+                                                      "type": "Null",
+                                                      "value": null
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "Integer",
+                                                  "value": 10
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "union_all": true,
+                                  "union_modes": [
+                                    "UNION ALL",
+                                    "UNION ALL"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "descending": true
+                        },
+                        {
+                          "expression": {
+                            "name": "ignore",
+                            "arguments": [
+                              {},
+                              {},
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              },
+                              {},
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              },
+                              {},
+                              {
+                                "name": "toUInt128",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              },
+                              {},
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              },
+                              {
+                                "expr": {
+                                  "type": "Null",
+                                  "value": null
+                                }
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            ]
+                          },
+                          "nulls_first": true
+                        },
+                        {
+                          "expression": {
+                            "parts": [
+                              "x"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          },
+          "descending": true,
+          "nulls_first": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "table": "skip_table",
+  "columns": [
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "v",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "v_set",
+      "expression": {
+        "parts": [
+          "v"
+        ]
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 100
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 2
+      }
+    },
+    {
+      "name": "v_mm",
+      "expression": {
+        "parts": [
+          "v"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 2
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "primary_key": [
+    {
+      "parts": [
+        "k"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

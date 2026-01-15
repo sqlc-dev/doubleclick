@@ -1,0 +1,85 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "bitmap_test"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "type": "Integer",
+          "value": 0
+        },
+        "op": "=",
+        "right": {
+          "name": "bitmapContains",
+          "arguments": [
+            {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "name": "groupBitmapState",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "uid"
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "bitmap_test"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "left": {
+                        "parts": [
+                          "pickup_date"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "2019-01-01"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "parts": [
+                "uid"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

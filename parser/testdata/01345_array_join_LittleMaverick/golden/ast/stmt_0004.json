@@ -1,0 +1,134 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "status"
+          ]
+        },
+        {
+          "name": "count",
+          "alias": "all"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "nested"
+                  ],
+                  "alias": "nestedJoined"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "status"
+            ]
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "status"
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "test"
+                        }
+                      }
+                    },
+                    {
+                      "array_join": {
+                        "columns": [
+                          {
+                            "parts": [
+                              "nested"
+                            ],
+                            "alias": "nestedJoined"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "group_by": [
+                  {
+                    "parts": [
+                      "status"
+                    ]
+                  }
+                ],
+                "order_by": [
+                  {
+                    "expression": {
+                      "name": "count"
+                    },
+                    "descending": true
+                  }
+                ],
+                "limit": {
+                  "type": "Integer",
+                  "value": 10
+                }
+              }
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "id"
+            ]
+          },
+          "list": [
+            {
+              "type": "String",
+              "value": "1"
+            },
+            {
+              "type": "String",
+              "value": "2"
+            }
+          ]
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "status"
+          ]
+        }
+      ],
+      "with_cube": true,
+      "limit": {
+        "type": "Integer",
+        "value": 100
+      }
+    }
+  ]
+}

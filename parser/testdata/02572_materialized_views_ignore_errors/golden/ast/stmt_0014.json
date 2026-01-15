@@ -1,0 +1,113 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "lower",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "status"
+                ]
+              },
+              "type": {
+                "name": "String"
+              },
+              "operator_syntax": true
+            }
+          ]
+        },
+        {
+          "name": "errorCodeToName",
+          "arguments": [
+            {
+              "parts": [
+                "exception_code"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_views_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "view_name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "concatWithSeparator",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "."
+              },
+              {
+                "name": "currentDatabase"
+              },
+              {
+                "type": "String",
+                "value": "push_to_proxy_mv_02572"
+              }
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "view_target"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "concatWithSeparator",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "."
+              },
+              {
+                "name": "currentDatabase"
+              },
+              {
+                "type": "String",
+                "value": "proxy_02572"
+              }
+            ]
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_date"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "event_time"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "materialize",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 42
+                            }
+                          ],
+                          "alias": "a"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "materialize",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          ],
+                          "alias": "a"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "expr": {
+                    "parts": [
+                      "t1",
+                      "a"
+                    ]
+                  },
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "type": "Integer",
+                            "value": 42
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "a"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "array": {
+            "parts": [
+              "x"
+            ]
+          },
+          "index": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "A"
+                          ]
+                        },
+                        {
+                          "name": "avgMap",
+                          "arguments": [
+                            {
+                              "expr": {
+                                "name": "arrayMap",
+                                "arguments": [
+                                  {
+                                    "parameters": [
+                                      "x"
+                                    ],
+                                    "body": {
+                                      "type": "Tuple",
+                                      "value": [
+                                        {
+                                          "parts": [
+                                            "x"
+                                          ]
+                                        },
+                                        {
+                                          "type": "Integer",
+                                          "value": 1
+                                        }
+                                      ],
+                                      "spaced_commas": true
+                                    }
+                                  },
+                                  {
+                                    "parts": [
+                                      "r"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "type": {
+                                "name": "Map(UInt8,Int64)"
+                              }
+                            }
+                          ],
+                          "alias": "x"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.{1,1}"
+                                  },
+                                  {
+                                    "name": "view",
+                                    "arguments": [
+                                      {
+                                        "query": {
+                                          "selects": [
+                                            {
+                                              "columns": [
+                                                {
+                                                  "parts": [
+                                                    "number"
+                                                  ],
+                                                  "alias": "A"
+                                                },
+                                                {
+                                                  "name": "range",
+                                                  "arguments": [
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 150
+                                                    }
+                                                  ],
+                                                  "alias": "r"
+                                                }
+                                              ],
+                                              "from": {
+                                                "tables": [
+                                                  {
+                                                    "table": {
+                                                      "table": {
+                                                        "name": "numbers",
+                                                        "arguments": [
+                                                          {
+                                                            "type": "Integer",
+                                                            "value": 60
+                                                          }
+                                                        ]
+                                                      }
+                                                    }
+                                                  }
+                                                ]
+                                              },
+                                              "where": {
+                                                "left": {
+                                                  "left": {
+                                                    "parts": [
+                                                      "A"
+                                                    ]
+                                                  },
+                                                  "op": "%",
+                                                  "right": {
+                                                    "type": "Integer",
+                                                    "value": 2
+                                                  },
+                                                  "parenthesized": true
+                                                },
+                                                "op": "=",
+                                                "right": {
+                                                  "name": "shardNum"
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "A"
+                          ]
+                        }
+                      ],
+                      "limit": {
+                        "type": "Integer",
+                        "value": 100000000
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "A"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 41
+        }
+      },
+      "settings": [
+        {
+          "name": "prefer_localhost_replica",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "name": "distributed_aggregation_memory_efficient",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "group_by_two_level_threshold",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "name": "group_by_two_level_threshold_bytes",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

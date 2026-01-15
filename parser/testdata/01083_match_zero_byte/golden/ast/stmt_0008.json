@@ -1,0 +1,52 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "unhex",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "00"
+                }
+              ]
+            },
+            "op": "||",
+            "right": {
+              "type": "String",
+              "value": " key=\"v\" "
+            }
+          },
+          "alias": "haystack"
+        },
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "haystack"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "extract",
+          "arguments": [
+            {
+              "parts": [
+                "haystack"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "key=\"(.*?)\""
+            }
+          ],
+          "alias": "needle"
+        }
+      ]
+    }
+  ]
+}

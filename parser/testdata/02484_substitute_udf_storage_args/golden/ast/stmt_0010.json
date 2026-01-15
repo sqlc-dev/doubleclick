@@ -1,0 +1,85 @@
+{
+  "table": "02484_substitute_udf",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "dt",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "number",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "02484_plusone",
+      "arguments": [
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "02484_plustwo",
+    "arguments": [
+      {
+        "parts": [
+          "id"
+        ]
+      }
+    ]
+  },
+  "sample_by": {
+    "name": "02484_plusone",
+    "arguments": [
+      {
+        "parts": [
+          "id"
+        ]
+      }
+    ]
+  },
+  "ttl": {
+    "expression": {
+      "name": "02484_plusthreemonths",
+      "arguments": [
+        {
+          "parts": [
+            "dt"
+          ]
+        }
+      ]
+    },
+    "elements": [
+      {
+        "expr": {
+          "name": "02484_plusthreemonths",
+          "arguments": [
+            {
+              "parts": [
+                "dt"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

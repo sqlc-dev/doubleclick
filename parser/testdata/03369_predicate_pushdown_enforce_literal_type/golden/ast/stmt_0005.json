@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "d"
+          ]
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1..10}"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "t_03369"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "event"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "String",
+          "value": ""
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "d"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "left": {
+            "parts": [
+              "d"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 1738281600
+              }
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      }
+    }
+  ]
+}

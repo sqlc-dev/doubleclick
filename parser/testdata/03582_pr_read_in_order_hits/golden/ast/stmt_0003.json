@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "Result hash   : "
+        },
+        {
+          "name": "cityHash64",
+          "arguments": [
+            {
+              "name": "groupArray",
+              "arguments": [
+                {
+                  "parts": [
+                    "CounterID"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "CounterID"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "test",
+                                "table": "hits"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "expr": {
+                          "name": "domain",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "URL"
+                              ]
+                            }
+                          ]
+                        },
+                        "list": [
+                          {
+                            "type": "String",
+                            "value": "yandex.ru"
+                          },
+                          {
+                            "type": "String",
+                            "value": "auto.ru"
+                          },
+                          {
+                            "type": "String",
+                            "value": "avito.ru"
+                          }
+                        ]
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "CounterID"
+                            ]
+                          }
+                        }
+                      ],
+                      "settings": [
+                        {
+                          "name": "enable_parallel_replicas",
+                          "value": {
+                            "type": "Integer",
+                            "value": 0
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

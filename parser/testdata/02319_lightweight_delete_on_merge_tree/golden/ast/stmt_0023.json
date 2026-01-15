@@ -1,0 +1,72 @@
+{
+  "table": "t_light",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "int"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "int"
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "int"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "i_c",
+      "expression": {
+        "parts": [
+          "b"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 4
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "parts": [
+        "c"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 5
+    }
+  },
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

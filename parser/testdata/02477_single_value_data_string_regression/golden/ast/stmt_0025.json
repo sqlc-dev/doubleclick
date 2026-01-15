@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "-2^31"
+        },
+        {
+          "name": "maxMerge",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "name": "maxMerge",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "expr": {
+                              "left": {
+                                "name": "unhex",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "00000080"
+                                  }
+                                ]
+                              },
+                              "op": "||",
+                              "right": {
+                                "name": "randomString",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 100500
+                                  }
+                                ]
+                              }
+                            },
+                            "type": {
+                              "name": "AggregateFunction(max, String)"
+                            }
+                          },
+                          "alias": "x"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

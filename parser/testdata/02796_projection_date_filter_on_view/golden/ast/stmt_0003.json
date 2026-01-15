@@ -1,0 +1,179 @@
+{
+  "table": "fx_1m",
+  "columns": [
+    {
+      "name": "symbol",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dt_close",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 3
+          },
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "DoubleDelta"
+          },
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    },
+    {
+      "name": "open",
+      "type": {
+        "name": "Float32"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "Delta"
+          },
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    },
+    {
+      "name": "high",
+      "type": {
+        "name": "Float32"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "Delta"
+          },
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    },
+    {
+      "name": "low",
+      "type": {
+        "name": "Float32"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "Delta"
+          },
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    },
+    {
+      "name": "close",
+      "type": {
+        "name": "Float32"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "Delta"
+          },
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    },
+    {
+      "name": "volume",
+      "type": {
+        "name": "Float32"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "Delta"
+          },
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "symbol"
+          ]
+        },
+        {
+          "parts": [
+            "dt_close"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYear",
+    "arguments": [
+      {
+        "parts": [
+          "dt_close"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

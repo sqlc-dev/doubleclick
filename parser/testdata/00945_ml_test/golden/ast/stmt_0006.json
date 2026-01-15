@@ -1,0 +1,123 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "left": {
+              "parts": [
+                "ans"
+              ]
+            },
+            "op": "\u003c",
+            "right": {
+              "type": "Float",
+              "value": 1.1,
+              "source": "1.1"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "ans"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Float",
+              "value": 0.9,
+              "source": "0.9"
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "with": [
+                        {
+                          "name": "model",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "parts": [
+                                        "state"
+                                      ]
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "table": "model"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": true
+                        }
+                      ],
+                      "columns": [
+                        {
+                          "name": "evalMLMethod",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "model"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "predict1"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "predict2"
+                              ]
+                            }
+                          ],
+                          "alias": "ans"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "defaults"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 2
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,450 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "tab",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {}
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "values",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "id_key UInt64, link UInt64"
+                              },
+                              {
+                                "type": "Tuple",
+                                "value": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 1
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 17
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Tuple",
+                                "value": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 2
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 17
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Tuple",
+                                "value": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 3
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 17
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Tuple",
+                                "value": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 4
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 17
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Tuple",
+                                "value": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 6
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 17
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Tuple",
+                                "value": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 5
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 17
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "iter",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 0
+                      },
+                      "alias": "id_key"
+                    },
+                    {
+                      "expr": {
+                        "type": "String",
+                        "value": "base"
+                      },
+                      "alias": "row_type"
+                    },
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 17
+                      },
+                      "alias": "link"
+                    }
+                  ]
+                },
+                {
+                  "selects": [
+                    {
+                      "with": [
+                        {
+                          "name": "remaining",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "parts": [
+                                        "tab",
+                                        "id_key"
+                                      ],
+                                      "alias": "id_key"
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "String",
+                                        "value": "true"
+                                      },
+                                      "type": {
+                                        "name": "text"
+                                      },
+                                      "alias": "row_type",
+                                      "operator_syntax": true
+                                    },
+                                    {
+                                      "parts": [
+                                        "iter",
+                                        "link"
+                                      ],
+                                      "alias": "link"
+                                    },
+                                    {
+                                      "name": "MIN",
+                                      "arguments": [
+                                        {
+                                          "parts": [
+                                            "tab",
+                                            "id_key"
+                                          ]
+                                        }
+                                      ],
+                                      "over": {},
+                                      "alias": "min"
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "table": "tab"
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "table": "iter"
+                                          }
+                                        },
+                                        "join": {
+                                          "type": "INNER",
+                                          "using": [
+                                            {
+                                              "parts": [
+                                                "link"
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "where": {
+                                    "left": {
+                                      "parts": [
+                                        "tab",
+                                        "id_key"
+                                      ]
+                                    },
+                                    "op": "\u003e",
+                                    "right": {
+                                      "parts": [
+                                        "iter",
+                                        "id_key"
+                                      ]
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": false
+                        },
+                        {
+                          "name": "first_remaining",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "parts": [
+                                        "id_key"
+                                      ]
+                                    },
+                                    {
+                                      "parts": [
+                                        "row_type"
+                                      ]
+                                    },
+                                    {
+                                      "parts": [
+                                        "link"
+                                      ]
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "table": "remaining"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "where": {
+                                    "left": {
+                                      "parts": [
+                                        "id_key"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "parts": [
+                                        "min"
+                                      ]
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": false
+                        },
+                        {
+                          "name": "effect",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "parts": [
+                                        "tab",
+                                        "id_key"
+                                      ],
+                                      "alias": "id_key"
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "String",
+                                        "value": "new"
+                                      },
+                                      "type": {
+                                        "name": "text"
+                                      },
+                                      "alias": "row_type",
+                                      "operator_syntax": true
+                                    },
+                                    {
+                                      "parts": [
+                                        "tab",
+                                        "link"
+                                      ],
+                                      "alias": "link"
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "table": "first_remaining"
+                                          },
+                                          "alias": "e"
+                                        }
+                                      },
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "table": "tab"
+                                          }
+                                        },
+                                        "join": {
+                                          "type": "INNER",
+                                          "on": {
+                                            "left": {
+                                              "parts": [
+                                                "e",
+                                                "id_key"
+                                              ]
+                                            },
+                                            "op": "=",
+                                            "right": {
+                                              "parts": [
+                                                "tab",
+                                                "id_key"
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "where": {
+                                    "left": {
+                                      "parts": [
+                                        "e",
+                                        "row_type"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "type": "String",
+                                      "value": "false"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": false
+                        }
+                      ],
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "first_remaining"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "effect"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "iter"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

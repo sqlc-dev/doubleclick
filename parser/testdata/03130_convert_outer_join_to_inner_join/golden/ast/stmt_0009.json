@@ -1,0 +1,74 @@
+{
+  "explain_type": "PLAN",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "test_table_1"
+                },
+                "alias": "lhs"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "test_table_2"
+                },
+                "alias": "rhs"
+              },
+              "join": {
+                "type": "LEFT",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "lhs",
+                      "id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "rhs",
+                      "id"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "rhs",
+              "id"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "settings": [
+          {
+            "name": "query_plan_join_swap_table",
+            "value": {
+              "type": "String",
+              "value": "false"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true,
+  "options_string": "header = 1, actions = 1"
+}

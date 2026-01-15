@@ -1,0 +1,86 @@
+{
+  "table": "tab_cos_f64",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "vec",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Float32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx",
+      "expression": {
+        "parts": [
+          "vec"
+        ]
+      },
+      "type": {
+        "name": "vector_similarity",
+        "arguments": [
+          {
+            "type": "String",
+            "value": "hnsw"
+          },
+          {
+            "type": "String",
+            "value": "cosineDistance"
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          },
+          {
+            "type": "String",
+            "value": "f64"
+          },
+          {
+            "type": "Integer",
+            "value": 0
+          },
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 2
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 3
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

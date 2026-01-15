@@ -1,0 +1,73 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "hits_text"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "hasAnyTokens",
+          "arguments": [
+            {
+              "parts": [
+                "URL"
+              ]
+            },
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "String",
+                  "value": "market"
+                },
+                {
+                  "type": "String",
+                  "value": "shop"
+                }
+              ],
+              "spaced_commas": true
+            }
+          ]
+        },
+        "op": "OR",
+        "right": {
+          "name": "hasAnyTokens",
+          "arguments": [
+            {
+              "parts": [
+                "SearchPhrase"
+              ]
+            },
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "String",
+                  "value": "market"
+                },
+                {
+                  "type": "String",
+                  "value": "shop"
+                }
+              ],
+              "spaced_commas": true
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

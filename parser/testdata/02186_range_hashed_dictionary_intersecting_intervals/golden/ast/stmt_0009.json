@@ -1,0 +1,76 @@
+{
+  "table": "02186_range_dictionary",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "start",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "end",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "id"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "02186_range_dictionary_source_table"
+          }
+        }
+      ]
+    },
+    "lifetime": {},
+    "layout": {
+      "type": "RANGE_HASHED",
+      "args": [
+        {
+          "key": "range_lookup_strategy",
+          "value": {
+            "type": "String",
+            "value": "min"
+          }
+        }
+      ]
+    },
+    "range": {
+      "min": {
+        "parts": [
+          "start"
+        ]
+      },
+      "max": {
+        "parts": [
+          "end"
+        ]
+      }
+    }
+  }
+}

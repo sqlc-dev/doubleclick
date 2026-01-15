@@ -1,0 +1,389 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "jemalloc_enabled",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "parts": [
+                          "value"
+                        ]
+                      },
+                      "list": [
+                        {
+                          "type": "String",
+                          "value": "ON"
+                        },
+                        {
+                          "type": "String",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "build_options"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "name"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": "USE_JEMALLOC"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "total_bins",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "jemalloc_bins"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "large_bins",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "jemalloc_bins"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "parts": [
+                      "large"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "small_bins",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "jemalloc_bins"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "op": "NOT",
+                    "operand": {
+                      "parts": [
+                        "large"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "large_allocated_bytes",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "sum",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "size"
+                            ]
+                          },
+                          "op": "*",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "allocations"
+                              ]
+                            },
+                            "op": "-",
+                            "right": {
+                              "parts": [
+                                "deallocations"
+                              ]
+                            },
+                            "parenthesized": true
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "jemalloc_bins"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "parts": [
+                      "large"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "small_allocated_bytes",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "sum",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "size"
+                            ]
+                          },
+                          "op": "*",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "allocations"
+                              ]
+                            },
+                            "op": "-",
+                            "right": {
+                              "parts": [
+                                "deallocations"
+                              ]
+                            },
+                            "parenthesized": true
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "jemalloc_bins"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "op": "NOT",
+                    "operand": {
+                      "parts": [
+                        "large"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "left": {
+              "parts": [
+                "total_bins"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            },
+            "parenthesized": true
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "jemalloc_enabled"
+            ]
+          }
+        },
+        {
+          "left": {
+            "left": {
+              "parts": [
+                "large_bins"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            },
+            "parenthesized": true
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "jemalloc_enabled"
+            ]
+          }
+        },
+        {
+          "left": {
+            "left": {
+              "parts": [
+                "small_bins"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            },
+            "parenthesized": true
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "jemalloc_enabled"
+            ]
+          }
+        },
+        {
+          "left": {
+            "left": {
+              "parts": [
+                "large_allocated_bytes"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            },
+            "parenthesized": true
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "jemalloc_enabled"
+            ]
+          }
+        },
+        {
+          "left": {
+            "left": {
+              "parts": [
+                "small_allocated_bytes"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            },
+            "parenthesized": true
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "jemalloc_enabled"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

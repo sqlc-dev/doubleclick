@@ -1,0 +1,108 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "boundingRatioMerge",
+          "arguments": [
+            {
+              "parts": [
+                "state"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "boundingRatioState",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "timestamp"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "event"
+                              ]
+                            }
+                          ],
+                          "alias": "state"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "rate_test"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "columns": [
+                        {
+                          "name": "boundingRatioState",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "timestamp"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "event"
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "rate_test2"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      }
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

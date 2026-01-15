@@ -1,0 +1,96 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "read_rows"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "Integer",
+            "value": 110000
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "QueryFinish"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "current_database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "yesterday"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "name": "lower",
+            "arguments": [
+              {
+                "parts": [
+                  "query"
+                ]
+              }
+            ]
+          },
+          "pattern": {
+            "name": "lower",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "SELECT s FROM order_by_desc ORDER BY u%"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

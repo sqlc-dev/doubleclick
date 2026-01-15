@@ -1,0 +1,173 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "left": {
+                "parts": [
+                  "lon"
+                ]
+              },
+              "op": "/",
+              "right": {
+                "type": "Integer",
+                "value": 5
+              }
+            },
+            "op": "-",
+            "right": {
+              "type": "Integer",
+              "value": 40
+            }
+          },
+          "alias": "lon1"
+        },
+        {
+          "expr": {
+            "left": {
+              "left": {
+                "parts": [
+                  "lat"
+                ]
+              },
+              "op": "/",
+              "right": {
+                "type": "Integer",
+                "value": 5
+              }
+            },
+            "op": "-",
+            "right": {
+              "type": "Integer",
+              "value": 20
+            }
+          },
+          "alias": "lat1"
+        },
+        {
+          "parts": [
+            "lon1"
+          ],
+          "alias": "lon2"
+        },
+        {
+          "parts": [
+            "lat1"
+          ],
+          "alias": "lat2"
+        },
+        {
+          "name": "geohashesInBox",
+          "arguments": [
+            {
+              "parts": [
+                "lon1"
+              ]
+            },
+            {
+              "parts": [
+                "lat1"
+              ]
+            },
+            {
+              "parts": [
+                "lon2"
+              ]
+            },
+            {
+              "parts": [
+                "lat2"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 12
+            }
+          ],
+          "alias": "g"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "name": "range",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "type": "Integer",
+                                    "value": 80
+                                  },
+                                  "op": "*",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 5
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "lon"
+                        },
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "name": "range",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "type": "Integer",
+                                    "value": 10
+                                  },
+                                  "op": "*",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 5
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "lat"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "g"
+              ]
+            }
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "Integer",
+          "value": 1
+        }
+      }
+    }
+  ]
+}

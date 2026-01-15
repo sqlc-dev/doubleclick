@@ -1,0 +1,99 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "table": "t1"
+        },
+        {
+          "table": "t2"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t1"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t2"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "x"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "x"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "name": "toUInt64",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "t1",
+                          "x"
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "name": "intDiv",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "t2",
+                          "y"
+                        ]
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "x"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "t2",
+              "y"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

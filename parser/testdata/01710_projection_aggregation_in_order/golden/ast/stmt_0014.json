@@ -1,0 +1,72 @@
+{
+  "table": "agg",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "ts",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "aaaa",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "ts"
+            ]
+          },
+          {
+            "parts": [
+              "key"
+            ]
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "value"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "ts"
+            ]
+          },
+          {
+            "parts": [
+              "key"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

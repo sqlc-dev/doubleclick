@@ -1,0 +1,68 @@
+{
+  "table": "tp",
+  "columns": [
+    {
+      "name": "type",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "eventcnt",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "type"
+            ]
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "eventcnt"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "type"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "type"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "deduplicate_merge_projection_mode",
+      "value": {
+        "type": "String",
+        "value": "rebuild"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

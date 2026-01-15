@@ -1,0 +1,102 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "s"
+          ]
+        },
+        {
+          "name": "replaceAll",
+          "arguments": [
+            {
+              "parts": [
+                "s"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "_"
+            },
+            {
+              "type": "String",
+              "value": "oo"
+            }
+          ],
+          "alias": "a"
+        },
+        {
+          "name": "REGEXP_REPLACE",
+          "arguments": [
+            {
+              "parts": [
+                "s"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "_"
+            },
+            {
+              "type": "String",
+              "value": "oo"
+            }
+          ],
+          "alias": "b"
+        },
+        {
+          "left": {
+            "parts": [
+              "a"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "b"
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "String",
+                                  "value": "._"
+                                },
+                                {
+                                  "type": "String",
+                                  "value": "._"
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ],
+                          "alias": "s"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

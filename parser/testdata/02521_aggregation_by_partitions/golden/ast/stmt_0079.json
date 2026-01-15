@@ -1,0 +1,78 @@
+{
+  "table": "t13",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "name": "intDiv",
+        "arguments": [
+          {
+            "parts": [
+              "a"
+            ]
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          }
+        ]
+      },
+      {
+        "name": "intDiv",
+        "arguments": [
+          {
+            "parts": [
+              "b"
+            ]
+          },
+          {
+            "type": "Integer",
+            "value": 3
+          }
+        ]
+      }
+    ],
+    "spaced_commas": true
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

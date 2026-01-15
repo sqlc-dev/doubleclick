@@ -1,0 +1,78 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "a",
+          "query": {
+            "name": "toStartOfHour",
+            "arguments": [
+              {
+                "parts": [
+                  "ts"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "value"
+              ]
+            }
+          ],
+          "alias": "v"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "normal"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "ts"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "String",
+          "value": "2021-12-06 22:00:00"
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "a"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "v"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 5
+      }
+    }
+  ]
+}

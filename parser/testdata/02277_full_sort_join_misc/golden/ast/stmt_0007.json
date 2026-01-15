@@ -1,0 +1,99 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": -1,
+                            "negative": true
+                          },
+                          "type": {
+                            "name": "Nullable",
+                            "parameters": [
+                              {
+                                "name": "Int32"
+                              }
+                            ],
+                            "has_parentheses": true
+                          },
+                          "alias": "key",
+                          "operator_syntax": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 4294967295
+                          },
+                          "type": {
+                            "name": "UInt32"
+                          },
+                          "alias": "key",
+                          "operator_syntax": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "FULL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "key"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "key"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "key"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

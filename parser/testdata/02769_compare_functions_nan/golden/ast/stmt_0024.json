@@ -1,0 +1,127 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "corr",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "id"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "id"
+                              ]
+                            }
+                          ],
+                          "alias": "corr_value"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test_table"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "value"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "subquery"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test_table"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANTI",
+              "on": {
+                "left": {
+                  "parts": [
+                    "subquery",
+                    "corr_value"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "test_table",
+                    "id"
+                  ]
+                },
+                "parenthesized": true
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "test_table",
+              "id"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "parts": [
+              "test_table",
+              "id"
+            ]
+          },
+          "parenthesized": true
+        },
+        "op": "AND",
+        "right": {
+          "op": "NOT",
+          "operand": {
+            "left": {
+              "parts": [
+                "test_table",
+                "id"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "parts": [
+                "test_table",
+                "id"
+              ]
+            },
+            "parenthesized": true
+          }
+        }
+      }
+    }
+  ]
+}

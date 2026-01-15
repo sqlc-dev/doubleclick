@@ -1,0 +1,77 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "Title"
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "left": {
+                "type": "Integer",
+                "value": 1000
+              },
+              "op": "*",
+              "right": {
+                "parts": [
+                  "distance"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_entry_distance"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "name": "ngramSearchUTF8",
+            "arguments": [
+              {
+                "parts": [
+                  "Title"
+                ]
+              },
+              {
+                "name": "extract",
+                "arguments": [
+                  {
+                    "parts": [
+                      "Title"
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "как дела"
+                  }
+                ]
+              }
+            ],
+            "alias": "distance"
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "Title"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

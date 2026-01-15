@@ -1,0 +1,74 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ],
+          "alias": "a"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "b"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "name": "numbers_mt",
+                    "arguments": [
+                      {
+                        "type": "Float",
+                        "value": 100000,
+                        "source": "1e5"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "b"
+          ]
+        }
+      ],
+      "grouping_sets": true,
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

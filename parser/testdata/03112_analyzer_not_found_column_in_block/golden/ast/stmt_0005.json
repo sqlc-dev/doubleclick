@@ -1,0 +1,83 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "user_id"
+          ]
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "parts": [
+                "user_id"
+              ]
+            }
+          ],
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "user_id"
+                ]
+              }
+            ]
+          },
+          "alias": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "my_first_table"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "timestamp"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "user_id"
+            ]
+          },
+          "list": [
+            {
+              "type": "Integer",
+              "value": 101
+            }
+          ]
+        }
+      },
+      "limit_by": [
+        {
+          "parts": [
+            "user_id"
+          ]
+        }
+      ],
+      "limit_by_limit": {
+        "type": "Integer",
+        "value": 2
+      }
+    }
+  ]
+}

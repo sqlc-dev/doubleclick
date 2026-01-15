@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "p",
+            "ts"
+          ]
+        },
+        {
+          "parts": [
+            "e",
+            "value"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          "type": {
+                            "name": "Float64"
+                          },
+                          "alias": "ts",
+                          "operator_syntax": true
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "p"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "events0"
+              },
+              "alias": "e"
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ASOF",
+              "on": {
+                "left": {
+                  "parts": [
+                    "p",
+                    "ts"
+                  ]
+                },
+                "op": "\u003e=",
+                "right": {
+                  "parts": [
+                    "e",
+                    "begin"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "p",
+              "ts"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

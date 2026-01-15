@@ -1,0 +1,124 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "query_1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "with": [
+                    {
+                      "name": "shared_data",
+                      "query": {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {
+                                  "expr": {
+                                    "type": "Integer",
+                                    "value": 1
+                                  },
+                                  "alias": "value"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "scalar_with": false
+                    },
+                    {
+                      "name": "shared_data_2",
+                      "query": {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {}
+                              ],
+                              "from": {
+                                "tables": [
+                                  {
+                                    "table": {
+                                      "table": {
+                                        "table": "shared_data"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "scalar_with": false
+                    }
+                  ],
+                  "columns": [
+                    {}
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "shared_data_2"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "shared_data",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {}
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "query_1"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "shared_data"
+              },
+              "alias": "s"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

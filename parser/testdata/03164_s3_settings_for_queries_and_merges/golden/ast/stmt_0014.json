@@ -1,0 +1,133 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "S3ReadRequestsCount"
+            }
+          },
+          "op": "-",
+          "right": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "S3ReadRequestsErrors"
+            }
+          }
+        },
+        {
+          "left": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "ReadBufferFromS3Bytes"
+            }
+          },
+          "op": "\u003c",
+          "right": {
+            "left": {
+              "array": {
+                "parts": [
+                  "ProfileEvents"
+                ]
+              },
+              "index": {
+                "type": "String",
+                "value": "ReadCompressedBytes"
+              }
+            },
+            "op": "*",
+            "right": {
+              "type": "Float",
+              "value": 1.1,
+              "source": "1.1"
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "event_date"
+                ]
+              },
+              "op": "\u003e=",
+              "right": {
+                "name": "yesterday"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "QueryFinish"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "query"
+            ]
+          },
+          "case_insensitive": true,
+          "pattern": {
+            "type": "String",
+            "value": "%INSERT INTO t_compact_bytes_s3 SELECT number, number, number%"
+          }
+        }
+      }
+    }
+  ]
+}

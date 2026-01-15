@@ -1,0 +1,546 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "v_date"
+          ],
+          "alias": "vDate"
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "v_share"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "v_sum"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "with": [
+                        {
+                          "name": "dummy_1",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "left": {
+                                        "name": "rand"
+                                      },
+                                      "op": "%",
+                                      "right": {
+                                        "type": "Integer",
+                                        "value": 10000
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": true
+                        },
+                        {
+                          "name": "dummy_2",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "left": {
+                                        "name": "rand"
+                                      },
+                                      "op": "%",
+                                      "right": {
+                                        "type": "Integer",
+                                        "value": 10000
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": true
+                        },
+                        {
+                          "name": "dummy_3",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "left": {
+                                        "name": "rand"
+                                      },
+                                      "op": "%",
+                                      "right": {
+                                        "type": "Integer",
+                                        "value": 10000
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": true
+                        },
+                        {
+                          "name": "_v",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "expr": {
+                                        "left": {
+                                          "name": "xxHash64",
+                                          "arguments": [
+                                            {
+                                              "name": "rand"
+                                            }
+                                          ]
+                                        },
+                                        "op": "%",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 100000
+                                        }
+                                      },
+                                      "alias": "d_id"
+                                    },
+                                    {
+                                      "name": "toDate",
+                                      "arguments": [
+                                        {
+                                          "left": {
+                                            "name": "parseDateTimeBestEffort",
+                                            "arguments": [
+                                              {
+                                                "type": "String",
+                                                "value": "2022-01-01"
+                                              }
+                                            ]
+                                          },
+                                          "op": "+",
+                                          "right": {
+                                            "left": {
+                                              "name": "rand"
+                                            },
+                                            "op": "%",
+                                            "right": {
+                                              "type": "Integer",
+                                              "value": 2600000
+                                            },
+                                            "parenthesized": true
+                                          }
+                                        }
+                                      ],
+                                      "alias": "v_date"
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "name": "numbers",
+                                            "arguments": [
+                                              {
+                                                "type": "Integer",
+                                                "value": 1000000
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "order_by": [
+                                    {
+                                      "expression": {
+                                        "parts": [
+                                          "d_id"
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": false
+                        },
+                        {
+                          "name": "_i",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "expr": {
+                                        "left": {
+                                          "name": "xxHash64",
+                                          "arguments": [
+                                            {
+                                              "name": "rand"
+                                            }
+                                          ]
+                                        },
+                                        "op": "%",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 40000
+                                        }
+                                      },
+                                      "alias": "d_id"
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "name": "numbers",
+                                            "arguments": [
+                                              {
+                                                "type": "Integer",
+                                                "value": 1000000
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": false
+                        },
+                        {
+                          "name": "not_i",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "expr": {
+                                        "type": "Null",
+                                        "value": null
+                                      },
+                                      "alias": "v_date"
+                                    },
+                                    {
+                                      "parts": [
+                                        "d_id"
+                                      ]
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "Integer",
+                                        "value": 0
+                                      },
+                                      "alias": "v_share"
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "table": "_i"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "limit": {
+                                    "type": "Integer",
+                                    "value": 100
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": false
+                        }
+                      ],
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "d_id"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "v_date"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "v_share"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "not_i"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "d_id"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "v_date"
+                                          ]
+                                        },
+                                        {
+                                          "expr": {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          "alias": "v_share"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "query": {
+                                                  "selects": [
+                                                    {
+                                                      "columns": [
+                                                        {
+                                                          "parts": [
+                                                            "d_id"
+                                                          ]
+                                                        },
+                                                        {
+                                                          "name": "arrayJoin",
+                                                          "arguments": [
+                                                            {
+                                                              "name": "groupArray",
+                                                              "arguments": [
+                                                                {
+                                                                  "parts": [
+                                                                    "v_date"
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ],
+                                                          "alias": "v_date"
+                                                        }
+                                                      ],
+                                                      "from": {
+                                                        "tables": [
+                                                          {
+                                                            "table": {
+                                                              "table": {
+                                                                "query": {
+                                                                  "selects": [
+                                                                    {
+                                                                      "columns": [
+                                                                        {
+                                                                          "parts": [
+                                                                            "v_date"
+                                                                          ]
+                                                                        },
+                                                                        {
+                                                                          "parts": [
+                                                                            "d_id"
+                                                                          ]
+                                                                        }
+                                                                      ],
+                                                                      "from": {
+                                                                        "tables": [
+                                                                          {
+                                                                            "table": {
+                                                                              "table": {
+                                                                                "table": "_v"
+                                                                              }
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      }
+                                                                    },
+                                                                    {
+                                                                      "columns": [
+                                                                        {
+                                                                          "expr": {
+                                                                            "type": "Null",
+                                                                            "value": null
+                                                                          },
+                                                                          "alias": "v_date"
+                                                                        },
+                                                                        {
+                                                                          "parts": [
+                                                                            "d_id"
+                                                                          ]
+                                                                        }
+                                                                      ],
+                                                                      "from": {
+                                                                        "tables": [
+                                                                          {
+                                                                            "table": {
+                                                                              "table": {
+                                                                                "table": "_i"
+                                                                              }
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      }
+                                                                    }
+                                                                  ],
+                                                                  "union_all": true,
+                                                                  "union_modes": [
+                                                                    "UNION ALL"
+                                                                  ]
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        ]
+                                                      },
+                                                      "group_by": [
+                                                        {
+                                                          "parts": [
+                                                            "d_id"
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  "union_all": true,
+                                  "union_modes": [
+                                    "UNION ALL"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "v_date"
+                            ]
+                          },
+                          "op": "\u003e=",
+                          "right": {
+                            "type": "String",
+                            "value": "2022-05-08"
+                          },
+                          "parenthesized": true
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "v_date"
+                            ]
+                          },
+                          "op": "\u003c=",
+                          "right": {
+                            "type": "String",
+                            "value": "2022-06-07"
+                          },
+                          "parenthesized": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "vDate"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "vDate"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

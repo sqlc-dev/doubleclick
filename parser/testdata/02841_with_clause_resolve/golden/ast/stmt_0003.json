@@ -1,0 +1,2840 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "sample_frequency",
+          "query": {
+            "type": "Integer",
+            "value": 44100
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "tick",
+          "query": {
+            "parts": [
+              "number"
+            ]
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "time",
+          "query": {
+            "left": {
+              "parts": [
+                "tick"
+              ]
+            },
+            "op": "/",
+            "right": {
+              "parts": [
+                "sample_frequency"
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "master_volume",
+          "query": {
+            "type": "Integer",
+            "value": 1
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "clamp",
+          "query": {
+            "parameters": [
+              "level"
+            ],
+            "body": {
+              "name": "least",
+              "arguments": [
+                {
+                  "type": "Float",
+                  "value": 1,
+                  "source": "1.0"
+                },
+                {
+                  "name": "greatest",
+                  "arguments": [
+                    {
+                      "op": "-",
+                      "operand": {
+                        "type": "Float",
+                        "value": 1,
+                        "source": "1.0"
+                      }
+                    },
+                    {
+                      "parts": [
+                        "level"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "output",
+          "query": {
+            "parameters": [
+              "level"
+            ],
+            "body": {
+              "expr": {
+                "left": {
+                  "left": {
+                    "name": "clamp",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "level"
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "*",
+                  "right": {
+                    "type": "Integer",
+                    "value": 32767
+                  }
+                },
+                "op": "*",
+                "right": {
+                  "parts": [
+                    "master_volume"
+                  ]
+                },
+                "parenthesized": true
+              },
+              "type": {
+                "name": "Int16"
+              },
+              "operator_syntax": true
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "mono",
+          "query": {
+            "parameters": [
+              "x"
+            ],
+            "body": {
+              "type": "Tuple",
+              "value": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                },
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ],
+              "spaced_commas": true
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "sine_wave",
+          "query": {
+            "parameters": [
+              "time"
+            ],
+            "body": {
+              "name": "sin",
+              "arguments": [
+                {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "time"
+                      ]
+                    },
+                    "op": "*",
+                    "right": {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  },
+                  "op": "*",
+                  "right": {
+                    "name": "pi"
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "square_wave",
+          "query": {
+            "parameters": [
+              "time"
+            ],
+            "body": {
+              "left": {
+                "left": {
+                  "left": {
+                    "expr": {
+                      "parts": [
+                        "time"
+                      ]
+                    },
+                    "type": {
+                      "name": "UInt64"
+                    },
+                    "operator_syntax": true
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              },
+              "op": "-",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "sawtooth_wave",
+          "query": {
+            "parameters": [
+              "time"
+            ],
+            "body": {
+              "left": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "time"
+                    ]
+                  },
+                  "op": "-",
+                  "right": {
+                    "name": "floor",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "time"
+                        ]
+                      }
+                    ]
+                  },
+                  "parenthesized": true
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              },
+              "op": "-",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "triangle_wave",
+          "query": {
+            "parameters": [
+              "time"
+            ],
+            "body": {
+              "left": {
+                "left": {
+                  "name": "abs",
+                  "arguments": [
+                    {
+                      "name": "sawtooth_wave",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "time"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              },
+              "op": "-",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "lfo",
+          "query": {
+            "parameters": [
+              "from",
+              "to",
+              "wave",
+              "time"
+            ],
+            "body": {
+              "left": {
+                "parts": [
+                  "from"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "name": "wave",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "time"
+                          ]
+                        }
+                      ]
+                    },
+                    "op": "+",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "/",
+                  "right": {
+                    "type": "Integer",
+                    "value": 2
+                  },
+                  "parenthesized": true
+                },
+                "op": "*",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "to"
+                    ]
+                  },
+                  "op": "-",
+                  "right": {
+                    "parts": [
+                      "from"
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "step_lfo",
+          "query": {
+            "parameters": [
+              "from",
+              "to",
+              "steps",
+              "time"
+            ],
+            "body": {
+              "left": {
+                "parts": [
+                  "from"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "left": {
+                  "left": {
+                    "name": "floor",
+                    "arguments": [
+                      {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "time"
+                            ]
+                          },
+                          "op": "-",
+                          "right": {
+                            "name": "floor",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "time"
+                                ]
+                              }
+                            ]
+                          },
+                          "parenthesized": true
+                        },
+                        "op": "*",
+                        "right": {
+                          "parts": [
+                            "steps"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "op": "/",
+                  "right": {
+                    "parts": [
+                      "steps"
+                    ]
+                  }
+                },
+                "op": "*",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "to"
+                    ]
+                  },
+                  "op": "-",
+                  "right": {
+                    "parts": [
+                      "from"
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "exp_step_lfo",
+          "query": {
+            "parameters": [
+              "from",
+              "to",
+              "steps",
+              "time"
+            ],
+            "body": {
+              "name": "exp",
+              "arguments": [
+                {
+                  "name": "step_lfo",
+                  "arguments": [
+                    {
+                      "name": "log",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "from"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "log",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "to"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "steps"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "time"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "uniform_noise",
+          "query": {
+            "parameters": [
+              "time"
+            ],
+            "body": {
+              "left": {
+                "name": "cityHash64",
+                "arguments": [
+                  {
+                    "parts": [
+                      "time"
+                    ]
+                  }
+                ]
+              },
+              "op": "/",
+              "right": {
+                "type": "Integer",
+                "value": 18446744073709551615
+              }
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "white_noise",
+          "query": {
+            "parameters": [
+              "time"
+            ],
+            "body": {
+              "name": "erf",
+              "arguments": [
+                {
+                  "name": "uniform_noise",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "time"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "bernoulli_noise",
+          "query": {
+            "parameters": [
+              "time"
+            ],
+            "body": {
+              "condition": {
+                "left": {
+                  "name": "cityHash64",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "time"
+                      ]
+                    }
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              },
+              "then": {
+                "type": "Integer",
+                "value": 1
+              },
+              "else": {
+                "op": "-",
+                "operand": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "clipping",
+          "query": {
+            "parameters": [
+              "x",
+              "amount"
+            ],
+            "body": {
+              "name": "clamp",
+              "arguments": [
+                {
+                  "left": {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  "op": "*",
+                  "right": {
+                    "parts": [
+                      "amount"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "power_distortion",
+          "query": {
+            "parameters": [
+              "x",
+              "amount"
+            ],
+            "body": {
+              "name": "clamp",
+              "arguments": [
+                {
+                  "condition": {
+                    "left": {
+                      "parts": [
+                        "x"
+                      ]
+                    },
+                    "op": "\u003e",
+                    "right": {
+                      "type": "Integer",
+                      "value": 0
+                    }
+                  },
+                  "then": {
+                    "name": "pow",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "x"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "amount"
+                        ]
+                      }
+                    ]
+                  },
+                  "else": {
+                    "op": "-",
+                    "operand": {
+                      "name": "pow",
+                      "arguments": [
+                        {
+                          "op": "-",
+                          "operand": {
+                            "parts": [
+                              "x"
+                            ]
+                          }
+                        },
+                        {
+                          "parts": [
+                            "amount"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "bitcrush",
+          "query": {
+            "parameters": [
+              "x",
+              "amount"
+            ],
+            "body": {
+              "left": {
+                "name": "round",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "x"
+                      ]
+                    },
+                    "op": "*",
+                    "right": {
+                      "name": "exp2",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "amount"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "op": "/",
+              "right": {
+                "name": "exp2",
+                "arguments": [
+                  {
+                    "parts": [
+                      "amount"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "desample",
+          "query": {
+            "parameters": [
+              "time",
+              "sample_frequency"
+            ],
+            "body": {
+              "left": {
+                "name": "round",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "time"
+                      ]
+                    },
+                    "op": "*",
+                    "right": {
+                      "parts": [
+                        "sample_frequency"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "op": "/",
+              "right": {
+                "parts": [
+                  "sample_frequency"
+                ]
+              }
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "thin",
+          "query": {
+            "parameters": [
+              "time",
+              "wave",
+              "amount"
+            ],
+            "body": {
+              "condition": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "time"
+                    ]
+                  },
+                  "op": "-",
+                  "right": {
+                    "name": "floor",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "time"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "op": "\u003c",
+                "right": {
+                  "left": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "op": "-",
+                  "right": {
+                    "parts": [
+                      "amount"
+                    ]
+                  },
+                  "parenthesized": true
+                },
+                "parenthesized": true
+              },
+              "then": {
+                "name": "wave",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "time"
+                      ]
+                    },
+                    "op": "*",
+                    "right": {
+                      "left": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "op": "-",
+                      "right": {
+                        "parts": [
+                          "amount"
+                        ]
+                      },
+                      "parenthesized": true
+                    }
+                  }
+                ]
+              },
+              "else": {
+                "type": "Integer",
+                "value": 0
+              }
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "skew",
+          "query": {
+            "parameters": [
+              "time",
+              "wave",
+              "amount"
+            ],
+            "body": {
+              "name": "wave",
+              "arguments": [
+                {
+                  "left": {
+                    "name": "floor",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "time"
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "name": "pow",
+                    "arguments": [
+                      {
+                        "left": {
+                          "parts": [
+                            "time"
+                          ]
+                        },
+                        "op": "-",
+                        "right": {
+                          "name": "floor",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "time"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "parts": [
+                          "amount"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "combine",
+          "query": {
+            "parameters": [
+              "a",
+              "b",
+              "weight"
+            ],
+            "body": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "a"
+                  ]
+                },
+                "op": "*",
+                "right": {
+                  "left": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "op": "-",
+                  "right": {
+                    "parts": [
+                      "weight"
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              },
+              "op": "+",
+              "right": {
+                "left": {
+                  "parts": [
+                    "b"
+                  ]
+                },
+                "op": "*",
+                "right": {
+                  "parts": [
+                    "weight"
+                  ]
+                }
+              }
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "envelope",
+          "query": {
+            "parameters": [
+              "time",
+              "offset",
+              "attack",
+              "hold",
+              "release"
+            ],
+            "body": {
+              "condition": {
+                "left": {
+                  "parts": [
+                    "time"
+                  ]
+                },
+                "op": "\u003c",
+                "right": {
+                  "parts": [
+                    "offset"
+                  ]
+                }
+              },
+              "then": {
+                "type": "Integer",
+                "value": 0
+              },
+              "else": {
+                "condition": {
+                  "left": {
+                    "parts": [
+                      "time"
+                    ]
+                  },
+                  "op": "\u003c",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "offset"
+                      ]
+                    },
+                    "op": "+",
+                    "right": {
+                      "parts": [
+                        "attack"
+                      ]
+                    }
+                  }
+                },
+                "then": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "time"
+                      ]
+                    },
+                    "op": "-",
+                    "right": {
+                      "parts": [
+                        "offset"
+                      ]
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "/",
+                  "right": {
+                    "parts": [
+                      "attack"
+                    ]
+                  },
+                  "parenthesized": true
+                },
+                "else": {
+                  "condition": {
+                    "left": {
+                      "parts": [
+                        "time"
+                      ]
+                    },
+                    "op": "\u003c",
+                    "right": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "offset"
+                          ]
+                        },
+                        "op": "+",
+                        "right": {
+                          "parts": [
+                            "attack"
+                          ]
+                        }
+                      },
+                      "op": "+",
+                      "right": {
+                        "parts": [
+                          "hold"
+                        ]
+                      }
+                    }
+                  },
+                  "then": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "else": {
+                    "condition": {
+                      "left": {
+                        "parts": [
+                          "time"
+                        ]
+                      },
+                      "op": "\u003c",
+                      "right": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "offset"
+                              ]
+                            },
+                            "op": "+",
+                            "right": {
+                              "parts": [
+                                "attack"
+                              ]
+                            }
+                          },
+                          "op": "+",
+                          "right": {
+                            "parts": [
+                              "hold"
+                            ]
+                          }
+                        },
+                        "op": "+",
+                        "right": {
+                          "parts": [
+                            "release"
+                          ]
+                        }
+                      }
+                    },
+                    "then": {
+                      "left": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "left": {
+                                "parts": [
+                                  "offset"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "parts": [
+                                  "attack"
+                                ]
+                              }
+                            },
+                            "op": "+",
+                            "right": {
+                              "parts": [
+                                "hold"
+                              ]
+                            }
+                          },
+                          "op": "+",
+                          "right": {
+                            "parts": [
+                              "release"
+                            ]
+                          }
+                        },
+                        "op": "-",
+                        "right": {
+                          "parts": [
+                            "time"
+                          ]
+                        },
+                        "parenthesized": true
+                      },
+                      "op": "/",
+                      "right": {
+                        "parts": [
+                          "release"
+                        ]
+                      }
+                    },
+                    "else": {
+                      "type": "Integer",
+                      "value": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "running_envelope",
+          "query": {
+            "parameters": [
+              "bpm",
+              "time",
+              "offset",
+              "attack",
+              "hold",
+              "release"
+            ],
+            "body": {
+              "name": "envelope",
+              "arguments": [
+                {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "time"
+                      ]
+                    },
+                    "op": "*",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "bpm"
+                        ]
+                      },
+                      "op": "/",
+                      "right": {
+                        "type": "Integer",
+                        "value": 60
+                      },
+                      "parenthesized": true
+                    }
+                  },
+                  "op": "-",
+                  "right": {
+                    "name": "floor",
+                    "arguments": [
+                      {
+                        "left": {
+                          "parts": [
+                            "time"
+                          ]
+                        },
+                        "op": "*",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "bpm"
+                            ]
+                          },
+                          "op": "/",
+                          "right": {
+                            "type": "Integer",
+                            "value": 60
+                          },
+                          "parenthesized": true
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "parts": [
+                    "offset"
+                  ]
+                },
+                {
+                  "parts": [
+                    "attack"
+                  ]
+                },
+                {
+                  "parts": [
+                    "hold"
+                  ]
+                },
+                {
+                  "parts": [
+                    "release"
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "sequencer",
+          "query": {
+            "parameters": [
+              "sequence",
+              "time"
+            ],
+            "body": {
+              "array": {
+                "parts": [
+                  "sequence"
+                ]
+              },
+              "index": {
+                "left": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "op": "+",
+                "right": {
+                  "left": {
+                    "expr": {
+                      "parts": [
+                        "time"
+                      ]
+                    },
+                    "type": {
+                      "name": "UInt64"
+                    },
+                    "operator_syntax": true
+                  },
+                  "op": "%",
+                  "right": {
+                    "name": "length",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "sequence"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "delay",
+          "query": {
+            "parameters": [
+              "time",
+              "wave",
+              "delay",
+              "decay",
+              "count"
+            ],
+            "body": {
+              "name": "arraySum",
+              "arguments": [
+                {
+                  "parameters": [
+                    "n"
+                  ],
+                  "body": {
+                    "left": {
+                      "name": "wave",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "time"
+                            ]
+                          },
+                          "op": "-",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "delay"
+                              ]
+                            },
+                            "op": "*",
+                            "right": {
+                              "parts": [
+                                "n"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "op": "*",
+                    "right": {
+                      "name": "pow",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "decay"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "n"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "range",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "count"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "kick",
+          "query": {
+            "name": "delay",
+            "arguments": [
+              {
+                "parts": [
+                  "time"
+                ]
+              },
+              {
+                "parameters": [
+                  "time"
+                ],
+                "body": {
+                  "left": {
+                    "name": "power_distortion",
+                    "arguments": [
+                      {
+                        "name": "sine_wave",
+                        "arguments": [
+                          {
+                            "left": {
+                              "left": {
+                                "parts": [
+                                  "time"
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "type": "Integer",
+                                "value": 80
+                              }
+                            },
+                            "op": "+",
+                            "right": {
+                              "name": "sine_wave",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "parts": [
+                                      "time"
+                                    ]
+                                  },
+                                  "op": "*",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "name": "lfo",
+                        "arguments": [
+                          {
+                            "type": "Float",
+                            "value": 0.5,
+                            "source": "0.5"
+                          },
+                          {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          {
+                            "parts": [
+                              "sine_wave"
+                            ]
+                          },
+                          {
+                            "left": {
+                              "parts": [
+                                "time"
+                              ]
+                            },
+                            "op": "/",
+                            "right": {
+                              "type": "Integer",
+                              "value": 16
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "*",
+                  "right": {
+                    "name": "running_envelope",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 60
+                      },
+                      {
+                        "parts": [
+                          "time"
+                        ]
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 0
+                      },
+                      {
+                        "type": "Float",
+                        "value": 0,
+                        "source": "0.0"
+                      },
+                      {
+                        "type": "Float",
+                        "value": 0.01,
+                        "source": "0.01"
+                      },
+                      {
+                        "type": "Float",
+                        "value": 0.1,
+                        "source": "0.1"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "Float",
+                "value": 0.2,
+                "source": "0.2"
+              },
+              {
+                "type": "Float",
+                "value": 0.5,
+                "source": "0.5"
+              },
+              {
+                "type": "Integer",
+                "value": 5
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "type": "Tuple",
+          "value": [
+            {
+              "name": "output",
+              "arguments": [
+                {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "kick"
+                          ]
+                        },
+                        "op": "+",
+                        "right": {
+                          "left": {
+                            "name": "delay",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "time"
+                                ]
+                              },
+                              {
+                                "parameters": [
+                                  "time"
+                                ],
+                                "body": {
+                                  "name": "power_distortion",
+                                  "arguments": [
+                                    {
+                                      "left": {
+                                        "name": "sine_wave",
+                                        "arguments": [
+                                          {
+                                            "left": {
+                                              "left": {
+                                                "parts": [
+                                                  "time"
+                                                ]
+                                              },
+                                              "op": "*",
+                                              "right": {
+                                                "type": "Integer",
+                                                "value": 50
+                                              }
+                                            },
+                                            "op": "+",
+                                            "right": {
+                                              "left": {
+                                                "type": "Integer",
+                                                "value": 1
+                                              },
+                                              "op": "*",
+                                              "right": {
+                                                "name": "sine_wave",
+                                                "arguments": [
+                                                  {
+                                                    "left": {
+                                                      "left": {
+                                                        "parts": [
+                                                          "time"
+                                                        ]
+                                                      },
+                                                      "op": "*",
+                                                      "right": {
+                                                        "type": "Integer",
+                                                        "value": 100
+                                                      }
+                                                    },
+                                                    "op": "+",
+                                                    "right": {
+                                                      "left": {
+                                                        "type": "Integer",
+                                                        "value": 1
+                                                      },
+                                                      "op": "/",
+                                                      "right": {
+                                                        "type": "Integer",
+                                                        "value": 4
+                                                      }
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "op": "*",
+                                      "right": {
+                                        "name": "running_envelope",
+                                        "arguments": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 60
+                                          },
+                                          {
+                                            "parts": [
+                                              "time"
+                                            ]
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          },
+                                          {
+                                            "type": "Float",
+                                            "value": 0.01,
+                                            "source": "0.01"
+                                          },
+                                          {
+                                            "type": "Float",
+                                            "value": 0.01,
+                                            "source": "0.01"
+                                          },
+                                          {
+                                            "type": "Float",
+                                            "value": 0.1,
+                                            "source": "0.1"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "name": "lfo",
+                                      "arguments": [
+                                        {
+                                          "type": "Integer",
+                                          "value": 1
+                                        },
+                                        {
+                                          "type": "Float",
+                                          "value": 0.75,
+                                          "source": "0.75"
+                                        },
+                                        {
+                                          "parts": [
+                                            "triangle_wave"
+                                          ]
+                                        },
+                                        {
+                                          "left": {
+                                            "parts": [
+                                              "time"
+                                            ]
+                                          },
+                                          "op": "/",
+                                          "right": {
+                                            "type": "Integer",
+                                            "value": 8
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "type": "Float",
+                                "value": 0.2,
+                                "source": "0.2"
+                              },
+                              {
+                                "type": "Float",
+                                "value": 0.5,
+                                "source": "0.5"
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            ]
+                          },
+                          "op": "*",
+                          "right": {
+                            "name": "lfo",
+                            "arguments": [
+                              {
+                                "type": "Float",
+                                "value": 0.5,
+                                "source": "0.5"
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              },
+                              {
+                                "parts": [
+                                  "triangle_wave"
+                                ]
+                              },
+                              {
+                                "left": {
+                                  "parts": [
+                                    "time"
+                                  ]
+                                },
+                                "op": "/",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 7
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "op": "+",
+                      "right": {
+                        "left": {
+                          "name": "delay",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "time"
+                              ]
+                            },
+                            {
+                              "parameters": [
+                                "time"
+                              ],
+                              "body": {
+                                "name": "power_distortion",
+                                "arguments": [
+                                  {
+                                    "left": {
+                                      "name": "sine_wave",
+                                      "arguments": [
+                                        {
+                                          "left": {
+                                            "left": {
+                                              "parts": [
+                                                "time"
+                                              ]
+                                            },
+                                            "op": "*",
+                                            "right": {
+                                              "name": "sequencer",
+                                              "arguments": [
+                                                {
+                                                  "type": "Array",
+                                                  "value": [
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 50
+                                                    },
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 100
+                                                    },
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 200
+                                                    },
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 400
+                                                    }
+                                                  ],
+                                                  "spaced_commas": true
+                                                },
+                                                {
+                                                  "left": {
+                                                    "parts": [
+                                                      "time"
+                                                    ]
+                                                  },
+                                                  "op": "/",
+                                                  "right": {
+                                                    "type": "Integer",
+                                                    "value": 2
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "op": "+",
+                                          "right": {
+                                            "left": {
+                                              "type": "Integer",
+                                              "value": 1
+                                            },
+                                            "op": "*",
+                                            "right": {
+                                              "name": "sine_wave",
+                                              "arguments": [
+                                                {
+                                                  "left": {
+                                                    "left": {
+                                                      "parts": [
+                                                        "time"
+                                                      ]
+                                                    },
+                                                    "op": "*",
+                                                    "right": {
+                                                      "name": "sequencer",
+                                                      "arguments": [
+                                                        {
+                                                          "type": "Array",
+                                                          "value": [
+                                                            {
+                                                              "type": "Integer",
+                                                              "value": 50
+                                                            },
+                                                            {
+                                                              "type": "Integer",
+                                                              "value": 100
+                                                            },
+                                                            {
+                                                              "type": "Integer",
+                                                              "value": 200
+                                                            }
+                                                          ],
+                                                          "spaced_commas": true
+                                                        },
+                                                        {
+                                                          "left": {
+                                                            "parts": [
+                                                              "time"
+                                                            ]
+                                                          },
+                                                          "op": "/",
+                                                          "right": {
+                                                            "type": "Integer",
+                                                            "value": 4
+                                                          }
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "op": "+",
+                                                  "right": {
+                                                    "left": {
+                                                      "type": "Integer",
+                                                      "value": 1
+                                                    },
+                                                    "op": "/",
+                                                    "right": {
+                                                      "type": "Integer",
+                                                      "value": 4
+                                                    }
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "op": "*",
+                                    "right": {
+                                      "name": "running_envelope",
+                                      "arguments": [
+                                        {
+                                          "type": "Integer",
+                                          "value": 60
+                                        },
+                                        {
+                                          "parts": [
+                                            "time"
+                                          ]
+                                        },
+                                        {
+                                          "type": "Float",
+                                          "value": 0.5,
+                                          "source": "0.5"
+                                        },
+                                        {
+                                          "type": "Float",
+                                          "value": 0.01,
+                                          "source": "0.01"
+                                        },
+                                        {
+                                          "type": "Float",
+                                          "value": 0.01,
+                                          "source": "0.01"
+                                        },
+                                        {
+                                          "type": "Float",
+                                          "value": 0.1,
+                                          "source": "0.1"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "name": "lfo",
+                                    "arguments": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 1
+                                      },
+                                      {
+                                        "type": "Float",
+                                        "value": 0.75,
+                                        "source": "0.75"
+                                      },
+                                      {
+                                        "parts": [
+                                          "triangle_wave"
+                                        ]
+                                      },
+                                      {
+                                        "left": {
+                                          "parts": [
+                                            "time"
+                                          ]
+                                        },
+                                        "op": "/",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 8
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "Float",
+                              "value": 0.2,
+                              "source": "0.2"
+                            },
+                            {
+                              "type": "Float",
+                              "value": 0.5,
+                              "source": "0.5"
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          ]
+                        },
+                        "op": "*",
+                        "right": {
+                          "name": "lfo",
+                          "arguments": [
+                            {
+                              "type": "Float",
+                              "value": 0.5,
+                              "source": "0.5"
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            {
+                              "parts": [
+                                "triangle_wave"
+                              ]
+                            },
+                            {
+                              "left": {
+                                "type": "Integer",
+                                "value": 16
+                              },
+                              "op": "+",
+                              "right": {
+                                "left": {
+                                  "parts": [
+                                    "time"
+                                  ]
+                                },
+                                "op": "/",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 11
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "op": "+",
+                    "right": {
+                      "left": {
+                        "name": "delay",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "time"
+                            ]
+                          },
+                          {
+                            "parameters": [
+                              "time"
+                            ],
+                            "body": {
+                              "left": {
+                                "name": "white_noise",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "time"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "name": "running_envelope",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 60
+                                  },
+                                  {
+                                    "parts": [
+                                      "time"
+                                    ]
+                                  },
+                                  {
+                                    "type": "Float",
+                                    "value": 0.75,
+                                    "source": "0.75"
+                                  },
+                                  {
+                                    "type": "Float",
+                                    "value": 0.01,
+                                    "source": "0.01"
+                                  },
+                                  {
+                                    "type": "Float",
+                                    "value": 0.01,
+                                    "source": "0.01"
+                                  },
+                                  {
+                                    "type": "Float",
+                                    "value": 0.1,
+                                    "source": "0.1"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "type": "Float",
+                            "value": 0.2,
+                            "source": "0.2"
+                          },
+                          {
+                            "type": "Float",
+                            "value": 0.5,
+                            "source": "0.5"
+                          },
+                          {
+                            "type": "Integer",
+                            "value": 10
+                          }
+                        ]
+                      },
+                      "op": "*",
+                      "right": {
+                        "name": "lfo",
+                        "arguments": [
+                          {
+                            "type": "Float",
+                            "value": 0.5,
+                            "source": "0.5"
+                          },
+                          {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          {
+                            "parts": [
+                              "triangle_wave"
+                            ]
+                          },
+                          {
+                            "left": {
+                              "type": "Integer",
+                              "value": 24
+                            },
+                            "op": "+",
+                            "right": {
+                              "left": {
+                                "parts": [
+                                  "time"
+                                ]
+                              },
+                              "op": "/",
+                              "right": {
+                                "type": "Integer",
+                                "value": 13
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "op": "+",
+                  "right": {
+                    "left": {
+                      "name": "sine_wave",
+                      "arguments": [
+                        {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "time"
+                              ]
+                            },
+                            "op": "*",
+                            "right": {
+                              "type": "Integer",
+                              "value": 100
+                            }
+                          },
+                          "op": "+",
+                          "right": {
+                            "left": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "op": "*",
+                            "right": {
+                              "name": "sine_wave",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "left": {
+                                      "parts": [
+                                        "time"
+                                      ]
+                                    },
+                                    "op": "*",
+                                    "right": {
+                                      "type": "Integer",
+                                      "value": 10
+                                    }
+                                  },
+                                  "op": "+",
+                                  "right": {
+                                    "left": {
+                                      "type": "Integer",
+                                      "value": 1
+                                    },
+                                    "op": "/",
+                                    "right": {
+                                      "type": "Integer",
+                                      "value": 4
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "op": "*",
+                    "right": {
+                      "name": "running_envelope",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 120
+                        },
+                        {
+                          "parts": [
+                            "time"
+                          ]
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 0
+                        },
+                        {
+                          "type": "Float",
+                          "value": 0.01,
+                          "source": "0.01"
+                        },
+                        {
+                          "type": "Float",
+                          "value": 0.01,
+                          "source": "0.01"
+                        },
+                        {
+                          "type": "Float",
+                          "value": 0.1,
+                          "source": "0.1"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "output",
+              "arguments": [
+                {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "kick"
+                        ]
+                      },
+                      "op": "+",
+                      "right": {
+                        "left": {
+                          "name": "delay",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "time"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "type": "Float",
+                                "value": 0.01,
+                                "source": "0.01"
+                              }
+                            },
+                            {
+                              "parameters": [
+                                "time"
+                              ],
+                              "body": {
+                                "name": "power_distortion",
+                                "arguments": [
+                                  {
+                                    "left": {
+                                      "name": "sine_wave",
+                                      "arguments": [
+                                        {
+                                          "left": {
+                                            "left": {
+                                              "parts": [
+                                                "time"
+                                              ]
+                                            },
+                                            "op": "*",
+                                            "right": {
+                                              "type": "Integer",
+                                              "value": 50
+                                            }
+                                          },
+                                          "op": "+",
+                                          "right": {
+                                            "left": {
+                                              "type": "Integer",
+                                              "value": 1
+                                            },
+                                            "op": "*",
+                                            "right": {
+                                              "name": "sine_wave",
+                                              "arguments": [
+                                                {
+                                                  "left": {
+                                                    "left": {
+                                                      "parts": [
+                                                        "time"
+                                                      ]
+                                                    },
+                                                    "op": "*",
+                                                    "right": {
+                                                      "type": "Integer",
+                                                      "value": 100
+                                                    }
+                                                  },
+                                                  "op": "+",
+                                                  "right": {
+                                                    "left": {
+                                                      "type": "Integer",
+                                                      "value": 1
+                                                    },
+                                                    "op": "/",
+                                                    "right": {
+                                                      "type": "Integer",
+                                                      "value": 4
+                                                    }
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "op": "*",
+                                    "right": {
+                                      "name": "running_envelope",
+                                      "arguments": [
+                                        {
+                                          "type": "Integer",
+                                          "value": 60
+                                        },
+                                        {
+                                          "parts": [
+                                            "time"
+                                          ]
+                                        },
+                                        {
+                                          "type": "Integer",
+                                          "value": 0
+                                        },
+                                        {
+                                          "type": "Float",
+                                          "value": 0.01,
+                                          "source": "0.01"
+                                        },
+                                        {
+                                          "type": "Float",
+                                          "value": 0.01,
+                                          "source": "0.01"
+                                        },
+                                        {
+                                          "type": "Float",
+                                          "value": 0.1,
+                                          "source": "0.1"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "name": "lfo",
+                                    "arguments": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 1
+                                      },
+                                      {
+                                        "type": "Float",
+                                        "value": 0.75,
+                                        "source": "0.75"
+                                      },
+                                      {
+                                        "parts": [
+                                          "triangle_wave"
+                                        ]
+                                      },
+                                      {
+                                        "left": {
+                                          "parts": [
+                                            "time"
+                                          ]
+                                        },
+                                        "op": "/",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 8
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type": "Float",
+                              "value": 0.2,
+                              "source": "0.2"
+                            },
+                            {
+                              "type": "Float",
+                              "value": 0.5,
+                              "source": "0.5"
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          ]
+                        },
+                        "op": "*",
+                        "right": {
+                          "name": "lfo",
+                          "arguments": [
+                            {
+                              "type": "Float",
+                              "value": 0.5,
+                              "source": "0.5"
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            {
+                              "parts": [
+                                "triangle_wave"
+                              ]
+                            },
+                            {
+                              "left": {
+                                "parts": [
+                                  "time"
+                                ]
+                              },
+                              "op": "/",
+                              "right": {
+                                "type": "Integer",
+                                "value": 7
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "op": "+",
+                    "right": {
+                      "left": {
+                        "name": "delay",
+                        "arguments": [
+                          {
+                            "left": {
+                              "parts": [
+                                "time"
+                              ]
+                            },
+                            "op": "-",
+                            "right": {
+                              "type": "Float",
+                              "value": 0.01,
+                              "source": "0.01"
+                            }
+                          },
+                          {
+                            "parameters": [
+                              "time"
+                            ],
+                            "body": {
+                              "name": "power_distortion",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "name": "sine_wave",
+                                    "arguments": [
+                                      {
+                                        "left": {
+                                          "left": {
+                                            "parts": [
+                                              "time"
+                                            ]
+                                          },
+                                          "op": "*",
+                                          "right": {
+                                            "name": "sequencer",
+                                            "arguments": [
+                                              {
+                                                "type": "Array",
+                                                "value": [
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 50
+                                                  },
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 100
+                                                  },
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 200
+                                                  },
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 400
+                                                  }
+                                                ],
+                                                "spaced_commas": true
+                                              },
+                                              {
+                                                "left": {
+                                                  "parts": [
+                                                    "time"
+                                                  ]
+                                                },
+                                                "op": "/",
+                                                "right": {
+                                                  "type": "Integer",
+                                                  "value": 2
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        "op": "+",
+                                        "right": {
+                                          "left": {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          "op": "*",
+                                          "right": {
+                                            "name": "sine_wave",
+                                            "arguments": [
+                                              {
+                                                "left": {
+                                                  "left": {
+                                                    "parts": [
+                                                      "time"
+                                                    ]
+                                                  },
+                                                  "op": "*",
+                                                  "right": {
+                                                    "name": "sequencer",
+                                                    "arguments": [
+                                                      {
+                                                        "type": "Array",
+                                                        "value": [
+                                                          {
+                                                            "type": "Integer",
+                                                            "value": 50
+                                                          },
+                                                          {
+                                                            "type": "Integer",
+                                                            "value": 100
+                                                          },
+                                                          {
+                                                            "type": "Integer",
+                                                            "value": 200
+                                                          }
+                                                        ],
+                                                        "spaced_commas": true
+                                                      },
+                                                      {
+                                                        "left": {
+                                                          "parts": [
+                                                            "time"
+                                                          ]
+                                                        },
+                                                        "op": "/",
+                                                        "right": {
+                                                          "type": "Integer",
+                                                          "value": 4
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "op": "+",
+                                                "right": {
+                                                  "left": {
+                                                    "type": "Integer",
+                                                    "value": 1
+                                                  },
+                                                  "op": "/",
+                                                  "right": {
+                                                    "type": "Integer",
+                                                    "value": 4
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "op": "*",
+                                  "right": {
+                                    "name": "running_envelope",
+                                    "arguments": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 60
+                                      },
+                                      {
+                                        "parts": [
+                                          "time"
+                                        ]
+                                      },
+                                      {
+                                        "type": "Float",
+                                        "value": 0.5,
+                                        "source": "0.5"
+                                      },
+                                      {
+                                        "type": "Float",
+                                        "value": 0.01,
+                                        "source": "0.01"
+                                      },
+                                      {
+                                        "type": "Float",
+                                        "value": 0.01,
+                                        "source": "0.01"
+                                      },
+                                      {
+                                        "type": "Float",
+                                        "value": 0.1,
+                                        "source": "0.1"
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "name": "lfo",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 1
+                                    },
+                                    {
+                                      "type": "Float",
+                                      "value": 0.75,
+                                      "source": "0.75"
+                                    },
+                                    {
+                                      "parts": [
+                                        "triangle_wave"
+                                      ]
+                                    },
+                                    {
+                                      "left": {
+                                        "parts": [
+                                          "time"
+                                        ]
+                                      },
+                                      "op": "/",
+                                      "right": {
+                                        "type": "Integer",
+                                        "value": 8
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "type": "Float",
+                            "value": 0.2,
+                            "source": "0.2"
+                          },
+                          {
+                            "type": "Float",
+                            "value": 0.5,
+                            "source": "0.5"
+                          },
+                          {
+                            "type": "Integer",
+                            "value": 10
+                          }
+                        ]
+                      },
+                      "op": "*",
+                      "right": {
+                        "name": "lfo",
+                        "arguments": [
+                          {
+                            "type": "Float",
+                            "value": 0.5,
+                            "source": "0.5"
+                          },
+                          {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          {
+                            "parts": [
+                              "triangle_wave"
+                            ]
+                          },
+                          {
+                            "left": {
+                              "type": "Integer",
+                              "value": 16
+                            },
+                            "op": "+",
+                            "right": {
+                              "left": {
+                                "parts": [
+                                  "time"
+                                ]
+                              },
+                              "op": "/",
+                              "right": {
+                                "type": "Integer",
+                                "value": 11
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "op": "+",
+                  "right": {
+                    "left": {
+                      "name": "delay",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "time"
+                            ]
+                          },
+                          "op": "+",
+                          "right": {
+                            "type": "Float",
+                            "value": 0.005,
+                            "source": "0.005"
+                          }
+                        },
+                        {
+                          "parameters": [
+                            "time"
+                          ],
+                          "body": {
+                            "left": {
+                              "name": "white_noise",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "time"
+                                  ]
+                                }
+                              ]
+                            },
+                            "op": "*",
+                            "right": {
+                              "name": "running_envelope",
+                              "arguments": [
+                                {
+                                  "type": "Integer",
+                                  "value": 60
+                                },
+                                {
+                                  "parts": [
+                                    "time"
+                                  ]
+                                },
+                                {
+                                  "type": "Float",
+                                  "value": 0.75,
+                                  "source": "0.75"
+                                },
+                                {
+                                  "type": "Float",
+                                  "value": 0.01,
+                                  "source": "0.01"
+                                },
+                                {
+                                  "type": "Float",
+                                  "value": 0.01,
+                                  "source": "0.01"
+                                },
+                                {
+                                  "type": "Float",
+                                  "value": 0.1,
+                                  "source": "0.1"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "type": "Float",
+                          "value": 0.2,
+                          "source": "0.2"
+                        },
+                        {
+                          "type": "Float",
+                          "value": 0.5,
+                          "source": "0.5"
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 10
+                        }
+                      ]
+                    },
+                    "op": "*",
+                    "right": {
+                      "name": "lfo",
+                      "arguments": [
+                        {
+                          "type": "Float",
+                          "value": 0.5,
+                          "source": "0.5"
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        {
+                          "parts": [
+                            "triangle_wave"
+                          ]
+                        },
+                        {
+                          "left": {
+                            "type": "Integer",
+                            "value": 24
+                          },
+                          "op": "+",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "time"
+                              ]
+                            },
+                            "op": "/",
+                            "right": {
+                              "type": "Integer",
+                              "value": 13
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "spaced_commas": true
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

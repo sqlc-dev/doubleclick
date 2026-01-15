@@ -1,0 +1,158 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "SUM",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 10
+                          },
+                          "alias": "number"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "left": {
+            "name": "cos",
+            "arguments": [
+              {
+                "left": {
+                  "name": "min2",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    }
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ]
+          },
+          "op": "-",
+          "right": {
+            "parts": [
+              "number"
+            ]
+          }
+        }
+      ],
+      "having": {
+        "left": {
+          "expr": {
+            "op": "-",
+            "operand": {
+              "name": "sign",
+              "arguments": [
+                {
+                  "op": "-",
+                  "operand": {
+                    "type": "Integer",
+                    "value": 233841197
+                  }
+                }
+              ]
+            }
+          },
+          "not": true
+        },
+        "op": "AND",
+        "right": {
+          "name": "sin",
+          "arguments": [
+            {
+              "left": {
+                "name": "lcm",
+                "arguments": [
+                  {
+                    "name": "SUM",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "number"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "SUM",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "number"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "op": "\u003e=",
+              "right": {
+                "expr": {
+                  "type": "String",
+                  "value": "372497213"
+                },
+                "not": true
+              }
+            }
+          ]
+        }
+      },
+      "settings": [
+        {
+          "name": "aggregate_functions_null_for_empty",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "enable_optimize_predicate_expression",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

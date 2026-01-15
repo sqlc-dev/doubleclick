@@ -1,0 +1,126 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "prewhere": {
+        "left": {},
+        "op": "OR",
+        "right": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "type": "Integer",
+                    "value": 8
+                  },
+                  "op": "OR",
+                  "right": {}
+                },
+                "op": "OR",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "parenthesized": true
+              },
+              "op": "OR",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            "op": "OR",
+            "right": {
+              "left": {
+                "name": "toTime64",
+                "arguments": [
+                  {
+                    "name": "isZeroOrNull",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 13
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                ]
+              },
+              "op": "\u003c=",
+              "right": {},
+              "parenthesized": true
+            }
+          },
+          "op": "OR",
+          "right": {
+            "name": "materialize",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 2
+              }
+            ]
+          },
+          "parenthesized": true
+        }
+      },
+      "group_by": [
+        {
+          "name": "toLowCardinality",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Integer",
+          "value": 1
+        },
+        {
+          "left": {
+            "name": "toTime64",
+            "arguments": [
+              {
+                "name": "isNullable",
+                "arguments": [
+                  {
+                    "name": "materialize",
+                    "arguments": [
+                      {
+                        "name": "materialize",
+                        "arguments": [
+                          {
+                            "type": "Integer",
+                            "value": 13
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "expr": {}
+              }
+            ]
+          },
+          "op": "\u003c=",
+          "right": {}
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "array": {
+                  "parts": [
+                    "errors"
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "average_latency"
+                ]
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "aggregated_zookeeper_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "parent_path"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "left": {
+              "left": {
+                "type": "String",
+                "value": "/test/01158/"
+              },
+              "op": "||",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "||",
+            "right": {
+              "type": "String",
+              "value": "/rmt"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "operation"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "Create"
+          }
+        }
+      }
+    }
+  ]
+}

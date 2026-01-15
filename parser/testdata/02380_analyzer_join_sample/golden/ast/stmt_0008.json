@@ -1,0 +1,109 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "t1",
+            "id"
+          ],
+          "alias": "t1_id"
+        },
+        {
+          "parts": [
+            "t2",
+            "id"
+          ],
+          "alias": "t2_id"
+        },
+        {
+          "parts": [
+            "t1",
+            "_sample_factor"
+          ],
+          "alias": "t1_sample_factor"
+        },
+        {
+          "parts": [
+            "t2",
+            "_sample_factor"
+          ],
+          "alias": "t2_sample_factor"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_table_join_1"
+              },
+              "alias": "t1",
+              "sample": {
+                "ratio": {
+                  "left": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "op": "/",
+                  "right": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test_table_join_2"
+              },
+              "alias": "t2",
+              "sample": {
+                "ratio": {
+                  "left": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "op": "/",
+                  "right": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                }
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

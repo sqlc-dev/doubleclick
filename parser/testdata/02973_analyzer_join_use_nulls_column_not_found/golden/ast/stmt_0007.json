@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "a",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 0
+                      },
+                      "alias": "key"
+                    },
+                    {
+                      "expr": {
+                        "type": "String",
+                        "value": "a"
+                      },
+                      "alias": "acol"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "b",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 2
+                      },
+                      "alias": "key"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "a",
+            "key"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "b"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "a"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "a"
+              },
+              "alias": "a1"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

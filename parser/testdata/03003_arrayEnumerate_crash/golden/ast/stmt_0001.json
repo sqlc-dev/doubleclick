@@ -1,0 +1,96 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayEnumerateUniqRanked",
+          "arguments": [
+            {
+              "name": "arrayEnumerateUniqRanked",
+              "arguments": [
+                {
+                  "type": "Array",
+                  "value": [
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 2
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 3
+                        }
+                      ],
+                      "spaced_commas": true
+                    },
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "type": "Integer",
+                          "value": 2
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 2
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      ],
+                      "spaced_commas": true
+                    },
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "type": "Integer",
+                          "value": 3
+                        }
+                      ]
+                    }
+                  ],
+                  "spaced_commas": true
+                }
+              ]
+            },
+            {
+              "left": {
+                "name": "materialize",
+                "arguments": [
+                  {
+                    "expr": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "alias": "x"
+                  }
+                ]
+              },
+              "op": "OR",
+              "right": {
+                "name": "toLowCardinality",
+                "arguments": [
+                  {
+                    "op": "-",
+                    "operand": {
+                      "type": "Integer",
+                      "value": 9223372036854775808
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

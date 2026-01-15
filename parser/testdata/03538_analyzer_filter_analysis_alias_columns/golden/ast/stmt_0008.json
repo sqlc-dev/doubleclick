@@ -1,0 +1,98 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 1
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "c0"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t0"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "localhost:9000"
+                                  },
+                                  {
+                                    "name": "currentDatabase"
+                                  },
+                                  {
+                                    "type": "String",
+                                    "value": "t0"
+                                  }
+                                ]
+                              },
+                              "alias": "ty"
+                            },
+                            "join": {
+                              "type": ""
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "tx"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t0"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "tx",
+                    "c0"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t0",
+                    "c0"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

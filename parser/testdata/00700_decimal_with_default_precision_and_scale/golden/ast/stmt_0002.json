@@ -1,0 +1,72 @@
+{
+  "if_not_exists": true,
+  "table": "decimal",
+  "columns": [
+    {
+      "name": "d1",
+      "type": {
+        "name": "DECIMAL",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 9
+          },
+          {
+            "type": "Integer",
+            "value": 8
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "d2",
+      "type": {
+        "name": "DECIMAL",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 18
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "d3",
+      "type": {
+        "name": "DECIMAL"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "d2"
+          ]
+        },
+        {
+          "parts": [
+            "d3"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toInt32",
+    "arguments": [
+      {
+        "parts": [
+          "d1"
+        ]
+      }
+    ]
+  }
+}

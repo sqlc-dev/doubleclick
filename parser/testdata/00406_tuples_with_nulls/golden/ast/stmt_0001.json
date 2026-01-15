@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "number"
+                ]
+              },
+              {
+                "name": "nullIf",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 3
+                    }
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "name": "nullIf",
+                    "arguments": [
+                      {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "%",
+                        "right": {
+                          "type": "Integer",
+                          "value": 2
+                        }
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 0
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "spaced_commas": true
+          },
+          "alias": "tuple"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      },
+      "format": {
+        "parts": [
+          "PrettyCompactNoEscapes"
+        ]
+      }
+    }
+  ]
+}

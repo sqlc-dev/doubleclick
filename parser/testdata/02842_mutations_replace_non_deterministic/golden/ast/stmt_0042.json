@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "replaceRegexpOne",
+          "arguments": [
+            {
+              "parts": [
+                "command"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "(\\d{10})"
+            },
+            {
+              "type": "String",
+              "value": "timestamp"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "mutations"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "t_mutations_nondeterministic"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "op": "NOT",
+          "operand": {
+            "parts": [
+              "is_done"
+            ]
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "command"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

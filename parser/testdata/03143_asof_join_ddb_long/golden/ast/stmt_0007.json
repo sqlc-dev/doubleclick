@@ -1,0 +1,58 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "SUM",
+          "arguments": [
+            {
+              "parts": [
+                "value"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "COUNT",
+          "arguments": [
+            {}
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "skewed_probe"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "build"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ASOF",
+              "using": [
+                {
+                  "parts": [
+                    "key"
+                  ]
+                },
+                {
+                  "parts": [
+                    "begin"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

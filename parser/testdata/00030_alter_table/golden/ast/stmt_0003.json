@@ -1,0 +1,112 @@
+{
+  "table": "alter_test",
+  "columns": [
+    {
+      "name": "CounterID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "StartDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "UserID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "VisitID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "NestedColumn",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "A",
+            "type": {
+              "name": "UInt8"
+            }
+          },
+          {
+            "name": "S",
+            "type": {
+              "name": "String"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "ToDrop",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "StartDate"
+        ]
+      },
+      {
+        "name": "intHash32",
+        "arguments": [
+          {
+            "parts": [
+              "UserID"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "CounterID"
+            ]
+          },
+          {
+            "parts": [
+              "StartDate"
+            ]
+          },
+          {
+            "name": "intHash32",
+            "arguments": [
+              {
+                "parts": [
+                  "UserID"
+                ]
+              }
+            ]
+          },
+          {
+            "parts": [
+              "VisitID"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

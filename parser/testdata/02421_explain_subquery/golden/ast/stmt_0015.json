@@ -1,0 +1,49 @@
+{
+  "table": "t1",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ],
+            "alias": "a"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "numbers"
+                }
+              }
+            }
+          ]
+        },
+        "limit": {
+          "type": "Integer",
+          "value": 100000
+        }
+      }
+    ]
+  }
+}

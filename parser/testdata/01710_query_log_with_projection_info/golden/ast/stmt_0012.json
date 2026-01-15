@@ -1,0 +1,80 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayStringConcat",
+          "arguments": [
+            {
+              "name": "arrayPopFront",
+              "arguments": [
+                {
+                  "name": "splitByString",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "."
+                    },
+                    {
+                      "array": {
+                        "parts": [
+                          "projections"
+                        ]
+                      },
+                      "index": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "."
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "current_database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "query"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "SELECT * FROM t WHERE id2 = 3 FORMAT Null;"
+          }
+        }
+      }
+    }
+  ]
+}

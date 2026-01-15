@@ -1,0 +1,258 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "x"
+          ]
+        },
+        {
+          "parts": [
+            "t"
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "parts": [
+                "sum"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 12
+            }
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "parts": [
+                "max"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 12
+            }
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "parts": [
+                "count"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 12
+            }
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "parts": [
+                "avg"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 12
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "sin",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "x"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "t"
+                        },
+                        {
+                          "name": "exponentialTimeDecayedSum",
+                          "parameters": [
+                            {
+                              "type": "Integer",
+                              "value": 100
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "parts": [
+                                "x"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "t"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "name": "w"
+                          },
+                          "alias": "sum"
+                        },
+                        {
+                          "name": "exponentialTimeDecayedMax",
+                          "parameters": [
+                            {
+                              "type": "Integer",
+                              "value": 100
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "parts": [
+                                "x"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "t"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "name": "w"
+                          },
+                          "alias": "max"
+                        },
+                        {
+                          "name": "exponentialTimeDecayedCount",
+                          "parameters": [
+                            {
+                              "type": "Integer",
+                              "value": 100
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "parts": [
+                                "t"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "name": "w"
+                          },
+                          "alias": "count"
+                        },
+                        {
+                          "name": "exponentialTimeDecayedAvg",
+                          "parameters": [
+                            {
+                              "type": "Integer",
+                              "value": 100
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "parts": [
+                                "x"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "t"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "name": "w"
+                          },
+                          "alias": "avg"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 1000000
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "window": [
+                        {
+                          "name": "w",
+                          "spec": {
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              }
+                            ],
+                            "frame": {
+                              "type": "ROWS",
+                              "start": {
+                                "type": "PRECEDING",
+                                "offset": {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              },
+                              "end": {
+                                "type": "FOLLOWING",
+                                "offset": {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

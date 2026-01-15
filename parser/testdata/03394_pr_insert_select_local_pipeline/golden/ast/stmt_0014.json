@@ -1,0 +1,110 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "current_database"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "name": "currentDatabase"
+                  }
+                },
+                "op": "OR",
+                "right": {
+                  "name": "has",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "databases"
+                      ]
+                    },
+                    {
+                      "name": "currentDatabase"
+                    }
+                  ]
+                },
+                "parenthesized": true
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "type"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "QueryFinish"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "query_kind"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "Insert"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "log_comment"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "c1fcb43d-1703-4ddb-b353-c8079b405c16"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_date"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "name": "yesterday"
+          }
+        }
+      }
+    }
+  ]
+}

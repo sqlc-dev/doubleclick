@@ -1,0 +1,186 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "address"
+          ]
+        },
+        {
+          "parts": [
+            "type"
+          ]
+        },
+        {
+          "parts": [
+            "has_watch"
+          ]
+        },
+        {
+          "parts": [
+            "op_num"
+          ]
+        },
+        {
+          "parts": [
+            "path"
+          ]
+        },
+        {
+          "parts": [
+            "is_ephemeral"
+          ]
+        },
+        {
+          "parts": [
+            "is_sequential"
+          ]
+        },
+        {
+          "parts": [
+            "version"
+          ]
+        },
+        {
+          "parts": [
+            "requests_size"
+          ]
+        },
+        {
+          "parts": [
+            "request_idx"
+          ]
+        },
+        {
+          "parts": [
+            "error"
+          ]
+        },
+        {
+          "parts": [
+            "watch_type"
+          ]
+        },
+        {
+          "parts": [
+            "watch_state"
+          ]
+        },
+        {
+          "parts": [
+            "path_created"
+          ]
+        },
+        {
+          "parts": [
+            "stat_version"
+          ]
+        },
+        {
+          "parts": [
+            "stat_cversion"
+          ]
+        },
+        {
+          "parts": [
+            "stat_dataLength"
+          ]
+        },
+        {
+          "parts": [
+            "stat_numChildren"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "zookeeper_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "path"
+            ]
+          },
+          "pattern": {
+            "left": {
+              "left": {
+                "type": "String",
+                "value": "/test/01158/"
+              },
+              "op": "||",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "||",
+            "right": {
+              "type": "String",
+              "value": "/rmt/log%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "op_num"
+            ]
+          },
+          "not": true,
+          "list": [
+            {
+              "type": "Integer",
+              "value": 3
+            },
+            {
+              "type": "Integer",
+              "value": 4
+            },
+            {
+              "type": "Integer",
+              "value": 12
+            },
+            {
+              "type": "Integer",
+              "value": 500
+            }
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "xid"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "type"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "request_idx"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

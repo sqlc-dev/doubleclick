@@ -1,0 +1,200 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "d",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "String",
+                        "value": "key"
+                      },
+                      "type": {
+                        "name": "Varchar",
+                        "parameters": [
+                          {
+                            "type": "Integer",
+                            "value": 255
+                          }
+                        ],
+                        "has_parentheses": true
+                      },
+                      "alias": "c",
+                      "operator_syntax": true
+                    },
+                    {
+                      "expr": {
+                        "type": "String",
+                        "value": "x"
+                      },
+                      "type": {
+                        "name": "Varchar",
+                        "parameters": [
+                          {
+                            "type": "Integer",
+                            "value": 255
+                          }
+                        ],
+                        "has_parentheses": true
+                      },
+                      "alias": "s",
+                      "operator_syntax": true
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "r1"
+          ]
+        },
+        {
+          "parts": [
+            "c"
+          ],
+          "alias": "r2"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "t"
+                          ],
+                          "alias": "s"
+                        },
+                        {
+                          "parts": [
+                            "c"
+                          ],
+                          "alias": "r1"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "type": "String",
+                                            "value": "y"
+                                          },
+                                          "type": {
+                                            "name": "Varchar",
+                                            "parameters": [
+                                              {
+                                                "type": "Integer",
+                                                "value": 255
+                                              }
+                                            ],
+                                            "has_parentheses": true
+                                          },
+                                          "alias": "t",
+                                          "operator_syntax": true
+                                        },
+                                        {
+                                          "expr": {
+                                            "type": "String",
+                                            "value": "x"
+                                          },
+                                          "type": {
+                                            "name": "Varchar",
+                                            "parameters": [
+                                              {
+                                                "type": "Integer",
+                                                "value": 255
+                                              }
+                                            ],
+                                            "has_parentheses": true
+                                          },
+                                          "alias": "s",
+                                          "operator_syntax": true
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "t1"
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "d"
+                              }
+                            },
+                            "join": {
+                              "type": "LEFT",
+                              "using": [
+                                {
+                                  "parts": [
+                                    "s"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "d"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "using": [
+                {
+                  "parts": [
+                    "s"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "join_use_nulls",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

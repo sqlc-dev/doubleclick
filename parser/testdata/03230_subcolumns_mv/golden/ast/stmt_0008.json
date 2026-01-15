@@ -1,0 +1,72 @@
+{
+  "view": "raw_to_attributes_mv",
+  "materialized": true,
+  "to": "attributes",
+  "columns": [
+    {
+      "name": "AttributeKeys",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "AttributeValues",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "mapKeys",
+            "arguments": [
+              {
+                "parts": [
+                  "Attributes"
+                ]
+              }
+            ],
+            "alias": "AttributeKeys"
+          },
+          {
+            "name": "mapValues",
+            "arguments": [
+              {
+                "parts": [
+                  "Attributes"
+                ]
+              }
+            ],
+            "alias": "AttributeValues"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "rawtable"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

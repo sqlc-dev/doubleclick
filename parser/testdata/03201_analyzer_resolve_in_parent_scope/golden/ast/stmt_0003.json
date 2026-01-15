@@ -1,0 +1,115 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "objectId",
+          "query": {
+            "array": {
+              "parts": [
+                "properties_value"
+              ]
+            },
+            "index": {
+              "name": "indexOf",
+              "arguments": [
+                {
+                  "parts": [
+                    "properties_key"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "objectId"
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "data",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Array",
+                        "value": [
+                          {
+                            "type": "String",
+                            "value": "objectId"
+                          }
+                        ]
+                      },
+                      "alias": "properties_key"
+                    },
+                    {
+                      "expr": {
+                        "type": "Array",
+                        "value": [
+                          {
+                            "type": "String",
+                            "value": "objectValue"
+                          }
+                        ]
+                      },
+                      "alias": "properties_value"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "nested_query",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "objectId"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "data"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "nested_query"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

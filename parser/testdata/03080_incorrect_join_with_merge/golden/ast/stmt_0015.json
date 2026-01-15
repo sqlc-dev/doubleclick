@@ -1,0 +1,83 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "first_table"
+              },
+              "alias": "s"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "second_table"
+              },
+              "alias": "f"
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ANY",
+              "global": true,
+              "using": [
+                {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "f",
+            "id2"
+          ]
+        },
+        "global": true,
+        "query": {
+          "selects": [
+            {
+              "columns": [
+                {
+                  "parts": [
+                    "id2"
+                  ]
+                }
+              ],
+              "from": {
+                "tables": [
+                  {
+                    "table": {
+                      "table": {
+                        "table": "second_table"
+                      }
+                    }
+                  }
+                ]
+              },
+              "group_by": [
+                {
+                  "parts": [
+                    "id2"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

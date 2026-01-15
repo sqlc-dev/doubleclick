@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "k"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "in"
+              ]
+            },
+            "op": "/",
+            "right": {
+              "parts": [
+                "out"
+              ]
+            }
+          },
+          "alias": "ratio"
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ],
+          "over": {
+            "name": "w"
+          },
+          "alias": "count_rows_w"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "error_win_func"
+              }
+            }
+          }
+        ]
+      },
+      "window": [
+        {
+          "name": "w",
+          "spec": {
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "CURRENT_ROW"
+              },
+              "end": {
+                "type": "FOLLOWING",
+                "offset": {
+                  "type": "Integer",
+                  "value": 3
+                }
+              }
+            }
+          }
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          }
+        }
+      ],
+      "limit_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "limit_by_limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "column"
+          ]
+        },
+        {
+          "parts": [
+            "subcolumns",
+            "names"
+          ],
+          "alias": "sname"
+        },
+        {
+          "parts": [
+            "subcolumns",
+            "types"
+          ],
+          "alias": "stype"
+        },
+        {
+          "left": {
+            "parts": [
+              "subcolumns",
+              "bytes_on_disk"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts_columns"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "subcolumns"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "t_subcolumns_sizes"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "parts": [
+            "active"
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "column"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "sname"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "stype"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

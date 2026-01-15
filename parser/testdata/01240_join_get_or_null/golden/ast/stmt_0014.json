@@ -1,0 +1,172 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "A",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "rowNumberInAllBlocks",
+                      "alias": "R"
+                    },
+                    {
+                      "name": "addDays",
+                      "arguments": [
+                        {
+                          "name": "toDate",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "2017-04-01"
+                            }
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "R"
+                          ]
+                        }
+                      ],
+                      "alias": "TVV"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 5
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "B",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "rowNumberInAllBlocks",
+                      "alias": "R"
+                    },
+                    {
+                      "name": "toDateTime",
+                      "arguments": [
+                        {
+                          "type": "Null",
+                          "value": null
+                        }
+                      ],
+                      "alias": "TVV"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "joinGetOrNull",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "test"
+            },
+            {
+              "type": "String",
+              "value": "y"
+            },
+            {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "parts": [
+                    "A",
+                    "TVV"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "TV1"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "A"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "B"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "using": [
+                {
+                  "parts": [
+                    "R"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "TV1"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

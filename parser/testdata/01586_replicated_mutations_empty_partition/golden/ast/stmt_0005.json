@@ -1,0 +1,67 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "zookeeper"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "path"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "type": "String",
+                  "value": "/clickhouse/test/"
+                },
+                "op": "||",
+                "right": {
+                  "name": "currentDatabase"
+                }
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": "/01586_replicated_mutations_empty_partitions/"
+              }
+            },
+            "op": "||",
+            "right": {
+              "name": "getMacro",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "shard"
+                }
+              ]
+            }
+          },
+          "op": "||",
+          "right": {
+            "type": "String",
+            "value": "/block_numbers"
+          }
+        }
+      }
+    }
+  ]
+}

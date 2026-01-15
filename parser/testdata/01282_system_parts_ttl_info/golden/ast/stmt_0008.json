@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "rows"
+          ]
+        },
+        {
+          "name": "toTimeZone",
+          "arguments": [
+            {
+              "parts": [
+                "delete_ttl_info_min"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "UTC"
+            }
+          ]
+        },
+        {
+          "name": "toTimeZone",
+          "arguments": [
+            {
+              "parts": [
+                "delete_ttl_info_max"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "UTC"
+            }
+          ]
+        },
+        {
+          "parts": [
+            "move_ttl_info",
+            "expression"
+          ]
+        },
+        {
+          "parts": [
+            "move_ttl_info",
+            "min"
+          ]
+        },
+        {
+          "parts": [
+            "move_ttl_info",
+            "max"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "ttl"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "parts": [
+            "active"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "col",
+          "query": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "quantilesGK",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 10000
+            },
+            {
+              "type": "Float",
+              "value": 0.25,
+              "source": "0.25"
+            },
+            {
+              "type": "Float",
+              "value": 0.5,
+              "source": "0.5"
+            },
+            {
+              "type": "Float",
+              "value": 0.75,
+              "source": "0.75"
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "col"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "parts": [
+                "col"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "quantilesGK",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 10000
+            },
+            {
+              "type": "Float",
+              "value": 0,
+              "source": "0.0"
+            },
+            {
+              "type": "Float",
+              "value": 1,
+              "source": "1.0"
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "col"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "col"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "table": "constraint_test_assumption",
+  "columns": [
+    {
+      "name": "URL",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "Int32"
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "name": "c1",
+      "expression": {
+        "left": {
+          "name": "domainWithoutWWW",
+          "arguments": [
+            {
+              "parts": [
+                "URL"
+              ]
+            }
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "bigmir.net"
+        }
+      }
+    },
+    {
+      "name": "c2",
+      "expression": {
+        "left": {
+          "left": {
+            "parts": [
+              "URL"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "String",
+            "value": "zzz"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "name": "startsWith",
+            "arguments": [
+              {
+                "parts": [
+                  "URL"
+                ]
+              },
+              {
+                "type": "String",
+                "value": "test"
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Boolean",
+            "value": true
+          }
+        }
+      }
+    }
+  ],
+  "engine": {
+    "name": "TinyLog"
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "g"
+          ]
+        },
+        {
+          "parts": [
+            "s"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "g"
+                          ]
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "s"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 4
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "name": "bitAnd",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          ],
+                          "alias": "g"
+                        }
+                      ],
+                      "with_totals": true,
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "g"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "expr": {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      }
+                    ],
+                    "spaced_commas": true
+                  },
+                  "alias": "a"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "TSV"
+        ]
+      }
+    }
+  ]
+}

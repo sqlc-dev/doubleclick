@@ -1,0 +1,112 @@
+{
+  "table": "goal",
+  "columns": [
+    {
+      "name": "CounterID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "StartDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "GoalID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "Visits",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sumIf"
+            ]
+          },
+          {
+            "name": "Int8"
+          },
+          {
+            "name": "UInt8"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "GoalReaches",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sum"
+            ]
+          },
+          {
+            "name": "Int8"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        {
+          "parts": [
+            "StartDate"
+          ]
+        },
+        {
+          "parts": [
+            "GoalID"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toStartOfMonth",
+    "arguments": [
+      {
+        "parts": [
+          "StartDate"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 256
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

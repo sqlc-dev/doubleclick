@@ -1,0 +1,118 @@
+{
+  "table": "dict_data",
+  "columns": [
+    {
+      "name": "v0",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "v1",
+      "type": {
+        "name": "Int16"
+      }
+    },
+    {
+      "name": "v2",
+      "type": {
+        "name": "Float32"
+      }
+    },
+    {
+      "name": "v3",
+      "type": {
+        "name": "Decimal128",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 10
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "v4",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "Memory",
+    "has_parentheses": true
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 65535
+            }
+          },
+          {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "*",
+            "right": {
+              "type": "Float",
+              "value": 1.1,
+              "source": "1.1"
+            }
+          },
+          {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "*",
+            "right": {
+              "type": "Float",
+              "value": 1.1,
+              "source": "1.1"
+            }
+          },
+          {
+            "type": "String",
+            "value": "foo"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

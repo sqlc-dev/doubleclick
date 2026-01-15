@@ -1,0 +1,144 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "02177_MV_3"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "ScalarSubqueriesGlobalCacheHit"
+            }
+          },
+          "alias": "scalar_cache_global_hit"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "ScalarSubqueriesLocalCacheHit"
+            }
+          },
+          "alias": "scalar_cache_local_hit"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "ScalarSubqueriesCacheMiss"
+            }
+          },
+          "alias": "scalar_cache_miss"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "current_database"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "name": "currentDatabase"
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "type"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "QueryFinish"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "query"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "-- THIRD INSERT\nINSERT INTO t1%"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "yesterday"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_time"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "left": {
+              "name": "now"
+            },
+            "op": "-",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 10
+              },
+              "unit": "MINUTE"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

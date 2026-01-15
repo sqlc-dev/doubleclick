@@ -1,0 +1,194 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "left"
+          ]
+        },
+        {
+          "parts": [
+            "right"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 4
+                            }
+                          },
+                          "alias": "k1"
+                        },
+                        {
+                          "name": "toString",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 3
+                              }
+                            }
+                          ],
+                          "alias": "k2"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "left"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "js1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 2
+                            }
+                          },
+                          "alias": "k1"
+                        },
+                        {
+                          "name": "toString",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 6
+                              }
+                            }
+                          ],
+                          "alias": "k2"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "right"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "js2"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ALL",
+              "using": [
+                {
+                  "parts": [
+                    "k1"
+                  ]
+                },
+                {
+                  "parts": [
+                    "k2"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "left"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "right"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

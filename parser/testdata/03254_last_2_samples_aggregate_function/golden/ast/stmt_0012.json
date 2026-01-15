@@ -1,0 +1,208 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "metric_id"
+          ]
+        },
+        {
+          "parts": [
+            "grid_timestamp"
+          ]
+        },
+        {
+          "type": "Tuple",
+          "value": [
+            {
+              "expr": {
+                "tuple": {
+                  "name": "finalizeAggregation",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "samples"
+                      ]
+                    }
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              "alias": "timestamp"
+            },
+            {
+              "expr": {
+                "tuple": {
+                  "name": "finalizeAggregation",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "samples"
+                      ]
+                    }
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              },
+              "alias": "value"
+            }
+          ],
+          "spaced_commas": true
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "left": {
+                  "parts": [
+                    "grid_timestamp"
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "value": {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  "unit": "MILLISECOND"
+                }
+              }
+            },
+            {
+              "parts": [
+                "timestamp"
+              ]
+            }
+          ],
+          "alias": "ts"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "clusterAllReplicas",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "test_shard_localhost"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "t_resampled_timeseries_delta"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "step"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 10
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "metric_id"
+              ]
+            },
+            "list": [
+              {
+                "type": "Integer",
+                "value": 3
+              },
+              {
+                "type": "Integer",
+                "value": 7
+              }
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "grid_timestamp"
+            ]
+          },
+          "low": {
+            "type": "String",
+            "value": "2024-12-12 12:00:00"
+          },
+          "high": {
+            "type": "String",
+            "value": "2024-12-12 12:02:00"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "metric_id"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "grid_timestamp"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "enable_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "max_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 3
+          }
+        },
+        {
+          "name": "parallel_replicas_for_non_replicated_merge_tree",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

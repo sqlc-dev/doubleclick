@@ -1,0 +1,78 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "domain"
+          ]
+        },
+        {
+          "name": "arrayUniq",
+          "arguments": [
+            {
+              "name": "groupArraySample",
+              "parameters": [
+                {
+                  "type": "Integer",
+                  "value": 5
+                },
+                {
+                  "type": "Integer",
+                  "value": 11111
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "subdomain"
+                  ]
+                }
+              ],
+              "distinct": true
+            }
+          ],
+          "alias": "example_subdomains"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "distinct_two_level"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "domain"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "domain"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "example_subdomains"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

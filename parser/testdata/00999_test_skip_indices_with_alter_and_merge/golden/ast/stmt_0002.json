@@ -1,0 +1,99 @@
+{
+  "table": "test_vertical_merge",
+  "columns": [
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "val1",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "val2",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx1",
+      "expression": {
+        "left": {
+          "parts": [
+            "val1"
+          ]
+        },
+        "op": "*",
+        "right": {
+          "parts": [
+            "val2"
+          ]
+        }
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "idx2",
+      "expression": {
+        "left": {
+          "parts": [
+            "val1"
+          ]
+        },
+        "op": "*",
+        "right": {
+          "parts": [
+            "k"
+          ]
+        }
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "k"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "vertical_merge_algorithm_min_rows_to_activate",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "vertical_merge_algorithm_min_columns_to_activate",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

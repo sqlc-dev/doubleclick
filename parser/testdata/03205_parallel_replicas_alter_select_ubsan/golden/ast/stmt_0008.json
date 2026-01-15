@@ -1,0 +1,117 @@
+{
+  "table": "t1",
+  "commands": [
+    {
+      "type": "MODIFY_COLUMN",
+      "column": {
+        "name": "a",
+        "type": {
+          "name": "Float64"
+        },
+        "ttl": {
+          "left": {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "parts": [
+                  "b"
+                ]
+              }
+            ]
+          },
+          "op": "+",
+          "right": {
+            "name": "toIntervalMonth",
+            "arguments": [
+              {
+                "name": "viewExplain",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "EXPLAIN"
+                  },
+                  {
+                    "type": "String",
+                    "value": "actions = 1"
+                  },
+                  {
+                    "query": {
+                      "selects": [
+                        {
+                          "columns": [
+                            {
+                              "name": "toIntervalMonth",
+                              "arguments": [
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 2
+                            }
+                          ],
+                          "from": {
+                            "tables": [
+                              {
+                                "table": {
+                                  "table": {
+                                    "table": "t1__fuzz_26"
+                                  }
+                                }
+                              }
+                            ]
+                          },
+                          "group_by": [
+                            {
+                              "name": "toFixedString",
+                              "arguments": [
+                                {
+                                  "type": "String",
+                                  "value": "%Prewhere%"
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 10
+                                }
+                              ]
+                            },
+                            {
+                              "name": "toNullable",
+                              "arguments": [
+                                {
+                                  "type": "Integer",
+                                  "value": 12
+                                }
+                              ]
+                            }
+                          ],
+                          "with_rollup": true
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "settings": [
+    {
+      "name": "allow_experimental_parallel_reading_from_replicas",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ]
+}

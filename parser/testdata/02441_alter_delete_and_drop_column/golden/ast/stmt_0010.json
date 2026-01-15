@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sleepEachRow",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "url",
+                "arguments": [
+                  {
+                    "left": {
+                      "type": "String",
+                      "value": "http://localhost:8123/?param_tries={1..10}\u0026query="
+                    },
+                    "op": "||",
+                    "right": {
+                      "name": "encodeURLComponent",
+                      "arguments": [
+                        {
+                          "left": {
+                            "left": {
+                              "type": "String",
+                              "value": "select * from system.replication_queue where database='"
+                            },
+                            "op": "||",
+                            "right": {
+                              "name": "currentDatabase"
+                            }
+                          },
+                          "op": "||",
+                          "right": {
+                            "type": "String",
+                            "value": "' and table='mut' and type='ALTER_METADATA'"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "String",
+                    "value": "LineAsString"
+                  },
+                  {
+                    "type": "String",
+                    "value": "s String"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "max_threads",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "http_make_head_request",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

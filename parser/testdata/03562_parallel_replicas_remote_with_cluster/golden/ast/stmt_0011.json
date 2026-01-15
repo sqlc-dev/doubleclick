@@ -1,0 +1,168 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "left": {
+                "array": {
+                  "parts": [
+                    "ProfileEvents"
+                  ]
+                },
+                "index": {
+                  "type": "String",
+                  "value": "ParallelReplicasQueryCount"
+                }
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "yesterday"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "initial_query_id"
+            ]
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "query_id"
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "database": "system",
+                          "table": "query_log"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "current_database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "type"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "QueryFinish"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "event_date"
+                        ]
+                      },
+                      "op": "\u003e=",
+                      "right": {
+                        "name": "yesterday"
+                      }
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "log_comment"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": "03562_152a0cc0-0811-46c9-839e-0f17426a1fc6"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "settings": [
+        {
+          "name": "parallel_replicas_for_non_replicated_merge_tree",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

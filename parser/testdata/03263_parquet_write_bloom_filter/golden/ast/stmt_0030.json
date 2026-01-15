@@ -1,0 +1,97 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "more bits per value: metadata"
+        },
+        {
+          "parts": [
+            "rg",
+            "num_rows"
+          ]
+        },
+        {
+          "parts": [
+            "col",
+            "name"
+          ]
+        },
+        {
+          "parts": [
+            "col",
+            "bloom_filter_bytes"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "file",
+                "arguments": [
+                  {
+                    "parts": [
+                      "bf_03263",
+                      "parquet"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "ParquetMetadata"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "row_groups"
+                  ],
+                  "alias": "rg"
+                }
+              ]
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "rg",
+                    "columns"
+                  ],
+                  "alias": "col"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "rg",
+              "file_offset"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "col",
+              "name"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

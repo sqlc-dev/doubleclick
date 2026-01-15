@@ -1,0 +1,122 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "limit/offset w/ GROUP BY"
+        },
+        {
+          "name": "count"
+        },
+        {
+          "parts": [
+            "number"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.{1,2}"
+                  },
+                  {
+                    "name": "view",
+                    "arguments": [
+                      {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {
+                                  "name": "intDiv",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "number"
+                                      ]
+                                    },
+                                    {
+                                      "type": "Integer",
+                                      "value": 2
+                                    }
+                                  ],
+                                  "alias": "number"
+                                }
+                              ],
+                              "from": {
+                                "tables": [
+                                  {
+                                    "table": {
+                                      "table": {
+                                        "name": "numbers",
+                                        "arguments": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 10
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "number"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "name": "count"
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "number"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "settings": [
+        {
+          "name": "limit",
+          "value": {
+            "type": "Integer",
+            "value": 2
+          }
+        },
+        {
+          "name": "offset",
+          "value": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ]
+    }
+  ]
+}

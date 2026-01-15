@@ -1,0 +1,118 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "read_rows"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "written_rows"
+            ]
+          }
+        },
+        {
+          "left": {
+            "parts": [
+              "read_rows"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "result_rows"
+            ]
+          }
+        },
+        {
+          "left": {
+            "parts": [
+              "read_bytes"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "written_bytes"
+            ]
+          }
+        },
+        {
+          "left": {
+            "parts": [
+              "read_bytes"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "result_bytes"
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "normalized_query_hash"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1214411238725380014
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "current_database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        }
+      },
+      "format": {
+        "parts": [
+          "CSV"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "abs",
+              "arguments": [
+                {
+                  "left": {
+                    "name": "corrStable",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "x_value"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "y_value"
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "-",
+                  "right": {
+                    "left": {
+                      "name": "covarPopStable",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "x_value"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "y_value"
+                          ]
+                        }
+                      ]
+                    },
+                    "op": "/",
+                    "right": {
+                      "left": {
+                        "name": "stddevPopStable",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "x_value"
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "*",
+                      "right": {
+                        "name": "stddevPopStable",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "y_value"
+                            ]
+                          }
+                        ]
+                      },
+                      "parenthesized": true
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 6
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "series"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

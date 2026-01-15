@@ -1,0 +1,69 @@
+{
+  "table": "map_test_index_map_values",
+  "columns": [
+    {
+      "name": "row_id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "map",
+      "type": {
+        "name": "Map",
+        "parameters": [
+          {
+            "name": "String"
+          },
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "map_bloom_filter_values",
+      "expression": {
+        "name": "mapValues",
+        "arguments": [
+          {
+            "parts": [
+              "map"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "bloom_filter"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "row_id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

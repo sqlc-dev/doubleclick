@@ -1,0 +1,152 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "item_id"
+                          ]
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "foo"
+                          },
+                          "alias": "key"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "val"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "item_id"
+                          ]
+                        }
+                      ],
+                      "with_totals": true,
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "item_id"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "l"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "item_id"
+                          ]
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "price_sold"
+                              ]
+                            }
+                          ],
+                          "alias": "val"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "item_id"
+                          ]
+                        }
+                      ],
+                      "with_totals": true,
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "item_id"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "r"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "l",
+                    "item_id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "r",
+                    "item_id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

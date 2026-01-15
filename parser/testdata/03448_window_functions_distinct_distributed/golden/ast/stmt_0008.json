@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "running_avg"
+              ]
+            }
+          ],
+          "alias": "final_running_avg"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        {
+                          "name": "avgDistinct",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "alias": "running_avg"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.0.0.{1,2,3}"
+                                  },
+                                  {
+                                    "name": "numbers_mt",
+                                    "arguments": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 100000
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

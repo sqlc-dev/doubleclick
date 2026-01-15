@@ -1,0 +1,113 @@
+{
+  "table": "mt_with_pk",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "type": "String",
+        "value": "2000-01-01"
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "z",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "n",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "Age",
+            "type": {
+              "name": "UInt8"
+            }
+          },
+          {
+            "name": "Name",
+            "type": {
+              "name": "String"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "w",
+      "type": {
+        "name": "Int16"
+      },
+      "default": {
+        "type": "Integer",
+        "value": 10
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "x"
+          ]
+        },
+        {
+          "parts": [
+            "z"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "d"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "Integer",
+        "value": 10000
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

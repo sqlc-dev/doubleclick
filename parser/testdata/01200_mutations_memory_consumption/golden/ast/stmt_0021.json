@@ -1,0 +1,114 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayDistinct",
+          "arguments": [
+            {
+              "name": "groupArray",
+              "arguments": [
+                {
+                  "name": "if",
+                  "arguments": [
+                    {
+                      "left": {
+                        "parts": [
+                          "read_bytes"
+                        ]
+                      },
+                      "op": "\u003e=",
+                      "right": {
+                        "parts": [
+                          "peak_memory_usage"
+                        ]
+                      }
+                    },
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "parts": [
+                            "read_bytes"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "peak_memory_usage"
+                          ]
+                        }
+                      ],
+                      "spaced_commas": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "event_type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "MutatePart"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "table_with_function_pk"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        }
+      }
+    }
+  ]
+}

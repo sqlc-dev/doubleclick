@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toDateTime",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "2021-08-15 18:57:56"
+            },
+            {
+              "type": "String",
+              "value": "UTC"
+            }
+          ],
+          "alias": "d"
+        },
+        {
+          "left": {
+            "name": "UUIDv7ToDateTime",
+            "arguments": [
+              {
+                "name": "dateTimeToUUIDv7",
+                "arguments": [
+                  {
+                    "parts": [
+                      "d"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ]
+          },
+          "op": "==",
+          "right": {
+            "parts": [
+              "d"
+            ]
+          }
+        },
+        {
+          "left": {
+            "name": "UUIDv7ToDateTime",
+            "arguments": [
+              {
+                "name": "dateTimeToUUIDv7",
+                "arguments": [
+                  {
+                    "name": "materialize",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "d"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ]
+          },
+          "op": "==",
+          "right": {
+            "parts": [
+              "d"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

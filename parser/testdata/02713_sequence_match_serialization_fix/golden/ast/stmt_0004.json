@@ -1,0 +1,125 @@
+{
+  "table": "02713_seqt",
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "n"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "sequenceMatchState",
+            "parameters": [
+              {
+                "type": "String",
+                "value": "(?1)(?2)"
+              }
+            ],
+            "arguments": [
+              {
+                "parts": [
+                  "time"
+                ]
+              },
+              {
+                "left": {
+                  "parts": [
+                    "number_"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              {
+                "left": {
+                  "parts": [
+                    "number_"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              }
+            ],
+            "alias": "seq"
+          },
+          {
+            "expr": {
+              "type": "Integer",
+              "value": 1
+            },
+            "alias": "n"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "number"
+                            ],
+                            "alias": "time"
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            },
+                            "alias": "number_"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "numbers_mt",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 100
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

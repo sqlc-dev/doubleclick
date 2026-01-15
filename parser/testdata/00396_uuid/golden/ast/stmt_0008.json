@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "uuid",
+          "query": {
+            "name": "generateUUIDv4"
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "str",
+          "query": {
+            "name": "identity",
+            "arguments": [
+              {
+                "name": "lower",
+                "arguments": [
+                  {
+                    "name": "hex",
+                    "arguments": [
+                      {
+                        "name": "reverse",
+                        "arguments": [
+                          {
+                            "name": "reinterpretAsString",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "uuid"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "uuid2",
+          "query": {
+            "name": "reinterpretAsUUID",
+            "arguments": [
+              {
+                "name": "reverse",
+                "arguments": [
+                  {
+                    "name": "unhex",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "str"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "uuid"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "uuid2"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

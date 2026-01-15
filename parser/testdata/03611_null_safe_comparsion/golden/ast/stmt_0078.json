@@ -1,0 +1,71 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "a"
+                ]
+              },
+              "op": "\u003c=\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          ],
+          "alias": "cnt_equal_1"
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "op": "NOT",
+              "operand": {
+                "left": {
+                  "parts": [
+                    "a"
+                  ]
+                },
+                "op": "\u003c=\u003e",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            }
+          ],
+          "alias": "cnt_distinct_1"
+        },
+        {
+          "name": "count",
+          "alias": "total_count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "03611_t_nullsafe"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "cnt_equal_1"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

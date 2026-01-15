@@ -1,0 +1,317 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "name": "any",
+                              "arguments": [
+                                {
+                                  "array": {
+                                    "parts": [
+                                      "ProfileEvents"
+                                    ]
+                                  },
+                                  "index": {
+                                    "type": "String",
+                                    "value": "ExternalProcessingFilesTotal"
+                                  }
+                                }
+                              ]
+                            },
+                            "op": "\u003e=",
+                            "right": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "name": "any",
+                              "arguments": [
+                                {
+                                  "array": {
+                                    "parts": [
+                                      "ProfileEvents"
+                                    ]
+                                  },
+                                  "index": {
+                                    "type": "String",
+                                    "value": "ExternalProcessingCompressedBytesTotal"
+                                  }
+                                }
+                              ]
+                            },
+                            "op": "\u003e=",
+                            "right": {
+                              "type": "Integer",
+                              "value": 100000
+                            }
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "name": "any",
+                            "arguments": [
+                              {
+                                "array": {
+                                  "parts": [
+                                    "ProfileEvents"
+                                  ]
+                                },
+                                "index": {
+                                  "type": "String",
+                                  "value": "ExternalProcessingUncompressedBytesTotal"
+                                }
+                              }
+                            ]
+                          },
+                          "op": "\u003e=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 100000
+                          }
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "name": "any",
+                          "arguments": [
+                            {
+                              "array": {
+                                "parts": [
+                                  "ProfileEvents"
+                                ]
+                              },
+                              "index": {
+                                "type": "String",
+                                "value": "ExternalJoinWritePart"
+                              }
+                            }
+                          ]
+                        },
+                        "op": "\u003e=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "name": "any",
+                        "arguments": [
+                          {
+                            "array": {
+                              "parts": [
+                                "ProfileEvents"
+                              ]
+                            },
+                            "index": {
+                              "type": "String",
+                              "value": "ExternalJoinMerge"
+                            }
+                          }
+                        ]
+                      },
+                      "op": "\u003e=",
+                      "right": {
+                        "type": "Integer",
+                        "value": 0
+                      }
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "name": "any",
+                      "arguments": [
+                        {
+                          "array": {
+                            "parts": [
+                              "ProfileEvents"
+                            ]
+                          },
+                          "index": {
+                            "type": "String",
+                            "value": "ExternalJoinCompressedBytes"
+                          }
+                        }
+                      ]
+                    },
+                    "op": "\u003e=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 100000
+                    }
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "name": "any",
+                    "arguments": [
+                      {
+                        "array": {
+                          "parts": [
+                            "ProfileEvents"
+                          ]
+                        },
+                        "index": {
+                          "type": "String",
+                          "value": "ExternalJoinUncompressedBytes"
+                        }
+                      }
+                    ]
+                  },
+                  "op": "\u003e=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 100000
+                  }
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "name": "count"
+                },
+                "op": "==",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            },
+            {
+              "type": "String",
+              "value": "ok"
+            },
+            {
+              "left": {
+                "left": {
+                  "left": {
+                    "type": "String",
+                    "value": "fail: "
+                  },
+                  "op": "||",
+                  "right": {
+                    "name": "toString",
+                    "arguments": [
+                      {
+                        "name": "count"
+                      }
+                    ]
+                  }
+                },
+                "op": "||",
+                "right": {
+                  "type": "String",
+                  "value": " "
+                }
+              },
+              "op": "||",
+              "right": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "name": "any",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "ProfileEvents"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "current_database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "log_comment"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "02402_external_disk_mertrics/join"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "query"
+              ]
+            },
+            "case_insensitive": true,
+            "pattern": {
+              "type": "String",
+              "value": "SELECT%2097152%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "QueryFinish"
+          }
+        }
+      }
+    }
+  ]
+}

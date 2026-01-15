@@ -1,0 +1,116 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "date"
+          ],
+          "alias": "period"
+        },
+        {
+          "expr": {
+            "type": "Integer",
+            "value": 1
+          },
+          "alias": "having_check"
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "date"
+              ]
+            }
+          ],
+          "alias": "period_start"
+        },
+        {
+          "name": "addDays",
+          "arguments": [
+            {
+              "name": "max",
+              "arguments": [
+                {
+                  "parts": [
+                    "date"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ],
+          "alias": "period_end"
+        },
+        {
+          "name": "dateDiff",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "second"
+            },
+            {
+              "parts": [
+                "period_start"
+              ]
+            },
+            {
+              "parts": [
+                "period_end"
+              ]
+            }
+          ],
+          "alias": "total_duration"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "metric"
+              ]
+            }
+          ],
+          "alias": "metric_"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "repro_hits"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "period"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "parts": [
+            "having_check"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "op": "-",
+          "operand": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      }
+    }
+  ]
+}

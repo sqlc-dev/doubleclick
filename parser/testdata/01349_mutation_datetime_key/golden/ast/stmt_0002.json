@@ -1,0 +1,64 @@
+{
+  "table": "cdp_orders",
+  "columns": [
+    {
+      "name": "order_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "order_status",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "order_time",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "order_time"
+          ]
+        },
+        {
+          "parts": [
+            "order_id"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMMDD",
+    "arguments": [
+      {
+        "parts": [
+          "order_time"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

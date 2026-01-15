@@ -1,0 +1,138 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "cityHash64",
+          "arguments": [
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "name": "groupArray",
+                  "arguments": [
+                    {
+                      "name": "tuple",
+                      "arguments": [
+                        {}
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "brand_id"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "rack_id"
+                          ]
+                        },
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "name": "arraySlice",
+                              "arguments": [
+                                {
+                                  "name": "arraySort",
+                                  "arguments": [
+                                    {
+                                      "name": "groupArray",
+                                      "arguments": [
+                                        {
+                                          "parts": [
+                                            "quantity"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "quantity"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "stack"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "brand_id"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "rack_id"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "brand_id"
+                            ]
+                          }
+                        },
+                        {
+                          "expression": {
+                            "parts": [
+                              "rack_id"
+                            ]
+                          }
+                        },
+                        {
+                          "expression": {
+                            "parts": [
+                              "quantity"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

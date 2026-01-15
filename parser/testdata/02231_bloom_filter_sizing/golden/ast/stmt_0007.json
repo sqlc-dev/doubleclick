@@ -1,0 +1,72 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "COUNT"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "table"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "bloom_filter_sizing_pk"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "secondary_indices_uncompressed_bytes"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 200
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "parts": [
+            "active"
+          ]
+        }
+      }
+    }
+  ]
+}

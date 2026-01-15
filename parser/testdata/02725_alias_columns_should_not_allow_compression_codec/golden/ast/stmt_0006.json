@@ -1,0 +1,38 @@
+{
+  "table": "alias_column_should_not_allow_compression",
+  "commands": [
+    {
+      "type": "ADD_COLUMN",
+      "column": {
+        "name": "user_id_hashed_1",
+        "type": {
+          "name": "UInt64"
+        },
+        "default": {
+          "name": "cityHash64",
+          "arguments": [
+            {
+              "parts": [
+                "user_id"
+              ]
+            }
+          ]
+        },
+        "default_kind": "ALIAS",
+        "codec": {
+          "codecs": [
+            {
+              "name": "LZ4HC",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

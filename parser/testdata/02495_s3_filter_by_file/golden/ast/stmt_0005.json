@@ -1,0 +1,118 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "num",
+          "query": {
+            "expr": {
+              "array": {
+                "name": "splitByChar",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "_"
+                  },
+                  {
+                    "parts": [
+                      "_file"
+                    ]
+                  }
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 3
+              }
+            },
+            "type": {
+              "name": "UInt64"
+            },
+            "operator_syntax": true
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "num"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "num"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "s3",
+                "arguments": [
+                  {
+                    "parts": [
+                      "s3_conn"
+                    ]
+                  },
+                  {
+                    "left": {
+                      "parts": [
+                        "filename"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": "test_02495_*"
+                    }
+                  },
+                  {
+                    "left": {
+                      "parts": [
+                        "format"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "parts": [
+                        "Parquet"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "num"
+          ]
+        },
+        "op": "\u003e=",
+        "right": {
+          "type": "Integer",
+          "value": 5
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "insid",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "insidvalue",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "insid_idx",
+      "expression": {
+        "parts": [
+          "insid"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "insidvalue_idx",
+      "expression": {
+        "parts": [
+          "insidvalue"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "insid"
+          ]
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ]
+}

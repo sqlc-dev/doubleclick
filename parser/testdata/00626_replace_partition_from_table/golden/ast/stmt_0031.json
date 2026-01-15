@@ -1,0 +1,82 @@
+{
+  "table": "test_block_numbers",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "max_block_number"
+                ]
+              }
+            ],
+            "alias": "m"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "parts"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "database"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "name": "currentDatabase"
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "table"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "dst"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "parts": [
+                "active"
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "name"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "1_%"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

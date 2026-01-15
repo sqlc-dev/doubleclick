@@ -1,0 +1,54 @@
+{
+  "table": "projection_without_key",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "x",
+      "select": {
+        "columns": [
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "key"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "left": {
+              "parts": [
+                "key"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ]
+}

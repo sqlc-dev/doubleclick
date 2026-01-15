@@ -1,0 +1,121 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toDayOfWeek",
+          "arguments": [
+            {
+              "parts": [
+                "ShipmentDate"
+              ]
+            }
+          ],
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_data"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "c"
+            ]
+          },
+          "not": true
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "name": "lowerUTF8",
+            "arguments": [
+              {
+                "name": "formatDateTime",
+                "arguments": [
+                  {
+                    "name": "date_add",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "DAY"
+                        ]
+                      },
+                      {
+                        "left": {
+                          "name": "toInt32",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "c"
+                              ]
+                            }
+                          ]
+                        },
+                        "op": "-",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      },
+                      {
+                        "name": "toDate",
+                        "arguments": [
+                          {
+                            "type": "String",
+                            "value": "2024-01-01"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "%W"
+                  }
+                ]
+              }
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%m%"
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "c"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 62
+      },
+      "offset": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ]
+}

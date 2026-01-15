@@ -1,0 +1,135 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "address"
+          ]
+        },
+        {
+          "expr": {
+            "tuple": {
+              "name": "bech32Decode",
+              "arguments": [
+                {
+                  "parts": [
+                    "address"
+                  ]
+                }
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "hrp"
+        },
+        {
+          "name": "hex",
+          "arguments": [
+            {
+              "tuple": {
+                "name": "bech32Decode",
+                "arguments": [
+                  {
+                    "parts": [
+                      "address"
+                    ]
+                  }
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 2
+              }
+            }
+          ],
+          "alias": "decoded"
+        },
+        {
+          "name": "hex",
+          "arguments": [
+            {
+              "tuple": {
+                "name": "bech32Decode",
+                "arguments": [
+                  {
+                    "parts": [
+                      "address_fixed"
+                    ]
+                  }
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 2
+              }
+            }
+          ],
+          "alias": "decoded_fixed"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "hex",
+              "arguments": [
+                {
+                  "tuple": {
+                    "name": "bech32Decode",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "address"
+                        ]
+                      }
+                    ]
+                  },
+                  "index": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "hex",
+              "arguments": [
+                {
+                  "tuple": {
+                    "name": "bech32Decode",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "address_fixed"
+                        ]
+                      }
+                    ]
+                  },
+                  "index": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                }
+              ]
+            }
+          },
+          "alias": "match"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "bech32_test"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

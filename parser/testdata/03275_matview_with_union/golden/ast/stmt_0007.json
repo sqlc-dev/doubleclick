@@ -1,0 +1,459 @@
+{
+  "view": "matview",
+  "materialized": true,
+  "to": "dst",
+  "columns": [
+    {
+      "name": "step",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "rounded_event_time",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "max"
+            ]
+          },
+          {
+            "name": "Int64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "alias": "step"
+                          },
+                          {
+                            "parts": [
+                              "key"
+                            ]
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "name": "intDiv",
+                                "arguments": [
+                                  {
+                                    "name": "toUnixTimestamp",
+                                    "arguments": [
+                                      {
+                                        "parts": [
+                                          "event_time"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "parts": [
+                                      "step"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "parts": [
+                                  "step"
+                                ]
+                              }
+                            },
+                            "alias": "rounded_event_time"
+                          },
+                          {
+                            "name": "initializeAggregation",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "maxState"
+                              },
+                              {
+                                "parts": [
+                                  "value"
+                                ]
+                              }
+                            ],
+                            "alias": "value"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "src"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "rounded_event_time"
+                              ]
+                            }
+                          },
+                          {
+                            "expression": {
+                              "parts": [
+                                "key"
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 5
+                            },
+                            "alias": "step"
+                          },
+                          {
+                            "parts": [
+                              "key"
+                            ]
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "name": "intDiv",
+                                "arguments": [
+                                  {
+                                    "name": "toUnixTimestamp",
+                                    "arguments": [
+                                      {
+                                        "parts": [
+                                          "event_time"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "parts": [
+                                      "step"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "parts": [
+                                  "step"
+                                ]
+                              }
+                            },
+                            "alias": "rounded_event_time"
+                          },
+                          {
+                            "name": "initializeAggregation",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "maxState"
+                              },
+                              {
+                                "parts": [
+                                  "value"
+                                ]
+                              }
+                            ],
+                            "alias": "value"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "src"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "rounded_event_time"
+                              ]
+                            }
+                          },
+                          {
+                            "expression": {
+                              "parts": [
+                                "key"
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 15
+                            },
+                            "alias": "step"
+                          },
+                          {
+                            "parts": [
+                              "key"
+                            ]
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "name": "intDiv",
+                                "arguments": [
+                                  {
+                                    "name": "toUnixTimestamp",
+                                    "arguments": [
+                                      {
+                                        "parts": [
+                                          "event_time"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "parts": [
+                                      "step"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "parts": [
+                                  "step"
+                                ]
+                              }
+                            },
+                            "alias": "rounded_event_time"
+                          },
+                          {
+                            "name": "initializeAggregation",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "maxState"
+                              },
+                              {
+                                "parts": [
+                                  "value"
+                                ]
+                              }
+                            ],
+                            "alias": "value"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "src"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "rounded_event_time"
+                              ]
+                            }
+                          },
+                          {
+                            "expression": {
+                              "parts": [
+                                "key"
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "Integer",
+                              "value": 30
+                            },
+                            "alias": "step"
+                          },
+                          {
+                            "parts": [
+                              "key"
+                            ]
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "name": "intDiv",
+                                "arguments": [
+                                  {
+                                    "name": "toUnixTimestamp",
+                                    "arguments": [
+                                      {
+                                        "parts": [
+                                          "event_time"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "parts": [
+                                      "step"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "parts": [
+                                  "step"
+                                ]
+                              }
+                            },
+                            "alias": "rounded_event_time"
+                          },
+                          {
+                            "name": "initializeAggregation",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "maxState"
+                              },
+                              {
+                                "parts": [
+                                  "value"
+                                ]
+                              }
+                            ],
+                            "alias": "value"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "src"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "rounded_event_time"
+                              ]
+                            }
+                          },
+                          {
+                            "expression": {
+                              "parts": [
+                                "key"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "union_all": true,
+                    "union_modes": [
+                      "UNION ALL",
+                      "UNION ALL",
+                      "UNION ALL"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "step"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "rounded_event_time"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "key"
+              ]
+            }
+          }
+        ],
+        "settings": [
+          {
+            "name": "query_plan_remove_redundant_sorting",
+            "value": {
+              "type": "Integer",
+              "value": 0
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

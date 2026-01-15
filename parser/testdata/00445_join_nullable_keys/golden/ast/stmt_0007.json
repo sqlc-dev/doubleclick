@@ -1,0 +1,177 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "k"
+          ]
+        },
+        {
+          "parts": [
+            "b"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "+",
+                            "right": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          },
+                          "alias": "k"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "js1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "nullIf",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "name": "if",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "left": {
+                                      "parts": [
+                                        "number"
+                                      ]
+                                    },
+                                    "op": "%",
+                                    "right": {
+                                      "type": "Integer",
+                                      "value": 2
+                                    }
+                                  },
+                                  "op": "==",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 0
+                                  }
+                                },
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 0
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "b"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "js2"
+            },
+            "join": {
+              "type": "RIGHT",
+              "using": [
+                {
+                  "parts": [
+                    "k"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "b"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

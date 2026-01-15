@@ -1,0 +1,212 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "A",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "rowNumberInAllBlocks",
+                      "alias": "R"
+                    },
+                    {
+                      "name": "addDays",
+                      "arguments": [
+                        {
+                          "name": "toDate",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "2021-05-18"
+                            }
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "R"
+                          ]
+                        }
+                      ],
+                      "alias": "TVV"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 5
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "B",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "rowNumberInAllBlocks",
+                      "alias": "R"
+                    },
+                    {
+                      "name": "toDateTime",
+                      "arguments": [
+                        {
+                          "type": "Null",
+                          "value": null
+                        }
+                      ],
+                      "alias": "TVV"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "joinGet",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "DATE_INFO_DICT"
+            },
+            {
+              "type": "String",
+              "value": "SHAMSI"
+            },
+            {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "parts": [
+                    "A",
+                    "TVV"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "TV1"
+        },
+        {
+          "expr": {
+            "left": {
+              "left": {
+                "name": "substr",
+                "arguments": [
+                  {
+                    "parts": [
+                      "TV1"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 3
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 8
+                  }
+                ]
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": " : "
+              }
+            },
+            "op": "||",
+            "right": {
+              "name": "toString",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                }
+              ]
+            }
+          },
+          "alias": "TV_CHAR_1"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "A"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "B"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "using": [
+                {
+                  "parts": [
+                    "R"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "TV1"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

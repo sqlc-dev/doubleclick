@@ -1,0 +1,450 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "bad_cnt",
+          "query": {
+            "left": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "name": "count"
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "t"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "left": {
+                        "expr": {
+                          "name": "accurateCastOrNull",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "d"
+                              ]
+                            },
+                            {
+                              "type": "String",
+                              "value": "IPv4"
+                            }
+                          ]
+                        },
+                        "not": true
+                      },
+                      "op": "AND",
+                      "right": {
+                        "expr": {
+                          "name": "toIPv4",
+                          "arguments": [
+                            {
+                              "name": "accurateCastOrNull",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "d"
+                                  ]
+                                },
+                                {
+                                  "type": "String",
+                                  "value": "IPv4"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "not": true,
+                        "list": [
+                          {
+                            "name": "toIPv4",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "0.0.0.0"
+                              }
+                            ]
+                          },
+                          {
+                            "name": "toIPv4",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "192.168.0.1"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "op": "+",
+            "right": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "name": "count"
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "t"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "left": {
+                        "expr": {
+                          "name": "accurateCastOrNull",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "d"
+                              ]
+                            },
+                            {
+                              "type": "String",
+                              "value": "IPv6"
+                            }
+                          ]
+                        },
+                        "not": true
+                      },
+                      "op": "AND",
+                      "right": {
+                        "expr": {
+                          "name": "toIPv6",
+                          "arguments": [
+                            {
+                              "name": "accurateCastOrNull",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "d"
+                                  ]
+                                },
+                                {
+                                  "type": "String",
+                                  "value": "IPv6"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "not": true,
+                        "list": [
+                          {
+                            "name": "toIPv6",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "::"
+                              }
+                            ]
+                          },
+                          {
+                            "name": "toIPv6",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "::1"
+                              }
+                            ]
+                          },
+                          {
+                            "name": "toIPv6",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "::ffff:192.168.0.1"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "ch_dbg_offenders"
+          },
+          "alias": "tag"
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "d"
+              ]
+            }
+          ],
+          "alias": "src_type"
+        },
+        {
+          "name": "toIPv4",
+          "arguments": [
+            {
+              "name": "accurateCastOrNull",
+              "arguments": [
+                {
+                  "parts": [
+                    "d"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "IPv4"
+                }
+              ]
+            }
+          ],
+          "alias": "v4"
+        },
+        {
+          "name": "toIPv6",
+          "arguments": [
+            {
+              "name": "accurateCastOrNull",
+              "arguments": [
+                {
+                  "parts": [
+                    "d"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "IPv6"
+                }
+              ]
+            }
+          ],
+          "alias": "v6"
+        },
+        {
+          "name": "toString",
+          "arguments": [
+            {
+              "parts": [
+                "d"
+              ]
+            }
+          ],
+          "alias": "raw_d"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "bad_cnt"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "left": {
+              "expr": {
+                "name": "accurateCastOrNull",
+                "arguments": [
+                  {
+                    "parts": [
+                      "d"
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "IPv4"
+                  }
+                ]
+              },
+              "not": true
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "name": "toIPv4",
+                "arguments": [
+                  {
+                    "name": "accurateCastOrNull",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "d"
+                        ]
+                      },
+                      {
+                        "type": "String",
+                        "value": "IPv4"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "not": true,
+              "list": [
+                {
+                  "name": "toIPv4",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "0.0.0.0"
+                    }
+                  ]
+                },
+                {
+                  "name": "toIPv4",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "192.168.0.1"
+                    }
+                  ]
+                }
+              ]
+            },
+            "parenthesized": true
+          },
+          "op": "OR",
+          "right": {
+            "left": {
+              "expr": {
+                "name": "accurateCastOrNull",
+                "arguments": [
+                  {
+                    "parts": [
+                      "d"
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "IPv6"
+                  }
+                ]
+              },
+              "not": true
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "name": "toIPv6",
+                "arguments": [
+                  {
+                    "name": "accurateCastOrNull",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "d"
+                        ]
+                      },
+                      {
+                        "type": "String",
+                        "value": "IPv6"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "not": true,
+              "list": [
+                {
+                  "name": "toIPv6",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "::"
+                    }
+                  ]
+                },
+                {
+                  "name": "toIPv6",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "::1"
+                    }
+                  ]
+                },
+                {
+                  "name": "toIPv6",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "::ffff:192.168.0.1"
+                    }
+                  ]
+                }
+              ]
+            },
+            "parenthesized": true
+          },
+          "parenthesized": true
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 20
+      }
+    }
+  ]
+}

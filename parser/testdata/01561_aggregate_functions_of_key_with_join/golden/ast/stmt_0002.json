@@ -1,0 +1,113 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "source",
+            "key"
+          ]
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "target",
+                "key"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "key"
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "x"
+                          },
+                          "alias": "name"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "source"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          "alias": "key"
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "x"
+                          },
+                          "alias": "name"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "target"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "source",
+                    "name"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "target",
+                    "name"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "source",
+            "key"
+          ]
+        }
+      ]
+    }
+  ]
+}

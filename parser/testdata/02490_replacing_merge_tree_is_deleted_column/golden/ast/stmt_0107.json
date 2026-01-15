@@ -1,0 +1,69 @@
+{
+  "table": "testVersionedCMT",
+  "columns": [
+    {
+      "name": "uid",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "version",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "is_deleted",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "sign",
+      "type": {
+        "name": "Int8"
+      }
+    }
+  ],
+  "engine": {
+    "name": "VersionedCollapsingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "sign"
+        ]
+      },
+      {
+        "parts": [
+          "version"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "uid"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "clean_deleted_rows",
+      "value": {
+        "type": "String",
+        "value": "Always"
+      }
+    },
+    {
+      "name": "allow_experimental_replacing_merge_with_cleanup",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

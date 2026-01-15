@@ -1,0 +1,64 @@
+{
+  "table": "test_qualify",
+  "where": {
+    "expr": {
+      "parts": [
+        "number"
+      ]
+    },
+    "query": {
+      "selects": [
+        {
+          "columns": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "from": {
+            "tables": [
+              {
+                "table": {
+                  "table": {
+                    "table": "test_qualify"
+                  }
+                }
+              }
+            ]
+          },
+          "qualify": {
+            "left": {
+              "name": "row_number",
+              "over": {
+                "order_by": [
+                  {
+                    "expression": {
+                      "parts": [
+                        "number"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 50
+            }
+          }
+        }
+      ]
+    }
+  },
+  "settings": [
+    {
+      "name": "validate_mutation_query",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ]
+}

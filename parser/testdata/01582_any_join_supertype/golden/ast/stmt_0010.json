@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toDateTime",
+          "arguments": [
+            {
+              "parts": [
+                "foo",
+                "server_time"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "UTC"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "foo"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "bar"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "dimension_1"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "toDate",
+          "arguments": [
+            {
+              "parts": [
+                "foo",
+                "server_time"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "UTC"
+            }
+          ]
+        },
+        "op": "\u003c=",
+        "right": {
+          "name": "toDate",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "2020-04-30"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

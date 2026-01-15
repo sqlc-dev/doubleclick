@@ -1,0 +1,134 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trimLeft",
+          "arguments": [
+            {
+              "name": "replaceRegexpAll",
+              "arguments": [
+                {
+                  "parts": [
+                    "explain"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "ReadFromRemoteParallelReplicas.*"
+                },
+                {
+                  "type": "String",
+                  "value": "ReadFromRemoteParallelReplicas"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "sum",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "key"
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "normal"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "key"
+                              ]
+                            },
+                            "op": "\u003e",
+                            "right": {
+                              "type": "Integer",
+                              "value": 9999
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "key"
+                              ]
+                            },
+                            "op": "\u003c",
+                            "right": {
+                              "type": "Integer",
+                              "value": 10010
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%ReadFromMergeTree%"
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%ReadFromRemoteParallelReplicas%"
+          }
+        }
+      },
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

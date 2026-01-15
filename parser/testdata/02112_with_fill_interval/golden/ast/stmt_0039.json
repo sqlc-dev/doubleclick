@@ -1,0 +1,61 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toStartOfHour",
+          "arguments": [
+            {
+              "parts": [
+                "d64"
+              ]
+            }
+          ],
+          "alias": "d64"
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "with_fill_date"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "d64"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "d64"
+            ]
+          },
+          "with_fill": true,
+          "fill_step": {
+            "value": {
+              "type": "Integer",
+              "value": 6
+            },
+            "unit": "HOUR"
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 5
+      }
+    }
+  ]
+}

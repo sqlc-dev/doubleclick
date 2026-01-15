@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "x",
+          "query": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "intDiv",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 3
+            }
+          ],
+          "alias": "y"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "x"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "parts": [
+                  "y"
+                ]
+              }
+            }
+          ],
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "y"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              }
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 7
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

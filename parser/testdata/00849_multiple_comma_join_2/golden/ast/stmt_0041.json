@@ -1,0 +1,129 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "left": {
+                "expr": {
+                  "parts": [
+                    "explain"
+                  ]
+                },
+                "pattern": {
+                  "type": "String",
+                  "value": "%COMMA%"
+                }
+              },
+              "op": "OR",
+              "right": {
+                "expr": {
+                  "parts": [
+                    "explain"
+                  ]
+                },
+                "pattern": {
+                  "type": "String",
+                  "value": "%CROSS%"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "explain"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "%INNER%"
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "QUERY TREE",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "t1",
+                              "a"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t1"
+                                }
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t2"
+                                }
+                              },
+                              "join": {
+                                "type": "INNER",
+                                "using": [
+                                  {
+                                    "parts": [
+                                      "a"
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t3"
+                                }
+                              },
+                              "join": {
+                                "type": "CROSS"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "explicit_type": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

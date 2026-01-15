@@ -1,0 +1,78 @@
+{
+  "view": "mv1",
+  "materialized": true,
+  "columns": [
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "type": "String",
+        "value": "b"
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "s"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "tuple"
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "tuple": {
+                  "type": "Tuple",
+                  "value": [
+                    {}
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": "mv1"
+              }
+            },
+            "alias": "s"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "src"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

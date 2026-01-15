@@ -1,0 +1,86 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "splitByChar",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "0"
+            },
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "name": "intHash64",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "arr"
+        },
+        {
+          "name": "arraySort",
+          "arguments": [
+            {
+              "parts": [
+                "arr"
+              ]
+            }
+          ],
+          "alias": "sorted"
+        },
+        {
+          "name": "arraySort",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "toUInt64OrZero",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "parts": [
+                "arr"
+              ]
+            }
+          ],
+          "alias": "sorted_nums"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "table": "large_alter_table_00804",
+  "columns": [
+    {
+      "name": "somedate",
+      "type": {
+        "name": "Date"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "ZSTD"
+          },
+          {
+            "name": "ZSTD"
+          },
+          {
+            "name": "ZSTD",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 12
+              }
+            ]
+          },
+          {
+            "name": "LZ4HC",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 12
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "LZ4"
+          },
+          {
+            "name": "ZSTD"
+          },
+          {
+            "name": "NONE"
+          },
+          {
+            "name": "LZ4HC"
+          }
+        ]
+      }
+    },
+    {
+      "name": "data",
+      "type": {
+        "name": "String"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "ZSTD",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "name": "LZ4HC"
+          },
+          {
+            "name": "NONE"
+          },
+          {
+            "name": "LZ4"
+          },
+          {
+            "name": "LZ4"
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "somedate"
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 2
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    },
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

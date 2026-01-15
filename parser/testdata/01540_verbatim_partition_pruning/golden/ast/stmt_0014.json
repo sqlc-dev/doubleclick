@@ -1,0 +1,63 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "k",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "d"
+          ]
+        },
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "name": "toYYYYMM",
+        "arguments": [
+          {
+            "parts": [
+              "d"
+            ]
+          }
+        ]
+      },
+      {
+        "parts": [
+          "k"
+        ]
+      }
+    ]
+  }
+}

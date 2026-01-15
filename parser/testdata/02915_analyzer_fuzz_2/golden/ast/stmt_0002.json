@@ -1,0 +1,61 @@
+{
+  "table": "t_delete_projection",
+  "columns": [
+    {
+      "name": "x",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p",
+      "select": {
+        "columns": [
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "y"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

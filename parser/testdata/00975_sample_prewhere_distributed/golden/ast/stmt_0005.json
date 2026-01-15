@@ -1,0 +1,61 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,3}"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "sample_prewhere"
+                    ]
+                  }
+                ]
+              },
+              "sample": {
+                "ratio": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "toDateTime",
+          "arguments": [
+            {
+              "parts": [
+                "time"
+              ]
+            }
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "2019-07-20 00:00:00"
+        }
+      }
+    }
+  ]
+}

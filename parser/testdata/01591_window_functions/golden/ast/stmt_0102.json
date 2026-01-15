@@ -1,0 +1,128 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "array": {
+                "parts": [
+                  "a"
+                ]
+              },
+              "index": {
+                "name": "length",
+                "arguments": [
+                  {
+                    "parts": [
+                      "a"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "groupArray",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "partition_by": [
+                              {
+                                "name": "modulo",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 11
+                                  }
+                                ]
+                              }
+                            ],
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "name": "modulo",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "number"
+                                      ]
+                                    },
+                                    {
+                                      "type": "Integer",
+                                      "value": 1111
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "alias": "a"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers_mt",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10000
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "max_block_size",
+          "value": {
+            "type": "Integer",
+            "value": 7
+          }
+        }
+      ]
+    }
+  ]
+}

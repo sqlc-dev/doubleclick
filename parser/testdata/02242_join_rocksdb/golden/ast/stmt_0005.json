@@ -1,0 +1,98 @@
+{
+  "table": "rdb",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "toUInt32",
+            "arguments": [
+              {
+                "left": {
+                  "name": "sipHash64",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    }
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 10
+                }
+              }
+            ],
+            "alias": "key"
+          },
+          {
+            "expr": {
+              "type": "Array",
+              "value": [
+                {
+                  "parts": [
+                    "key"
+                  ]
+                },
+                {
+                  "left": {
+                    "parts": [
+                      "key"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ],
+              "spaced_commas": true
+            },
+            "alias": "value"
+          },
+          {
+            "expr": {
+              "left": {
+                "type": "String",
+                "value": "val2"
+              },
+              "op": "||",
+              "right": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "key"
+                    ]
+                  }
+                ]
+              },
+              "parenthesized": true
+            },
+            "alias": "value2"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers_mt",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

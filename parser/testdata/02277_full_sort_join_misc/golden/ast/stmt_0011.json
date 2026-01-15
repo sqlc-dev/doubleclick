@@ -1,0 +1,104 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "a"
+                          },
+                          "type": {
+                            "name": "LowCardinality",
+                            "parameters": [
+                              {
+                                "name": "String"
+                              }
+                            ],
+                            "has_parentheses": true
+                          },
+                          "alias": "key",
+                          "operator_syntax": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "a"
+                          },
+                          "type": {
+                            "name": "LowCardinality",
+                            "parameters": [
+                              {
+                                "name": "String"
+                              }
+                            ],
+                            "has_parentheses": true
+                          },
+                          "alias": "key",
+                          "operator_syntax": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "key"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "key"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "key"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

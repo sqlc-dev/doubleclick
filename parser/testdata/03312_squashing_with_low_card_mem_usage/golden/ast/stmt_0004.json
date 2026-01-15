@@ -1,0 +1,150 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "t2",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "String",
+                        "value": "x"
+                      },
+                      "alias": "s"
+                    },
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers_mt",
+                            "arguments": [
+                              {
+                                "type": "Float",
+                                "value": 10000,
+                                "source": "10000."
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "t1",
+            "s"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t2"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "name": "substr",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "t1",
+                        "s"
+                      ]
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "s"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Float",
+        "value": 100000,
+        "source": "1e5"
+      },
+      "settings": [
+        {
+          "name": "max_threads",
+          "value": {
+            "type": "Integer",
+            "value": 32
+          }
+        },
+        {
+          "name": "max_memory_usage",
+          "value": {
+            "type": "String",
+            "value": "2Gi"
+          }
+        },
+        {
+          "name": "join_algorithm",
+          "value": {
+            "type": "String",
+            "value": "parallel_hash"
+          }
+        },
+        {
+          "name": "min_joined_block_size_bytes",
+          "value": {
+            "type": "String",
+            "value": "1Mi"
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

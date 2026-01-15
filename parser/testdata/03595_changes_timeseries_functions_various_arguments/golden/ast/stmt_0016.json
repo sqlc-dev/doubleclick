@@ -1,0 +1,99 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "timeSeriesChangesToGrid",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 15
+            },
+            {
+              "type": "Integer",
+              "value": 125
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            },
+            {
+              "type": "Integer",
+              "value": 20
+            }
+          ],
+          "arguments": [
+            {
+              "name": "arrayResize",
+              "arguments": [
+                {
+                  "parts": [
+                    "timestamps"
+                  ]
+                },
+                {
+                  "name": "arrayMin",
+                  "arguments": [
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "name": "length",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "timestamps"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "length",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "values"
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "spaced_commas": true
+                    }
+                  ],
+                  "alias": "min_len"
+                }
+              ]
+            },
+            {
+              "name": "arrayResize",
+              "arguments": [
+                {
+                  "parts": [
+                    "values"
+                  ]
+                },
+                {
+                  "parts": [
+                    "min_len"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "ts_data"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

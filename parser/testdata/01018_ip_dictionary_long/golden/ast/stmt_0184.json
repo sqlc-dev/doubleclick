@@ -1,0 +1,103 @@
+{
+  "database": "{CLICKHOUSE_DATABASE:Identifier}",
+  "table": "table_ip_trie",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "type": "String",
+                "value": "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff/"
+              },
+              "op": "||",
+              "right": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "+",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        "parenthesized": true
+                      },
+                      "op": "*",
+                      "right": {
+                        "type": "Integer",
+                        "value": 13
+                      }
+                    },
+                    "op": "%",
+                    "right": {
+                      "type": "Integer",
+                      "value": 129
+                    }
+                  }
+                ]
+              }
+            },
+            "alias": "prefix"
+          },
+          {
+            "name": "toString",
+            "arguments": [
+              {
+                "left": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "op": "+",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "*",
+                  "right": {
+                    "type": "Integer",
+                    "value": 13
+                  }
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 129
+                }
+              }
+            ],
+            "alias": "val"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "numbers"
+                }
+              }
+            }
+          ]
+        },
+        "limit": {
+          "type": "Integer",
+          "value": 129
+        }
+      }
+    ]
+  }
+}

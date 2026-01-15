@@ -1,0 +1,75 @@
+{
+  "table": "indexed_table",
+  "columns": [
+    {
+      "name": "tm",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "log_message",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "log_message",
+      "expression": {
+        "parts": [
+          "log_message"
+        ]
+      },
+      "type": {
+        "name": "tokenbf_v1",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 4096
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          },
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "tm"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "Integer",
+        "value": 50
+      }
+    },
+    {
+      "name": "min_index_granularity_bytes",
+      "value": {
+        "type": "Integer",
+        "value": 40
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

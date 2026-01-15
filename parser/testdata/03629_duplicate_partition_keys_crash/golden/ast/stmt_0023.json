@@ -1,0 +1,64 @@
+{
+  "table": "test_hash_duplicates",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "data",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "name": "sipHash64",
+        "arguments": [
+          {
+            "parts": [
+              "data"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "cityHash64",
+        "arguments": [
+          {
+            "parts": [
+              "data"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "sipHash64",
+        "arguments": [
+          {
+            "parts": [
+              "data"
+            ]
+          }
+        ]
+      }
+    ],
+    "spaced_commas": true
+  }
+}

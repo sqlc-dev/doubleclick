@@ -1,0 +1,124 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "bar",
+            "a"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "a"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          "alias": "b"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "foo"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "a"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          "alias": "b"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "bar"
+            },
+            "join": {
+              "type": "RIGHT",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "foo",
+                      "b"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "bar",
+                      "a"
+                    ]
+                  },
+                  "parenthesized": true
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "foo",
+                      "b"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "bar",
+                      "b"
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "bar",
+              "a"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

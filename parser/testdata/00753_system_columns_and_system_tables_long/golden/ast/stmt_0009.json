@@ -1,0 +1,81 @@
+{
+  "table": "check_system_tables",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "version",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "sign",
+      "type": {
+        "name": "Int8"
+      }
+    }
+  ],
+  "engine": {
+    "name": "VersionedCollapsingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "sign"
+        ]
+      },
+      {
+        "parts": [
+          "version"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "date"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "date"
+    ]
+  },
+  "settings": [
+    {
+      "name": "compress_marks",
+      "value": {
+        "type": "Boolean",
+        "value": false
+      }
+    },
+    {
+      "name": "compress_primary_key",
+      "value": {
+        "type": "Boolean",
+        "value": false
+      }
+    },
+    {
+      "name": "auto_statistics_types",
+      "value": {
+        "type": "String",
+        "value": ""
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

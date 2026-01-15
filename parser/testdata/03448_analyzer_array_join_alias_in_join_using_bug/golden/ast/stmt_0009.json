@@ -1,0 +1,83 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "arr"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.2"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "local_table"
+                    ]
+                  }
+                ]
+              },
+              "alias": "r"
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "arr"
+                  ],
+                  "alias": "arr_item"
+                }
+              ]
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "arr_item"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "foo"
+            },
+            "join": {
+              "type": "RIGHT",
+              "using": [
+                {
+                  "parts": [
+                    "arr_item"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

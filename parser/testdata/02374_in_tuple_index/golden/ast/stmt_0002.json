@@ -1,0 +1,72 @@
+{
+  "table": "t_in_tuple_index",
+  "columns": [
+    {
+      "name": "ID",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "USER_ID",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "PLATFORM",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "PLATFORM"
+          ]
+        },
+        {
+          "parts": [
+            "USER_ID"
+          ]
+        },
+        {
+          "parts": [
+            "ID"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 2048
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

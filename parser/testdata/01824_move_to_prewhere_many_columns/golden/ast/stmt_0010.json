@@ -1,0 +1,125 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "replaceRegexpAll",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "__table1\\."
+            },
+            {
+              "type": "String",
+              "value": ""
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "count"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t_move_to_prewhere"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "left": {
+                              "left": {
+                                "parts": [
+                                  "a"
+                                ]
+                              },
+                              "op": "AND",
+                              "right": {
+                                "parts": [
+                                  "b"
+                                ]
+                              }
+                            },
+                            "op": "AND",
+                            "right": {
+                              "parts": [
+                                "c"
+                              ]
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "op": "NOT",
+                            "operand": {
+                              "name": "ignore",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "fat_string"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Prewhere%"
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Filter%"
+          }
+        }
+      }
+    }
+  ]
+}

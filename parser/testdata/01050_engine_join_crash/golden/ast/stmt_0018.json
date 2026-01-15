@@ -1,0 +1,75 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "tx",
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "tx",
+            "value"
+          ]
+        },
+        {
+          "parts": [
+            "m",
+            "name"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "transaction"
+              },
+              "alias": "tx"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "master"
+              },
+              "alias": "m"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "parts": [
+                    "m",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "tx",
+                    "master_id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "tx",
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

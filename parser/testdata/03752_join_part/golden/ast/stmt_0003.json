@@ -1,0 +1,108 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "t0",
+            "c0"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t0"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t0"
+              },
+              "alias": "tx"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t0",
+                    "c0"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "tx",
+                    "c0"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "tx",
+              "_part_offset"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "name": "randomFixedString",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 5
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "tx",
+              "_part"
+            ]
+          }
+        }
+      },
+      "settings": [
+        {
+          "name": "query_plan_use_logical_join_step",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "name": "use_join_disjunctions_push_down",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

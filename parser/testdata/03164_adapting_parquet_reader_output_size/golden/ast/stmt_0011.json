@@ -1,0 +1,77 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "roundToExp2",
+          "arguments": [
+            {
+              "left": {
+                "name": "max",
+                "arguments": [
+                  {
+                    "name": "blockSize"
+                  }
+                ]
+              },
+              "op": "+",
+              "right": {
+                "name": "sum",
+                "arguments": [
+                  {
+                    "name": "ignore",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "short"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "long_low_cardinality"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "file",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "03164_adapting_parquet_reader_output_size.parquet"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "input_format_parquet_prefer_block_bytes",
+          "value": {
+            "type": "Integer",
+            "value": 700000
+          }
+        },
+        {
+          "name": "input_format_parquet_use_native_reader_v3",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

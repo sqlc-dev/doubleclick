@@ -1,0 +1,118 @@
+{
+  "table": "versioned_collapsing_merge_tree_with_sampling",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "Int8"
+      }
+    },
+    {
+      "name": "z",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "VersionedCollapsingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "left": {
+          "name": "sipHash64",
+          "arguments": [
+            {
+              "parts": [
+                "a"
+              ]
+            }
+          ]
+        },
+        "op": "+",
+        "right": {
+          "parts": [
+            "b"
+          ]
+        }
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "a"
+            ]
+          },
+          {
+            "left": {
+              "name": "sipHash64",
+              "arguments": [
+                {
+                  "parts": [
+                    "a"
+                  ]
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "b"
+              ]
+            }
+          },
+          {
+            "parts": [
+              "b"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 111
+      },
+      {
+        "parts": [
+          "y"
+        ]
+      },
+      {
+        "parts": [
+          "b"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  }
+}

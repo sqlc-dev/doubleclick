@@ -1,0 +1,63 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "cityHash64",
+          "arguments": [
+            {
+              "left": {
+                "name": "rand"
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 1000
+              }
+            }
+          ],
+          "alias": "n"
+        },
+        {
+          "name": "groupBitmapState",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers_mt",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 200000000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "n"
+          ]
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

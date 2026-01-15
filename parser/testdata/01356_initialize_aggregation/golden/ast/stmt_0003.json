@@ -1,0 +1,77 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "topKWeightedMerge",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 10
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "state"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "initializeAggregation",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "topKWeightedState(10)"
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "state"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 1000
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

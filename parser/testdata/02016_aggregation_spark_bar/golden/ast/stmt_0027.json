@@ -1,0 +1,114 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "k",
+          "query": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "DIV",
+            "right": {
+              "type": "Integer",
+              "value": 50
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "value",
+          "query": {
+            "name": "toUInt32",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 50
+                }
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "k"
+          ]
+        },
+        {
+          "name": "sparkbar",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 50
+            },
+            {
+              "type": "Integer",
+              "value": 0
+            },
+            {
+              "type": "Integer",
+              "value": 99
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "parts": [
+                "value"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 100
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "alias": "queries"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "min",
+              "arguments": [
+                {
+                  "parts": [
+                    "memory_usage"
+                  ]
+                }
+              ]
+            },
+            "op": "\u003c",
+            "right": {
+              "type": "Integer",
+              "value": 20000000
+            }
+          },
+          "alias": "min_less_then_20mb"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "max",
+              "arguments": [
+                {
+                  "parts": [
+                    "memory_usage"
+                  ]
+                }
+              ]
+            },
+            "op": "\u003c",
+            "right": {
+              "type": "Integer",
+              "value": 20000000
+            }
+          },
+          "alias": "max_less_then_20mb"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "current_database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "QueryFinish"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "query_kind"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "Select"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "query"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%test_function(number, 0)%"
+          }
+        }
+      },
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

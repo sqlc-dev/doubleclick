@@ -1,0 +1,246 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "symbol",
+          "query": {
+            "name": "addressToSymbol",
+            "arguments": [
+              {
+                "name": "arrayJoin",
+                "arguments": [
+                  {
+                    "parts": [
+                      "trace"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "trace_log"
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "name": "greaterOrEquals",
+            "arguments": [
+              {
+                "parts": [
+                  "event_date"
+                ]
+              },
+              {
+                "name": "ignore",
+                "arguments": [
+                  {
+                    "name": "ignore",
+                    "arguments": [
+                      {
+                        "name": "ignore",
+                        "arguments": [
+                          {
+                            "type": "Null",
+                            "value": null
+                          },
+                          {
+                            "type": "String",
+                            "value": ""
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 256
+                  }
+                ]
+              },
+              {
+                "name": "yesterday"
+              }
+            ]
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "trace_type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "Memory"
+            },
+            "parenthesized": true
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "query_id"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "ignore",
+                      "arguments": [
+                        {
+                          "name": "ignore",
+                          "arguments": [
+                            {
+                              "name": "ignore",
+                              "arguments": [
+                                {
+                                  "name": "ignore",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 65536
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "name": "ignore",
+                              "arguments": [
+                                {
+                                  "type": "Integer",
+                                  "value": 65537
+                                }
+                              ]
+                            },
+                            {
+                              "name": "ignore",
+                              "arguments": [
+                                {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "String",
+                          "value": ""
+                        }
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "query_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "current_database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "event_date"
+                          ]
+                        },
+                        "op": "\u003e=",
+                        "right": {
+                          "name": "yesterday"
+                        },
+                        "parenthesized": true
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "expr": {
+                        "parts": [
+                          "query"
+                        ]
+                      },
+                      "pattern": {
+                        "type": "String",
+                        "value": "%test memory profiler%"
+                      }
+                    }
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "event_time"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          },
+          "parenthesized": true
+        }
+      }
+    }
+  ]
+}

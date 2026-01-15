@@ -1,0 +1,1393 @@
+{
+  "explain_type": "SYNTAX",
+  "statement": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "cs_ui",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "cs_item_sk"
+                        ]
+                      },
+                      {
+                        "name": "sum",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "cs_ext_list_price"
+                            ]
+                          }
+                        ],
+                        "alias": "sale"
+                      },
+                      {
+                        "name": "sum",
+                        "arguments": [
+                          {
+                            "left": {
+                              "left": {
+                                "parts": [
+                                  "cr_refunded_cash"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "parts": [
+                                  "cr_reversed_charge"
+                                ]
+                              },
+                              "parenthesized": true
+                            },
+                            "op": "+",
+                            "right": {
+                              "parts": [
+                                "cr_store_credit"
+                              ]
+                            }
+                          }
+                        ],
+                        "alias": "refund"
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "catalog_sales"
+                            }
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "catalog_returns"
+                            }
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "cs_item_sk"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "parts": [
+                            "cr_item_sk"
+                          ]
+                        },
+                        "parenthesized": true
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "cs_order_number"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "parts": [
+                            "cr_order_number"
+                          ]
+                        },
+                        "parenthesized": true
+                      }
+                    },
+                    "group_by": [
+                      {
+                        "parts": [
+                          "cs_item_sk"
+                        ]
+                      }
+                    ],
+                    "having": {
+                      "left": {
+                        "name": "sum",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "cs_ext_list_price"
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "\u003e",
+                      "right": {
+                        "left": {
+                          "type": "Integer",
+                          "value": 2
+                        },
+                        "op": "*",
+                        "right": {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "left": {
+                                "left": {
+                                  "parts": [
+                                    "cr_refunded_cash"
+                                  ]
+                                },
+                                "op": "+",
+                                "right": {
+                                  "parts": [
+                                    "cr_reversed_charge"
+                                  ]
+                                },
+                                "parenthesized": true
+                              },
+                              "op": "+",
+                              "right": {
+                                "parts": [
+                                  "cr_store_credit"
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        "parenthesized": true
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          },
+          {
+            "name": "cross_sales",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "i_product_name"
+                        ],
+                        "alias": "product_name"
+                      },
+                      {
+                        "parts": [
+                          "i_item_sk"
+                        ],
+                        "alias": "item_sk"
+                      },
+                      {
+                        "parts": [
+                          "s_store_name"
+                        ],
+                        "alias": "store_name"
+                      },
+                      {
+                        "parts": [
+                          "s_zip"
+                        ],
+                        "alias": "store_zip"
+                      },
+                      {
+                        "parts": [
+                          "ad1",
+                          "ca_street_number"
+                        ],
+                        "alias": "b_street_number"
+                      },
+                      {
+                        "parts": [
+                          "ad1",
+                          "ca_street_name"
+                        ],
+                        "alias": "b_street_name"
+                      },
+                      {
+                        "parts": [
+                          "ad1",
+                          "ca_city"
+                        ],
+                        "alias": "b_city"
+                      },
+                      {
+                        "parts": [
+                          "ad1",
+                          "ca_zip"
+                        ],
+                        "alias": "b_zip"
+                      },
+                      {
+                        "parts": [
+                          "ad2",
+                          "ca_street_number"
+                        ],
+                        "alias": "c_street_number"
+                      },
+                      {
+                        "parts": [
+                          "ad2",
+                          "ca_street_name"
+                        ],
+                        "alias": "c_street_name"
+                      },
+                      {
+                        "parts": [
+                          "ad2",
+                          "ca_city"
+                        ],
+                        "alias": "c_city"
+                      },
+                      {
+                        "parts": [
+                          "ad2",
+                          "ca_zip"
+                        ],
+                        "alias": "c_zip"
+                      },
+                      {
+                        "parts": [
+                          "d1",
+                          "d_year"
+                        ],
+                        "alias": "syear"
+                      },
+                      {
+                        "parts": [
+                          "d2",
+                          "d_year"
+                        ],
+                        "alias": "fsyear"
+                      },
+                      {
+                        "parts": [
+                          "d3",
+                          "d_year"
+                        ],
+                        "alias": "s2year"
+                      },
+                      {
+                        "name": "count",
+                        "arguments": [
+                          {}
+                        ],
+                        "alias": "cnt"
+                      },
+                      {
+                        "name": "sum",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "ss_wholesale_cost"
+                            ]
+                          }
+                        ],
+                        "alias": "s1"
+                      },
+                      {
+                        "name": "sum",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "ss_list_price"
+                            ]
+                          }
+                        ],
+                        "alias": "s2"
+                      },
+                      {
+                        "name": "sum",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "ss_coupon_amt"
+                            ]
+                          }
+                        ],
+                        "alias": "s3"
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "store_sales"
+                            }
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "store_returns"
+                            }
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "cs_ui"
+                            }
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "date_dim"
+                            },
+                            "alias": "d1"
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "date_dim"
+                            },
+                            "alias": "d2"
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "date_dim"
+                            },
+                            "alias": "d3"
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "store"
+                            }
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "customer"
+                            }
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "customer_demographics"
+                            },
+                            "alias": "cd1"
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "customer_demographics"
+                            },
+                            "alias": "cd2"
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "promotion"
+                            }
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "household_demographics"
+                            },
+                            "alias": "hd1"
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "household_demographics"
+                            },
+                            "alias": "hd2"
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "customer_address"
+                            },
+                            "alias": "ad1"
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "customer_address"
+                            },
+                            "alias": "ad2"
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "income_band"
+                            },
+                            "alias": "ib1"
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "income_band"
+                            },
+                            "alias": "ib2"
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "table": "item"
+                            }
+                          },
+                          "join": {
+                            "type": ""
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "left": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "left": {
+                                "left": {
+                                  "left": {
+                                    "left": {
+                                      "left": {
+                                        "left": {
+                                          "left": {
+                                            "left": {
+                                              "left": {
+                                                "left": {
+                                                  "left": {
+                                                    "left": {
+                                                      "left": {
+                                                        "left": {
+                                                          "left": {
+                                                            "left": {
+                                                              "left": {
+                                                                "left": {
+                                                                  "parts": [
+                                                                    "ss_store_sk"
+                                                                  ]
+                                                                },
+                                                                "op": "=",
+                                                                "right": {
+                                                                  "parts": [
+                                                                    "s_store_sk"
+                                                                  ]
+                                                                },
+                                                                "parenthesized": true
+                                                              },
+                                                              "op": "AND",
+                                                              "right": {
+                                                                "left": {
+                                                                  "parts": [
+                                                                    "ss_sold_date_sk"
+                                                                  ]
+                                                                },
+                                                                "op": "=",
+                                                                "right": {
+                                                                  "parts": [
+                                                                    "d1",
+                                                                    "d_date_sk"
+                                                                  ]
+                                                                },
+                                                                "parenthesized": true
+                                                              }
+                                                            },
+                                                            "op": "AND",
+                                                            "right": {
+                                                              "left": {
+                                                                "parts": [
+                                                                  "ss_customer_sk"
+                                                                ]
+                                                              },
+                                                              "op": "=",
+                                                              "right": {
+                                                                "parts": [
+                                                                  "c_customer_sk"
+                                                                ]
+                                                              },
+                                                              "parenthesized": true
+                                                            }
+                                                          },
+                                                          "op": "AND",
+                                                          "right": {
+                                                            "left": {
+                                                              "parts": [
+                                                                "ss_cdemo_sk"
+                                                              ]
+                                                            },
+                                                            "op": "=",
+                                                            "right": {
+                                                              "parts": [
+                                                                "cd1",
+                                                                "cd_demo_sk"
+                                                              ]
+                                                            },
+                                                            "parenthesized": true
+                                                          }
+                                                        },
+                                                        "op": "AND",
+                                                        "right": {
+                                                          "left": {
+                                                            "parts": [
+                                                              "ss_hdemo_sk"
+                                                            ]
+                                                          },
+                                                          "op": "=",
+                                                          "right": {
+                                                            "parts": [
+                                                              "hd1",
+                                                              "hd_demo_sk"
+                                                            ]
+                                                          },
+                                                          "parenthesized": true
+                                                        }
+                                                      },
+                                                      "op": "AND",
+                                                      "right": {
+                                                        "left": {
+                                                          "parts": [
+                                                            "ss_addr_sk"
+                                                          ]
+                                                        },
+                                                        "op": "=",
+                                                        "right": {
+                                                          "parts": [
+                                                            "ad1",
+                                                            "ca_address_sk"
+                                                          ]
+                                                        },
+                                                        "parenthesized": true
+                                                      }
+                                                    },
+                                                    "op": "AND",
+                                                    "right": {
+                                                      "left": {
+                                                        "parts": [
+                                                          "ss_item_sk"
+                                                        ]
+                                                      },
+                                                      "op": "=",
+                                                      "right": {
+                                                        "parts": [
+                                                          "i_item_sk"
+                                                        ]
+                                                      },
+                                                      "parenthesized": true
+                                                    }
+                                                  },
+                                                  "op": "AND",
+                                                  "right": {
+                                                    "left": {
+                                                      "parts": [
+                                                        "ss_item_sk"
+                                                      ]
+                                                    },
+                                                    "op": "=",
+                                                    "right": {
+                                                      "parts": [
+                                                        "sr_item_sk"
+                                                      ]
+                                                    },
+                                                    "parenthesized": true
+                                                  }
+                                                },
+                                                "op": "AND",
+                                                "right": {
+                                                  "left": {
+                                                    "parts": [
+                                                      "ss_ticket_number"
+                                                    ]
+                                                  },
+                                                  "op": "=",
+                                                  "right": {
+                                                    "parts": [
+                                                      "sr_ticket_number"
+                                                    ]
+                                                  },
+                                                  "parenthesized": true
+                                                }
+                                              },
+                                              "op": "AND",
+                                              "right": {
+                                                "left": {
+                                                  "parts": [
+                                                    "ss_item_sk"
+                                                  ]
+                                                },
+                                                "op": "=",
+                                                "right": {
+                                                  "parts": [
+                                                    "cs_ui",
+                                                    "cs_item_sk"
+                                                  ]
+                                                },
+                                                "parenthesized": true
+                                              }
+                                            },
+                                            "op": "AND",
+                                            "right": {
+                                              "left": {
+                                                "parts": [
+                                                  "c_current_cdemo_sk"
+                                                ]
+                                              },
+                                              "op": "=",
+                                              "right": {
+                                                "parts": [
+                                                  "cd2",
+                                                  "cd_demo_sk"
+                                                ]
+                                              },
+                                              "parenthesized": true
+                                            }
+                                          },
+                                          "op": "AND",
+                                          "right": {
+                                            "left": {
+                                              "parts": [
+                                                "c_current_hdemo_sk"
+                                              ]
+                                            },
+                                            "op": "=",
+                                            "right": {
+                                              "parts": [
+                                                "hd2",
+                                                "hd_demo_sk"
+                                              ]
+                                            },
+                                            "parenthesized": true
+                                          }
+                                        },
+                                        "op": "AND",
+                                        "right": {
+                                          "left": {
+                                            "parts": [
+                                              "c_current_addr_sk"
+                                            ]
+                                          },
+                                          "op": "=",
+                                          "right": {
+                                            "parts": [
+                                              "ad2",
+                                              "ca_address_sk"
+                                            ]
+                                          },
+                                          "parenthesized": true
+                                        }
+                                      },
+                                      "op": "AND",
+                                      "right": {
+                                        "left": {
+                                          "parts": [
+                                            "c_first_sales_date_sk"
+                                          ]
+                                        },
+                                        "op": "=",
+                                        "right": {
+                                          "parts": [
+                                            "d2",
+                                            "d_date_sk"
+                                          ]
+                                        },
+                                        "parenthesized": true
+                                      }
+                                    },
+                                    "op": "AND",
+                                    "right": {
+                                      "left": {
+                                        "parts": [
+                                          "c_first_shipto_date_sk"
+                                        ]
+                                      },
+                                      "op": "=",
+                                      "right": {
+                                        "parts": [
+                                          "d3",
+                                          "d_date_sk"
+                                        ]
+                                      },
+                                      "parenthesized": true
+                                    }
+                                  },
+                                  "op": "AND",
+                                  "right": {
+                                    "left": {
+                                      "parts": [
+                                        "ss_promo_sk"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "parts": [
+                                        "p_promo_sk"
+                                      ]
+                                    },
+                                    "parenthesized": true
+                                  }
+                                },
+                                "op": "AND",
+                                "right": {
+                                  "left": {
+                                    "parts": [
+                                      "hd1",
+                                      "hd_income_band_sk"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "parts": [
+                                      "ib1",
+                                      "ib_income_band_sk"
+                                    ]
+                                  },
+                                  "parenthesized": true
+                                }
+                              },
+                              "op": "AND",
+                              "right": {
+                                "left": {
+                                  "parts": [
+                                    "hd2",
+                                    "hd_income_band_sk"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "parts": [
+                                    "ib2",
+                                    "ib_income_band_sk"
+                                  ]
+                                },
+                                "parenthesized": true
+                              }
+                            },
+                            "op": "AND",
+                            "right": {
+                              "left": {
+                                "parts": [
+                                  "cd1",
+                                  "cd_marital_status"
+                                ]
+                              },
+                              "op": "!=",
+                              "right": {
+                                "parts": [
+                                  "cd2",
+                                  "cd_marital_status"
+                                ]
+                              },
+                              "parenthesized": true
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "expr": {
+                              "parts": [
+                                "i_color"
+                              ]
+                            },
+                            "list": [
+                              {
+                                "type": "String",
+                                "value": "maroon"
+                              },
+                              {
+                                "type": "String",
+                                "value": "burnished"
+                              },
+                              {
+                                "type": "String",
+                                "value": "dim"
+                              },
+                              {
+                                "type": "String",
+                                "value": "steel"
+                              },
+                              {
+                                "type": "String",
+                                "value": "navajo"
+                              },
+                              {
+                                "type": "String",
+                                "value": "chocolate"
+                              }
+                            ]
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "i_current_price"
+                              ]
+                            },
+                            "op": "\u003e=",
+                            "right": {
+                              "type": "Integer",
+                              "value": 35
+                            },
+                            "parenthesized": true
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "i_current_price"
+                              ]
+                            },
+                            "op": "\u003c=",
+                            "right": {
+                              "left": {
+                                "type": "Integer",
+                                "value": 35
+                              },
+                              "op": "+",
+                              "right": {
+                                "type": "Integer",
+                                "value": 10
+                              },
+                              "parenthesized": true
+                            },
+                            "parenthesized": true
+                          },
+                          "parenthesized": true
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "i_current_price"
+                            ]
+                          },
+                          "op": "\u003e=",
+                          "right": {
+                            "left": {
+                              "type": "Integer",
+                              "value": 35
+                            },
+                            "op": "+",
+                            "right": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "parenthesized": true
+                          },
+                          "parenthesized": true
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "i_current_price"
+                            ]
+                          },
+                          "op": "\u003c=",
+                          "right": {
+                            "left": {
+                              "type": "Integer",
+                              "value": 35
+                            },
+                            "op": "+",
+                            "right": {
+                              "type": "Integer",
+                              "value": 15
+                            },
+                            "parenthesized": true
+                          },
+                          "parenthesized": true
+                        },
+                        "parenthesized": true
+                      }
+                    },
+                    "group_by": [
+                      {
+                        "parts": [
+                          "i_product_name"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "i_item_sk"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "s_store_name"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "s_zip"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "ad1",
+                          "ca_street_number"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "ad1",
+                          "ca_street_name"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "ad1",
+                          "ca_city"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "ad1",
+                          "ca_zip"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "ad2",
+                          "ca_street_number"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "ad2",
+                          "ca_street_name"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "ad2",
+                          "ca_city"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "ad2",
+                          "ca_zip"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "d1",
+                          "d_year"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "d2",
+                          "d_year"
+                        ]
+                      },
+                      {
+                        "parts": [
+                          "d3",
+                          "d_year"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          }
+        ],
+        "columns": [
+          {
+            "parts": [
+              "cs1",
+              "product_name"
+            ]
+          },
+          {
+            "parts": [
+              "cs1",
+              "store_name"
+            ]
+          },
+          {
+            "parts": [
+              "cs1",
+              "store_zip"
+            ]
+          },
+          {
+            "parts": [
+              "cs1",
+              "b_street_number"
+            ]
+          },
+          {
+            "parts": [
+              "cs1",
+              "b_street_name"
+            ]
+          },
+          {
+            "parts": [
+              "cs1",
+              "b_city"
+            ]
+          },
+          {
+            "parts": [
+              "cs1",
+              "b_zip"
+            ]
+          },
+          {
+            "parts": [
+              "cs1",
+              "c_street_number"
+            ]
+          },
+          {
+            "parts": [
+              "cs1",
+              "c_street_name"
+            ]
+          },
+          {
+            "parts": [
+              "cs1",
+              "c_city"
+            ]
+          },
+          {
+            "parts": [
+              "cs1",
+              "c_zip"
+            ]
+          },
+          {
+            "parts": [
+              "cs1",
+              "syear"
+            ]
+          },
+          {
+            "parts": [
+              "cs1",
+              "cnt"
+            ]
+          },
+          {
+            "parts": [
+              "cs1",
+              "s1"
+            ],
+            "alias": "s11"
+          },
+          {
+            "parts": [
+              "cs1",
+              "s2"
+            ],
+            "alias": "s21"
+          },
+          {
+            "parts": [
+              "cs1",
+              "s3"
+            ],
+            "alias": "s31"
+          },
+          {
+            "parts": [
+              "cs2",
+              "s1"
+            ],
+            "alias": "s12"
+          },
+          {
+            "parts": [
+              "cs2",
+              "s2"
+            ],
+            "alias": "s22"
+          },
+          {
+            "parts": [
+              "cs2",
+              "s3"
+            ],
+            "alias": "s32"
+          },
+          {
+            "parts": [
+              "cs2",
+              "syear"
+            ]
+          },
+          {
+            "parts": [
+              "cs2",
+              "cnt"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "cross_sales"
+                },
+                "alias": "cs1"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "cross_sales"
+                },
+                "alias": "cs2"
+              },
+              "join": {
+                "type": ""
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "cs1",
+                        "item_sk"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "parts": [
+                        "cs2",
+                        "item_sk"
+                      ]
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "cs1",
+                        "syear"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 2000
+                    },
+                    "parenthesized": true
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "cs2",
+                      "syear"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "left": {
+                      "type": "Integer",
+                      "value": 2000
+                    },
+                    "op": "+",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "parenthesized": true
+                  },
+                  "parenthesized": true
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "cs2",
+                    "cnt"
+                  ]
+                },
+                "op": "\u003c=",
+                "right": {
+                  "parts": [
+                    "cs1",
+                    "cnt"
+                  ]
+                },
+                "parenthesized": true
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "cs1",
+                  "store_name"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "parts": [
+                  "cs2",
+                  "store_name"
+                ]
+              },
+              "parenthesized": true
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "cs1",
+                "store_zip"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "cs2",
+                "store_zip"
+              ]
+            },
+            "parenthesized": true
+          }
+        },
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "cs1",
+                "product_name"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "cs1",
+                "store_name"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "cs2",
+                "cnt"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "cs1",
+                "s1"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "cs2",
+                "s1"
+              ]
+            }
+          }
+        ],
+        "format": {
+          "parts": [
+            "Null"
+          ]
+        }
+      }
+    ]
+  },
+  "explicit_type": true
+}

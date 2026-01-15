@@ -1,0 +1,97 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "ts"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "toUInt32",
+                "arguments": [
+                  {
+                    "name": "toDateTime",
+                    "arguments": [
+                      {
+                        "name": "toString",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "ts"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "type": "Integer",
+                              "value": 10000
+                            },
+                            "op": "+",
+                            "right": {
+                              "left": {
+                                "type": "Integer",
+                                "value": 1234
+                              },
+                              "op": "*",
+                              "right": {
+                                "parts": [
+                                  "number"
+                                ]
+                              }
+                            }
+                          },
+                          "alias": "ts"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 1000000
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

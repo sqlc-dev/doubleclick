@@ -1,0 +1,92 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "data"
+          ]
+        },
+        {
+          "parts": [
+            "_size"
+          ]
+        },
+        {
+          "parts": [
+            "_file"
+          ]
+        },
+        {
+          "parts": [
+            "_path"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "s3Cluster",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "test_cluster_two_shards"
+                  },
+                  {
+                    "parts": [
+                      "s3_conn"
+                    ]
+                  },
+                  {
+                    "left": {
+                      "parts": [
+                        "filename"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": "03036_archive*.zip :: example*.csv"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "id"
+                ]
+              },
+              {
+                "parts": [
+                  "_file"
+                ]
+              },
+              {
+                "parts": [
+                  "_path"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        }
+      ]
+    }
+  ]
+}

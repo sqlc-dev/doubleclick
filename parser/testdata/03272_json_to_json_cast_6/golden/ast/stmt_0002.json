@@ -1,0 +1,74 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "{\"a\" : [{\"b\" : 42}]}"
+          },
+          "type": {
+            "name": "JSON",
+            "parameters": [
+              {
+                "expr": {
+                  "name": "a",
+                  "type": {
+                    "name": "Array",
+                    "parameters": [
+                      {
+                        "name": "JSON"
+                      }
+                    ],
+                    "has_parentheses": true
+                  }
+                }
+              }
+            ],
+            "has_parentheses": true
+          },
+          "alias": "json",
+          "operator_syntax": true
+        },
+        {
+          "parts": [
+            "json",
+            "a",
+            "b"
+          ]
+        },
+        {
+          "expr": {
+            "parts": [
+              "json"
+            ]
+          },
+          "type": {
+            "name": "JSON"
+          },
+          "alias": "json2",
+          "operator_syntax": true
+        },
+        {
+          "name": "dynamicType",
+          "arguments": [
+            {
+              "parts": [
+                "json2",
+                "a"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "json2",
+            "a",
+            ":`Array(JSON)`",
+            "b"
+          ]
+        }
+      ]
+    }
+  ]
+}

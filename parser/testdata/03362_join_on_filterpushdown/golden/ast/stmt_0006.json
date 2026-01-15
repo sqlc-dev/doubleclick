@@ -1,0 +1,163 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "key"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "value"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 100
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "key"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "value"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 100
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "key"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "key"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "t1",
+              "value"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "Integer",
+            "value": 50
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "t2",
+              "value"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "Integer",
+            "value": 50
+          }
+        }
+      },
+      "settings": [
+        {
+          "name": "log_comment",
+          "value": {
+            "type": "String",
+            "value": "03362_join_on_filterpushdown_left_where"
+          }
+        }
+      ],
+      "settings_after_format": true,
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

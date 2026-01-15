@@ -1,0 +1,50 @@
+{
+  "table": "min_max_with_nullable_string",
+  "columns": [
+    {
+      "name": "t",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "nullable_str",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "nullable_str_min_max",
+      "expression": {
+        "parts": [
+          "nullable_str"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "t"
+      ]
+    }
+  ]
+}

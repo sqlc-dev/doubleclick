@@ -1,0 +1,312 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "type": "Integer",
+            "value": 1
+          },
+          "op": "*",
+          "right": {
+            "type": "Float",
+            "value": 1000.0001,
+            "source": "1000.0001"
+          }
+        },
+        {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "name": "count",
+                    "arguments": [
+                      {
+                        "type": "Float",
+                        "value": 1,
+                        "source": "1."
+                      }
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "op": "-",
+                    "operand": {
+                      "type": "Integer",
+                      "value": 2147483647
+                    }
+                  },
+                  "parenthesized": true
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "name": "count",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "a"
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Float",
+                    "value": 1.1920928955078125e-7,
+                    "source": "1.1920928955078125e-7"
+                  },
+                  "parenthesized": true
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "name": "count",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "val"
+                      ]
+                    }
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 1048577
+                },
+                "parenthesized": true
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "name": "sum",
+                "arguments": [
+                  {
+                    "parts": [
+                      "val"
+                    ]
+                  }
+                ]
+              },
+              "op": "=",
+              "right": {
+                "left": {
+                  "left": {
+                    "type": "Null",
+                    "value": null
+                  },
+                  "op": "*",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1048576
+                  },
+                  "parenthesized": true
+                },
+                "op": "/",
+                "right": {
+                  "op": "-",
+                  "operand": {
+                    "type": "Integer",
+                    "value": 9223372036854775807
+                  }
+                },
+                "parenthesized": true
+              },
+              "parenthesized": true
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "a"
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "left": {
+                "left": {
+                  "type": "Integer",
+                  "value": 9223372036854775806
+                },
+                "op": "*",
+                "right": {
+                  "type": "Float",
+                  "value": 10000000000,
+                  "source": "10000000000."
+                },
+                "parenthesized": true
+              },
+              "op": "/",
+              "right": {
+                "type": "Integer",
+                "value": 1048575
+              },
+              "parenthesized": true
+            },
+            "parenthesized": true
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "a"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "val"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t1"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t2"
+                              }
+                            },
+                            "join": {
+                              "type": "FULL",
+                              "on": {
+                                "left": {
+                                  "left": {
+                                    "left": {
+                                      "parts": [
+                                        "t1",
+                                        "a"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "parts": [
+                                        "t2",
+                                        "key"
+                                      ]
+                                    },
+                                    "parenthesized": true
+                                  },
+                                  "op": "OR",
+                                  "right": {
+                                    "left": {
+                                      "type": "Integer",
+                                      "value": 1
+                                    },
+                                    "op": "*",
+                                    "right": {
+                                      "type": "Float",
+                                      "value": "+Inf"
+                                    },
+                                    "parenthesized": true
+                                  }
+                                },
+                                "op": "OR",
+                                "right": {
+                                  "left": {
+                                    "parts": [
+                                      "t1",
+                                      "b"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "parts": [
+                                      "t2",
+                                      "key"
+                                    ]
+                                  },
+                                  "parenthesized": true
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "type": "String",
+          "value": "65537"
+        }
+      ],
+      "with_cube": true,
+      "settings": [
+        {
+          "name": "max_block_size",
+          "value": {
+            "type": "Integer",
+            "value": 100
+          }
+        },
+        {
+          "name": "join_use_nulls",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "max_execution_time",
+          "value": {
+            "type": "Float",
+            "value": 1,
+            "source": "1."
+          }
+        },
+        {
+          "name": "max_result_rows",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "name": "max_result_bytes",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "settings_after_format": true,
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

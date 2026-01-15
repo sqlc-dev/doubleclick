@@ -1,0 +1,283 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "queries",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "query_id"
+                      ]
+                    },
+                    {
+                      "name": "row_number",
+                      "over": {
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "event_time_microseconds"
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "alias": "ordinal"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "type"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "String",
+                            "value": "QueryFinish"
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "current_database"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "name": "currentDatabase"
+                          }
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "query_kind"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "Select"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "array": {
+                          "parts": [
+                            "Settings"
+                          ]
+                        },
+                        "index": {
+                          "type": "String",
+                          "value": "min_bytes_to_use_direct_io"
+                        }
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "1"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "queries",
+            "ordinal"
+          ]
+        },
+        {
+          "parts": [
+            "thread_name"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "array": {
+                    "parts": [
+                      "ProfileEvents"
+                    ]
+                  },
+                  "index": {
+                    "type": "String",
+                    "value": "OSReadBytes"
+                  }
+                }
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          "alias": "disk_reading"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_thread_log"
+              },
+              "alias": "qtl"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "queries"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "queries",
+                    "query_id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "qtl",
+                    "query_id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "query_id"
+              ]
+            },
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "query_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "queries"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "OSReadBytes"
+            }
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      },
+      "group_by": [
+        {
+          "type": "Integer",
+          "value": 1
+        },
+        {
+          "type": "Integer",
+          "value": 2
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ]
+    }
+  ]
+}

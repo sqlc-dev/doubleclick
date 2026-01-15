@@ -1,0 +1,80 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "type": "Integer",
+            "value": 2
+          },
+          "op": "+",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              },
+              "alias": "X"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              },
+              "alias": "Y"
+            },
+            "join": {
+              "type": "RIGHT",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "X",
+                      "dummy"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                },
+                "op": "=",
+                "right": {
+                  "name": "toUInt16",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "Y",
+                        "dummy"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "join_use_nulls",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

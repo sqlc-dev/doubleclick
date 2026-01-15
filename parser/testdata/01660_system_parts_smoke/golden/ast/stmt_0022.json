@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "name": "count"
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            {
+              "type": "String",
+              "value": "HAVE PARTS"
+            },
+            {
+              "type": "String",
+              "value": "NO PARTS"
+            }
+          ]
+        },
+        {
+          "parts": [
+            "_state"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "table"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "data_01660"
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "_state"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "_state"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

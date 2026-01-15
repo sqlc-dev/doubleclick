@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 1
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t0"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t0"
+              },
+              "alias": "tx"
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ASOF",
+              "on": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t0"
+              },
+              "alias": "ty"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t0",
+                    "c0"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "ty",
+                    "c0"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "allow_general_join_planning",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

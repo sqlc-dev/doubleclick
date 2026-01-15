@@ -1,0 +1,115 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toYYYYMM",
+          "arguments": [
+            {
+              "parts": [
+                "date"
+              ]
+            }
+          ],
+          "alias": "date_"
+        },
+        {
+          "parts": [
+            "n"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "name": "toDate",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "20230815"
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "toDate",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "20230816"
+                                  }
+                                ]
+                              }
+                            ],
+                            "spaced_commas": true
+                          },
+                          "alias": "date"
+                        },
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            ],
+                            "spaced_commas": true
+                          },
+                          "alias": "n"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "data"
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "date"
+                  ]
+                },
+                {
+                  "parts": [
+                    "n"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "date_"
+          ]
+        },
+        "op": "\u003e=",
+        "right": {
+          "type": "Integer",
+          "value": 202303
+        }
+      }
+    }
+  ]
+}

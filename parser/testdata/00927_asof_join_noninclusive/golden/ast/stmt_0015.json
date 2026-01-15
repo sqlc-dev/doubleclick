@@ -1,0 +1,139 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "A",
+            "k"
+          ]
+        },
+        {
+          "name": "toString",
+          "arguments": [
+            {
+              "parts": [
+                "A",
+                "t"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "UTC"
+            }
+          ]
+        },
+        {
+          "parts": [
+            "A",
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "B",
+            "b"
+          ]
+        },
+        {
+          "name": "toString",
+          "arguments": [
+            {
+              "parts": [
+                "B",
+                "t"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "UTC"
+            }
+          ]
+        },
+        {
+          "parts": [
+            "B",
+            "k"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "A"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "B"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ASOF",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "A",
+                      "k"
+                    ]
+                  },
+                  "op": "==",
+                  "right": {
+                    "parts": [
+                      "B",
+                      "k"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "A",
+                      "t"
+                    ]
+                  },
+                  "op": "\u003e=",
+                  "right": {
+                    "parts": [
+                      "B",
+                      "t"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "A",
+                  "k"
+                ]
+              },
+              {
+                "parts": [
+                  "A",
+                  "t"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        }
+      ]
+    }
+  ]
+}

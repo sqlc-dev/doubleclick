@@ -1,0 +1,63 @@
+{
+  "table": "ttl_03519_1",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date32"
+      }
+    },
+    {
+      "name": "date_key",
+      "type": {
+        "name": "Int"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "date"
+      ]
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "date"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "value": {
+          "type": "Integer",
+          "value": 1
+        },
+        "unit": "MONTH"
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "date"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 1
+            },
+            "unit": "MONTH"
+          }
+        }
+      }
+    ]
+  }
+}

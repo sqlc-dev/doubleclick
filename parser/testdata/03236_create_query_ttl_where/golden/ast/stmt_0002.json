@@ -1,0 +1,103 @@
+{
+  "table": "ttl",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "timestamp"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "name": "toIntervalSecond",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 2
+          }
+        ]
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "timestamp"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "name": "toIntervalSecond",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "where": {
+          "expr": {
+            "parts": [
+              "a"
+            ]
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "database": "system",
+                          "table": "numbers"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "limit": {
+                  "type": "Integer",
+                  "value": 100000
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

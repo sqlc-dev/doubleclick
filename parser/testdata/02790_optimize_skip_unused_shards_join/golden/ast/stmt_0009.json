@@ -1,0 +1,208 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "name": "if",
+              "arguments": [
+                {
+                  "left": {
+                    "parts": [
+                      "inner_distributed",
+                      "id"
+                    ]
+                  },
+                  "op": "!=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                },
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "type": "Integer",
+                  "value": 0
+                }
+              ]
+            }
+          ],
+          "alias": "total"
+        },
+        {
+          "parts": [
+            "inner_distributed",
+            "date"
+          ],
+          "alias": "date"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "outer_distributed"
+              },
+              "alias": "outer_distributed",
+              "final": true
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "inner_distributed",
+                            "outer_id"
+                          ],
+                          "alias": "outer_id"
+                        },
+                        {
+                          "parts": [
+                            "inner_distributed",
+                            "id"
+                          ],
+                          "alias": "id"
+                        },
+                        {
+                          "parts": [
+                            "inner_distributed",
+                            "date"
+                          ],
+                          "alias": "date"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "inner_distributed"
+                              },
+                              "alias": "inner_distributed",
+                              "final": true
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "inner_distributed",
+                            "organization_id"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 15078
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "inner_distributed"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "inner_distributed",
+                    "outer_id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "outer_distributed",
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "outer_distributed",
+              "organization_id"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 15078
+          },
+          "parenthesized": true
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "date"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "1970-01-01"
+              }
+            ]
+          },
+          "parenthesized": true
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "date"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "date"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "settings": [
+        {
+          "name": "distributed_product_mode",
+          "value": {
+            "type": "String",
+            "value": "local"
+          }
+        },
+        {
+          "name": "optimize_skip_unused_shards",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

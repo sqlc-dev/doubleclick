@@ -1,0 +1,143 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "if",
+                          "arguments": [
+                            {
+                              "left": {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "%",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 0
+                              }
+                            },
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1000
+                              }
+                            }
+                          ],
+                          "alias": "k"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 100
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "s1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "dict_flat"
+              },
+              "alias": "d"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "k"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "key"
+                    ]
+                  }
+                },
+                "op": "OR",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "k"
+                    ]
+                  },
+                  "op": "==",
+                  "right": {
+                    "left": {
+                      "type": "Integer",
+                      "value": 1000
+                    },
+                    "op": "*",
+                    "right": {
+                      "parts": [
+                        "key"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "key"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,577 @@
+{
+  "table": "projection_test",
+  "columns": [
+    {
+      "name": "sum(block_count)",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "domain_alias",
+      "type": {
+        "name": "UInt64"
+      },
+      "default": {
+        "name": "length",
+        "arguments": [
+          {
+            "parts": [
+              "domain"
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "datetime",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "domain",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "x_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "y_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "block_count",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "retry_count",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "duration",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "kbytes",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "buffer_time",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "first_time",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "total_bytes",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "valid_bytes",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "completed_bytes",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "fixed_bytes",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "force_bytes",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p",
+      "select": {
+        "columns": [
+          {
+            "name": "toStartOfMinute",
+            "arguments": [
+              {
+                "parts": [
+                  "datetime"
+                ]
+              }
+            ],
+            "alias": "dt_m"
+          },
+          {
+            "left": {
+              "name": "countIf",
+              "arguments": [
+                {
+                  "left": {
+                    "parts": [
+                      "first_time"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "name": "count"
+            }
+          },
+          {
+            "name": "avg",
+            "arguments": [
+              {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "kbytes"
+                    ]
+                  },
+                  "op": "*",
+                  "right": {
+                    "type": "Integer",
+                    "value": 8
+                  },
+                  "parenthesized": true
+                },
+                "op": "/",
+                "right": {
+                  "parts": [
+                    "duration"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "count"
+          },
+          {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "block_count"
+                  ]
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "duration"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "avg",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "block_count"
+                  ]
+                },
+                "op": "/",
+                "right": {
+                  "parts": [
+                    "duration"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "buffer_time"
+                  ]
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "duration"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "avg",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "buffer_time"
+                  ]
+                },
+                "op": "/",
+                "right": {
+                  "parts": [
+                    "duration"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "valid_bytes"
+                  ]
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "total_bytes"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "completed_bytes"
+                  ]
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "total_bytes"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "fixed_bytes"
+                  ]
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "total_bytes"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "force_bytes"
+                  ]
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "total_bytes"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "valid_bytes"
+                  ]
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "total_bytes"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "retry_count"
+                  ]
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "duration"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "avg",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "retry_count"
+                  ]
+                },
+                "op": "/",
+                "right": {
+                  "parts": [
+                    "duration"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "left": {
+              "name": "countIf",
+              "arguments": [
+                {
+                  "left": {
+                    "parts": [
+                      "block_count"
+                    ]
+                  },
+                  "op": "\u003e",
+                  "right": {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "name": "count"
+            }
+          },
+          {
+            "left": {
+              "name": "countIf",
+              "arguments": [
+                {
+                  "left": {
+                    "parts": [
+                      "first_time"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "name": "count"
+            }
+          },
+          {
+            "name": "uniqHLL12",
+            "arguments": [
+              {
+                "parts": [
+                  "x_id"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "uniqHLL12",
+            "arguments": [
+              {
+                "parts": [
+                  "y_id"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "dt_m"
+            ]
+          },
+          {
+            "parts": [
+              "domain"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "toStartOfTenMinutes",
+      "arguments": [
+        {
+          "parts": [
+            "datetime"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDate",
+    "arguments": [
+      {
+        "parts": [
+          "datetime"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "Integer",
+        "value": 10000000
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

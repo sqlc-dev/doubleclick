@@ -1,0 +1,92 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "input",
+          "query": {
+            "expr": {
+              "type": "String",
+              "value": "text"
+            },
+            "type": {
+              "name": "Nullable",
+              "parameters": [
+                {
+                  "name": "String"
+                }
+              ],
+              "has_parentheses": true
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "mode",
+          "query": {
+            "type": "String",
+            "value": "aes-256-ofb"
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "input"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "hex",
+          "arguments": [
+            {
+              "name": "aes_encrypt_mysql",
+              "arguments": [
+                {
+                  "parts": [
+                    "mode"
+                  ]
+                },
+                {
+                  "parts": [
+                    "input"
+                  ]
+                },
+                {
+                  "parts": [
+                    "key32"
+                  ]
+                },
+                {
+                  "parts": [
+                    "iv"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "encryption_test"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

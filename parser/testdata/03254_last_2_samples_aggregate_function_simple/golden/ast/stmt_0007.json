@@ -1,0 +1,119 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "metric_id"
+          ]
+        },
+        {
+          "parts": [
+            "grid_timestamp"
+          ]
+        },
+        {
+          "type": "Tuple",
+          "value": [
+            {
+              "expr": {
+                "tuple": {
+                  "name": "finalizeAggregation",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "samples"
+                      ]
+                    }
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              "alias": "timestamp"
+            },
+            {
+              "expr": {
+                "tuple": {
+                  "name": "finalizeAggregation",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "samples"
+                      ]
+                    }
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              },
+              "alias": "value"
+            }
+          ],
+          "spaced_commas": true
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t_resampled_timeseries_15_sec"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "metric_id"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 3
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "grid_timestamp"
+            ]
+          },
+          "low": {
+            "type": "String",
+            "value": "2024-12-12 12:00:15"
+          },
+          "high": {
+            "type": "String",
+            "value": "2024-12-12 12:00:30"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "metric_id"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "grid_timestamp"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

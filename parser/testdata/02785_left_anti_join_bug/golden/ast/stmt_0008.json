@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "104857.5"
+                          },
+                          "type": {
+                            "name": "Float32"
+                          }
+                        },
+                        {
+                          "name": "corr",
+                          "arguments": [
+                            {
+                              "type": "Null",
+                              "value": null
+                            },
+                            {
+                              "parts": [
+                                "id"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "id"
+                              ]
+                            }
+                          ],
+                          "alias": "corr_value"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test_table__fuzz_3"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "value"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "subquery"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test_table"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANTI",
+              "on": {
+                "left": {
+                  "parts": [
+                    "subquery",
+                    "corr_value"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "test_table",
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

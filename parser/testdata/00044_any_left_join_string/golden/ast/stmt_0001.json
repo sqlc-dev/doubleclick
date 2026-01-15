@@ -1,0 +1,164 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "domain"
+          ]
+        },
+        {
+          "parts": [
+            "hits"
+          ]
+        },
+        {
+          "parts": [
+            "visits"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "domain",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "URL"
+                              ]
+                            }
+                          ],
+                          "alias": "domain"
+                        },
+                        {
+                          "name": "count",
+                          "alias": "hits"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "test",
+                                "table": "hits"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "domain"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "domain",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "StartURL"
+                              ]
+                            }
+                          ],
+                          "alias": "domain"
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "Sign"
+                              ]
+                            }
+                          ],
+                          "alias": "visits"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "test",
+                                "table": "visits"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "domain"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "domain"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "hits"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      },
+      "settings": [
+        {
+          "name": "joined_subquery_requires_alias",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

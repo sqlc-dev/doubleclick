@@ -1,0 +1,48 @@
+{
+  "table": "ip_part_test",
+  "columns": [
+    {
+      "name": "ipv4",
+      "type": {
+        "name": "IPv4"
+      }
+    },
+    {
+      "name": "ipv6",
+      "type": {
+        "name": "IPv6"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "ipv6"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "ipv6"
+    ]
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "type": "String",
+            "value": "1.2.3.4"
+          },
+          {
+            "type": "String",
+            "value": "::ffff:1.2.3.4"
+          }
+        ]
+      }
+    ]
+  }
+}

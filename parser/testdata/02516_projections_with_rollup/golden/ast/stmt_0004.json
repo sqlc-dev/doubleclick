@@ -1,0 +1,94 @@
+{
+  "table": "video_log",
+  "columns": [
+    {
+      "name": "datetime",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "user_id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "device_id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "domain",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "bytes",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "duration",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "user_id"
+          ]
+        },
+        {
+          "parts": [
+            "device_id"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDate",
+    "arguments": [
+      {
+        "parts": [
+          "datetime"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "Integer",
+        "value": 10485760
+      }
+    },
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

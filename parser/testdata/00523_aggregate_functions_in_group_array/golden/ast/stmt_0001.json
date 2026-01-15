@@ -1,0 +1,173 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "key2"
+          ]
+        },
+        {
+          "name": "arrayReduce",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "uniqExactMerge"
+            },
+            {
+              "parts": [
+                "arr"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "key1"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 3
+                            }
+                          },
+                          "alias": "key2"
+                        },
+                        {
+                          "name": "groupArray",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "state"
+                              ]
+                            }
+                          ],
+                          "alias": "arr"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "left": {
+                                              "parts": [
+                                                "number"
+                                              ]
+                                            },
+                                            "op": "%",
+                                            "right": {
+                                              "type": "Integer",
+                                              "value": 10
+                                            }
+                                          },
+                                          "alias": "key1"
+                                        },
+                                        {
+                                          "name": "uniqExactState",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "number"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "state"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "query": {
+                                                  "selects": [
+                                                    {
+                                                      "columns": [
+                                                        {}
+                                                      ],
+                                                      "from": {
+                                                        "tables": [
+                                                          {
+                                                            "table": {
+                                                              "table": {
+                                                                "database": "system",
+                                                                "table": "numbers"
+                                                              }
+                                                            }
+                                                          }
+                                                        ]
+                                                      },
+                                                      "limit": {
+                                                        "type": "Integer",
+                                                        "value": 100
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "key1"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "key2"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "key2"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

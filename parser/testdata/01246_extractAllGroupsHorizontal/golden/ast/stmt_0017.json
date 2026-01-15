@@ -1,0 +1,156 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "haystack"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "matches"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "array": {
+                "parts": [
+                  "matches"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          ]
+        },
+        {
+          "name": "arrayReduce",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "sum"
+            },
+            {
+              "name": "arrayMap",
+              "arguments": [
+                {
+                  "parameters": [
+                    "x"
+                  ],
+                  "body": {
+                    "name": "length",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "x"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "array": {
+                    "parts": [
+                      "matches"
+                    ]
+                  },
+                  "index": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "repeat",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "abcdefghijklmnopqrstuvwxyz"
+                            },
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            }
+                          ],
+                          "alias": "haystack"
+                        },
+                        {
+                          "name": "extractAllGroupsHorizontal",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "haystack"
+                              ]
+                            },
+                            {
+                              "type": "String",
+                              "value": "(\\w)"
+                            }
+                          ],
+                          "alias": "matches"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 3
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "topLevelDomain",
+          "arguments": [
+            {
+              "name": "concat",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "http://"
+                },
+                {
+                  "parts": [
+                    "k"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "tld"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "u"
+              ]
+            }
+          ],
+          "alias": "u"
+        },
+        {
+          "name": "uniqMerge",
+          "arguments": [
+            {
+              "parts": [
+                "us"
+              ]
+            }
+          ],
+          "alias": "us"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "domain",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "URL"
+                              ]
+                            }
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "name": "uniq",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "UserID"
+                              ]
+                            }
+                          ],
+                          "alias": "u"
+                        },
+                        {
+                          "name": "uniqState",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "UserID"
+                              ]
+                            }
+                          ],
+                          "alias": "us"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "test",
+                                "table": "hits"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "k"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "tld"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "u"
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "tld"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 100
+      }
+    }
+  ]
+}

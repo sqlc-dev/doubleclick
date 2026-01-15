@@ -1,0 +1,83 @@
+{
+  "table": "02162_test_dictionary",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "range_value",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "start",
+      "type": {
+        "name": "UInt64"
+      },
+      "expression": {
+        "parts": [
+          "range_value"
+        ]
+      }
+    },
+    {
+      "name": "end",
+      "type": {
+        "name": "UInt64"
+      },
+      "expression": {
+        "parts": [
+          "range_value"
+        ]
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "id"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "02162_test_table"
+          }
+        }
+      ]
+    },
+    "lifetime": {},
+    "layout": {
+      "type": "RANGE_HASHED"
+    },
+    "range": {
+      "min": {
+        "parts": [
+          "start"
+        ]
+      },
+      "max": {
+        "parts": [
+          "end"
+        ]
+      }
+    }
+  }
+}

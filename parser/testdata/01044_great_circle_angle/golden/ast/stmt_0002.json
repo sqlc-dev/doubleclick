@@ -1,0 +1,113 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "lon",
+          "query": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "-",
+            "right": {
+              "type": "Integer",
+              "value": 180
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "lon"
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "expr": {
+                "left": {
+                  "name": "greatCircleAngle",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 0
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 0
+                    },
+                    {
+                      "parts": [
+                        "lon"
+                      ]
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 0
+                    }
+                  ]
+                },
+                "op": "-",
+                "right": {
+                  "name": "abs",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "lon"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "err"
+            },
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 360
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "abs",
+          "arguments": [
+            {
+              "parts": [
+                "err"
+              ]
+            }
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Float",
+          "value": 0.01,
+          "source": "0.01"
+        }
+      }
+    }
+  ]
+}

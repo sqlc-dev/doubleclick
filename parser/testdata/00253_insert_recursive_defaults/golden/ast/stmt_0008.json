@@ -1,0 +1,191 @@
+{
+  "table": "elog_cut",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "name": "toDate",
+        "arguments": [
+          {
+            "parts": [
+              "uts"
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "uts",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "pr",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "ya_uid",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "adf_uid",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "owner_id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "eff_uid",
+      "type": {
+        "name": "UInt64"
+      },
+      "default": {
+        "name": "if",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "adf_uid"
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          {
+            "parts": [
+              "adf_uid"
+            ]
+          },
+          {
+            "parts": [
+              "ya_uid"
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "page_session",
+      "type": {
+        "name": "UInt64"
+      },
+      "default": {
+        "name": "cityHash64",
+        "arguments": [
+          {
+            "parts": [
+              "eff_uid"
+            ]
+          },
+          {
+            "parts": [
+              "pr"
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "sample_key",
+      "type": {
+        "name": "UInt64"
+      },
+      "default": {
+        "parts": [
+          "page_session"
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "date"
+        ]
+      },
+      {
+        "name": "cityHash64",
+        "arguments": [
+          {
+            "parts": [
+              "adf_uid"
+            ]
+          },
+          {
+            "parts": [
+              "ya_uid"
+            ]
+          },
+          {
+            "parts": [
+              "pr"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "owner_id"
+            ]
+          },
+          {
+            "parts": [
+              "date"
+            ]
+          },
+          {
+            "name": "cityHash64",
+            "arguments": [
+              {
+                "parts": [
+                  "adf_uid"
+                ]
+              },
+              {
+                "parts": [
+                  "ya_uid"
+                ]
+              },
+              {
+                "parts": [
+                  "pr"
+                ]
+              }
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

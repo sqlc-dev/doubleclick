@@ -1,0 +1,64 @@
+{
+  "table": "mytable_local",
+  "columns": [
+    {
+      "name": "created",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "eventday",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "user_id",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "eventday"
+          ]
+        },
+        {
+          "parts": [
+            "user_id"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "eventday"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "number_of_free_entries_in_pool_to_lower_max_size_of_merge",
+      "value": {
+        "type": "Integer",
+        "value": 100
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

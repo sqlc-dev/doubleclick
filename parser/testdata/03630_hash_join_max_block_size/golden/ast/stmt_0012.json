@@ -1,0 +1,102 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "customers",
+                            "customer_id"
+                          ],
+                          "alias": "dim_customers_id"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "b_orders"
+                              },
+                              "alias": "orders"
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "b_customers"
+                              },
+                              "alias": "customers"
+                            },
+                            "join": {
+                              "type": "RIGHT",
+                              "strictness": "ANY",
+                              "on": {
+                                "left": {
+                                  "parts": [
+                                    "orders",
+                                    "order_id"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "parts": [
+                                    "customers",
+                                    "first_order_id"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "b_addresses"
+                              },
+                              "alias": "shipping_addresses"
+                            },
+                            "join": {
+                              "type": "LEFT",
+                              "strictness": "ANY",
+                              "on": {
+                                "left": {
+                                  "parts": [
+                                    "shipping_addresses",
+                                    "address_id"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "parts": [
+                                    "orders",
+                                    "address_id"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

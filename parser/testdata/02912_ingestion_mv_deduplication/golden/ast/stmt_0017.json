@@ -1,0 +1,96 @@
+{
+  "view": "mv",
+  "materialized": true,
+  "engine": {
+    "name": "ReplicatedSummingMergeTree",
+    "parameters": [
+      {
+        "left": {
+          "left": {
+            "type": "String",
+            "value": "/clickhouse/"
+          },
+          "op": "||",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "||",
+        "right": {
+          "type": "String",
+          "value": "/mv/{shard}/"
+        }
+      },
+      {
+        "type": "String",
+        "value": "{replica}"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "hour"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMMDD",
+    "arguments": [
+      {
+        "parts": [
+          "hour"
+        ]
+      }
+    ]
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "toStartOfHour",
+            "arguments": [
+              {
+                "parts": [
+                  "time"
+                ]
+              }
+            ],
+            "alias": "hour"
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ],
+            "alias": "sum_amount"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "landing"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "hour"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

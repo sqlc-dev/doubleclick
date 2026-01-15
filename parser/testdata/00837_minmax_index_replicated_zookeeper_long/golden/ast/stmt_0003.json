@@ -1,0 +1,240 @@
+{
+  "table": "minmax_idx1",
+  "columns": [
+    {
+      "name": "u64",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "i32",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "f64",
+      "type": {
+        "name": "Float64"
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "Decimal",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 10
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "e",
+      "type": {
+        "name": "Enum8",
+        "parameters": [
+          {
+            "left": {
+              "type": "String",
+              "value": "a"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "b"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "c"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "dt",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_all",
+      "expression": {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "i32"
+            ]
+          },
+          {
+            "left": {
+              "parts": [
+                "i32"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "f64"
+              ]
+            }
+          },
+          {
+            "parts": [
+              "d"
+            ]
+          },
+          {
+            "parts": [
+              "s"
+            ]
+          },
+          {
+            "parts": [
+              "e"
+            ]
+          },
+          {
+            "parts": [
+              "dt"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "idx_2",
+      "expression": {
+        "type": "Tuple",
+        "value": [
+          {
+            "left": {
+              "parts": [
+                "u64"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "name": "toYear",
+              "arguments": [
+                {
+                  "parts": [
+                    "dt"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "substring",
+            "arguments": [
+              {
+                "parts": [
+                  "s"
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 2
+              },
+              {
+                "type": "Integer",
+                "value": 4
+              }
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 3
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_00837/minmax"
+      },
+      {
+        "type": "String",
+        "value": "r1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "u64"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 2
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

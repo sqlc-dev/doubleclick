@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "UserID"
+          ]
+        },
+        {
+          "name": "uniq",
+          "arguments": [
+            {
+              "parts": [
+                "SearchPhrase"
+              ]
+            }
+          ],
+          "alias": "m"
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits_s3"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "UserID"
+          ]
+        },
+        {
+          "parts": [
+            "SearchPhrase"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "UserID"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "m"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

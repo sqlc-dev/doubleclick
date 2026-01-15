@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toStartOfMinute",
+          "arguments": [
+            {
+              "parts": [
+                "datetime"
+              ]
+            }
+          ],
+          "alias": "dt_m"
+        },
+        {
+          "name": "count"
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "block_count"
+                ]
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "duration"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "block_count"
+                ]
+              },
+              "op": "/",
+              "right": {
+                "parts": [
+                  "duration"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "projection_test"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "dt_m"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "dt_m"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

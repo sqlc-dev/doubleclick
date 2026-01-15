@@ -1,0 +1,60 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "compound_value",
+          "query": {
+            "expr": {
+              "name": "tuple",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                }
+              ]
+            },
+            "type": {
+              "name": "Tuple (value UInt64)"
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "table": "test_table",
+          "transformers": [
+            {
+              "type": "apply",
+              "apply_lambda": {
+                "parameters": [
+                  "x"
+                ],
+                "body": {
+                  "table": "compound_value"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_table"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

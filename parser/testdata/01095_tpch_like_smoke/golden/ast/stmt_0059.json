@@ -1,0 +1,503 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "l_extendedprice"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "left": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "op": "-",
+                "right": {
+                  "parts": [
+                    "l_discount"
+                  ]
+                },
+                "parenthesized": true
+              }
+            }
+          ],
+          "alias": "revenue"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "lineitem"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "part"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "p_partkey"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "parts": [
+                              "l_partkey"
+                            ]
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "p_brand"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "String",
+                            "value": "Brand#12"
+                          }
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "expr": {
+                          "parts": [
+                            "p_container"
+                          ]
+                        },
+                        "list": [
+                          {
+                            "type": "String",
+                            "value": "SM CASE"
+                          },
+                          {
+                            "type": "String",
+                            "value": "SM BOX"
+                          },
+                          {
+                            "type": "String",
+                            "value": "SM PACK"
+                          },
+                          {
+                            "type": "String",
+                            "value": "SM PKG"
+                          }
+                        ]
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "l_quantity"
+                        ]
+                      },
+                      "op": "\u003e=",
+                      "right": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "l_quantity"
+                      ]
+                    },
+                    "op": "\u003c=",
+                    "right": {
+                      "left": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "op": "+",
+                      "right": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "expr": {
+                    "parts": [
+                      "p_size"
+                    ]
+                  },
+                  "low": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "high": {
+                    "type": "Integer",
+                    "value": 5
+                  }
+                }
+              },
+              "op": "AND",
+              "right": {
+                "expr": {
+                  "parts": [
+                    "l_shipmode"
+                  ]
+                },
+                "list": [
+                  {
+                    "type": "String",
+                    "value": "AIR"
+                  },
+                  {
+                    "type": "String",
+                    "value": "AIR REG"
+                  }
+                ]
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "l_shipinstruct"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "DELIVER IN PERSON"
+              }
+            },
+            "parenthesized": true
+          },
+          "op": "OR",
+          "right": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "p_partkey"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "parts": [
+                              "l_partkey"
+                            ]
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "p_brand"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "String",
+                            "value": "Brand#23"
+                          }
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "expr": {
+                          "parts": [
+                            "p_container"
+                          ]
+                        },
+                        "list": [
+                          {
+                            "type": "String",
+                            "value": "MED BAG"
+                          },
+                          {
+                            "type": "String",
+                            "value": "MED BOX"
+                          },
+                          {
+                            "type": "String",
+                            "value": "MED PKG"
+                          },
+                          {
+                            "type": "String",
+                            "value": "MED PACK"
+                          }
+                        ]
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "l_quantity"
+                        ]
+                      },
+                      "op": "\u003e=",
+                      "right": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "l_quantity"
+                      ]
+                    },
+                    "op": "\u003c=",
+                    "right": {
+                      "left": {
+                        "type": "Integer",
+                        "value": 10
+                      },
+                      "op": "+",
+                      "right": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "expr": {
+                    "parts": [
+                      "p_size"
+                    ]
+                  },
+                  "low": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "high": {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                }
+              },
+              "op": "AND",
+              "right": {
+                "expr": {
+                  "parts": [
+                    "l_shipmode"
+                  ]
+                },
+                "list": [
+                  {
+                    "type": "String",
+                    "value": "AIR"
+                  },
+                  {
+                    "type": "String",
+                    "value": "AIR REG"
+                  }
+                ]
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "l_shipinstruct"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "DELIVER IN PERSON"
+              }
+            },
+            "parenthesized": true
+          }
+        },
+        "op": "OR",
+        "right": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "p_partkey"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "parts": [
+                            "l_partkey"
+                          ]
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "p_brand"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "Brand#34"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "expr": {
+                        "parts": [
+                          "p_container"
+                        ]
+                      },
+                      "list": [
+                        {
+                          "type": "String",
+                          "value": "LG CASE"
+                        },
+                        {
+                          "type": "String",
+                          "value": "LG BOX"
+                        },
+                        {
+                          "type": "String",
+                          "value": "LG PACK"
+                        },
+                        {
+                          "type": "String",
+                          "value": "LG PKG"
+                        }
+                      ]
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "l_quantity"
+                      ]
+                    },
+                    "op": "\u003e=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 20
+                    }
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "l_quantity"
+                    ]
+                  },
+                  "op": "\u003c=",
+                  "right": {
+                    "left": {
+                      "type": "Integer",
+                      "value": 20
+                    },
+                    "op": "+",
+                    "right": {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  }
+                }
+              },
+              "op": "AND",
+              "right": {
+                "expr": {
+                  "parts": [
+                    "p_size"
+                  ]
+                },
+                "low": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "high": {
+                  "type": "Integer",
+                  "value": 15
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "l_shipmode"
+                ]
+              },
+              "list": [
+                {
+                  "type": "String",
+                  "value": "AIR"
+                },
+                {
+                  "type": "String",
+                  "value": "AIR REG"
+                }
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "l_shipinstruct"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "DELIVER IN PERSON"
+            }
+          },
+          "parenthesized": true
+        }
+      }
+    }
+  ]
+}

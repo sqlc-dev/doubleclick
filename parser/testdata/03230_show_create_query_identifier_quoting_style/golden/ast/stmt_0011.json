@@ -1,0 +1,89 @@
+{
+  "table": "uk_prices_aggs_dest",
+  "columns": [
+    {
+      "name": "month",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "min_price",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "min"
+            ]
+          },
+          {
+            "name": "UInt32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "max_price",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "max"
+            ]
+          },
+          {
+            "name": "UInt32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "volume",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "count"
+            ]
+          },
+          {
+            "name": "UInt32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "avg_price",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "avg"
+            ]
+          },
+          {
+            "name": "UInt32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree"
+  },
+  "primary_key": [
+    {
+      "parts": [
+        "month"
+      ]
+    }
+  ]
+}

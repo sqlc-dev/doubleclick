@@ -1,0 +1,223 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "d",
+          "query": {
+            "left": {
+              "left": {
+                "type": "Integer",
+                "value": 60
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 60
+              },
+              "parenthesized": true
+            },
+            "op": "*",
+            "right": {
+              "type": "Integer",
+              "value": 24
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "toStartOfDay",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "alias": "k"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "y"
+              ]
+            }
+          ],
+          "alias": "v"
+        },
+        {
+          "expr": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "z"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "parts": [
+                      "d"
+                    ]
+                  },
+                  "parenthesized": true
+                },
+                "op": "*",
+                "right": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "z"
+                      ]
+                    },
+                    "op": "+",
+                    "right": {
+                      "parts": [
+                        "d"
+                      ]
+                    }
+                  },
+                  "op": "-",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "parenthesized": true
+                }
+              },
+              "op": "/",
+              "right": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            "op": "-",
+            "right": {
+              "left": {
+                "left": {
+                  "name": "toUInt64",
+                  "arguments": [
+                    {
+                      "left": {
+                        "parts": [
+                          "k"
+                        ]
+                      },
+                      "op": "-",
+                      "right": {
+                        "name": "toDateTime",
+                        "arguments": [
+                          {
+                            "type": "String",
+                            "value": "2000-01-01"
+                          },
+                          {
+                            "type": "String",
+                            "value": "UTC"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "alias": "z"
+                },
+                "op": "*",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "z"
+                    ]
+                  },
+                  "op": "-",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "parenthesized": true
+                }
+              },
+              "op": "/",
+              "right": {
+                "type": "Integer",
+                "value": 2
+              }
+            }
+          },
+          "alias": "est"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "est"
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "v"
+              ]
+            }
+          },
+          "alias": "delta"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "tab"
+              },
+              "final": true
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "max_threads",
+          "value": {
+            "type": "Integer",
+            "value": 8
+          }
+        },
+        {
+          "name": "optimize_aggregation_in_order",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "split_parts_ranges_into_intersecting_and_non_intersecting_final",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

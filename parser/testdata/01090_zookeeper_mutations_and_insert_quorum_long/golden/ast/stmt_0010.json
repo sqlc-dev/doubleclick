@@ -1,0 +1,63 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "COUNT"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "mutations"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "table"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "mutations_and_quorum%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "is_done"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      }
+    }
+  ]
+}

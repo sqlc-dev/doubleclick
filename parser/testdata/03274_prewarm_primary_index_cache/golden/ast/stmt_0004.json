@@ -1,0 +1,73 @@
+{
+  "table": "t_prewarm_cache_rmt_2",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/03274_prewarm_mark_cache_smt/t_prewarm_cache"
+      },
+      {
+        "type": "String",
+        "value": "2"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "parts": [
+        "a"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 2
+    }
+  },
+  "settings": [
+    {
+      "name": "prewarm_primary_key_cache",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "use_primary_key_cache",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

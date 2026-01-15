@@ -1,0 +1,99 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "text_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "event_time"
+                ]
+              },
+              "op": "\u003e=",
+              "right": {
+                "left": {
+                  "name": "now"
+                },
+                "op": "-",
+                "right": {
+                  "value": {
+                    "type": "Integer",
+                    "value": 120
+                  },
+                  "unit": "SECOND"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "level"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "type": "String",
+                "value": "Error"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "message"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%CHECKSUM_DOESNT_MATCH%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "logger_name"
+            ]
+          },
+          "pattern": {
+            "left": {
+              "left": {
+                "type": "String",
+                "value": "%"
+              },
+              "op": "||",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "||",
+            "right": {
+              "type": "String",
+              "value": "%checksums_r%"
+            },
+            "parenthesized": true
+          }
+        }
+      }
+    }
+  ]
+}

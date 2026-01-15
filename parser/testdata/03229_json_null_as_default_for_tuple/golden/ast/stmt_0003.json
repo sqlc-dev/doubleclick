@@ -1,0 +1,57 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "name": "materialize",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "{\"a\" : [[1, {}], null]}"
+              }
+            ]
+          },
+          "type": {
+            "name": "JSON"
+          },
+          "alias": "json",
+          "operator_syntax": true
+        },
+        {
+          "name": "getSubcolumn",
+          "arguments": [
+            {
+              "parts": [
+                "json"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "a"
+            }
+          ]
+        },
+        {
+          "name": "dynamicType",
+          "arguments": [
+            {
+              "name": "getSubcolumn",
+              "arguments": [
+                {
+                  "parts": [
+                    "json"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "a"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

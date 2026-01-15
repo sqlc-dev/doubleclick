@@ -1,0 +1,86 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toHour",
+          "arguments": [
+            {
+              "name": "toTimeZone",
+              "arguments": [
+                {
+                  "parts": [
+                    "t"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "UTC"
+                }
+              ]
+            }
+          ],
+          "alias": "toHour_UTC"
+        },
+        {
+          "name": "toHour",
+          "arguments": [
+            {
+              "name": "toTimeZone",
+              "arguments": [
+                {
+                  "parts": [
+                    "t"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "Asia/Jerusalem"
+                }
+              ]
+            }
+          ],
+          "alias": "toHour_Israel"
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_tz_hour"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "toHour_Israel"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 8
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "toHour_UTC"
+          ]
+        },
+        {
+          "parts": [
+            "toHour_Israel"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "argMax",
+          "arguments": [
+            {
+              "name": "untuple",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Tuple",
+                            "value": [
+                              {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "+",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              }
+                            ],
+                            "spaced_commas": true
+                          },
+                          "alias": "x"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "having": {
+        "left": {
+          "tuple": {
+            "name": "tuple",
+            "arguments": [
+              {
+                "name": "untuple",
+                "arguments": [
+                  {
+                    "name": "min",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "x"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "index": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        "op": "!=",
+        "right": {
+          "type": "Integer",
+          "value": 42
+        }
+      }
+    }
+  ]
+}

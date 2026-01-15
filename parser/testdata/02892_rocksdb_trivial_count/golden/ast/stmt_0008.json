@@ -1,0 +1,68 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "total_rows"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "total_bytes"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "tables"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "dict"
+          }
+        }
+      },
+      "format": {
+        "parts": [
+          "CSV"
+        ]
+      }
+    }
+  ]
+}

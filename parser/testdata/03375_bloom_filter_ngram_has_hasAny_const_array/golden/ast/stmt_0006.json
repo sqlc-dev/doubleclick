@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trimLeft",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            }
+          ],
+          "alias": "explain"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "bf"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "bloom_filter_has_const_array"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "name": "has",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "String",
+                                  "value": "a"
+                                },
+                                {
+                                  "type": "String",
+                                  "value": "d"
+                                }
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "bf"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "indexes = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "Description%"
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "Granules%"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "table": "ttl_00933_1",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "Int"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "toDate",
+      "arguments": [
+        {
+          "parts": [
+            "d"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "tuple"
+  },
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "d"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "value": {
+          "type": "Integer",
+          "value": 1
+        },
+        "unit": "SECOND"
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "d"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 1
+            },
+            "unit": "SECOND"
+          }
+        }
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "remove_empty_parts",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

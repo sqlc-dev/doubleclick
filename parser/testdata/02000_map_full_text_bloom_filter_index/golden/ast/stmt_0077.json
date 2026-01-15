@@ -1,0 +1,147 @@
+{
+  "table": "bf_ngrambf_map_keys_test",
+  "columns": [
+    {
+      "name": "row_id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "map",
+      "type": {
+        "name": "Map",
+        "parameters": [
+          {
+            "name": "String"
+          },
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "map_fixed",
+      "type": {
+        "name": "Map",
+        "parameters": [
+          {
+            "name": "FixedString",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 2
+              }
+            ],
+            "has_parentheses": true
+          },
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "map_keys_ngrambf",
+      "expression": {
+        "name": "mapKeys",
+        "arguments": [
+          {
+            "parts": [
+              "map"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "ngrambf_v1",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 4
+          },
+          {
+            "type": "Integer",
+            "value": 256
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          },
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "map_fixed_keys_ngrambf",
+      "expression": {
+        "name": "mapKeys",
+        "arguments": [
+          {
+            "parts": [
+              "map_fixed"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "ngrambf_v1",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 4
+          },
+          {
+            "type": "Integer",
+            "value": 256
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          },
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "row_id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

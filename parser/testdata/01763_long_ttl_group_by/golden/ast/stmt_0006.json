@@ -1,0 +1,85 @@
+{
+  "table": "test_ttl_group_by01763",
+  "columns": [
+    {
+      "parts": [
+        "key"
+      ]
+    },
+    {
+      "parts": [
+        "ts"
+      ]
+    },
+    {
+      "parts": [
+        "value"
+      ]
+    }
+  ],
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 5
+              }
+            },
+            "alias": "key"
+          },
+          {
+            "left": {
+              "left": {
+                "name": "now"
+              },
+              "op": "-",
+              "right": {
+                "value": {
+                  "type": "Integer",
+                  "value": 2
+                },
+                "unit": "MONTH"
+              }
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "number"
+              ]
+            }
+          },
+          {
+            "type": "Integer",
+            "value": 1
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 100000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

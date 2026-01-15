@@ -1,0 +1,210 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "start_ts",
+          "query": {
+            "expr": {
+              "type": "String",
+              "value": "2024-12-12 12:00:15"
+            },
+            "type": {
+              "name": "DateTime64",
+              "parameters": [
+                {
+                  "type": "Integer",
+                  "value": 3
+                },
+                {
+                  "type": "String",
+                  "value": "UTC"
+                }
+              ],
+              "has_parentheses": true
+            },
+            "operator_syntax": true
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "end_ts",
+          "query": {
+            "left": {
+              "parts": [
+                "start_ts"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 60
+              },
+              "unit": "SECOND"
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "step_seconds",
+          "query": {
+            "type": "Integer",
+            "value": 15
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "window_seconds",
+          "query": {
+            "type": "Integer",
+            "value": 45
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "metric_id"
+          ]
+        },
+        {
+          "name": "timeSeriesInstantDeltaToGrid",
+          "parameters": [
+            {
+              "parts": [
+                "start_ts"
+              ]
+            },
+            {
+              "parts": [
+                "end_ts"
+              ]
+            },
+            {
+              "parts": [
+                "step_seconds"
+              ]
+            },
+            {
+              "parts": [
+                "window_seconds"
+              ]
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "timestamp"
+              ]
+            },
+            {
+              "parts": [
+                "value"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "timeSeriesInstantRateToGrid",
+          "parameters": [
+            {
+              "parts": [
+                "start_ts"
+              ]
+            },
+            {
+              "parts": [
+                "end_ts"
+              ]
+            },
+            {
+              "parts": [
+                "step_seconds"
+              ]
+            },
+            {
+              "parts": [
+                "window_seconds"
+              ]
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "timestamp"
+              ]
+            },
+            {
+              "parts": [
+                "value"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t_raw_timeseries"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "metric_id"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 3
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "timestamp"
+            ]
+          },
+          "low": {
+            "left": {
+              "parts": [
+                "start_ts"
+              ]
+            },
+            "op": "-",
+            "right": {
+              "value": {
+                "parts": [
+                  "window_seconds"
+                ]
+              },
+              "unit": "SECONDS"
+            }
+          },
+          "high": {
+            "parts": [
+              "end_ts"
+            ]
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "metric_id"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "quantileTiming",
+          "parameters": [
+            {
+              "type": "Float",
+              "value": 0.5,
+              "source": "0.5"
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "t"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "quantileTimingWeighted",
+          "parameters": [
+            {
+              "type": "Float",
+              "value": 0.5,
+              "source": "0.5"
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "t"
+              ]
+            },
+            {
+              "parts": [
+                "w"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "t"
+                        },
+                        {
+                          "expr": {
+                            "condition": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 77
+                              }
+                            },
+                            "then": {
+                              "type": "Integer",
+                              "value": 10
+                            },
+                            "else": {
+                              "type": "Integer",
+                              "value": 0
+                            }
+                          },
+                          "alias": "w"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 100
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

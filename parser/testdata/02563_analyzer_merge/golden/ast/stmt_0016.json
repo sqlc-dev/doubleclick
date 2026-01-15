@@ -1,0 +1,79 @@
+{
+  "database": "02563_db",
+  "table": "t_1",
+  "columns": [
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 9
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "timestamp"
+          ]
+        },
+        {
+          "parts": [
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "b"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "formatDateTime",
+    "arguments": [
+      {
+        "name": "toStartOfMinute",
+        "arguments": [
+          {
+            "parts": [
+              "timestamp"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "String",
+        "value": "%Y%m%d%H"
+      },
+      {
+        "type": "String",
+        "value": "UTC"
+      }
+    ]
+  }
+}

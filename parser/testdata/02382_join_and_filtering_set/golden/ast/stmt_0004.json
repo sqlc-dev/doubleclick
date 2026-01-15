@@ -1,0 +1,100 @@
+{
+  "table": "t2",
+  "columns": [
+    {
+      "name": "x",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "y"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "name": "sipHash64",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "t2_x"
+                  }
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 100
+              }
+            },
+            "alias": "x"
+          },
+          {
+            "expr": {
+              "left": {
+                "name": "sipHash64",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "t2_y"
+                  }
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 100
+              }
+            },
+            "alias": "y"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 100
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

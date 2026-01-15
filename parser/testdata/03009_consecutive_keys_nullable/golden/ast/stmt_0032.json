@@ -1,0 +1,116 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "array": {
+              "name": "splitByChar",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "."
+                },
+                {
+                  "array": {
+                    "parts": [
+                      "tables"
+                    ]
+                  },
+                  "index": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "alias": "table"
+        },
+        {
+          "left": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "AggregationOptimizedEqualRangesOfKeys"
+            }
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "query"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%SELECT%FROM%t_nullable_keys_%"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "table"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

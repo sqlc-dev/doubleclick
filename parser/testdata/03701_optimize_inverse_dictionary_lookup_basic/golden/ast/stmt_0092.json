@@ -1,0 +1,119 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "t1",
+            "color_id"
+          ]
+        },
+        {
+          "parts": [
+            "t1",
+            "payload"
+          ]
+        },
+        {
+          "parts": [
+            "t2",
+            "payload"
+          ],
+          "alias": "payload2"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "color_id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "color_id"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "name": "dictGetString",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "colors"
+                      },
+                      {
+                        "type": "String",
+                        "value": "name"
+                      },
+                      {
+                        "parts": [
+                          "t1",
+                          "color_id"
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "String",
+                    "value": "red"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "t1",
+              "color_id"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "t1",
+              "payload"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "payload2"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

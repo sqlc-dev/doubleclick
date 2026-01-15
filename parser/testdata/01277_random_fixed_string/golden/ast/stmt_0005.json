@@ -1,0 +1,136 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "c"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 30000
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "name": "arrayMap",
+                              "arguments": [
+                                {
+                                  "parameters": [
+                                    "x"
+                                  ],
+                                  "body": {
+                                    "name": "reinterpretAsUInt8",
+                                    "arguments": [
+                                      {
+                                        "name": "substring",
+                                        "arguments": [
+                                          {
+                                            "name": "randomFixedString",
+                                            "arguments": [
+                                              {
+                                                "type": "Integer",
+                                                "value": 100
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "left": {
+                                              "parts": [
+                                                "x"
+                                              ]
+                                            },
+                                            "op": "+",
+                                            "right": {
+                                              "type": "Integer",
+                                              "value": 1
+                                            }
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "name": "range",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 100
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "byte"
+                        },
+                        {
+                          "name": "count",
+                          "alias": "c"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 100000
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "byte"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "byte"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

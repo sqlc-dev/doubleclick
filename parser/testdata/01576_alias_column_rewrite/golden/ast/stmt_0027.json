@@ -1,0 +1,108 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "struct",
+                  "key"
+                ]
+              }
+            ]
+          },
+          "op": "==",
+          "right": {
+            "type": "Integer",
+            "value": 30
+          }
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "struct",
+                  "value"
+                ]
+              }
+            ]
+          },
+          "op": "==",
+          "right": {
+            "type": "Integer",
+            "value": 30
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "struct",
+                            "key"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "struct",
+                            "value"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test_table"
+                              }
+                            }
+                          },
+                          {
+                            "array_join": {
+                              "columns": [
+                                {
+                                  "parts": [
+                                    "struct"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "day"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "2020-01-01"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "t_uuid"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "name": "cityHash64",
+                        "arguments": [
+                          {
+                            "name": "reinterpretAsString",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "x"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "name": "cityHash64",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "x"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "name": "length",
+                        "arguments": [
+                          {
+                            "name": "reinterpretAsString",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "x"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "Integer",
+                        "value": 16
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "op": "=",
+          "right": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count",
+                      "alias": "c2"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "t_uuid"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "name": "length",
+                      "arguments": [
+                        {
+                          "name": "reinterpretAsString",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "x"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 16
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,238 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "parts": [
+                "is_initial_query"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "inital"
+            },
+            {
+              "type": "String",
+              "value": "secondary"
+            }
+          ]
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "left": {
+                  "name": "toUInt64OrZero",
+                  "arguments": [
+                    {
+                      "array": {
+                        "parts": [
+                          "Settings"
+                        ]
+                      },
+                      "index": {
+                        "type": "String",
+                        "value": "parallel_replicas_insert_select_local_pipeline"
+                      }
+                    }
+                  ]
+                },
+                "op": "==",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              "op": "AND",
+              "right": {
+                "parts": [
+                  "is_initial_query"
+                ]
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            },
+            {
+              "type": "Integer",
+              "value": 8
+            }
+          ],
+          "alias": "threads_limit"
+        },
+        {
+          "name": "least",
+          "arguments": [
+            {
+              "parts": [
+                "peak_threads_usage"
+              ]
+            },
+            {
+              "parts": [
+                "threads_limit"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "format",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "local_pipeline={}"
+            },
+            {
+              "array": {
+                "parts": [
+                  "Settings"
+                ]
+              },
+              "index": {
+                "type": "String",
+                "value": "parallel_replicas_insert_select_local_pipeline"
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "current_database"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "name": "currentDatabase"
+                  }
+                },
+                "op": "OR",
+                "right": {
+                  "name": "has",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "databases"
+                      ]
+                    },
+                    {
+                      "name": "currentDatabase"
+                    }
+                  ]
+                },
+                "parenthesized": true
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "type"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "QueryFinish"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "array": {
+                  "parts": [
+                    "Settings"
+                  ]
+                },
+                "index": {
+                  "type": "String",
+                  "value": "allow_experimental_parallel_reading_from_replicas"
+                }
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "1"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "query_kind"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "Insert"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "name": "has",
+          "arguments": [
+            {
+              "parts": [
+                "tables"
+              ]
+            },
+            {
+              "left": {
+                "name": "currentDatabase"
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": ".t_rmt_target"
+              }
+            }
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "allow_experimental_parallel_reading_from_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

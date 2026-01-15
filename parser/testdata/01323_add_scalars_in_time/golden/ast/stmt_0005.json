@@ -1,0 +1,120 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "arr1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "type": "Integer",
+                          "value": 0
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 2
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 3
+                        }
+                      ],
+                      "spaced_commas": true
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "arraySort",
+          "arguments": [
+            {
+              "name": "arrayIntersect",
+              "arguments": [
+                {
+                  "name": "argMax",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "seqs"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "create_time"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "parts": [
+                    "arr1"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "common"
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "tags"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "id"
+          ]
+        },
+        "pattern": {
+          "type": "String",
+          "value": "id%"
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

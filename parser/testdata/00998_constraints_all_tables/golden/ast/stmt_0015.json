@@ -1,0 +1,49 @@
+{
+  "table": "constrained",
+  "columns": [
+    {
+      "name": "URL",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "name": "is_censor",
+      "expression": {
+        "left": {
+          "name": "domainWithoutWWW",
+          "arguments": [
+            {
+              "parts": [
+                "URL"
+              ]
+            }
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "censor.net"
+        }
+      }
+    },
+    {
+      "name": "is_utf8",
+      "expression": {
+        "name": "isValidUTF8",
+        "arguments": [
+          {
+            "parts": [
+              "URL"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "StripeLog"
+  }
+}

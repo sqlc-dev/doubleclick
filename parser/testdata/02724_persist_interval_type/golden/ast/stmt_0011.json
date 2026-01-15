@@ -1,0 +1,79 @@
+{
+  "table": "t1",
+  "select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "c",
+            "query": {
+              "name": "toDateTime64",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2023-01-01 00:00:00.000000001"
+                },
+                {
+                  "type": "Integer",
+                  "value": 9
+                },
+                {
+                  "type": "String",
+                  "value": "US/Eastern"
+                }
+              ]
+            },
+            "scalar_with": true
+          }
+        ],
+        "columns": [
+          {
+            "field": "MINUTE",
+            "from": {
+              "left": {
+                "parts": [
+                  "c"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "name": "toIntervalSecond",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "op": "*",
+                    "right": {
+                      "type": "Integer",
+                      "value": 60
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "table": "url",
+  "columns": [
+    {
+      "name": "n",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "col",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "URL",
+    "parameters": [
+      {
+        "name": "replace",
+        "arguments": [
+          {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "type": "String",
+                      "value": "https://localhost:"
+                    },
+                    "op": "||",
+                    "right": {
+                      "name": "getServerPort",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "https_port"
+                        }
+                      ]
+                    }
+                  },
+                  "op": "||",
+                  "right": {
+                    "type": "String",
+                    "value": "/?query="
+                  }
+                },
+                "op": "||",
+                "right": {
+                  "type": "String",
+                  "value": "select n, _table from "
+                }
+              },
+              "op": "||",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "||",
+            "right": {
+              "type": "String",
+              "value": ".merge format CSV"
+            }
+          },
+          {
+            "type": "String",
+            "value": " "
+          },
+          {
+            "type": "String",
+            "value": "+"
+          }
+        ]
+      },
+      {
+        "parts": [
+          "CSV"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  }
+}

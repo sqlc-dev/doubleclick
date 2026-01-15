@@ -1,0 +1,95 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "bs"
+                ]
+              }
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "Integer",
+            "value": 70000
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "avg",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "a"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "max",
+                          "arguments": [
+                            {
+                              "name": "blockSize"
+                            }
+                          ],
+                          "alias": "bs"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "test_cluster_two_shards"
+                                    ]
+                                  },
+                                  {
+                                    "name": "currentDatabase"
+                                  },
+                                  {
+                                    "parts": [
+                                      "t"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "a"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

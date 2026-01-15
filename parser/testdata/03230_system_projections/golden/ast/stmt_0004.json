@@ -1,0 +1,78 @@
+{
+  "table": "projections_2",
+  "columns": [
+    {
+      "name": "name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "frequency",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "agg",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "name"
+            ]
+          },
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "frequency"
+                ]
+              }
+            ],
+            "alias": "max_frequency"
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "name"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "agg_no_key",
+      "select": {
+        "columns": [
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "frequency"
+                ]
+              }
+            ],
+            "alias": "max_frequency"
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "name"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "table": "stored_aggregates",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "toDate",
+            "arguments": [
+              {
+                "left": {
+                  "name": "toUInt16",
+                  "arguments": [
+                    {
+                      "name": "toDate",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "2014-06-01"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "name": "intDiv",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 100
+                    }
+                  ]
+                }
+              }
+            ],
+            "alias": "d"
+          },
+          {
+            "name": "uniqState",
+            "arguments": [
+              {
+                "name": "intDiv",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "op": "+",
+                    "right": {
+                      "type": "Integer",
+                      "value": 50
+                    }
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            ],
+            "alias": "Uniq"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "database": "system",
+                                  "table": "numbers"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "limit": {
+                          "type": "Integer",
+                          "value": 1000
+                        },
+                        "offset": {
+                          "type": "Integer",
+                          "value": 500
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "d"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

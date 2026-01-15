@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "tj"
+              }
+            },
+            "join": {
+              "type": "RIGHT",
+              "strictness": "ALL",
+              "on": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "t",
+                        "key1"
+                      ]
+                    },
+                    "op": "+",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  },
+                  "op": "==",
+                  "right": {
+                    "parts": [
+                      "tj",
+                      "key1"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "name": "toUInt64",
+                    "arguments": [
+                      {
+                        "left": {
+                          "parts": [
+                            "t",
+                            "key2"
+                          ]
+                        },
+                        "op": "-",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    ]
+                  },
+                  "op": "==",
+                  "right": {
+                    "parts": [
+                      "tj",
+                      "key2"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "t",
+              "key1"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "tj",
+              "key2"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "TSVWithNames"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "timestamp"
+          ]
+        },
+        {
+          "parts": [
+            "payload"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "events"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "organisation_id"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "reinterpretAsUUID",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ]
+          },
+          "parenthesized": true
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "session_id"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "reinterpretAsUUID",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 0
+              }
+            ]
+          },
+          "parenthesized": true
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "timestamp"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "payload"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

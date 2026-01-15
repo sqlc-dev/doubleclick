@@ -1,0 +1,137 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "dt1",
+          "query": {
+            "name": "toDateTime64",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2001-12-31 23:59:59.999999998"
+              },
+              {
+                "type": "Integer",
+                "value": 9
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "dt2",
+          "query": {
+            "name": "toDateTime64",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2001-12-31 23:59:59.999999999"
+              },
+              {
+                "type": "Integer",
+                "value": 9
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "dt1"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "parts": [
+              "dt2"
+            ]
+          }
+        },
+        {
+          "left": {
+            "left": {
+              "parts": [
+                "dt1"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 1
+              },
+              "unit": "NANOSECOND"
+            },
+            "parenthesized": true
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "dt2"
+            ]
+          }
+        },
+        {
+          "left": {
+            "left": {
+              "parts": [
+                "dt1"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 2
+              },
+              "unit": "NANOSECOND"
+            },
+            "parenthesized": true
+          },
+          "op": "\u003e",
+          "right": {
+            "parts": [
+              "dt2"
+            ]
+          }
+        },
+        {
+          "left": {
+            "left": {
+              "parts": [
+                "dt1"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 3
+              },
+              "unit": "NANOSECOND"
+            },
+            "parenthesized": true
+          },
+          "op": "\u003e",
+          "right": {
+            "parts": [
+              "dt2"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

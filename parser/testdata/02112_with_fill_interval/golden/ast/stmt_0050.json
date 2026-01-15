@@ -1,0 +1,101 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toStartOfMonth",
+          "arguments": [
+            {
+              "parts": [
+                "d"
+              ]
+            }
+          ],
+          "alias": "d"
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "with_fill_date"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "d"
+          ]
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "d"
+            ]
+          },
+          "with_fill": true,
+          "fill_from": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2020-01-01"
+              }
+            ]
+          },
+          "fill_to": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2020-05-01"
+              }
+            ]
+          },
+          "fill_step": {
+            "value": {
+              "type": "Integer",
+              "value": 1
+            },
+            "unit": "MONTH"
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          },
+          "with_fill": true,
+          "fill_from": {
+            "type": "Integer",
+            "value": 1
+          },
+          "fill_to": {
+            "type": "Integer",
+            "value": 5
+          }
+        }
+      ]
+    }
+  ]
+}

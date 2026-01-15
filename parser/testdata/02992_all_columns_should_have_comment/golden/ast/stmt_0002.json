@@ -1,0 +1,186 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "type": "String",
+                  "value": "Column "
+                },
+                "op": "||",
+                "right": {
+                  "parts": [
+                    "name"
+                  ]
+                }
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": " from table "
+              }
+            },
+            "op": "||",
+            "right": {
+              "name": "concat",
+              "arguments": [
+                {
+                  "parts": [
+                    "database"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "."
+                },
+                {
+                  "parts": [
+                    "table"
+                  ]
+                }
+              ]
+            }
+          },
+          "op": "||",
+          "right": {
+            "type": "String",
+            "value": " should have a comment"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "columns"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "database"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "system"
+                },
+                "parenthesized": true
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "comment"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": ""
+                },
+                "parenthesized": true
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "table"
+                ]
+              },
+              "not": true,
+              "case_insensitive": true,
+              "pattern": {
+                "type": "String",
+                "value": "%log%"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "table"
+              ]
+            },
+            "not": true,
+            "list": [
+              {
+                "type": "String",
+                "value": "numbers"
+              },
+              {
+                "type": "String",
+                "value": "numbers_mt"
+              },
+              {
+                "type": "String",
+                "value": "one"
+              },
+              {
+                "type": "String",
+                "value": "generate_series"
+              },
+              {
+                "type": "String",
+                "value": "generateSeries"
+              },
+              {
+                "type": "String",
+                "value": "coverage_log"
+              },
+              {
+                "type": "String",
+                "value": "filesystem_read_prefetches_log"
+              },
+              {
+                "type": "String",
+                "value": "custom_metrics"
+              },
+              {
+                "type": "String",
+                "value": "custom_metrics_refresher"
+              },
+              {
+                "type": "String",
+                "value": "prometheus_metrics"
+              },
+              {
+                "type": "String",
+                "value": "unicode"
+              }
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "default_kind"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "String",
+            "value": "ALIAS"
+          },
+          "parenthesized": true
+        }
+      }
+    }
+  ]
+}

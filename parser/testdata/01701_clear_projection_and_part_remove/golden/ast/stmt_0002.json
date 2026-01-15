@@ -1,0 +1,77 @@
+{
+  "table": "tp_1",
+  "columns": [
+    {
+      "name": "x",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "Int32"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "x"
+            ]
+          },
+          {
+            "parts": [
+              "y"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "x"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "y"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "intDiv",
+    "arguments": [
+      {
+        "parts": [
+          "y"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 100
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "old_parts_lifetime",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

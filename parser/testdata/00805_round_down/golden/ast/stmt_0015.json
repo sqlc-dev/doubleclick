@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "toDecimal64",
+              "arguments": [
+                {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                {
+                  "type": "Integer",
+                  "value": 5
+                }
+              ]
+            },
+            "op": "/",
+            "right": {
+              "type": "Integer",
+              "value": 100
+            }
+          },
+          "alias": "x"
+        },
+        {
+          "name": "roundDown",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            },
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "name": "toDecimal32",
+                  "arguments": [
+                    {
+                      "type": "Float",
+                      "value": 0.04,
+                      "source": "0.04"
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  ]
+                },
+                {
+                  "name": "toDecimal32",
+                  "arguments": [
+                    {
+                      "type": "Float",
+                      "value": 0.05,
+                      "source": "0.05"
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  ]
+                },
+                {
+                  "name": "toDecimal32",
+                  "arguments": [
+                    {
+                      "type": "Float",
+                      "value": 0.06,
+                      "source": "0.06"
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  ]
+                }
+              ],
+              "spaced_commas": true
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

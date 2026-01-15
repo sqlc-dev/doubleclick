@@ -1,0 +1,74 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "resolutions",
+          "query": {
+            "name": "range",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 0
+              },
+              {
+                "type": "Integer",
+                "value": 8
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "distinct": true,
+      "columns": [
+        {
+          "parts": [
+            "resolution"
+          ]
+        },
+        {
+          "name": "h3PolygonToCells",
+          "arguments": [
+            {
+              "parts": [
+                "ring"
+              ]
+            },
+            {
+              "name": "arrayJoin",
+              "arguments": [
+                {
+                  "parts": [
+                    "resolutions"
+                  ]
+                }
+              ],
+              "alias": "resolution"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "rings"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "resolution"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

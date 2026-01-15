@@ -1,0 +1,87 @@
+{
+  "table": "video_log_result",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "toStartOfHour",
+            "arguments": [
+              {
+                "parts": [
+                  "datetime"
+                ]
+              }
+            ],
+            "alias": "hour"
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "bytes"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "avg",
+            "arguments": [
+              {
+                "parts": [
+                  "duration"
+                ]
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "video_log"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "parts": [
+                    "hour"
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "2022-07-22"
+            },
+            "parenthesized": true
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "device_id"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "100"
+            },
+            "parenthesized": true
+          }
+        }
+      }
+    ]
+  }
+}

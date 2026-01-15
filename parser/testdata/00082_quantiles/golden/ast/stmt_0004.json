@@ -1,0 +1,89 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "CounterID"
+          ],
+          "alias": "k"
+        },
+        {
+          "name": "quantilesExact",
+          "parameters": [
+            {
+              "type": "Float",
+              "value": 0.1,
+              "source": "0.1"
+            },
+            {
+              "type": "Float",
+              "value": 0.5,
+              "source": "0.5"
+            },
+            {
+              "type": "Float",
+              "value": 0.9,
+              "source": "0.9"
+            },
+            {
+              "type": "Float",
+              "value": 0.99,
+              "source": "0.99"
+            },
+            {
+              "type": "Float",
+              "value": 0.999,
+              "source": "0.999"
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "ResolutionWidth"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "name": "count"
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "CounterID"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

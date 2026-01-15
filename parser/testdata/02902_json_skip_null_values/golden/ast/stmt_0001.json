@@ -1,0 +1,106 @@
+{
+  "table": "test_02902",
+  "engine": {
+    "name": "File",
+    "parameters": [
+      {
+        "parts": [
+          "JSONEachRow"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "settings": [
+    {
+      "name": "output_format_json_named_tuples_as_objects",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "output_format_json_skip_null_value_in_named_tuples",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true,
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "expr": {
+                "type": "Tuple",
+                "value": [
+                  {
+                    "expr": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "type": {
+                      "name": "String"
+                    },
+                    "operator_syntax": true
+                  },
+                  {
+                    "type": "Null",
+                    "value": null
+                  },
+                  {
+                    "type": "Tuple",
+                    "value": [
+                      {
+                        "expr": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "type": {
+                          "name": "String"
+                        },
+                        "operator_syntax": true
+                      },
+                      {
+                        "type": "Null",
+                        "value": null
+                      }
+                    ],
+                    "spaced_commas": true
+                  }
+                ],
+                "spaced_commas": true
+              },
+              "type": {
+                "name": "Tuple(a Nullable(String), b Nullable(Int64), c Tuple(x Nullable(String), y Nullable(Float64)))"
+              }
+            },
+            "alias": "c"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 3
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "explain_type": "PLAN",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "x"
+                            ]
+                          },
+                          {
+                            "name": "sum",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "y"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "parts": [
+                                  "z"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            },
+                            "alias": "q"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "remote",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "127.0.0.{1,2}"
+                                    },
+                                    {
+                                      "name": "currentDatabase"
+                                    },
+                                    {
+                                      "parts": [
+                                        "tab"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "group_by": [
+                          {
+                            "type": "Tuple",
+                            "value": [
+                              {
+                                "parts": [
+                                  "x"
+                                ]
+                              },
+                              {
+                                "left": {
+                                  "parts": [
+                                    "z"
+                                  ]
+                                },
+                                "op": "+",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              }
+                            ],
+                            "spaced_commas": true
+                          },
+                          {
+                            "type": "Tuple",
+                            "value": [
+                              {
+                                "parts": [
+                                  "x"
+                                ]
+                              },
+                              {
+                                "left": {
+                                  "parts": [
+                                    "z"
+                                  ]
+                                },
+                                "op": "+",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              }
+                            ],
+                            "spaced_commas": true
+                          }
+                        ],
+                        "grouping_sets": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "q"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 42
+          }
+        }
+      }
+    ]
+  },
+  "has_settings": true,
+  "options_string": "indexes = 1"
+}

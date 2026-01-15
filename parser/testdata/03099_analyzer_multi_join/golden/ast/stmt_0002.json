@@ -1,0 +1,205 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "tb1",
+            "owner_id"
+          ],
+          "alias": "owner_id"
+        },
+        {
+          "parts": [
+            "type"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "owner_id"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 100
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "tb1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "name": "values",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "type varchar"
+                  },
+                  {
+                    "type": "String",
+                    "value": "type1"
+                  },
+                  {
+                    "type": "String",
+                    "value": "type2"
+                  },
+                  {
+                    "type": "String",
+                    "value": "type3"
+                  }
+                ]
+              },
+              "alias": "pt"
+            },
+            "join": {
+              "type": "CROSS"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "tb2",
+                            "owner_id"
+                          ],
+                          "alias": "owner_id"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "number"
+                                          ],
+                                          "alias": "owner_id"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "name": "numbers",
+                                                "arguments": [
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 100
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "owner_id"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "tb2"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "merged"
+            },
+            "join": {
+              "type": "LEFT",
+              "using": [
+                {
+                  "parts": [
+                    "owner_id"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "tb1",
+            "owner_id"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "parts": [
+            "merged",
+            "owner_id"
+          ]
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "tb1",
+            "owner_id"
+          ]
+        },
+        {
+          "parts": [
+            "type"
+          ]
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "table": "table_for_rename_with_primary_key",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "key1",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "key2",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "key3",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value1",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value2",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx",
+      "expression": {
+        "parts": [
+          "value1"
+        ]
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 1
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_01213/table_for_rename_pk2"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "key1"
+          ]
+        },
+        {
+          "parts": [
+            "key2"
+          ]
+        },
+        {
+          "parts": [
+            "key3"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "date"
+    ]
+  },
+  "primary_key": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "key1"
+          ]
+        },
+        {
+          "parts": [
+            "key2"
+          ]
+        }
+      ]
+    }
+  ]
+}

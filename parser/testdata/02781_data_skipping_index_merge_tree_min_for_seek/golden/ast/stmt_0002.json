@@ -1,0 +1,55 @@
+{
+  "table": "data",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "v1",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "v1_index",
+      "expression": {
+        "parts": [
+          "v1"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

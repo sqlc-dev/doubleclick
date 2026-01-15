@@ -1,0 +1,64 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "concat",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "name": "toLowCardinality",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "b"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "a"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "parts": [
+                      "system"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "one"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "type": "String",
+          "value": "a"
+        }
+      ]
+    }
+  ]
+}

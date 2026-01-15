@@ -1,0 +1,254 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "array": {
+                  "parts": [
+                    "ProfileEvents"
+                  ]
+                },
+                "index": {
+                  "type": "String",
+                  "value": "JoinProbeTableRowCount"
+                }
+              },
+              "op": "==",
+              "right": {
+                "type": "Integer",
+                "value": 50
+              }
+            },
+            {
+              "type": "String",
+              "value": "ok"
+            },
+            {
+              "left": {
+                "type": "String",
+                "value": "fail: "
+              },
+              "op": "||",
+              "right": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "array": {
+                      "parts": [
+                        "ProfileEvents"
+                      ]
+                    },
+                    "index": {
+                      "type": "String",
+                      "value": "JoinProbeTableRowCount"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "array": {
+                  "parts": [
+                    "ProfileEvents"
+                  ]
+                },
+                "index": {
+                  "type": "String",
+                  "value": "JoinBuildTableRowCount"
+                }
+              },
+              "op": "==",
+              "right": {
+                "type": "Integer",
+                "value": 100
+              }
+            },
+            {
+              "type": "String",
+              "value": "ok"
+            },
+            {
+              "left": {
+                "type": "String",
+                "value": "fail: "
+              },
+              "op": "||",
+              "right": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "array": {
+                      "parts": [
+                        "ProfileEvents"
+                      ]
+                    },
+                    "index": {
+                      "type": "String",
+                      "value": "JoinBuildTableRowCount"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "array": {
+                  "parts": [
+                    "ProfileEvents"
+                  ]
+                },
+                "index": {
+                  "type": "String",
+                  "value": "JoinResultRowCount"
+                }
+              },
+              "op": "==",
+              "right": {
+                "type": "Integer",
+                "value": 50
+              }
+            },
+            {
+              "type": "String",
+              "value": "ok"
+            },
+            {
+              "left": {
+                "type": "String",
+                "value": "fail: "
+              },
+              "op": "||",
+              "right": {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "array": {
+                      "parts": [
+                        "ProfileEvents"
+                      ]
+                    },
+                    "index": {
+                      "type": "String",
+                      "value": "JoinResultRowCount"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "type"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "QueryFinish"
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "event_date"
+                  ]
+                },
+                "op": "\u003e=",
+                "right": {
+                  "name": "yesterday"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "query_kind"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "Select"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "log_comment"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "03362_join_on_filterpushdown_left_where"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,188 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "TraficSourceID"
+          ]
+        },
+        {
+          "parts": [
+            "SearchEngineID"
+          ]
+        },
+        {
+          "parts": [
+            "AdvEngineID"
+          ]
+        },
+        {
+          "expr": {
+            "condition": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "SearchEngineID"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "AdvEngineID"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              "parenthesized": true
+            },
+            "then": {
+              "parts": [
+                "Referer"
+              ]
+            },
+            "else": {
+              "type": "String",
+              "value": ""
+            }
+          },
+          "alias": "Src"
+        },
+        {
+          "parts": [
+            "URL"
+          ],
+          "alias": "Dst"
+        },
+        {
+          "name": "count",
+          "alias": "PageViews"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits_s3"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "CounterID"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 62
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "EventDate"
+                ]
+              },
+              "op": "\u003e=",
+              "right": {
+                "type": "String",
+                "value": "2013-07-01"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "EventDate"
+              ]
+            },
+            "op": "\u003c=",
+            "right": {
+              "type": "String",
+              "value": "2013-07-31"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "op": "NOT",
+          "operand": {
+            "parts": [
+              "Refresh"
+            ]
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "TraficSourceID"
+          ]
+        },
+        {
+          "parts": [
+            "SearchEngineID"
+          ]
+        },
+        {
+          "parts": [
+            "AdvEngineID"
+          ]
+        },
+        {
+          "parts": [
+            "Src"
+          ]
+        },
+        {
+          "parts": [
+            "Dst"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "PageViews"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "TraficSourceID"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1000
+      }
+    }
+  ]
+}

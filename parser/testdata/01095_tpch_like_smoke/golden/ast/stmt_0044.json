@@ -1,0 +1,136 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "c_count"
+          ]
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ],
+          "alias": "custdist"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "c_custkey"
+                          ]
+                        },
+                        {
+                          "name": "count",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "o_orderkey"
+                              ]
+                            }
+                          ],
+                          "alias": "c_count"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "customer"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "orders"
+                              }
+                            },
+                            "join": {
+                              "type": "LEFT",
+                              "on": {
+                                "left": {
+                                  "left": {
+                                    "parts": [
+                                      "c_custkey"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "parts": [
+                                      "o_custkey"
+                                    ]
+                                  }
+                                },
+                                "op": "AND",
+                                "right": {
+                                  "expr": {
+                                    "parts": [
+                                      "o_comment"
+                                    ]
+                                  },
+                                  "not": true,
+                                  "pattern": {
+                                    "type": "String",
+                                    "value": "%special%requests%"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "c_custkey"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "c_orders"
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "c_count"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "custdist"
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "c_count"
+            ]
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t_1"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "order_0"
+            ]
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "name": "toUInt64",
+                    "arguments": [
+                      {
+                        "left": {
+                          "name": "rand64"
+                        },
+                        "op": "%",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1000
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "database": "system",
+                          "table": "numbers"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "limit": {
+                  "type": "Integer",
+                  "value": 100
+                }
+              }
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "_part_offset"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "parts": [
+              "order_0"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

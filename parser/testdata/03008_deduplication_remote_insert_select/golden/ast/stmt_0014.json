@@ -1,0 +1,68 @@
+{
+  "view": "mv_dst",
+  "materialized": true,
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "a"
+            ]
+          },
+          {
+            "name": "sumState",
+            "arguments": [
+              {
+                "parts": [
+                  "b"
+                ]
+              }
+            ],
+            "alias": "sum_b"
+          },
+          {
+            "name": "uniqState",
+            "arguments": [
+              {
+                "parts": [
+                  "b"
+                ]
+              }
+            ],
+            "alias": "uniq_b"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "dst_null"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "a"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

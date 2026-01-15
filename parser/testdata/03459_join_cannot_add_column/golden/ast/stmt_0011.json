@@ -1,0 +1,94 @@
+{
+  "table": "t3",
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "name": "rowNumberInAllBlocks"
+              },
+              "op": "+",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            "alias": "id"
+          },
+          {
+            "parts": [
+              "t1",
+              "id"
+            ]
+          },
+          {
+            "parts": [
+              "t2",
+              "id"
+            ]
+          },
+          {
+            "parts": [
+              "t1",
+              "name"
+            ]
+          },
+          {
+            "parts": [
+              "t2",
+              "name"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "t1"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "t2"
+                }
+              },
+              "join": {
+                "type": "LEFT",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "id"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

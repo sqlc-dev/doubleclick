@@ -1,0 +1,284 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "floor",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 4
+                  }
+                ]
+              }
+            },
+            {
+              "expr": {
+                "array": {
+                  "parts": [
+                    "original_medians_array",
+                    "medians_by_version"
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              "alias": "l"
+            }
+          ],
+          "alias": "l_rounded"
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "floor",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 4
+                  }
+                ]
+              }
+            },
+            {
+              "expr": {
+                "array": {
+                  "parts": [
+                    "original_medians_array",
+                    "medians_by_version"
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              },
+              "alias": "r"
+            }
+          ],
+          "alias": "r_rounded"
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x",
+                "y"
+              ],
+              "body": {
+                "name": "floor",
+                "arguments": [
+                  {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "y"
+                        ]
+                      },
+                      "op": "-",
+                      "right": {
+                        "parts": [
+                          "x"
+                        ]
+                      },
+                      "parenthesized": true
+                    },
+                    "op": "/",
+                    "right": {
+                      "parts": [
+                        "x"
+                      ]
+                    }
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                ]
+              }
+            },
+            {
+              "parts": [
+                "l"
+              ]
+            },
+            {
+              "parts": [
+                "r"
+              ]
+            }
+          ],
+          "alias": "diff_percent"
+        },
+        {
+          "parts": [
+            "test"
+          ]
+        },
+        {
+          "parts": [
+            "query"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "rd"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "type": "Array",
+                                "value": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 1
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Array",
+                                "value": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 3
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 4
+                                  }
+                                ]
+                              }
+                            ],
+                            "spaced_commas": true
+                          },
+                          "alias": "medians_by_version"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "original_medians_array"
+            },
+            "join": {
+              "type": ""
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "test"
+                          },
+                          "alias": "test"
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "query"
+                          },
+                          "alias": "query"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "any_query"
+            },
+            "join": {
+              "type": ""
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "A"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "check_single_query"
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

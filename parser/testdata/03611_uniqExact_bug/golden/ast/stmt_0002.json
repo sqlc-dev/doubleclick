@@ -1,0 +1,258 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "c1",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "c2",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "c2"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "gen",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "expr": {
+                          "left": {
+                            "name": "xxHash32",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "number"
+                                ]
+                              }
+                            ]
+                          },
+                          "op": "%",
+                          "right": {
+                            "type": "Integer",
+                            "value": 1000000
+                          }
+                        },
+                        "alias": "u1"
+                      },
+                      {
+                        "expr": {
+                          "left": {
+                            "name": "xxHash32",
+                            "arguments": [
+                              {
+                                "left": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                },
+                                "op": "+",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 12345
+                                }
+                              }
+                            ]
+                          },
+                          "op": "%",
+                          "right": {
+                            "type": "Integer",
+                            "value": 1000000
+                          }
+                        },
+                        "alias": "u2"
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "name": "numbers",
+                              "arguments": [
+                                {
+                                  "type": "Float",
+                                  "value": 1000000,
+                                  "source": "1e6"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          }
+        ],
+        "columns": [
+          {
+            "type": "Integer",
+            "value": 1071106
+          },
+          {
+            "left": {
+              "type": "Integer",
+              "value": 5
+            },
+            "op": "+",
+            "right": {
+              "left": {
+                "type": "Integer",
+                "value": 1
+              },
+              "op": "+",
+              "right": {
+                "left": {
+                  "type": "Integer",
+                  "value": 151703
+                },
+                "op": "*",
+                "right": {
+                  "left": {
+                    "left": {
+                      "type": "Integer",
+                      "value": 2
+                    },
+                    "op": "*",
+                    "right": {
+                      "parts": [
+                        "u1"
+                      ]
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "*",
+                  "right": {
+                    "left": {
+                      "type": "Integer",
+                      "value": 2
+                    },
+                    "op": "*",
+                    "right": {
+                      "parts": [
+                        "u2"
+                      ]
+                    },
+                    "parenthesized": true
+                  },
+                  "parenthesized": true
+                }
+              },
+              "parenthesized": true
+            }
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "gen"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "columns": [
+          {
+            "type": "Integer",
+            "value": 1071102
+          },
+          {
+            "left": {
+              "type": "Integer",
+              "value": 8
+            },
+            "op": "+",
+            "right": {
+              "left": {
+                "type": "Integer",
+                "value": 1
+              },
+              "op": "+",
+              "right": {
+                "left": {
+                  "type": "Integer",
+                  "value": 151693
+                },
+                "op": "*",
+                "right": {
+                  "left": {
+                    "left": {
+                      "type": "Integer",
+                      "value": 2
+                    },
+                    "op": "*",
+                    "right": {
+                      "parts": [
+                        "u1"
+                      ]
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "*",
+                  "right": {
+                    "left": {
+                      "type": "Integer",
+                      "value": 2
+                    },
+                    "op": "*",
+                    "right": {
+                      "parts": [
+                        "u2"
+                      ]
+                    },
+                    "parenthesized": true
+                  },
+                  "parenthesized": true
+                }
+              },
+              "parenthesized": true
+            }
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "gen"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "union_all": true,
+    "union_modes": [
+      "UNION ALL"
+    ]
+  }
+}

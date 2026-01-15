@@ -1,0 +1,78 @@
+{
+  "table": "enum_test",
+  "columns": [
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "host",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "e",
+      "type": {
+        "name": "Enum8",
+        "parameters": [
+          {
+            "left": {
+              "type": "String",
+              "value": "IU"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "WS"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "timestamp"
+          ]
+        },
+        {
+          "parts": [
+            "host"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDate",
+    "arguments": [
+      {
+        "parts": [
+          "timestamp"
+        ]
+      }
+    ]
+  }
+}

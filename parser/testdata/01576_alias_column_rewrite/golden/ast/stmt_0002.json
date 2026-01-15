@@ -1,0 +1,114 @@
+{
+  "table": "test_table",
+  "columns": [
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "day",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "name": "toDate",
+        "arguments": [
+          {
+            "parts": [
+              "timestamp"
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "day1",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "day"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "day2",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "day1"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "time",
+      "type": {
+        "name": "DateTime"
+      },
+      "default": {
+        "parts": [
+          "timestamp"
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "timestamp"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMMDD",
+    "arguments": [
+      {
+        "parts": [
+          "timestamp"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

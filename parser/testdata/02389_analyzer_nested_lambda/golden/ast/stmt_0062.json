@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "groupArray",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "alias": "counts"
+        },
+        {
+          "name": "arraySum",
+          "arguments": [
+            {
+              "name": "arrayMap",
+              "arguments": [
+                {
+                  "parameters": [
+                    "x"
+                  ],
+                  "body": {
+                    "left": {
+                      "parts": [
+                        "x"
+                      ]
+                    },
+                    "op": "+",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "parenthesized": true
+                  }
+                },
+                {
+                  "parts": [
+                    "counts"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "hello"
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "left": {
+                  "parts": [
+                    "x"
+                  ]
+                },
+                "op": "/",
+                "right": {
+                  "parts": [
+                    "hello"
+                  ]
+                },
+                "parenthesized": true
+              }
+            },
+            {
+              "parts": [
+                "counts"
+              ]
+            }
+          ],
+          "alias": "res"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1000000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

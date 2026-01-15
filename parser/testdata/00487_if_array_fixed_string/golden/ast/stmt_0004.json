@@ -1,0 +1,128 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "condition": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "then": {
+            "name": "materialize",
+            "arguments": [
+              {
+                "name": "arrayMap",
+                "arguments": [
+                  {
+                    "parameters": [
+                      "x"
+                    ],
+                    "body": {
+                      "name": "toFixedString",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "x"
+                          ]
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 5
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "String",
+                        "value": "hello"
+                      },
+                      {
+                        "type": "String",
+                        "value": "world"
+                      }
+                    ],
+                    "spaced_commas": true
+                  }
+                ]
+              }
+            ]
+          },
+          "else": {
+            "name": "materialize",
+            "arguments": [
+              {
+                "name": "arrayMap",
+                "arguments": [
+                  {
+                    "parameters": [
+                      "x"
+                    ],
+                    "body": {
+                      "name": "toFixedString",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "x"
+                          ]
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 5
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "String",
+                        "value": "a"
+                      },
+                      {
+                        "type": "String",
+                        "value": "b"
+                      },
+                      {
+                        "type": "String",
+                        "value": "c"
+                      }
+                    ],
+                    "spaced_commas": true
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 4
+      }
+    }
+  ]
+}

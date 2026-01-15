@@ -1,0 +1,110 @@
+{
+  "table": "projection_test",
+  "select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "id",
+            "query": {
+              "name": "rowNumberInAllBlocks"
+            },
+            "scalar_with": true
+          }
+        ],
+        "columns": [
+          {
+            "type": "Integer",
+            "value": 1
+          },
+          {
+            "left": {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2020-10-24 00:00:00"
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "left": {
+                "parts": [
+                  "id"
+                ]
+              },
+              "op": "/",
+              "right": {
+                "type": "Integer",
+                "value": 20
+              },
+              "parenthesized": true
+            }
+          },
+          {
+            "name": "toString",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "id"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 100
+                }
+              }
+            ]
+          },
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "generateRandom",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "x_id String, y_id String, block_count Int64, retry_count Int64, duration Int64, kbytes Int64, buffer_time Int64, first_time Int64, total_bytes Nullable(UInt64), valid_bytes Nullable(UInt64), completed_bytes Nullable(UInt64), fixed_bytes Nullable(UInt64), force_bytes Nullable(UInt64)"
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 10
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "limit": {
+          "type": "Integer",
+          "value": 1000
+        },
+        "settings": [
+          {
+            "name": "max_threads",
+            "value": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true
+}

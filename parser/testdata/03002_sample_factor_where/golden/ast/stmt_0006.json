@@ -1,0 +1,63 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "uniq",
+            "arguments": [
+              {
+                "parts": [
+                  "b"
+                ]
+              }
+            ]
+          },
+          "op": "*",
+          "right": {
+            "name": "any",
+            "arguments": [
+              {
+                "parts": [
+                  "_sample_factor"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t_sample_factor"
+              },
+              "sample": {
+                "ratio": {
+                  "type": "Integer",
+                  "value": 200000
+                }
+              }
+            }
+          }
+        ]
+      },
+      "prewhere": {
+        "left": {
+          "parts": [
+            "a"
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "op": "-",
+          "operand": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      }
+    }
+  ]
+}

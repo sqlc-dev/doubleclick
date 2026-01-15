@@ -1,0 +1,115 @@
+{
+  "table": "t_02809",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 10
+            }
+          },
+          {
+            "name": "toString",
+            "arguments": [
+              {
+                "name": "arrayMap",
+                "arguments": [
+                  {
+                    "parameters": [
+                      "i"
+                    ],
+                    "body": {
+                      "name": "cityHash64",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "i"
+                            ]
+                          },
+                          "op": "*",
+                          "right": {
+                            "parts": [
+                              "number"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "range",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 50
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 10000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

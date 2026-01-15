@@ -1,0 +1,117 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "any",
+          "arguments": [
+            {
+              "parts": [
+                "uuid"
+              ]
+            }
+          ],
+          "alias": "id"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "max",
+              "arguments": [
+                {
+                  "parts": [
+                    "end_ts"
+                  ]
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "name": "any",
+              "arguments": [
+                {
+                  "parts": [
+                    "start_ts"
+                  ]
+                }
+              ]
+            }
+          },
+          "alias": "time_delta"
+        },
+        {
+          "name": "any",
+          "arguments": [
+            {
+              "parts": [
+                "start_ts"
+              ]
+            }
+          ],
+          "alias": "start_ts"
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "end_ts"
+              ]
+            }
+          ],
+          "alias": "end_ts"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "mytable"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "uuid"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "end_ts"
+              ]
+            }
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "type": "Integer",
+          "value": 1620141001
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "name": "any",
+            "arguments": [
+              {
+                "parts": [
+                  "start_ts"
+                ]
+              }
+            ]
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

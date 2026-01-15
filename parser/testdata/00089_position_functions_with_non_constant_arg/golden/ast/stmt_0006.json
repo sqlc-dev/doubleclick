@@ -1,0 +1,72 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "position",
+          "arguments": [
+            {
+              "parts": [
+                "URL"
+              ]
+            },
+            {
+              "name": "domain",
+              "arguments": [
+                {
+                  "parts": [
+                    "URL"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "x"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "x"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "URL"
+            ]
+          },
+          "not": true,
+          "pattern": {
+            "type": "String",
+            "value": "%yandex.ru%"
+          }
+        }
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 100
+      }
+    }
+  ]
+}

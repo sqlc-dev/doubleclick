@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "1970-08-01 00:00:00"
+                },
+                {
+                  "type": "String",
+                  "value": "Asia/Shanghai"
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "unit": "YEAR"
+            },
+            "parenthesized": true
+          },
+          "alias": "DST_Y"
+        },
+        {
+          "name": "timezoneOffset",
+          "arguments": [
+            {
+              "parts": [
+                "DST_Y"
+              ]
+            }
+          ],
+          "alias": "t"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 51
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "t"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "Integer",
+          "value": 28800
+        }
+      }
+    }
+  ]
+}

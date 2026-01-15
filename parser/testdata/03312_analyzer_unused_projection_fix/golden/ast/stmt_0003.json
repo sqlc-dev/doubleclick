@@ -1,0 +1,287 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "T1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "A"
+                    },
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "B"
+                    }
+                  ]
+                },
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "A"
+                    },
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "B"
+                    }
+                  ]
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "T2",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "A"
+                    },
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "B"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "T1_WITH_ROWNUM",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "A"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "B"
+                      ]
+                    },
+                    {
+                      "name": "ROW_NUMBER",
+                      "over": {
+                        "partition_by": [
+                          {
+                            "parts": [
+                              "A"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "B"
+                            ]
+                          }
+                        ],
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "A"
+                              ]
+                            }
+                          },
+                          {
+                            "expression": {
+                              "parts": [
+                                "B"
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "alias": "RNK"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "T1"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "T2_WITH_ROWNUM",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "A"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "B"
+                      ]
+                    },
+                    {
+                      "name": "ROW_NUMBER",
+                      "over": {
+                        "partition_by": [
+                          {
+                            "parts": [
+                              "A"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "B"
+                            ]
+                          }
+                        ],
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "A"
+                              ]
+                            }
+                          },
+                          {
+                            "expression": {
+                              "parts": [
+                                "B"
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "alias": "RNK"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "T2"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "RESULT",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "T1_WITH_ROWNUM"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "T2_WITH_ROWNUM"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "operators": [
+                    "EXCEPT"
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "RESULT"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

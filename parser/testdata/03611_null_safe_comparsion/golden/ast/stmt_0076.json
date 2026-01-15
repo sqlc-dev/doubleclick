@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "a"
+              ]
+            },
+            "op": "\u003c=\u003e",
+            "right": {
+              "parts": [
+                "b"
+              ]
+            }
+          },
+          "alias": "eq"
+        },
+        {
+          "expr": {
+            "op": "NOT",
+            "operand": {
+              "left": {
+                "parts": [
+                  "a"
+                ]
+              },
+              "op": "\u003c=\u003e",
+              "right": {
+                "parts": [
+                  "b"
+                ]
+              }
+            }
+          },
+          "alias": "distinct_flag"
+        },
+        {
+          "name": "count",
+          "alias": "cnt"
+        },
+        {
+          "name": "groupArray",
+          "arguments": [
+            {
+              "parts": [
+                "id"
+              ]
+            }
+          ],
+          "alias": "ids"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "03611_t_nullsafe"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "eq"
+          ]
+        },
+        {
+          "parts": [
+            "distinct_flag"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "eq"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

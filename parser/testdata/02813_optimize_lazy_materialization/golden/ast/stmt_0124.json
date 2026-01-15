@@ -1,0 +1,115 @@
+{
+  "table": "optimize_lazy_materialization_with_low_cardinality_data_type",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "condition": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            "then": {
+              "type": "Integer",
+              "value": 2000
+            },
+            "else": {
+              "parts": [
+                "number"
+              ]
+            }
+          },
+          {
+            "name": "multiIf",
+            "arguments": [
+              {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              {
+                "type": "String",
+                "value": "aa"
+              },
+              {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              {
+                "type": "String",
+                "value": "bbb"
+              },
+              {
+                "type": "String",
+                "value": "cccc"
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 0
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 1000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

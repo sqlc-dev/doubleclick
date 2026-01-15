@@ -1,0 +1,80 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "condition": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            "then": {
+              "type": "Null",
+              "value": null
+            },
+            "else": {
+              "name": "toNullable",
+              "arguments": [
+                {
+                  "left": {
+                    "expr": {
+                      "type": "String",
+                      "value": "2023-02-09"
+                    },
+                    "type": {
+                      "name": "Date"
+                    },
+                    "operator_syntax": true
+                  },
+                  "op": "+",
+                  "right": {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "alias": "d"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 5
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "d"
+            ]
+          },
+          "nulls_first": false,
+          "with_fill": true
+        }
+      ]
+    }
+  ]
+}

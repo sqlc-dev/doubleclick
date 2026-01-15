@@ -1,0 +1,222 @@
+{
+  "table": "index_test",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "arr",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "array_index",
+      "expression": {
+        "name": "arrayMap",
+        "arguments": [
+          {
+            "parameters": [
+              "x"
+            ],
+            "body": {
+              "name": "lower",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "parts": [
+              "arr"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "bloom_filter",
+        "arguments": [
+          {
+            "type": "Float",
+            "value": 0.01,
+            "source": "0.01"
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "array_index_2",
+      "expression": {
+        "name": "arrayMap",
+        "arguments": [
+          {
+            "parameters": [
+              "x",
+              "y"
+            ],
+            "body": {
+              "name": "concat",
+              "arguments": [
+                {
+                  "name": "lower",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "x"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "parts": [
+                    "y"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "parts": [
+              "arr"
+            ]
+          },
+          {
+            "parts": [
+              "arr"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "bloom_filter",
+        "arguments": [
+          {
+            "type": "Float",
+            "value": 0.01,
+            "source": "0.01"
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "array_index_3",
+      "expression": {
+        "name": "arrayMap",
+        "arguments": [
+          {
+            "parameters": [
+              "x",
+              "y"
+            ],
+            "body": {
+              "name": "concat",
+              "arguments": [
+                {
+                  "name": "lower",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "x"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "parts": [
+                    "y"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "_"
+                },
+                {
+                  "name": "toString",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "parts": [
+              "arr"
+            ]
+          },
+          {
+            "parts": [
+              "arr"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "bloom_filter",
+        "arguments": [
+          {
+            "type": "Float",
+            "value": 0.01,
+            "source": "0.01"
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "settings": [
+    {
+      "name": "allow_suspicious_indices",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 4
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

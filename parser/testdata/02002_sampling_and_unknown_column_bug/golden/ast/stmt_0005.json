@@ -1,0 +1,60 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "uniq",
+          "arguments": [
+            {
+              "parts": [
+                "user_id"
+              ]
+            }
+          ],
+          "alias": "a"
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "_sample_factor"
+              ]
+            }
+          ],
+          "alias": "x"
+        },
+        {
+          "left": {
+            "parts": [
+              "a"
+            ]
+          },
+          "op": "*",
+          "right": {
+            "parts": [
+              "x"
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "sessions"
+              },
+              "sample": {
+                "ratio": {
+                  "type": "Integer",
+                  "value": 10000000
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

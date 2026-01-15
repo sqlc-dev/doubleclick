@@ -1,0 +1,94 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "path"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "name"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "value"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "zookeeper"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "path"
+                            ]
+                          }
+                        },
+                        {
+                          "expression": {
+                            "parts": [
+                              "name"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "path"
+          ]
+        },
+        "pattern": {
+          "left": {
+            "left": {
+              "type": "String",
+              "value": "/"
+            },
+            "op": "||",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "||",
+          "right": {
+            "type": "String",
+            "value": "/1-insert-test%"
+          }
+        }
+      }
+    }
+  ]
+}

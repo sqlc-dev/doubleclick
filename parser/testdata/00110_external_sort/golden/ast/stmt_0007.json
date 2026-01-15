@@ -1,0 +1,102 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "expr": {
+                  "array": {
+                    "parts": [
+                      "ProfileEvents"
+                    ]
+                  },
+                  "index": {
+                    "type": "String",
+                    "value": "ExternalSortWritePart"
+                  }
+                },
+                "alias": "x"
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 10
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            },
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "type": "String",
+              "value": "QueryStart"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "array": {
+              "parts": [
+                "Settings"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "max_bytes_before_external_sort"
+            }
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "10000000"
+          }
+        }
+      }
+    }
+  ]
+}

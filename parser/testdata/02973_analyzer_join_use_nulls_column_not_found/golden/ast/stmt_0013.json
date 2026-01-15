@@ -1,0 +1,141 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "a",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 0
+                      },
+                      "alias": "key"
+                    },
+                    {
+                      "expr": {
+                        "type": "String",
+                        "value": "a"
+                      },
+                      "alias": "acol"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "b",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 2
+                      },
+                      "alias": "key"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "a",
+            "acol"
+          ]
+        },
+        {
+          "parts": [
+            "a1",
+            "acol"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "b"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "a"
+              }
+            },
+            "join": {
+              "type": "FULL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "a",
+                    "key"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "b",
+                    "key"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "a"
+              },
+              "alias": "a1"
+            },
+            "join": {
+              "type": "FULL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "a1",
+                    "key"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "a",
+                    "key"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

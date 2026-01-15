@@ -1,0 +1,133 @@
+{
+  "table": "defaults",
+  "columns": [
+    {
+      "name": "x",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "a",
+      "type": null,
+      "default": {
+        "left": {
+          "parts": [
+            "x"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "parts": [
+            "y"
+          ]
+        }
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "Float32"
+      },
+      "default": {
+        "name": "round",
+        "arguments": [
+          {
+            "name": "log",
+            "arguments": [
+              {
+                "left": {
+                  "left": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "op": "+",
+                  "right": {
+                    "parts": [
+                      "x"
+                    ]
+                  }
+                },
+                "op": "+",
+                "right": {
+                  "parts": [
+                    "y"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "type": "Integer",
+            "value": 5
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "type": "Integer",
+        "value": 42
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "e",
+      "type": null,
+      "default": {
+        "left": {
+          "parts": [
+            "x"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "parts": [
+            "y"
+          ]
+        }
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "f",
+      "type": null,
+      "default": {
+        "left": {
+          "parts": [
+            "x"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "parts": [
+            "y"
+          ]
+        }
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "x"
+      ]
+    }
+  ]
+}

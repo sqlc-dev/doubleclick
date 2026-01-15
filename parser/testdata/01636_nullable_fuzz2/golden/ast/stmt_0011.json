@@ -1,0 +1,246 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "EventDate"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "EventDate"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "tracking_events_tmp"
+                              },
+                              "alias": "t1"
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "EventDate"
+                              ]
+                            },
+                            "op": "\u003e=",
+                            "right": {
+                              "name": "toDate",
+                              "arguments": [
+                                {
+                                  "type": "String",
+                                  "value": "2020-07-09"
+                                }
+                              ]
+                            },
+                            "parenthesized": true
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "EventDate"
+                              ]
+                            },
+                            "op": "\u003c=",
+                            "right": {
+                              "name": "toDate",
+                              "arguments": [
+                                {
+                                  "type": "String",
+                                  "value": "2020-07-11"
+                                }
+                              ]
+                            },
+                            "parenthesized": true
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "APIKey"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          "parenthesized": true
+                        }
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "EventDate"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "EventDate"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.0.0.{1,3}"
+                                  },
+                                  {
+                                    "name": "currentDatabase"
+                                  },
+                                  {
+                                    "parts": [
+                                      "open_events_tmp"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "alias": "t2"
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "EventDate"
+                            ]
+                          },
+                          "op": "\u003c=",
+                          "right": {
+                            "name": "toDate",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "2020-07-12"
+                              }
+                            ]
+                          },
+                          "parenthesized": true
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "APIKey"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          "parenthesized": true
+                        }
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "EventDate"
+                          ]
+                        }
+                      ],
+                      "with_totals": true
+                    }
+                  ]
+                }
+              }
+            },
+            "join": {
+              "type": "FULL",
+              "using": [
+                {
+                  "parts": [
+                    "EventDate"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "EventDate"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "totals_mode",
+          "value": {
+            "type": "String",
+            "value": "after_having_auto"
+          }
+        },
+        {
+          "name": "group_by_overflow_mode",
+          "value": {
+            "type": "String",
+            "value": "any"
+          }
+        },
+        {
+          "name": "max_rows_to_group_by",
+          "value": {
+            "type": "Integer",
+            "value": 10000000
+          }
+        },
+        {
+          "name": "joined_subquery_requires_alias",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

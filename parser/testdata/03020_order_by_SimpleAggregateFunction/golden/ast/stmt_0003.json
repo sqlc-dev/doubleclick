@@ -1,0 +1,49 @@
+{
+  "table": "data",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sum"
+            ]
+          },
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "key"
+          ]
+        },
+        {
+          "parts": [
+            "value"
+          ]
+        }
+      ]
+    }
+  ]
+}

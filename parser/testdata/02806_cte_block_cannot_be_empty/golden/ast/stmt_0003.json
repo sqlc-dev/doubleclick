@@ -1,0 +1,124 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "outer_table",
+                  "condition_value"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            {
+              "name": "formatRowNoNewline",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "JSONEachRow"
+                },
+                {
+                  "parts": [
+                    "outer_table",
+                    "result_date"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": ""
+            }
+          ],
+          "alias": "json"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "condition_value"
+                        },
+                        {
+                          "name": "date_add",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "month"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "inner_table",
+                                "offset"
+                              ]
+                            },
+                            {
+                              "name": "toDate",
+                              "arguments": [
+                                {
+                                  "type": "String",
+                                  "value": "2023-06-24"
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "result_date"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "type": "Integer",
+                                            "value": 2
+                                          },
+                                          "alias": "offset"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "inner_table"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "outer_table"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.{1,2}"
+                  },
+                  {
+                    "name": "view",
+                    "arguments": [
+                      {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {
+                                  "expr": {
+                                    "left": {
+                                      "parts": [
+                                        "number"
+                                      ]
+                                    },
+                                    "op": "%",
+                                    "right": {
+                                      "type": "Integer",
+                                      "value": 20
+                                    }
+                                  },
+                                  "alias": "number"
+                                }
+                              ],
+                              "from": {
+                                "tables": [
+                                  {
+                                    "table": {
+                                      "table": {
+                                        "name": "numbers",
+                                        "arguments": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 40
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "where": {
+                                "left": {
+                                  "left": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  "op": "%",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 2
+                                  },
+                                  "parenthesized": true
+                                },
+                                "op": "=",
+                                "right": {
+                                  "left": {
+                                    "name": "shardNum"
+                                  },
+                                  "op": "-",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 1
+                                  },
+                                  "parenthesized": true
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "number"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "number"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 5
+      },
+      "limit_by": [
+        {
+          "parts": [
+            "number"
+          ]
+        }
+      ],
+      "limit_by_limit": {
+        "type": "Integer",
+        "value": 1
+      },
+      "limit_by_has_limit": true,
+      "offset": {
+        "type": "Integer",
+        "value": 5
+      },
+      "settings": [
+        {
+          "name": "optimize_skip_unused_shards",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "optimize_distributed_group_by_sharding_key",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "distributed_push_down_limit",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

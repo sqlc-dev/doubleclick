@@ -1,0 +1,128 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "table1",
+            "id1"
+          ],
+          "alias": "id1"
+        },
+        {
+          "parts": [
+            "table1",
+            "date1"
+          ],
+          "alias": "date1"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "id1"
+                        },
+                        {
+                          "name": "toDateTime",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "2025-01-01 01:00:00"
+                            }
+                          ],
+                          "alias": "date1"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "table1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "id2"
+                        },
+                        {
+                          "name": "toDate",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "2025-01-01"
+                            }
+                          ],
+                          "alias": "date2"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "p"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "table1",
+                    "id1"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "p",
+                    "id2"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "toDate",
+          "arguments": [
+            {
+              "parts": [
+                "table1",
+                "date1"
+              ]
+            }
+          ]
+        },
+        "op": "=",
+        "right": {
+          "parts": [
+            "p",
+            "date2"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "block_0",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {}
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "loans"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "block_1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "sum",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "loan_number"
+                          ]
+                        }
+                      ],
+                      "alias": "loan_number"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "block_0"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "security_id"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "loan_number"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "block_1"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "loan_number"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 3
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "loan_number"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "prefer_column_name_to_alias",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

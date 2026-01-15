@@ -1,0 +1,95 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "EventDate"
+          ]
+        },
+        {
+          "name": "finalizeAggregation",
+          "arguments": [
+            {
+              "parts": [
+                "state"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "runningAccumulate",
+          "arguments": [
+            {
+              "parts": [
+                "state"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "EventDate"
+                          ]
+                        },
+                        {
+                          "name": "uniqState",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "UserID"
+                              ]
+                            }
+                          ],
+                          "alias": "state"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "test",
+                                "table": "hits"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "EventDate"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "EventDate"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

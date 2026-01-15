@@ -1,0 +1,89 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "parts": [
+            "value"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "merge_tree_settings"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "tier"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "Experimental"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "Bool"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "value"
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "type": "String",
+              "value": "0"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "name"
+            ]
+          },
+          "not": true,
+          "list": [
+            {
+              "type": "String",
+              "value": "remove_rolled_back_parts_immediately"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trimLeft",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            }
+          ],
+          "alias": "explain"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "count"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "tab"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "name": "hasAnyTokens",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "message"
+                              ]
+                            },
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "String",
+                                  "value": "Hello"
+                                },
+                                {
+                                  "type": "String",
+                                  "value": "World"
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "indexes = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%Description:%"
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%Parts:%"
+            }
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Granules:%"
+          }
+        }
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 3
+      },
+      "offset": {
+        "type": "Integer",
+        "value": 2
+      }
+    }
+  ]
+}

@@ -1,0 +1,419 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "men",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "toUInt32",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        }
+                      ],
+                      "alias": "id"
+                    },
+                    {
+                      "name": "mod",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "id"
+                          ]
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 100
+                        }
+                      ],
+                      "alias": "age"
+                    },
+                    {
+                      "expr": {
+                        "left": {
+                          "name": "mod",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "id"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 1000
+                            }
+                          ]
+                        },
+                        "op": "*",
+                        "right": {
+                          "type": "Integer",
+                          "value": 60
+                        }
+                      },
+                      "alias": "sal"
+                    },
+                    {
+                      "name": "mod",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "id"
+                          ]
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 60
+                        }
+                      ],
+                      "alias": "nat"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "numbers"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "limit": {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "t",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "number"
+                      ],
+                      "alias": "n"
+                    },
+                    {
+                      "name": "multiIf",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "n"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 0
+                          }
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 0
+                        },
+                        {
+                          "left": {
+                            "parts": [
+                              "n"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 6
+                        },
+                        {
+                          "left": {
+                            "parts": [
+                              "n"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 2
+                          }
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 30
+                        },
+                        {
+                          "type": "Null",
+                          "value": null
+                        }
+                      ],
+                      "alias": "lo"
+                    },
+                    {
+                      "name": "multiIf",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "n"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 0
+                          }
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 5
+                        },
+                        {
+                          "left": {
+                            "parts": [
+                              "n"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 29
+                        },
+                        {
+                          "left": {
+                            "parts": [
+                              "n"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 2
+                          }
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 99
+                        },
+                        {
+                          "type": "Null",
+                          "value": null
+                        }
+                      ],
+                      "alias": "hi"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "numbers"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "limit": {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "t2",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "toString",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "n"
+                          ]
+                        }
+                      ],
+                      "alias": "name"
+                    },
+                    {
+                      "name": "groupBitmapState",
+                      "arguments": [
+                        {
+                          "name": "multiIf",
+                          "arguments": [
+                            {
+                              "left": {
+                                "left": {
+                                  "parts": [
+                                    "age"
+                                  ]
+                                },
+                                "op": "\u003e=",
+                                "right": {
+                                  "parts": [
+                                    "lo"
+                                  ]
+                                },
+                                "parenthesized": true
+                              },
+                              "op": "AND",
+                              "right": {
+                                "left": {
+                                  "parts": [
+                                    "age"
+                                  ]
+                                },
+                                "op": "\u003c=",
+                                "right": {
+                                  "parts": [
+                                    "hi"
+                                  ]
+                                },
+                                "parenthesized": true
+                              }
+                            },
+                            {
+                              "parts": [
+                                "id"
+                              ]
+                            },
+                            {
+                              "type": "Null",
+                              "value": null
+                            }
+                          ]
+                        }
+                      ],
+                      "alias": "bit_state"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "men"
+                          }
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "table": "t"
+                          }
+                        },
+                        "join": {
+                          "type": ""
+                        }
+                      }
+                    ]
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "n"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "name": "sumIf",
+          "arguments": [
+            {
+              "parts": [
+                "sal"
+              ]
+            },
+            {
+              "name": "bitmapContains",
+              "arguments": [
+                {
+                  "parts": [
+                    "bit_state"
+                  ]
+                },
+                {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "men"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t2"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "name"
+          ]
+        }
+      ]
+    }
+  ]
+}

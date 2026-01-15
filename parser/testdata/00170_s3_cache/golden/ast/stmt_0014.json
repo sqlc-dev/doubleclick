@@ -1,0 +1,57 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "RegionID"
+          ]
+        },
+        {
+          "name": "uniq",
+          "arguments": [
+            {
+              "parts": [
+                "UserID"
+              ]
+            }
+          ],
+          "alias": "u"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits_s3"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "RegionID"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "u"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

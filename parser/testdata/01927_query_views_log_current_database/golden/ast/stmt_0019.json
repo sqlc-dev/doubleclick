@@ -1,0 +1,198 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "Query log rows"
+          },
+          "alias": "stage"
+        },
+        {
+          "parts": [
+            "read_rows"
+          ]
+        },
+        {
+          "parts": [
+            "written_rows"
+          ]
+        },
+        {
+          "name": "arraySort",
+          "arguments": [
+            {
+              "parts": [
+                "databases"
+              ]
+            }
+          ],
+          "alias": "databases"
+        },
+        {
+          "name": "arraySort",
+          "arguments": [
+            {
+              "parts": [
+                "tables"
+              ]
+            }
+          ],
+          "alias": "tables"
+        },
+        {
+          "name": "arraySort",
+          "arguments": [
+            {
+              "parts": [
+                "views"
+              ]
+            }
+          ],
+          "alias": "views"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "SleepFunctionCalls"
+            }
+          },
+          "alias": "sleep_calls"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "SleepFunctionMicroseconds"
+            }
+          },
+          "alias": "sleep_us"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "SelectedRows"
+            }
+          },
+          "alias": "profile_select_rows"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "SelectedBytes"
+            }
+          },
+          "alias": "profile_select_bytes"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "InsertedRows"
+            }
+          },
+          "alias": "profile_insert_rows"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "InsertedBytes"
+            }
+          },
+          "alias": "profile_insert_bytes"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "parts": [
+                "query"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "-- INSERT 1%INSERT INTO table_a%"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_date"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "name": "yesterday"
+          }
+        }
+      },
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

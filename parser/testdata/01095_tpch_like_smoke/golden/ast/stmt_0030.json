@@ -1,0 +1,172 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "l_extendedprice"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "parts": [
+                  "l_discount"
+                ]
+              }
+            }
+          ],
+          "alias": "revenue"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "lineitem"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "l_shipdate"
+                ]
+              },
+              "op": "\u003e=",
+              "right": {
+                "name": "toDate",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "1994-01-01"
+                  }
+                ]
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "l_shipdate"
+                ]
+              },
+              "op": "\u003c",
+              "right": {
+                "left": {
+                  "name": "toDate",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "1994-01-01"
+                    }
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "value": {
+                    "type": "String",
+                    "value": "1"
+                  },
+                  "unit": "YEAR"
+                }
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "l_discount"
+              ]
+            },
+            "low": {
+              "left": {
+                "name": "toDecimal32",
+                "arguments": [
+                  {
+                    "type": "Float",
+                    "value": 0.06,
+                    "source": "0.06"
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                ]
+              },
+              "op": "-",
+              "right": {
+                "name": "toDecimal32",
+                "arguments": [
+                  {
+                    "type": "Float",
+                    "value": 0.01,
+                    "source": "0.01"
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                ]
+              }
+            },
+            "high": {
+              "left": {
+                "name": "toDecimal32",
+                "arguments": [
+                  {
+                    "type": "Float",
+                    "value": 0.06,
+                    "source": "0.06"
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                ]
+              },
+              "op": "+",
+              "right": {
+                "name": "toDecimal32",
+                "arguments": [
+                  {
+                    "type": "Float",
+                    "value": 0.01,
+                    "source": "0.01"
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "l_quantity"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "Integer",
+            "value": 24
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "toUInt32",
+              "arguments": [
+                {
+                  "parts": [
+                    "s"
+                  ]
+                }
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 5
+            }
+          },
+          "alias": "k"
+        },
+        {
+          "name": "groupUniqArray",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "u"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 4
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t_sparse_full"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "s"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "String",
+          "value": ""
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

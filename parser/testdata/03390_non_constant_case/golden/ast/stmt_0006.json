@@ -1,0 +1,114 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "event_date"
+          ]
+        },
+        {
+          "operand": {
+            "parts": [
+              "event_date"
+            ]
+          },
+          "whens": [
+            {
+              "condition": {
+                "name": "toDate",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "2024-03-10"
+                  }
+                ]
+              },
+              "result": {
+                "type": "String",
+                "value": "Special day"
+              }
+            },
+            {
+              "condition": {
+                "name": "toDate",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "2024-03-12"
+                  }
+                ]
+              },
+              "result": {
+                "type": "String",
+                "value": "Today"
+              }
+            }
+          ],
+          "else": {
+            "type": "String",
+            "value": "Normal Day"
+          },
+          "alias": "event_type"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "name": "toDate",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "2024-03-10"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "toDate",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "2024-03-11"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "name": "toDate",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "2024-03-12"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ],
+                          "alias": "event_date"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

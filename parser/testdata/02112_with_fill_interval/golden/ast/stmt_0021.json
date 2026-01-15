@@ -1,0 +1,61 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toStartOfMonth",
+          "arguments": [
+            {
+              "parts": [
+                "d32"
+              ]
+            }
+          ],
+          "alias": "d32"
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "with_fill_date"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "d32"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "d32"
+            ]
+          },
+          "with_fill": true,
+          "fill_step": {
+            "value": {
+              "type": "Integer",
+              "value": 1
+            },
+            "unit": "MONTH"
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 5
+      }
+    }
+  ]
+}

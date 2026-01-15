@@ -1,0 +1,169 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "v",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "name": "toFixedString",
+                        "arguments": [
+                          {
+                            "name": "toFixedString",
+                            "arguments": [
+                              {
+                                "name": "materialize",
+                                "arguments": [
+                                  {
+                                    "name": "toFixedString",
+                                    "arguments": [
+                                      {
+                                        "type": "String",
+                                        "value": "111111111111111111111111111111111111111"
+                                      },
+                                      {
+                                        "type": "Integer",
+                                        "value": 39
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 39
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Integer",
+                            "value": 39
+                          }
+                        ]
+                      },
+                      "type": {
+                        "name": "UInt128"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "coalesce",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "name": "toLowCardinality",
+                  "arguments": [
+                    {
+                      "name": "toNullable",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            },
+            {
+              "type": "Null",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "v"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "test__fuzz_21"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "name": "coalesce",
+          "arguments": [
+            {
+              "type": "Null",
+              "value": null
+            }
+          ]
+        },
+        {
+          "name": "coalesce",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            },
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "type": "Null",
+                  "value": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

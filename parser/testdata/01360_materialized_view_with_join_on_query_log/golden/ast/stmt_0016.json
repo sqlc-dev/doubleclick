@@ -1,0 +1,109 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "extract",
+          "arguments": [
+            {
+              "parts": [
+                "query"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "/\\*\\s*QUERY_GROUP_ID:(.*?)\\s*\\*/"
+            }
+          ],
+          "alias": "QUERY_GROUP_ID"
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "current_database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "op": "\u003c\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "yesterday"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "QUERY_GROUP_ID"
+            ]
+          },
+          "op": "\u003c\u003e",
+          "right": {
+            "type": "String",
+            "value": ""
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "QUERY_GROUP_ID"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "QUERY_GROUP_ID"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

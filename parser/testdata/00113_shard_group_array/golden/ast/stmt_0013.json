@@ -1,0 +1,132 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "name": "toUInt64",
+              "arguments": [
+                {
+                  "parts": [
+                    "ns"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "name": "toUInt64",
+              "arguments": [
+                {
+                  "parts": [
+                    "ns"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "intDiv",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 100
+                            }
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "name": "groupArray",
+                          "arguments": [
+                            {
+                              "name": "toString",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "ns"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.0.0.{2,3}"
+                                  },
+                                  {
+                                    "name": "currentDatabase"
+                                  },
+                                  {
+                                    "type": "String",
+                                    "value": "numbers_mt"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "k"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "ns"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

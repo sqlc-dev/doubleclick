@@ -1,0 +1,78 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "PP",
+            "Key1"
+          ],
+          "alias": "x1"
+        },
+        {
+          "parts": [
+            "ParsedParams",
+            "Key2"
+          ],
+          "alias": "x2"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "ParsedParams"
+                  ],
+                  "alias": "PP"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 1704509
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "x1"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "x2"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

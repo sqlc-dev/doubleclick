@@ -1,0 +1,226 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "build",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "k"
+                      ]
+                    },
+                    {
+                      "expr": {
+                        "left": {
+                          "name": "toDateTime",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "2001-01-01 00:00:00"
+                            }
+                          ]
+                        },
+                        "op": "+",
+                        "right": {
+                          "value": {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          "unit": "MINUTE"
+                        }
+                      },
+                      "alias": "t"
+                    },
+                    {
+                      "parts": [
+                        "number"
+                      ],
+                      "alias": "v"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 10000
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "parts": [
+                                        "number"
+                                      ],
+                                      "alias": "k"
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "name": "numbers",
+                                            "arguments": [
+                                              {
+                                                "type": "Integer",
+                                                "value": 50
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "join": {
+                          "type": ""
+                        }
+                      }
+                    ]
+                  },
+                  "settings": [
+                    {
+                      "name": "join_algorithm",
+                      "value": {
+                        "type": "String",
+                        "value": "default"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "probe",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "left": {
+                          "parts": [
+                            "k"
+                          ]
+                        },
+                        "op": "*",
+                        "right": {
+                          "type": "Integer",
+                          "value": 2
+                        }
+                      },
+                      "alias": "k"
+                    },
+                    {
+                      "expr": {
+                        "left": {
+                          "parts": [
+                            "t"
+                          ]
+                        },
+                        "op": "-",
+                        "right": {
+                          "value": {
+                            "type": "Integer",
+                            "value": 30
+                          },
+                          "unit": "SECOND"
+                        }
+                      },
+                      "alias": "t"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "build"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "SUM",
+          "arguments": [
+            {
+              "parts": [
+                "v"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "probe"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "build"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ASOF",
+              "using": [
+                {
+                  "parts": [
+                    "k"
+                  ]
+                },
+                {
+                  "parts": [
+                    "t"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

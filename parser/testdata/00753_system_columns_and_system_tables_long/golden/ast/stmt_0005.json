@@ -1,0 +1,76 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "parts": [
+            "is_in_partition_key"
+          ]
+        },
+        {
+          "parts": [
+            "is_in_sorting_key"
+          ]
+        },
+        {
+          "parts": [
+            "is_in_primary_key"
+          ]
+        },
+        {
+          "parts": [
+            "is_in_sampling_key"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "columns"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "table"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "check_system_tables"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        }
+      },
+      "format": {
+        "parts": [
+          "PrettyCompactNoEscapes"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "json",
+      "type": {
+        "name": "JSON",
+        "parameters": [
+          {
+            "expr": {
+              "name": "a",
+              "type": {
+                "name": "UInt32"
+              }
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "t",
+      "type": {
+        "name": "Tuple",
+        "parameters": [
+          {
+            "name": "a",
+            "type": {
+              "name": "UInt32"
+            }
+          },
+          {
+            "name": "b",
+            "type": {
+              "name": "UInt32"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p1",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "json"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "json",
+              "a"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "p2",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "t"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "t",
+              "a"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "p3",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "json"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "json",
+              "c",
+              ":`Array(JSON)`",
+              "d",
+              ":`Int64`"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

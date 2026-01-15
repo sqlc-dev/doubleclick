@@ -1,0 +1,95 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "value"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "min_value"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "max_value"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "uniqExact",
+          "arguments": [
+            {
+              "parts": [
+                "key"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_ttl_group_by01763"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "key"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 3
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "ts"
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "left": {
+              "name": "today"
+            },
+            "op": "-",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 30
+              },
+              "unit": "DAY"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

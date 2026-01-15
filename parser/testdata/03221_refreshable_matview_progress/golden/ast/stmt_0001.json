@@ -1,0 +1,65 @@
+{
+  "view": "03221_rmv",
+  "materialized": true,
+  "has_refresh": true,
+  "refresh_type": "AFTER",
+  "refresh_interval": {
+    "type": "Integer",
+    "value": 10
+  },
+  "refresh_unit": "SECOND",
+  "columns": [
+    {
+      "name": "x",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "Memory"
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ],
+            "alias": "x"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 3
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "columns": [
+          {
+            "name": "rand64",
+            "alias": "x"
+          }
+        ]
+      }
+    ],
+    "union_all": true,
+    "union_modes": [
+      "UNION ALL"
+    ]
+  }
+}

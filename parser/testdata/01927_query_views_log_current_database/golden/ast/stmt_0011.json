@@ -1,0 +1,78 @@
+{
+  "view": "matview_join_d_e",
+  "materialized": true,
+  "to": "table_f",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "table_d",
+              "a"
+            ],
+            "alias": "a"
+          },
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "table_e",
+                  "count"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "name": "sleepEachRow",
+                "arguments": [
+                  {
+                    "type": "Float",
+                    "value": 0.000003,
+                    "source": "0.000003"
+                  }
+                ]
+              }
+            },
+            "alias": "count"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "table_d"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "table_e"
+                }
+              },
+              "join": {
+                "type": "LEFT",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "table_d",
+                      "a"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "table_e",
+                      "a"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

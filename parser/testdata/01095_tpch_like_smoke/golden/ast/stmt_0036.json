@@ -1,0 +1,300 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "nation"
+          ]
+        },
+        {
+          "parts": [
+            "o_year"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "amount"
+              ]
+            }
+          ],
+          "alias": "sum_profit"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "n_name"
+                          ],
+                          "alias": "nation"
+                        },
+                        {
+                          "field": "YEAR",
+                          "from": {
+                            "parts": [
+                              "o_orderdate"
+                            ]
+                          },
+                          "alias": "o_year"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "left": {
+                                "parts": [
+                                  "l_extendedprice"
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "left": {
+                                  "type": "Integer",
+                                  "value": 1
+                                },
+                                "op": "-",
+                                "right": {
+                                  "parts": [
+                                    "l_discount"
+                                  ]
+                                },
+                                "parenthesized": true
+                              }
+                            },
+                            "op": "-",
+                            "right": {
+                              "left": {
+                                "parts": [
+                                  "ps_supplycost"
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "parts": [
+                                  "l_quantity"
+                                ]
+                              }
+                            }
+                          },
+                          "alias": "amount"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "part"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "supplier"
+                              }
+                            },
+                            "join": {
+                              "type": ""
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "lineitem"
+                              }
+                            },
+                            "join": {
+                              "type": ""
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "partsupp"
+                              }
+                            },
+                            "join": {
+                              "type": ""
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "orders"
+                              }
+                            },
+                            "join": {
+                              "type": ""
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "nation"
+                              }
+                            },
+                            "join": {
+                              "type": ""
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "left": {
+                                "left": {
+                                  "left": {
+                                    "left": {
+                                      "parts": [
+                                        "s_suppkey"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "parts": [
+                                        "l_suppkey"
+                                      ]
+                                    }
+                                  },
+                                  "op": "AND",
+                                  "right": {
+                                    "left": {
+                                      "parts": [
+                                        "ps_suppkey"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "parts": [
+                                        "l_suppkey"
+                                      ]
+                                    }
+                                  }
+                                },
+                                "op": "AND",
+                                "right": {
+                                  "left": {
+                                    "parts": [
+                                      "ps_partkey"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "parts": [
+                                      "l_partkey"
+                                    ]
+                                  }
+                                }
+                              },
+                              "op": "AND",
+                              "right": {
+                                "left": {
+                                  "parts": [
+                                    "p_partkey"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "parts": [
+                                    "l_partkey"
+                                  ]
+                                }
+                              }
+                            },
+                            "op": "AND",
+                            "right": {
+                              "left": {
+                                "parts": [
+                                  "o_orderkey"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "parts": [
+                                  "l_orderkey"
+                                ]
+                              }
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "s_nationkey"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "n_nationkey"
+                              ]
+                            }
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "expr": {
+                            "parts": [
+                              "p_name"
+                            ]
+                          },
+                          "pattern": {
+                            "type": "String",
+                            "value": "%green%"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "profit"
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "nation"
+          ]
+        },
+        {
+          "parts": [
+            "o_year"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "nation"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "o_year"
+            ]
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

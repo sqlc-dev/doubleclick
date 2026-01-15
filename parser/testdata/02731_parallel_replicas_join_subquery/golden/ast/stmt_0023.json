@@ -1,0 +1,262 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "value1"
+          ]
+        },
+        {
+          "parts": [
+            "value2"
+          ]
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "parts": [
+                "count"
+              ]
+            }
+          ],
+          "alias": "avg"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "key"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "value1"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "value2"
+                          ]
+                        },
+                        {
+                          "name": "count",
+                          "alias": "count"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "join_outer_table"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "key"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "value1"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "value2"
+                                          ]
+                                        },
+                                        {
+                                          "name": "toUInt64",
+                                          "arguments": [
+                                            {
+                                              "name": "min",
+                                              "arguments": [
+                                                {
+                                                  "parts": [
+                                                    "time"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "start_ts"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "join_inner_table"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "prewhere": {
+                                        "left": {
+                                          "left": {
+                                            "parts": [
+                                              "id"
+                                            ]
+                                          },
+                                          "op": "=",
+                                          "right": {
+                                            "type": "String",
+                                            "value": "833c9e22-c245-4eb5-8745-117a9a1f26b1"
+                                          },
+                                          "parenthesized": true
+                                        },
+                                        "op": "AND",
+                                        "right": {
+                                          "left": {
+                                            "parts": [
+                                              "number"
+                                            ]
+                                          },
+                                          "op": "\u003e",
+                                          "right": {
+                                            "name": "toUInt64",
+                                            "arguments": [
+                                              {
+                                                "type": "String",
+                                                "value": "1610517366120"
+                                              }
+                                            ]
+                                          },
+                                          "parenthesized": true
+                                        }
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "key"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "value1"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "value2"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            "join": {
+                              "type": "INNER",
+                              "using": [
+                                {
+                                  "parts": [
+                                    "key"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "key"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "value1"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "value2"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "value1"
+          ]
+        },
+        {
+          "parts": [
+            "value2"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "value1"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "value2"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "enable_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "name": "parallel_replicas_only_with_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

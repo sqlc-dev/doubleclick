@@ -1,0 +1,104 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "status",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Enum8",
+            "parameters": [
+              {
+                "left": {
+                  "type": "String",
+                  "value": "NEW"
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              {
+                "left": {
+                  "type": "String",
+                  "value": "CANCEL"
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "nested.nestedType",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Nullable",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "partition",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "partition"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "partition"
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,76 @@
+{
+  "table": "test_table",
+  "columns": [
+    {
+      "name": "col1",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "col2",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "col3",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sumMap"
+            ]
+          },
+          {
+            "name": "Tuple",
+            "parameters": [
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "UInt8"
+                  }
+                ],
+                "has_parentheses": true
+              },
+              {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "UInt8"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "col1"
+          ]
+        },
+        {
+          "parts": [
+            "col2"
+          ]
+        }
+      ]
+    }
+  ]
+}

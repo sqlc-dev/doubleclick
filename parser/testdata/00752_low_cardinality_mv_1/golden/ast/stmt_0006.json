@@ -1,0 +1,104 @@
+{
+  "view": "lc_mv_00752",
+  "materialized": true,
+  "populate": true,
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "substring",
+            "arguments": [
+              {
+                "parts": [
+                  "str"
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ],
+            "alias": "letter"
+          },
+          {
+            "name": "min",
+            "arguments": [
+              {
+                "name": "length",
+                "arguments": [
+                  {
+                    "parts": [
+                      "str"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "min_len"
+          },
+          {
+            "name": "max",
+            "arguments": [
+              {
+                "name": "length",
+                "arguments": [
+                  {
+                    "parts": [
+                      "str"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "max_len"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "lc_00752"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "name": "substring",
+            "arguments": [
+              {
+                "parts": [
+                  "str"
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

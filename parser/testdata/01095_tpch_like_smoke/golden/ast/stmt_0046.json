@@ -1,0 +1,196 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "left": {
+                "name": "toDecimal32",
+                "arguments": [
+                  {
+                    "type": "Float",
+                    "value": 100,
+                    "source": "100.00"
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                ]
+              },
+              "op": "*",
+              "right": {
+                "name": "sum",
+                "arguments": [
+                  {
+                    "whens": [
+                      {
+                        "condition": {
+                          "expr": {
+                            "parts": [
+                              "p_type"
+                            ]
+                          },
+                          "pattern": {
+                            "type": "String",
+                            "value": "PROMO%"
+                          }
+                        },
+                        "result": {
+                          "left": {
+                            "parts": [
+                              "l_extendedprice"
+                            ]
+                          },
+                          "op": "*",
+                          "right": {
+                            "left": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "op": "-",
+                            "right": {
+                              "parts": [
+                                "l_discount"
+                              ]
+                            },
+                            "parenthesized": true
+                          }
+                        }
+                      }
+                    ],
+                    "else": {
+                      "type": "Integer",
+                      "value": 0
+                    }
+                  }
+                ]
+              }
+            },
+            "op": "/",
+            "right": {
+              "left": {
+                "type": "Integer",
+                "value": 1
+              },
+              "op": "+",
+              "right": {
+                "name": "sum",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "l_extendedprice"
+                      ]
+                    },
+                    "op": "*",
+                    "right": {
+                      "left": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "op": "-",
+                      "right": {
+                        "parts": [
+                          "l_discount"
+                        ]
+                      },
+                      "parenthesized": true
+                    }
+                  }
+                ]
+              },
+              "parenthesized": true
+            }
+          },
+          "alias": "promo_revenue"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "lineitem"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "part"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "l_partkey"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "p_partkey"
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "l_shipdate"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "1995-09-01"
+                }
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "l_shipdate"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "left": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "1995-09-01"
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "type": "String",
+                "value": "1"
+              },
+              "unit": "MONTH"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

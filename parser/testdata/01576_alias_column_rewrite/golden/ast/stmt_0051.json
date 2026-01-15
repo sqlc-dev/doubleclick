@@ -1,0 +1,58 @@
+{
+  "table": "pl",
+  "columns": [
+    {
+      "name": "dt",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "i",
+      "type": {
+        "name": "int"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p",
+      "select": {
+        "columns": [
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "i"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "name": "toStartOfMinute",
+            "arguments": [
+              {
+                "parts": [
+                  "dt"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "dt"
+      ]
+    }
+  ]
+}

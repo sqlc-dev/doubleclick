@@ -1,0 +1,63 @@
+{
+  "table": "pk_order",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "Int32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "d"
+          ]
+        },
+        {
+          "parts": [
+            "a"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDate",
+    "arguments": [
+      {
+        "parts": [
+          "d"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

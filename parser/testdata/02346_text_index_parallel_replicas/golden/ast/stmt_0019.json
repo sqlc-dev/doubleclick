@@ -1,0 +1,130 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "array": {
+                  "parts": [
+                    "ProfileEvents"
+                  ]
+                },
+                "index": {
+                  "type": "String",
+                  "value": "ParallelReplicasUsedCount"
+                }
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "array": {
+                  "parts": [
+                    "ProfileEvents"
+                  ]
+                },
+                "index": {
+                  "type": "String",
+                  "value": "TextIndexUsedEmbeddedPostings"
+                }
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "current_database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "OR",
+            "right": {
+              "left": {
+                "name": "position",
+                "arguments": [
+                  {
+                    "parts": [
+                      "query"
+                    ]
+                  },
+                  {
+                    "name": "currentDatabase"
+                  }
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            "parenthesized": true
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "query"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%SELECT%tab%hasAnyTokens%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "QueryFinish"
+          }
+        }
+      }
+    }
+  ]
+}

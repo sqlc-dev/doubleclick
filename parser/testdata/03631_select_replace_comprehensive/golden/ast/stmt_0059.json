@@ -1,0 +1,89 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "category"
+          ]
+        },
+        {
+          "parts": [
+            "total"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "category"
+                              ]
+                            },
+                            "op": "||",
+                            "right": {
+                              "type": "String",
+                              "value": "_modified"
+                            }
+                          },
+                          "alias": "category"
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "value"
+                              ]
+                            }
+                          ],
+                          "alias": "total"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test_group_by_sub"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "category"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "category"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

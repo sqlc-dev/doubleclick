@@ -1,0 +1,143 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "x",
+          "query": {
+            "name": "round",
+            "arguments": [
+              {
+                "name": "exp",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 6
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "y",
+          "query": {
+            "condition": {
+              "left": {
+                "parts": [
+                  "x"
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 18446744073709551615
+              }
+            },
+            "then": {
+              "type": "Integer",
+              "value": 18446744073709551615
+            },
+            "else": {
+              "name": "toUInt64",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "z",
+          "query": {
+            "condition": {
+              "left": {
+                "parts": [
+                  "x"
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 2147483647
+              }
+            },
+            "then": {
+              "type": "Integer",
+              "value": 2147483647
+            },
+            "else": {
+              "name": "toInt32",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "formatReadableDecimalSize",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "formatReadableDecimalSize",
+          "arguments": [
+            {
+              "parts": [
+                "y"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "formatReadableDecimalSize",
+          "arguments": [
+            {
+              "parts": [
+                "z"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 70
+      }
+    }
+  ]
+}

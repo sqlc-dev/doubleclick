@@ -1,0 +1,178 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "time_with_microseconds",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "query_start_time_microseconds"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "current_database"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "name": "currentDatabase"
+                    }
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "query_start_time"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "t",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "type": "Float",
+                      "value": "+Inf"
+                    },
+                    {
+                      "parts": [
+                        "query_start_time"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "current_database"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "name": "currentDatabase"
+                    }
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "query_start_time"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "name": "dateDiff",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "second"
+                  },
+                  {
+                    "name": "toDateTime",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "time_with_microseconds"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "toDateTime",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "t"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "op": "=",
+              "right": {
+                "op": "-",
+                "operand": {
+                  "type": "Integer",
+                  "value": 9223372036854775808
+                }
+              }
+            },
+            {
+              "type": "String",
+              "value": "ok"
+            },
+            {
+              "type": "String",
+              "value": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

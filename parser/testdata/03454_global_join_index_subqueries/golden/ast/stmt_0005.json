@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "cluster",
+                "arguments": [
+                  {
+                    "parts": [
+                      "test_cluster_two_shards"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "system",
+                      "one"
+                    ]
+                  }
+                ]
+              },
+              "alias": "A"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "cluster",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "test_cluster_two_shards"
+                                    ]
+                                  },
+                                  {
+                                    "parts": [
+                                      "system",
+                                      "one"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "B"
+            },
+            "join": {
+              "type": "INNER",
+              "global": true,
+              "on": {
+                "left": {
+                  "parts": [
+                    "A",
+                    "dummy"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "B",
+                    "dummy"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

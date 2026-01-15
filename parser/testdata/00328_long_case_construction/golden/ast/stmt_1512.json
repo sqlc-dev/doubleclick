@@ -1,0 +1,73 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "whens": [
+            {
+              "condition": {
+                "type": "Integer",
+                "value": 1
+              },
+              "result": {
+                "parts": [
+                  "col2"
+                ]
+              }
+            },
+            {
+              "condition": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "col1"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 3
+                  },
+                  "parenthesized": true
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              "result": {
+                "type": "String",
+                "value": "bar"
+              }
+            }
+          ],
+          "else": {
+            "name": "toFixedString",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "baz"
+              },
+              {
+                "type": "Integer",
+                "value": 16
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "multi_if_check"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

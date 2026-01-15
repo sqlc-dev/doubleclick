@@ -1,0 +1,129 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "QUERY TREE",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t1"
+                                }
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t2"
+                                }
+                              },
+                              "join": {
+                                "type": "INNER",
+                                "on": {
+                                  "left": {
+                                    "left": {
+                                      "left": {
+                                        "left": {
+                                          "parts": [
+                                            "t1",
+                                            "x"
+                                          ]
+                                        },
+                                        "op": "=",
+                                        "right": {
+                                          "parts": [
+                                            "t2",
+                                            "x"
+                                          ]
+                                        },
+                                        "parenthesized": true
+                                      },
+                                      "op": "AND",
+                                      "right": {
+                                        "expr": {
+                                          "parts": [
+                                            "t1",
+                                            "x"
+                                          ]
+                                        },
+                                        "not": true
+                                      }
+                                    },
+                                    "op": "AND",
+                                    "right": {
+                                      "type": "Boolean",
+                                      "value": true
+                                    }
+                                  },
+                                  "op": "AND",
+                                  "right": {
+                                    "expr": {
+                                      "parts": [
+                                        "t2",
+                                        "x"
+                                      ]
+                                    },
+                                    "not": true
+                                  },
+                                  "parenthesized": true
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "explicit_type": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%CONSTANT%"
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "case_insensitive": true,
+          "pattern": {
+            "type": "String",
+            "value": "%is%null%"
+          }
+        }
+      }
+    }
+  ]
+}

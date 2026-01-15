@@ -1,0 +1,376 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "interval_start",
+          "query": {
+            "name": "multiIf",
+            "arguments": [
+              {
+                "left": {
+                  "type": "String",
+                  "value": "-1"
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "-1"
+                }
+              },
+              {
+                "type": "Integer",
+                "value": 10080
+              },
+              {
+                "left": {
+                  "type": "String",
+                  "value": "-1"
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "7"
+                }
+              },
+              {
+                "type": "Integer",
+                "value": 60
+              },
+              {
+                "left": {
+                  "type": "String",
+                  "value": "-1"
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "1"
+                }
+              },
+              {
+                "type": "Integer",
+                "value": 5
+              },
+              {
+                "type": "Integer",
+                "value": 1440
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "days_run",
+          "query": {
+            "name": "multiIf",
+            "arguments": [
+              {
+                "left": {
+                  "type": "String",
+                  "value": "-1"
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "-1"
+                }
+              },
+              {
+                "expr": {
+                  "name": "CEIL",
+                  "arguments": [
+                    {
+                      "left": {
+                        "left": {
+                          "name": "today"
+                        },
+                        "op": "-",
+                        "right": {
+                          "name": "toDate",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "2017-06-22"
+                            }
+                          ]
+                        },
+                        "parenthesized": true
+                      },
+                      "op": "/",
+                      "right": {
+                        "type": "Integer",
+                        "value": 7
+                      }
+                    }
+                  ]
+                },
+                "type": {
+                  "name": "UInt16"
+                },
+                "operator_syntax": true
+              },
+              {
+                "left": {
+                  "type": "String",
+                  "value": "-1"
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "7"
+                }
+              },
+              {
+                "type": "Integer",
+                "value": 168
+              },
+              {
+                "left": {
+                  "type": "String",
+                  "value": "-1"
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "1"
+                }
+              },
+              {
+                "type": "Integer",
+                "value": 288
+              },
+              {
+                "type": "Integer",
+                "value": 90
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "block_time",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "arrayJoin",
+                      "arguments": [
+                        {
+                          "name": "arrayMap",
+                          "arguments": [
+                            {
+                              "parameters": [
+                                "i"
+                              ],
+                              "body": {
+                                "name": "toDateTime",
+                                "arguments": [
+                                  {
+                                    "left": {
+                                      "name": "toStartOfInterval",
+                                      "arguments": [
+                                        {
+                                          "name": "now"
+                                        },
+                                        {
+                                          "value": {
+                                            "parts": [
+                                              "interval_start"
+                                            ]
+                                          },
+                                          "unit": "MINUTE"
+                                        }
+                                      ]
+                                    },
+                                    "op": "-",
+                                    "right": {
+                                      "left": {
+                                        "left": {
+                                          "parts": [
+                                            "interval_start"
+                                          ]
+                                        },
+                                        "op": "*",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 60
+                                        }
+                                      },
+                                      "op": "*",
+                                      "right": {
+                                        "parts": [
+                                          "i"
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "String",
+                                    "value": "UTC"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "name": "range",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "days_run"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "sales",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "toDateTime",
+                      "arguments": [
+                        {
+                          "name": "toStartOfInterval",
+                          "arguments": [
+                            {
+                              "name": "now"
+                            },
+                            {
+                              "value": {
+                                "parts": [
+                                  "interval_start"
+                                ]
+                              },
+                              "unit": "MINUTE"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "String",
+                          "value": "UTC"
+                        }
+                      ],
+                      "alias": "block_time"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "block_time"
+                      ]
+                    }
+                  ],
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "block_time"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "block_time"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "sales"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "block_time"
+          ]
+        },
+        "op": "\u003e=",
+        "right": {
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "name": "MIN",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "block_time"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "sales"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

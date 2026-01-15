@@ -1,0 +1,71 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "field",
+          "query": {
+            "name": "arrayJoin",
+            "arguments": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "String",
+                    "value": "a"
+                  },
+                  {
+                    "type": "String",
+                    "value": "a"
+                  },
+                  {
+                    "type": "String",
+                    "value": "b"
+                  },
+                  {
+                    "type": "String",
+                    "value": "b"
+                  }
+                ],
+                "spaced_commas": true
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "field"
+          ]
+        },
+        {
+          "name": "count",
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "field"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

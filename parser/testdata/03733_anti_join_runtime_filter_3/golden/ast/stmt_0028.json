@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "n_nationkey"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "nation"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "expr": {
+                          "parts": [
+                            "n_name"
+                          ]
+                        },
+                        "list": [
+                          {
+                            "type": "String",
+                            "value": "FRANCE"
+                          },
+                          {
+                            "type": "String",
+                            "value": "GERMANY"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "n"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "customer"
+              }
+            },
+            "join": {
+              "type": "RIGHT",
+              "strictness": "ANTI",
+              "on": {
+                "left": {
+                  "parts": [
+                    "c_nationkey"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "n",
+                    "n_nationkey"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

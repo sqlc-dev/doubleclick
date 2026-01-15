@@ -1,0 +1,125 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "uniqExact",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "alias": "u"
+        },
+        {
+          "name": "uniqExactIf",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            },
+            {
+              "left": {
+                "parts": [
+                  "name"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "a"
+              }
+            }
+          ],
+          "alias": "ue"
+        },
+        {
+          "name": "uniqExactIf",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            },
+            {
+              "expr": {
+                "parts": [
+                  "name"
+                ]
+              },
+              "list": [
+                {
+                  "type": "String",
+                  "value": "a"
+                },
+                {
+                  "type": "String",
+                  "value": "b"
+                }
+              ]
+            }
+          ],
+          "alias": "ui"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toNullable",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "a"
+                            }
+                          ],
+                          "alias": "name"
+                        },
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "name": "range",
+                              "arguments": [
+                                {
+                                  "type": "Integer",
+                                  "value": 10
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "x"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "name"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "a"
+        }
+      }
+    }
+  ]
+}

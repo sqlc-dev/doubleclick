@@ -1,0 +1,123 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "key"
+          ]
+        },
+        {
+          "parts": [
+            "s1",
+            "value"
+          ]
+        },
+        {
+          "parts": [
+            "s2",
+            "value"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "key1"
+                          },
+                          "alias": "key"
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "value1"
+                          },
+                          "alias": "value"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "s1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "key1"
+                          },
+                          "alias": "key"
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": ""
+                          },
+                          "alias": "value"
+                        }
+                      ]
+                    },
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "key2"
+                          },
+                          "alias": "key"
+                        },
+                        {
+                          "name": "toNullable",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": ""
+                            }
+                          ],
+                          "alias": "value"
+                        }
+                      ]
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              },
+              "alias": "s2"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ALL",
+              "using": [
+                {
+                  "parts": [
+                    "key"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "exception_code"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "current_database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "name": "lower",
+                "arguments": [
+                  {
+                    "parts": [
+                      "query"
+                    ]
+                  }
+                ]
+              },
+              "pattern": {
+                "name": "lower",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "SELECT * FROM test_table_for_01070_exception_code_in_query_log_table%"
+                  }
+                ]
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "yesterday"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "event_time"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "left": {
+              "name": "now"
+            },
+            "op": "-",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 5
+              },
+              "unit": "MINUTE"
+            }
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "exception_code"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

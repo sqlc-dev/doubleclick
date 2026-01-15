@@ -1,0 +1,91 @@
+{
+  "table": "ip_bloom",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "ip4",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "IPv4"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "ip6",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "IPv6"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "x4",
+      "expression": {
+        "parts": [
+          "ip4"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter",
+        "arguments": [
+          {
+            "type": "Float",
+            "value": 0.1,
+            "source": "0.1"
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 3
+      }
+    },
+    {
+      "name": "x6",
+      "expression": {
+        "parts": [
+          "ip6"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter",
+        "arguments": [
+          {
+            "type": "Float",
+            "value": 0.1,
+            "source": "0.1"
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 3
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "table": "bloom_filter_has_const_array",
+  "columns": [
+    {
+      "name": "bf",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "abf",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_bf",
+      "expression": {
+        "parts": [
+          "bf"
+        ]
+      },
+      "type": {
+        "name": "tokenbf_v1",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 512
+          },
+          {
+            "type": "Integer",
+            "value": 3
+          },
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "idx_abf",
+      "expression": {
+        "parts": [
+          "abf"
+        ]
+      },
+      "type": {
+        "name": "tokenbf_v1",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 512
+          },
+          {
+            "type": "Integer",
+            "value": 3
+          },
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": null
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

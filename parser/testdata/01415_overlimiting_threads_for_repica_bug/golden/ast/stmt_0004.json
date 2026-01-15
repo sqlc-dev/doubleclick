@@ -1,0 +1,74 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1|2}"
+                  },
+                  {
+                    "name": "numbers_mt",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 1000000
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "left": {
+            "parts": [
+              "number"
+            ]
+          },
+          "op": "%",
+          "right": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

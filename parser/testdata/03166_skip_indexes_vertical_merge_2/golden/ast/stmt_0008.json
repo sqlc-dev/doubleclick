@@ -1,0 +1,211 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "uuid",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "uuid"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "tables"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "database"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "name": "currentDatabase"
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "table"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "t_ind_merge_2"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "groups",
+          "query": {
+            "array": {
+              "name": "extractAllGroupsVertical",
+              "arguments": [
+                {
+                  "parts": [
+                    "message"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "containing (\\d+) columns \\((\\d+) merged, (\\d+) gathered\\)"
+                }
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "groups"
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "total"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "groups"
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "alias": "merged"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "groups"
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 3
+            }
+          },
+          "alias": "gathered"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "text_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "query_id"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "left": {
+                "parts": [
+                  "uuid"
+                ]
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": "::all_1_2_1"
+              }
+            },
+            "parenthesized": true
+          },
+          "op": "OR",
+          "right": {
+            "left": {
+              "parts": [
+                "query_id"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "left": {
+                "name": "currentDatabase"
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": ".t_ind_merge_2::all_1_2_1"
+              }
+            },
+            "parenthesized": true
+          },
+          "parenthesized": true
+        },
+        "op": "AND",
+        "right": {
+          "name": "notEmpty",
+          "arguments": [
+            {
+              "parts": [
+                "groups"
+              ]
+            }
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "table": "dep2",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "country",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "purchase_location",
+      "type": {
+        "name": "UInt16"
+      },
+      "default": {
+        "name": "if",
+        "arguments": [
+          {
+            "expr": {
+              "parts": [
+                "id"
+              ]
+            },
+            "list": [
+              {
+                "name": "joinGet",
+                "arguments": [
+                  {
+                    "name": "concat",
+                    "arguments": [
+                      {
+                        "name": "currentDatabase"
+                      },
+                      {
+                        "type": "String",
+                        "value": ".id_join"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "location"
+                  },
+                  {
+                    "type": "String",
+                    "value": "CLICK"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Integer",
+            "value": 123
+          },
+          {
+            "type": "Integer",
+            "value": 456
+          }
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/test/02433/{database}/dep"
+      },
+      {
+        "type": "String",
+        "value": "2"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

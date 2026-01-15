@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "parts": [
+            "c"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "user_id"
+                          ]
+                        },
+                        {
+                          "name": "count",
+                          "alias": "c"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "messages"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "user_id"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "messages"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "users"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "messages",
+                    "user_id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "users",
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "user_id"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "table": "t_materialize_delete",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "v",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "parts": [
+        "id"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 10
+    }
+  }
+}

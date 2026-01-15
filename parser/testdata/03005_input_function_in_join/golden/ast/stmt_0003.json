@@ -1,0 +1,94 @@
+{
+  "table": "test",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "x",
+              "number"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "number"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "database": "system",
+                                  "table": "numbers"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "limit": {
+                          "type": "Integer",
+                          "value": 10
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "x"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "name": "input",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "a UInt64"
+                    }
+                  ]
+                },
+                "alias": "y"
+              },
+              "join": {
+                "type": "INNER",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "x",
+                      "number"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "y",
+                      "a"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "format": {
+          "parts": [
+            "CSV"
+          ]
+        }
+      }
+    ]
+  }
+}

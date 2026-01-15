@@ -1,0 +1,133 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "z",
+          "query": {
+            "name": "arrayJoin",
+            "arguments": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "String",
+                    "value": "a"
+                  },
+                  {
+                    "type": "String",
+                    "value": "b"
+                  }
+                ],
+                "spaced_commas": true
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "z"
+          ]
+        },
+        {
+          "name": "sumMergeForEach",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "alias": "x"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "sumStateForEach",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "Float",
+                                  "value": 1,
+                                  "source": "1."
+                                },
+                                {
+                                  "type": "Float",
+                                  "value": 1.1,
+                                  "source": "1.1"
+                                },
+                                {
+                                  "type": "Float",
+                                  "value": 1.1300175,
+                                  "source": "1.1300175"
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ],
+                          "alias": "x"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.0.0.{1,2}"
+                                  },
+                                  {
+                                    "parts": [
+                                      "system",
+                                      "one"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "z"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "z"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

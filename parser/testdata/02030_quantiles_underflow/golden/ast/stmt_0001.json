@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "y"
+              ],
+              "body": {
+                "name": "round",
+                "arguments": [
+                  {
+                    "parts": [
+                      "y"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            {
+              "name": "quantilesExactInclusive",
+              "parameters": [
+                {
+                  "type": "Float",
+                  "value": 0.1,
+                  "source": "0.1"
+                },
+                {
+                  "type": "Float",
+                  "value": 0.9,
+                  "source": "0.9"
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "q"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "op": "-",
+                                  "operand": {
+                                    "type": "Integer",
+                                    "value": 2147483648
+                                  }
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ],
+                          "alias": "x"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

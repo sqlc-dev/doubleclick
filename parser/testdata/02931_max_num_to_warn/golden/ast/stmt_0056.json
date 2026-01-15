@@ -1,0 +1,63 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "replaceRegexpAll",
+          "arguments": [
+            {
+              "parts": [
+                "message"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "\\(\\d+\\)"
+            },
+            {
+              "type": "String",
+              "value": "_"
+            }
+          ]
+        },
+        {
+          "parts": [
+            "message_format_string"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "warnings"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "message"
+          ]
+        },
+        "pattern": {
+          "type": "String",
+          "value": "The number of%"
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "message"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

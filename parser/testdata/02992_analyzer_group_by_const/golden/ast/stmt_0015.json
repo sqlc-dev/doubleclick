@@ -1,0 +1,144 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "tuple",
+          "arguments": [
+            {
+              "name": "nullIf",
+              "arguments": [
+                {
+                  "name": "toDateTime",
+                  "arguments": [
+                    {
+                      "name": "formatDateTime",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "hr"
+                          ]
+                        },
+                        {
+                          "type": "String",
+                          "value": "%F %T"
+                        },
+                        {
+                          "type": "String",
+                          "value": "America/Los_Angeles"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "String",
+                      "value": "America/Los_Angeles"
+                    }
+                  ]
+                },
+                {
+                  "name": "toDateTime",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 0
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "c1"
+        },
+        {
+          "name": "defaultValueOfArgumentType",
+          "arguments": [
+            {
+              "name": "toTimeZone",
+              "arguments": [
+                {
+                  "parts": [
+                    "ts"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "America/Los_Angeles"
+                }
+              ]
+            }
+          ],
+          "alias": "c2"
+        },
+        {
+          "name": "formatDateTime",
+          "arguments": [
+            {
+              "parts": [
+                "hr"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "%F %T"
+            },
+            {
+              "type": "String",
+              "value": "America/Los_Angeles"
+            }
+          ],
+          "alias": "c3"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "ttt"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "c1"
+          ]
+        },
+        {
+          "parts": [
+            "c2"
+          ]
+        },
+        {
+          "parts": [
+            "c3"
+          ]
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

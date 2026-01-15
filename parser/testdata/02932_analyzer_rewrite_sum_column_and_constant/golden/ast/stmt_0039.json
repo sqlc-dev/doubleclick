@@ -1,0 +1,84 @@
+{
+  "explain_type": "QUERY TREE",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "expr": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "alias": "m"
+                },
+                "op": "+",
+                "right": {
+                  "parts": [
+                    "uint64"
+                  ],
+                  "alias": "n"
+                }
+              }
+            ],
+            "alias": "j"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "test_table"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "parts": [
+                "m"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "n"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          }
+        },
+        "having": {
+          "left": {
+            "parts": [
+              "j"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      }
+    ]
+  },
+  "explicit_type": true
+}

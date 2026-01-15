@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "d"
+          ]
+        },
+        {
+          "parts": [
+            "c"
+          ]
+        },
+        {
+          "name": "row_number",
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "d"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "c"
+                  ]
+                }
+              }
+            ]
+          },
+          "alias": "c8"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              }
+            }
+          }
+        ]
+      },
+      "qualify": {
+        "left": {
+          "parts": [
+            "c8"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "d"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "max_threads",
+          "value": {
+            "type": "Integer",
+            "value": 2
+          }
+        },
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.{1..4}"
+                  },
+                  {
+                    "name": "view",
+                    "arguments": [
+                      {
+                        "query": {
+                          "selects": [
+                            {
+                              "columns": [
+                                {
+                                  "parts": [
+                                    "number"
+                                  ],
+                                  "alias": "id"
+                                }
+                              ],
+                              "from": {
+                                "tables": [
+                                  {
+                                    "table": {
+                                      "table": {
+                                        "name": "numbers",
+                                        "arguments": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "bitAnd",
+                    "arguments": [
+                      {
+                        "name": "murmurHash3_32",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "id"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2147483647
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "id"
+          ]
+        },
+        "list": [
+          {
+            "type": "Integer",
+            "value": 2
+          },
+          {
+            "type": "Integer",
+            "value": 3
+          }
+        ]
+      }
+    }
+  ]
+}

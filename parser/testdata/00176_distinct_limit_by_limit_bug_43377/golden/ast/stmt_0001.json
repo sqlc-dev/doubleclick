@@ -1,0 +1,121 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "distinct": true,
+                      "columns": [
+                        {
+                          "parts": [
+                            "Title"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "SearchPhrase"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "test",
+                                "table": "hits"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "SearchPhrase"
+                              ]
+                            },
+                            "op": "!=",
+                            "right": {
+                              "type": "String",
+                              "value": ""
+                            },
+                            "parenthesized": true
+                          },
+                          "op": "AND",
+                          "right": {
+                            "op": "NOT",
+                            "operand": {
+                              "name": "match",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "Title"
+                                  ]
+                                },
+                                {
+                                  "type": "String",
+                                  "value": "[а-яА-ЯёЁ]"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "op": "NOT",
+                          "operand": {
+                            "name": "match",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "SearchPhrase"
+                                ]
+                              },
+                              {
+                                "type": "String",
+                                "value": "[а-яА-ЯёЁ]"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      },
+                      "limit_by": [
+                        {
+                          "parts": [
+                            "Title"
+                          ]
+                        }
+                      ],
+                      "limit_by_limit": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "limit_by_has_limit": true
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

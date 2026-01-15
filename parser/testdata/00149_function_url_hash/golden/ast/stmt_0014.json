@@ -1,0 +1,112 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "URLHash",
+            "arguments": [
+              {
+                "parts": [
+                  "url"
+                ]
+              },
+              {
+                "expr": {
+                  "type": "Integer",
+                  "value": 4
+                },
+                "alias": "level"
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "URLHash",
+            "arguments": [
+              {
+                "array": {
+                  "name": "URLHierarchy",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "url"
+                      ]
+                    }
+                  ]
+                },
+                "index": {
+                  "left": {
+                    "parts": [
+                      "level"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "expr": {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "String",
+                        "value": ""
+                      },
+                      {
+                        "type": "String",
+                        "value": "http://ya.ru"
+                      },
+                      {
+                        "type": "String",
+                        "value": "http://ya.ru/"
+                      },
+                      {
+                        "type": "String",
+                        "value": "http://ya.ru/a"
+                      },
+                      {
+                        "type": "String",
+                        "value": "http://ya.ru/a/"
+                      },
+                      {
+                        "type": "String",
+                        "value": "http://ya.ru/a/b"
+                      },
+                      {
+                        "type": "String",
+                        "value": "http://ya.ru/a/b?"
+                      }
+                    ],
+                    "spaced_commas": true
+                  },
+                  "alias": "url"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

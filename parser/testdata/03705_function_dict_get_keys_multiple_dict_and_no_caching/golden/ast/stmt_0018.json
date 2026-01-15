@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "target_category"
+          ]
+        },
+        {
+          "name": "dictGetKeys",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "dict_geo"
+            },
+            {
+              "type": "String",
+              "value": "timezone"
+            },
+            {
+              "name": "concat",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "UTC"
+                },
+                {
+                  "name": "substring",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "target_timezone"
+                      ]
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 4
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "country_city_by_tz_expr"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "inputs"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "target_category"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "target_brand"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "target_timezone"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

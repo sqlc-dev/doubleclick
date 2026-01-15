@@ -1,0 +1,218 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "test_cte",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "ref_10",
+                        "c11"
+                      ],
+                      "alias": "c_2_c2350_1"
+                    },
+                    {
+                      "parts": [
+                        "ref_9",
+                        "c9"
+                      ],
+                      "alias": "c_2_c2351_2"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "test_table_1"
+                          },
+                          "alias": "ref_9"
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "table": "test_table_1"
+                          },
+                          "alias": "ref_10"
+                        },
+                        "join": {
+                          "type": "RIGHT",
+                          "on": {
+                            "left": {
+                              "parts": [
+                                "ref_9",
+                                "c11"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "ref_10",
+                                "c9"
+                              ]
+                            },
+                            "parenthesized": true
+                          }
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "table": "test_table_2"
+                          },
+                          "alias": "ref_11"
+                        },
+                        "join": {
+                          "type": "INNER",
+                          "on": {
+                            "left": {
+                              "parts": [
+                                "ref_10",
+                                "c8"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "ref_11",
+                                "vkey"
+                              ]
+                            },
+                            "parenthesized": true
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "expr": {
+                      "left": {
+                        "parts": [
+                          "ref_10",
+                          "pkey"
+                        ]
+                      },
+                      "op": "+",
+                      "right": {
+                        "parts": [
+                          "ref_11",
+                          "pkey"
+                        ]
+                      },
+                      "parenthesized": true
+                    },
+                    "low": {
+                      "parts": [
+                        "ref_11",
+                        "vkey"
+                      ]
+                    },
+                    "high": {
+                      "whens": [
+                        {
+                          "condition": {
+                            "left": {
+                              "op": "-",
+                              "operand": {
+                                "type": "Float",
+                                "value": 30.87,
+                                "source": "30.87"
+                              }
+                            },
+                            "op": "\u003e=",
+                            "right": {
+                              "parts": [
+                                "ref_9",
+                                "c10"
+                              ]
+                            },
+                            "parenthesized": true
+                          },
+                          "result": {
+                            "parts": [
+                              "ref_11",
+                              "c15"
+                            ]
+                          }
+                        }
+                      ],
+                      "else": {
+                        "parts": [
+                          "ref_11",
+                          "pkey"
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "ref_13",
+            "c_2_c2350_1"
+          ],
+          "alias": "c_2_c2357_3"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_cte"
+              },
+              "alias": "ref_13"
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "ref_13",
+            "c_2_c2351_2"
+          ]
+        },
+        "query": {
+          "selects": [
+            {
+              "columns": [
+                {
+                  "parts": [
+                    "ref_14",
+                    "c_2_c2351_2"
+                  ],
+                  "alias": "c_5_c2352_0"
+                }
+              ],
+              "from": {
+                "tables": [
+                  {
+                    "table": {
+                      "table": {
+                        "table": "test_cte"
+                      },
+                      "alias": "ref_14"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

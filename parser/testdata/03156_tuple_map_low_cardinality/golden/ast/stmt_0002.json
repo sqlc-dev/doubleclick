@@ -1,0 +1,67 @@
+{
+  "table": "t_map_lc",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "t",
+      "type": {
+        "name": "Tuple",
+        "parameters": [
+          {
+            "name": "m",
+            "type": {
+              "name": "Map",
+              "parameters": [
+                {
+                  "name": "LowCardinality",
+                  "parameters": [
+                    {
+                      "name": "String"
+                    }
+                  ],
+                  "has_parentheses": true
+                },
+                {
+                  "name": "LowCardinality",
+                  "parameters": [
+                    {
+                      "name": "String"
+                    }
+                  ],
+                  "has_parentheses": true
+                }
+              ],
+              "has_parentheses": true
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

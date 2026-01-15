@@ -1,0 +1,70 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "==",
+          "right": {
+            "type": "Integer",
+            "value": 3
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "key"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "join_test_right"
+              }
+            },
+            "join": {
+              "type": "RIGHT",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "key"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "join_test_right",
+                    "key"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

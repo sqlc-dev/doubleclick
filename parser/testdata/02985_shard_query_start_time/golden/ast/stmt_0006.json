@@ -1,0 +1,250 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "id_and_start_tuple",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "type": "Tuple",
+                      "value": [
+                        {
+                          "parts": [
+                            "query_id"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "query_start_time"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "query_start_time_microseconds"
+                          ]
+                        }
+                      ],
+                      "spaced_commas": true
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "event_date"
+                            ]
+                          },
+                          "op": "\u003e=",
+                          "right": {
+                            "name": "yesterday"
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "current_database"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "name": "currentDatabase"
+                          }
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "log_comment"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "02985_shard_query_start_time_query_1"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "type"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "QueryFinish"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "type"
+          ]
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "query_start_time"
+                ]
+              },
+              "op": "\u003e=",
+              "right": {
+                "parts": [
+                  "initial_query_start_time"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "query_start_time_microseconds"
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "parts": [
+                  "initial_query_start_time_microseconds"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "initial_query_start_time"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "tuple": {
+                  "parts": [
+                    "id_and_start_tuple"
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "initial_query_start_time_microseconds"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "tuple": {
+                  "parts": [
+                    "id_and_start_tuple"
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 3
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "op": "NOT",
+          "operand": {
+            "parts": [
+              "is_initial_query"
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "initial_query_id"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "tuple": {
+              "parts": [
+                "id_and_start_tuple"
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "type"
+          ]
+        }
+      ]
+    }
+  ]
+}

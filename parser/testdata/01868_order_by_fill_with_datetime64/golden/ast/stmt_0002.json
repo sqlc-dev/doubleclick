@@ -1,0 +1,129 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "n"
+          ]
+        },
+        {
+          "parts": [
+            "source"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toDateTime64",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1000
+                              }
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 9
+                            },
+                            {
+                              "type": "String",
+                              "value": "Asia/Istanbul"
+                            }
+                          ],
+                          "alias": "n"
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "original"
+                          },
+                          "alias": "source"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          "op": "%",
+                          "right": {
+                            "type": "Integer",
+                            "value": 3
+                          },
+                          "parenthesized": true
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "n"
+            ]
+          },
+          "with_fill": true,
+          "fill_step": {
+            "name": "toDateTime64",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 1000
+              },
+              {
+                "type": "Integer",
+                "value": 9
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

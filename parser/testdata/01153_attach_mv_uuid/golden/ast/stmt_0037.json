@@ -1,0 +1,82 @@
+{
+  "table": "mv",
+  "columns": [
+    {
+      "name": "n",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "n2",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "n"
+      ]
+    }
+  ],
+  "is_materialized_view": true,
+  "uuid": "3bd68e3c-2693-4352-ad66-a66eba9e345e",
+  "inner_uuid": "3bd68e3c-2693-4352-ad66-a66eba9e345e",
+  "partition_by": {
+    "left": {
+      "parts": [
+        "n"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 10
+    }
+  },
+  "select_query": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "n"
+            ]
+          },
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "n"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "parts": [
+                  "n"
+                ]
+              }
+            },
+            "alias": "n2"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "src"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

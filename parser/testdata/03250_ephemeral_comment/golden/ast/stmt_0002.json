@@ -1,0 +1,108 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "start_s",
+      "type": {
+        "name": "UInt32"
+      },
+      "default_kind": "EPHEMERAL",
+      "comment": "start UNIX time"
+    },
+    {
+      "name": "start_us",
+      "type": {
+        "name": "UInt16"
+      },
+      "default_kind": "EPHEMERAL",
+      "comment": "start microseconds"
+    },
+    {
+      "name": "finish_s",
+      "type": {
+        "name": "UInt32"
+      },
+      "default_kind": "EPHEMERAL",
+      "comment": "finish UNIX time"
+    },
+    {
+      "name": "finish_us",
+      "type": {
+        "name": "UInt16"
+      },
+      "default_kind": "EPHEMERAL",
+      "comment": "finish microseconds"
+    },
+    {
+      "name": "captured",
+      "type": {
+        "name": "DateTime"
+      },
+      "default": {
+        "name": "fromUnixTimestamp",
+        "arguments": [
+          {
+            "parts": [
+              "start_s"
+            ]
+          }
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "duration",
+      "type": {
+        "name": "Decimal32",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 6
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "left": {
+          "left": {
+            "parts": [
+              "finish_s"
+            ]
+          },
+          "op": "-",
+          "right": {
+            "parts": [
+              "start_s"
+            ]
+          }
+        },
+        "op": "+",
+        "right": {
+          "left": {
+            "left": {
+              "parts": [
+                "finish_us"
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "start_us"
+              ]
+            },
+            "parenthesized": true
+          },
+          "op": "/",
+          "right": {
+            "type": "Integer",
+            "value": 1000000
+          }
+        }
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "engine": {
+    "name": "Null"
+  }
+}

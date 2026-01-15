@@ -1,0 +1,137 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "QUERY TREE",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t1"
+                                }
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "t2"
+                                }
+                              },
+                              "join": {
+                                "type": "INNER",
+                                "on": {
+                                  "left": {
+                                    "left": {
+                                      "parts": [
+                                        "t1",
+                                        "x"
+                                      ]
+                                    },
+                                    "op": "\u003c=\u003e",
+                                    "right": {
+                                      "parts": [
+                                        "t2",
+                                        "x"
+                                      ]
+                                    }
+                                  },
+                                  "op": "OR",
+                                  "right": {
+                                    "left": {
+                                      "left": {
+                                        "expr": {
+                                          "parts": [
+                                            "t1",
+                                            "x"
+                                          ]
+                                        }
+                                      },
+                                      "op": "AND",
+                                      "right": {
+                                        "left": {
+                                          "parts": [
+                                            "t1",
+                                            "y"
+                                          ]
+                                        },
+                                        "op": "\u003c=\u003e",
+                                        "right": {
+                                          "parts": [
+                                            "t2",
+                                            "y"
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    "op": "AND",
+                                    "right": {
+                                      "expr": {
+                                        "parts": [
+                                          "t2",
+                                          "x"
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  "parenthesized": true
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "explicit_type": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%CONSTANT%"
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "case_insensitive": true,
+          "pattern": {
+            "type": "String",
+            "value": "%is%null%"
+          }
+        }
+      }
+    }
+  ]
+}

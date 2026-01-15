@@ -1,0 +1,67 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "_shard_num"
+          ],
+          "alias": "shard_num"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ],
+          "alias": "rows"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.{1,2}"
+                  },
+                  {
+                    "parts": [
+                      "system"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "one"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "_shard_num"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "_shard_num"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

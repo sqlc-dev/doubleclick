@@ -1,0 +1,89 @@
+{
+  "table": "test_break_ddl",
+  "commands": [
+    {
+      "type": "ADD_COLUMN",
+      "column": {
+        "name": "source_address",
+        "type": {
+          "name": "String"
+        },
+        "ttl": {
+          "left": {
+            "parts": [
+              "event_time"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "name": "toIntervalDay",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 30
+              }
+            ]
+          }
+        }
+      },
+      "after_column": "event_time"
+    },
+    {
+      "type": "ADD_COLUMN",
+      "column": {
+        "name": "destination_address",
+        "type": {
+          "name": "String"
+        },
+        "ttl": {
+          "left": {
+            "parts": [
+              "event_time"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "name": "toIntervalDay",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 30
+              }
+            ]
+          }
+        }
+      },
+      "after_column": "source_address"
+    },
+    {
+      "type": "MODIFY_ORDER_BY",
+      "order_by_expr": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "event_date"
+          ]
+        },
+        {
+          "parts": [
+            "event_time"
+          ]
+        },
+        {
+          "parts": [
+            "source_address"
+          ]
+        },
+        {
+          "parts": [
+            "destination_address"
+          ]
+        }
+      ]
+    }
+  ]
+}

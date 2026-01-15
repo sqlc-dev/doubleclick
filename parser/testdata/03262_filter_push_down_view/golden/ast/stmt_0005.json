@@ -1,0 +1,107 @@
+{
+  "view": "alpha__day",
+  "columns": [
+    {
+      "name": "ts_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "auid",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "ts_date"
+            ]
+          },
+          {
+            "parts": [
+              "auid"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "toDate",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "ts"
+                                ]
+                              }
+                            ],
+                            "alias": "ts_date"
+                          },
+                          {
+                            "parts": [
+                              "auid"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "alpha"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "ts_date"
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "left": {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2024-01-01 00:00:00"
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 1
+              },
+              "unit": "DAY"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

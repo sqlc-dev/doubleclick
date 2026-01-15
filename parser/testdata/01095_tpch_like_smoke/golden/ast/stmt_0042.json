@@ -1,0 +1,259 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "l_shipmode"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "whens": [
+                {
+                  "condition": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "o_orderpriority"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "1-URGENT"
+                      }
+                    },
+                    "op": "OR",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "o_orderpriority"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "2-HIGH"
+                      }
+                    }
+                  },
+                  "result": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ],
+              "else": {
+                "type": "Integer",
+                "value": 0
+              }
+            }
+          ],
+          "alias": "high_line_count"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "whens": [
+                {
+                  "condition": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "o_orderpriority"
+                        ]
+                      },
+                      "op": "\u003c\u003e",
+                      "right": {
+                        "type": "String",
+                        "value": "1-URGENT"
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "o_orderpriority"
+                        ]
+                      },
+                      "op": "\u003c\u003e",
+                      "right": {
+                        "type": "String",
+                        "value": "2-HIGH"
+                      }
+                    }
+                  },
+                  "result": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ],
+              "else": {
+                "type": "Integer",
+                "value": 0
+              }
+            }
+          ],
+          "alias": "low_line_count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "orders"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "lineitem"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "o_orderkey"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "l_orderkey"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "expr": {
+                    "parts": [
+                      "l_shipmode"
+                    ]
+                  },
+                  "list": [
+                    {
+                      "type": "String",
+                      "value": "MAIL"
+                    },
+                    {
+                      "type": "String",
+                      "value": "SHIP"
+                    }
+                  ]
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "l_commitdate"
+                  ]
+                },
+                "op": "\u003c",
+                "right": {
+                  "parts": [
+                    "l_receiptdate"
+                  ]
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "l_shipdate"
+                ]
+              },
+              "op": "\u003c",
+              "right": {
+                "parts": [
+                  "l_commitdate"
+                ]
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "l_receiptdate"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "1994-01-01"
+                }
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "l_receiptdate"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "left": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "1994-01-01"
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "type": "String",
+                "value": "1"
+              },
+              "unit": "YEAR"
+            }
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "l_shipmode"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "l_shipmode"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

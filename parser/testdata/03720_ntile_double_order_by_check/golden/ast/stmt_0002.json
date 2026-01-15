@@ -1,0 +1,83 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "ntile",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ],
+          "over": {
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              }
+            ]
+          },
+          "alias": "a"
+        },
+        {
+          "name": "ntile",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ],
+          "over": {
+            "order_by": [
+              {
+                "expression": {
+                  "left": {
+                    "parts": [
+                      "id"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                }
+              }
+            ]
+          },
+          "alias": "b"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "id"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "table": "t_1",
+  "columns": [
+    {
+      "name": "order_0",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "ordinary_1",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "p_time",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "computed",
+      "type": null,
+      "default": {
+        "left": {
+          "type": "String",
+          "value": "computed_"
+        },
+        "op": "||",
+        "right": {
+          "expr": {
+            "parts": [
+              "p_time"
+            ]
+          },
+          "type": {
+            "name": "String"
+          }
+        }
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "granule",
+      "type": null,
+      "default": {
+        "left": {
+          "expr": {
+            "left": {
+              "parts": [
+                "order_0"
+              ]
+            },
+            "op": "/",
+            "right": {
+              "type": "Integer",
+              "value": 8192
+            }
+          },
+          "type": {
+            "name": "UInt64"
+          }
+        },
+        "op": "%",
+        "right": {
+          "type": "Integer",
+          "value": 3
+        }
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "index_granule",
+      "expression": {
+        "parts": [
+          "granule"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "order_0"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "p_time"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

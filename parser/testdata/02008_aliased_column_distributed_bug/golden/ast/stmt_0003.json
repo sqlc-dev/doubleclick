@@ -1,0 +1,53 @@
+{
+  "table": "click_storage",
+  "columns": [
+    {
+      "name": "PhraseID",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "PhraseProcessedID",
+      "type": {
+        "name": "UInt64"
+      },
+      "default": {
+        "name": "if",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "PhraseID"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 5
+            }
+          },
+          {
+            "parts": [
+              "PhraseID"
+            ]
+          },
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

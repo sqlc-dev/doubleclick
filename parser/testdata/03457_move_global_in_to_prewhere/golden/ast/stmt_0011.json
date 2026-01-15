@@ -1,0 +1,94 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "replaceRegexpAll",
+          "arguments": [
+            {
+              "name": "trim",
+              "arguments": [
+                {
+                  "parts": [
+                    "explain"
+                  ]
+                }
+              ],
+              "sql_standard": true
+            },
+            {
+              "type": "String",
+              "value": "__table\\d\\.|__set_\\d+_\\d+|_subquery\\d+|03457_filter"
+            },
+            {
+              "type": "String",
+              "value": ""
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "03457_data"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "expr": {
+                            "parts": [
+                              "key"
+                            ]
+                          },
+                          "not": true,
+                          "global": true,
+                          "list": [
+                            {
+                              "parts": [
+                                "03457_filter"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "explain"
+          ]
+        },
+        "pattern": {
+          "type": "String",
+          "value": "%Prewhere filter column: globalNotIn%"
+        }
+      }
+    }
+  ]
+}

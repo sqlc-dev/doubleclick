@@ -1,0 +1,83 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "reference_vec",
+          "query": {
+            "type": "Array",
+            "value": [
+              {
+                "name": "toBFloat16",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "L2DistanceTransposed",
+              "arguments": [
+                {
+                  "parts": [
+                    "vec"
+                  ]
+                },
+                {
+                  "parts": [
+                    "reference_vec"
+                  ]
+                },
+                {
+                  "name": "toLowCardinality",
+                  "arguments": [
+                    {
+                      "name": "toNullable",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 5
+            }
+          ],
+          "alias": "dist"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "qbit"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

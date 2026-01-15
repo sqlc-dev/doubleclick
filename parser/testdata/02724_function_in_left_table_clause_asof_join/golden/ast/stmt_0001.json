@@ -1,0 +1,157 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "id"
+                        },
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 2
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 3
+                              }
+                            ],
+                            "spaced_commas": true
+                          },
+                          "alias": "arr"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "sessions"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "session_id"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 4
+                          },
+                          "alias": "id"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "visitors"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ASOF",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "visitors",
+                      "session_id"
+                    ]
+                  },
+                  "op": "\u003c=",
+                  "right": {
+                    "parts": [
+                      "sessions",
+                      "id"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "name": "arrayFirst",
+                    "arguments": [
+                      {
+                        "parameters": [
+                          "a"
+                        ],
+                        "body": {
+                          "parts": [
+                            "a"
+                          ]
+                        }
+                      },
+                      {
+                        "name": "arrayMap",
+                        "arguments": [
+                          {
+                            "parameters": [
+                              "a"
+                            ],
+                            "body": {
+                              "parts": [
+                                "a"
+                              ]
+                            }
+                          },
+                          {
+                            "parts": [
+                              "sessions",
+                              "arr"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "visitors",
+                      "id"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

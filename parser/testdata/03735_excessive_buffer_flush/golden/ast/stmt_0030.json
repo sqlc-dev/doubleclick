@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "array": {
+              "name": "extractAll",
+              "arguments": [
+                {
+                  "parts": [
+                    "logger_name"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "StorageBuffer \\([^.]+\\.([^)]+)\\)"
+                }
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "table_name"
+        },
+        {
+          "name": "max2",
+          "arguments": [
+            {
+              "name": "count"
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "text_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "logger_name"
+          ]
+        },
+        "pattern": {
+          "name": "format",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "%StorageBuffer ({}.%"
+            },
+            {
+              "name": "currentDatabase"
+            }
+          ]
+        }
+      },
+      "group_by": [
+        {
+          "type": "Integer",
+          "value": 1
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

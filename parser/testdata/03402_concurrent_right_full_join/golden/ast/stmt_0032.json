@@ -1,0 +1,89 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "l",
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "l",
+            "value"
+          ]
+        },
+        {
+          "parts": [
+            "r",
+            "description"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t_l_filter"
+              },
+              "alias": "l"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t_r_filter"
+              },
+              "alias": "r"
+            },
+            "join": {
+              "type": "RIGHT",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "l",
+                      "id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "r",
+                      "id"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "expr": {
+                    "parts": [
+                      "r",
+                      "description"
+                    ]
+                  },
+                  "pattern": {
+                    "type": "String",
+                    "value": "F%"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "r",
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "check_start_time"
+          ]
+        },
+        {
+          "parts": [
+            "check_name"
+          ]
+        },
+        {
+          "parts": [
+            "test_name"
+          ]
+        },
+        {
+          "parts": [
+            "test_status"
+          ]
+        },
+        {
+          "parts": [
+            "check_status"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "checks"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "type": "Integer",
+                "value": 1
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "test_status"
+                  ]
+                },
+                "op": "!=",
+                "right": {
+                  "type": "String",
+                  "value": "SKIPPED"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "test_status"
+                ]
+              },
+              "op": "!=",
+              "right": {
+                "type": "String",
+                "value": "OK"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "check_status"
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "type": "String",
+              "value": "success"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "test_name"
+            ]
+          },
+          "case_insensitive": true,
+          "pattern": {
+            "type": "String",
+            "value": "%parallel_replicas%"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "check_start_time"
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "check_name"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "test_name"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "query_plan_read_in_order",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "optimize_read_in_order",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "allow_experimental_parallel_reading_from_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "cluster_for_parallel_replicas",
+          "value": {
+            "type": "String",
+            "value": "test_cluster_one_shard_three_replicas_localhost"
+          }
+        },
+        {
+          "name": "max_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 3
+          }
+        }
+      ]
+    }
+  ]
+}

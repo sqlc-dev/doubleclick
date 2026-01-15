@@ -1,0 +1,987 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "m0",
+                            "pt"
+                          ],
+                          "alias": "pt"
+                        },
+                        {
+                          "parts": [
+                            "m0",
+                            "uvctr"
+                          ],
+                          "alias": "uvctr"
+                        },
+                        {
+                          "name": "round",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "m1",
+                                "uvctr"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 4
+                            }
+                          ],
+                          "alias": "uvctr_hb_last_value"
+                        },
+                        {
+                          "name": "round",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "m2",
+                                "uvctr"
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 4
+                            }
+                          ],
+                          "alias": "uvctr_tb_last_value"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "m0",
+                                            "pt"
+                                          ],
+                                          "alias": "pt"
+                                        },
+                                        {
+                                          "name": "COALESCE",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "m0",
+                                                "brand_name"
+                                              ]
+                                            },
+                                            {
+                                              "parts": [
+                                                "m1",
+                                                "brand_name"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "brand_name"
+                                        },
+                                        {
+                                          "name": "if",
+                                          "arguments": [
+                                            {
+                                              "left": {
+                                                "name": "isNaN",
+                                                "arguments": [
+                                                  {
+                                                    "left": {
+                                                      "parts": [
+                                                        "click_uv"
+                                                      ]
+                                                    },
+                                                    "op": "/",
+                                                    "right": {
+                                                      "parts": [
+                                                        "exposure_uv"
+                                                      ]
+                                                    }
+                                                  }
+                                                ]
+                                              },
+                                              "op": "OR",
+                                              "right": {
+                                                "name": "isInfinite",
+                                                "arguments": [
+                                                  {
+                                                    "left": {
+                                                      "parts": [
+                                                        "click_uv"
+                                                      ]
+                                                    },
+                                                    "op": "/",
+                                                    "right": {
+                                                      "parts": [
+                                                        "exposure_uv"
+                                                      ]
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            },
+                                            {
+                                              "type": "Null",
+                                              "value": null
+                                            },
+                                            {
+                                              "left": {
+                                                "parts": [
+                                                  "click_uv"
+                                                ]
+                                              },
+                                              "op": "/",
+                                              "right": {
+                                                "parts": [
+                                                  "exposure_uv"
+                                                ]
+                                              }
+                                            }
+                                          ],
+                                          "alias": "uvctr"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "query": {
+                                                  "selects": [
+                                                    {
+                                                      "columns": [
+                                                        {
+                                                          "parts": [
+                                                            "pt"
+                                                          ],
+                                                          "alias": "pt"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "brand_name"
+                                                          ],
+                                                          "alias": "brand_name"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "exposure_uv"
+                                                          ],
+                                                          "alias": "exposure_uv"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "click_uv"
+                                                          ],
+                                                          "alias": "click_uv"
+                                                        }
+                                                      ],
+                                                      "from": {
+                                                        "tables": [
+                                                          {
+                                                            "table": {
+                                                              "table": {
+                                                                "table": "test2"
+                                                              }
+                                                            }
+                                                          }
+                                                        ]
+                                                      },
+                                                      "where": {
+                                                        "left": {
+                                                          "parts": [
+                                                            "pt"
+                                                          ]
+                                                        },
+                                                        "op": "=",
+                                                        "right": {
+                                                          "type": "String",
+                                                          "value": "20230626"
+                                                        }
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "alias": "m0"
+                                            }
+                                          },
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "query": {
+                                                  "selects": [
+                                                    {
+                                                      "columns": [
+                                                        {
+                                                          "parts": [
+                                                            "pt"
+                                                          ],
+                                                          "alias": "pt"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "brand_name"
+                                                          ],
+                                                          "alias": "brand_name"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "total_indirect_order_cnt"
+                                                          ],
+                                                          "alias": "total_indirect_order_cnt"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "total_indirect_gmv"
+                                                          ],
+                                                          "alias": "total_indirect_gmv"
+                                                        }
+                                                      ],
+                                                      "from": {
+                                                        "tables": [
+                                                          {
+                                                            "table": {
+                                                              "table": {
+                                                                "table": "test1"
+                                                              }
+                                                            }
+                                                          }
+                                                        ]
+                                                      },
+                                                      "where": {
+                                                        "left": {
+                                                          "parts": [
+                                                            "pt"
+                                                          ]
+                                                        },
+                                                        "op": "=",
+                                                        "right": {
+                                                          "type": "String",
+                                                          "value": "20230626"
+                                                        }
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "alias": "m1"
+                                            },
+                                            "join": {
+                                              "type": "FULL",
+                                              "on": {
+                                                "left": {
+                                                  "left": {
+                                                    "parts": [
+                                                      "m0",
+                                                      "brand_name"
+                                                    ]
+                                                  },
+                                                  "op": "=",
+                                                  "right": {
+                                                    "parts": [
+                                                      "m1",
+                                                      "brand_name"
+                                                    ]
+                                                  }
+                                                },
+                                                "op": "AND",
+                                                "right": {
+                                                  "left": {
+                                                    "parts": [
+                                                      "m0",
+                                                      "pt"
+                                                    ]
+                                                  },
+                                                  "op": "=",
+                                                  "right": {
+                                                    "parts": [
+                                                      "m1",
+                                                      "pt"
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "m0"
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "m0",
+                                            "pt"
+                                          ],
+                                          "alias": "pt"
+                                        },
+                                        {
+                                          "name": "if",
+                                          "arguments": [
+                                            {
+                                              "left": {
+                                                "name": "isNaN",
+                                                "arguments": [
+                                                  {
+                                                    "left": {
+                                                      "parts": [
+                                                        "click_uv"
+                                                      ]
+                                                    },
+                                                    "op": "/",
+                                                    "right": {
+                                                      "parts": [
+                                                        "exposure_uv"
+                                                      ]
+                                                    }
+                                                  }
+                                                ]
+                                              },
+                                              "op": "OR",
+                                              "right": {
+                                                "name": "isInfinite",
+                                                "arguments": [
+                                                  {
+                                                    "left": {
+                                                      "parts": [
+                                                        "click_uv"
+                                                      ]
+                                                    },
+                                                    "op": "/",
+                                                    "right": {
+                                                      "parts": [
+                                                        "exposure_uv"
+                                                      ]
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            },
+                                            {
+                                              "type": "Null",
+                                              "value": null
+                                            },
+                                            {
+                                              "left": {
+                                                "parts": [
+                                                  "click_uv"
+                                                ]
+                                              },
+                                              "op": "/",
+                                              "right": {
+                                                "parts": [
+                                                  "exposure_uv"
+                                                ]
+                                              }
+                                            }
+                                          ],
+                                          "alias": "uvctr"
+                                        },
+                                        {
+                                          "name": "COALESCE",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "m0",
+                                                "brand_name"
+                                              ]
+                                            },
+                                            {
+                                              "parts": [
+                                                "m1",
+                                                "brand_name"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "brand_name"
+                                        },
+                                        {
+                                          "parts": [
+                                            "exposure_uv"
+                                          ],
+                                          "alias": "exposure_uv"
+                                        },
+                                        {
+                                          "parts": [
+                                            "click_uv"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "query": {
+                                                  "selects": [
+                                                    {
+                                                      "columns": [
+                                                        {
+                                                          "parts": [
+                                                            "pt"
+                                                          ],
+                                                          "alias": "pt"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "brand_name"
+                                                          ],
+                                                          "alias": "brand_name"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "exposure_uv"
+                                                          ],
+                                                          "alias": "exposure_uv"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "click_uv"
+                                                          ],
+                                                          "alias": "click_uv"
+                                                        }
+                                                      ],
+                                                      "from": {
+                                                        "tables": [
+                                                          {
+                                                            "table": {
+                                                              "table": {
+                                                                "table": "test2"
+                                                              }
+                                                            }
+                                                          }
+                                                        ]
+                                                      },
+                                                      "where": {
+                                                        "left": {
+                                                          "parts": [
+                                                            "pt"
+                                                          ]
+                                                        },
+                                                        "op": "=",
+                                                        "right": {
+                                                          "type": "String",
+                                                          "value": "20230625"
+                                                        }
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "alias": "m0"
+                                            }
+                                          },
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "query": {
+                                                  "selects": [
+                                                    {
+                                                      "columns": [
+                                                        {
+                                                          "parts": [
+                                                            "pt"
+                                                          ],
+                                                          "alias": "pt"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "brand_name"
+                                                          ],
+                                                          "alias": "brand_name"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "total_indirect_order_cnt"
+                                                          ],
+                                                          "alias": "total_indirect_order_cnt"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "total_indirect_gmv"
+                                                          ],
+                                                          "alias": "total_indirect_gmv"
+                                                        }
+                                                      ],
+                                                      "from": {
+                                                        "tables": [
+                                                          {
+                                                            "table": {
+                                                              "table": {
+                                                                "table": "test1"
+                                                              }
+                                                            }
+                                                          }
+                                                        ]
+                                                      },
+                                                      "where": {
+                                                        "left": {
+                                                          "parts": [
+                                                            "pt"
+                                                          ]
+                                                        },
+                                                        "op": "=",
+                                                        "right": {
+                                                          "type": "String",
+                                                          "value": "20230625"
+                                                        }
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "alias": "m1"
+                                            },
+                                            "join": {
+                                              "type": "FULL",
+                                              "on": {
+                                                "left": {
+                                                  "left": {
+                                                    "parts": [
+                                                      "m0",
+                                                      "brand_name"
+                                                    ]
+                                                  },
+                                                  "op": "=",
+                                                  "right": {
+                                                    "parts": [
+                                                      "m1",
+                                                      "brand_name"
+                                                    ]
+                                                  }
+                                                },
+                                                "op": "AND",
+                                                "right": {
+                                                  "left": {
+                                                    "parts": [
+                                                      "m0",
+                                                      "pt"
+                                                    ]
+                                                  },
+                                                  "op": "=",
+                                                  "right": {
+                                                    "parts": [
+                                                      "m1",
+                                                      "pt"
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "m1"
+                            },
+                            "join": {
+                              "type": "LEFT",
+                              "on": {
+                                "left": {
+                                  "left": {
+                                    "parts": [
+                                      "m0",
+                                      "brand_name"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "parts": [
+                                      "m1",
+                                      "brand_name"
+                                    ]
+                                  }
+                                },
+                                "op": "AND",
+                                "right": {
+                                  "left": {
+                                    "parts": [
+                                      "m0",
+                                      "pt"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "parts": [
+                                      "m1",
+                                      "pt"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "m0",
+                                            "pt"
+                                          ],
+                                          "alias": "pt"
+                                        },
+                                        {
+                                          "name": "if",
+                                          "arguments": [
+                                            {
+                                              "left": {
+                                                "name": "isNaN",
+                                                "arguments": [
+                                                  {
+                                                    "left": {
+                                                      "parts": [
+                                                        "click_uv"
+                                                      ]
+                                                    },
+                                                    "op": "/",
+                                                    "right": {
+                                                      "parts": [
+                                                        "exposure_uv"
+                                                      ]
+                                                    }
+                                                  }
+                                                ]
+                                              },
+                                              "op": "OR",
+                                              "right": {
+                                                "name": "isInfinite",
+                                                "arguments": [
+                                                  {
+                                                    "left": {
+                                                      "parts": [
+                                                        "click_uv"
+                                                      ]
+                                                    },
+                                                    "op": "/",
+                                                    "right": {
+                                                      "parts": [
+                                                        "exposure_uv"
+                                                      ]
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            },
+                                            {
+                                              "type": "Null",
+                                              "value": null
+                                            },
+                                            {
+                                              "left": {
+                                                "parts": [
+                                                  "click_uv"
+                                                ]
+                                              },
+                                              "op": "/",
+                                              "right": {
+                                                "parts": [
+                                                  "exposure_uv"
+                                                ]
+                                              }
+                                            }
+                                          ],
+                                          "alias": "uvctr"
+                                        },
+                                        {
+                                          "name": "COALESCE",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "m0",
+                                                "brand_name"
+                                              ]
+                                            },
+                                            {
+                                              "parts": [
+                                                "m1",
+                                                "brand_name"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "brand_name"
+                                        },
+                                        {
+                                          "parts": [
+                                            "exposure_uv"
+                                          ],
+                                          "alias": "exposure_uv"
+                                        },
+                                        {
+                                          "parts": [
+                                            "click_uv"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "query": {
+                                                  "selects": [
+                                                    {
+                                                      "columns": [
+                                                        {
+                                                          "parts": [
+                                                            "pt"
+                                                          ],
+                                                          "alias": "pt"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "brand_name"
+                                                          ],
+                                                          "alias": "brand_name"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "exposure_uv"
+                                                          ],
+                                                          "alias": "exposure_uv"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "click_uv"
+                                                          ],
+                                                          "alias": "click_uv"
+                                                        }
+                                                      ],
+                                                      "from": {
+                                                        "tables": [
+                                                          {
+                                                            "table": {
+                                                              "table": {
+                                                                "table": "test2"
+                                                              }
+                                                            }
+                                                          }
+                                                        ]
+                                                      },
+                                                      "where": {
+                                                        "left": {
+                                                          "parts": [
+                                                            "pt"
+                                                          ]
+                                                        },
+                                                        "op": "=",
+                                                        "right": {
+                                                          "type": "String",
+                                                          "value": "20220626"
+                                                        }
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "alias": "m0"
+                                            }
+                                          },
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "query": {
+                                                  "selects": [
+                                                    {
+                                                      "columns": [
+                                                        {
+                                                          "parts": [
+                                                            "pt"
+                                                          ],
+                                                          "alias": "pt"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "brand_name"
+                                                          ],
+                                                          "alias": "brand_name"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "total_indirect_order_cnt"
+                                                          ],
+                                                          "alias": "total_indirect_order_cnt"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "total_indirect_gmv"
+                                                          ],
+                                                          "alias": "total_indirect_gmv"
+                                                        }
+                                                      ],
+                                                      "from": {
+                                                        "tables": [
+                                                          {
+                                                            "table": {
+                                                              "table": {
+                                                                "table": "test1"
+                                                              }
+                                                            }
+                                                          }
+                                                        ]
+                                                      },
+                                                      "where": {
+                                                        "left": {
+                                                          "parts": [
+                                                            "pt"
+                                                          ]
+                                                        },
+                                                        "op": "=",
+                                                        "right": {
+                                                          "type": "String",
+                                                          "value": "20220626"
+                                                        }
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "alias": "m1"
+                                            },
+                                            "join": {
+                                              "type": "FULL",
+                                              "on": {
+                                                "left": {
+                                                  "left": {
+                                                    "parts": [
+                                                      "m0",
+                                                      "brand_name"
+                                                    ]
+                                                  },
+                                                  "op": "=",
+                                                  "right": {
+                                                    "parts": [
+                                                      "m1",
+                                                      "brand_name"
+                                                    ]
+                                                  }
+                                                },
+                                                "op": "AND",
+                                                "right": {
+                                                  "left": {
+                                                    "parts": [
+                                                      "m0",
+                                                      "pt"
+                                                    ]
+                                                  },
+                                                  "op": "=",
+                                                  "right": {
+                                                    "parts": [
+                                                      "m1",
+                                                      "pt"
+                                                    ]
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "m2"
+                            },
+                            "join": {
+                              "type": "LEFT",
+                              "on": {
+                                "left": {
+                                  "left": {
+                                    "parts": [
+                                      "m0",
+                                      "brand_name"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "parts": [
+                                      "m2",
+                                      "brand_name"
+                                    ]
+                                  }
+                                },
+                                "op": "AND",
+                                "right": {
+                                  "left": {
+                                    "parts": [
+                                      "m0",
+                                      "pt"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "parts": [
+                                      "m2",
+                                      "pt"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "c0"
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "pt"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "uvctr"
+            ]
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

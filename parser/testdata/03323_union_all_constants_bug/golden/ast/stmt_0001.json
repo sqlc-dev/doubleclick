@@ -1,0 +1,255 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "transactions_data",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 42
+                      },
+                      "alias": "grade_name_id"
+                    },
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 42
+                      },
+                      "alias": "today_flow_transaction_count"
+                    },
+                    {
+                      "expr": {
+                        "expr": {
+                          "type": "String",
+                          "value": "good"
+                        },
+                        "type": {
+                          "name": "Nullable(String)"
+                        }
+                      },
+                      "alias": "status"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "expr": {
+                                        "type": "Integer",
+                                        "value": 42
+                                      },
+                                      "alias": "dispenser_id"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "alias": "trans_his"
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "expr": {
+                                        "type": "Integer",
+                                        "value": 42
+                                      },
+                                      "alias": "dispenser_id"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "alias": "gde"
+                        },
+                        "join": {
+                          "type": "INNER",
+                          "on": {
+                            "left": {
+                              "parts": [
+                                "trans_his",
+                                "dispenser_id"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "gde",
+                                "dispenser_id"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "flag"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "transactions_data",
+                            "grade_name_id"
+                          ],
+                          "alias": "grade_name_id"
+                        },
+                        {
+                          "name": "multiIf",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "transactions_data",
+                                  "status"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "String",
+                                "value": "low"
+                              }
+                            },
+                            {
+                              "type": "String",
+                              "value": "YELLOW"
+                            },
+                            {
+                              "type": "Null",
+                              "value": null
+                            }
+                          ],
+                          "alias": "flag"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "transactions_data"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "grade_name_id"
+                          ]
+                        },
+                        {
+                          "name": "multiIf",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "status"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "String",
+                                "value": "good"
+                              }
+                            },
+                            {
+                              "type": "String",
+                              "value": "GREEN"
+                            },
+                            {
+                              "type": "Null",
+                              "value": null
+                            }
+                          ],
+                          "alias": "flag"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "transactions_data"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "status"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "good"
+                        }
+                      }
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "grade_name_id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

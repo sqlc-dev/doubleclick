@@ -1,0 +1,104 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "primary_key_bytes_in_memory"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "left": {
+            "parts": [
+              "primary_key_bytes_in_memory"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "Integer",
+            "value": 16000
+          }
+        },
+        {
+          "left": {
+            "parts": [
+              "primary_key_bytes_in_memory_allocated"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "Integer",
+            "value": 16000
+          }
+        },
+        {
+          "left": {
+            "left": {
+              "parts": [
+                "primary_key_bytes_in_memory_allocated"
+              ]
+            },
+            "op": "/",
+            "right": {
+              "parts": [
+                "primary_key_bytes_in_memory"
+              ]
+            }
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "Float",
+            "value": 1.1,
+            "source": "1.1"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "test"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "table"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "hits"
+          }
+        }
+      }
+    }
+  ]
+}

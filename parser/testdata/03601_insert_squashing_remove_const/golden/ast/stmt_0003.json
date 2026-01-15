@@ -1,0 +1,176 @@
+{
+  "table": "tbl_x",
+  "select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "c4",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "expr": {
+                          "type": "String",
+                          "value": "aaa"
+                        },
+                        "alias": "col2"
+                      }
+                    ]
+                  },
+                  {
+                    "columns": [
+                      {
+                        "type": "String",
+                        "value": "bbb"
+                      }
+                    ]
+                  }
+                ],
+                "union_all": true,
+                "union_modes": [
+                  "UNION ALL"
+                ]
+              }
+            },
+            "scalar_with": false
+          },
+          {
+            "name": "c6",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "r",
+                          "col2"
+                        ],
+                        "alias": "col2"
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "query": {
+                                "selects": [
+                                  {
+                                    "columns": [
+                                      {
+                                        "expr": {
+                                          "type": "String",
+                                          "value": "ccc"
+                                        },
+                                        "alias": "col2"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            "alias": "r"
+                          }
+                        },
+                        {
+                          "table": {
+                            "table": {
+                              "query": {
+                                "selects": [
+                                  {
+                                    "columns": [
+                                      {
+                                        "expr": {
+                                          "type": "String",
+                                          "value": "foo"
+                                        },
+                                        "alias": "col2"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            "alias": "rt"
+                          },
+                          "join": {
+                            "type": "LEFT",
+                            "using": [
+                              {
+                                "parts": [
+                                  "col2"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          }
+        ],
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "c4"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "c6"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "union_all": true,
+                    "union_modes": [
+                      "UNION ALL"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

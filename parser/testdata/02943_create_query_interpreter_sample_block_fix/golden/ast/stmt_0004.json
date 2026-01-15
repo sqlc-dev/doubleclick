@@ -1,0 +1,88 @@
+{
+  "view": "test_mv",
+  "materialized": true,
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "arr"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "constant_value",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "type": "String",
+                        "value": "\\d[a-z]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "scalar_with": true
+          }
+        ],
+        "columns": [
+          {
+            "name": "extractAll",
+            "arguments": [
+              {
+                "name": "concat",
+                "arguments": [
+                  {
+                    "name": "toString",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "number"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "a"
+                  }
+                ]
+              },
+              {
+                "name": "assumeNotNull",
+                "arguments": [
+                  {
+                    "parts": [
+                      "constant_value"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "arr"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "test_table"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

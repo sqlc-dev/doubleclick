@@ -1,0 +1,60 @@
+{
+  "table": "remote_test",
+  "columns": [
+    {
+      "name": "uid",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "its",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "action_code",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "day",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "day"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "uid"
+            ]
+          },
+          {
+            "parts": [
+              "its"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

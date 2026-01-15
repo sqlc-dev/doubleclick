@@ -1,0 +1,82 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "a",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "query": {
+                        "selects": [
+                          {
+                            "columns": [
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            ],
+                            "where": {
+                              "type": "Integer",
+                              "value": 0
+                            }
+                          }
+                        ]
+                      },
+                      "alias": "b"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 1
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "a"
+              }
+            },
+            "join": {
+              "type": "CROSS"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "a",
+            "b"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      }
+    }
+  ]
+}

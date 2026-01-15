@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "name": "toUInt256",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 2
+                }
+              ]
+            }
+          },
+          "alias": "key"
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "key"
+          ]
+        }
+      ],
+      "with_cube": true,
+      "with_totals": true,
+      "qualify": {
+        "left": {
+          "parts": [
+            "key"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "name": "toNullable",
+          "arguments": [
+            {
+              "name": "toNullable",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 0
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

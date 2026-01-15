@@ -1,0 +1,57 @@
+{
+  "table": "s3_table_half_schema_with_format",
+  "columns": [
+    {
+      "name": "year",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "S3",
+    "parameters": [
+      {
+        "parts": [
+          "s3_conn"
+        ]
+      },
+      {
+        "left": {
+          "parts": [
+            "filename"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "half_baked/**.parquet"
+        }
+      },
+      {
+        "left": {
+          "parts": [
+            "format"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "parts": [
+            "Parquet"
+          ]
+        }
+      }
+    ],
+    "has_parentheses": true
+  },
+  "settings": [
+    {
+      "name": "use_hive_partitioning",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

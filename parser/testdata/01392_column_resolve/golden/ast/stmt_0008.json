@@ -1,0 +1,185 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "conversion",
+            "conversionId"
+          ],
+          "alias": "myConversionId"
+        },
+        {
+          "parts": [
+            "click",
+            "clickId"
+          ],
+          "alias": "myClickId"
+        },
+        {
+          "parts": [
+            "click",
+            "myValue"
+          ],
+          "alias": "myValue"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "conversionId"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "value"
+                          ],
+                          "alias": "myValue"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "tableConversion"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "conversion"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "clickId"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "conversionId"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "value"
+                          ],
+                          "alias": "myValue"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "tableClick"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "click"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "click",
+                    "conversionId"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "conversion",
+                    "conversionId"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "leftjoin"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "dummy"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "dummy",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "conversion",
+                    "conversionId"
+                  ]
+                },
+                "parenthesized": true
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "myValue"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

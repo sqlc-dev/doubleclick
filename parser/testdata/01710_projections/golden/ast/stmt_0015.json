@@ -1,0 +1,219 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toStartOfMinute",
+          "arguments": [
+            {
+              "parts": [
+                "datetime"
+              ]
+            }
+          ],
+          "alias": "dt_m"
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "buffer_time"
+                ]
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "duration"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "buffer_time"
+                ]
+              },
+              "op": "/",
+              "right": {
+                "parts": [
+                  "duration"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "valid_bytes"
+                ]
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "total_bytes"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "completed_bytes"
+                ]
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "total_bytes"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "fixed_bytes"
+                ]
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "total_bytes"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "force_bytes"
+                ]
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "total_bytes"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "valid_bytes"
+                ]
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "total_bytes"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "projection_test"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "domain"
+          ]
+        },
+        "list": [
+          {
+            "type": "String",
+            "value": "12"
+          },
+          {
+            "type": "String",
+            "value": "14"
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "dt_m"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "dt_m"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

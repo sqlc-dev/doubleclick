@@ -1,0 +1,104 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trim",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            }
+          ],
+          "sql_standard": true
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "count"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "tab"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "name": "hasToken",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "text"
+                              ]
+                            },
+                            {
+                              "type": "String",
+                              "value": "Hello"
+                            }
+                          ]
+                        },
+                        "settings": [
+                          {
+                            "name": "use_skip_indexes_on_data_read",
+                            "value": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1, indexes = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Filter column%"
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Name: idx_text%"
+          }
+        }
+      }
+    }
+  ]
+}

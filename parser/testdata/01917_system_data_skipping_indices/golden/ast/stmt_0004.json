@@ -1,0 +1,145 @@
+{
+  "table": "data_01917_2",
+  "columns": [
+    {
+      "name": "name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "frequency",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "memory",
+      "expression": {
+        "left": {
+          "parts": [
+            "frequency"
+          ]
+        },
+        "op": "*",
+        "right": {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "name"
+              ]
+            }
+          ]
+        },
+        "parenthesized": true
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 1000
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 5
+      }
+    },
+    {
+      "name": "sample_index1",
+      "expression": {
+        "type": "Tuple",
+        "value": [
+          {
+            "name": "length",
+            "arguments": [
+              {
+                "parts": [
+                  "name"
+                ]
+              }
+            ]
+          },
+          {
+            "parts": [
+              "name"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 4
+      }
+    },
+    {
+      "name": "sample_index2",
+      "expression": {
+        "type": "Tuple",
+        "value": [
+          {
+            "name": "lower",
+            "arguments": [
+              {
+                "parts": [
+                  "name"
+                ]
+              }
+            ]
+          },
+          {
+            "parts": [
+              "name"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      "type": {
+        "name": "ngrambf_v1",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 3
+          },
+          {
+            "type": "Integer",
+            "value": 256
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          },
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 4
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "name"
+      ]
+    }
+  ]
+}

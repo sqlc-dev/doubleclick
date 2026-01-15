@@ -1,0 +1,159 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "range",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "alias": "k1"
+        },
+        {
+          "name": "range",
+          "arguments": [
+            {
+              "parts": [
+                "y"
+              ]
+            }
+          ],
+          "alias": "k2"
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "condition": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            },
+                            "then": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "else": {
+                              "type": "Integer",
+                              "value": 0
+                            }
+                          },
+                          "alias": "x"
+                        },
+                        {
+                          "expr": {
+                            "condition": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 3
+                              }
+                            },
+                            "then": {
+                              "name": "toUInt64",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "type": "Integer",
+                                    "value": 20
+                                  },
+                                  "op": "-",
+                                  "right": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  }
+                                }
+                              ]
+                            },
+                            "else": {
+                              "type": "Integer",
+                              "value": 0
+                            }
+                          },
+                          "alias": "y"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 20
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k1"
+          ]
+        },
+        {
+          "parts": [
+            "k2"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k1"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "k2"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

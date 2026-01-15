@@ -1,0 +1,187 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "A",
+            "_appointment_id"
+          ]
+        },
+        {
+          "parts": [
+            "A",
+            "_id"
+          ]
+        },
+        {
+          "parts": [
+            "A",
+            "_status"
+          ]
+        },
+        {
+          "parts": [
+            "A",
+            "_set_by_id"
+          ]
+        },
+        {
+          "parts": [
+            "A",
+            "_company_id"
+          ]
+        },
+        {
+          "parts": [
+            "A",
+            "_client_id"
+          ]
+        },
+        {
+          "parts": [
+            "A",
+            "_type"
+          ]
+        },
+        {
+          "parts": [
+            "A",
+            "_at"
+          ]
+        },
+        {
+          "parts": [
+            "A",
+            "_vacancy_id"
+          ]
+        },
+        {
+          "parts": [
+            "A",
+            "_set_at"
+          ]
+        },
+        {
+          "parts": [
+            "A",
+            "_job_requisition_id"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "appointment_events"
+              },
+              "alias": "A"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "_appointment_id"
+                          ]
+                        },
+                        {
+                          "name": "MAX",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "_set_at"
+                              ]
+                            }
+                          ],
+                          "alias": "max_set_at"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "appointment_events"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "expr": {
+                          "parts": [
+                            "_status"
+                          ]
+                        },
+                        "list": [
+                          {
+                            "type": "String",
+                            "value": "Created"
+                          },
+                          {
+                            "type": "String",
+                            "value": "Transferred"
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "_appointment_id"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "B"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "_appointment_id"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "A",
+            "_set_at"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "parts": [
+            "B",
+            "max_set_at"
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

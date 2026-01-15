@@ -1,0 +1,51 @@
+{
+  "table": "foo",
+  "columns": [
+    {
+      "name": "server_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "server_time",
+      "type": {
+        "name": "Datetime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "Asia/Istanbul"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "dimension_1",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "server_date"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "server_date"
+        ]
+      }
+    ]
+  }
+}

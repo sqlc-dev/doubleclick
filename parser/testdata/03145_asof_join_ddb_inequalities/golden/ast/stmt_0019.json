@@ -1,0 +1,75 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "p",
+            "begin"
+          ]
+        },
+        {
+          "parts": [
+            "e",
+            "begin"
+          ]
+        },
+        {
+          "parts": [
+            "e",
+            "value"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "probe0"
+              },
+              "alias": "p"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "events0"
+              },
+              "alias": "e"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ASOF",
+              "on": {
+                "left": {
+                  "parts": [
+                    "p",
+                    "begin"
+                  ]
+                },
+                "op": "\u003c=",
+                "right": {
+                  "parts": [
+                    "e",
+                    "begin"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "p",
+              "begin"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

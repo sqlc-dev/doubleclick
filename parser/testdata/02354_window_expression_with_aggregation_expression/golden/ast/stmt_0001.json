@@ -1,0 +1,136 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "left": {
+                "name": "sum",
+                "arguments": [
+                  {
+                    "parts": [
+                      "a"
+                    ]
+                  }
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 100
+              }
+            },
+            "op": "/",
+            "right": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "name": "sum",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "a"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "over": {
+                "partition_by": [
+                  {
+                    "parts": [
+                      "b"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "alias": "r"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "a"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          "alias": "b"
+                        }
+                      ]
+                    },
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 3
+                          },
+                          "alias": "a"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 4
+                          },
+                          "alias": "b"
+                        }
+                      ]
+                    },
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 5
+                          },
+                          "alias": "a"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          "alias": "b"
+                        }
+                      ]
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL",
+                    "UNION ALL"
+                  ]
+                }
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "b"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "table": "ttl",
+  "columns": [
+    {
+      "name": "i",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "type": "String",
+        "value": "b"
+      },
+      "default_kind": "DEFAULT",
+      "ttl": {
+        "condition": {
+          "left": {
+            "left": {
+              "parts": [
+                "a"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "then": {
+          "left": {
+            "name": "today"
+          },
+          "op": "-",
+          "right": {
+            "type": "Integer",
+            "value": 10
+          }
+        },
+        "else": {
+          "name": "toDate",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "2100-01-01"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "ind_s",
+      "expression": {
+        "parts": [
+          "s"
+        ]
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 1
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "i"
+      ]
+    }
+  ]
+}

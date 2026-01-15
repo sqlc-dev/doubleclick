@@ -1,0 +1,111 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "lambda_1",
+          "query": {
+            "parameters": [
+              "x"
+            ],
+            "body": {
+              "name": "toString",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 3
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parts": [
+                "lambda_1"
+              ],
+              "alias": "lambda_2"
+            },
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "type": "Integer",
+                  "value": 2
+                },
+                {
+                  "type": "Integer",
+                  "value": 3
+                }
+              ],
+              "spaced_commas": true
+            }
+          ]
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parts": [
+                "lambda_2"
+              ]
+            },
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "type": "Array",
+                  "value": [
+                    {
+                      "type": "String",
+                      "value": "1"
+                    },
+                    {
+                      "type": "String",
+                      "value": "2"
+                    },
+                    {
+                      "type": "String",
+                      "value": "3"
+                    }
+                  ],
+                  "spaced_commas": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "where": {
+        "name": "toNullable",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 9
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "lambda_2"
+          ]
+        }
+      ]
+    }
+  ]
+}

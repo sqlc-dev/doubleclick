@@ -1,0 +1,170 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "cityHash64",
+          "arguments": [
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "name": "groupArray",
+                  "arguments": [
+                    {
+                      "name": "tuple",
+                      "arguments": [
+                        {}
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "brand_id"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "rack_id"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "quantity"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "brand_id"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "rack_id"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "quantity"
+                                          ]
+                                        },
+                                        {
+                                          "name": "row_number",
+                                          "over": {
+                                            "partition_by": [
+                                              {
+                                                "parts": [
+                                                  "brand_id"
+                                                ]
+                                              },
+                                              {
+                                                "parts": [
+                                                  "rack_id"
+                                                ]
+                                              }
+                                            ],
+                                            "order_by": [
+                                              {
+                                                "expression": {
+                                                  "parts": [
+                                                    "quantity"
+                                                  ]
+                                                }
+                                              }
+                                            ]
+                                          },
+                                          "alias": "rn"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "stack"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "t0"
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "rn"
+                          ]
+                        },
+                        "op": "\u003c=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 2
+                        }
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "brand_id"
+                            ]
+                          }
+                        },
+                        {
+                          "expression": {
+                            "parts": [
+                              "rack_id"
+                            ]
+                          }
+                        },
+                        {
+                          "expression": {
+                            "parts": [
+                              "quantity"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

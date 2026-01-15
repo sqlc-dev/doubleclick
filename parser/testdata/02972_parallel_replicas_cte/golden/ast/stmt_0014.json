@@ -1,0 +1,128 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "cte1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "n"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "numbers_1e3"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "cte2",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "n"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "numbers_1e3"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "expr": {
+                      "parts": [
+                        "n"
+                      ]
+                    },
+                    "list": [
+                      {
+                        "parts": [
+                          "cte1"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "cte2"
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "enable_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "parallel_replicas_for_non_replicated_merge_tree",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "cluster_for_parallel_replicas",
+          "value": {
+            "type": "String",
+            "value": "test_cluster_one_shard_three_replicas_localhost"
+          }
+        },
+        {
+          "name": "max_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 3
+          }
+        }
+      ]
+    }
+  ]
+}

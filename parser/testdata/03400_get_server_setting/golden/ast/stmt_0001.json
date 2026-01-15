@@ -1,0 +1,111 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toBool",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "t1",
+                  "val"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "parts": [
+                  "t2",
+                  "val"
+                ]
+              }
+            }
+          ],
+          "alias": "should_be_equal"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toBool",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "value"
+                              ]
+                            }
+                          ],
+                          "alias": "val"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "server_settings"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "name"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "String",
+                          "value": "allow_use_jemalloc_memory"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "getServerSetting",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "allow_use_jemalloc_memory"
+                            }
+                          ],
+                          "alias": "val"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

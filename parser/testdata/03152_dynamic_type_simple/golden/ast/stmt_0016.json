@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "finalizeAggregation",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "dynamic_state"
+                ]
+              },
+              "type": {
+                "name": "AggregateFunction(sum, UInt64)"
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "expr": {
+                              "parts": [
+                                "state"
+                              ]
+                            },
+                            "type": {
+                              "name": "Dynamic"
+                            }
+                          },
+                          "alias": "dynamic_state"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "sumState",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "number"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "state"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "name": "numbers",
+                                                "arguments": [
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 10000
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

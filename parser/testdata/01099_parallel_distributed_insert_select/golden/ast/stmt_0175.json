@@ -1,0 +1,69 @@
+{
+  "table": "distributed_01099_b",
+  "select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "url",
+            "query": {
+              "left": {
+                "type": "String",
+                "value": "http://localhost:8123/?query="
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": "select+{1,2,3}+format+TSV"
+              }
+            },
+            "scalar_with": true
+          }
+        ],
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "urlCluster",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "test_cluster_two_shards"
+                    },
+                    {
+                      "query": {
+                        "selects": [
+                          {
+                            "columns": [
+                              {
+                                "parts": [
+                                  "url"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "String",
+                      "value": "TSV"
+                    },
+                    {
+                      "type": "String",
+                      "value": "s String"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

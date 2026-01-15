@@ -1,0 +1,65 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "condition": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "then": {
+            "name": "materialize",
+            "arguments": [
+              {
+                "name": "toFixedString",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "hello"
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 5
+                  }
+                ]
+              }
+            ]
+          },
+          "else": {
+            "name": "materialize",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "world"
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 5
+      }
+    }
+  ]
+}

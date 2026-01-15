@@ -1,0 +1,66 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "countIf",
+          "arguments": [
+            {
+              "name": "isNull",
+              "arguments": [
+                {
+                  "parts": [
+                    "l",
+                    "value"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t_l_any"
+              },
+              "alias": "l"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t_r_any"
+              },
+              "alias": "r"
+            },
+            "join": {
+              "type": "RIGHT",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "parts": [
+                    "l",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "r",
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

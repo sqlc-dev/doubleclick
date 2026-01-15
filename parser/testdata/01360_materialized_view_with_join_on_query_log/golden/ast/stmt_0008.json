@@ -1,0 +1,119 @@
+{
+  "view": "slow_log",
+  "materialized": true,
+  "engine": {
+    "name": "Memory"
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "extract",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "query"
+                                ]
+                              },
+                              {
+                                "type": "String",
+                                "value": "/\\*\\s*QUERY_GROUP_ID:(.*?)\\s*\\*/"
+                              }
+                            ],
+                            "alias": "QUERY_GROUP_ID"
+                          },
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "database": "system",
+                                  "table": "query_log"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "type"
+                              ]
+                            },
+                            "op": "\u003c\u003e",
+                            "right": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "event_date"
+                              ]
+                            },
+                            "op": "\u003e=",
+                            "right": {
+                              "name": "yesterday"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "ql"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "expected_times"
+                }
+              },
+              "join": {
+                "type": "INNER",
+                "using": [
+                  {
+                    "parts": [
+                      "QUERY_GROUP_ID"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "query_duration_ms"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "parts": [
+              "max_query_duration_ms"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "td_d"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "t",
+                            "id"
+                          ],
+                          "alias": "td_id"
+                        },
+                        {
+                          "parts": [
+                            "t",
+                            "d"
+                          ],
+                          "alias": "td_d"
+                        },
+                        {
+                          "name": "uniqExact",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "tdt",
+                                "id"
+                              ]
+                            }
+                          ],
+                          "alias": "cnt"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "tdt"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "td"
+                              },
+                              "alias": "t"
+                            },
+                            "join": {
+                              "type": "INNER",
+                              "on": {
+                                "left": {
+                                  "name": "toDate",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "tdt",
+                                        "dt"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "parts": [
+                                    "t",
+                                    "d"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "td_id"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "td_d"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "td_d"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "2025-04-01"
+        }
+      }
+    }
+  ]
+}

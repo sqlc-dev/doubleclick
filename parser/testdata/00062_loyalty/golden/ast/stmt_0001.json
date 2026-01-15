@@ -1,0 +1,309 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "loyalty"
+          ]
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        },
+        {
+          "name": "bar",
+          "arguments": [
+            {
+              "left": {
+                "name": "log",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "c"
+                      ]
+                    },
+                    "op": "+",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    }
+                  }
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 1000
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 0
+            },
+            {
+              "left": {
+                "name": "log",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 6000
+                  }
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 1000
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 80
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "UserID"
+                          ]
+                        },
+                        {
+                          "name": "toInt8",
+                          "arguments": [
+                            {
+                              "left": {
+                                "condition": {
+                                  "left": {
+                                    "parts": [
+                                      "yandex"
+                                    ]
+                                  },
+                                  "op": "\u003e",
+                                  "right": {
+                                    "parts": [
+                                      "google"
+                                    ]
+                                  }
+                                },
+                                "then": {
+                                  "left": {
+                                    "parts": [
+                                      "yandex"
+                                    ]
+                                  },
+                                  "op": "/",
+                                  "right": {
+                                    "left": {
+                                      "parts": [
+                                        "yandex"
+                                      ]
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                      "parts": [
+                                        "google"
+                                      ]
+                                    },
+                                    "parenthesized": true
+                                  }
+                                },
+                                "else": {
+                                  "left": {
+                                    "op": "-",
+                                    "operand": {
+                                      "parts": [
+                                        "google"
+                                      ]
+                                    }
+                                  },
+                                  "op": "/",
+                                  "right": {
+                                    "left": {
+                                      "parts": [
+                                        "yandex"
+                                      ]
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                      "parts": [
+                                        "google"
+                                      ]
+                                    },
+                                    "parenthesized": true
+                                  }
+                                }
+                              },
+                              "op": "*",
+                              "right": {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            }
+                          ],
+                          "alias": "loyalty"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "UserID"
+                                          ]
+                                        },
+                                        {
+                                          "name": "sum",
+                                          "arguments": [
+                                            {
+                                              "left": {
+                                                "parts": [
+                                                  "SearchEngineID"
+                                                ]
+                                              },
+                                              "op": "=",
+                                              "right": {
+                                                "type": "Integer",
+                                                "value": 2
+                                              }
+                                            }
+                                          ],
+                                          "alias": "yandex"
+                                        },
+                                        {
+                                          "name": "sum",
+                                          "arguments": [
+                                            {
+                                              "left": {
+                                                "parts": [
+                                                  "SearchEngineID"
+                                                ]
+                                              },
+                                              "op": "=",
+                                              "right": {
+                                                "type": "Integer",
+                                                "value": 3
+                                              }
+                                            }
+                                          ],
+                                          "alias": "google"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "database": "test",
+                                                "table": "hits"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "where": {
+                                        "left": {
+                                          "left": {
+                                            "parts": [
+                                              "SearchEngineID"
+                                            ]
+                                          },
+                                          "op": "=",
+                                          "right": {
+                                            "type": "Integer",
+                                            "value": 2
+                                          }
+                                        },
+                                        "op": "OR",
+                                        "right": {
+                                          "left": {
+                                            "parts": [
+                                              "SearchEngineID"
+                                            ]
+                                          },
+                                          "op": "=",
+                                          "right": {
+                                            "type": "Integer",
+                                            "value": 3
+                                          }
+                                        }
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "UserID"
+                                          ]
+                                        }
+                                      ],
+                                      "having": {
+                                        "left": {
+                                          "left": {
+                                            "parts": [
+                                              "yandex"
+                                            ]
+                                          },
+                                          "op": "+",
+                                          "right": {
+                                            "parts": [
+                                              "google"
+                                            ]
+                                          }
+                                        },
+                                        "op": "\u003e",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 10
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "loyalty"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "loyalty"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

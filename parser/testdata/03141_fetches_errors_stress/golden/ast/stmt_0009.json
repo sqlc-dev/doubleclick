@@ -1,0 +1,74 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "event_time_microseconds"
+          ]
+        },
+        {
+          "parts": [
+            "logger_name"
+          ]
+        },
+        {
+          "parts": [
+            "message"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "text_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "level"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "Error"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "message"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Malformed chunked encoding%"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "LineAsString"
+        ]
+      }
+    }
+  ]
+}

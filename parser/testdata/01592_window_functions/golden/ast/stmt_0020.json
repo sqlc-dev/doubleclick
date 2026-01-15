@@ -1,0 +1,195 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "product_name"
+          ]
+        },
+        {
+          "parts": [
+            "price"
+          ]
+        },
+        {
+          "parts": [
+            "group_name"
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "parts": [
+                "avg0"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "parts": [
+                "avg1"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "product_name"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "price"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "group_name"
+                          ]
+                        },
+                        {
+                          "name": "avg",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "price"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "partition_by": [
+                              {
+                                "parts": [
+                                  "group_name"
+                                ]
+                              }
+                            ],
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "price"
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "alias": "avg0"
+                        },
+                        {
+                          "name": "avg",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "price"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "partition_by": [
+                              {
+                                "parts": [
+                                  "group_name"
+                                ]
+                              }
+                            ],
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "price"
+                                  ]
+                                }
+                              }
+                            ],
+                            "frame": {
+                              "type": "RANGE",
+                              "start": {
+                                "type": "UNBOUNDED_PRECEDING"
+                              },
+                              "end": {
+                                "type": "UNBOUNDED_FOLLOWING"
+                              }
+                            }
+                          },
+                          "alias": "avg1"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "products"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "product_groups"
+                              }
+                            },
+                            "join": {
+                              "type": "INNER",
+                              "using": [
+                                {
+                                  "parts": [
+                                    "group_id"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t"
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "group_name"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "product_name"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "price"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

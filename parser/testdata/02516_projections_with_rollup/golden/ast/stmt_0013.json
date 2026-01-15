@@ -1,0 +1,167 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "avg_duration1"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "avg_duration1"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "avg_duration2"
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "bytes"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "hour"
+                          ]
+                        },
+                        {
+                          "name": "toStartOfHour",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "datetime"
+                              ]
+                            }
+                          ],
+                          "alias": "hour"
+                        },
+                        {
+                          "name": "avg",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "duration"
+                              ]
+                            }
+                          ],
+                          "alias": "avg_duration1"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "video_log"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "hour"
+                          ]
+                        }
+                      ],
+                      "with_rollup": true,
+                      "with_totals": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "hour"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "sum_bytes"
+                          ],
+                          "alias": "sum_bytes2"
+                        },
+                        {
+                          "parts": [
+                            "avg_duration"
+                          ],
+                          "alias": "avg_duration2"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "video_log_result__fuzz_0"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "using": [
+                {
+                  "parts": [
+                    "hour"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "joined_subquery_requires_alias",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

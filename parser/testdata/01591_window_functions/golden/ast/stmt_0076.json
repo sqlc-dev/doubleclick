@@ -1,0 +1,144 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "name": "nth_value",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ],
+          "over": {
+            "name": "w"
+          },
+          "alias": "firstValue"
+        },
+        {
+          "name": "nth_value",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ],
+          "over": {
+            "name": "w"
+          },
+          "alias": "secondValue"
+        },
+        {
+          "name": "nth_value",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 3
+            }
+          ],
+          "over": {
+            "name": "w"
+          },
+          "alias": "thirdValue"
+        },
+        {
+          "name": "nth_value",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 4
+            }
+          ],
+          "over": {
+            "name": "w"
+          },
+          "alias": "fourthValue"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "window": [
+        {
+          "name": "w",
+          "spec": {
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "RANGE",
+              "start": {
+                "type": "PRECEDING",
+                "offset": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              "end": {
+                "type": "FOLLOWING",
+                "offset": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            }
+          }
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "number"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

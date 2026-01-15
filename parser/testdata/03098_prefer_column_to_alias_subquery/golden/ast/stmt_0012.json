@@ -1,0 +1,244 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "column_1"
+            ]
+          },
+          "op": "/",
+          "right": {
+            "parts": [
+              "column_2"
+            ]
+          }
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "max",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "column_1"
+                              ]
+                            }
+                          ],
+                          "alias": "column_1"
+                        },
+                        {
+                          "name": "max",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "column_2"
+                              ]
+                            }
+                          ],
+                          "alias": "column_2"
+                        },
+                        {
+                          "parts": [
+                            "id"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "max",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "column_1"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "column_1"
+                                        },
+                                        {
+                                          "expr": {
+                                            "type": "Null",
+                                            "value": null
+                                          },
+                                          "alias": "column_2"
+                                        },
+                                        {
+                                          "parts": [
+                                            "id"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "clickhouse_alias_issue_1"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "id"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "type": "Null",
+                                            "value": null
+                                          },
+                                          "alias": "column_1"
+                                        },
+                                        {
+                                          "name": "max",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "column_2"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "column_2"
+                                        },
+                                        {
+                                          "parts": [
+                                            "id"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "clickhouse_alias_issue_2"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "id"
+                                          ]
+                                        }
+                                      ],
+                                      "settings": [
+                                        {
+                                          "name": "prefer_column_name_to_alias",
+                                          "value": {
+                                            "type": "Integer",
+                                            "value": 1
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "union_all": true,
+                                  "union_modes": [
+                                    "UNION ALL"
+                                  ]
+                                }
+                              },
+                              "alias": "T1"
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "id"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "id"
+                            ]
+                          },
+                          "descending": true
+                        }
+                      ],
+                      "settings": [
+                        {
+                          "name": "prefer_column_name_to_alias",
+                          "value": {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "T2"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "column_1"
+            ]
+          },
+          "not": true
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "column_2"
+            ]
+          },
+          "not": true
+        }
+      },
+      "settings": [
+        {
+          "name": "prefer_column_name_to_alias",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

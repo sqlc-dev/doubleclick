@@ -1,0 +1,255 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "time"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "name": "toNullable",
+              "arguments": [
+                {
+                  "parts": [
+                    "time"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "time"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "name": "toNullable",
+              "arguments": [
+                {
+                  "parts": [
+                    "time"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "argMax",
+          "arguments": [
+            {
+              "parts": [
+                "value"
+              ]
+            },
+            {
+              "parts": [
+                "time"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "argMax",
+          "arguments": [
+            {
+              "parts": [
+                "value"
+              ]
+            },
+            {
+              "name": "toNullable",
+              "arguments": [
+                {
+                  "parts": [
+                    "time"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "argMin",
+          "arguments": [
+            {
+              "parts": [
+                "value"
+              ]
+            },
+            {
+              "parts": [
+                "time"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "argMin",
+          "arguments": [
+            {
+              "parts": [
+                "value"
+              ]
+            },
+            {
+              "name": "toNullable",
+              "arguments": [
+                {
+                  "parts": [
+                    "time"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "argMinIf",
+          "arguments": [
+            {
+              "parts": [
+                "value"
+              ]
+            },
+            {
+              "name": "toNullable",
+              "arguments": [
+                {
+                  "parts": [
+                    "time"
+                  ]
+                }
+              ]
+            },
+            {
+              "left": {
+                "parts": [
+                  "time"
+                ]
+              },
+              "op": "!=",
+              "right": {
+                "type": "String",
+                "value": "2021-01-01 00:00:00.000"
+              }
+            }
+          ]
+        },
+        {
+          "name": "argMaxIf",
+          "arguments": [
+            {
+              "parts": [
+                "value"
+              ]
+            },
+            {
+              "name": "toNullable",
+              "arguments": [
+                {
+                  "parts": [
+                    "time"
+                  ]
+                }
+              ]
+            },
+            {
+              "left": {
+                "parts": [
+                  "time"
+                ]
+              },
+              "op": "!=",
+              "right": {
+                "type": "String",
+                "value": "2021-01-01 00:00:59.000"
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "time"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "name": "fromUnixTimestamp64Milli",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 1609459200000
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ]
+          },
+          "parenthesized": true
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "time"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "name": "fromUnixTimestamp64Milli",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 1609459260000
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ]
+          },
+          "parenthesized": true
+        }
+      },
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

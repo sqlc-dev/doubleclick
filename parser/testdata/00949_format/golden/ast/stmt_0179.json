@@ -1,0 +1,85 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "format",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "{}{}{}"
+              },
+              {
+                "name": "materialize",
+                "arguments": [
+                  {
+                    "name": "toFixedString",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "a"
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "materialize",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "b"
+                  }
+                ]
+              },
+              {
+                "name": "materialize",
+                "arguments": [
+                  {
+                    "name": "toFixedString",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "c"
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "op": "==",
+          "right": {
+            "type": "String",
+            "value": "abc"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 5
+      }
+    }
+  ]
+}

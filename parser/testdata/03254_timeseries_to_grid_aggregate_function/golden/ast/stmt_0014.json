@@ -1,0 +1,58 @@
+{
+  "table": "ts_data_agg",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "left": {
+              "name": "toUnixTimestamp",
+              "arguments": [
+                {
+                  "parts": [
+                    "timestamp"
+                  ]
+                }
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          },
+          {
+            "name": "initializeAggregation",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "timeSeriesResampleToGridWithStalenessState(100, 200, 10, 15)"
+              },
+              {
+                "parts": [
+                  "timestamp"
+                ]
+              },
+              {
+                "parts": [
+                  "value"
+                ]
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "ts_data"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

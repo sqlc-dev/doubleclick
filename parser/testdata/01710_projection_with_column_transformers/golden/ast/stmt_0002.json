@@ -1,0 +1,47 @@
+{
+  "table": "foo",
+  "columns": [
+    {
+      "name": "bar",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p",
+      "select": {
+        "columns": [
+          {
+            "apply": [
+              "groupUniqArray"
+            ],
+            "transformers": [
+              {
+                "type": "apply",
+                "apply": "groupUniqArray",
+                "apply_params": [
+                  {
+                    "type": "Integer",
+                    "value": 100
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "bar"
+      ]
+    }
+  ]
+}

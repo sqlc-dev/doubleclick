@@ -1,0 +1,368 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "bad_v4",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "t"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "expr": {
+                        "name": "accurateCastOrNull",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "d"
+                            ]
+                          },
+                          {
+                            "type": "String",
+                            "value": "IPv4"
+                          }
+                        ]
+                      },
+                      "not": true
+                    },
+                    "op": "AND",
+                    "right": {
+                      "expr": {
+                        "name": "toIPv4",
+                        "arguments": [
+                          {
+                            "name": "accurateCastOrNull",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "d"
+                                ]
+                              },
+                              {
+                                "type": "String",
+                                "value": "IPv4"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "not": true,
+                      "list": [
+                        {
+                          "name": "toIPv4",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "0.0.0.0"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "toIPv4",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "192.168.0.1"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "bad_v6",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "count"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "t"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "expr": {
+                        "name": "accurateCastOrNull",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "d"
+                            ]
+                          },
+                          {
+                            "type": "String",
+                            "value": "IPv6"
+                          }
+                        ]
+                      },
+                      "not": true
+                    },
+                    "op": "AND",
+                    "right": {
+                      "expr": {
+                        "name": "toIPv6",
+                        "arguments": [
+                          {
+                            "name": "accurateCastOrNull",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "d"
+                                ]
+                              },
+                              {
+                                "type": "String",
+                                "value": "IPv6"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "not": true,
+                      "list": [
+                        {
+                          "name": "toIPv6",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "::"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "toIPv6",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "::1"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "toIPv6",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "::ffff:192.168.0.1"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "bad_cnt",
+          "query": {
+            "left": {
+              "parts": [
+                "bad_v4"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "bad_v6"
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "ch_dbg_summary"
+          },
+          "alias": "tag"
+        },
+        {
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "name": "count"
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "t"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "alias": "total"
+        },
+        {
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "name": "count"
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "t"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "expr": {
+                    "name": "accurateCastOrNull",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "d"
+                        ]
+                      },
+                      {
+                        "type": "String",
+                        "value": "IPv4"
+                      }
+                    ]
+                  },
+                  "not": true
+                }
+              }
+            ]
+          },
+          "alias": "typed_v4"
+        },
+        {
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "name": "count"
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "t"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "expr": {
+                    "name": "accurateCastOrNull",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "d"
+                        ]
+                      },
+                      {
+                        "type": "String",
+                        "value": "IPv6"
+                      }
+                    ]
+                  },
+                  "not": true
+                }
+              }
+            ]
+          },
+          "alias": "typed_v6"
+        },
+        {
+          "parts": [
+            "bad_v4"
+          ]
+        },
+        {
+          "parts": [
+            "bad_v6"
+          ]
+        },
+        {
+          "name": "version",
+          "alias": "ver"
+        },
+        {
+          "name": "getSetting",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "session_timezone"
+            }
+          ],
+          "alias": "tz"
+        }
+      ],
+      "where": {
+        "left": {
+          "parts": [
+            "bad_cnt"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      }
+    }
+  ]
+}

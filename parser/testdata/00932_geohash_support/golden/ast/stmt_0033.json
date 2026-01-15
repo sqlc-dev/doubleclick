@@ -1,0 +1,278 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "geohashDecode",
+          "arguments": [
+            {
+              "parts": [
+                "encoded"
+              ]
+            }
+          ],
+          "alias": "actual"
+        },
+        {
+          "type": "String",
+          "value": "expected:"
+        },
+        {
+          "parts": [
+            "encoded"
+          ]
+        },
+        {
+          "type": "String",
+          "value": "=\u003e"
+        },
+        {
+          "parts": [
+            "latitude"
+          ]
+        },
+        {
+          "parts": [
+            "longitude"
+          ]
+        },
+        {
+          "type": "String",
+          "value": "length:"
+        },
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "encoded"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "String",
+          "value": "max lat error:"
+        },
+        {
+          "expr": {
+            "left": {
+              "type": "Integer",
+              "value": 180
+            },
+            "op": "/",
+            "right": {
+              "name": "power",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 2
+                },
+                {
+                  "left": {
+                    "type": "Float",
+                    "value": 2.5,
+                    "source": "2.5"
+                  },
+                  "op": "*",
+                  "right": {
+                    "name": "length",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "encoded"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "alias": "latitude_max_error"
+        },
+        {
+          "type": "String",
+          "value": "max lon error:"
+        },
+        {
+          "expr": {
+            "left": {
+              "type": "Integer",
+              "value": 360
+            },
+            "op": "/",
+            "right": {
+              "name": "power",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 2
+                },
+                {
+                  "left": {
+                    "type": "Float",
+                    "value": 2.5,
+                    "source": "2.5"
+                  },
+                  "op": "*",
+                  "right": {
+                    "name": "length",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "encoded"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "alias": "longitude_max_error"
+        },
+        {
+          "type": "String",
+          "value": "err:"
+        },
+        {
+          "expr": {
+            "left": {
+              "tuple": {
+                "parts": [
+                  "actual"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "latitude"
+              ]
+            },
+            "parenthesized": true
+          },
+          "alias": "lat_error"
+        },
+        {
+          "expr": {
+            "left": {
+              "tuple": {
+                "parts": [
+                  "actual"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "longitude"
+              ]
+            },
+            "parenthesized": true
+          },
+          "alias": "lon_error"
+        },
+        {
+          "type": "String",
+          "value": "derr:"
+        },
+        {
+          "left": {
+            "name": "abs",
+            "arguments": [
+              {
+                "parts": [
+                  "lat_error"
+                ]
+              }
+            ]
+          },
+          "op": "-",
+          "right": {
+            "parts": [
+              "latitude_max_error"
+            ]
+          }
+        },
+        {
+          "left": {
+            "name": "abs",
+            "arguments": [
+              {
+                "parts": [
+                  "lon_error"
+                ]
+              }
+            ]
+          },
+          "op": "-",
+          "right": {
+            "parts": [
+              "longitude_max_error"
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "geohash_test_data"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "name": "abs",
+            "arguments": [
+              {
+                "parts": [
+                  "lat_error"
+                ]
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "parts": [
+              "latitude_max_error"
+            ]
+          }
+        },
+        "op": "OR",
+        "right": {
+          "left": {
+            "name": "abs",
+            "arguments": [
+              {
+                "parts": [
+                  "lon_error"
+                ]
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "parts": [
+              "longitude_max_error"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

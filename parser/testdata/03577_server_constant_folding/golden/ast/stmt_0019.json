@@ -1,0 +1,134 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "shardNum"
+        },
+        {
+          "parts": [
+            "tab",
+            "number"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1..3}"
+                  },
+                  {
+                    "name": "numbers",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 100
+                      }
+                    ]
+                  }
+                ]
+              },
+              "alias": "tab"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "shardNum"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "flt"
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ALL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "tab",
+                    "number"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "flt",
+                    "number"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "t1",
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "t2",
+            "id"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_table_1"
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test_table_2"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "RIGHT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "id"
+                  ]
+                },
+                "parenthesized": true
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "name": "acos",
+            "arguments": [
+              {
+                "parts": [
+                  "t2",
+                  "id"
+                ]
+              }
+            ]
+          },
+          "op": "\u003c\u003e",
+          "right": {
+            "name": "atan",
+            "arguments": [
+              {
+                "parts": [
+                  "t1",
+                  "id"
+                ]
+              }
+            ]
+          },
+          "parenthesized": true
+        },
+        "op": "AND",
+        "right": {
+          "op": "NOT",
+          "operand": {
+            "left": {
+              "name": "acos",
+              "arguments": [
+                {
+                  "parts": [
+                    "t2",
+                    "id"
+                  ]
+                }
+              ]
+            },
+            "op": "\u003c\u003e",
+            "right": {
+              "name": "atan",
+              "arguments": [
+                {
+                  "parts": [
+                    "t1",
+                    "id"
+                  ]
+                }
+              ]
+            },
+            "parenthesized": true
+          }
+        }
+      }
+    }
+  ]
+}

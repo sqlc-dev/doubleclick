@@ -1,0 +1,88 @@
+{
+  "table": "t2",
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "left": {
+              "name": "rowNumberInAllBlocks"
+            },
+            "op": "+",
+            "right": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "name": "count"
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "t0"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "arrayJoin",
+                            "arguments": [
+                              {
+                                "type": "Array",
+                                "value": [
+                                  {
+                                    "type": "String",
+                                    "value": "hello"
+                                  },
+                                  {
+                                    "type": "String",
+                                    "value": "world"
+                                  }
+                                ],
+                                "spaced_commas": true
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

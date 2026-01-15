@@ -1,0 +1,59 @@
+{
+  "table": "test_block_mismatch_sk2",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "a"
+          ]
+        },
+        {
+          "name": "toDate",
+          "arguments": [
+            {
+              "parts": [
+                "b"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "b"
+        ]
+      }
+    ]
+  },
+  "primary_key": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ]
+}

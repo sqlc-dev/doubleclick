@@ -1,0 +1,59 @@
+{
+  "table": "replaceall",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "name": "today"
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "fs",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 16
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "date"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "date"
+            ]
+          },
+          {
+            "parts": [
+              "fs"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

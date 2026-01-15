@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "any",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "_shard_num"
+                              ]
+                            }
+                          ],
+                          "alias": "shard_num"
+                        },
+                        {
+                          "name": "count"
+                        },
+                        {
+                          "name": "uniq",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "dummy"
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.0.0.{2,3}"
+                                  },
+                                  {
+                                    "parts": [
+                                      "system",
+                                      "one"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "shard_num"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      },
+      "offset": {
+        "type": "Integer",
+        "value": 1
+      },
+      "settings": [
+        {
+          "name": "distributed_group_by_no_merge",
+          "value": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ]
+    }
+  ]
+}

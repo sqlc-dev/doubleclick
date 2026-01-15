@@ -1,0 +1,96 @@
+{
+  "table": "users_compact",
+  "columns": [
+    {
+      "name": "uid",
+      "type": {
+        "name": "Int16"
+      }
+    },
+    {
+      "name": "name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "age",
+      "type": {
+        "name": "Int16"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p1",
+      "select": {
+        "columns": [
+          {
+            "name": "count"
+          },
+          {
+            "parts": [
+              "age"
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "age"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "p2",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "age"
+            ]
+          },
+          {
+            "parts": [
+              "name"
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "age"
+            ]
+          },
+          {
+            "parts": [
+              "name"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "uid"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 10485760
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

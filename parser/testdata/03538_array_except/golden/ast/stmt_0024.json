@@ -1,0 +1,153 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "excludes",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "id"
+                    },
+                    {
+                      "expr": {
+                        "type": "Array",
+                        "value": [
+                          {
+                            "type": "String",
+                            "value": "b"
+                          },
+                          {
+                            "type": "String",
+                            "value": "d"
+                          }
+                        ]
+                      },
+                      "alias": "exclude"
+                    }
+                  ]
+                },
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 2
+                      },
+                      "alias": "id"
+                    },
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "type": "String",
+                          "value": "a"
+                        },
+                        {
+                          "type": "String",
+                          "value": "c"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 3
+                      },
+                      "alias": "id"
+                    },
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "type": "String",
+                          "value": "x"
+                        },
+                        {
+                          "type": "String",
+                          "value": "y"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL",
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "name": "arrayExcept",
+          "arguments": [
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "String",
+                  "value": "a"
+                },
+                {
+                  "type": "String",
+                  "value": "b"
+                },
+                {
+                  "type": "String",
+                  "value": "c"
+                }
+              ]
+            },
+            {
+              "parts": [
+                "exclude"
+              ]
+            }
+          ],
+          "alias": "result"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "excludes"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

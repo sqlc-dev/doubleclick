@@ -1,0 +1,119 @@
+{
+  "explain_type": "SYNTAX",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "msg"
+            ]
+          },
+          {
+            "name": "toDateTime",
+            "arguments": [
+              {
+                "name": "intDiv",
+                "arguments": [
+                  {
+                    "parts": [
+                      "ms"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 1000
+                  }
+                ]
+              }
+            ],
+            "alias": "time"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "type": "String",
+                              "value": "hello"
+                            },
+                            "alias": "msg"
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "name": "toUInt64",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "t"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1000
+                              }
+                            },
+                            "alias": "ms"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "generateRandom",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "t DateTime"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "limit": {
+                          "type": "Integer",
+                          "value": 10
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "msg"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "time"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "explicit_type": true
+}

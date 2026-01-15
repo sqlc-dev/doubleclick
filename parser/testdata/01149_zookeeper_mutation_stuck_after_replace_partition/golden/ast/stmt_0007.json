@@ -1,0 +1,52 @@
+{
+  "table": "rmt",
+  "columns": [
+    {
+      "name": "n",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/test_01149_{database}/rmt"
+      },
+      {
+        "type": "String",
+        "value": "r1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "n"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "intDiv",
+    "arguments": [
+      {
+        "parts": [
+          "n"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 10
+      }
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 1
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toLowCardinality",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 0
+                            }
+                          ],
+                          "alias": "a"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "a"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "a"
+              },
+              "alias": "b"
+            },
+            "join": {
+              "type": "FULL",
+              "using": [
+                {
+                  "parts": [
+                    "a"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "a"
+              },
+              "alias": "c"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "b",
+                    "a"
+                  ]
+                },
+                "op": "\u003e",
+                "right": {
+                  "parts": [
+                    "c",
+                    "a"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "join_use_nulls",
+          "value": {
+            "type": "Boolean",
+            "value": true
+          }
+        }
+      ]
+    }
+  ]
+}

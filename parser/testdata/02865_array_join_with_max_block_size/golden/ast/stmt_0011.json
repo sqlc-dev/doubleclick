@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "n"
+            ]
+          },
+          "op": "%",
+          "right": {
+            "type": "Integer",
+            "value": 10
+          }
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "range",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 0
+                            },
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "x"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 1000
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "array_join": {
+              "left": true,
+              "columns": [
+                {
+                  "parts": [
+                    "x"
+                  ],
+                  "alias": "n"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "left": {
+            "parts": [
+              "n"
+            ]
+          },
+          "op": "%",
+          "right": {
+            "type": "Integer",
+            "value": 10
+          }
+        }
+      ]
+    }
+  ]
+}

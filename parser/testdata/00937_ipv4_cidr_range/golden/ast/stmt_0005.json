@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "ip_range",
+          "query": {
+            "name": "IPv4CIDRToRange",
+            "arguments": [
+              {
+                "name": "toIPv4",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "192.168.0.0"
+                  }
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 8
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "COUNT",
+          "arguments": [
+            {}
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "ipv4_range"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "ip"
+          ]
+        },
+        "low": {
+          "name": "tupleElement",
+          "arguments": [
+            {
+              "parts": [
+                "ip_range"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ]
+        },
+        "high": {
+          "name": "tupleElement",
+          "arguments": [
+            {
+              "parts": [
+                "ip_range"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

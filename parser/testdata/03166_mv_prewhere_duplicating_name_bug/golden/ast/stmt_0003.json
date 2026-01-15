@@ -1,0 +1,55 @@
+{
+  "view": "mv",
+  "materialized": true,
+  "to": "dst",
+  "columns": [
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "lc",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "type": "String",
+              "value": "a"
+            },
+            "alias": "s"
+          },
+          {
+            "name": "toLowCardinality",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "b"
+              }
+            ],
+            "alias": "lc"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "src"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "table": "tab1",
+  "columns": [
+    {
+      "name": "valueDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "bb_ticker",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "ric",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "update_timestamp",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "tab1_bb_ticker_idx",
+      "expression": {
+        "parts": [
+          "bb_ticker"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 4
+      }
+    },
+    {
+      "name": "tab1_ric_idx",
+      "expression": {
+        "parts": [
+          "ric"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 4
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "update_timestamp"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "valueDate"
+          ]
+        },
+        {
+          "parts": [
+            "bb_ticker"
+          ]
+        },
+        {
+          "parts": [
+            "ric"
+          ]
+        }
+      ]
+    }
+  ],
+  "primary_key": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "valueDate"
+          ]
+        },
+        {
+          "parts": [
+            "bb_ticker"
+          ]
+        },
+        {
+          "parts": [
+            "ric"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 111
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "compress_primary_key",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

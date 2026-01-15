@@ -1,0 +1,56 @@
+{
+  "table": "replicated_mutations_empty_partitions",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "left": {
+          "left": {
+            "type": "String",
+            "value": "/clickhouse/test/"
+          },
+          "op": "||",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "||",
+        "right": {
+          "type": "String",
+          "value": "/01586_replicated_mutations_empty_partitions/{shard}"
+        }
+      },
+      {
+        "type": "String",
+        "value": "{replica}"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "key"
+    ]
+  }
+}

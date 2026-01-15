@@ -1,0 +1,65 @@
+{
+  "table": "ts_data_agg",
+  "columns": [
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "agg",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "name": "timeSeriesResampleToGridWithStaleness",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 100
+              },
+              {
+                "type": "Integer",
+                "value": 200
+              },
+              {
+                "type": "Integer",
+                "value": 10
+              },
+              {
+                "type": "Integer",
+                "value": 15
+              }
+            ]
+          },
+          {
+            "name": "DateTime",
+            "parameters": [
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ],
+            "has_parentheses": true
+          },
+          {
+            "name": "Float64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "k"
+      ]
+    }
+  ]
+}

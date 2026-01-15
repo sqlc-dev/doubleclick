@@ -1,0 +1,48 @@
+{
+  "table": "long",
+  "columns": [
+    {
+      "name": "e",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "t",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "t"
+      ]
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "parts": [
+          "e"
+        ]
+      },
+      {
+        "name": "toStartOfMonth",
+        "arguments": [
+          {
+            "parts": [
+              "t"
+            ]
+          }
+        ]
+      }
+    ],
+    "spaced_commas": true
+  }
+}

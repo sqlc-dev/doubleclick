@@ -1,0 +1,66 @@
+{
+  "view": "mv_table",
+  "materialized": true,
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/03008_deduplication_insert_into_partitioned_table_mv"
+      },
+      {
+        "type": "String",
+        "value": "{replica}"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "key"
+            ]
+          },
+          {
+            "parts": [
+              "value"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "partitioned_table"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

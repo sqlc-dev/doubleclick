@@ -1,0 +1,89 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "replaceAll",
+          "arguments": [
+            {
+              "parts": [
+                "query"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "\n"
+            },
+            {
+              "type": "String",
+              "value": "\\n"
+            }
+          ]
+        },
+        {
+          "name": "lower",
+          "arguments": [
+            {
+              "expr": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "type": {
+                "name": "String"
+              },
+              "operator_syntax": true
+            }
+          ]
+        },
+        {
+          "name": "errorCodeToName",
+          "arguments": [
+            {
+              "parts": [
+                "exception_code"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "current_database"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "name": "currentDatabase"
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "CSV"
+        ]
+      }
+    }
+  ]
+}

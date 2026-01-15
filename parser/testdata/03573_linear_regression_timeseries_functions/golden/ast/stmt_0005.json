@@ -1,0 +1,203 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "start",
+          "query": {
+            "type": "Integer",
+            "value": 1734955380
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "end",
+          "query": {
+            "type": "Integer",
+            "value": 1734955680
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "step",
+          "query": {
+            "type": "Integer",
+            "value": 15
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "window",
+          "query": {
+            "type": "Integer",
+            "value": 300
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "predict_offset",
+          "query": {
+            "type": "Integer",
+            "value": 60
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "grid",
+          "query": {
+            "name": "range",
+            "arguments": [
+              {
+                "parts": [
+                  "start"
+                ]
+              },
+              {
+                "left": {
+                  "parts": [
+                    "end"
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              {
+                "parts": [
+                  "step"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "arrayZip",
+          "arguments": [
+            {
+              "parts": [
+                "grid"
+              ]
+            },
+            {
+              "name": "timeSeriesDerivToGrid",
+              "parameters": [
+                {
+                  "parts": [
+                    "start"
+                  ]
+                },
+                {
+                  "parts": [
+                    "end"
+                  ]
+                },
+                {
+                  "parts": [
+                    "step"
+                  ]
+                },
+                {
+                  "parts": [
+                    "window"
+                  ]
+                }
+              ],
+              "arguments": [
+                {
+                  "name": "toUnixTimestamp",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "timestamp"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "parts": [
+                    "value"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "deriv_5m"
+        },
+        {
+          "name": "arrayZip",
+          "arguments": [
+            {
+              "parts": [
+                "grid"
+              ]
+            },
+            {
+              "name": "timeSeriesPredictLinearToGrid",
+              "parameters": [
+                {
+                  "parts": [
+                    "start"
+                  ]
+                },
+                {
+                  "parts": [
+                    "end"
+                  ]
+                },
+                {
+                  "parts": [
+                    "step"
+                  ]
+                },
+                {
+                  "parts": [
+                    "window"
+                  ]
+                },
+                {
+                  "parts": [
+                    "predict_offset"
+                  ]
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "timestamp"
+                  ]
+                },
+                {
+                  "parts": [
+                    "value"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "predict_linear_5m_offset_1m"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "ts_raw_data"
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

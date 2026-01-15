@@ -1,0 +1,650 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "score_with_group",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "array": {
+                          "parts": [
+                            "scores"
+                          ]
+                        },
+                        "index": {
+                          "parts": [
+                            "idx"
+                          ]
+                        }
+                      },
+                      "alias": "score"
+                    },
+                    {
+                      "expr": {
+                        "array": {
+                          "parts": [
+                            "labels"
+                          ]
+                        },
+                        "index": {
+                          "parts": [
+                            "idx"
+                          ]
+                        }
+                      },
+                      "alias": "label"
+                    },
+                    {
+                      "name": "FLOOR",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "score"
+                            ]
+                          },
+                          "op": "/",
+                          "right": {
+                            "type": "Integer",
+                            "value": 3
+                          }
+                        }
+                      ],
+                      "alias": "group"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "name": "range",
+                                      "arguments": [
+                                        {
+                                          "type": "Integer",
+                                          "value": 1
+                                        },
+                                        {
+                                          "type": "Integer",
+                                          "value": 11
+                                        }
+                                      ],
+                                      "alias": "idx"
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "Array",
+                                        "value": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 2
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 3
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 4
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 5
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 6
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 7
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 8
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 9
+                                          }
+                                        ],
+                                        "spaced_commas": true
+                                      },
+                                      "alias": "scores"
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "Array",
+                                        "value": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          }
+                                        ],
+                                        "spaced_commas": true
+                                      },
+                                      "alias": "labels"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "array_join": {
+                          "columns": [
+                            {
+                              "parts": [
+                                "idx"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "grouped_scores",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "group"
+                      ]
+                    },
+                    {
+                      "name": "groupArrayArray",
+                      "arguments": [
+                        {
+                          "name": "array",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "score"
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "alias": "scores"
+                    },
+                    {
+                      "name": "groupArrayArray",
+                      "arguments": [
+                        {
+                          "name": "array",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "label"
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "alias": "labels"
+                    },
+                    {
+                      "name": "countIf",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "label"
+                            ]
+                          },
+                          "op": "\u003e",
+                          "right": {
+                            "type": "Integer",
+                            "value": 0
+                          }
+                        }
+                      ],
+                      "alias": "group_tp"
+                    },
+                    {
+                      "name": "countIf",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "label"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 0
+                          }
+                        }
+                      ],
+                      "alias": "group_fp"
+                    },
+                    {
+                      "name": "COALESCE",
+                      "arguments": [
+                        {
+                          "name": "SUM",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "group_tp"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "group"
+                                  ]
+                                },
+                                "descending": true
+                              }
+                            ],
+                            "frame": {
+                              "type": "ROWS",
+                              "start": {
+                                "type": "UNBOUNDED_PRECEDING"
+                              },
+                              "end": {
+                                "type": "PRECEDING",
+                                "offset": {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      ],
+                      "alias": "prev_group_tp"
+                    },
+                    {
+                      "name": "COALESCE",
+                      "arguments": [
+                        {
+                          "name": "SUM",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "group_fp"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "group"
+                                  ]
+                                },
+                                "descending": true
+                              }
+                            ],
+                            "frame": {
+                              "type": "ROWS",
+                              "start": {
+                                "type": "UNBOUNDED_PRECEDING"
+                              },
+                              "end": {
+                                "type": "PRECEDING",
+                                "offset": {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      ],
+                      "alias": "prev_group_fp"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "score_with_group"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "group_by": [
+                    {
+                      "parts": [
+                        "group"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "partial_aucs",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "arrayAUCPR",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "scores"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "labels"
+                          ]
+                        },
+                        {
+                          "type": "Array",
+                          "value": [
+                            {
+                              "name": "COALESCE",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "prev_group_tp"
+                                  ]
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 0
+                                }
+                              ]
+                            },
+                            {
+                              "name": "COALESCE",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "prev_group_fp"
+                                  ]
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 0
+                                }
+                              ]
+                            },
+                            {
+                              "name": "COALESCE",
+                              "arguments": [
+                                {
+                                  "name": "SUM",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "group_tp"
+                                      ]
+                                    }
+                                  ],
+                                  "over": {}
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 0
+                                }
+                              ]
+                            }
+                          ],
+                          "spaced_commas": true,
+                          "spaced_brackets": true
+                        }
+                      ],
+                      "alias": "partial_pr_auc"
+                    },
+                    {
+                      "name": "arrayROCAUC",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "scores"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "labels"
+                          ]
+                        },
+                        {
+                          "type": "Boolean",
+                          "value": true
+                        },
+                        {
+                          "type": "Array",
+                          "value": [
+                            {
+                              "name": "COALESCE",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "prev_group_tp"
+                                  ]
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 0
+                                }
+                              ]
+                            },
+                            {
+                              "name": "COALESCE",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "prev_group_fp"
+                                  ]
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 0
+                                }
+                              ]
+                            },
+                            {
+                              "name": "COALESCE",
+                              "arguments": [
+                                {
+                                  "name": "SUM",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "group_tp"
+                                      ]
+                                    }
+                                  ],
+                                  "over": {}
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 0
+                                }
+                              ]
+                            },
+                            {
+                              "name": "COALESCE",
+                              "arguments": [
+                                {
+                                  "name": "SUM",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "group_fp"
+                                      ]
+                                    }
+                                  ],
+                                  "over": {}
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 0
+                                }
+                              ]
+                            }
+                          ],
+                          "spaced_commas": true,
+                          "spaced_brackets": true
+                        }
+                      ],
+                      "alias": "partial_roc_auc"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "grouped_scores"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "floor",
+          "arguments": [
+            {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "partial_pr_auc"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            }
+          ],
+          "alias": "pr_auc"
+        },
+        {
+          "name": "floor",
+          "arguments": [
+            {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "partial_roc_auc"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            }
+          ],
+          "alias": "roc_auc"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "partial_aucs"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

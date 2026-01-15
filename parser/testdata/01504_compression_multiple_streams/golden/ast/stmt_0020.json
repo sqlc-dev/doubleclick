@@ -1,0 +1,139 @@
+{
+  "table": "columns_with_multiple_streams_compact",
+  "columns": [
+    {
+      "name": "field0",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Int64"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "Delta",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "name": "LZ4"
+          }
+        ]
+      }
+    },
+    {
+      "name": "field1",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Int64"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "Delta"
+          },
+          {
+            "name": "LZ4"
+          }
+        ]
+      }
+    },
+    {
+      "name": "field2",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Array",
+            "parameters": [
+              {
+                "name": "Int64"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "Delta"
+          },
+          {
+            "name": "LZ4"
+          }
+        ]
+      }
+    },
+    {
+      "name": "field3",
+      "type": {
+        "name": "Tuple",
+        "parameters": [
+          {
+            "name": "UInt32"
+          },
+          {
+            "name": "Array",
+            "parameters": [
+              {
+                "name": "UInt64"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "Delta"
+          },
+          {
+            "name": "Default"
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "settings": [
+    {
+      "name": "min_rows_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 100000
+      }
+    },
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 100000
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

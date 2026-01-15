@@ -1,0 +1,72 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "date"
+          ],
+          "alias": "d"
+        },
+        {
+          "name": "toNullable",
+          "arguments": [
+            {
+              "parts": [
+                "f"
+              ]
+            }
+          ],
+          "alias": "f"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "02861_interpolate"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "id"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "1"
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "d"
+            ]
+          },
+          "with_fill": true,
+          "fill_step": {
+            "name": "toIntervalDay",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ]
+          }
+        }
+      ],
+      "interpolate": [
+        {
+          "column": "f"
+        }
+      ]
+    }
+  ]
+}

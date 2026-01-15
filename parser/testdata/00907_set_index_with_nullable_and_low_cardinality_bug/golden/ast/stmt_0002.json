@@ -1,0 +1,120 @@
+{
+  "table": "null_lc_set_index",
+  "columns": [
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "action",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "Nullable",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "user",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "Nullable",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "test_user_idx",
+      "expression": {
+        "parts": [
+          "user"
+        ]
+      },
+      "type": {
+        "name": "set",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "timestamp"
+          ]
+        },
+        {
+          "parts": [
+            "action"
+          ]
+        },
+        {
+          "name": "cityHash64",
+          "arguments": [
+            {
+              "parts": [
+                "user"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMMDD",
+    "arguments": [
+      {
+        "parts": [
+          "timestamp"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "allow_nullable_key",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

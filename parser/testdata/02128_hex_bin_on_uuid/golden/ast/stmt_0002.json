@@ -1,0 +1,76 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "uuid",
+          "query": {
+            "name": "generateUUIDv4"
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "str1",
+          "query": {
+            "name": "replace",
+            "arguments": [
+              {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "uuid"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "String",
+                "value": "-"
+              },
+              {
+                "type": "String",
+                "value": ""
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "str2",
+          "query": {
+            "name": "lower",
+            "arguments": [
+              {
+                "name": "hex",
+                "arguments": [
+                  {
+                    "parts": [
+                      "uuid"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "str1"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "str2"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

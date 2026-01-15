@@ -1,0 +1,197 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "A",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {}
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "number"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "B",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {}
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "number"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "C",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {}
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "A"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "B"
+              },
+              "alias": "B"
+            },
+            "join": {
+              "type": "PASTE"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "C"
+              },
+              "alias": "C"
+            },
+            "join": {
+              "type": "PASTE"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "A",
+              "number"
+            ]
+          },
+          "op": "%",
+          "right": {
+            "type": "Integer",
+            "value": 2
+          }
+        },
+        "op": "==",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      },
+      "settings": [
+        {
+          "name": "query_plan_filter_push_down",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

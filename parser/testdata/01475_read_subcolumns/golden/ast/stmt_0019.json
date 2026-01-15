@@ -1,0 +1,82 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "array": {
+            "parts": [
+              "ProfileEvents"
+            ]
+          },
+          "index": {
+            "type": "String",
+            "value": "FileOpen"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            },
+            "parenthesized": true
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "name": "lower",
+              "arguments": [
+                {
+                  "parts": [
+                    "query"
+                  ]
+                }
+              ]
+            },
+            "pattern": {
+              "name": "lower",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "SELECT t._ FROM %t_tup%"
+                }
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "current_database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "name": "count",
+          "alias": "cnt"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.{1,2}"
+                  },
+                  {
+                    "parts": [
+                      "system",
+                      "settings"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "name"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "left": {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "value"
+                ]
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "String",
+            "value": "9"
+          },
+          "parenthesized": true
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "name": "min",
+            "arguments": [
+              {
+                "parts": [
+                  "changed"
+                ]
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          },
+          "parenthesized": true
+        }
+      },
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

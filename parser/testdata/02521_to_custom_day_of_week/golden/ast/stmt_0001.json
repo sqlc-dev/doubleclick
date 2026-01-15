@@ -1,0 +1,59 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "date_mon",
+          "query": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2023-01-09"
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "date_sun",
+          "query": {
+            "left": {
+              "parts": [
+                "date_mon"
+              ]
+            },
+            "op": "-",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "toDayOfWeek",
+          "arguments": [
+            {
+              "parts": [
+                "date_mon"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toDayOfWeek",
+          "arguments": [
+            {
+              "parts": [
+                "date_sun"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

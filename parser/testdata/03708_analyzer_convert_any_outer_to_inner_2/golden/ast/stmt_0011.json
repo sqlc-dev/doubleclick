@@ -1,0 +1,120 @@
+{
+  "explain_type": "PLAN",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "users"
+                },
+                "alias": "u1"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "name": "sum",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "age"
+                                  ]
+                                }
+                              ]
+                            },
+                            "type": {
+                              "name": "Nullable",
+                              "parameters": [
+                                {
+                                  "name": "Int64"
+                                }
+                              ],
+                              "has_parentheses": true
+                            },
+                            "alias": "age_sum",
+                            "operator_syntax": true
+                          },
+                          {
+                            "parts": [
+                              "name"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "users"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "group_by": [
+                          {
+                            "parts": [
+                              "name"
+                            ]
+                          }
+                        ],
+                        "with_cube": true
+                      }
+                    ]
+                  }
+                },
+                "alias": "u2"
+              },
+              "join": {
+                "type": "LEFT",
+                "strictness": "ANY",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "u1",
+                      "name"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "u2",
+                      "name"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "uid"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "parts": [
+              "age_sum"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "has_settings": true,
+  "options_string": "actions = 1, keep_logical_steps = 1"
+}

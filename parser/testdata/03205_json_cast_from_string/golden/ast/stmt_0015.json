@@ -1,0 +1,71 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "name": "materialize",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "{\"a\" : {\"b\" : {\"c\" : {\"d\" : 42}, \"e\" : 43}, \"f\" : 44}, \"g\" : 44}"
+              }
+            ]
+          },
+          "type": {
+            "name": "JSON",
+            "parameters": [
+              {
+                "expr": {
+                  "left": {
+                    "parts": [
+                      "max_dynamic_paths"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              }
+            ],
+            "has_parentheses": true
+          },
+          "alias": "json",
+          "operator_syntax": true
+        },
+        {
+          "name": "JSONAllPathsWithTypes",
+          "arguments": [
+            {
+              "parts": [
+                "json"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "JSONDynamicPathsWithTypes",
+          "arguments": [
+            {
+              "parts": [
+                "json"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "JSONSharedDataPathsWithTypes",
+          "arguments": [
+            {
+              "parts": [
+                "json"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "my.json",
+      "type": {
+        "name": "JSON",
+        "parameters": [
+          {
+            "expr": {
+              "name": "a",
+              "type": {
+                "name": "UInt32"
+              }
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "a1",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "parts": [
+          "my",
+          "json",
+          "a"
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "a2",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "parts": [
+          "my",
+          "json",
+          "a"
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "b1",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "parts": [
+          "my",
+          "json",
+          "b"
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "b2",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "parts": [
+          "my",
+          "json",
+          "b"
+        ]
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx1",
+      "expression": {
+        "parts": [
+          "my",
+          "json",
+          "a"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      }
+    },
+    {
+      "name": "idx2",
+      "expression": {
+        "expr": {
+          "parts": [
+            "my",
+            "json",
+            "b"
+          ]
+        },
+        "type": {
+          "name": "Int64"
+        },
+        "operator_syntax": true
+      },
+      "type": {
+        "name": "minmax"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "prj1",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "my",
+              "json"
+            ]
+          },
+          {
+            "parts": [
+              "my",
+              "json",
+              "a"
+            ]
+          },
+          {
+            "parts": [
+              "my",
+              "json",
+              "b"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "my",
+              "json",
+              "a"
+            ]
+          },
+          {
+            "expr": {
+              "parts": [
+                "my",
+                "json",
+                "b"
+              ]
+            },
+            "type": {
+              "name": "Int32"
+            },
+            "operator_syntax": true
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "my",
+            "json",
+            "a"
+          ]
+        },
+        {
+          "expr": {
+            "parts": [
+              "my",
+              "json",
+              "b"
+            ]
+          },
+          "type": {
+            "name": "Int32"
+          },
+          "operator_syntax": true
+        },
+        {
+          "left": {
+            "parts": [
+              "my",
+              "json",
+              "a"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "type": "Integer",
+            "value": 42
+          }
+        },
+        {
+          "left": {
+            "expr": {
+              "parts": [
+                "my",
+                "json",
+                "b"
+              ]
+            },
+            "type": {
+              "name": "Int32"
+            },
+            "operator_syntax": true
+          },
+          "op": "+",
+          "right": {
+            "type": "Integer",
+            "value": 42
+          }
+        }
+      ]
+    }
+  ]
+}

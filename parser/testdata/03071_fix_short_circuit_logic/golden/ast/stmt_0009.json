@@ -1,0 +1,216 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "block_timestamp"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "block_timestamp"
+                          ]
+                        },
+                        {
+                          "name": "bytes2hex",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "token_address"
+                              ]
+                            }
+                          ],
+                          "alias": "token_address_hex"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "transfer_id"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "address"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "value"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "block_timestamp"
+                                          ]
+                                        },
+                                        {
+                                          "parts": [
+                                            "token_address"
+                                          ]
+                                        },
+                                        {
+                                          "expr": {
+                                            "type": "String",
+                                            "value": "zksync"
+                                          },
+                                          "alias": "chain"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "test"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "left": {
+                                "parts": [
+                                  "address"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "name": "hex2bytes",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "0xd387a6e4e84a6c86bd90c158c6028a58cc8ac459"
+                                  }
+                                ]
+                              },
+                              "parenthesized": true
+                            },
+                            "op": "AND",
+                            "right": {
+                              "expr": {
+                                "parts": [
+                                  "transfer_id"
+                                ]
+                              },
+                              "not": true,
+                              "pattern": {
+                                "type": "String",
+                                "value": "gas%"
+                              }
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "value"
+                              ]
+                            },
+                            "op": "\u003e",
+                            "right": {
+                              "type": "Integer",
+                              "value": 0
+                            },
+                            "parenthesized": true
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "name": "dictGetOrDefault",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "token_data_map"
+                              ]
+                            },
+                            {
+                              "type": "String",
+                              "value": "is_blacklisted"
+                            },
+                            {
+                              "type": "Tuple",
+                              "value": [
+                                {
+                                  "parts": [
+                                    "token_address_hex"
+                                  ]
+                                },
+                                {
+                                  "type": "String",
+                                  "value": "zksync"
+                                }
+                              ],
+                              "spaced_commas": true
+                            },
+                            {
+                              "type": "Boolean",
+                              "value": true
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "max_threads",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "short_circuit_function_evaluation",
+          "value": {
+            "type": "String",
+            "value": "enable"
+          }
+        },
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

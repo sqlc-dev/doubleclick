@@ -1,0 +1,82 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "reference_vec",
+          "query": {
+            "type": "Array",
+            "value": [
+              {
+                "type": "Float",
+                "value": 1,
+                "source": "1."
+              },
+              {
+                "type": "Float",
+                "value": 2,
+                "source": "2."
+              }
+            ],
+            "spaced_commas": true
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "tab"
+              }
+            }
+          }
+        ]
+      },
+      "prewhere": {
+        "left": {
+          "parts": [
+            "id"
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "type": "Integer",
+          "value": 5000
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "name": "cosineDistance",
+            "arguments": [
+              {
+                "parts": [
+                  "vec"
+                ]
+              },
+              {
+                "parts": [
+                  "reference_vec"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      },
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

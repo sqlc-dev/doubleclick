@@ -1,0 +1,43 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "machine_id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "machine_id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "timestamp"
+        ]
+      }
+    ]
+  }
+}

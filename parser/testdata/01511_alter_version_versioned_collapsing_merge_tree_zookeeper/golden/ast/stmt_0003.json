@@ -1,0 +1,73 @@
+{
+  "table": "table_with_version_replicated_1",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "version",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "sign",
+      "type": {
+        "name": "Int8"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedVersionedCollapsingMergeTree",
+    "parameters": [
+      {
+        "left": {
+          "left": {
+            "type": "String",
+            "value": "/clickhouse/"
+          },
+          "op": "||",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "||",
+        "right": {
+          "type": "String",
+          "value": "/test_01511/{shard}/t"
+        }
+      },
+      {
+        "type": "String",
+        "value": "1_{replica}"
+      },
+      {
+        "parts": [
+          "sign"
+        ]
+      },
+      {
+        "parts": [
+          "version"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arraySort",
+          "arguments": [
+            {
+              "name": "groupUniqArray",
+              "arguments": [
+                {
+                  "type": "Tuple",
+                  "value": [
+                    {
+                      "parts": [
+                        "partition_mod"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "argMin_val"
+                      ]
+                    }
+                  ],
+                  "spaced_commas": true
+                }
+              ]
+            }
+          ],
+          "alias": "argmin_per_partition"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ],
+                          "alias": "ts"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "ts"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          },
+                          "alias": "partition_mod"
+                        },
+                        {
+                          "name": "toString",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "ts"
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 5
+                              }
+                            }
+                          ],
+                          "alias": "s"
+                        },
+                        {
+                          "name": "argMinDistinct",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "ts"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "s"
+                              ]
+                            }
+                          ],
+                          "over": {
+                            "partition_by": [
+                              {
+                                "left": {
+                                  "parts": [
+                                    "ts"
+                                  ]
+                                },
+                                "op": "%",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 3
+                                }
+                              }
+                            ],
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "ts"
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "alias": "argMin_val"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.0.0.{1,2,3}"
+                                  },
+                                  {
+                                    "name": "numbers_mt",
+                                    "arguments": [
+                                      {
+                                        "type": "Integer",
+                                        "value": 100000
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "ts"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "function": {
+    "name": "file",
+    "arguments": [
+      {
+        "type": "String",
+        "value": "03630_parquet_bool_bug.parquet"
+      }
+    ]
+  },
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ],
+            "alias": "n"
+          },
+          {
+            "name": "arrayMap",
+            "arguments": [
+              {
+                "parameters": [
+                  "i"
+                ],
+                "body": {
+                  "name": "toBool",
+                  "arguments": [
+                    {
+                      "left": {
+                        "left": {
+                          "name": "bitShiftRight",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "i"
+                              ]
+                            }
+                          ]
+                        },
+                        "op": "%",
+                        "right": {
+                          "type": "Integer",
+                          "value": 2
+                        }
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "range",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 8
+                  }
+                ]
+              }
+            ],
+            "alias": "bits"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 256
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "settings": [
+          {
+            "name": "engine_file_truncate_on_insert",
+            "value": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true
+}

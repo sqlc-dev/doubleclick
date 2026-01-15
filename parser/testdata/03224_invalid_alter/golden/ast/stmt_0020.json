@@ -1,0 +1,68 @@
+{
+  "table": "test3",
+  "columns": [
+    {
+      "name": "str",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "column_with_codec",
+      "type": {
+        "name": "String"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    },
+    {
+      "name": "column_with_alias",
+      "type": {
+        "name": "String"
+      },
+      "default": {
+        "name": "concat",
+        "arguments": [
+          {
+            "parts": [
+              "str"
+            ]
+          },
+          {
+            "expr": {
+              "type": "String",
+              "value": "a"
+            },
+            "alias": "a"
+          }
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/03224_invalid_alter/{database}_atomic/{table}"
+      },
+      {
+        "type": "String",
+        "value": "r1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "on_cluster": "test_shard_localhost"
+}

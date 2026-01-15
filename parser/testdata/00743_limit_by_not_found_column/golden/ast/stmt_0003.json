@@ -1,0 +1,102 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ],
+          "alias": "total"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "message"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "info"
+                          ]
+                        },
+                        {
+                          "name": "count",
+                          "alias": "cnt"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "installation_stats"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "expr": {
+                          "parts": [
+                            "message_type"
+                          ]
+                        },
+                        "pattern": {
+                          "type": "String",
+                          "value": "fail"
+                        }
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "message"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "info"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "cnt"
+                            ]
+                          },
+                          "descending": true
+                        }
+                      ],
+                      "limit_by": [
+                        {
+                          "parts": [
+                            "message"
+                          ]
+                        }
+                      ],
+                      "limit_by_limit": {
+                        "type": "Integer",
+                        "value": 5
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "key_a"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "key_b"
+              ]
+            }
+          },
+          "alias": "d"
+        },
+        {
+          "name": "rank",
+          "over": {},
+          "alias": "f"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "name": "rand"
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          },
+                          "alias": "key_a"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "name": "rand",
+                              "arguments": [
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 5
+                            }
+                          },
+                          "alias": "key_b"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 100
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "key_a"
+          ]
+        },
+        {
+          "parts": [
+            "key_b"
+          ]
+        }
+      ],
+      "with_rollup": true,
+      "order_by": [
+        {
+          "expression": {
+            "name": "multiIf",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "d"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              {
+                "parts": [
+                  "key_a"
+                ]
+              },
+              {
+                "type": "Null",
+                "value": null
+              }
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

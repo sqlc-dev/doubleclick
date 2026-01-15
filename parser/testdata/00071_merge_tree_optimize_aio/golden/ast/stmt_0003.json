@@ -1,0 +1,104 @@
+{
+  "table": "hits_snippet",
+  "columns": [
+    {
+      "name": "EventTime",
+      "type": {
+        "name": "DateTime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "Asia/Dubai"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "EventDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "CounterID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "UserID",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "URL",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "Referer",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "EventDate"
+        ]
+      },
+      {
+        "name": "intHash32",
+        "arguments": [
+          {
+            "parts": [
+              "UserID"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "CounterID"
+            ]
+          },
+          {
+            "parts": [
+              "EventDate"
+            ]
+          },
+          {
+            "name": "intHash32",
+            "arguments": [
+              {
+                "parts": [
+                  "UserID"
+                ]
+              }
+            ]
+          },
+          {
+            "parts": [
+              "EventTime"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "table": "t1"
+        },
+        {
+          "table": "t2"
+        },
+        {
+          "expr": {
+            "type": "String",
+            "value": "world"
+          },
+          "alias": "constant"
+        },
+        {
+          "name": "isConstant",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "world"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 2
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "type": "String",
+                          "value": "hello"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 3
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "type": "String",
+                          "value": "world"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "t1",
+                    "k"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t2",
+                    "k"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "t1",
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "subquery_1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "a"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "subquery_2",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "left": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "op": "+",
+                      "right": {
+                        "parts": [
+                          "subquery_1",
+                          "a"
+                        ]
+                      }
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "subquery_1"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "subquery_2"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

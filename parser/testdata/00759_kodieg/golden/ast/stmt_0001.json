@@ -1,0 +1,130 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "Array",
+            "value": [
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "type": "Integer",
+                "value": 2
+              },
+              {
+                "type": "Integer",
+                "value": 3
+              },
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "type": "Integer",
+                "value": 3
+              }
+            ],
+            "spaced_commas": true
+          },
+          "alias": "a"
+        },
+        {
+          "name": "indexOf",
+          "arguments": [
+            {
+              "name": "arrayReverse",
+              "arguments": [
+                {
+                  "name": "arraySlice",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "a"
+                      ]
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    {
+                      "op": "-",
+                      "operand": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 3
+            }
+          ],
+          "alias": "offset_from_right"
+        },
+        {
+          "name": "arraySlice",
+          "arguments": [
+            {
+              "parts": [
+                "a"
+              ]
+            },
+            {
+              "name": "multiIf",
+              "arguments": [
+                {
+                  "left": {
+                    "parts": [
+                      "offset_from_right"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                },
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "left": {
+                    "left": {
+                      "name": "length",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "a"
+                          ]
+                        }
+                      ]
+                    },
+                    "op": "-",
+                    "right": {
+                      "parts": [
+                        "offset_from_right"
+                      ]
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

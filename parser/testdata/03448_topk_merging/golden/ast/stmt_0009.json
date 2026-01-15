@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "untuple",
+                          "arguments": [
+                            {
+                              "name": "arrayJoin",
+                              "arguments": [
+                                {
+                                  "name": "topKWeightedMerge",
+                                  "parameters": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 100
+                                    },
+                                    {
+                                      "type": "Integer",
+                                      "value": 3
+                                    },
+                                    {
+                                      "type": "String",
+                                      "value": "counts"
+                                    }
+                                  ],
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "top_items"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "top"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "topk_test"
+                              },
+                              "final": true
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "top",
+              "count"
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "top",
+              "item"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "begin"
+          ]
+        },
+        {
+          "expr": {
+            "parts": [
+              "value"
+            ]
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "e1",
+                      "value"
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "query": {
+                            "selects": [
+                              {
+                                "columns": [
+                                  {}
+                                ],
+                                "from": {
+                                  "tables": [
+                                    {
+                                      "table": {
+                                        "table": {
+                                          "table": "events"
+                                        },
+                                        "alias": "e1"
+                                      }
+                                    }
+                                  ]
+                                },
+                                "where": {
+                                  "left": {
+                                    "parts": [
+                                      "e1",
+                                      "value"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "parts": [
+                                      "events",
+                                      "value"
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        "alias": "e1"
+                      }
+                    },
+                    {
+                      "table": {
+                        "table": {
+                          "query": {
+                            "selects": [
+                              {
+                                "columns": [
+                                  {
+                                    "expr": {
+                                      "parts": [
+                                        "number"
+                                      ]
+                                    },
+                                    "type": {
+                                      "name": "Float64"
+                                    },
+                                    "alias": "begin",
+                                    "operator_syntax": true
+                                  }
+                                ],
+                                "from": {
+                                  "tables": [
+                                    {
+                                      "table": {
+                                        "table": {
+                                          "name": "numbers",
+                                          "arguments": [
+                                            {
+                                              "type": "Integer",
+                                              "value": 10
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                },
+                                "where": {
+                                  "left": {
+                                    "left": {
+                                      "parts": [
+                                        "number"
+                                      ]
+                                    },
+                                    "op": "\u003e=",
+                                    "right": {
+                                      "type": "Integer",
+                                      "value": 1
+                                    }
+                                  },
+                                  "op": "AND",
+                                  "right": {
+                                    "left": {
+                                      "parts": [
+                                        "number"
+                                      ]
+                                    },
+                                    "op": "\u003c",
+                                    "right": {
+                                      "type": "Integer",
+                                      "value": 10
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "join": {
+                        "type": "INNER",
+                        "strictness": "ASOF",
+                        "using": [
+                          {
+                            "parts": [
+                              "begin"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "events"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "begin"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

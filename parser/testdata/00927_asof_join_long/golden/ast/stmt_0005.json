@@ -1,0 +1,195 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "SUM",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "trades",
+                  "price"
+                ]
+              },
+              "op": "-",
+              "right": {
+                "parts": [
+                  "tvs",
+                  "tv"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "k"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "t"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "t"
+                          ],
+                          "alias": "price"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "toUInt32",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "number"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "k"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "name": "numbers",
+                                                "arguments": [
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 1000
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "keys"
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "toUInt32",
+                                          "arguments": [
+                                            {
+                                              "left": {
+                                                "parts": [
+                                                  "number"
+                                                ]
+                                              },
+                                              "op": "*",
+                                              "right": {
+                                                "type": "Integer",
+                                                "value": 10
+                                              }
+                                            }
+                                          ],
+                                          "alias": "t"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "name": "numbers",
+                                                "arguments": [
+                                                  {
+                                                    "type": "Integer",
+                                                    "value": 3000
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "trade_times"
+                            },
+                            "join": {
+                              "type": "CROSS"
+                            }
+                          }
+                        ]
+                      },
+                      "settings": [
+                        {
+                          "name": "join_algorithm",
+                          "value": {
+                            "type": "String",
+                            "value": "hash"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "trades"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "tvs"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ASOF",
+              "using": [
+                {
+                  "parts": [
+                    "k"
+                  ]
+                },
+                {
+                  "parts": [
+                    "t"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

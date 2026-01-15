@@ -1,0 +1,98 @@
+{
+  "table": "aggregates",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "name": "toDate",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "2016-10-31"
+                  }
+                ]
+              },
+              "op": "+",
+              "right": {
+                "parts": [
+                  "number"
+                ]
+              }
+            },
+            "alias": "d"
+          },
+          {
+            "name": "uniqState",
+            "arguments": [
+              {
+                "name": "toUInt64",
+                "arguments": [
+                  {
+                    "name": "arrayJoin",
+                    "arguments": [
+                      {
+                        "name": "range",
+                        "arguments": [
+                          {
+                            "type": "Integer",
+                            "value": 100
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "s"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "database": "system",
+                                  "table": "numbers"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "limit": {
+                          "type": "Integer",
+                          "value": 2
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "d"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

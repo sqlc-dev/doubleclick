@@ -1,0 +1,122 @@
+{
+  "view": "test_mv",
+  "materialized": true,
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "subquery_on_source",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "col1"
+                        ],
+                        "alias": "aliased"
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "test_table"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          },
+          {
+            "name": "output",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {}
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "test_table"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "expr": {
+                        "parts": [
+                          "col1"
+                        ]
+                      },
+                      "query": {
+                        "selects": [
+                          {
+                            "columns": [
+                              {
+                                "parts": [
+                                  "aliased"
+                                ]
+                              }
+                            ],
+                            "from": {
+                              "tables": [
+                                {
+                                  "table": {
+                                    "table": {
+                                      "table": "subquery_on_source"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          }
+        ],
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "output"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

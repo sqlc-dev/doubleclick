@@ -1,0 +1,44 @@
+{
+  "table": "part_log_profile_events_r2",
+  "columns": [
+    {
+      "name": "x",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_02378/part_log_profile_events"
+      },
+      {
+        "type": "String",
+        "value": "r2"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "x"
+      ]
+    }
+  ],
+  "partition_by": {
+    "left": {
+      "parts": [
+        "x"
+      ]
+    },
+    "op": "\u003e=",
+    "right": {
+      "type": "Integer",
+      "value": 128
+    }
+  }
+}

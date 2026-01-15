@@ -1,0 +1,76 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 1
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test2"
+              },
+              "alias": "test2"
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "name": "arrayFilter",
+                  "arguments": [
+                    {
+                      "parameters": [
+                        "t"
+                      ],
+                      "body": {
+                        "expr": {
+                          "parts": [
+                            "t"
+                          ]
+                        },
+                        "global": true,
+                        "query": {
+                          "selects": [
+                            {
+                              "distinct": true,
+                              "columns": [
+                                {
+                                  "name": "now",
+                                  "alias": "ym:a"
+                                }
+                              ],
+                              "where": {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "parts": [
+                        "test2",
+                        "b"
+                      ]
+                    }
+                  ],
+                  "alias": "test2_b"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "table": "dst",
+  "columns": [
+    {
+      "name": "step",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "rounded_event_time",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "max"
+            ]
+          },
+          {
+            "name": "Int64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "step"
+          ]
+        },
+        {
+          "parts": [
+            "rounded_event_time"
+          ]
+        },
+        {
+          "parts": [
+            "key"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "key"
+          ]
+        },
+        {
+          "name": "untuple",
+          "arguments": [
+            {
+              "name": "argMax",
+              "arguments": [
+                {
+                  "type": "Tuple",
+                  "value": [
+                    {
+                      "except": [
+                        "key"
+                      ],
+                      "transformers": [
+                        {
+                          "type": "except",
+                          "except": [
+                            "key"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "parts": [
+                    "v1"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "kv"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "key"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "key"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "TSVWithNames"
+        ]
+      }
+    }
+  ]
+}

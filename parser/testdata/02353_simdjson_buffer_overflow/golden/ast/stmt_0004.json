@@ -1,0 +1,82 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers_mt"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "op": "NOT",
+        "operand": {
+          "name": "ignore",
+          "arguments": [
+            {
+              "name": "JSONExtract",
+              "arguments": [
+                {
+                  "left": {
+                    "left": {
+                      "type": "String",
+                      "value": "{"
+                    },
+                    "op": "||",
+                    "right": {
+                      "name": "repeat",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "\"a\":\"b\","
+                        },
+                        {
+                          "left": {
+                            "name": "rand"
+                          },
+                          "op": "%",
+                          "right": {
+                            "type": "Integer",
+                            "value": 10
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "op": "||",
+                  "right": {
+                    "type": "String",
+                    "value": "\"c\":\"d\"}"
+                  }
+                },
+                {
+                  "type": "String",
+                  "value": "a"
+                },
+                {
+                  "type": "String",
+                  "value": "String"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

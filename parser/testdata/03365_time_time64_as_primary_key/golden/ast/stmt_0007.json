@@ -1,0 +1,127 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "floor",
+          "arguments": [
+            {
+              "left": {
+                "expr": {
+                  "parts": [
+                    "a"
+                  ]
+                },
+                "type": {
+                  "name": "Int32"
+                }
+              },
+              "op": "/",
+              "right": {
+                "type": "Integer",
+                "value": 60
+              }
+            }
+          ],
+          "alias": "minute_bucket"
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ],
+          "alias": "total_records"
+        },
+        {
+          "name": "min",
+          "arguments": [
+            {
+              "parts": [
+                "a"
+              ]
+            }
+          ],
+          "alias": "min_time"
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "a"
+              ]
+            }
+          ],
+          "alias": "max_time"
+        },
+        {
+          "name": "groupArray",
+          "arguments": [
+            {
+              "parts": [
+                "b"
+              ]
+            }
+          ],
+          "alias": "all_b_values"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_time"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "a"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 12435
+          },
+          "parenthesized": true
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "a"
+            ]
+          },
+          "op": "\u003c",
+          "right": {
+            "type": "Integer",
+            "value": 12437
+          },
+          "parenthesized": true
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "minute_bucket"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "minute_bucket"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

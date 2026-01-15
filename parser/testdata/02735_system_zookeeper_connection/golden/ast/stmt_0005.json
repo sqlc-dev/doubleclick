@@ -1,0 +1,85 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "parts": [
+            "host"
+          ]
+        },
+        {
+          "parts": [
+            "port"
+          ]
+        },
+        {
+          "parts": [
+            "index"
+          ]
+        },
+        {
+          "parts": [
+            "is_expired"
+          ]
+        },
+        {
+          "parts": [
+            "keeper_api_version"
+          ]
+        },
+        {
+          "expr": {
+            "parts": [
+              "connected_time"
+            ]
+          },
+          "low": {
+            "name": "yesterday"
+          },
+          "high": {
+            "left": {
+              "name": "now"
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 3
+              },
+              "unit": "SECONDS"
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "zookeeper_connection"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "name"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "String",
+          "value": "default"
+        }
+      }
+    }
+  ]
+}

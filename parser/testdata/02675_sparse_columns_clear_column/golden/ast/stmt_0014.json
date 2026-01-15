@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "groupArray",
+          "arguments": [
+            {
+              "parts": [
+                "message"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "text_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "logger_name"
+            ]
+          },
+          "pattern": {
+            "left": {
+              "left": {
+                "left": {
+                  "type": "String",
+                  "value": "%"
+                },
+                "op": "||",
+                "right": {
+                  "name": "currentDatabase"
+                }
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": ".t_sparse_columns_clear"
+              }
+            },
+            "op": "||",
+            "right": {
+              "type": "String",
+              "value": "%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "level"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "Error"
+          }
+        }
+      }
+    }
+  ]
+}

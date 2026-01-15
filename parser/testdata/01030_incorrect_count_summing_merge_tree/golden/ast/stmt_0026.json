@@ -1,0 +1,43 @@
+{
+  "table": "tst",
+  "columns": [
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Int8"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "timestamp"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "timestamp"
+        ]
+      }
+    ]
+  }
+}

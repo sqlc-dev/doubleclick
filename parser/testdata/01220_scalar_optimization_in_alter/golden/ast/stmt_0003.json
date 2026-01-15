@@ -1,0 +1,39 @@
+{
+  "table": "cdp_segments",
+  "columns": [
+    {
+      "name": "seg_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "mid_seqs",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "groupBitmap"
+            ]
+          },
+          {
+            "name": "UInt32"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplacingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "seg_id"
+      ]
+    }
+  ]
+}

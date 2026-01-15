@@ -1,0 +1,238 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "Depending views 2"
+          },
+          "alias": "stage"
+        },
+        {
+          "parts": [
+            "view_name"
+          ]
+        },
+        {
+          "parts": [
+            "view_type"
+          ]
+        },
+        {
+          "parts": [
+            "status"
+          ]
+        },
+        {
+          "parts": [
+            "view_target"
+          ]
+        },
+        {
+          "parts": [
+            "view_query"
+          ]
+        },
+        {
+          "parts": [
+            "read_rows"
+          ]
+        },
+        {
+          "parts": [
+            "written_rows"
+          ]
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "SleepFunctionCalls"
+            }
+          },
+          "alias": "sleep_calls"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "SleepFunctionMicroseconds"
+            }
+          },
+          "alias": "sleep_us"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "SelectedRows"
+            }
+          },
+          "alias": "profile_select_rows"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "SelectedBytes"
+            }
+          },
+          "alias": "profile_select_bytes"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "InsertedRows"
+            }
+          },
+          "alias": "profile_insert_rows"
+        },
+        {
+          "expr": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "InsertedBytes"
+            }
+          },
+          "alias": "profile_insert_bytes"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_views_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "initial_query_id"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "initial_query_id"
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "database": "system",
+                          "table": "query_log"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "left": {
+                    "left": {
+                      "expr": {
+                        "parts": [
+                          "query"
+                        ]
+                      },
+                      "pattern": {
+                        "type": "String",
+                        "value": "-- INSERT 2%INSERT INTO table_d%"
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "current_database"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "name": "currentDatabase"
+                      }
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "event_date"
+                      ]
+                    },
+                    "op": "\u003e=",
+                    "right": {
+                      "name": "yesterday"
+                    }
+                  }
+                },
+                "limit": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            ]
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "view_name"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

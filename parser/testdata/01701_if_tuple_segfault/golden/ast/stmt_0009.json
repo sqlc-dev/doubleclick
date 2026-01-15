@@ -1,0 +1,102 @@
+{
+  "table": "agg_table",
+  "commands": [
+    {
+      "type": "UPDATE",
+      "where": {
+        "expr": {
+          "parts": [
+            "time"
+          ]
+        },
+        "low": {
+          "name": "toDateTime",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "2020-08-01 00:00:00"
+            }
+          ]
+        },
+        "high": {
+          "name": "toDateTime",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "2020-12-01 00:00:00"
+            }
+          ]
+        }
+      },
+      "assignments": [
+        {
+          "column": "agg",
+          "value": {
+            "type": "Tuple",
+            "value": [
+              {
+                "tuple": {
+                  "parts": [
+                    "agg"
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              {
+                "name": "arrayMap",
+                "arguments": [
+                  {
+                    "parameters": [
+                      "x"
+                    ],
+                    "body": {
+                      "name": "toUInt64",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "x"
+                            ]
+                          },
+                          "op": "/",
+                          "right": {
+                            "type": "Integer",
+                            "value": 2
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "tuple": {
+                      "parts": [
+                        "agg"
+                      ]
+                    },
+                    "index": {
+                      "type": "Integer",
+                      "value": 2
+                    }
+                  }
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "mutations_sync",
+      "value": {
+        "type": "Integer",
+        "value": 2
+      }
+    }
+  ]
+}

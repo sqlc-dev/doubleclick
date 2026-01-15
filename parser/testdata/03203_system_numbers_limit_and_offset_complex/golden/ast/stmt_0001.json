@@ -1,0 +1,475 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "is_prime_slow",
+          "query": {
+            "left": {
+              "left": {
+                "parts": [
+                  "num"
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              },
+              "parenthesized": true
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "name": "arraySum",
+                "arguments": [
+                  {
+                    "name": "arrayMap",
+                    "arguments": [
+                      {
+                        "parameters": [
+                          "y"
+                        ],
+                        "body": {
+                          "left": {
+                            "left": {
+                              "left": {
+                                "parts": [
+                                  "y"
+                                ]
+                              },
+                              "op": "\u003e",
+                              "right": {
+                                "type": "Integer",
+                                "value": 1
+                              },
+                              "parenthesized": true
+                            },
+                            "op": "AND",
+                            "right": {
+                              "left": {
+                                "parts": [
+                                  "y"
+                                ]
+                              },
+                              "op": "\u003c",
+                              "right": {
+                                "parts": [
+                                  "num"
+                                ]
+                              },
+                              "parenthesized": true
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "left": {
+                                "parts": [
+                                  "num"
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "parts": [
+                                  "y"
+                                ]
+                              },
+                              "parenthesized": true
+                            },
+                            "op": "=",
+                            "right": {
+                              "type": "Integer",
+                              "value": 0
+                            },
+                            "parenthesized": true
+                          },
+                          "parenthesized": true
+                        }
+                      },
+                      {
+                        "name": "range",
+                        "arguments": [
+                          {
+                            "left": {
+                              "name": "toUInt64",
+                              "arguments": [
+                                {
+                                  "name": "sqrt",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "num"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            "op": "+",
+                            "right": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              },
+              "parenthesized": true
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "num"
+          ]
+        },
+        {
+          "parts": [
+            "ds"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "with": [
+                        {
+                          "name": "digits_sum",
+                          "query": {
+                            "name": "arraySum",
+                            "arguments": [
+                              {
+                                "name": "arrayMap",
+                                "arguments": [
+                                  {
+                                    "parameters": [
+                                      "y"
+                                    ],
+                                    "body": {
+                                      "name": "toUInt8",
+                                      "arguments": [
+                                        {
+                                          "parts": [
+                                            "y"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "name": "splitByString",
+                                    "arguments": [
+                                      {
+                                        "type": "String",
+                                        "value": ""
+                                      },
+                                      {
+                                        "name": "toString",
+                                        "arguments": [
+                                          {
+                                            "parts": [
+                                              "num"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          "scalar_with": true
+                        }
+                      ],
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "type": "Integer",
+                              "value": 1
+                            },
+                            "op": "+",
+                            "right": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "*",
+                              "right": {
+                                "type": "Integer",
+                                "value": 2
+                              },
+                              "parenthesized": true
+                            }
+                          },
+                          "alias": "num"
+                        },
+                        {
+                          "parts": [
+                            "digits_sum"
+                          ],
+                          "alias": "ds"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers_mt",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10000
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "expr": {
+                          "parts": [
+                            "ds"
+                          ]
+                        },
+                        "query": {
+                          "selects": [
+                            {
+                              "with": [
+                                {
+                                  "name": "is_prime_slow",
+                                  "query": {
+                                    "left": {
+                                      "left": {
+                                        "parts": [
+                                          "number"
+                                        ]
+                                      },
+                                      "op": "\u003e",
+                                      "right": {
+                                        "type": "Integer",
+                                        "value": 1
+                                      },
+                                      "parenthesized": true
+                                    },
+                                    "op": "AND",
+                                    "right": {
+                                      "left": {
+                                        "name": "arraySum",
+                                        "arguments": [
+                                          {
+                                            "name": "arrayMap",
+                                            "arguments": [
+                                              {
+                                                "parameters": [
+                                                  "y"
+                                                ],
+                                                "body": {
+                                                  "left": {
+                                                    "left": {
+                                                      "left": {
+                                                        "parts": [
+                                                          "y"
+                                                        ]
+                                                      },
+                                                      "op": "\u003e",
+                                                      "right": {
+                                                        "type": "Integer",
+                                                        "value": 1
+                                                      },
+                                                      "parenthesized": true
+                                                    },
+                                                    "op": "AND",
+                                                    "right": {
+                                                      "left": {
+                                                        "parts": [
+                                                          "y"
+                                                        ]
+                                                      },
+                                                      "op": "\u003c",
+                                                      "right": {
+                                                        "parts": [
+                                                          "number"
+                                                        ]
+                                                      },
+                                                      "parenthesized": true
+                                                    }
+                                                  },
+                                                  "op": "AND",
+                                                  "right": {
+                                                    "left": {
+                                                      "left": {
+                                                        "parts": [
+                                                          "number"
+                                                        ]
+                                                      },
+                                                      "op": "%",
+                                                      "right": {
+                                                        "parts": [
+                                                          "y"
+                                                        ]
+                                                      },
+                                                      "parenthesized": true
+                                                    },
+                                                    "op": "=",
+                                                    "right": {
+                                                      "type": "Integer",
+                                                      "value": 0
+                                                    },
+                                                    "parenthesized": true
+                                                  },
+                                                  "parenthesized": true
+                                                }
+                                              },
+                                              {
+                                                "name": "range",
+                                                "arguments": [
+                                                  {
+                                                    "left": {
+                                                      "name": "toUInt64",
+                                                      "arguments": [
+                                                        {
+                                                          "name": "sqrt",
+                                                          "arguments": [
+                                                            {
+                                                              "parts": [
+                                                                "number"
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    },
+                                                    "op": "+",
+                                                    "right": {
+                                                      "type": "Integer",
+                                                      "value": 1
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "op": "=",
+                                      "right": {
+                                        "type": "Integer",
+                                        "value": 0
+                                      },
+                                      "parenthesized": true
+                                    }
+                                  },
+                                  "scalar_with": true
+                                }
+                              ],
+                              "columns": [
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              ],
+                              "from": {
+                                "tables": [
+                                  {
+                                    "table": {
+                                      "table": {
+                                        "name": "numbers",
+                                        "arguments": [
+                                          {
+                                            "left": {
+                                              "type": "Integer",
+                                              "value": 180
+                                            },
+                                            "op": "+",
+                                            "right": {
+                                              "type": "Integer",
+                                              "value": 1
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              },
+                              "where": {
+                                "parts": [
+                                  "is_prime_slow"
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "parts": [
+          "is_prime_slow"
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "num"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      },
+      "offset": {
+        "type": "Integer",
+        "value": 998
+      },
+      "settings": [
+        {
+          "name": "max_block_size",
+          "value": {
+            "type": "Integer",
+            "value": 64
+          }
+        },
+        {
+          "name": "max_threads",
+          "value": {
+            "type": "Integer",
+            "value": 16
+          }
+        }
+      ]
+    }
+  ]
+}

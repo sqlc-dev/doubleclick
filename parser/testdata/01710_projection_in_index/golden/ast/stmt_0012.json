@@ -1,0 +1,72 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "fromUnixTimestamp64Milli",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "time"
+                              ]
+                            },
+                            {
+                              "type": "String",
+                              "value": "UTC"
+                            }
+                          ],
+                          "alias": "time_fmt"
+                        },
+                        {
+                          "parts": [
+                            "name"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "time_fmt"
+                          ]
+                        },
+                        "op": "\u003e",
+                        "right": {
+                          "type": "String",
+                          "value": "2022-09-05 00:00:00"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

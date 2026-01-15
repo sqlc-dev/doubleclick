@@ -1,0 +1,44 @@
+{
+  "table": "trunc",
+  "columns": [
+    {
+      "name": "n",
+      "type": {
+        "name": "int"
+      }
+    }
+  ],
+  "columns_primary_key": [
+    {
+      "parts": [
+        "n"
+      ]
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/test/1166/{database}"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "partition_by": {
+    "left": {
+      "parts": [
+        "n"
+      ]
+    },
+    "op": "%",
+    "right": {
+      "type": "Integer",
+      "value": 10
+    }
+  }
+}

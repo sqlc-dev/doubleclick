@@ -1,0 +1,98 @@
+{
+  "view": "03215_test_v",
+  "as_select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "test_table",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "expr": {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        "alias": "number"
+                      }
+                    ]
+                  },
+                  {
+                    "columns": [
+                      {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "+",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "test_table"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "where": {
+                      "left": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "op": "\u003c",
+                      "right": {
+                        "type": "Integer",
+                        "value": 100
+                      }
+                    }
+                  }
+                ],
+                "union_all": true,
+                "union_modes": [
+                  "UNION ALL"
+                ]
+              }
+            },
+            "scalar_with": false
+          }
+        ],
+        "columns": [
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "test_table"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

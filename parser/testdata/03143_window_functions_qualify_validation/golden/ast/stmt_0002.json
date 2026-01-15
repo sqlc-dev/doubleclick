@@ -1,0 +1,255 @@
+{
+  "table": "uk_price_paid",
+  "columns": [
+    {
+      "name": "price",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "postcode1",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "postcode2",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "type",
+      "type": {
+        "name": "Enum8",
+        "parameters": [
+          {
+            "left": {
+              "type": "String",
+              "value": "terraced"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "semi-detached"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "detached"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "flat"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 4
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "other"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "is_new",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "duration",
+      "type": {
+        "name": "Enum8",
+        "parameters": [
+          {
+            "left": {
+              "type": "String",
+              "value": "freehold"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "leasehold"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "unknown"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "addr1",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "addr2",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "street",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "locality",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "town",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "district",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "county",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "postcode1"
+          ]
+        },
+        {
+          "parts": [
+            "postcode2"
+          ]
+        },
+        {
+          "parts": [
+            "addr1"
+          ]
+        },
+        {
+          "parts": [
+            "addr2"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "f",
+            "id1"
+          ],
+          "alias": "ID"
+        },
+        {
+          "parts": [
+            "d",
+            "name"
+          ],
+          "alias": "Name"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "f",
+                "value"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2,3}"
+                  },
+                  {
+                    "parts": [
+                      "test_01383",
+                      "fact"
+                    ]
+                  }
+                ]
+              },
+              "alias": "f"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "database": "test_01383",
+                "table": "dimension"
+              },
+              "alias": "d"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "f",
+                    "id1"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "d",
+                    "id1"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "f",
+            "id1"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "parts": [
+            "f",
+            "id2"
+          ]
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "ID"
+          ]
+        },
+        {
+          "parts": [
+            "Name"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ID"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "table": "t",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 6
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "b"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toStartOfDay",
+    "arguments": [
+      {
+        "parts": [
+          "a"
+        ]
+      }
+    ]
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "values",
+                  "arguments": [
+                    {
+                      "type": "Tuple",
+                      "value": [
+                        {
+                          "type": "String",
+                          "value": "2023-01-01 00:00:00"
+                        },
+                        {
+                          "type": "String",
+                          "value": "fd4c03"
+                        }
+                      ],
+                      "spaced_commas": true
+                    },
+                    {
+                      "type": "Tuple",
+                      "value": [
+                        {
+                          "type": "String",
+                          "value": "2023-01-01 00:00:00"
+                        },
+                        {
+                          "type": "String",
+                          "value": "123456"
+                        }
+                      ],
+                      "spaced_commas": true
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 2
+        },
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "parts": [
+            "creation_csn"
+          ]
+        },
+        {
+          "parts": [
+            "removal_tid"
+          ]
+        },
+        {
+          "parts": [
+            "removal_csn"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "table"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "txn_counters"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "system",
+              "parts",
+              "name"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

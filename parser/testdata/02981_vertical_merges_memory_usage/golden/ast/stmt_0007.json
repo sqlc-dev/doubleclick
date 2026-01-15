@@ -1,0 +1,137 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "merge_algorithm"
+          ]
+        },
+        {
+          "condition": {
+            "left": {
+              "parts": [
+                "peak_memory_usage"
+              ]
+            },
+            "op": "\u003c",
+            "right": {
+              "left": {
+                "left": {
+                  "type": "Integer",
+                  "value": 500
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 1024
+                }
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 1024
+              }
+            }
+          },
+          "then": {
+            "type": "String",
+            "value": "OK"
+          },
+          "else": {
+            "name": "format",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "FAIL: memory usage: {}"
+              },
+              {
+                "name": "formatReadableSize",
+                "arguments": [
+                  {
+                    "parts": [
+                      "peak_memory_usage"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "table"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "t_vertical_merge_memory"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "event_type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "MergeParts"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "name": "length",
+            "arguments": [
+              {
+                "parts": [
+                  "merged_from"
+                ]
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "table": "table_for_alter",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "Int8"
+      }
+    },
+    {
+      "name": "version",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "sign",
+      "type": {
+        "name": "Int8"
+      },
+      "default": {
+        "type": "Integer",
+        "value": 1
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedVersionedCollapsingMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/01526_alter_add/t1"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      },
+      {
+        "parts": [
+          "sign"
+        ]
+      },
+      {
+        "parts": [
+          "version"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "d"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "y"
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

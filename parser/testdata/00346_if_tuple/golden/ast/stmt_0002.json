@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "condition": {
+            "type": "Integer",
+            "value": 0
+          },
+          "then": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "number"
+                ]
+              },
+              {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "spaced_commas": true
+          },
+          "else": {
+            "type": "Tuple",
+            "value": [
+              {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 10
+                }
+              },
+              {
+                "name": "concat",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "! "
+                  },
+                  {
+                    "name": "toString",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "number"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

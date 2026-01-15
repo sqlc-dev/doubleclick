@@ -1,0 +1,73 @@
+{
+  "view": "test_mv_b",
+  "materialized": true,
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_02124/{table}"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "A"
+    ]
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "test"
+            ]
+          },
+          {
+            "parts": [
+              "A"
+            ]
+          },
+          {
+            "name": "count",
+            "alias": "c"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "test"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "test"
+            ]
+          },
+          {
+            "parts": [
+              "A"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

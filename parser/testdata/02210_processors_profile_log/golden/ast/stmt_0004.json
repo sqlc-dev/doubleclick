@@ -1,0 +1,234 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "query_id_",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "query_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "current_database"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "name": "currentDatabase"
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "array": {
+                          "parts": [
+                            "Settings"
+                          ]
+                        },
+                        "index": {
+                          "type": "String",
+                          "value": "log_processors_profiles"
+                        }
+                      },
+                      "op": "=",
+                      "right": {
+                        "type": "String",
+                        "value": "1"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "name": "multiIf",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "name"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "ExpressionTransform"
+              }
+            },
+            {
+              "condition": {
+                "left": {
+                  "parts": [
+                    "elapsed_us"
+                  ]
+                },
+                "op": "\u003e=",
+                "right": {
+                  "type": "Float",
+                  "value": 900000,
+                  "source": "0.9e6"
+                }
+              },
+              "then": {
+                "type": "Integer",
+                "value": 1
+              },
+              "else": {
+                "parts": [
+                  "elapsed_us"
+                ]
+              }
+            },
+            {
+              "left": {
+                "parts": [
+                  "name"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "SourceFromSingleChunk"
+              }
+            },
+            {
+              "condition": {
+                "left": {
+                  "parts": [
+                    "output_wait_elapsed_us"
+                  ]
+                },
+                "op": "\u003e=",
+                "right": {
+                  "type": "Float",
+                  "value": 900000,
+                  "source": "0.9e6"
+                }
+              },
+              "then": {
+                "type": "Integer",
+                "value": 1
+              },
+              "else": {
+                "parts": [
+                  "output_wait_elapsed_us"
+                ]
+              }
+            },
+            {
+              "condition": {
+                "left": {
+                  "parts": [
+                    "input_wait_elapsed_us"
+                  ]
+                },
+                "op": "\u003e=",
+                "right": {
+                  "type": "Float",
+                  "value": 1000000,
+                  "source": "1e6"
+                }
+              },
+              "then": {
+                "type": "Integer",
+                "value": 1
+              },
+              "else": {
+                "parts": [
+                  "input_wait_elapsed_us"
+                ]
+              }
+            }
+          ],
+          "alias": "elapsed"
+        },
+        {
+          "parts": [
+            "input_rows"
+          ]
+        },
+        {
+          "parts": [
+            "input_bytes"
+          ]
+        },
+        {
+          "parts": [
+            "output_rows"
+          ]
+        },
+        {
+          "parts": [
+            "output_bytes"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "processors_profile_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "query_id"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "parts": [
+            "query_id_"
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "name"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

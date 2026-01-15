@@ -1,0 +1,61 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "name": "cume_dist",
+          "over": {
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "PRECEDING",
+                "offset": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              "end": {
+                "type": "FOLLOWING",
+                "offset": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 5
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,233 @@
+{
+  "view": "mv_checkouts2target",
+  "materialized": true,
+  "to": "target_table",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "name": "maxState",
+            "arguments": [
+              {
+                "name": "toDateTime",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  },
+                  {
+                    "type": "String",
+                    "value": "UTC"
+                  }
+                ]
+              }
+            ],
+            "alias": "latest_login_time"
+          },
+          {
+            "name": "maxState",
+            "arguments": [
+              {
+                "parts": [
+                  "ts"
+                ]
+              }
+            ],
+            "alias": "latest_checkout_time"
+          },
+          {
+            "name": "if",
+            "arguments": [
+              {
+                "left": {
+                  "name": "max",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "current_latest_login_time"
+                      ]
+                    }
+                  ]
+                },
+                "op": "\u003e",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              {
+                "name": "minState",
+                "arguments": [
+                  {
+                    "name": "toUInt64",
+                    "arguments": [
+                      {
+                        "left": {
+                          "parts": [
+                            "ts"
+                          ]
+                        },
+                        "op": "-",
+                        "right": {
+                          "parts": [
+                            "current_latest_login_time"
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "minState",
+                "arguments": [
+                  {
+                    "name": "toUInt64",
+                    "arguments": [
+                      {
+                        "op": "-",
+                        "operand": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "fastest_session"
+          },
+          {
+            "name": "maxState",
+            "arguments": [
+              {
+                "name": "toUInt64",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                ]
+              }
+            ],
+            "alias": "biggest_inactivity_period"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "checkouts"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "id"
+                            ]
+                          },
+                          {
+                            "name": "maxMerge",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "latest_login_time"
+                                ]
+                              }
+                            ],
+                            "alias": "current_latest_login_time"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "target_table"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "expr": {
+                            "parts": [
+                              "id"
+                            ]
+                          },
+                          "query": {
+                            "selects": [
+                              {
+                                "columns": [
+                                  {
+                                    "parts": [
+                                      "id"
+                                    ]
+                                  }
+                                ],
+                                "from": {
+                                  "tables": [
+                                    {
+                                      "table": {
+                                        "table": {
+                                          "table": "checkouts"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        "group_by": [
+                          {
+                            "parts": [
+                              "id"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              "join": {
+                "type": "LEFT",
+                "using": [
+                  {
+                    "parts": [
+                      "id"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

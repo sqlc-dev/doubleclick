@@ -1,0 +1,73 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "file",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "02841.parquet"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "name": "indexHint",
+        "arguments": [
+          {
+            "left": {
+              "expr": {
+                "parts": [
+                  "u16"
+                ]
+              },
+              "low": {
+                "type": "Integer",
+                "value": 4000
+              },
+              "high": {
+                "type": "Integer",
+                "value": 61000
+              }
+            },
+            "op": "OR",
+            "right": {
+              "left": {
+                "parts": [
+                  "u16"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "type": "Integer",
+                "value": 42
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

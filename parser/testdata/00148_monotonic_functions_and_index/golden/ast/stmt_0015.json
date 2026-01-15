@@ -1,0 +1,71 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "uniq",
+          "arguments": [
+            {
+              "parts": [
+                "CounterID"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "uniqUpTo",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 5
+            }
+          ],
+          "arguments": [
+            {
+              "name": "toInt16",
+              "arguments": [
+                {
+                  "parts": [
+                    "CounterID"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "toInt16",
+          "arguments": [
+            {
+              "parts": [
+                "CounterID"
+              ]
+            }
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 1731
+        }
+      }
+    }
+  ]
+}

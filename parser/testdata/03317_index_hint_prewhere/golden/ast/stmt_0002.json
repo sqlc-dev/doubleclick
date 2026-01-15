@@ -1,0 +1,85 @@
+{
+  "table": "test_indexHint_prewhere",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "colA",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "colB",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "colA_tokens_idx",
+      "expression": {
+        "name": "tokens",
+        "arguments": [
+          {
+            "parts": [
+              "colA"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "bloom_filter"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "colB_tokens_idx",
+      "expression": {
+        "name": "tokens",
+        "arguments": [
+          {
+            "parts": [
+              "colB"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "bloom_filter"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

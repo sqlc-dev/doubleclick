@@ -1,0 +1,88 @@
+{
+  "table_expr": {
+    "table": {
+      "query": {
+        "selects": [
+          {
+            "columns": [
+              {
+                "expr": {
+                  "expr": {
+                    "name": "tuple",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  "type": {
+                    "name": "Tuple (id UInt64)"
+                  }
+                },
+                "alias": "a"
+              },
+              {
+                "name": "untuple",
+                "arguments": [
+                  {
+                    "parts": [
+                      "a"
+                    ]
+                  }
+                ],
+                "alias": "untupled_value"
+              },
+              {
+                "name": "arrayMap",
+                "arguments": [
+                  {
+                    "expr": {
+                      "parameters": [
+                        "x"
+                      ],
+                      "body": {
+                        "parts": [
+                          "untupled_value"
+                        ]
+                      }
+                    },
+                    "alias": "untupled_value_in_lambda"
+                  },
+                  {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 3
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "from": {
+              "tables": [
+                {
+                  "table": {
+                    "table": {
+                      "table": "test_table"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

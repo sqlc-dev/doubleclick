@@ -1,0 +1,71 @@
+{
+  "table": "02680_datetime64_monotonic_check",
+  "columns": [
+    {
+      "name": "t",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 3
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Decimal",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 18
+              },
+              {
+                "type": "Integer",
+                "value": 14
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "x"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMMDD",
+    "arguments": [
+      {
+        "parts": [
+          "t"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "allow_nullable_key",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

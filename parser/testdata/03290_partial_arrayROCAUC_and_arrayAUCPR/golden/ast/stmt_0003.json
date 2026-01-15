@@ -1,0 +1,309 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "partial_aucs",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "arrayAUCPR",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "scores"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "labels"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "pr_offsets"
+                          ]
+                        }
+                      ],
+                      "alias": "partial_pr_auc"
+                    },
+                    {
+                      "name": "arrayROCAUC",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "scores"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "labels"
+                          ]
+                        },
+                        {
+                          "type": "Boolean",
+                          "value": true
+                        },
+                        {
+                          "parts": [
+                            "roc_offsets"
+                          ]
+                        }
+                      ],
+                      "alias": "partial_roc_auc"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "expr": {
+                                        "type": "Array",
+                                        "value": [
+                                          {
+                                            "type": "Float",
+                                            "value": 0.8,
+                                            "source": "0.8"
+                                          },
+                                          {
+                                            "type": "Float",
+                                            "value": 0.4,
+                                            "source": "0.4"
+                                          }
+                                        ],
+                                        "spaced_commas": true
+                                      },
+                                      "alias": "scores"
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "Array",
+                                        "value": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          }
+                                        ],
+                                        "spaced_commas": true
+                                      },
+                                      "alias": "labels"
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "Array",
+                                        "value": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 2
+                                          }
+                                        ],
+                                        "spaced_commas": true
+                                      },
+                                      "alias": "pr_offsets"
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "Array",
+                                        "value": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 2
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 2
+                                          }
+                                        ],
+                                        "spaced_commas": true
+                                      },
+                                      "alias": "roc_offsets"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "columns": [
+                                    {
+                                      "expr": {
+                                        "type": "Array",
+                                        "value": [
+                                          {
+                                            "type": "Float",
+                                            "value": 0.35,
+                                            "source": "0.35"
+                                          },
+                                          {
+                                            "type": "Float",
+                                            "value": 0.1,
+                                            "source": "0.1"
+                                          }
+                                        ],
+                                        "spaced_commas": true
+                                      },
+                                      "alias": "scores"
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "Array",
+                                        "value": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 0
+                                          }
+                                        ],
+                                        "spaced_commas": true
+                                      },
+                                      "alias": "labels"
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "Array",
+                                        "value": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 2
+                                          }
+                                        ],
+                                        "spaced_commas": true
+                                      },
+                                      "alias": "pr_offsets"
+                                    },
+                                    {
+                                      "expr": {
+                                        "type": "Array",
+                                        "value": [
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 2
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 2
+                                          }
+                                        ],
+                                        "spaced_commas": true
+                                      },
+                                      "alias": "roc_offsets"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "union_all": true,
+                              "union_modes": [
+                                "UNION ALL"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "floor",
+          "arguments": [
+            {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "partial_pr_auc"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "name": "floor",
+          "arguments": [
+            {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "partial_roc_auc"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "partial_aucs"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

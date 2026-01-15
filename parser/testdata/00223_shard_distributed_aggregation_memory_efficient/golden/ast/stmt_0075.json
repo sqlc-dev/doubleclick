@@ -1,0 +1,201 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "c"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            ]
+          },
+          "list": [
+            {
+              "type": "Integer",
+              "value": 0
+            },
+            {
+              "type": "Integer",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "expr": {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "c"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              }
+            ]
+          },
+          "list": [
+            {
+              "type": "Integer",
+              "value": 0
+            },
+            {
+              "type": "Integer",
+              "value": 5
+            }
+          ]
+        },
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "c"
+                ]
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 10
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        {
+                          "name": "count",
+                          "alias": "c"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.0.0.{2,3}"
+                                  },
+                                  {
+                                    "name": "currentDatabase"
+                                  },
+                                  {
+                                    "parts": [
+                                      "numbers_10_00223"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          "op": "\u003c",
+                          "right": {
+                            "condition": {
+                              "left": {
+                                "name": "randConstant"
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            },
+                            "then": {
+                              "type": "Integer",
+                              "value": 5
+                            },
+                            "else": {
+                              "type": "Integer",
+                              "value": 10
+                            }
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          "op": "\u003e=",
+                          "right": {
+                            "condition": {
+                              "left": {
+                                "name": "randConstant"
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            },
+                            "then": {
+                              "type": "Integer",
+                              "value": 0
+                            },
+                            "else": {
+                              "type": "Integer",
+                              "value": 5
+                            }
+                          }
+                        }
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

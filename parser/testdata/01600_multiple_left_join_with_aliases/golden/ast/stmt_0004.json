@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "base",
+            "id"
+          ],
+          "alias": "base.id"
+        },
+        {
+          "parts": [
+            "derived2",
+            "value2"
+          ],
+          "alias": "derived2.value2"
+        },
+        {
+          "parts": [
+            "derived1",
+            "value1"
+          ],
+          "alias": "derived1.value1"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "base"
+              },
+              "alias": "base"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "derived2"
+              },
+              "alias": "derived2"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "base",
+                    "id2"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "derived2",
+                    "id2"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "derived1"
+              },
+              "alias": "derived1"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "base",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "derived1",
+                    "id1"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

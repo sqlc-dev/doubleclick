@@ -1,0 +1,65 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "parts": [
+              "value"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "histogram_metrics"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "keeper_client_queue_duration_milliseconds"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "array": {
+              "parts": [
+                "labels"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "le"
+            }
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "+Inf"
+          }
+        }
+      }
+    }
+  ]
+}

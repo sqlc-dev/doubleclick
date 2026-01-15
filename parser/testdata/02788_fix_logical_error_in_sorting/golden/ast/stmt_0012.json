@@ -1,0 +1,246 @@
+{
+  "explain_type": "PIPELINE",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "pageId"
+            ]
+          },
+          {
+            "expr": {
+              "type": "Array",
+              "value": [
+                {
+                  "parts": [
+                    "prev_active_ts"
+                  ]
+                },
+                {
+                  "parts": [
+                    "timestamp"
+                  ]
+                }
+              ],
+              "spaced_commas": true
+            },
+            "alias": "inactivity_timestamps"
+          },
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "timestamp"
+                ]
+              },
+              "op": "-",
+              "right": {
+                "parts": [
+                  "prev_active_ts"
+                ]
+              }
+            },
+            "alias": "inactive_duration"
+          },
+          {
+            "parts": [
+              "timestamp"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "pageId"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "timestamp"
+                            ]
+                          },
+                          {
+                            "name": "neighbor",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "timestamp"
+                                ]
+                              },
+                              {
+                                "op": "-",
+                                "operand": {
+                                  "type": "Integer",
+                                  "value": 1
+                                }
+                              }
+                            ],
+                            "alias": "prev_active_ts"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "session_events"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "left": {
+                              "left": {
+                                "expr": {
+                                  "parts": [
+                                    "type"
+                                  ]
+                                },
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "type"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "event_types"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "where": {
+                                        "left": {
+                                          "parts": [
+                                            "active"
+                                          ]
+                                        },
+                                        "op": "=",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 1
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "op": "AND",
+                              "right": {
+                                "left": {
+                                  "parts": [
+                                    "sessionId"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "type": "String",
+                                  "value": "693de636-6d9b-47b7-b52a-33bd303b6255"
+                                },
+                                "parenthesized": true
+                              }
+                            },
+                            "op": "AND",
+                            "right": {
+                              "left": {
+                                "parts": [
+                                  "session_events",
+                                  "clientId"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "Integer",
+                                "value": 141
+                              },
+                              "parenthesized": true
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "pageId"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "type": "Integer",
+                              "value": 1686053240314
+                            },
+                            "parenthesized": true
+                          }
+                        },
+                        "order_by": [
+                          {
+                            "expression": {
+                              "parts": [
+                                "timestamp"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "name": "runningDifference",
+            "arguments": [
+              {
+                "parts": [
+                  "timestamp"
+                ]
+              }
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "Integer",
+            "value": 500
+          }
+        },
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "timestamp"
+              ]
+            }
+          }
+        ],
+        "format": {
+          "parts": [
+            "Null"
+          ]
+        }
+      }
+    ]
+  },
+  "explicit_type": true
+}

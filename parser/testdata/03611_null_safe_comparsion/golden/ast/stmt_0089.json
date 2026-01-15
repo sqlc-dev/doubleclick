@@ -1,0 +1,129 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "op": "NOT",
+            "operand": {
+              "left": {
+                "parts": [
+                  "a"
+                ]
+              },
+              "op": "\u003c=\u003e",
+              "right": {
+                "parts": [
+                  "b"
+                ]
+              }
+            }
+          },
+          "alias": "distinct_flag"
+        },
+        {
+          "name": "count",
+          "over": {
+            "partition_by": [
+              {
+                "left": {
+                  "parts": [
+                    "a"
+                  ]
+                },
+                "op": "\u003c=\u003e",
+                "right": {
+                  "parts": [
+                    "b"
+                  ]
+                }
+              }
+            ]
+          },
+          "alias": "partition_by_eq"
+        },
+        {
+          "name": "count",
+          "over": {
+            "partition_by": [
+              {
+                "op": "NOT",
+                "operand": {
+                  "left": {
+                    "parts": [
+                      "a"
+                    ]
+                  },
+                  "op": "\u003c=\u003e",
+                  "right": {
+                    "parts": [
+                      "b"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "alias": "partition_by_distinct"
+        },
+        {
+          "name": "count",
+          "over": {
+            "partition_by": [
+              {
+                "left": {
+                  "parts": [
+                    "a"
+                  ]
+                },
+                "op": "\u003c=\u003e",
+                "right": {
+                  "parts": [
+                    "b"
+                  ]
+                }
+              },
+              {
+                "op": "NOT",
+                "operand": {
+                  "left": {
+                    "parts": [
+                      "a"
+                    ]
+                  },
+                  "op": "\u003c=\u003e",
+                  "right": {
+                    "parts": [
+                      "b"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "alias": "partition_by_both"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "03611_t_nullsafe"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "distinct_flag"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

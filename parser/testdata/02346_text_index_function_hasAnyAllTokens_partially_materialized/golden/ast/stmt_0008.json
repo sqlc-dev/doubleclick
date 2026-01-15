@@ -1,0 +1,179 @@
+{
+  "view": "explain_indexes",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "trimLeft",
+            "arguments": [
+              {
+                "parts": [
+                  "explain"
+                ]
+              }
+            ],
+            "alias": "explain"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "viewExplain",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "EXPLAIN"
+                                    },
+                                    {
+                                      "type": "String",
+                                      "value": "indexes = 1"
+                                    },
+                                    {
+                                      "query": {
+                                        "selects": [
+                                          {
+                                            "columns": [
+                                              {
+                                                "name": "groupArray",
+                                                "arguments": [
+                                                  {
+                                                    "parts": [
+                                                      "id"
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ],
+                                            "from": {
+                                              "tables": [
+                                                {
+                                                  "table": {
+                                                    "table": {
+                                                      "table": "tab"
+                                                    }
+                                                  }
+                                                }
+                                              ]
+                                            },
+                                            "where": {
+                                              "name": "hasAnyTokens",
+                                              "arguments": [
+                                                {
+                                                  "parts": [
+                                                    "message"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "Array",
+                                                  "value": [
+                                                    {
+                                                      "type": "String",
+                                                      "value": "def"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "expr": {
+                    "parts": [
+                      "explain"
+                    ]
+                  },
+                  "pattern": {
+                    "type": "String",
+                    "value": "%Name%"
+                  }
+                },
+                "op": "OR",
+                "right": {
+                  "expr": {
+                    "parts": [
+                      "explain"
+                    ]
+                  },
+                  "pattern": {
+                    "type": "String",
+                    "value": "%Description%"
+                  }
+                }
+              },
+              "op": "OR",
+              "right": {
+                "expr": {
+                  "parts": [
+                    "explain"
+                  ]
+                },
+                "pattern": {
+                  "type": "String",
+                  "value": "%Parts%"
+                }
+              }
+            },
+            "op": "OR",
+            "right": {
+              "expr": {
+                "parts": [
+                  "explain"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "%Granules%"
+              }
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%Range%"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

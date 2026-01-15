@@ -1,0 +1,192 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "REGEXP_REPLACE",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "_runtime_filter_\\d+"
+            },
+            {
+              "type": "String",
+              "value": "_runtime_filter_UNIQ_ID"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "query": {
+                                    "selects": [
+                                      {
+                                        "columns": [
+                                          {
+                                            "parts": [
+                                              "a",
+                                              "number"
+                                            ],
+                                            "alias": "a_number"
+                                          },
+                                          {
+                                            "parts": [
+                                              "b",
+                                              "number"
+                                            ],
+                                            "alias": "b_number"
+                                          }
+                                        ],
+                                        "from": {
+                                          "tables": [
+                                            {
+                                              "table": {
+                                                "table": {
+                                                  "name": "numbers",
+                                                  "arguments": [
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 10
+                                                    }
+                                                  ]
+                                                },
+                                                "alias": "a"
+                                              }
+                                            },
+                                            {
+                                              "table": {
+                                                "table": {
+                                                  "name": "numbers",
+                                                  "arguments": [
+                                                    {
+                                                      "type": "Integer",
+                                                      "value": 10
+                                                    }
+                                                  ]
+                                                },
+                                                "alias": "b"
+                                              },
+                                              "join": {
+                                                "type": "INNER",
+                                                "on": {
+                                                  "left": {
+                                                    "left": {
+                                                      "parts": [
+                                                        "a",
+                                                        "number"
+                                                      ]
+                                                    },
+                                                    "op": "%",
+                                                    "right": {
+                                                      "type": "Integer",
+                                                      "value": 2
+                                                    }
+                                                  },
+                                                  "op": "=",
+                                                  "right": {
+                                                    "left": {
+                                                      "parts": [
+                                                        "b",
+                                                        "number"
+                                                      ]
+                                                    },
+                                                    "op": "%",
+                                                    "right": {
+                                                      "type": "Integer",
+                                                      "value": 3
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                "alias": "ab"
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "numbers",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 10
+                                    }
+                                  ]
+                                },
+                                "alias": "c"
+                              },
+                              "join": {
+                                "type": "INNER",
+                                "on": {
+                                  "left": {
+                                    "parts": [
+                                      "b_number"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "left": {
+                                      "parts": [
+                                        "c",
+                                        "number"
+                                      ]
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                      "type": "Integer",
+                                      "value": 2
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "settings": [
+                          {
+                            "name": "enable_join_runtime_filters",
+                            "value": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

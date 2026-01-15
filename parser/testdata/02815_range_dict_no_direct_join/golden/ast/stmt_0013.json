@@ -1,0 +1,77 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "amount"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "ids"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "discounts_dict"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "advertiser_id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "amount"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "join_algorithm",
+          "value": {
+            "type": "String",
+            "value": "direct"
+          }
+        }
+      ]
+    }
+  ]
+}

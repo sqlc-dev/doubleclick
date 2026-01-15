@@ -1,0 +1,62 @@
+{
+  "view": "without_deduplication_mv",
+  "materialized": true,
+  "engine": {
+    "name": "ReplicatedAggregatingMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/test_00510/without_deduplication_mv"
+      },
+      {
+        "type": "String",
+        "value": "r1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "dummy"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "type": "Integer",
+              "value": 0
+            },
+            "alias": "dummy"
+          },
+          {
+            "name": "countState",
+            "arguments": [
+              {
+                "parts": [
+                  "x"
+                ]
+              }
+            ],
+            "alias": "cnt"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "without_deduplication"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

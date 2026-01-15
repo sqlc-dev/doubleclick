@@ -1,0 +1,69 @@
+{
+  "table": "tp",
+  "columns": [
+    {
+      "name": "d1",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "d2",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "eventcnt",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p",
+      "select": {
+        "columns": [
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "eventcnt"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "d1"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "d1"
+          ]
+        },
+        {
+          "parts": [
+            "d2"
+          ]
+        }
+      ]
+    }
+  ]
+}

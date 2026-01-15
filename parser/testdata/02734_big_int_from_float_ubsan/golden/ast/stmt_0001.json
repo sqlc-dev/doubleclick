@@ -1,0 +1,151 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "precision",
+          "query": {
+            "type": "Integer",
+            "value": 18
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "int",
+          "query": {
+            "name": "toUInt256",
+            "arguments": [
+              {
+                "op": "-",
+                "operand": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "converted",
+          "query": {
+            "name": "toUInt256",
+            "arguments": [
+              {
+                "name": "toFloat64",
+                "arguments": [
+                  {
+                    "parts": [
+                      "int"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "int_str",
+          "query": {
+            "name": "toString",
+            "arguments": [
+              {
+                "parts": [
+                  "int"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "converted_str",
+          "query": {
+            "name": "toString",
+            "arguments": [
+              {
+                "parts": [
+                  "converted"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "length",
+              "arguments": [
+                {
+                  "parts": [
+                    "int_str"
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "length",
+              "arguments": [
+                {
+                  "parts": [
+                    "converted_str"
+                  ]
+                }
+              ]
+            }
+          },
+          "alias": "have_same_length"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "substring",
+              "arguments": [
+                {
+                  "parts": [
+                    "int_str"
+                  ]
+                },
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "parts": [
+                    "precision"
+                  ]
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "substring",
+              "arguments": [
+                {
+                  "parts": [
+                    "converted_str"
+                  ]
+                },
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "parts": [
+                    "precision"
+                  ]
+                }
+              ]
+            }
+          },
+          "alias": "have_same_prefix"
+        }
+      ]
+    }
+  ]
+}

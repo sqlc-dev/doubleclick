@@ -1,0 +1,97 @@
+{
+  "table": "t_resampled_timeseries",
+  "columns": [
+    {
+      "name": "step",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "metric_id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "grid_timestamp",
+      "type": {
+        "name": "DateTime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "DoubleDelta"
+          },
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    },
+    {
+      "name": "samples",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "timeSeriesLastTwoSamples"
+            ]
+          },
+          {
+            "name": "DateTime64",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 3
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ],
+            "has_parentheses": true
+          },
+          {
+            "name": "Float64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "step"
+          ]
+        },
+        {
+          "parts": [
+            "metric_id"
+          ]
+        },
+        {
+          "parts": [
+            "grid_timestamp"
+          ]
+        }
+      ]
+    }
+  ]
+}

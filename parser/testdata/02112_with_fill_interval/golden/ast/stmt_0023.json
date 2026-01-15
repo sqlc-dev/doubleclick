@@ -1,0 +1,75 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toStartOfMonth",
+          "arguments": [
+            {
+              "parts": [
+                "d32"
+              ]
+            }
+          ],
+          "alias": "d32"
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "with_fill_date"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "d32"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "d32"
+            ]
+          },
+          "with_fill": true,
+          "fill_from": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2020-01-01"
+              }
+            ]
+          },
+          "fill_to": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2021-01-01"
+              }
+            ]
+          },
+          "fill_step": {
+            "value": {
+              "type": "Integer",
+              "value": 3
+            },
+            "unit": "MONTH"
+          }
+        }
+      ]
+    }
+  ]
+}

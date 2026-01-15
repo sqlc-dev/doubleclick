@@ -1,0 +1,89 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "max",
+            "arguments": [
+              {
+                "name": "cityHash64",
+                "arguments": [
+                  {}
+                ]
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "quantile",
+                          "parameters": [
+                            {
+                              "type": "Float",
+                              "value": 0.1,
+                              "source": "0.1"
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "parts": [
+                                "d"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "quantile",
+                          "parameters": [
+                            {
+                              "type": "Float",
+                              "value": 0.5,
+                              "source": "0.5"
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "parts": [
+                                "d"
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "datetime"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

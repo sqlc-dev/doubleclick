@@ -1,0 +1,68 @@
+{
+  "table": "bftest",
+  "columns": [
+    {
+      "name": "k",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Int64"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "parts": [
+          "x"
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Int64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "ix1",
+      "expression": {
+        "parts": [
+          "x"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 3
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "k"
+      ]
+    }
+  ]
+}

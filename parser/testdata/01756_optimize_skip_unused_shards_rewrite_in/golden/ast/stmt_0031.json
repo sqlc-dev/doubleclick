@@ -1,0 +1,92 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "key_signed",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "currentDatabase"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {},
+        {
+          "name": "ignore",
+          "arguments": [
+            {
+              "parts": [
+                "key_signed"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "cluster",
+                "arguments": [
+                  {
+                    "parts": [
+                      "test_cluster_two_shards"
+                    ]
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "data_01756_signed"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "key"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "key"
+          ]
+        },
+        "list": [
+          {
+            "op": "-",
+            "operand": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          {
+            "op": "-",
+            "operand": {
+              "type": "Integer",
+              "value": 2
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

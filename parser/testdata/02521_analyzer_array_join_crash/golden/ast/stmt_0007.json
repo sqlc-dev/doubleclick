@@ -1,0 +1,78 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "value_element"
+          ]
+        },
+        {
+          "parts": [
+            "value"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_table"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "expr": {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 1048577
+                      }
+                    ]
+                  },
+                  "alias": "value_element"
+                }
+              ]
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "name": "arrayMap",
+                  "arguments": [
+                    {
+                      "parameters": [
+                        "x"
+                      ],
+                      "body": {
+                        "parts": [
+                          "value_element"
+                        ]
+                      }
+                    },
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "type": "String",
+                          "value": ""
+                        }
+                      ]
+                    }
+                  ],
+                  "alias": "value"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

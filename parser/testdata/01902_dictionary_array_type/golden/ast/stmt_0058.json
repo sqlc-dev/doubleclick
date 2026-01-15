@@ -1,0 +1,112 @@
+{
+  "table": "range_dictionary",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "start_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "end_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "array_value",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Int64"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "type": "Array",
+        "value": [
+          {
+            "type": "Integer",
+            "value": 1
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          },
+          {
+            "type": "Integer",
+            "value": 3
+          }
+        ]
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "key"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "HOST",
+          "value": {
+            "type": "String",
+            "value": "localhost"
+          }
+        },
+        {
+          "key": "PORT",
+          "value": {
+            "name": "tcpPort"
+          }
+        },
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "range_dictionary_array_source_table"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 1
+      },
+      "max": {
+        "type": "Integer",
+        "value": 1000
+      }
+    },
+    "layout": {
+      "type": "RANGE_HASHED"
+    },
+    "range": {
+      "min": {
+        "parts": [
+          "start_date"
+        ]
+      },
+      "max": {
+        "parts": [
+          "end_date"
+        ]
+      }
+    }
+  }
+}

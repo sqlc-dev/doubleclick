@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "parts": [
+            "zookeeper_name"
+          ]
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "replicas"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "database"
+                  ]
+                },
+                {
+                  "parts": [
+                    "table"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "database"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "name": "currentDatabase"
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "parts": [
+            "zookeeper_name"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "table"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "zookeeper_name"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "CSV"
+        ]
+      }
+    }
+  ]
+}

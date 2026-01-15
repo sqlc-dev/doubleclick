@@ -1,0 +1,120 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "parts": [
+            "row_number"
+          ]
+        },
+        {
+          "expr": {
+            "expr": {
+              "left": {
+                "parts": [
+                  "percent_rank"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 10000
+              }
+            },
+            "type": {
+              "name": "Int32"
+            }
+          },
+          "alias": "percent_rank"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        {
+                          "name": "row_number",
+                          "over": {},
+                          "alias": "row_number"
+                        },
+                        {
+                          "name": "percent_rank",
+                          "over": {
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              }
+                            ]
+                          },
+                          "alias": "percent_rank"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10000
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "number"
+                            ]
+                          }
+                        }
+                      ],
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "max_block_size",
+          "value": {
+            "type": "Integer",
+            "value": 100
+          }
+        }
+      ]
+    }
+  ]
+}

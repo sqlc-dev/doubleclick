@@ -1,0 +1,95 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "left": {
+              "type": "Integer",
+              "value": 70
+            },
+            "op": "=",
+            "right": {
+              "left": {
+                "left": {
+                  "type": "Integer",
+                  "value": 10
+                },
+                "op": "*",
+                "right": {
+                  "name": "sum",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "t1",
+                        "id"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "op": "+",
+              "right": {
+                "name": "sum",
+                "arguments": [
+                  {
+                    "parts": [
+                      "t2",
+                      "id"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "name": "count"
+            },
+            "op": "==",
+            "right": {
+              "type": "Integer",
+              "value": 4
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t1"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t2"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "name": "toNullable",
+                "arguments": [
+                  {
+                    "name": "toLowCardinality",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

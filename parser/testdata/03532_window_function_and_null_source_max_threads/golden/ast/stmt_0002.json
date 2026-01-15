@@ -1,0 +1,325 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trimLeft",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PIPELINE",
+                  "statement": {
+                    "selects": [
+                      {
+                        "with": [
+                          {
+                            "name": "nums",
+                            "query": {
+                              "query": {
+                                "selects": [
+                                  {
+                                    "columns": [
+                                      {
+                                        "parts": [
+                                          "n1",
+                                          "n"
+                                        ],
+                                        "alias": "a"
+                                      },
+                                      {
+                                        "parts": [
+                                          "n2",
+                                          "n"
+                                        ],
+                                        "alias": "b"
+                                      }
+                                    ],
+                                    "from": {
+                                      "tables": [
+                                        {
+                                          "table": {
+                                            "table": {
+                                              "table": "empty"
+                                            },
+                                            "alias": "n1"
+                                          }
+                                        },
+                                        {
+                                          "table": {
+                                            "table": {
+                                              "table": "empty"
+                                            },
+                                            "alias": "n2"
+                                          },
+                                          "join": {
+                                            "type": ""
+                                          }
+                                        }
+                                      ]
+                                    },
+                                    "where": {
+                                      "left": {
+                                        "left": {
+                                          "parts": [
+                                            "n1",
+                                            "n"
+                                          ]
+                                        },
+                                        "op": "%",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 7
+                                        },
+                                        "parenthesized": true
+                                      },
+                                      "op": "=",
+                                      "right": {
+                                        "left": {
+                                          "parts": [
+                                            "n2",
+                                            "n"
+                                          ]
+                                        },
+                                        "op": "%",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 5
+                                        },
+                                        "parenthesized": true
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "scalar_with": false
+                          },
+                          {
+                            "name": "window1",
+                            "query": {
+                              "query": {
+                                "selects": [
+                                  {
+                                    "columns": [
+                                      {
+                                        "parts": [
+                                          "a"
+                                        ]
+                                      },
+                                      {
+                                        "name": "lagInFrame",
+                                        "arguments": [
+                                          {
+                                            "parts": [
+                                              "a"
+                                            ]
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          {
+                                            "parts": [
+                                              "a"
+                                            ]
+                                          }
+                                        ],
+                                        "over": {
+                                          "partition_by": [
+                                            {
+                                              "parts": [
+                                                "a"
+                                              ]
+                                            }
+                                          ],
+                                          "order_by": [
+                                            {
+                                              "expression": {
+                                                "parts": [
+                                                  "a"
+                                                ]
+                                              }
+                                            }
+                                          ],
+                                          "frame": {
+                                            "type": "ROWS",
+                                            "start": {
+                                              "type": "UNBOUNDED_PRECEDING"
+                                            },
+                                            "end": {
+                                              "type": "CURRENT_ROW"
+                                            }
+                                          }
+                                        },
+                                        "alias": "lag"
+                                      }
+                                    ],
+                                    "from": {
+                                      "tables": [
+                                        {
+                                          "table": {
+                                            "table": {
+                                              "table": "nums"
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "scalar_with": false
+                          },
+                          {
+                            "name": "window2",
+                            "query": {
+                              "query": {
+                                "selects": [
+                                  {
+                                    "columns": [
+                                      {
+                                        "parts": [
+                                          "lag"
+                                        ]
+                                      },
+                                      {
+                                        "name": "leadInFrame",
+                                        "arguments": [
+                                          {
+                                            "parts": [
+                                              "lag"
+                                            ]
+                                          },
+                                          {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          {
+                                            "parts": [
+                                              "a"
+                                            ]
+                                          }
+                                        ],
+                                        "over": {
+                                          "partition_by": [
+                                            {
+                                              "parts": [
+                                                "a"
+                                              ]
+                                            }
+                                          ],
+                                          "order_by": [
+                                            {
+                                              "expression": {
+                                                "parts": [
+                                                  "a"
+                                                ]
+                                              }
+                                            }
+                                          ],
+                                          "frame": {
+                                            "type": "ROWS",
+                                            "start": {
+                                              "type": "UNBOUNDED_PRECEDING"
+                                            },
+                                            "end": {
+                                              "type": "CURRENT_ROW"
+                                            }
+                                          }
+                                        },
+                                        "alias": "lead"
+                                      }
+                                    ],
+                                    "from": {
+                                      "tables": [
+                                        {
+                                          "table": {
+                                            "table": {
+                                              "table": "window1"
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "scalar_with": false
+                          }
+                        ],
+                        "columns": [
+                          {
+                            "parts": [
+                              "lead"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "window2"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "settings": [
+                          {
+                            "name": "max_threads",
+                            "value": {
+                              "type": "Integer",
+                              "value": 20
+                            }
+                          },
+                          {
+                            "name": "enable_parallel_replicas",
+                            "value": {
+                              "type": "Integer",
+                              "value": 0
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "explicit_type": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "explain"
+          ]
+        },
+        "pattern": {
+          "type": "String",
+          "value": "%Resize%"
+        }
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 3
+      }
+    }
+  ]
+}

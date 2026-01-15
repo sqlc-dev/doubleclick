@@ -1,0 +1,173 @@
+{
+  "view": "mv_resampled_timeseries",
+  "materialized": true,
+  "to": "t_resampled_timeseries_15_sec",
+  "columns": [
+    {
+      "name": "metric_id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "grid_timestamp",
+      "type": {
+        "name": "DateTime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "DoubleDelta"
+          },
+          {
+            "name": "ZSTD"
+          }
+        ]
+      }
+    },
+    {
+      "name": "samples",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "timeSeriesLastTwoSamples"
+            ]
+          },
+          {
+            "name": "DateTime64",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 3
+              },
+              {
+                "type": "String",
+                "value": "UTC"
+              }
+            ],
+            "has_parentheses": true
+          },
+          {
+            "name": "Float64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "metric_id"
+            ]
+          },
+          {
+            "expr": {
+              "left": {
+                "name": "ceil",
+                "arguments": [
+                  {
+                    "left": {
+                      "name": "toUnixTimestamp",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "timestamp"
+                            ]
+                          },
+                          "op": "+",
+                          "right": {
+                            "value": {
+                              "type": "Integer",
+                              "value": 999
+                            },
+                            "unit": "MILLISECOND"
+                          }
+                        }
+                      ]
+                    },
+                    "op": "/",
+                    "right": {
+                      "type": "Integer",
+                      "value": 15
+                    }
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 15
+              }
+            },
+            "alias": "grid_timestamp"
+          },
+          {
+            "name": "initializeAggregation",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "timeSeriesLastTwoSamplesState"
+              },
+              {
+                "parts": [
+                  "timestamp"
+                ]
+              },
+              {
+                "parts": [
+                  "value"
+                ]
+              }
+            ],
+            "alias": "samples"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "t_raw_timeseries"
+                }
+              }
+            }
+          ]
+        },
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "metric_id"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "grid_timestamp"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

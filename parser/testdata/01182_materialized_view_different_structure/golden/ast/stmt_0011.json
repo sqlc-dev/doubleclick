@@ -1,0 +1,106 @@
+{
+  "view": "test_mv",
+  "materialized": true,
+  "to": "test_table",
+  "columns": [
+    {
+      "name": "number",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "Decimal",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 38
+          },
+          {
+            "type": "Integer",
+            "value": 6
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ],
+            "alias": "value"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {},
+                          {
+                            "name": "toDecimal64",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 6
+                              }
+                            ],
+                            "alias": "val"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "numbers"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "number"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

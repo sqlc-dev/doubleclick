@@ -1,0 +1,165 @@
+{
+  "table": "prd_bid_events_simple_no_partition",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "arrayElement",
+            "arguments": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "String",
+                    "value": "impression"
+                  },
+                  {
+                    "type": "String",
+                    "value": "start"
+                  },
+                  {
+                    "type": "String",
+                    "value": "firstQuartile"
+                  },
+                  {
+                    "type": "String",
+                    "value": "midpoint"
+                  },
+                  {
+                    "type": "String",
+                    "value": "thirdQuartile"
+                  },
+                  {
+                    "type": "String",
+                    "value": "complete"
+                  },
+                  {
+                    "type": "String",
+                    "value": "ad_request"
+                  },
+                  {
+                    "type": "String",
+                    "value": "random_value"
+                  }
+                ],
+                "spaced_commas": true,
+                "spaced_brackets": true
+              },
+              {
+                "left": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "op": "+",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 8
+                  },
+                  "parenthesized": true
+                }
+              }
+            ]
+          },
+          {
+            "name": "toDateTime64",
+            "arguments": [
+              {
+                "left": {
+                  "left": {
+                    "left": {
+                      "type": "String",
+                      "value": "2025-11-19 14:26:52"
+                    },
+                    "op": "-",
+                    "right": {
+                      "name": "toIntervalDay",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          "op": "%",
+                          "right": {
+                            "type": "Integer",
+                            "value": 30
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "op": "-",
+                  "right": {
+                    "name": "toIntervalSecond",
+                    "arguments": [
+                      {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "%",
+                        "right": {
+                          "type": "Integer",
+                          "value": 86400
+                        }
+                      }
+                    ]
+                  }
+                },
+                "op": "-",
+                "right": {
+                  "name": "toIntervalMillisecond",
+                  "arguments": [
+                    {
+                      "left": {
+                        "parts": [
+                          "number"
+                        ]
+                      },
+                      "op": "%",
+                      "right": {
+                        "type": "Integer",
+                        "value": 1000
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "Integer",
+                "value": 9
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 500000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "activity",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "groupUniqArrayState",
+                      "arguments": [
+                        {
+                          "name": "toDate",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "2025-01-01 01:00:00"
+                            }
+                          ]
+                        }
+                      ],
+                      "alias": "dates_seen"
+                    },
+                    {
+                      "name": "toDateTime",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "2025-01-01 01:00:00"
+                        }
+                      ],
+                      "alias": "last_seen"
+                    }
+                  ]
+                },
+                {
+                  "columns": [
+                    {
+                      "name": "groupUniqArrayState",
+                      "arguments": [
+                        {
+                          "name": "toDate",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "2023-11-11 11:11:11"
+                            }
+                          ]
+                        }
+                      ],
+                      "alias": "dates_seen"
+                    },
+                    {
+                      "name": "toDateTime",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "2023-11-11 11:11:11"
+                        }
+                      ],
+                      "alias": "last_seen"
+                    }
+                  ]
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "last_seen"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "activity"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "last_seen"
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "name": "toDateTime",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "2020-01-01 00:00:00"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

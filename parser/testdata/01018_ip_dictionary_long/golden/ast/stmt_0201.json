@@ -1,0 +1,51 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "type": "String",
+            "value": "2001:db8::/32"
+          },
+          "op": "==",
+          "right": {
+            "name": "dictGetString",
+            "arguments": [
+              {
+                "left": {
+                  "name": "CLICKHOUSE_DATABASE",
+                  "type": {
+                    "name": "String"
+                  }
+                },
+                "op": "||",
+                "right": {
+                  "type": "String",
+                  "value": ".dict_ip_trie"
+                }
+              },
+              {
+                "type": "String",
+                "value": "prefix"
+              },
+              {
+                "name": "tuple",
+                "arguments": [
+                  {
+                    "name": "IPv6StringToNum",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": "2001:db8::1"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

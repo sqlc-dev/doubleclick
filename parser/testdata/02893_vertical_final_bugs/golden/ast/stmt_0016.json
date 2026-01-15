@@ -1,0 +1,123 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayJoin",
+          "arguments": [
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "Tuple",
+                  "value": [
+                    {
+                      "parts": [
+                        "k1"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "v"
+                      ]
+                    }
+                  ],
+                  "spaced_commas": true
+                },
+                {
+                  "type": "Tuple",
+                  "value": [
+                    {
+                      "parts": [
+                        "k2"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "v"
+                      ]
+                    }
+                  ],
+                  "spaced_commas": true
+                }
+              ],
+              "spaced_commas": true
+            }
+          ],
+          "alias": "row"
+        },
+        {
+          "expr": {
+            "tuple": {
+              "parts": [
+                "row"
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "k"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              },
+              "final": true
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "k1"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "Integer",
+            "value": 3
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "k"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "row"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "enable_vertical_final",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

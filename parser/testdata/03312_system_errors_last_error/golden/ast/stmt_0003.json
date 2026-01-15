@@ -1,0 +1,74 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "last_error_message"
+          ]
+        },
+        {
+          "parts": [
+            "last_error_format_string"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "errors"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "name"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "FUNCTION_THROW_IF_VALUE_IS_NON_ZERO"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "last_error_time"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "left": {
+                "name": "now"
+              },
+              "op": "-",
+              "right": {
+                "type": "Integer",
+                "value": 10
+              }
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "op": "NOT",
+          "operand": {
+            "parts": [
+              "remote"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

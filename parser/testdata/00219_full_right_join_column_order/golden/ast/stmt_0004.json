@@ -1,0 +1,134 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "b"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "a"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 2000
+                          },
+                          "alias": "b"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "js1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 2
+                          },
+                          "alias": "a"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 3000
+                          },
+                          "alias": "b"
+                        }
+                      ]
+                    },
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "a"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 2000
+                          },
+                          "alias": "b"
+                        }
+                      ]
+                    }
+                  ],
+                  "union_all": true,
+                  "union_modes": [
+                    "UNION ALL"
+                  ]
+                }
+              },
+              "alias": "js2"
+            },
+            "join": {
+              "type": "RIGHT",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "a"
+                  ]
+                },
+                {
+                  "parts": [
+                    "b"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "a"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "b"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

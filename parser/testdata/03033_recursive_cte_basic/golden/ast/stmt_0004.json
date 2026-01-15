@@ -1,0 +1,98 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "recursive_cte",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "name": "toUInt8",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      ],
+                      "alias": "n"
+                    }
+                  ]
+                },
+                {
+                  "columns": [
+                    {
+                      "name": "toUInt8",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "n"
+                            ]
+                          },
+                          "op": "+",
+                          "right": {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "recursive_cte"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "n"
+                      ]
+                    },
+                    "op": "\u003c",
+                    "right": {
+                      "type": "Integer",
+                      "value": 10
+                    }
+                  }
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "n"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "recursive_cte"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "compound_value",
+          "query": {
+            "expr": {
+              "name": "tuple",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "type": "Integer",
+                  "value": 1
+                }
+              ]
+            },
+            "type": {
+              "name": "Tuple (value_1 UInt64, value_2 UInt64)"
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "plus",
+                "arguments": [
+                  {
+                    "table": "compound_value"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "type": "Integer",
+                  "value": 2
+                },
+                {
+                  "type": "Integer",
+                  "value": 3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

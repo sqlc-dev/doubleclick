@@ -1,0 +1,136 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "number"
+          ]
+        },
+        {
+          "parts": [
+            "arr1"
+          ]
+        },
+        {
+          "parts": [
+            "arr2"
+          ]
+        },
+        {
+          "parts": [
+            "x"
+          ]
+        },
+        {
+          "parts": [
+            "y"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        {
+                          "name": "range",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            }
+                          ],
+                          "alias": "arr1"
+                        },
+                        {
+                          "name": "range",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 3
+                              }
+                            }
+                          ],
+                          "alias": "arr2"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 10
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "array_join": {
+              "left": true,
+              "columns": [
+                {
+                  "parts": [
+                    "arr1"
+                  ],
+                  "alias": "x"
+                },
+                {
+                  "parts": [
+                    "arr2"
+                  ],
+                  "alias": "y"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "enable_unaligned_array_join",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

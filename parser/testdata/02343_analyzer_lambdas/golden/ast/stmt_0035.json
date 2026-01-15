@@ -1,0 +1,61 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "lambda",
+          "query": {
+            "parameters": [
+              "x"
+            ],
+            "body": {
+              "name": "untuple",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "expr": {
+              "type": "Tuple",
+              "value": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "type": "String",
+                  "value": "Value"
+                }
+              ],
+              "spaced_commas": true
+            },
+            "type": {
+              "name": "Tuple (id UInt64, value String)"
+            }
+          },
+          "alias": "value"
+        },
+        {
+          "name": "lambda",
+          "arguments": [
+            {
+              "parts": [
+                "value"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

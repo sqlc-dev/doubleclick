@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "ip_range",
+          "query": {
+            "name": "IPv6CIDRToRange",
+            "arguments": [
+              {
+                "name": "IPv6StringToNum",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "2001:0db8:0000:85a3:0000:0000:ac1f:8001"
+                  }
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 64
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "COUNT",
+          "arguments": [
+            {}
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "ipv6_range"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "ip"
+          ]
+        },
+        "low": {
+          "name": "tupleElement",
+          "arguments": [
+            {
+              "parts": [
+                "ip_range"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ]
+        },
+        "high": {
+          "name": "tupleElement",
+          "arguments": [
+            {
+              "parts": [
+                "ip_range"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

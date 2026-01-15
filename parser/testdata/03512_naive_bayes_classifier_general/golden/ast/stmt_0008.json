@@ -1,0 +1,71 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "model_name"
+          ]
+        },
+        {
+          "parts": [
+            "input_text"
+          ]
+        },
+        {
+          "name": "naiveBayesClassifier",
+          "arguments": [
+            {
+              "parts": [
+                "model_name"
+              ]
+            },
+            {
+              "parts": [
+                "input_text"
+              ]
+            }
+          ],
+          "alias": "classification"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "model_names"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "input_texts"
+              }
+            },
+            "join": {
+              "type": "CROSS"
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "model_name"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "input_text"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

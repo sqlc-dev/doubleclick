@@ -1,0 +1,104 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "日期"
+          ]
+        },
+        {
+          "parts": [
+            "location",
+            "name"
+          ]
+        },
+        {
+          "parts": [
+            "store",
+            "状态"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "sales"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "store"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "store",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "店铺"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "location"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "location",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "地址"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 2
+          }
+        },
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 3
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "t",
+      "type": {
+        "name": "Tuple",
+        "parameters": [
+          {
+            "name": "a",
+            "type": {
+              "name": "UInt32"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "UInt32"
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "t",
+            "a"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "type": "Integer",
+          "value": 42
+        }
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

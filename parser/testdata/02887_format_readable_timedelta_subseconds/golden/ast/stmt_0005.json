@@ -1,0 +1,57 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "maximum_unit",
+          "query": {
+            "type": "String",
+            "value": "milliseconds"
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "elapsed",
+          "query": {
+            "name": "arrayJoin",
+            "arguments": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  },
+                  {
+                    "type": "Float",
+                    "value": 1.0005,
+                    "source": "1.0005"
+                  }
+                ],
+                "spaced_commas": true
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "formatReadableTimeDelta",
+          "arguments": [
+            {
+              "parts": [
+                "elapsed"
+              ]
+            },
+            {
+              "parts": [
+                "maximum_unit"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

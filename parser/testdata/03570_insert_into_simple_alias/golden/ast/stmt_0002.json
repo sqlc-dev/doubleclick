@@ -1,0 +1,87 @@
+{
+  "table": "alias_insert_test",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "Float64"
+      }
+    },
+    {
+      "name": "UserID",
+      "type": null,
+      "default": {
+        "parts": [
+          "id"
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "UserName",
+      "type": null,
+      "default": {
+        "parts": [
+          "name"
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "UpperName",
+      "type": null,
+      "default": {
+        "name": "upper",
+        "arguments": [
+          {
+            "parts": [
+              "name"
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "ValuePlusOne",
+      "type": null,
+      "default": {
+        "left": {
+          "parts": [
+            "value"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "type": "Float",
+          "value": 1,
+          "source": "1.0"
+        }
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

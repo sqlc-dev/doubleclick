@@ -1,0 +1,67 @@
+{
+  "table": "text_index_validation",
+  "columns": [
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_s",
+      "expression": {
+        "parts": [
+          "s"
+        ]
+      },
+      "type": {
+        "name": "text",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "tokenizer"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "sparseGrams",
+              "arguments": [
+                {
+                  "type": "Integer",
+                  "value": 3
+                },
+                {
+                  "type": "Integer",
+                  "value": 10
+                },
+                {
+                  "type": "Integer",
+                  "value": 5
+                },
+                {
+                  "type": "Integer",
+                  "value": 6
+                },
+                {
+                  "type": "Integer",
+                  "value": 7
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ]
+}

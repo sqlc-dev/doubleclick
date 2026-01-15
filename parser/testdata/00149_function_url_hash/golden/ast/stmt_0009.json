@@ -1,0 +1,59 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "URLHash",
+            "arguments": [
+              {
+                "expr": {
+                  "type": "String",
+                  "value": "http://ya.ru/a"
+                },
+                "alias": "url"
+              },
+              {
+                "expr": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "alias": "level"
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "URLHash",
+            "arguments": [
+              {
+                "array": {
+                  "name": "URLHierarchy",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "url"
+                      ]
+                    }
+                  ]
+                },
+                "index": {
+                  "left": {
+                    "parts": [
+                      "level"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

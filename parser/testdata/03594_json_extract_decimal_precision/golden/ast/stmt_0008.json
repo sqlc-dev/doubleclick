@@ -1,0 +1,176 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "Test 5: Edge cases with extreme precision"
+          },
+          "alias": "test_name"
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "json_data"
+          ]
+        },
+        {
+          "name": "JSONExtract",
+          "arguments": [
+            {
+              "parts": [
+                "json_data"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "dec"
+            },
+            {
+              "type": "String",
+              "value": "Decimal(38,37)"
+            }
+          ],
+          "alias": "extracted_decimal"
+        },
+        {
+          "expr": {
+            "name": "JSONExtractString",
+            "arguments": [
+              {
+                "parts": [
+                  "json_data"
+                ]
+              },
+              {
+                "type": "String",
+                "value": "dec"
+              }
+            ]
+          },
+          "type": {
+            "name": "Decimal",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 38
+              },
+              {
+                "type": "Integer",
+                "value": 37
+              }
+            ],
+            "has_parentheses": true
+          },
+          "alias": "string_cast_decimal",
+          "operator_syntax": true
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "JSONExtract",
+              "arguments": [
+                {
+                  "parts": [
+                    "json_data"
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "dec"
+                },
+                {
+                  "type": "String",
+                  "value": "Decimal(38,37)"
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "expr": {
+                "name": "JSONExtractString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "json_data"
+                    ]
+                  },
+                  {
+                    "type": "String",
+                    "value": "dec"
+                  }
+                ]
+              },
+              "type": {
+                "name": "Decimal",
+                "parameters": [
+                  {
+                    "type": "Integer",
+                    "value": 38
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 37
+                  }
+                ],
+                "has_parentheses": true
+              },
+              "operator_syntax": true
+            }
+          },
+          "alias": "precision_preserved"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_json_decimal_precision"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "id"
+          ]
+        },
+        "list": [
+          {
+            "type": "Integer",
+            "value": 9
+          },
+          {
+            "type": "Integer",
+            "value": 10
+          },
+          {
+            "type": "Integer",
+            "value": 11
+          },
+          {
+            "type": "Integer",
+            "value": 12
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

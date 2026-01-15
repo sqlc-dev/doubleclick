@@ -1,0 +1,57 @@
+{
+  "table": "table_with_column_ttl",
+  "columns": [
+    {
+      "name": "EventTime",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "UserID",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "Age",
+      "type": {
+        "name": "UInt8"
+      },
+      "ttl": {
+        "left": {
+          "parts": [
+            "EventTime"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "value": {
+            "type": "Integer",
+            "value": 3
+          },
+          "unit": "MONTH"
+        }
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

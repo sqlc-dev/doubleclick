@@ -1,0 +1,110 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 1
+        },
+        {
+          "parts": [
+            "system",
+            "parts",
+            "name"
+          ]
+        },
+        {
+          "left": {
+            "parts": [
+              "txn_counters",
+              "creation_tid"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "system",
+              "parts",
+              "creation_tid"
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "txn_counters"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "txn_counters",
+                    "_part"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "system",
+                    "parts",
+                    "name"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "table"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "txn_counters"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "system",
+              "parts",
+              "name"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

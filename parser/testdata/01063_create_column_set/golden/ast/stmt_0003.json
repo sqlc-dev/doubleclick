@@ -1,0 +1,79 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "mt"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "x"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "js2"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "prewhere": {
+        "expr": {
+          "parts": [
+            "x"
+          ]
+        },
+        "list": [
+          {
+            "type": "Integer",
+            "value": 1
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "y"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "name": "today"
+        }
+      }
+    }
+  ]
+}

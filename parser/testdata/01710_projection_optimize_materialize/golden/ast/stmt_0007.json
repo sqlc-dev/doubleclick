@@ -1,0 +1,158 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "parts": [
+            "partition"
+          ]
+        },
+        {
+          "name": "formatReadableSize",
+          "arguments": [
+            {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "data_compressed_bytes"
+                  ]
+                }
+              ],
+              "alias": "size"
+            }
+          ],
+          "alias": "compressed"
+        },
+        {
+          "name": "formatReadableSize",
+          "arguments": [
+            {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "data_uncompressed_bytes"
+                  ]
+                }
+              ],
+              "alias": "usize"
+            }
+          ],
+          "alias": "uncompressed"
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "usize"
+                ]
+              },
+              "op": "/",
+              "right": {
+                "parts": [
+                  "size"
+                ]
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 2
+            }
+          ],
+          "alias": "compr_rate"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "rows"
+              ]
+            }
+          ],
+          "alias": "rows"
+        },
+        {
+          "name": "count",
+          "alias": "part_count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "projection_parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "z"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "parts": [
+            "active"
+          ]
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "parts": [
+            "partition"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "size"
+            ]
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

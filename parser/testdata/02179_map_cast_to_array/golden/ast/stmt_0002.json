@@ -1,0 +1,69 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "value",
+          "query": {
+            "name": "map",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "type": "String",
+                "value": "Test"
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "type",
+          "query": {
+            "type": "String",
+            "value": "Array(Tuple(UInt64, UInt64))"
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "value"
+          ]
+        },
+        {
+          "expr": {
+            "parts": [
+              "value"
+            ]
+          },
+          "type_expr": {
+            "parts": [
+              "type"
+            ]
+          }
+        },
+        {
+          "expr": {
+            "name": "materialize",
+            "arguments": [
+              {
+                "parts": [
+                  "value"
+                ]
+              }
+            ]
+          },
+          "type_expr": {
+            "parts": [
+              "type"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

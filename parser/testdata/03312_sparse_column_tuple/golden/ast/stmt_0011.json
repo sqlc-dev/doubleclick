@@ -1,0 +1,103 @@
+{
+  "table": "dst_sparse",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "budget",
+      "type": {
+        "name": "Tuple",
+        "parameters": [
+          {
+            "name": "currencyCode",
+            "type": {
+              "name": "String"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "ratio_of_defaults_for_sparse_serialization",
+      "value": {
+        "type": "Float",
+        "value": 0.9,
+        "source": "0.9"
+      }
+    },
+    {
+      "name": "serialization_info_version",
+      "value": {
+        "type": "String",
+        "value": "basic"
+      }
+    }
+  ],
+  "settings_before_comment": true,
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "name": "arrayJoin",
+            "arguments": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "name": "tuple",
+                    "arguments": [
+                      {
+                        "type": "String",
+                        "value": ""
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 999
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

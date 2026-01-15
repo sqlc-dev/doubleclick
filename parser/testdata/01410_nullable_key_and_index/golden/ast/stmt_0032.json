@@ -1,0 +1,60 @@
+{
+  "table": "nullable_minmax_index",
+  "columns": [
+    {
+      "name": "k",
+      "type": {
+        "name": "int"
+      }
+    },
+    {
+      "name": "v",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "int"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "v_minmax",
+      "expression": {
+        "parts": [
+          "v"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 4
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "k"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

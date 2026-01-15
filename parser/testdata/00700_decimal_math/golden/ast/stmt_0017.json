@@ -1,0 +1,68 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toDecimal64",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "42.42"
+            },
+            {
+              "type": "Integer",
+              "value": 4
+            }
+          ],
+          "alias": "x"
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "lgamma",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 6
+            }
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "left": {
+                "name": "tgamma",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  }
+                ]
+              },
+              "op": "/",
+              "right": {
+                "type": "Float",
+                "value": 1e+50,
+                "source": "1e50"
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 6
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

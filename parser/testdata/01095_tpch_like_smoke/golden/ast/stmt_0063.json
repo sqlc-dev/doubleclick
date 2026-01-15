@@ -1,0 +1,333 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "s_name"
+          ]
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ],
+          "alias": "numwait"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "supplier"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "lineitem"
+              },
+              "alias": "l1"
+            },
+            "join": {
+              "type": ""
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "orders"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "nation"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "s_suppkey"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "parts": [
+                          "l1",
+                          "l_suppkey"
+                        ]
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "o_orderkey"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "parts": [
+                          "l1",
+                          "l_orderkey"
+                        ]
+                      }
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "o_orderstatus"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": "F"
+                    }
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "l1",
+                      "l_receiptdate"
+                    ]
+                  },
+                  "op": "\u003e",
+                  "right": {
+                    "parts": [
+                      "l1",
+                      "l_commitdate"
+                    ]
+                  }
+                }
+              },
+              "op": "AND",
+              "right": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "lineitem"
+                              },
+                              "alias": "l2"
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "l2",
+                              "l_orderkey"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "parts": [
+                              "l1",
+                              "l_orderkey"
+                            ]
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "l2",
+                              "l_suppkey"
+                            ]
+                          },
+                          "op": "\u003c\u003e",
+                          "right": {
+                            "parts": [
+                              "l1",
+                              "l_suppkey"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "op": "NOT",
+              "operand": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "lineitem"
+                              },
+                              "alias": "l3"
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "l3",
+                                "l_orderkey"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "l1",
+                                "l_orderkey"
+                              ]
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "l3",
+                                "l_suppkey"
+                              ]
+                            },
+                            "op": "\u003c\u003e",
+                            "right": {
+                              "parts": [
+                                "l1",
+                                "l_suppkey"
+                              ]
+                            }
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "left": {
+                            "parts": [
+                              "l3",
+                              "l_receiptdate"
+                            ]
+                          },
+                          "op": "\u003e",
+                          "right": {
+                            "parts": [
+                              "l3",
+                              "l_commitdate"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "s_nationkey"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "n_nationkey"
+              ]
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "n_name"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "SAUDI ARABIA"
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "s_name"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "numwait"
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "s_name"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 100
+      },
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

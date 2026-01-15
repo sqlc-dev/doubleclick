@@ -1,0 +1,175 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 1
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                ]
+              },
+              "alias": "tx"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                ]
+              },
+              "alias": "ty"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "tx",
+                    "number"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "ty",
+                    "number"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                ]
+              },
+              "alias": "tz"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "tz",
+                      "number"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "ty",
+                      "number"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "name": "if",
+                    "arguments": [
+                      {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "tx",
+                              "number"
+                            ]
+                          },
+                          "op": "%",
+                          "right": {
+                            "type": "Integer",
+                            "value": 2
+                          }
+                        },
+                        "op": "==",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      }
+                    ]
+                  },
+                  "op": "!=",
+                  "right": {
+                    "name": "if",
+                    "arguments": [
+                      {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "tz",
+                              "number"
+                            ]
+                          },
+                          "op": "%",
+                          "right": {
+                            "type": "Integer",
+                            "value": 2
+                          }
+                        },
+                        "op": "==",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 3
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "query_plan_use_logical_join_step",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

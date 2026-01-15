@@ -1,0 +1,81 @@
+{
+  "table": "qbit",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            "alias": "id"
+          },
+          {
+            "name": "arrayMap",
+            "arguments": [
+              {
+                "parameters": [
+                  "i"
+                ],
+                "body": {
+                  "name": "toFloat32",
+                  "arguments": [
+                    {
+                      "left": {
+                        "parts": [
+                          "i"
+                        ]
+                      },
+                      "op": "+",
+                      "right": {
+                        "parts": [
+                          "number"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "range",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                ]
+              }
+            ],
+            "alias": "vec"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 3
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

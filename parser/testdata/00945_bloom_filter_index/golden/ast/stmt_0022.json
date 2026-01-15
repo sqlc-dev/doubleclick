@@ -1,0 +1,127 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "liter_prepared_set",
+          "query": {
+            "type": "Tuple",
+            "value": [
+              {
+                "type": "Tuple",
+                "value": [
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  {
+                    "type": "Tuple",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    ],
+                    "spaced_commas": true
+                  }
+                ],
+                "spaced_commas": true
+              },
+              {
+                "type": "Tuple",
+                "value": [
+                  {
+                    "type": "Integer",
+                    "value": 2
+                  },
+                  {
+                    "type": "Tuple",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      }
+                    ],
+                    "spaced_commas": true
+                  }
+                ],
+                "spaced_commas": true
+              }
+            ],
+            "spaced_commas": true
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "COUNT"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "single_column_bloom_filter"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "type": "Tuple",
+          "value": [
+            {
+              "parts": [
+                "i64"
+              ]
+            },
+            {
+              "type": "Tuple",
+              "value": [
+                {
+                  "parts": [
+                    "i64"
+                  ]
+                },
+                {
+                  "parts": [
+                    "i32"
+                  ]
+                }
+              ],
+              "spaced_commas": true
+            }
+          ],
+          "spaced_commas": true
+        },
+        "list": [
+          {
+            "parts": [
+              "liter_prepared_set"
+            ]
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "max_rows_to_read",
+          "value": {
+            "type": "Integer",
+            "value": 6
+          }
+        }
+      ]
+    }
+  ]
+}

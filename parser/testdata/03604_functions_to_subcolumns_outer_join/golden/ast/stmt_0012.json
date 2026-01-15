@@ -1,0 +1,77 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "parts": [
+              "nullableStringCol"
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "users_ext"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "users"
+              },
+              "alias": "users2"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "users_ext",
+                    "uid"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "users2",
+                    "uid"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "users"
+              }
+            },
+            "join": {
+              "type": "FULL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "users2",
+                    "uid"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "users",
+                    "uid"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

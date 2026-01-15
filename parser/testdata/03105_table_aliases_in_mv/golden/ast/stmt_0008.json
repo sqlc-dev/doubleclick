@@ -1,0 +1,122 @@
+{
+  "view": "mv",
+  "materialized": true,
+  "populate": true,
+  "columns": [
+    {
+      "name": "event_time",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "event_name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "user_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "user_type",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "event_time"
+          ]
+        },
+        {
+          "parts": [
+            "event_name"
+          ]
+        }
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "e",
+              "event_time"
+            ]
+          },
+          {
+            "parts": [
+              "e",
+              "event_name"
+            ]
+          },
+          {
+            "parts": [
+              "e",
+              "user_id"
+            ]
+          },
+          {
+            "parts": [
+              "u",
+              "user_type"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "event"
+                },
+                "alias": "e"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "user"
+                },
+                "alias": "u"
+              },
+              "join": {
+                "type": "INNER",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "u",
+                      "user_id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "e",
+                      "user_id"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

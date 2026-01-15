@@ -1,0 +1,43 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "time",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 3
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "name": "toStartOfInterval",
+    "arguments": [
+      {
+        "parts": [
+          "time"
+        ]
+      },
+      {
+        "value": {
+          "type": "Integer",
+          "value": 2
+        },
+        "unit": "YEAR"
+      }
+    ]
+  }
+}

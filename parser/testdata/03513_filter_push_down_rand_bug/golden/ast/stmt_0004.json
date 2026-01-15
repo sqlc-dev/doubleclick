@@ -1,0 +1,121 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "in_sample"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "with": [
+                        {
+                          "name": "RandomUsers",
+                          "query": {
+                            "query": {
+                              "selects": [
+                                {
+                                  "columns": [
+                                    {
+                                      "parts": [
+                                        "user_id"
+                                      ]
+                                    },
+                                    {
+                                      "expr": {
+                                        "left": {
+                                          "name": "rand"
+                                        },
+                                        "op": "%",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 2
+                                        }
+                                      },
+                                      "alias": "in_sample"
+                                    }
+                                  ],
+                                  "from": {
+                                    "tables": [
+                                      {
+                                        "table": {
+                                          "table": {
+                                            "table": "users_items"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  "group_by": [
+                                    {
+                                      "parts": [
+                                        "user_id"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "scalar_with": false
+                        }
+                      ],
+                      "columns": [
+                        {
+                          "parts": [
+                            "user_id"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "in_sample"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "RandomUsers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "in_sample"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "reference_vec",
+          "query": {
+            "type": "Array",
+            "value": [
+              {
+                "type": "Float",
+                "value": 0,
+                "source": "0.0"
+              },
+              {
+                "type": "Float",
+                "value": 2,
+                "source": "2.0"
+              }
+            ],
+            "spaced_commas": true
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "vec"
+          ]
+        },
+        {
+          "name": "L2Distance",
+          "arguments": [
+            {
+              "parts": [
+                "vec"
+              ]
+            },
+            {
+              "parts": [
+                "reference_vec"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "tab_l2_i8"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "name": "L2Distance",
+            "arguments": [
+              {
+                "parts": [
+                  "vec"
+                ]
+              },
+              {
+                "parts": [
+                  "reference_vec"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 3
+      }
+    }
+  ]
+}

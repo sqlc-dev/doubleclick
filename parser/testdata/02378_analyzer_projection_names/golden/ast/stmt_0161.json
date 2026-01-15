@@ -1,0 +1,67 @@
+{
+  "table_expr": {
+    "table": {
+      "query": {
+        "selects": [
+          {
+            "columns": [
+              {
+                "name": "count",
+                "over": {
+                  "partition_by": [
+                    {
+                      "parts": [
+                        "id"
+                      ],
+                      "alias": "id_alias"
+                    },
+                    {
+                      "parts": [
+                        "value"
+                      ],
+                      "alias": "value_alias"
+                    }
+                  ],
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "id"
+                        ]
+                      }
+                    },
+                    {
+                      "expression": {
+                        "parts": [
+                          "value"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "frame": {
+                    "type": "ROWS",
+                    "start": {
+                      "type": "CURRENT_ROW"
+                    }
+                  }
+                }
+              }
+            ],
+            "from": {
+              "tables": [
+                {
+                  "table": {
+                    "table": {
+                      "table": "test_table"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

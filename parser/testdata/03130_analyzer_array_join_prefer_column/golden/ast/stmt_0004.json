@@ -1,0 +1,86 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "materialize",
+          "arguments": [
+            {
+              "parts": [
+                "id"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "id"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "type": "String",
+                          "value": "aaa"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "subquery"
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "expr": {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "alias": "id"
+                }
+              ]
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test_table"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "id"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

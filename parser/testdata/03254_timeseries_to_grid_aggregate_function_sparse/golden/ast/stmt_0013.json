@@ -1,0 +1,236 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "begin",
+          "query": {
+            "type": "Integer",
+            "value": 100
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "end",
+          "query": {
+            "type": "Integer",
+            "value": 200
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "step_sec",
+          "query": {
+            "type": "Integer",
+            "value": 10
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "staleness_sec",
+          "query": {
+            "type": "Integer",
+            "value": 15
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "begin_ts",
+          "query": {
+            "expr": {
+              "parts": [
+                "begin"
+              ]
+            },
+            "type": {
+              "name": "DateTime",
+              "parameters": [
+                {
+                  "type": "String",
+                  "value": "UTC"
+                }
+              ],
+              "has_parentheses": true
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "end_ts",
+          "query": {
+            "expr": {
+              "parts": [
+                "end"
+              ]
+            },
+            "type": {
+              "name": "DateTime",
+              "parameters": [
+                {
+                  "type": "String",
+                  "value": "UTC"
+                }
+              ],
+              "has_parentheses": true
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "grid",
+          "query": {
+            "name": "range",
+            "arguments": [
+              {
+                "parts": [
+                  "begin"
+                ]
+              },
+              {
+                "left": {
+                  "parts": [
+                    "end"
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "parts": [
+                    "step_sec"
+                  ]
+                }
+              },
+              {
+                "parts": [
+                  "step_sec"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "arrayZip",
+          "arguments": [
+            {
+              "parts": [
+                "grid"
+              ]
+            },
+            {
+              "name": "timeSeriesResampleToGridWithStaleness",
+              "parameters": [
+                {
+                  "parts": [
+                    "begin_ts"
+                  ]
+                },
+                {
+                  "parts": [
+                    "end_ts"
+                  ]
+                },
+                {
+                  "parts": [
+                    "step_sec"
+                  ]
+                },
+                {
+                  "parts": [
+                    "staleness_sec"
+                  ]
+                }
+              ],
+              "arguments": [
+                {
+                  "expr": {
+                    "parts": [
+                      "timestamp"
+                    ]
+                  },
+                  "type": {
+                    "name": "DateTime64",
+                    "parameters": [
+                      {
+                        "type": "Integer",
+                        "value": 6
+                      },
+                      {
+                        "type": "String",
+                        "value": "UTC"
+                      }
+                    ],
+                    "has_parentheses": true
+                  },
+                  "operator_syntax": true
+                },
+                {
+                  "parts": [
+                    "value"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "e"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "clusterAllReplicas",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "test_shard_localhost"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "ts_data"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "enable_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "max_parallel_replicas",
+          "value": {
+            "type": "Integer",
+            "value": 3
+          }
+        },
+        {
+          "name": "parallel_replicas_for_non_replicated_merge_tree",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "prefer_localhost_replica",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

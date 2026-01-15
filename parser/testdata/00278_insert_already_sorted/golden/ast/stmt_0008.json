@@ -1,0 +1,81 @@
+{
+  "table": "sorted",
+  "columns": [
+    {
+      "parts": [
+        "x"
+      ]
+    }
+  ],
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "condition": {
+                "left": {
+                  "left": {
+                    "name": "intHash64",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "number"
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1000
+                  }
+                },
+                "op": "=",
+                "right": {
+                  "type": "Integer",
+                  "value": 0
+                }
+              },
+              "then": {
+                "type": "Integer",
+                "value": 999
+              },
+              "else": {
+                "name": "intDiv",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 100000
+                  }
+                ]
+              }
+            },
+            "alias": "x"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "numbers"
+                }
+              }
+            }
+          ]
+        },
+        "limit": {
+          "type": "Integer",
+          "value": 1000000
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "table": "r_prop_table2",
+  "columns": [
+    {
+      "name": "column_default",
+      "type": {
+        "name": "UInt64"
+      },
+      "default": {
+        "type": "Integer",
+        "value": 42
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "column_codec",
+      "type": {
+        "name": "String"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "ZSTD",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 10
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "column_comment",
+      "type": {
+        "name": "Date"
+      },
+      "comment": "Some comment"
+    },
+    {
+      "name": "column_ttl",
+      "type": {
+        "name": "UInt64"
+      },
+      "ttl": {
+        "left": {
+          "parts": [
+            "column_comment"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "value": {
+            "type": "Integer",
+            "value": 1
+          },
+          "unit": "MONTH"
+        }
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/{database}/test_01493/r_prop_table"
+      },
+      {
+        "type": "String",
+        "value": "2"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "column_comment"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "value": {
+          "type": "Integer",
+          "value": 2
+        },
+        "unit": "MONTH"
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "column_comment"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 2
+            },
+            "unit": "MONTH"
+          }
+        }
+      }
+    ]
+  }
+}

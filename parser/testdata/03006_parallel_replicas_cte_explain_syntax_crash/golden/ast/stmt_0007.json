@@ -1,0 +1,102 @@
+{
+  "explain_type": "SYNTAX",
+  "statement": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "cte1",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "n"
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "numbers_1e6__fuzz_34"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          },
+          {
+            "name": "cte2",
+            "query": {
+              "query": {
+                "selects": [
+                  {
+                    "columns": [
+                      {
+                        "parts": [
+                          "n"
+                        ]
+                      }
+                    ],
+                    "from": {
+                      "tables": [
+                        {
+                          "table": {
+                            "table": {
+                              "table": "numbers_1e6__fuzz_33"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "prewhere": {
+                      "expr": {
+                        "parts": [
+                          "n"
+                        ]
+                      },
+                      "list": [
+                        {
+                          "parts": [
+                            "cte1"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "scalar_with": false
+          }
+        ],
+        "columns": [
+          {
+            "name": "count"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "cte2"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "explicit_type": true
+}

@@ -1,0 +1,64 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "condition": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "then": {
+            "type": "String",
+            "value": "Hello"
+          },
+          "else": {
+            "name": "toFixedString",
+            "arguments": [
+              {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "op": "-",
+                    "operand": {
+                      "parts": [
+                        "number"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 2
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

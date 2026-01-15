@@ -1,0 +1,717 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "floor",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 4
+                  }
+                ]
+              }
+            },
+            {
+              "expr": {
+                "array": {
+                  "parts": [
+                    "original_medians_array",
+                    "medians_by_version"
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 1
+                }
+              },
+              "alias": "l"
+            }
+          ],
+          "alias": "l_rounded"
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "name": "floor",
+                "arguments": [
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 4
+                  }
+                ]
+              }
+            },
+            {
+              "expr": {
+                "array": {
+                  "parts": [
+                    "original_medians_array",
+                    "medians_by_version"
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              },
+              "alias": "r"
+            }
+          ],
+          "alias": "r_rounded"
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x",
+                "y"
+              ],
+              "body": {
+                "name": "floor",
+                "arguments": [
+                  {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "y"
+                        ]
+                      },
+                      "op": "-",
+                      "right": {
+                        "parts": [
+                          "x"
+                        ]
+                      },
+                      "parenthesized": true
+                    },
+                    "op": "/",
+                    "right": {
+                      "parts": [
+                        "x"
+                      ]
+                    }
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                ]
+              }
+            },
+            {
+              "parts": [
+                "l"
+              ]
+            },
+            {
+              "parts": [
+                "r"
+              ]
+            }
+          ],
+          "alias": "diff_percent"
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x",
+                "y"
+              ],
+              "body": {
+                "name": "floor",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "x"
+                      ]
+                    },
+                    "op": "/",
+                    "right": {
+                      "parts": [
+                        "y"
+                      ]
+                    }
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                ]
+              }
+            },
+            {
+              "parts": [
+                "threshold"
+              ]
+            },
+            {
+              "parts": [
+                "l"
+              ]
+            }
+          ],
+          "alias": "threshold_percent"
+        },
+        {
+          "parts": [
+            "test"
+          ]
+        },
+        {
+          "parts": [
+            "query"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "quantileExactForEach",
+                          "parameters": [
+                            {
+                              "type": "Float",
+                              "value": 0.999,
+                              "source": "0.999"
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "name": "arrayMap",
+                              "arguments": [
+                                {
+                                  "parameters": [
+                                    "x",
+                                    "y"
+                                  ],
+                                  "body": {
+                                    "name": "abs",
+                                    "arguments": [
+                                      {
+                                        "left": {
+                                          "parts": [
+                                            "x"
+                                          ]
+                                        },
+                                        "op": "-",
+                                        "right": {
+                                          "parts": [
+                                            "y"
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "array": {
+                                    "parts": [
+                                      "metrics_by_label"
+                                    ]
+                                  },
+                                  "index": {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                },
+                                {
+                                  "array": {
+                                    "parts": [
+                                      "metrics_by_label"
+                                    ]
+                                  },
+                                  "index": {
+                                    "type": "Integer",
+                                    "value": 2
+                                  }
+                                }
+                              ],
+                              "alias": "d"
+                            }
+                          ],
+                          "alias": "threshold"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "virtual_run"
+                                          ]
+                                        },
+                                        {
+                                          "name": "groupArrayInsertAt",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "median_metrics"
+                                              ]
+                                            },
+                                            {
+                                              "parts": [
+                                                "random_label"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "metrics_by_label"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "query": {
+                                                  "selects": [
+                                                    {
+                                                      "columns": [
+                                                        {
+                                                          "name": "medianExactForEach",
+                                                          "arguments": [
+                                                            {
+                                                              "parts": [
+                                                                "metrics"
+                                                              ]
+                                                            }
+                                                          ],
+                                                          "alias": "median_metrics"
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "virtual_run"
+                                                          ]
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "random_label"
+                                                          ]
+                                                        }
+                                                      ],
+                                                      "from": {
+                                                        "tables": [
+                                                          {
+                                                            "table": {
+                                                              "table": {
+                                                                "query": {
+                                                                  "selects": [
+                                                                    {
+                                                                      "columns": [
+                                                                        {},
+                                                                        {
+                                                                          "name": "toUInt32",
+                                                                          "arguments": [
+                                                                            {
+                                                                              "left": {
+                                                                                "name": "rowNumberInAllBlocks"
+                                                                              },
+                                                                              "op": "%",
+                                                                              "right": {
+                                                                                "type": "Integer",
+                                                                                "value": 2
+                                                                              }
+                                                                            }
+                                                                          ],
+                                                                          "alias": "random_label"
+                                                                        }
+                                                                      ],
+                                                                      "from": {
+                                                                        "tables": [
+                                                                          {
+                                                                            "table": {
+                                                                              "table": {
+                                                                                "query": {
+                                                                                  "selects": [
+                                                                                    {
+                                                                                      "columns": [
+                                                                                        {
+                                                                                          "parts": [
+                                                                                            "metrics"
+                                                                                          ]
+                                                                                        },
+                                                                                        {
+                                                                                          "parts": [
+                                                                                            "number"
+                                                                                          ],
+                                                                                          "alias": "virtual_run"
+                                                                                        }
+                                                                                      ],
+                                                                                      "from": {
+                                                                                        "tables": [
+                                                                                          {
+                                                                                            "table": {
+                                                                                              "table": {
+                                                                                                "query": {
+                                                                                                  "selects": [
+                                                                                                    {
+                                                                                                      "columns": [
+                                                                                                        {
+                                                                                                          "parts": [
+                                                                                                            "metrics"
+                                                                                                          ]
+                                                                                                        },
+                                                                                                        {
+                                                                                                          "parts": [
+                                                                                                            "run"
+                                                                                                          ]
+                                                                                                        },
+                                                                                                        {
+                                                                                                          "parts": [
+                                                                                                            "version"
+                                                                                                          ]
+                                                                                                        }
+                                                                                                      ],
+                                                                                                      "from": {
+                                                                                                        "tables": [
+                                                                                                          {
+                                                                                                            "table": {
+                                                                                                              "table": {
+                                                                                                                "table": "table"
+                                                                                                              }
+                                                                                                            }
+                                                                                                          }
+                                                                                                        ]
+                                                                                                      }
+                                                                                                    }
+                                                                                                  ]
+                                                                                                }
+                                                                                              },
+                                                                                              "alias": "no_query"
+                                                                                            }
+                                                                                          },
+                                                                                          {
+                                                                                            "table": {
+                                                                                              "table": {
+                                                                                                "name": "numbers",
+                                                                                                "arguments": [
+                                                                                                  {
+                                                                                                    "type": "Integer",
+                                                                                                    "value": 1
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Integer",
+                                                                                                    "value": 100000
+                                                                                                  }
+                                                                                                ]
+                                                                                              },
+                                                                                              "alias": "nn"
+                                                                                            },
+                                                                                            "join": {
+                                                                                              "type": ""
+                                                                                            }
+                                                                                          }
+                                                                                        ]
+                                                                                      },
+                                                                                      "order_by": [
+                                                                                        {
+                                                                                          "expression": {
+                                                                                            "parts": [
+                                                                                              "virtual_run"
+                                                                                            ]
+                                                                                          }
+                                                                                        },
+                                                                                        {
+                                                                                          "expression": {
+                                                                                            "name": "rand"
+                                                                                          }
+                                                                                        }
+                                                                                      ]
+                                                                                    }
+                                                                                  ]
+                                                                                }
+                                                                              },
+                                                                              "alias": "virtual_runs"
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      }
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              },
+                                                              "alias": "relabeled"
+                                                            }
+                                                          }
+                                                        ]
+                                                      },
+                                                      "group_by": [
+                                                        {
+                                                          "parts": [
+                                                            "virtual_run"
+                                                          ]
+                                                        },
+                                                        {
+                                                          "parts": [
+                                                            "random_label"
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "alias": "virtual_medians"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "virtual_run"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "virtual_medians_array"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "rd"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "groupArrayInsertAt",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "median_metrics"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "version"
+                              ]
+                            }
+                          ],
+                          "alias": "medians_by_version"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "name": "medianExactForEach",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "metrics"
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "median_metrics"
+                                        },
+                                        {
+                                          "parts": [
+                                            "version"
+                                          ]
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "table"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "version"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "original_medians"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "original_medians_array"
+            },
+            "join": {
+              "type": ""
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "any",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "test"
+                              ]
+                            }
+                          ],
+                          "alias": "test"
+                        },
+                        {
+                          "name": "any",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "query"
+                              ]
+                            }
+                          ],
+                          "alias": "query"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "table"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "any_query"
+            },
+            "join": {
+              "type": ""
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "throwIf",
+                          "arguments": [
+                            {
+                              "name": "uniq",
+                              "arguments": [
+                                {
+                                  "type": "Tuple",
+                                  "value": [
+                                    {
+                                      "parts": [
+                                        "test"
+                                      ]
+                                    },
+                                    {
+                                      "parts": [
+                                        "query"
+                                      ]
+                                    }
+                                  ],
+                                  "spaced_commas": true
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "table"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "check_single_query"
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

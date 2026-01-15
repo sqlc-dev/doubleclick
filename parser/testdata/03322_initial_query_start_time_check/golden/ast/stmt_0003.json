@@ -1,0 +1,141 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "now"
+          },
+          "op": "==",
+          "right": {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "t"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "left": {
+            "name": "initialQueryStartTime"
+          },
+          "op": "==",
+          "right": {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "it"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "left": {
+            "name": "initialQueryStartTime"
+          },
+          "op": "==",
+          "right": {
+            "name": "min",
+            "arguments": [
+              {
+                "parts": [
+                  "it"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "left": {
+            "name": "initialQueryStartTime"
+          },
+          "op": "\u003e=",
+          "right": {
+            "left": {
+              "name": "now"
+            },
+            "op": "-",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "it"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "t"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.0.0.{1..10}"
+                                  },
+                                  {
+                                    "name": "currentDatabase"
+                                  },
+                                  {
+                                    "parts": [
+                                      "tmp"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "max_distributed_connections",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "async_socket_for_remote",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

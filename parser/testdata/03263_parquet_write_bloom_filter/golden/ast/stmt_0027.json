@@ -1,0 +1,64 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "bf: LowCardinality(String) hit"
+        },
+        {
+          "name": "count"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "expr": {
+                "left": {
+                  "parts": [
+                    "lc"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "lc4"
+                }
+              },
+              "alias": "cond"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "file",
+                "arguments": [
+                  {
+                    "parts": [
+                      "bf_03263",
+                      "parquet"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "name": "indexHint",
+        "arguments": [
+          {
+            "parts": [
+              "cond"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "1M without 0"
+        },
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "name": "maxMerge",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "expr": {
+                              "left": {
+                                "left": {
+                                  "name": "unhex",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "00001000"
+                                    }
+                                  ]
+                                },
+                                "op": "||",
+                                "right": {
+                                  "name": "randomString",
+                                  "arguments": [
+                                    {
+                                      "left": {
+                                        "type": "Integer",
+                                        "value": 1048576
+                                      },
+                                      "op": "-",
+                                      "right": {
+                                        "type": "Integer",
+                                        "value": 1
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "op": "||",
+                              "right": {
+                                "type": "String",
+                                "value": "x"
+                              }
+                            },
+                            "type": {
+                              "name": "AggregateFunction(max, String)"
+                            }
+                          },
+                          "alias": "x"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

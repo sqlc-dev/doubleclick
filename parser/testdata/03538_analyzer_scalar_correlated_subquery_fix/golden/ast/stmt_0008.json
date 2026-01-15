@@ -1,0 +1,107 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "ps_partkey"
+          ]
+        },
+        {
+          "parts": [
+            "ps_suppkey"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "partsupp"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "ps_availqty"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "left": {
+                      "type": "Float",
+                      "value": 0.5,
+                      "source": "0.5"
+                    },
+                    "op": "*",
+                    "right": {
+                      "name": "sum",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "l_quantity"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "lineitem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "l_partkey"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "parts": [
+                        "ps_partkey"
+                      ]
+                    },
+                    "parenthesized": true
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "l_suppkey"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "parts": [
+                        "ps_suppkey"
+                      ]
+                    },
+                    "parenthesized": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,189 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "id",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "query_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "current_database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "expr": {
+                          "name": "normalizeQuery",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "query"
+                              ]
+                            }
+                          ]
+                        },
+                        "pattern": {
+                          "name": "normalizeQuery",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "WITH 01091 AS id SELECT 1;"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "left": {
+                        "parts": [
+                          "event_date"
+                        ]
+                      },
+                      "op": "\u003e=",
+                      "right": {
+                        "left": {
+                          "name": "today"
+                        },
+                        "op": "-",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        },
+                        "parenthesized": true
+                      },
+                      "parenthesized": true
+                    }
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "event_time"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "uniqExact",
+          "arguments": [
+            {
+              "parts": [
+                "thread_id"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_thread_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "event_date"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "left": {
+                "name": "today"
+              },
+              "op": "-",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              },
+              "parenthesized": true
+            },
+            "parenthesized": true
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "query_id"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "id"
+              ]
+            },
+            "parenthesized": true
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "thread_id"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "parts": [
+              "master_thread_id"
+            ]
+          },
+          "parenthesized": true
+        }
+      }
+    }
+  ]
+}

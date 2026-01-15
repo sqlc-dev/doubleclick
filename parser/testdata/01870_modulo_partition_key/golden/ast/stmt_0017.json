@@ -1,0 +1,70 @@
+{
+  "table": "table2",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "v",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "left": {
+          "name": "toInt32",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "id"
+                ]
+              },
+              "op": "/",
+              "right": {
+                "type": "Integer",
+                "value": 2
+              }
+            }
+          ]
+        },
+        "op": "%",
+        "right": {
+          "type": "Integer",
+          "value": 3
+        }
+      },
+      {
+        "left": {
+          "parts": [
+            "id"
+          ]
+        },
+        "op": "%",
+        "right": {
+          "type": "Integer",
+          "value": 200
+        }
+      }
+    ],
+    "spaced_commas": true
+  }
+}

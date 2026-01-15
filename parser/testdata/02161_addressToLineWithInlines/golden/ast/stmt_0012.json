@@ -1,0 +1,211 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "lineWithInlines",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "distinct": true,
+                  "columns": [
+                    {
+                      "name": "addressToLineWithInlines",
+                      "arguments": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "trace"
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "alias": "lineWithInlines"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "trace_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "query_id"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "query": {
+                        "selects": [
+                          {
+                            "columns": [
+                              {
+                                "parts": [
+                                  "query_id"
+                                ]
+                              }
+                            ],
+                            "from": {
+                              "tables": [
+                                {
+                                  "table": {
+                                    "table": {
+                                      "database": "system",
+                                      "table": "query_log"
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            "where": {
+                              "left": {
+                                "left": {
+                                  "parts": [
+                                    "current_database"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "name": "currentDatabase"
+                                }
+                              },
+                              "op": "AND",
+                              "right": {
+                                "left": {
+                                  "parts": [
+                                    "log_comment"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "type": "String",
+                                  "value": "02161_test_case"
+                                }
+                              }
+                            },
+                            "order_by": [
+                              {
+                                "expression": {
+                                  "parts": [
+                                    "event_time"
+                                  ]
+                                },
+                                "descending": true
+                              }
+                            ],
+                            "limit": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "type": "String",
+          "value": "has inlines:"
+        },
+        {
+          "name": "or",
+          "arguments": [
+            {
+              "left": {
+                "name": "max",
+                "arguments": [
+                  {
+                    "name": "length",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "lineWithInlines"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            {
+              "left": {
+                "name": "max",
+                "arguments": [
+                  {
+                    "name": "locate",
+                    "arguments": [
+                      {
+                        "array": {
+                          "parts": [
+                            "lineWithInlines"
+                          ]
+                        },
+                        "index": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      },
+                      {
+                        "type": "String",
+                        "value": ":"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "lineWithInlines"
+              }
+            }
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "short_circuit_function_evaluation",
+          "value": {
+            "type": "String",
+            "value": "enable"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "table": "defaulted",
+  "columns": [
+    {
+      "name": "payload",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "date",
+      "type": null,
+      "default": {
+        "name": "today"
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "key",
+      "type": null,
+      "default": {
+        "left": {
+          "type": "Integer",
+          "value": 0
+        },
+        "op": "*",
+        "right": {
+          "name": "rand"
+        }
+      },
+      "default_kind": "MATERIALIZED"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "date"
+        ]
+      },
+      {
+        "parts": [
+          "key"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

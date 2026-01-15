@@ -1,0 +1,220 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "a",
+            "pk"
+          ]
+        },
+        {
+          "parts": [
+            "b",
+            "pk"
+          ]
+        },
+        {
+          "parts": [
+            "a",
+            "dt"
+          ]
+        },
+        {
+          "parts": [
+            "b",
+            "dt"
+          ]
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "a",
+                "pk"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "parts": [
+                "b",
+                "pk"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "parts": [
+                    "a",
+                    "dt"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "toTypeName",
+          "arguments": [
+            {
+              "name": "materialize",
+              "arguments": [
+                {
+                  "parts": [
+                    "b",
+                    "dt"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "name": "toUInt8",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              ]
+                            },
+                            "op": "\u003e",
+                            "right": {
+                              "type": "Integer",
+                              "value": 0
+                            }
+                          },
+                          "alias": "pk"
+                        },
+                        {
+                          "name": "toUInt8",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "dt"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 3
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "a"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "pk"
+                        },
+                        {
+                          "name": "toNullable",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 0
+                            }
+                          ],
+                          "alias": "dt"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "b"
+            },
+            "join": {
+              "type": "INNER",
+              "strictness": "ASOF",
+              "using": [
+                {
+                  "parts": [
+                    "pk"
+                  ]
+                },
+                {
+                  "parts": [
+                    "dt"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "a",
+              "dt"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

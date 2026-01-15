@@ -1,0 +1,234 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "dim"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "idnum"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_bm_join"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "dim"
+                          ]
+                        },
+                        {
+                          "name": "bitmapOrCardinality",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "ids"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "ids2"
+                              ]
+                            }
+                          ],
+                          "alias": "idnum"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "dim"
+                                          ]
+                                        },
+                                        {
+                                          "name": "groupBitmapState",
+                                          "arguments": [
+                                            {
+                                              "name": "toUInt64",
+                                              "arguments": [
+                                                {
+                                                  "parts": [
+                                                    "id"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "ids"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "test_bm"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "where": {
+                                        "left": {
+                                          "parts": [
+                                            "dim"
+                                          ]
+                                        },
+                                        "op": "\u003e",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 2
+                                        }
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "dim"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "A"
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "dim"
+                                          ]
+                                        },
+                                        {
+                                          "name": "groupBitmapState",
+                                          "arguments": [
+                                            {
+                                              "name": "toUInt64",
+                                              "arguments": [
+                                                {
+                                                  "parts": [
+                                                    "id"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "alias": "ids2"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "table": "test_bm"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "where": {
+                                        "left": {
+                                          "parts": [
+                                            "dim"
+                                          ]
+                                        },
+                                        "op": "\u003c",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 2
+                                        }
+                                      },
+                                      "group_by": [
+                                        {
+                                          "parts": [
+                                            "dim"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "B"
+                            },
+                            "join": {
+                              "type": "RIGHT",
+                              "strictness": "ALL",
+                              "using": [
+                                {
+                                  "parts": [
+                                    "dim"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "C"
+            },
+            "join": {
+              "type": "RIGHT",
+              "using": [
+                {
+                  "parts": [
+                    "dim"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "dim"
+          ]
+        }
+      ]
+    }
+  ]
+}

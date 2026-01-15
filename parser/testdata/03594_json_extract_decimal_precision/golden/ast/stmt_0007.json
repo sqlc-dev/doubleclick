@@ -1,0 +1,176 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "Test 4: Original issue #69082 verification"
+          },
+          "alias": "test_name"
+        },
+        {
+          "name": "JSONExtract",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "{\"dec\": 111244542.003}"
+            },
+            {
+              "type": "String",
+              "value": "dec"
+            },
+            {
+              "type": "String",
+              "value": "Decimal(31,16)"
+            }
+          ],
+          "alias": "direct_extraction"
+        },
+        {
+          "expr": {
+            "name": "JSONExtractString",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "{\"dec\": 111244542.003}"
+              },
+              {
+                "type": "String",
+                "value": "dec"
+              }
+            ]
+          },
+          "type": {
+            "name": "Decimal",
+            "parameters": [
+              {
+                "type": "Integer",
+                "value": 32
+              },
+              {
+                "type": "Integer",
+                "value": 16
+              }
+            ],
+            "has_parentheses": true
+          },
+          "alias": "string_cast",
+          "operator_syntax": true
+        },
+        {
+          "name": "toString",
+          "arguments": [
+            {
+              "name": "JSONExtract",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "{\"dec\": 111244542.003}"
+                },
+                {
+                  "type": "String",
+                  "value": "dec"
+                },
+                {
+                  "type": "String",
+                  "value": "Decimal(31,16)"
+                }
+              ]
+            }
+          ],
+          "alias": "direct_extraction_str"
+        },
+        {
+          "name": "toString",
+          "arguments": [
+            {
+              "expr": {
+                "name": "JSONExtractString",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "{\"dec\": 111244542.003}"
+                  },
+                  {
+                    "type": "String",
+                    "value": "dec"
+                  }
+                ]
+              },
+              "type": {
+                "name": "Decimal",
+                "parameters": [
+                  {
+                    "type": "Integer",
+                    "value": 32
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 16
+                  }
+                ],
+                "has_parentheses": true
+              },
+              "operator_syntax": true
+            }
+          ],
+          "alias": "string_cast_str"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "JSONExtract",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "{\"dec\": 111244542.003}"
+                },
+                {
+                  "type": "String",
+                  "value": "dec"
+                },
+                {
+                  "type": "String",
+                  "value": "Decimal(31,16)"
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "expr": {
+                "name": "JSONExtractString",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "{\"dec\": 111244542.003}"
+                  },
+                  {
+                    "type": "String",
+                    "value": "dec"
+                  }
+                ]
+              },
+              "type": {
+                "name": "Decimal",
+                "parameters": [
+                  {
+                    "type": "Integer",
+                    "value": 32
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 16
+                  }
+                ],
+                "has_parentheses": true
+              },
+              "operator_syntax": true
+            }
+          },
+          "alias": "issue_resolved"
+        }
+      ]
+    }
+  ]
+}

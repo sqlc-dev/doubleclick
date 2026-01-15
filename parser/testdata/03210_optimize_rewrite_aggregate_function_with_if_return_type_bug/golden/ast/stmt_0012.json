@@ -1,0 +1,81 @@
+{
+  "view": "mv",
+  "materialized": true,
+  "to": "b",
+  "columns": [
+    {
+      "name": "b_id",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "uniq"
+            ]
+          },
+          {
+            "name": "Nullable",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "uniqState",
+            "arguments": [
+              {
+                "name": "if",
+                "arguments": [
+                  {
+                    "left": {
+                      "parts": [
+                        "a_id"
+                      ]
+                    },
+                    "op": "!=",
+                    "right": {
+                      "type": "String",
+                      "value": ""
+                    }
+                  },
+                  {
+                    "parts": [
+                      "a_id"
+                    ]
+                  },
+                  {
+                    "type": "Null",
+                    "value": null
+                  }
+                ]
+              }
+            ],
+            "alias": "b_id"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "a"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

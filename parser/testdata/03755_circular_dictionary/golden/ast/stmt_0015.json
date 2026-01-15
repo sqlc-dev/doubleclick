@@ -1,0 +1,52 @@
+{
+  "table": "storages3_dict",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "metric",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "metric"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "QUERY",
+          "value": {
+            "type": "String",
+            "value": "SELECT metric, value FROM system.metrics WHERE metric LIKE 'StorageS3%'"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 0
+      },
+      "max": {
+        "type": "Integer",
+        "value": 1000
+      }
+    },
+    "layout": {
+      "type": "COMPLEX_KEY_HASHED"
+    }
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "users"
+              },
+              "alias": "u1"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "age"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 50
+          },
+          "parenthesized": true
+        },
+        "op": "OR",
+        "right": {
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {}
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "users2"
+                        },
+                        "alias": "u2"
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "left": {
+                    "parts": [
+                      "u1",
+                      "age"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "u2",
+                      "age"
+                    ]
+                  }
+                }
+              },
+              {
+                "columns": [
+                  {}
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "users2"
+                        },
+                        "alias": "u2"
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "left": {
+                    "parts": [
+                      "u1",
+                      "age"
+                    ]
+                  },
+                  "op": "!=",
+                  "right": {
+                    "parts": [
+                      "u2",
+                      "age"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "allow_experimental_correlated_subqueries",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ],
+      "settings_after_format": true,
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "users"
+              },
+              "alias": "u1"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "uid"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "name": "sum",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "age"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "users"
+                        },
+                        "alias": "u2"
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "left": {
+                    "parts": [
+                      "u1",
+                      "name"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "u2",
+                      "name"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

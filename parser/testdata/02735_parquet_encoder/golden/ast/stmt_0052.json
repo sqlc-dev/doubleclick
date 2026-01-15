@@ -1,0 +1,145 @@
+{
+  "function": {
+    "name": "file",
+    "arguments": [
+      {
+        "parts": [
+          "statistics_02735",
+          "parquet"
+        ]
+      }
+    ]
+  },
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "type": "Integer",
+                "value": 100
+              },
+              "op": "+",
+              "right": {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 200
+                }
+              }
+            },
+            "alias": "a"
+          },
+          {
+            "name": "toUInt32",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 3000
+                }
+              }
+            ],
+            "alias": "u"
+          },
+          {
+            "name": "toInt32",
+            "arguments": [
+              {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 3000
+                }
+              }
+            ],
+            "alias": "i"
+          },
+          {
+            "name": "if",
+            "arguments": [
+              {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                },
+                "op": "==",
+                "right": {
+                  "type": "Integer",
+                  "value": 9
+                }
+              },
+              {
+                "name": "toString",
+                "arguments": [
+                  {
+                    "parts": [
+                      "number"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Null",
+                "value": null
+              }
+            ],
+            "alias": "s"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1000000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "settings": [
+          {
+            "name": "output_format_parquet_row_group_size",
+            "value": {
+              "type": "Integer",
+              "value": 1000000
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true
+}

@@ -1,0 +1,110 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "Integer",
+            "value": 7
+          },
+          "alias": "p"
+        },
+        {
+          "name": "geohashEncode",
+          "arguments": [
+            {
+              "parts": [
+                "longitude"
+              ]
+            },
+            {
+              "parts": [
+                "latitude"
+              ]
+            },
+            {
+              "parts": [
+                "p"
+              ]
+            }
+          ],
+          "alias": "actual"
+        },
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "actual"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "parts": [
+                  "encoded"
+                ]
+              }
+            },
+            {
+              "type": "String",
+              "value": "Ok"
+            },
+            {
+              "name": "concat",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "expected: "
+                },
+                {
+                  "parts": [
+                    "encoded"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "geohash_test_data"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "encoded"
+              ]
+            }
+          ]
+        },
+        "op": "=",
+        "right": {
+          "parts": [
+            "p"
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "all"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "table": "orders",
+  "columns": [
+    {
+      "name": "o_orderkey",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "o_custkey",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "o_orderstatus",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 1
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "o_totalprice",
+      "type": {
+        "name": "Decimal",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 18
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "o_orderdate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "o_orderpriority",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 15
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "o_clerk",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 15
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "o_shippriority",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "o_comment",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "name": "c1",
+      "expression": {
+        "left": {
+          "parts": [
+            "o_totalprice"
+          ]
+        },
+        "op": "\u003e=",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "o_orderdate"
+          ]
+        },
+        {
+          "parts": [
+            "o_orderkey"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "name": "arrayMap",
+                              "arguments": [
+                                {
+                                  "parameters": [
+                                    "i"
+                                  ],
+                                  "body": {
+                                    "left": {
+                                      "parts": [
+                                        "i"
+                                      ]
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                      "type": "Integer",
+                                      "value": 1
+                                    },
+                                    "parenthesized": true
+                                  }
+                                },
+                                {
+                                  "name": "range",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 2
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "index"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers_mt",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 100000
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        }
+                      ],
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "index"
+                            ]
+                          }
+                        }
+                      ],
+                      "settings": [
+                        {
+                          "name": "max_block_size",
+                          "value": {
+                            "type": "Integer",
+                            "value": 100000
+                          }
+                        },
+                        {
+                          "name": "max_threads",
+                          "value": {
+                            "type": "Integer",
+                            "value": 2
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

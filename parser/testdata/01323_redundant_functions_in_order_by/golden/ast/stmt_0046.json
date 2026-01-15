@@ -1,0 +1,100 @@
+{
+  "explain_type": "SYNTAX",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            },
+                            "alias": "key"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "numbers",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 4
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "s"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "test"
+                },
+                "alias": "t"
+              },
+              "join": {
+                "type": "FULL",
+                "using": [
+                  {
+                    "parts": [
+                      "key"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "s",
+                "key"
+              ]
+            }
+          },
+          {
+            "expression": {
+              "parts": [
+                "t",
+                "key"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "explicit_type": true
+}

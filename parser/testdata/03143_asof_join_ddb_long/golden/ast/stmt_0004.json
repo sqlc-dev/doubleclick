@@ -1,0 +1,96 @@
+{
+  "table": "build",
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "key"
+          ]
+        },
+        {
+          "parts": [
+            "begin"
+          ]
+        }
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "name": "toDateTime",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "1990-03-21 13:00:00"
+                  }
+                ]
+              },
+              "op": "+",
+              "right": {
+                "value": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "unit": "MINUTE"
+              }
+            },
+            "alias": "begin"
+          },
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 4
+              }
+            },
+            "alias": "key"
+          },
+          {
+            "parts": [
+              "number"
+            ],
+            "alias": "value"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 0
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 4000000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

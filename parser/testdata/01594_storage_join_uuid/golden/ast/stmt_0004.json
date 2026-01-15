@@ -1,0 +1,38 @@
+{
+  "if_not_exists": true,
+  "table": "t",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UUID"
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDate",
+    "arguments": [
+      {
+        "parts": [
+          "d"
+        ]
+      }
+    ]
+  }
+}

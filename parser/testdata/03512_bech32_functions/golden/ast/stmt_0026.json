@@ -1,0 +1,143 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "hrp"
+          ]
+        },
+        {
+          "parts": [
+            "data"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "hrp"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "tuple": {
+                "parts": [
+                  "tup"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          },
+          "alias": "match_hrp"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "data"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "lower",
+              "arguments": [
+                {
+                  "name": "hex",
+                  "arguments": [
+                    {
+                      "tuple": {
+                        "parts": [
+                          "tup"
+                        ]
+                      },
+                      "index": {
+                        "type": "Integer",
+                        "value": 2
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "alias": "match_data"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "hrp"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "data"
+                          ]
+                        },
+                        {
+                          "name": "bech32Decode",
+                          "arguments": [
+                            {
+                              "name": "bech32Encode",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "hrp"
+                                  ]
+                                },
+                                {
+                                  "name": "unhex",
+                                  "arguments": [
+                                    {
+                                      "parts": [
+                                        "data"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "witver"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "tup"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "bech32_test"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "round_trip"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

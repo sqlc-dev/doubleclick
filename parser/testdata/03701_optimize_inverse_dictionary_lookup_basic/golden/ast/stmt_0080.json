@@ -1,0 +1,86 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "color_id"
+          ]
+        },
+        {
+          "name": "row_number",
+          "over": {
+            "partition_by": [
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "color_id"
+                  ]
+                }
+              }
+            ]
+          },
+          "alias": "rn"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t"
+              }
+            }
+          }
+        ]
+      },
+      "qualify": {
+        "left": {
+          "name": "dictGetString",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "colors"
+            },
+            {
+              "type": "String",
+              "value": "name"
+            },
+            {
+              "parts": [
+                "color_id"
+              ]
+            }
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "red"
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "color_id"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "rn"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "table": "fx_1m",
+  "commands": [
+    {
+      "type": "ADD_PROJECTION",
+      "projection": {
+        "name": "fx_5m",
+        "select": {
+          "columns": [
+            {
+              "parts": [
+                "symbol"
+              ]
+            },
+            {
+              "name": "toStartOfInterval",
+              "arguments": [
+                {
+                  "parts": [
+                    "dt_close"
+                  ]
+                },
+                {
+                  "value": {
+                    "type": "Integer",
+                    "value": 300
+                  },
+                  "unit": "SECOND"
+                }
+              ],
+              "alias": "dt_close"
+            },
+            {
+              "name": "argMin",
+              "arguments": [
+                {
+                  "parts": [
+                    "open"
+                  ]
+                },
+                {
+                  "parts": [
+                    "dt_close"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "max",
+              "arguments": [
+                {
+                  "parts": [
+                    "high"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "min",
+              "arguments": [
+                {
+                  "parts": [
+                    "low"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "argMax",
+              "arguments": [
+                {
+                  "parts": [
+                    "close"
+                  ]
+                },
+                {
+                  "parts": [
+                    "dt_close"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "volume"
+                  ]
+                }
+              ],
+              "alias": "volume"
+            }
+          ],
+          "group_by": [
+            {
+              "parts": [
+                "symbol"
+              ]
+            },
+            {
+              "parts": [
+                "dt_close"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "table": "Test",
+  "columns": [
+    {
+      "name": "impression_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "impression_id_compressed",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 16
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "UUIDStringToNum",
+        "arguments": [
+          {
+            "name": "substring",
+            "arguments": [
+              {
+                "parts": [
+                  "impression_id"
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "type": "Integer",
+                "value": 36
+              }
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "impression_id_hashed",
+      "type": {
+        "name": "UInt16"
+      },
+      "default": {
+        "name": "reinterpretAsUInt16",
+        "arguments": [
+          {
+            "parts": [
+              "impression_id_compressed"
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "event_date",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "event_date"
+        ]
+      },
+      {
+        "parts": [
+          "impression_id_hashed"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "event_date"
+            ]
+          },
+          {
+            "parts": [
+              "impression_id_hashed"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 1
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "visits"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "name": "arrayFilter",
+                  "arguments": [
+                    {
+                      "parameters": [
+                        "t"
+                      ],
+                      "body": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    },
+                    {
+                      "name": "arrayMap",
+                      "arguments": [
+                        {
+                          "parameters": [
+                            "x"
+                          ],
+                          "body": {
+                            "name": "tuple",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "x"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "Array",
+                          "value": [
+                            {
+                              "type": "Integer",
+                              "value": 42
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "alias": "i"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "type": "Tuple",
+          "value": [
+            {
+              "parts": [
+                "str"
+              ]
+            },
+            {
+              "tuple": {
+                "parts": [
+                  "i"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          ],
+          "spaced_commas": true
+        },
+        "list": [
+          {
+            "type": "String",
+            "value": "x"
+          },
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      }
+    }
+  ]
+}

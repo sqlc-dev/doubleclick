@@ -1,0 +1,134 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "tmp1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "expr": {
+                          "parts": [
+                            "s1"
+                          ]
+                        },
+                        "type": {
+                          "name": "FixedString(10)"
+                        }
+                      },
+                      "alias": "fs1"
+                    },
+                    {
+                      "parts": [
+                        "s2"
+                      ],
+                      "alias": "sector"
+                    },
+                    {
+                      "parts": [
+                        "s3"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "t1"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "s3"
+                      ]
+                    },
+                    "op": "!=",
+                    "right": {
+                      "type": "String",
+                      "value": "test"
+                    },
+                    "parenthesized": true
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "fs1"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t2"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "tmp1"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "using": [
+                {
+                  "parts": [
+                    "fs1"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "fs1"
+          ]
+        },
+        "list": [
+          {
+            "type": "String",
+            "value": "test"
+          }
+        ]
+      },
+      "settings": [
+        {
+          "name": "enable_multiple_prewhere_read_steps",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "name": "query_plan_merge_filters",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

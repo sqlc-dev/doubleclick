@@ -1,0 +1,96 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "table": "t1"
+        },
+        {
+          "table": "t2"
+        },
+        {
+          "table": "t3"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "table1"
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "table2"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "table1",
+                    "a"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "table2",
+                    "a"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "table3"
+              },
+              "alias": "t3"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "table2",
+                    "b"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "table3",
+                    "b"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "t1",
+              "a"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "PrettyCompactNoEscapes"
+        ]
+      }
+    }
+  ]
+}

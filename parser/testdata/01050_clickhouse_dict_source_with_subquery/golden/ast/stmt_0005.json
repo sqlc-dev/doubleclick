@@ -1,0 +1,115 @@
+{
+  "database": "{CLICKHOUSE_DATABASE:Identifier}",
+  "view": "test_view_01051_d",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "k2"
+                ]
+              },
+              "op": "+",
+              "right": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            "alias": "key"
+          },
+          {
+            "expr": {
+              "left": {
+                "parts": [
+                  "v2"
+                ]
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": "_x"
+              }
+            },
+            "alias": "value"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "expr": {
+                              "left": {
+                                "parts": [
+                                  "key"
+                                ]
+                              },
+                              "op": "+",
+                              "right": {
+                                "type": "Integer",
+                                "value": 2
+                              }
+                            },
+                            "alias": "k2"
+                          },
+                          {
+                            "expr": {
+                              "left": {
+                                "parts": [
+                                  "value"
+                                ]
+                              },
+                              "op": "||",
+                              "right": {
+                                "type": "String",
+                                "value": "_y"
+                              }
+                            },
+                            "alias": "v2"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "test_01051_d"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

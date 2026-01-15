@@ -1,0 +1,95 @@
+{
+  "explain_type": "",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "numbers"
+                },
+                "alias": "n"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "s3",
+                                  "arguments": [
+                                    {
+                                      "type": "String",
+                                      "value": "http://localhost:11111/test/a.tsv"
+                                    },
+                                    {
+                                      "type": "String",
+                                      "value": "TSV"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "s"
+              },
+              "join": {
+                "type": "INNER",
+                "on": {
+                  "left": {
+                    "name": "toInt64",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "n",
+                          "number"
+                        ]
+                      }
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "name": "toInt64",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "s",
+                          "c1"
+                        ]
+                      }
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

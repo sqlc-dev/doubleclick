@@ -1,0 +1,107 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "base64Decode",
+          "arguments": [
+            {
+              "name": "base64Encode",
+              "arguments": [
+                {
+                  "name": "normalizeQuery",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "query"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "log_comment"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "ad15a651"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "current_database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        }
+      },
+      "group_by": [
+        {
+          "name": "normalizeQuery",
+          "arguments": [
+            {
+              "parts": [
+                "query"
+              ]
+            }
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "name": "normalizeQuery",
+            "arguments": [
+              {
+                "parts": [
+                  "query"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

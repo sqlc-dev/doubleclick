@@ -1,0 +1,239 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "u"
+          ]
+        },
+        {
+          "parts": [
+            "cumSum"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "u"
+                          ]
+                        },
+                        {
+                          "name": "min",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "d"
+                              ]
+                            }
+                          ],
+                          "alias": "mn"
+                        },
+                        {
+                          "name": "max",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "d"
+                              ]
+                            }
+                          ],
+                          "alias": "mx"
+                        },
+                        {
+                          "name": "groupArray",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "d"
+                              ]
+                            }
+                          ],
+                          "alias": "dg"
+                        },
+                        {
+                          "name": "groupArray",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "v"
+                              ]
+                            }
+                          ],
+                          "alias": "vg"
+                        },
+                        {
+                          "name": "arrayMap",
+                          "arguments": [
+                            {
+                              "parameters": [
+                                "x"
+                              ],
+                              "body": {
+                                "left": {
+                                  "parts": [
+                                    "x"
+                                  ]
+                                },
+                                "op": "+",
+                                "right": {
+                                  "parts": [
+                                    "mn"
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "name": "range",
+                              "arguments": [
+                                {
+                                  "name": "toUInt32",
+                                  "arguments": [
+                                    {
+                                      "left": {
+                                        "left": {
+                                          "parts": [
+                                            "mx"
+                                          ]
+                                        },
+                                        "op": "-",
+                                        "right": {
+                                          "parts": [
+                                            "mn"
+                                          ]
+                                        }
+                                      },
+                                      "op": "+",
+                                      "right": {
+                                        "type": "Integer",
+                                        "value": 1
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "days"
+                        },
+                        {
+                          "name": "toString",
+                          "arguments": [
+                            {
+                              "name": "arrayCumSum",
+                              "arguments": [
+                                {
+                                  "name": "arrayMap",
+                                  "arguments": [
+                                    {
+                                      "parameters": [
+                                        "x"
+                                      ],
+                                      "body": {
+                                        "array": {
+                                          "parts": [
+                                            "vg"
+                                          ]
+                                        },
+                                        "index": {
+                                          "name": "indexOf",
+                                          "arguments": [
+                                            {
+                                              "parts": [
+                                                "dg"
+                                              ]
+                                            },
+                                            {
+                                              "parts": [
+                                                "x"
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "parts": [
+                                        "days"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "cumSum"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          "alias": "u"
+                                        },
+                                        {
+                                          "expr": {
+                                            "left": {
+                                              "name": "today"
+                                            },
+                                            "op": "-",
+                                            "right": {
+                                              "type": "Integer",
+                                              "value": 1
+                                            }
+                                          },
+                                          "alias": "d"
+                                        },
+                                        {
+                                          "expr": {
+                                            "type": "Integer",
+                                            "value": 1
+                                          },
+                                          "alias": "v"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "u"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

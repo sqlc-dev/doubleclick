@@ -1,0 +1,53 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "distributed_table1"
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "distributed_table2"
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "INNER",
+              "global": true,
+              "on": {
+                "left": {
+                  "name": "materialize",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 42
+                    }
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "t1",
+                    "a"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

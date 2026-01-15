@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "over": {
+            "name": "w"
+          },
+          "alias": "x"
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "number"
+              ]
+            }
+          ],
+          "over": {
+            "name": "w"
+          },
+          "alias": "y"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2}"
+                  },
+                  {
+                    "type": "String",
+                    "value": ""
+                  },
+                  {
+                    "parts": [
+                      "t_01568"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "window": [
+        {
+          "name": "w",
+          "spec": {
+            "partition_by": [
+              {
+                "parts": [
+                  "p"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "x"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "y"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

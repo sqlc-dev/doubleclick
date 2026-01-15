@@ -1,0 +1,117 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "x"
+          ]
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "A"
+              ]
+            }
+          ],
+          "alias": "mA"
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "B"
+              ]
+            }
+          ],
+          "alias": "mB"
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "C"
+              ]
+            }
+          ],
+          "alias": "mC"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "x"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "x"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "left": {
+            "parts": [
+              "mA"
+            ]
+          },
+          "op": "AND",
+          "right": {
+            "parts": [
+              "mB"
+            ]
+          },
+          "parenthesized": true
+        },
+        "op": "OR",
+        "right": {
+          "left": {
+            "parts": [
+              "mA"
+            ]
+          },
+          "op": "AND",
+          "right": {
+            "parts": [
+              "mC"
+            ]
+          },
+          "parenthesized": true
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "x"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      },
+      "settings": [
+        {
+          "name": "optimize_extract_common_expressions",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "q_id",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "initial_query_id"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "left": {
+                        "left": {
+                          "parts": [
+                            "current_database"
+                          ]
+                        },
+                        "op": "=",
+                        "right": {
+                          "name": "currentDatabase"
+                        }
+                      },
+                      "op": "AND",
+                      "right": {
+                        "left": {
+                          "parts": [
+                            "event_date"
+                          ]
+                        },
+                        "op": "\u003e=",
+                        "right": {
+                          "name": "yesterday"
+                        }
+                      }
+                    },
+                    "op": "AND",
+                    "right": {
+                      "expr": {
+                        "parts": [
+                          "query"
+                        ]
+                      },
+                      "pattern": {
+                        "type": "String",
+                        "value": "-- INSERT USING VALUES%"
+                      }
+                    }
+                  },
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "type": "String",
+          "value": "VALUES"
+        },
+        {
+          "left": {
+            "parts": [
+              "view_duration_ms"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "Integer",
+            "value": 50
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_views_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "initial_query_id"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "parts": [
+            "q_id"
+          ]
+        }
+      }
+    }
+  ]
+}

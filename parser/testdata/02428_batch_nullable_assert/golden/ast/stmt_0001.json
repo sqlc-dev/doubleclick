@@ -1,0 +1,206 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "roundBankers",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 100
+            }
+          ]
+        },
+        {
+          "op": "-",
+          "operand": {
+            "type": "Integer",
+            "value": 9223372036854775808
+          }
+        },
+        {
+          "name": "roundBankers",
+          "arguments": [
+            {
+              "tuple": {
+                "parts": [
+                  "result"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 256
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "studentTTest",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "sample"
+                              ]
+                            },
+                            {
+                              "parts": [
+                                "variant"
+                              ]
+                            }
+                          ],
+                          "alias": "result"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "left": {
+                                              "name": "toFloat64",
+                                              "arguments": [
+                                                {
+                                                  "parts": [
+                                                    "number"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "op": "%",
+                                            "right": {
+                                              "type": "Null",
+                                              "value": null
+                                            }
+                                          },
+                                          "alias": "sample"
+                                        },
+                                        {
+                                          "expr": {
+                                            "type": "Integer",
+                                            "value": 0
+                                          },
+                                          "alias": "variant"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "database": "system",
+                                                "table": "numbers"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "limit": {
+                                        "type": "Integer",
+                                        "value": 1025
+                                      }
+                                    },
+                                    {
+                                      "columns": [
+                                        {
+                                          "expr": {
+                                            "left": {
+                                              "left": {
+                                                "name": "toFloat64",
+                                                "arguments": [
+                                                  {
+                                                    "parts": [
+                                                      "number"
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              "op": "%",
+                                              "right": {
+                                                "type": "Integer",
+                                                "value": 9223372036854775807
+                                              },
+                                              "parenthesized": true
+                                            },
+                                            "op": "+",
+                                            "right": {
+                                              "type": "Float",
+                                              "value": "NaN"
+                                            }
+                                          },
+                                          "alias": "sample"
+                                        },
+                                        {
+                                          "expr": {
+                                            "op": "-",
+                                            "operand": {
+                                              "type": "Integer",
+                                              "value": 9223372036854775808
+                                            }
+                                          },
+                                          "alias": "variant"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "database": "system",
+                                                "table": "numbers"
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      "limit": {
+                                        "type": "Integer",
+                                        "value": 1024
+                                      }
+                                    }
+                                  ],
+                                  "union_all": true,
+                                  "union_modes": [
+                                    "UNION ALL"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "CSV"
+        ]
+      }
+    }
+  ]
+}

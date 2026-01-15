@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "domainWithoutWWW",
+          "arguments": [
+            {
+              "parts": [
+                "Referer"
+              ]
+            }
+          ],
+          "alias": "key"
+        },
+        {
+          "name": "avg",
+          "arguments": [
+            {
+              "name": "length",
+              "arguments": [
+                {
+                  "parts": [
+                    "Referer"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "l"
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "Referer"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits_s3"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "Referer"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "type": "String",
+          "value": ""
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "key"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "parts": [
+            "c"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 100000
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "l"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 25
+      }
+    }
+  ]
+}

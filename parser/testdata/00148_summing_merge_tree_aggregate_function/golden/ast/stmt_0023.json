@@ -1,0 +1,66 @@
+{
+  "table": "summing_merge_tree_aggregate_function",
+  "columns": [
+    {
+      "name": "d",
+      "type": null,
+      "default": {
+        "name": "today"
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "name": "topK",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "name": "UInt8"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "parts": [
+          "k"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

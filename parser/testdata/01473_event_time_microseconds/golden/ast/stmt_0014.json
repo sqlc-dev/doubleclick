@@ -1,0 +1,138 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "time",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "event_time_microseconds"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "event_time"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "database": "system",
+                            "table": "query_thread_log"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "current_database"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "name": "currentDatabase"
+                    }
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "event_time"
+                        ]
+                      },
+                      "descending": true
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "if",
+          "arguments": [
+            {
+              "left": {
+                "name": "dateDiff",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "second"
+                  },
+                  {
+                    "name": "toDateTime",
+                    "arguments": [
+                      {
+                        "tuple": {
+                          "parts": [
+                            "time"
+                          ]
+                        },
+                        "index": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "toDateTime",
+                    "arguments": [
+                      {
+                        "tuple": {
+                          "parts": [
+                            "time"
+                          ]
+                        },
+                        "index": {
+                          "type": "Integer",
+                          "value": 2
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            {
+              "type": "String",
+              "value": "ok"
+            },
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "parts": [
+                    "time"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arraySort",
+          "arguments": [
+            {
+              "name": "arrayMap",
+              "arguments": [
+                {
+                  "parameters": [
+                    "x"
+                  ],
+                  "body": {
+                    "condition": {
+                      "left": {
+                        "parts": [
+                          "x"
+                        ]
+                      },
+                      "op": "==",
+                      "right": {
+                        "type": "String",
+                        "value": "crc32"
+                      }
+                    },
+                    "then": {
+                      "type": "String",
+                      "value": "CRC32"
+                    },
+                    "else": {
+                      "parts": [
+                        "x"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "arrayFilter",
+                  "arguments": [
+                    {
+                      "parameters": [
+                        "x"
+                      ],
+                      "body": {
+                        "left": {
+                          "parts": [
+                            "x"
+                          ]
+                        },
+                        "op": "!=",
+                        "right": {
+                          "type": "String",
+                          "value": "arrayJoin"
+                        }
+                      }
+                    },
+                    {
+                      "parts": [
+                        "used_functions"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "arraySort(used_functions)"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "QueryFinish"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "query"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%toDate('2000-12-05')%"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "query_start_time"
+            ]
+          },
+          "descending": true
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      },
+      "format": {
+        "parts": [
+          "TabSeparatedWithNames"
+        ]
+      }
+    }
+  ]
+}

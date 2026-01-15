@@ -1,0 +1,78 @@
+{
+  "table": "agg_func_col",
+  "columns": [
+    {
+      "name": "p",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "d",
+      "type": {
+        "name": "AggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sum"
+            ]
+          },
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "arrayReduce",
+        "arguments": [
+          {
+            "type": "String",
+            "value": "sumState"
+          },
+          {
+            "type": "Array",
+            "value": [
+              {
+                "name": "toUInt64",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 200
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "p"
+        ]
+      },
+      {
+        "parts": [
+          "k"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 1
+      }
+    ],
+    "has_parentheses": true
+  }
+}

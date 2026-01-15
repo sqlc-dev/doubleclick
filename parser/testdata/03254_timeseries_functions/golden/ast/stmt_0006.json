@@ -1,0 +1,226 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "start",
+          "query": {
+            "type": "Integer",
+            "value": 1734955380
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "end",
+          "query": {
+            "type": "Integer",
+            "value": 1734955680
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "step",
+          "query": {
+            "type": "Integer",
+            "value": 15
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "window",
+          "query": {
+            "type": "Integer",
+            "value": 300
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "grid",
+          "query": {
+            "name": "timeSeriesRange",
+            "arguments": [
+              {
+                "parts": [
+                  "start"
+                ]
+              },
+              {
+                "parts": [
+                  "end"
+                ]
+              },
+              {
+                "parts": [
+                  "step"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "arrayZip",
+          "arguments": [
+            {
+              "parts": [
+                "grid"
+              ]
+            },
+            {
+              "name": "timeSeriesLastToGrid",
+              "parameters": [
+                {
+                  "parts": [
+                    "start"
+                  ]
+                },
+                {
+                  "parts": [
+                    "end"
+                  ]
+                },
+                {
+                  "parts": [
+                    "step"
+                  ]
+                },
+                {
+                  "parts": [
+                    "window"
+                  ]
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "timestamp"
+                  ]
+                },
+                {
+                  "parts": [
+                    "value"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "last_5m"
+        },
+        {
+          "name": "arrayZip",
+          "arguments": [
+            {
+              "parts": [
+                "grid"
+              ]
+            },
+            {
+              "name": "timeSeriesRateToGrid",
+              "parameters": [
+                {
+                  "parts": [
+                    "start"
+                  ]
+                },
+                {
+                  "parts": [
+                    "end"
+                  ]
+                },
+                {
+                  "parts": [
+                    "step"
+                  ]
+                },
+                {
+                  "parts": [
+                    "window"
+                  ]
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "timestamp"
+                  ]
+                },
+                {
+                  "parts": [
+                    "value"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "rate_5m"
+        },
+        {
+          "name": "arrayZip",
+          "arguments": [
+            {
+              "parts": [
+                "grid"
+              ]
+            },
+            {
+              "name": "timeSeriesDeltaToGrid",
+              "parameters": [
+                {
+                  "parts": [
+                    "start"
+                  ]
+                },
+                {
+                  "parts": [
+                    "end"
+                  ]
+                },
+                {
+                  "parts": [
+                    "step"
+                  ]
+                },
+                {
+                  "parts": [
+                    "window"
+                  ]
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "timestamp"
+                  ]
+                },
+                {
+                  "parts": [
+                    "value"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "delta_5m"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "ts_raw_data"
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

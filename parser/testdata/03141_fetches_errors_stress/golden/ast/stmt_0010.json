@@ -1,0 +1,154 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "name": "errorCodeToName",
+          "arguments": [
+            {
+              "parts": [
+                "error"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "error"
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "name": "errorCodeToName",
+              "arguments": [
+                {
+                  "parts": [
+                    "error"
+                  ]
+                }
+              ]
+            },
+            "not": true,
+            "list": [
+              {
+                "type": "String",
+                "value": "FAULT_INJECTED"
+              },
+              {
+                "type": "String",
+                "value": "NO_REPLICA_HAS_PART"
+              },
+              {
+                "type": "String",
+                "value": "ATTEMPT_TO_READ_AFTER_EOF"
+              }
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "left": {
+              "name": "errorCodeToName",
+              "arguments": [
+                {
+                  "parts": [
+                    "error"
+                  ]
+                }
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "type": "String",
+              "value": "POCO_EXCEPTION"
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "exception"
+              ]
+            },
+            "not": true,
+            "pattern": {
+              "type": "String",
+              "value": "%Malformed message: Unexpected EOF%"
+            }
+          },
+          "parenthesized": true
+        }
+      },
+      "group_by": [
+        {
+          "type": "Integer",
+          "value": 1
+        },
+        {
+          "type": "Integer",
+          "value": 2
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ]
+    }
+  ]
+}

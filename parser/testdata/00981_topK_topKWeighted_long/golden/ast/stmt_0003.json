@@ -1,0 +1,98 @@
+{
+  "table": "topk",
+  "select": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "frequent",
+            "query": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "%",
+                "right": {
+                  "type": "Integer",
+                  "value": 7
+                }
+              },
+              "op": "=",
+              "right": {
+                "type": "Integer",
+                "value": 0
+              }
+            },
+            "scalar_with": true
+          }
+        ],
+        "columns": [
+          {
+            "name": "toString",
+            "arguments": [
+              {
+                "condition": {
+                  "parts": [
+                    "frequent"
+                  ]
+                },
+                "then": {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 10
+                  }
+                },
+                "else": {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "condition": {
+              "parts": [
+                "frequent"
+              ]
+            },
+            "then": {
+              "type": "Integer",
+              "value": 999999999
+            },
+            "else": {
+              "parts": [
+                "number"
+              ]
+            }
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 4000000
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

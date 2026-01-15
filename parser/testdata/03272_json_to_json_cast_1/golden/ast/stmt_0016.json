@@ -1,0 +1,154 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "parts": [
+              "json"
+            ]
+          },
+          "type": {
+            "name": "JSON",
+            "parameters": [
+              {
+                "expr": {
+                  "left": {
+                    "parts": [
+                      "max_dynamic_paths"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 4
+                  }
+                }
+              },
+              {
+                "expr": {
+                  "left": {
+                    "parts": [
+                      "max_dynamic_types"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 4
+                  }
+                }
+              },
+              {
+                "expr": {
+                  "name": "a",
+                  "type": {
+                    "name": "UInt32"
+                  }
+                }
+              },
+              {
+                "expr": {
+                  "name": "b",
+                  "type": {
+                    "name": "String"
+                  }
+                }
+              },
+              {
+                "expr": {
+                  "name": "SKIP",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "c"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ],
+            "has_parentheses": true
+          },
+          "alias": "json2",
+          "operator_syntax": true
+        },
+        {
+          "name": "JSONDynamicPaths",
+          "arguments": [
+            {
+              "parts": [
+                "json2"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "JSONSharedDataPaths",
+          "arguments": [
+            {
+              "parts": [
+                "json2"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "dynamicType",
+          "arguments": [
+            {
+              "parts": [
+                "json2",
+                "k2"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "isDynamicElementInSharedData",
+          "arguments": [
+            {
+              "parts": [
+                "json2",
+                "k2"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "dynamicType",
+          "arguments": [
+            {
+              "parts": [
+                "json2",
+                "k4"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "isDynamicElementInSharedData",
+          "arguments": [
+            {
+              "parts": [
+                "json2",
+                "k4"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

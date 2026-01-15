@@ -1,0 +1,111 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "key"
+          ]
+        },
+        {
+          "parts": [
+            "val1"
+          ]
+        },
+        {
+          "parts": [
+            "val2"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "assumeNotNull",
+              "arguments": [
+                {
+                  "parts": [
+                    "val1"
+                  ]
+                }
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "parts": [
+                "val2"
+              ]
+            }
+          },
+          "alias": "x1"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "val1"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "parts": [
+                "val2"
+              ]
+            }
+          },
+          "alias": "x2"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "data"
+              },
+              "final": true
+            }
+          }
+        ]
+      },
+      "prewhere": {
+        "left": {
+          "name": "assumeNotNull",
+          "arguments": [
+            {
+              "parts": [
+                "val1"
+              ]
+            }
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "x1"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "parts": [
+            "x2"
+          ]
+        }
+      },
+      "settings": [
+        {
+          "name": "max_threads",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

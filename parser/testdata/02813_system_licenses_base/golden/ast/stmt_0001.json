@@ -1,0 +1,110 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "replace": [
+            {
+              "expr": {
+                "name": "substring",
+                "arguments": [
+                  {
+                    "parts": [
+                      "license_text"
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  {
+                    "name": "position",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "license_text"
+                        ]
+                      },
+                      {
+                        "type": "String",
+                        "value": "\n"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "name": "license_text"
+            }
+          ],
+          "transformers": [
+            {
+              "type": "replace",
+              "replaces": [
+                {
+                  "expr": {
+                    "name": "substring",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "license_text"
+                        ]
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "name": "position",
+                        "arguments": [
+                          {
+                            "parts": [
+                              "license_text"
+                            ]
+                          },
+                          {
+                            "type": "String",
+                            "value": "\n"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "name": "license_text"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "licenses"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "library_name"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "poco"
+        }
+      },
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

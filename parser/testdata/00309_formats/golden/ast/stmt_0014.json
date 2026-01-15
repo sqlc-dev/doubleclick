@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "left": {
+                "parts": [
+                  "number"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 246
+              }
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 10
+            }
+          },
+          "alias": "n"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2000-01-01"
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "parts": [
+                "n"
+              ]
+            }
+          },
+          "alias": "d"
+        },
+        {
+          "expr": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "n"
+                ]
+              },
+              {
+                "parts": [
+                  "d"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          },
+          "alias": "tuple"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      },
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ],
+      "settings_after_format": true,
+      "format": {
+        "parts": [
+          "TabSeparatedWithNamesAndTypes"
+        ]
+      }
+    }
+  ]
+}

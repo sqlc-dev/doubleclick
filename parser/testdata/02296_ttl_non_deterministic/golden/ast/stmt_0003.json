@@ -1,0 +1,68 @@
+{
+  "table": "t_ttl_non_deterministic",
+  "columns": [
+    {
+      "name": "A",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "/clickhouse/tables/{database}/ttl1"
+      },
+      {
+        "type": "String",
+        "value": "1"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "A"
+      ]
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "name": "now"
+      },
+      "op": "+",
+      "right": {
+        "name": "toIntervalMonth",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 1
+          }
+        ]
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "name": "now"
+          },
+          "op": "+",
+          "right": {
+            "name": "toIntervalMonth",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,269 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "explain"
+          ],
+          "alias": "e"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "tab_l"
+                                },
+                                "alias": "l"
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "tab_m"
+                                },
+                                "alias": "m"
+                              },
+                              "join": {
+                                "type": "INNER",
+                                "on": {
+                                  "left": {
+                                    "left": {
+                                      "left": {
+                                        "parts": [
+                                          "l",
+                                          "a"
+                                        ]
+                                      },
+                                      "op": "*",
+                                      "right": {
+                                        "type": "Integer",
+                                        "value": 2
+                                      }
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "left": {
+                                        "parts": [
+                                          "m",
+                                          "c"
+                                        ]
+                                      },
+                                      "op": "+",
+                                      "right": {
+                                        "parts": [
+                                          "m",
+                                          "d"
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  "op": "AND",
+                                  "right": {
+                                    "left": {
+                                      "parts": [
+                                        "l",
+                                        "d"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "parts": [
+                                        "m",
+                                        "a"
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "tab_r"
+                                },
+                                "alias": "r"
+                              },
+                              "join": {
+                                "type": "INNER",
+                                "on": {
+                                  "left": {
+                                    "left": {
+                                      "left": {
+                                        "left": {
+                                          "parts": [
+                                            "l",
+                                            "a"
+                                          ]
+                                        },
+                                        "op": "*",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 2
+                                        }
+                                      },
+                                      "op": "=",
+                                      "right": {
+                                        "left": {
+                                          "parts": [
+                                            "r",
+                                            "a"
+                                          ]
+                                        },
+                                        "op": "*",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 2
+                                        }
+                                      }
+                                    },
+                                    "op": "AND",
+                                    "right": {
+                                      "left": {
+                                        "left": {
+                                          "parts": [
+                                            "l",
+                                            "b"
+                                          ]
+                                        },
+                                        "op": "+",
+                                        "right": {
+                                          "parts": [
+                                            "l",
+                                            "c"
+                                          ]
+                                        }
+                                      },
+                                      "op": "=",
+                                      "right": {
+                                        "left": {
+                                          "parts": [
+                                            "r",
+                                            "c"
+                                          ]
+                                        },
+                                        "op": "*",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 2
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "op": "AND",
+                                  "right": {
+                                    "left": {
+                                      "parts": [
+                                        "l",
+                                        "d"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "parts": [
+                                        "r",
+                                        "d"
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "expr": {
+                  "parts": [
+                    "e"
+                  ]
+                },
+                "pattern": {
+                  "type": "String",
+                  "value": "%ReadFromMergeTree%"
+                }
+              },
+              "op": "OR",
+              "right": {
+                "expr": {
+                  "parts": [
+                    "e"
+                  ]
+                },
+                "pattern": {
+                  "type": "String",
+                  "value": "%Expression%"
+                }
+              }
+            },
+            "op": "OR",
+            "right": {
+              "expr": {
+                "parts": [
+                  "e"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "%Join%"
+              }
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "e"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%Clauses%"
+            }
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "e"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Sharding%"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "subdepartment",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      "alias": "level"
+                    },
+                    {}
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "department"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "name"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "String",
+                      "value": "A"
+                    }
+                  }
+                },
+                {
+                  "columns": [
+                    {
+                      "left": {
+                        "parts": [
+                          "sd",
+                          "level"
+                        ]
+                      },
+                      "op": "+",
+                      "right": {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    },
+                    {
+                      "table": "d"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "department"
+                          },
+                          "alias": "d"
+                        }
+                      },
+                      {
+                        "table": {
+                          "table": {
+                            "table": "subdepartment"
+                          },
+                          "alias": "sd"
+                        },
+                        "join": {
+                          "type": ""
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "d",
+                        "parent_department"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "parts": [
+                        "sd",
+                        "id"
+                      ]
+                    }
+                  }
+                }
+              ],
+              "union_all": true,
+              "union_modes": [
+                "UNION ALL"
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "subdepartment"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "name"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

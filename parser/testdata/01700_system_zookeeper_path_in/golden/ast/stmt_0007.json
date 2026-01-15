@@ -1,0 +1,111 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "r1"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "zookeeper"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "path"
+            ]
+          },
+          "list": [
+            {
+              "left": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "type": "String",
+                      "value": "/clickhouse/"
+                    },
+                    "op": "||",
+                    "right": {
+                      "name": "currentDatabase"
+                    }
+                  },
+                  "op": "||",
+                  "right": {
+                    "type": "String",
+                    "value": "/01700_system_zookeeper_path_in/"
+                  }
+                },
+                "op": "||",
+                "right": {
+                  "name": "getMacro",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": "shard"
+                    }
+                  ]
+                }
+              },
+              "op": "||",
+              "right": {
+                "type": "String",
+                "value": "/replicas"
+              }
+            }
+          ]
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "name"
+            ]
+          },
+          "pattern": {
+            "left": {
+              "left": {
+                "type": "String",
+                "value": "%"
+              },
+              "op": "||",
+              "right": {
+                "name": "getMacro",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "replica"
+                  }
+                ]
+              }
+            },
+            "op": "||",
+            "right": {
+              "type": "String",
+              "value": "%"
+            }
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "name"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,226 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        {
+          "parts": [
+            "hits"
+          ]
+        },
+        {
+          "parts": [
+            "visits"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "CounterID"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 100000
+                            },
+                            "parenthesized": true
+                          },
+                          "alias": "CounterID"
+                        },
+                        {
+                          "name": "count",
+                          "alias": "hits"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "test",
+                                "table": "hits"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "CounterID"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "CounterID"
+                              ]
+                            },
+                            "op": "%",
+                            "right": {
+                              "type": "Integer",
+                              "value": 100000
+                            },
+                            "parenthesized": true
+                          },
+                          "alias": "CounterID"
+                        },
+                        {
+                          "name": "sum",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "Sign"
+                              ]
+                            }
+                          ],
+                          "alias": "visits"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "test",
+                                "table": "visits"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "CounterID"
+                          ]
+                        }
+                      ],
+                      "having": {
+                        "left": {
+                          "parts": [
+                            "visits"
+                          ]
+                        },
+                        "op": "\u003e",
+                        "right": {
+                          "type": "Integer",
+                          "value": 0
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "join": {
+              "type": "FULL",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "CounterID"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "hits"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "op": "OR",
+        "right": {
+          "left": {
+            "parts": [
+              "visits"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "left": {
+              "parts": [
+                "hits"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "left": {
+                "parts": [
+                  "visits"
+                ]
+              },
+              "op": "*",
+              "right": {
+                "type": "Integer",
+                "value": 10
+              }
+            }
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "CounterID"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 20
+      }
+    }
+  ]
+}

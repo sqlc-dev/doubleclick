@@ -1,0 +1,54 @@
+{
+  "table": "ttl",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "a",
+      "type": {
+        "name": "Int"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "a"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDayOfMonth",
+    "arguments": [
+      {
+        "parts": [
+          "d"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "max_number_of_merges_with_ttl_in_pool",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "materialize_ttl_recalculate_only",
+      "value": {
+        "type": "Boolean",
+        "value": true
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,94 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "p"
+              ],
+              "body": {
+                "type": "Tuple",
+                "value": [
+                  {
+                    "name": "round",
+                    "arguments": [
+                      {
+                        "tuple": {
+                          "parts": [
+                            "p"
+                          ]
+                        },
+                        "index": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      }
+                    ]
+                  },
+                  {
+                    "name": "round",
+                    "arguments": [
+                      {
+                        "tuple": {
+                          "parts": [
+                            "p"
+                          ]
+                        },
+                        "index": {
+                          "type": "Integer",
+                          "value": 2
+                        }
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      }
+                    ]
+                  }
+                ],
+                "spaced_commas": true
+              }
+            },
+            {
+              "name": "h3ToGeoBoundary",
+              "arguments": [
+                {
+                  "parts": [
+                    "h3_index"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "h3_indexes"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "h3_index"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

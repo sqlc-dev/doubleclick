@@ -1,0 +1,166 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "part_name"
+          ]
+        },
+        {
+          "name": "arraySort",
+          "arguments": [
+            {
+              "name": "groupArrayIf",
+              "arguments": [
+                {
+                  "parts": [
+                    "table"
+                  ]
+                },
+                {
+                  "left": {
+                    "parts": [
+                      "event_type"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "String",
+                    "value": "MergeParts"
+                  }
+                }
+              ]
+            }
+          ],
+          "alias": "mergers"
+        },
+        {
+          "name": "arraySort",
+          "arguments": [
+            {
+              "name": "groupArrayIf",
+              "arguments": [
+                {
+                  "parts": [
+                    "table"
+                  ]
+                },
+                {
+                  "left": {
+                    "parts": [
+                      "event_type"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "String",
+                    "value": "DownloadPart"
+                  }
+                }
+              ]
+            }
+          ],
+          "alias": "fetchers"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "event_time"
+                ]
+              },
+              "op": "\u003e",
+              "right": {
+                "left": {
+                  "name": "now"
+                },
+                "op": "-",
+                "right": {
+                  "type": "Integer",
+                  "value": 120
+                },
+                "parenthesized": true
+              },
+              "parenthesized": true
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "table"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "execute\\_on\\_single\\_replica\\_r%"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "part_name"
+              ]
+            },
+            "not": true,
+            "pattern": {
+              "type": "String",
+              "value": "%\\_0"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          },
+          "parenthesized": true
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "part_name"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "part_name"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Vertical"
+        ]
+      }
+    }
+  ]
+}

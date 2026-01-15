@@ -1,0 +1,85 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "block_filter",
+          "query": {
+            "expr": {
+              "parts": [
+                "Block_Height"
+              ]
+            },
+            "low": {
+              "type": "Integer",
+              "value": 1
+            },
+            "high": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "block_filter"
+          ]
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "Block_Date"
+            ]
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "Block_Date"
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "test"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "parts": [
+                    "block_filter"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

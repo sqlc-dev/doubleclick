@@ -1,0 +1,65 @@
+{
+  "table": "test_alter_mixed",
+  "commands": [
+    {
+      "type": "DROP_COLUMN",
+      "column_name": "a"
+    },
+    {
+      "type": "DROP_COLUMN",
+      "column_name": "a",
+      "if_exists": true
+    },
+    {
+      "type": "MODIFY_COLUMN",
+      "column": {
+        "name": "a",
+        "type": {
+          "name": "Int64"
+        }
+      },
+      "if_exists": true
+    },
+    {
+      "type": "COMMENT_COLUMN",
+      "column_name": "a",
+      "if_exists": true,
+      "comment": "should be ignored"
+    },
+    {
+      "type": "RENAME_COLUMN",
+      "column_name": "a",
+      "new_name": "a_renamed",
+      "if_exists": true
+    },
+    {
+      "type": "MODIFY_COLUMN",
+      "column": {
+        "name": "b",
+        "type": {
+          "name": "String"
+        },
+        "default": {
+          "type": "String",
+          "value": "test"
+        },
+        "default_kind": "DEFAULT"
+      },
+      "if_exists": true
+    },
+    {
+      "type": "DROP_COLUMN",
+      "column_name": "c"
+    },
+    {
+      "type": "MODIFY_COLUMN",
+      "column": {
+        "name": "c",
+        "type": {
+          "name": "Float32"
+        }
+      },
+      "if_exists": true
+    }
+  ]
+}

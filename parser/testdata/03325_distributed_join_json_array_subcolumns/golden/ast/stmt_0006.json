@@ -1,0 +1,76 @@
+{
+  "table": "test_distr",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "data",
+      "type": {
+        "name": "JSON",
+        "parameters": [
+          {
+            "expr": {
+              "name": "arr1",
+              "type": {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "String"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            }
+          },
+          {
+            "expr": {
+              "name": "arr2",
+              "type": {
+                "name": "Array",
+                "parameters": [
+                  {
+                    "name": "Int32"
+                  }
+                ],
+                "has_parentheses": true
+              }
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "Distributed",
+    "parameters": [
+      {
+        "parts": [
+          "test_cluster_one_shard_three_replicas_localhost"
+        ]
+      },
+      {
+        "name": "currentDatabase"
+      },
+      {
+        "type": "String",
+        "value": "test"
+      },
+      {
+        "name": "murmurHash2_32",
+        "arguments": [
+          {
+            "parts": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "has_parentheses": true
+  }
+}

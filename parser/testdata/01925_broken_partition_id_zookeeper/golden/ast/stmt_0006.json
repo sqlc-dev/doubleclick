@@ -1,0 +1,70 @@
+{
+  "table": "old_partition_key",
+  "columns": [
+    {
+      "name": "sd",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "dh",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "ak",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "ed",
+      "type": {
+        "name": "Date"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "sd"
+        ]
+      },
+      {
+        "parts": [
+          "dh"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "ak"
+            ]
+          },
+          {
+            "parts": [
+              "ed"
+            ]
+          },
+          {
+            "parts": [
+              "dh"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

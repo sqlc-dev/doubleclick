@@ -1,0 +1,85 @@
+{
+  "if_not_exists": true,
+  "table": "second",
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "inn"
+          ]
+        },
+        {
+          "parts": [
+            "sessionId"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "parts": [
+          "inn"
+        ]
+      },
+      {
+        "name": "toYYYYMM",
+        "arguments": [
+          {
+            "parts": [
+              "received"
+            ]
+          }
+        ]
+      }
+    ],
+    "spaced_commas": true
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "now",
+            "alias": "received"
+          },
+          {
+            "expr": {
+              "type": "String",
+              "value": "123456789"
+            },
+            "alias": "inn"
+          },
+          {
+            "expr": {
+              "type": "String",
+              "value": "42"
+            },
+            "alias": "sessionId"
+          },
+          {
+            "expr": {
+              "type": "String",
+              "value": "111"
+            },
+            "alias": "serial"
+          },
+          {
+            "expr": {
+              "type": "String",
+              "value": "222"
+            },
+            "alias": "reg"
+          }
+        ]
+      }
+    ]
+  }
+}

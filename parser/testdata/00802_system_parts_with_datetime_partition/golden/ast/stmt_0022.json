@@ -1,0 +1,119 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "partition"
+          ]
+        },
+        {
+          "name": "toUnixTimestamp",
+          "arguments": [
+            {
+              "name": "MIN",
+              "arguments": [
+                {
+                  "parts": [
+                    "min_time"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "min_unix_time"
+        },
+        {
+          "name": "toUnixTimestamp",
+          "arguments": [
+            {
+              "name": "MAX",
+              "arguments": [
+                {
+                  "parts": [
+                    "max_time"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "max_unix_time"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "parts"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "table"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "datetime_table"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "active"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "partition"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "partition"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "CSV"
+        ]
+      }
+    }
+  ]
+}

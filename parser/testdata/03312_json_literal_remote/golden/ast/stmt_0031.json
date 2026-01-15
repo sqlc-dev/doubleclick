@@ -1,0 +1,88 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "{\"a\" : {\"b\" : 1, \"c\" : \"str\", \"d\" : [1]}}"
+          },
+          "type": {
+            "name": "JSON",
+            "parameters": [
+              {
+                "expr": {
+                  "name": "a",
+                  "type": {
+                    "name": "Tuple",
+                    "parameters": [
+                      {
+                        "name": "b",
+                        "type": {
+                          "name": "Int64"
+                        }
+                      },
+                      {
+                        "name": "c",
+                        "type": {
+                          "name": "String"
+                        }
+                      },
+                      {
+                        "name": "d",
+                        "type": {
+                          "name": "Array",
+                          "parameters": [
+                            {
+                              "name": "Int64"
+                            }
+                          ],
+                          "has_parentheses": true
+                        }
+                      }
+                    ],
+                    "has_parentheses": true
+                  }
+                }
+              }
+            ],
+            "has_parentheses": true
+          },
+          "alias": "json",
+          "operator_syntax": true
+        },
+        {
+          "name": "JSONAllPathsWithTypes",
+          "arguments": [
+            {
+              "parts": [
+                "json"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.2"
+                  },
+                  {
+                    "type": "String",
+                    "value": "system.one"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

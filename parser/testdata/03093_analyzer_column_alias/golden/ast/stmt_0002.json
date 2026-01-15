@@ -1,0 +1,168 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "Carrier"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "name": "toFloat64",
+              "arguments": [
+                {
+                  "parts": [
+                    "C3"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "C1"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "name": "toFloat64",
+              "arguments": [
+                {
+                  "parts": [
+                    "C1"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "C2"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "name": "toFloat64",
+              "arguments": [
+                {
+                  "parts": [
+                    "C2"
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "C3"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "Carrier"
+                        },
+                        {
+                          "name": "count",
+                          "arguments": [
+                            {
+                              "expr": {
+                                "type": "Integer",
+                                "value": 1
+                              },
+                              "type": {
+                                "name": "Nullable(Int32)"
+                              }
+                            }
+                          ],
+                          "alias": "C1"
+                        },
+                        {
+                          "name": "max",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "C2"
+                        },
+                        {
+                          "name": "min",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          ],
+                          "alias": "C3"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "Carrier"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "ITBL"
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "Carrier"
+          ]
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1000001
+      },
+      "settings": [
+        {
+          "name": "prefer_column_name_to_alias",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "animal_name"
+          ]
+        },
+        {
+          "parts": [
+            "animal_key"
+          ]
+        },
+        {
+          "parts": [
+            "color_name"
+          ]
+        },
+        {
+          "parts": [
+            "color_key"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "fact"
+              },
+              "alias": "a"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toInt64",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "animal_key"
+                              ]
+                            }
+                          ],
+                          "alias": "animal_key"
+                        },
+                        {
+                          "parts": [
+                            "animal_name"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "animals"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "b"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "a",
+                    "animal_key"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "b",
+                    "animal_key"
+                  ]
+                },
+                "parenthesized": true
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toInt64",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "color_key"
+                              ]
+                            }
+                          ],
+                          "alias": "color_key"
+                        },
+                        {
+                          "parts": [
+                            "color_name"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "colors"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "c"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "a",
+                    "color_key"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "c",
+                    "color_key"
+                  ]
+                },
+                "parenthesized": true
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

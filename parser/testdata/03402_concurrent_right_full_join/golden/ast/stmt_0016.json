@@ -1,0 +1,93 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "l",
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "l",
+            "value"
+          ]
+        },
+        {
+          "parts": [
+            "r",
+            "description"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t_l_small"
+              },
+              "alias": "l"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t_r_small"
+              },
+              "alias": "r"
+            },
+            "join": {
+              "type": "FULL",
+              "on": {
+                "left": {
+                  "parts": [
+                    "l",
+                    "id"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "r",
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "name": "coalesce",
+            "arguments": [
+              {
+                "parts": [
+                  "l",
+                  "id"
+                ]
+              },
+              {
+                "parts": [
+                  "r",
+                  "id"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "r",
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "table": "arraytest",
+  "columns": [
+    {
+      "name": "created_date",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "name": "toDate",
+        "arguments": [
+          {
+            "parts": [
+              "created_at"
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "created_at",
+      "type": {
+        "name": "DateTime"
+      },
+      "default": {
+        "name": "now"
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "strings",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "emptyArrayString"
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "created_date"
+        ]
+      },
+      {
+        "name": "cityHash64",
+        "arguments": [
+          {
+            "parts": [
+              "created_at"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "created_date"
+            ]
+          },
+          {
+            "name": "cityHash64",
+            "arguments": [
+              {
+                "parts": [
+                  "created_at"
+                ]
+              }
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

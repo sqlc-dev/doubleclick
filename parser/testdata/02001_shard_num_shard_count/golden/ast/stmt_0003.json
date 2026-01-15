@@ -1,0 +1,57 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "shardNum",
+          "alias": "n"
+        },
+        {
+          "name": "shardCount",
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{1,2,3}"
+                  },
+                  {
+                    "parts": [
+                      "system",
+                      "one"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "n"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "prefer_localhost_replica",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

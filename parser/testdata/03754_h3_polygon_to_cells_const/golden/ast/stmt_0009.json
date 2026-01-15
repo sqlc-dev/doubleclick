@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "name": "h3PolygonToCells",
+          "arguments": [
+            {
+              "parts": [
+                "ring"
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 7
+            }
+          ]
+        },
+        {
+          "left": {
+            "name": "arraySort",
+            "arguments": [
+              {
+                "name": "arrayMap",
+                "arguments": [
+                  {
+                    "parameters": [
+                      "x"
+                    ],
+                    "body": {
+                      "name": "h3ToString",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "x"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "h3PolygonToCells",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "ring"
+                        ]
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 7
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "parts": [
+              "reference"
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "rings"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

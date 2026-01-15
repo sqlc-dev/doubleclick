@@ -1,0 +1,72 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "name": "groupUniqArray",
+              "arguments": [
+                {
+                  "parts": [
+                    "v"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{2,3,4,5}"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "type": "String",
+                    "value": "group_uniq_str"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "id"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "max_rows_to_read",
+          "value": {
+            "type": "String",
+            "value": "100M"
+          }
+        }
+      ]
+    }
+  ]
+}

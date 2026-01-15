@@ -1,0 +1,79 @@
+{
+  "table_expr": {
+    "table": {
+      "query": {
+        "selects": [
+          {
+            "columns": [
+              {
+                "expr": {
+                  "expr": {
+                    "name": "tuple",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  "type": {
+                    "name": "Tuple (id UInt64)"
+                  }
+                },
+                "alias": "a"
+              },
+              {
+                "name": "arrayMap",
+                "arguments": [
+                  {
+                    "parameters": [
+                      "x"
+                    ],
+                    "body": {
+                      "name": "untuple",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "a"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      },
+                      {
+                        "type": "Integer",
+                        "value": 3
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "from": {
+              "tables": [
+                {
+                  "table": {
+                    "table": {
+                      "table": "test_table"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

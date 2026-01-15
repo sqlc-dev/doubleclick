@@ -1,0 +1,76 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "a1"
+          ]
+        },
+        {
+          "parts": [
+            "copy",
+            "a1"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "tab1"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "tab1_copy"
+              },
+              "alias": "copy"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ANY",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "tab1",
+                      "b1"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                },
+                "op": "=",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "tab1_copy",
+                      "b1"
+                    ]
+                  },
+                  "op": "+",
+                  "right": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "JSONEachRow"
+        ]
+      }
+    }
+  ]
+}

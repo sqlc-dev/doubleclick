@@ -1,0 +1,75 @@
+{
+  "table": "table_with_lc_key",
+  "columns": [
+    {
+      "name": "enum_key",
+      "type": {
+        "name": "Enum8",
+        "parameters": [
+          {
+            "left": {
+              "type": "String",
+              "value": "x"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "y"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "lc_key",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "enum_key"
+          ]
+        },
+        {
+          "parts": [
+            "lc_key"
+          ]
+        }
+      ]
+    }
+  ]
+}

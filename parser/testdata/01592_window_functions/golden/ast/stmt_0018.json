@@ -1,0 +1,105 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "product_name"
+          ]
+        },
+        {
+          "parts": [
+            "group_name"
+          ]
+        },
+        {
+          "parts": [
+            "price"
+          ]
+        },
+        {
+          "name": "LAST_VALUE",
+          "arguments": [
+            {
+              "parts": [
+                "price"
+              ]
+            }
+          ],
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "group_name"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "price"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "RANGE",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              },
+              "end": {
+                "type": "UNBOUNDED_FOLLOWING"
+              }
+            }
+          },
+          "alias": "highest_price_per_group"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "products"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "product_groups"
+              }
+            },
+            "join": {
+              "type": "INNER",
+              "using": [
+                {
+                  "parts": [
+                    "group_id"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "group_name"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "product_name"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

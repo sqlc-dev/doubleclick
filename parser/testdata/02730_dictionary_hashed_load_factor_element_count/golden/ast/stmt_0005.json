@@ -1,0 +1,61 @@
+{
+  "table": "dict_sharded",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "v0",
+      "type": {
+        "name": "UInt16"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "key"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "dict_data"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 0
+      },
+      "max": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    "layout": {
+      "type": "HASHED",
+      "args": [
+        {
+          "key": "SHARDS",
+          "value": {
+            "type": "Integer",
+            "value": 32
+          }
+        }
+      ]
+    }
+  }
+}

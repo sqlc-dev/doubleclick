@@ -1,0 +1,69 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "pp",
+          "query": {
+            "name": "arrayJoin",
+            "arguments": [
+              {
+                "parts": [
+                  "ParsedParams.Key2"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "ParsedParams",
+            "Key2"
+          ],
+          "alias": "x"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "test",
+                "table": "hits"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "op": "NOT",
+        "operand": {
+          "name": "ignore",
+          "arguments": [
+            {
+              "parts": [
+                "pp"
+              ]
+            }
+          ]
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "x"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 2
+      }
+    }
+  ]
+}

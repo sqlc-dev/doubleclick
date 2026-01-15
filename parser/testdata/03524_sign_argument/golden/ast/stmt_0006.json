@@ -1,0 +1,62 @@
+{
+  "if_not_exists": true,
+  "database": "{CLICKHOUSE_DATABASE:Identifier}",
+  "table": "t2",
+  "columns": [
+    {
+      "name": "c0",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "c1",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "c2",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "left": {
+        "parts": [
+          "c1"
+        ]
+      },
+      "op": "/",
+      "right": {
+        "parts": [
+          "c0"
+        ]
+      }
+    }
+  ],
+  "partition_by": {
+    "op": "-",
+    "operand": {
+      "parts": [
+        "c1"
+      ]
+    }
+  },
+  "settings": [
+    {
+      "name": "allow_suspicious_indices",
+      "value": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

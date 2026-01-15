@@ -1,0 +1,133 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "concat",
+          "arguments": [
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "parts": [
+                    "number"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "arrayStringConcat",
+              "arguments": [
+                {
+                  "name": "arrayMap",
+                  "arguments": [
+                    {
+                      "parameters": [
+                        "x"
+                      ],
+                      "body": {
+                        "type": "String",
+                        "value": "."
+                      }
+                    },
+                    {
+                      "name": "range",
+                      "arguments": [
+                        {
+                          "left": {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          "op": "%",
+                          "right": {
+                            "type": "Integer",
+                            "value": 10
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "alias": "k"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "remote",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "127.0.0.{2,3}"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "numbers_10_00290"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "number"
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "condition": {
+            "left": {
+              "name": "randConstant"
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "then": {
+            "type": "Integer",
+            "value": 4999
+          },
+          "else": {
+            "type": "Integer",
+            "value": 10000
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

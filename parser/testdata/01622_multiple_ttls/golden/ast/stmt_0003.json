@@ -1,0 +1,141 @@
+{
+  "table": "ttl_where",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "i",
+      "type": {
+        "name": "UInt32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "d"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "name": "toIntervalYear",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 10
+          }
+        ]
+      }
+    },
+    "expressions": [
+      {
+        "left": {
+          "parts": [
+            "d"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "name": "toIntervalYear",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 40
+            }
+          ]
+        }
+      }
+    ],
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "d"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "name": "toIntervalYear",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 10
+              }
+            ]
+          }
+        },
+        "where": {
+          "left": {
+            "left": {
+              "parts": [
+                "i"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      },
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "d"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "name": "toIntervalYear",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 40
+              }
+            ]
+          }
+        },
+        "where": {
+          "left": {
+            "left": {
+              "parts": [
+                "i"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      }
+    ]
+  }
+}

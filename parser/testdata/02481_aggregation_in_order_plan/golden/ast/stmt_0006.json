@@ -1,0 +1,161 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "a"
+                            ]
+                          },
+                          {
+                            "name": "any",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "b"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "c"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "d"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "tab"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "parts": [
+                              "b"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        },
+                        "group_by": [
+                          {
+                            "parts": [
+                              "a"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "c"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "d"
+                            ]
+                          }
+                        ],
+                        "settings": [
+                          {
+                            "name": "optimize_aggregation_in_order",
+                            "value": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          },
+                          {
+                            "name": "query_plan_aggregation_in_order",
+                            "value": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "actions = 1, sorting = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%ReadFromMergeTree%"
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%Aggregating%"
+            }
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Order:%"
+          }
+        }
+      },
+      "settings": [
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

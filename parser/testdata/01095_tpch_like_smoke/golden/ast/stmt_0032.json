@@ -1,0 +1,377 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "supp_nation"
+          ]
+        },
+        {
+          "parts": [
+            "cust_nation"
+          ]
+        },
+        {
+          "parts": [
+            "l_year"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "volume"
+              ]
+            }
+          ],
+          "alias": "revenue"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "n1",
+                            "n_name"
+                          ],
+                          "alias": "supp_nation"
+                        },
+                        {
+                          "parts": [
+                            "n2",
+                            "n_name"
+                          ],
+                          "alias": "cust_nation"
+                        },
+                        {
+                          "field": "YEAR",
+                          "from": {
+                            "parts": [
+                              "l_shipdate"
+                            ]
+                          },
+                          "alias": "l_year"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "l_extendedprice"
+                              ]
+                            },
+                            "op": "*",
+                            "right": {
+                              "left": {
+                                "type": "Integer",
+                                "value": 1
+                              },
+                              "op": "-",
+                              "right": {
+                                "parts": [
+                                  "l_discount"
+                                ]
+                              },
+                              "parenthesized": true
+                            }
+                          },
+                          "alias": "volume"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "supplier"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "lineitem"
+                              }
+                            },
+                            "join": {
+                              "type": ""
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "orders"
+                              }
+                            },
+                            "join": {
+                              "type": ""
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "customer"
+                              }
+                            },
+                            "join": {
+                              "type": ""
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "nation"
+                              },
+                              "alias": "n1"
+                            },
+                            "join": {
+                              "type": ""
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "nation"
+                              },
+                              "alias": "n2"
+                            },
+                            "join": {
+                              "type": ""
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "left": {
+                                "left": {
+                                  "left": {
+                                    "left": {
+                                      "parts": [
+                                        "s_suppkey"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "parts": [
+                                        "l_suppkey"
+                                      ]
+                                    }
+                                  },
+                                  "op": "AND",
+                                  "right": {
+                                    "left": {
+                                      "parts": [
+                                        "o_orderkey"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "parts": [
+                                        "l_orderkey"
+                                      ]
+                                    }
+                                  }
+                                },
+                                "op": "AND",
+                                "right": {
+                                  "left": {
+                                    "parts": [
+                                      "c_custkey"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "parts": [
+                                      "o_custkey"
+                                    ]
+                                  }
+                                }
+                              },
+                              "op": "AND",
+                              "right": {
+                                "left": {
+                                  "parts": [
+                                    "s_nationkey"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "parts": [
+                                    "n1",
+                                    "n_nationkey"
+                                  ]
+                                }
+                              }
+                            },
+                            "op": "AND",
+                            "right": {
+                              "left": {
+                                "parts": [
+                                  "c_nationkey"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "parts": [
+                                  "n2",
+                                  "n_nationkey"
+                                ]
+                              }
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "left": {
+                                "left": {
+                                  "parts": [
+                                    "n1",
+                                    "n_name"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "type": "String",
+                                  "value": "FRANCE"
+                                }
+                              },
+                              "op": "AND",
+                              "right": {
+                                "left": {
+                                  "parts": [
+                                    "n2",
+                                    "n_name"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "type": "String",
+                                  "value": "GERMANY"
+                                }
+                              },
+                              "parenthesized": true
+                            },
+                            "op": "OR",
+                            "right": {
+                              "left": {
+                                "left": {
+                                  "parts": [
+                                    "n1",
+                                    "n_name"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "type": "String",
+                                  "value": "GERMANY"
+                                }
+                              },
+                              "op": "AND",
+                              "right": {
+                                "left": {
+                                  "parts": [
+                                    "n2",
+                                    "n_name"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "type": "String",
+                                  "value": "FRANCE"
+                                }
+                              },
+                              "parenthesized": true
+                            },
+                            "parenthesized": true
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "expr": {
+                            "parts": [
+                              "l_shipdate"
+                            ]
+                          },
+                          "low": {
+                            "name": "toDate",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "1995-01-01"
+                              }
+                            ]
+                          },
+                          "high": {
+                            "name": "toDate",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "1996-12-31"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "shipping"
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "supp_nation"
+          ]
+        },
+        {
+          "parts": [
+            "cust_nation"
+          ]
+        },
+        {
+          "parts": [
+            "l_year"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "supp_nation"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "cust_nation"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "l_year"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

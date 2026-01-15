@@ -1,0 +1,77 @@
+{
+  "table": "data_01515",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "d1",
+      "type": {
+        "name": "Int"
+      }
+    },
+    {
+      "name": "d1_null",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Int"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "d1_idx",
+      "expression": {
+        "parts": [
+          "d1"
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    },
+    {
+      "name": "d1_null_idx",
+      "expression": {
+        "name": "assumeNotNull",
+        "arguments": [
+          {
+            "parts": [
+              "d1_null"
+            ]
+          }
+        ]
+      },
+      "type": {
+        "name": "minmax"
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ]
+}

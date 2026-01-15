@@ -1,0 +1,150 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "cpu_total_week"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "with": [
+                        {
+                          "name": "cpu_total_7",
+                          "query": {
+                            "name": "neighbor",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "cpu_total"
+                                ]
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 7
+                              }
+                            ]
+                          },
+                          "scalar_with": true
+                        }
+                      ],
+                      "columns": [
+                        {
+                          "parts": [
+                            "rDate"
+                          ]
+                        },
+                        {
+                          "name": "floor",
+                          "arguments": [
+                            {
+                              "name": "multiIf",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "parts": [
+                                      "cpu_total_7"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 0
+                                  }
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 0
+                                },
+                                {
+                                  "left": {
+                                    "parts": [
+                                      "cpu_total"
+                                    ]
+                                  },
+                                  "op": "-",
+                                  "right": {
+                                    "parts": [
+                                      "cpu_total_7"
+                                    ]
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "Integer",
+                              "value": 2
+                            }
+                          ],
+                          "alias": "cpu_total_week"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "t_table_471873"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "rDate"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "String",
+            "value": "2022-03-06"
+          },
+          "parenthesized": true
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "rDate"
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "type": "String",
+            "value": "2022-03-06"
+          },
+          "parenthesized": true
+        }
+      },
+      "settings": [
+        {
+          "name": "enable_optimize_predicate_expression",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

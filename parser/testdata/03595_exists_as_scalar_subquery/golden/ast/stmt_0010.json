@@ -1,0 +1,99 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "type": "String",
+            "value": "ScalarSubqueriesGlobalCacheHit "
+          },
+          "op": "||",
+          "right": {
+            "array": {
+              "parts": [
+                "ProfileEvents"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "ScalarSubqueriesGlobalCacheHit"
+            }
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "op": "!=",
+              "right": {
+                "type": "String",
+                "value": "QueryStart"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "current_database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "query"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "select%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "array": {
+              "parts": [
+                "Settings"
+              ]
+            },
+            "index": {
+              "type": "String",
+              "value": "execute_exists_as_scalar_subquery"
+            }
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "1"
+          }
+        }
+      }
+    }
+  ]
+}

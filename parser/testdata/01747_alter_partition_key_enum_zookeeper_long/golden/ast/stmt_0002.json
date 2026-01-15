@@ -1,0 +1,105 @@
+{
+  "table": "report",
+  "columns": [
+    {
+      "name": "product",
+      "type": {
+        "name": "Enum8",
+        "parameters": [
+          {
+            "left": {
+              "type": "String",
+              "value": "IU"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "WS"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "machine",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "branch",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "generated_time",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "product"
+          ]
+        },
+        {
+          "parts": [
+            "machine"
+          ]
+        },
+        {
+          "parts": [
+            "branch"
+          ]
+        },
+        {
+          "parts": [
+            "generated_time"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "parts": [
+          "product"
+        ]
+      },
+      {
+        "name": "toYYYYMM",
+        "arguments": [
+          {
+            "parts": [
+              "generated_time"
+            ]
+          }
+        ]
+      }
+    ],
+    "spaced_commas": true
+  }
+}

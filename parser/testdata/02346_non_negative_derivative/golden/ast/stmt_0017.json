@@ -1,0 +1,86 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "ts"
+          ]
+        },
+        {
+          "parts": [
+            "metric"
+          ]
+        },
+        {
+          "name": "nonNegativeDerivative",
+          "arguments": [
+            {
+              "parts": [
+                "metric"
+              ]
+            },
+            {
+              "parts": [
+                "ts"
+              ]
+            },
+            {
+              "value": {
+                "type": "Integer",
+                "value": 12
+              },
+              "unit": "QUARTER"
+            }
+          ],
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "metric"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "ts"
+                  ]
+                }
+              },
+              {
+                "expression": {
+                  "parts": [
+                    "metric"
+                  ]
+                }
+              }
+            ],
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "UNBOUNDED_PRECEDING"
+              },
+              "end": {
+                "type": "UNBOUNDED_FOLLOWING"
+              }
+            }
+          },
+          "alias": "deriv"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "nnd"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

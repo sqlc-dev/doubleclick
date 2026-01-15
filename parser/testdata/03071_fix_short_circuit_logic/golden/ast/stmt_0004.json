@@ -1,0 +1,103 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "transfer_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "address",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 20
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "UInt256"
+      }
+    },
+    {
+      "name": "block_timestamp",
+      "type": {
+        "name": "DateTime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "token_address",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 20
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "address"
+          ]
+        },
+        {
+          "parts": [
+            "block_timestamp"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "block_timestamp"
+        ]
+      }
+    ]
+  },
+  "primary_key": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "address"
+          ]
+        },
+        {
+          "parts": [
+            "block_timestamp"
+          ]
+        }
+      ]
+    }
+  ]
+}

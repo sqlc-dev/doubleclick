@@ -1,0 +1,91 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "name": "arrayJoin",
+          "arguments": [
+            {
+              "name": "JSONAllPaths",
+              "arguments": [
+                {
+                  "parts": [
+                    "json2"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "parts": [
+                              "json"
+                            ]
+                          },
+                          "type": {
+                            "name": "JSON",
+                            "parameters": [
+                              {
+                                "expr": {
+                                  "left": {
+                                    "parts": [
+                                      "max_dynamic_paths"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                }
+                              }
+                            ],
+                            "has_parentheses": true
+                          },
+                          "alias": "json2",
+                          "operator_syntax": true
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "all"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

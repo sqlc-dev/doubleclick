@@ -1,0 +1,152 @@
+{
+  "table": "test",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 10485760
+      }
+    },
+    {
+      "name": "compress_marks",
+      "value": {
+        "type": "Boolean",
+        "value": false
+      }
+    },
+    {
+      "name": "compress_primary_key",
+      "value": {
+        "type": "Boolean",
+        "value": false
+      }
+    },
+    {
+      "name": "serialization_info_version",
+      "value": {
+        "type": "String",
+        "value": "basic"
+      }
+    },
+    {
+      "name": "disk",
+      "value": {
+        "name": "disk",
+        "arguments": [
+          {
+            "left": {
+              "parts": [
+                "type"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "parts": [
+                "cache"
+              ]
+            }
+          },
+          {
+            "left": {
+              "parts": [
+                "name"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "02240_bypass_cache_threshold"
+            }
+          },
+          {
+            "left": {
+              "parts": [
+                "max_size"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "128Mi"
+            }
+          },
+          {
+            "left": {
+              "parts": [
+                "path"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "filesystem_cache_bypass_cache_threshold/"
+            }
+          },
+          {
+            "left": {
+              "parts": [
+                "enable_bypass_cache_with_threshold"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          {
+            "left": {
+              "parts": [
+                "bypass_cache_threshold"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 100
+            }
+          },
+          {
+            "left": {
+              "parts": [
+                "disk"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "s3_disk"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

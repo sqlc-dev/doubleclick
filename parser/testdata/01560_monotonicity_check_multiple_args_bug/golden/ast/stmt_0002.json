@@ -1,0 +1,96 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "delta",
+          "query": {
+            "name": "arrayJoin",
+            "arguments": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                ],
+                "spaced_commas": true
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "parts": [
+                    "time"
+                  ]
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "name": "toIntervalDay",
+              "arguments": [
+                {
+                  "parts": [
+                    "delta"
+                  ]
+                }
+              ]
+            }
+          },
+          "alias": "dt"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toDateTime",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "2020.11.12 19:02:04"
+                            }
+                          ],
+                          "alias": "time"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "dt"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

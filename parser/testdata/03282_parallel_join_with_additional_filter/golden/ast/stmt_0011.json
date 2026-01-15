@@ -1,0 +1,110 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "table": "t1"
+        },
+        {
+          "table": "t2"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t1"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "t2"
+              }
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "key"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "key"
+                    ]
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "t1",
+                        "key"
+                      ]
+                    },
+                    "op": "\u003c",
+                    "right": {
+                      "parts": [
+                        "t2",
+                        "a"
+                      ]
+                    }
+                  },
+                  "op": "OR",
+                  "right": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "t1",
+                          "a"
+                        ]
+                      },
+                      "op": "%",
+                      "right": {
+                        "type": "Integer",
+                        "value": 2
+                      }
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 0
+                    }
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "join_algorithm",
+          "value": {
+            "type": "String",
+            "value": "parallel_hash"
+          }
+        }
+      ]
+    }
+  ]
+}

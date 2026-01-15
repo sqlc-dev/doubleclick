@@ -1,0 +1,83 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "name": "abs",
+                  "arguments": [
+                    {
+                      "left": {
+                        "name": "asinh",
+                        "arguments": [
+                          {
+                            "name": "sinh",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "x"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "op": "-",
+                      "right": {
+                        "parts": [
+                          "x"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "op": "\u003c",
+                "right": {
+                  "type": "Float",
+                  "value": 1e-9,
+                  "source": "1e-9"
+                }
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "count"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "name": "range",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 100
+                    }
+                  ],
+                  "alias": "x"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

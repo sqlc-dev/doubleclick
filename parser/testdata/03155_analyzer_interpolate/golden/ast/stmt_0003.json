@@ -1,0 +1,173 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "n"
+          ]
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 5
+            }
+          },
+          "alias": "inter"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "toFloat32",
+                          "arguments": [
+                            {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            }
+                          ],
+                          "alias": "n"
+                        },
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "number"
+                              ]
+                            },
+                            "op": "*",
+                            "right": {
+                              "type": "Integer",
+                              "value": 2
+                            }
+                          },
+                          "alias": "mn"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "parts": [
+                              "number"
+                            ]
+                          },
+                          "op": "%",
+                          "right": {
+                            "type": "Integer",
+                            "value": 3
+                          }
+                        },
+                        "op": "=",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "n"
+          ]
+        },
+        {
+          "parts": [
+            "inter"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "n"
+            ]
+          },
+          "with_fill": true,
+          "fill_from": {
+            "type": "Integer",
+            "value": 0
+          },
+          "fill_to": {
+            "type": "Float",
+            "value": 5.51,
+            "source": "5.51"
+          },
+          "fill_step": {
+            "type": "Float",
+            "value": 0.5,
+            "source": "0.5"
+          }
+        }
+      ],
+      "interpolate": [
+        {
+          "column": "inter",
+          "value": {
+            "left": {
+              "parts": [
+                "mn"
+              ]
+            },
+            "op": "*",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

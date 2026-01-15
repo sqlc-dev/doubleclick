@@ -1,0 +1,146 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "arr1"
+          ]
+        },
+        {
+          "parts": [
+            "arr2"
+          ]
+        },
+        {
+          "name": "count",
+          "alias": "c"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayMap",
+                          "arguments": [
+                            {
+                              "parameters": [
+                                "x"
+                              ],
+                              "body": {
+                                "name": "toString",
+                                "arguments": [
+                                  {
+                                    "parts": [
+                                      "x"
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "name": "range",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "arr1"
+                        },
+                        {
+                          "name": "range",
+                          "arguments": [
+                            {
+                              "name": "toUInt64",
+                              "arguments": [
+                                {
+                                  "left": {
+                                    "type": "Integer",
+                                    "value": 10
+                                  },
+                                  "op": "-",
+                                  "right": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "arr2"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 11
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "arr1"
+          ]
+        },
+        {
+          "parts": [
+            "arr2"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "c"
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "arr1"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "arr2"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

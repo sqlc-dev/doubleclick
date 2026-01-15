@@ -1,0 +1,62 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "c"
+          ]
+        },
+        {
+          "expr": {
+            "type": "String",
+            "value": "original"
+          },
+          "alias": "original"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "with_fill_staleness"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "a"
+            ]
+          },
+          "descending": true,
+          "with_fill": true,
+          "fill_staleness": {
+            "value": {
+              "op": "-",
+              "operand": {
+                "type": "Integer",
+                "value": 2
+              }
+            },
+            "unit": "SECOND"
+          }
+        }
+      ],
+      "interpolate": [
+        {
+          "column": "c"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "table": "merge_tree_deduplication",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "part",
+      "type": {
+        "name": "UInt8"
+      },
+      "default": {
+        "type": "Integer",
+        "value": 77
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "part"
+    ]
+  },
+  "settings": [
+    {
+      "name": "non_replicated_deduplication_window",
+      "value": {
+        "type": "Integer",
+        "value": 3
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

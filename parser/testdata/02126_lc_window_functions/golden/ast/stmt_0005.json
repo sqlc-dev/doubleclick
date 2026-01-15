@@ -1,0 +1,117 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Null",
+          "value": null
+        },
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "name": "max",
+          "arguments": [
+            {
+              "parts": [
+                "id"
+              ]
+            }
+          ],
+          "over": {
+            "frame": {
+              "type": "ROWS",
+              "start": {
+                "type": "PRECEDING",
+                "offset": {
+                  "type": "Integer",
+                  "value": 10
+                }
+              },
+              "end": {
+                "type": "UNBOUNDED_FOLLOWING"
+              }
+            }
+          },
+          "alias": "aid"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "type": "Null",
+                          "value": null
+                        },
+                        {
+                          "name": "max",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "id"
+                              ]
+                            }
+                          ],
+                          "over": {}
+                        },
+                        {
+                          "name": "materialize",
+                          "arguments": [
+                            {
+                              "name": "toLowCardinality",
+                              "arguments": [
+                                {
+                                  "type": "String",
+                                  "value": ""
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "id"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers_mt",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 0
+                                  },
+                                  {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

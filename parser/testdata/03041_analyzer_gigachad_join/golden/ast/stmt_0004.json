@@ -1,0 +1,228 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "alias_first",
+            "inn"
+          ]
+        },
+        {
+          "name": "arrayFirst",
+          "arguments": [
+            {
+              "parameters": [
+                "t"
+              ],
+              "body": {
+                "name": "isNotNull",
+                "arguments": [
+                  {
+                    "parts": [
+                      "t"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "tuple": {
+                "parts": [
+                  "regInfo"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          ]
+        },
+        {
+          "name": "arrayFirst",
+          "arguments": [
+            {
+              "parameters": [
+                "t"
+              ],
+              "body": {
+                "name": "isNotNull",
+                "arguments": [
+                  {
+                    "parts": [
+                      "t"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "tuple": {
+                "parts": [
+                  "regInfo"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 2
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "first"
+              },
+              "alias": "alias_first"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "alias_second",
+                            "inn"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "alias_second",
+                            "sessionId"
+                          ]
+                        },
+                        {
+                          "name": "groupArray",
+                          "arguments": [
+                            {
+                              "type": "Tuple",
+                              "value": [
+                                {
+                                  "parts": [
+                                    "serial"
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "reg"
+                                  ]
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ],
+                          "alias": "regInfo"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "second"
+                              },
+                              "alias": "alias_second"
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "inn"
+                          ]
+                        },
+                        {
+                          "parts": [
+                            "sessionId"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "resp"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "alias_first",
+                      "inn"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "resp",
+                      "inn"
+                    ]
+                  },
+                  "parenthesized": true
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "alias_first",
+                      "sessionId"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "resp",
+                      "sessionId"
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "name": "if",
+        "arguments": [
+          {
+            "expr": {
+              "type": "String",
+              "value": "123456789"
+            },
+            "not": true
+          },
+          {
+            "left": {
+              "parts": [
+                "alias_first",
+                "inn"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "123456789"
+            }
+          },
+          {
+            "type": "Integer",
+            "value": 1
+          }
+        ]
+      }
+    }
+  ]
+}

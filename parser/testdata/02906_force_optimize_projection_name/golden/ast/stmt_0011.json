@@ -1,0 +1,86 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "read_rows"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "current_database"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "name": "currentDatabase"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "query"
+                ]
+              },
+              "pattern": {
+                "type": "String",
+                "value": "%SELECT name FROM test%"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "array": {
+                "parts": [
+                  "Settings"
+                ]
+              },
+              "index": {
+                "type": "String",
+                "value": "force_optimize_projection_name"
+              }
+            },
+            "op": "=",
+            "right": {
+              "type": "String",
+              "value": "projection_name"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "ExceptionBeforeStart"
+          }
+        }
+      }
+    }
+  ]
+}

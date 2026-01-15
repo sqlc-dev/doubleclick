@@ -1,0 +1,125 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PIPELINE",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "query": {
+                                    "selects": [
+                                      {
+                                        "columns": [
+                                          {
+                                            "name": "materialize",
+                                            "arguments": [
+                                              {
+                                                "type": "String",
+                                                "value": "a"
+                                              }
+                                            ],
+                                            "alias": "key"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                "alias": "t1"
+                              }
+                            },
+                            {
+                              "table": {
+                                "table": {
+                                  "query": {
+                                    "selects": [
+                                      {
+                                        "columns": [
+                                          {
+                                            "name": "materialize",
+                                            "arguments": [
+                                              {
+                                                "type": "String",
+                                                "value": "a"
+                                              }
+                                            ],
+                                            "alias": "key"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                "alias": "t2"
+                              },
+                              "join": {
+                                "type": "INNER",
+                                "on": {
+                                  "left": {
+                                    "parts": [
+                                      "t1",
+                                      "key"
+                                    ]
+                                  },
+                                  "op": "=",
+                                  "right": {
+                                    "parts": [
+                                      "t2",
+                                      "key"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "explicit_type": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "explain"
+          ]
+        },
+        "case_insensitive": true,
+        "pattern": {
+          "type": "String",
+          "value": "%FilterBySetOnTheFlyTransform%"
+        }
+      }
+    }
+  ]
+}

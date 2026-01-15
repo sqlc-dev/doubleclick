@@ -1,0 +1,156 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "id"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "value"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "id"
+                        },
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "value"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "alias": "t2"
+            },
+            "join": {
+              "type": "LEFT",
+              "strictness": "ASOF",
+              "on": {
+                "left": {
+                  "left": {
+                    "left": {
+                      "left": {
+                        "parts": [
+                          "t1",
+                          "id"
+                        ]
+                      },
+                      "op": "=",
+                      "right": {
+                        "parts": [
+                          "t2",
+                          "id"
+                        ]
+                      },
+                      "parenthesized": true
+                    },
+                    "op": "AND",
+                    "right": {
+                      "expr": {
+                        "name": "toUInt256",
+                        "arguments": [
+                          {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        ]
+                      },
+                      "query": {
+                        "selects": [
+                          {
+                            "columns": [
+                              {
+                                "name": "materialize",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 1
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "op": "!=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "parenthesized": true
+                  }
+                },
+                "op": "AND",
+                "right": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "value"
+                    ]
+                  },
+                  "op": "\u003e=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "value"
+                    ]
+                  },
+                  "parenthesized": true
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

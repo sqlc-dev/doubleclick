@@ -1,0 +1,69 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "position",
+            "arguments": [
+              {
+                "name": "materialize",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "abc"
+                  }
+                ],
+                "alias": "h"
+              },
+              {
+                "name": "lower",
+                "arguments": [
+                  {
+                    "expr": {
+                      "type": "String",
+                      "value": "aBc"
+                    },
+                    "alias": "n"
+                  }
+                ]
+              }
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "positionCaseInsensitive",
+            "arguments": [
+              {
+                "parts": [
+                  "h"
+                ]
+              },
+              {
+                "parts": [
+                  "n"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "numbers"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

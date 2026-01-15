@@ -1,0 +1,85 @@
+{
+  "view": "mview",
+  "materialized": true,
+  "engine": {
+    "name": "SummingMergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "day"
+          ]
+        },
+        {
+          "parts": [
+            "card_id"
+          ]
+        }
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "toDate",
+            "arguments": [
+              {
+                "parts": [
+                  "timestamp"
+                ]
+              }
+            ],
+            "alias": "day"
+          },
+          {
+            "parts": [
+              "card_id"
+            ]
+          },
+          {
+            "name": "count",
+            "arguments": [
+              {}
+            ],
+            "alias": "card_view"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "source"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "day"
+                ]
+              },
+              {
+                "parts": [
+                  "card_id"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        ]
+      }
+    ]
+  },
+  "on_cluster": "test_shard_localhost"
+}

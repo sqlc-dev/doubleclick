@@ -1,0 +1,80 @@
+{
+  "table": "test_00808_push_down_with_finalizeAggregation",
+  "engine": {
+    "name": "AggregatingMergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "n"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "name": "intDiv",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 25
+              }
+            ],
+            "alias": "n"
+          },
+          {
+            "name": "avgState",
+            "arguments": [
+              {
+                "parts": [
+                  "number"
+                ]
+              }
+            ],
+            "alias": "s"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "name": "numbers",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 2500
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "n"
+            ]
+          }
+        ],
+        "order_by": [
+          {
+            "expression": {
+              "parts": [
+                "n"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "EventDate",
+          "query": {
+            "left": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2000-01-01"
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "left": {
+                "name": "rand"
+              },
+              "op": "%",
+              "right": {
+                "type": "Integer",
+                "value": 30000,
+                "parenthesized": true
+              }
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 1000000
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "EventDate"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "name": "toDate",
+          "arguments": [
+            {
+              "name": "concat",
+              "arguments": [
+                {
+                  "name": "toString",
+                  "arguments": [
+                    {
+                      "name": "toYear",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "EventDate"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "-"
+                },
+                {
+                  "name": "toString",
+                  "arguments": [
+                    {
+                      "name": "toMonth",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "EventDate"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "-"
+                },
+                {
+                  "name": "toString",
+                  "arguments": [
+                    {
+                      "name": "toDayOfMonth",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "EventDate"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

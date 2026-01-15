@@ -1,0 +1,77 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "n"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "merge",
+                "arguments": [
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "type": "String",
+                    "value": "src_table"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "_table"
+            ]
+          },
+          "list": [
+            {
+              "parts": [
+                "set"
+              ]
+            }
+          ]
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "left": {
+              "parts": [
+                "n"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          "op": "=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      }
+    }
+  ]
+}

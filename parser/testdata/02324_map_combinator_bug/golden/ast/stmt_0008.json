@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "ignore",
+          "arguments": [
+            {
+              "expr": {
+                "type": "Tuple",
+                "value": [
+                  {
+                    "name": "arrayMap",
+                    "arguments": [
+                      {
+                        "parameters": [
+                          "k"
+                        ],
+                        "body": {
+                          "name": "toString",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "k"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "mapKeys",
+                        "arguments": [
+                          {
+                            "name": "uniqMapMerge",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "uniq_tags_ids"
+                                ]
+                              }
+                            ],
+                            "alias": "m"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "mapValues",
+                    "arguments": [
+                      {
+                        "parts": [
+                          "m"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "spaced_commas": true
+              },
+              "type": {
+                "name": "Map(String, UInt32)"
+              }
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "segfault_mv"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

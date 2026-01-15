@@ -1,0 +1,118 @@
+{
+  "table": "t2",
+  "columns": [
+    {
+      "name": "time",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "bar",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "dimension_2",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "dt",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "name": "toDate",
+        "arguments": [
+          {
+            "parts": [
+              "time"
+            ]
+          }
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "dt2",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "name": "toDayOfYear",
+        "arguments": [
+          {
+            "parts": [
+              "time"
+            ]
+          }
+        ]
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "aliascol2",
+      "type": null,
+      "default": {
+        "left": {
+          "parts": [
+            "bar"
+          ]
+        },
+        "op": "||",
+        "right": {
+          "parts": [
+            "dimension_2"
+          ]
+        }
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "time_alias",
+      "type": {
+        "name": "DateTime"
+      },
+      "default": {
+        "parts": [
+          "time"
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "dt"
+          ]
+        },
+        {
+          "parts": [
+            "bar"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "dt"
+        ]
+      }
+    ]
+  }
+}

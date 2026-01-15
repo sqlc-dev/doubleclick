@@ -1,0 +1,84 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "c1"
+              ]
+            }
+          ],
+          "alias": "v"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "type": "Integer",
+                            "value": 1
+                          },
+                          "alias": "c1"
+                        },
+                        {
+                          "expr": {
+                            "type": "Array",
+                            "value": [
+                              {
+                                "type": "String",
+                                "value": "v"
+                              }
+                            ]
+                          },
+                          "alias": "c2"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "name": "arrayExists",
+        "arguments": [
+          {
+            "parameters": [
+              "v"
+            ],
+            "body": {
+              "left": {
+                "parts": [
+                  "v"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "v"
+              },
+              "parenthesized": true
+            }
+          },
+          {
+            "parts": [
+              "c2"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

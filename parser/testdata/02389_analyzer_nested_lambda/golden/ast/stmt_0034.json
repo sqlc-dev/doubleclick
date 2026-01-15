@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ],
+          "alias": "id_alias"
+        },
+        {
+          "name": "arrayMap",
+          "arguments": [
+            {
+              "parameters": [
+                "x"
+              ],
+              "body": {
+                "left": {
+                  "parts": [
+                    "x"
+                  ]
+                },
+                "op": "+",
+                "right": {
+                  "array": {
+                    "name": "arrayMap",
+                    "arguments": [
+                      {
+                        "parameters": [
+                          "y"
+                        ],
+                        "body": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "x"
+                              ]
+                            },
+                            "op": "+",
+                            "right": {
+                              "parts": [
+                                "y"
+                              ]
+                            }
+                          },
+                          "op": "+",
+                          "right": {
+                            "parts": [
+                              "id_alias"
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "type": "Array",
+                        "value": [
+                          {
+                            "type": "Integer",
+                            "value": 1
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "index": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                }
+              }
+            },
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "Integer",
+                  "value": 1
+                },
+                {
+                  "type": "Integer",
+                  "value": 2
+                },
+                {
+                  "type": "Integer",
+                  "value": 3
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_table"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

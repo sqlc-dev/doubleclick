@@ -1,0 +1,145 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trimLeft",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            }
+          ],
+          "alias": "explain"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "with": [
+                          {
+                            "name": "reference_vec",
+                            "query": {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "Float",
+                                  "value": 0,
+                                  "source": "0.0"
+                                },
+                                {
+                                  "type": "Float",
+                                  "value": 2,
+                                  "source": "2.0"
+                                }
+                              ],
+                              "spaced_commas": true
+                            },
+                            "scalar_with": true
+                          }
+                        ],
+                        "columns": [
+                          {
+                            "parts": [
+                              "id"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "tab"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "order_by": [
+                          {
+                            "expression": {
+                              "name": "L2Distance",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "vec2"
+                                  ]
+                                },
+                                {
+                                  "parts": [
+                                    "reference_vec"
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ],
+                        "limit": {
+                          "type": "Integer",
+                          "value": 3
+                        }
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "indexes = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "case_insensitive": true,
+            "pattern": {
+              "type": "String",
+              "value": "%Skip%"
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "case_insensitive": true,
+            "pattern": {
+              "type": "String",
+              "value": "%Name: idx%"
+            }
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "case_insensitive": true,
+          "pattern": {
+            "type": "String",
+            "value": "%vector_similarity%"
+          }
+        }
+      }
+    }
+  ]
+}

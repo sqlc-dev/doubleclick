@@ -1,0 +1,130 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "left": {
+              "name": "regionToName",
+              "arguments": [
+                {
+                  "expr": {
+                    "parts": [
+                      "n1",
+                      "number"
+                    ]
+                  },
+                  "type": {
+                    "name": "UInt32"
+                  },
+                  "operator_syntax": true
+                },
+                {
+                  "type": "String",
+                  "value": "en"
+                }
+              ]
+            },
+            "op": "||",
+            "right": {
+              "condition": {
+                "name": "regionIn",
+                "arguments": [
+                  {
+                    "expr": {
+                      "parts": [
+                        "n1",
+                        "number"
+                      ]
+                    },
+                    "type": {
+                      "name": "UInt32"
+                    },
+                    "operator_syntax": true
+                  },
+                  {
+                    "expr": {
+                      "parts": [
+                        "n2",
+                        "number"
+                      ]
+                    },
+                    "type": {
+                      "name": "UInt32"
+                    },
+                    "operator_syntax": true
+                  }
+                ]
+              },
+              "then": {
+                "type": "String",
+                "value": " is in "
+              },
+              "else": {
+                "type": "String",
+                "value": " is not in "
+              }
+            }
+          },
+          "op": "||",
+          "right": {
+            "name": "regionToName",
+            "arguments": [
+              {
+                "expr": {
+                  "parts": [
+                    "n2",
+                    "number"
+                  ]
+                },
+                "type": {
+                  "name": "UInt32"
+                },
+                "operator_syntax": true
+              },
+              {
+                "type": "String",
+                "value": "en"
+              }
+            ]
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 13
+                  }
+                ]
+              },
+              "alias": "n1"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 13
+                  }
+                ]
+              },
+              "alias": "n2"
+            },
+            "join": {
+              "type": "CROSS"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

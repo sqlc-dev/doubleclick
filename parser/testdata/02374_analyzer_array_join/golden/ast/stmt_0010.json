@@ -1,0 +1,65 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "constant_array",
+          "query": {
+            "type": "Array",
+            "value": [
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "type": "Integer",
+                "value": 2
+              },
+              {
+                "type": "Integer",
+                "value": 3
+              }
+            ],
+            "spaced_commas": true
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "value"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_table"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "parts": [
+                    "constant_array"
+                  ],
+                  "alias": "value"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

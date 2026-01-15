@@ -1,0 +1,671 @@
+{
+  "view": "view_order_attribution",
+  "columns": [
+    {
+      "name": "order_product_event_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "brand_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "user_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "sp_id",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "gmv",
+      "type": {
+        "name": "Float64"
+      }
+    },
+    {
+      "name": "gsv",
+      "type": {
+        "name": "Float64"
+      }
+    },
+    {
+      "name": "po_created_at",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 9
+          },
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "event_brand_id",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "campaign_id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "event_bid_type",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "event_bid_value",
+      "type": {
+        "name": "Nullable",
+        "parameters": [
+          {
+            "name": "Float64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "event_inventory_id",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "event_user_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "ad_event_id",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "event_type",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "latest_ad_created_at",
+      "type": {
+        "name": "DateTime64",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 9
+          },
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "order_product_event_id"
+            ]
+          },
+          {
+            "parts": [
+              "order_id"
+            ]
+          },
+          {
+            "parts": [
+              "brand_id"
+            ]
+          },
+          {
+            "parts": [
+              "user_id"
+            ]
+          },
+          {
+            "parts": [
+              "sp_id"
+            ]
+          },
+          {
+            "parts": [
+              "gmv"
+            ]
+          },
+          {
+            "parts": [
+              "gsv"
+            ]
+          },
+          {
+            "parts": [
+              "po_created_at"
+            ]
+          },
+          {
+            "name": "argMax",
+            "arguments": [
+              {
+                "parts": [
+                  "event_brand_id"
+                ]
+              },
+              {
+                "parts": [
+                  "event_rank"
+                ]
+              }
+            ],
+            "alias": "event_brand_id"
+          },
+          {
+            "name": "argMax",
+            "arguments": [
+              {
+                "parts": [
+                  "campaign_id"
+                ]
+              },
+              {
+                "parts": [
+                  "event_rank"
+                ]
+              }
+            ],
+            "alias": "campaign_id"
+          },
+          {
+            "name": "argMax",
+            "arguments": [
+              {
+                "parts": [
+                  "event_bid_type"
+                ]
+              },
+              {
+                "parts": [
+                  "event_rank"
+                ]
+              }
+            ],
+            "alias": "event_bid_type"
+          },
+          {
+            "name": "argMax",
+            "arguments": [
+              {
+                "parts": [
+                  "event_bid_value"
+                ]
+              },
+              {
+                "parts": [
+                  "event_rank"
+                ]
+              }
+            ],
+            "alias": "event_bid_value"
+          },
+          {
+            "name": "argMax",
+            "arguments": [
+              {
+                "parts": [
+                  "event_inventory_id"
+                ]
+              },
+              {
+                "parts": [
+                  "event_rank"
+                ]
+              }
+            ],
+            "alias": "event_inventory_id"
+          },
+          {
+            "name": "argMax",
+            "arguments": [
+              {
+                "parts": [
+                  "event_user_id"
+                ]
+              },
+              {
+                "parts": [
+                  "event_rank"
+                ]
+              }
+            ],
+            "alias": "event_user_id"
+          },
+          {
+            "name": "argMax",
+            "arguments": [
+              {
+                "parts": [
+                  "ad_event_id"
+                ]
+              },
+              {
+                "parts": [
+                  "event_rank"
+                ]
+              }
+            ],
+            "alias": "ad_event_id"
+          },
+          {
+            "name": "argMax",
+            "arguments": [
+              {
+                "parts": [
+                  "event_type"
+                ]
+              },
+              {
+                "parts": [
+                  "event_rank"
+                ]
+              }
+            ],
+            "alias": "event_type"
+          },
+          {
+            "name": "argMax",
+            "arguments": [
+              {
+                "parts": [
+                  "latest_ad_created_at"
+                ]
+              },
+              {
+                "parts": [
+                  "event_rank"
+                ]
+              }
+            ],
+            "alias": "latest_ad_created_at"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "order_product_event_id"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "order_id"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "brand_id"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "user_id"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "sp_id"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "gmv"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "gsv"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "po_created_at"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "event_type"
+                            ]
+                          },
+                          {
+                            "name": "if",
+                            "arguments": [
+                              {
+                                "left": {
+                                  "parts": [
+                                    "event_type"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "type": "String",
+                                  "value": "click"
+                                }
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              },
+                              {
+                                "type": "Integer",
+                                "value": 0
+                              }
+                            ],
+                            "alias": "event_rank"
+                          },
+                          {
+                            "name": "argMax",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "event_brand_id"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "_version"
+                                ]
+                              }
+                            ],
+                            "alias": "event_brand_id"
+                          },
+                          {
+                            "name": "argMax",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "campaign_id"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "_version"
+                                ]
+                              }
+                            ],
+                            "alias": "campaign_id"
+                          },
+                          {
+                            "name": "argMax",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "event_bid_type"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "_version"
+                                ]
+                              }
+                            ],
+                            "alias": "event_bid_type"
+                          },
+                          {
+                            "name": "argMax",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "event_bid_value"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "_version"
+                                ]
+                              }
+                            ],
+                            "alias": "event_bid_value"
+                          },
+                          {
+                            "name": "argMax",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "event_inventory_id"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "_version"
+                                ]
+                              }
+                            ],
+                            "alias": "event_inventory_id"
+                          },
+                          {
+                            "name": "argMax",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "event_user_id"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "_version"
+                                ]
+                              }
+                            ],
+                            "alias": "event_user_id"
+                          },
+                          {
+                            "name": "argMax",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "ad_event_id"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "_version"
+                                ]
+                              }
+                            ],
+                            "alias": "ad_event_id"
+                          },
+                          {
+                            "name": "argMax",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "latest_ad_created_at"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "_version"
+                                ]
+                              }
+                            ],
+                            "alias": "latest_ad_created_at"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "database": "analytics",
+                                  "table": "order_attribution"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "parts": [
+                              "attribution_window"
+                            ]
+                          },
+                          "op": "\u003c=",
+                          "right": {
+                            "name": "attr_window",
+                            "type": {
+                              "name": "UInt32"
+                            }
+                          }
+                        },
+                        "group_by": [
+                          {
+                            "parts": [
+                              "order_product_event_id"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "order_id"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "brand_id"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "user_id"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "sp_id"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "gmv"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "gsv"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "po_created_at"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "event_type"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "order_product_event_id"
+            ]
+          },
+          {
+            "parts": [
+              "order_id"
+            ]
+          },
+          {
+            "parts": [
+              "brand_id"
+            ]
+          },
+          {
+            "parts": [
+              "user_id"
+            ]
+          },
+          {
+            "parts": [
+              "sp_id"
+            ]
+          },
+          {
+            "parts": [
+              "gmv"
+            ]
+          },
+          {
+            "parts": [
+              "gsv"
+            ]
+          },
+          {
+            "parts": [
+              "po_created_at"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

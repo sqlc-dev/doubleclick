@@ -1,0 +1,232 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "cnt"
+                  ]
+                }
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          "alias": "total"
+        },
+        {
+          "array": {
+            "parts": [
+              "k"
+            ]
+          },
+          "index": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "array": {
+            "parts": [
+              "k"
+            ]
+          },
+          "index": {
+            "type": "Integer",
+            "value": 2
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayMap",
+                          "arguments": [
+                            {
+                              "parameters": [
+                                "x"
+                              ],
+                              "body": {
+                                "condition": {
+                                  "left": {
+                                    "parts": [
+                                      "x"
+                                    ]
+                                  },
+                                  "op": "%",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 3
+                                  }
+                                },
+                                "then": {
+                                  "name": "toNullable",
+                                  "arguments": [
+                                    {
+                                      "left": {
+                                        "left": {
+                                          "parts": [
+                                            "number"
+                                          ]
+                                        },
+                                        "op": "%",
+                                        "right": {
+                                          "type": "Integer",
+                                          "value": 5
+                                        }
+                                      },
+                                      "op": "+",
+                                      "right": {
+                                        "parts": [
+                                          "x"
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                },
+                                "else": {
+                                  "type": "Null",
+                                  "value": null
+                                }
+                              }
+                            },
+                            {
+                              "name": "range",
+                              "arguments": [
+                                {
+                                  "type": "Integer",
+                                  "value": 3
+                                }
+                              ]
+                            }
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "expr": {
+                            "condition": {
+                              "left": {
+                                "parts": [
+                                  "number"
+                                ]
+                              },
+                              "op": "%",
+                              "right": {
+                                "type": "Integer",
+                                "value": 4
+                              }
+                            },
+                            "then": {
+                              "name": "toNullable",
+                              "arguments": [
+                                {
+                                  "name": "rand"
+                                }
+                              ]
+                            },
+                            "else": {
+                              "type": "Null",
+                              "value": null
+                            }
+                          },
+                          "alias": "cnt"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "numbers_mt"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "\u003c",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1000000
+                        }
+                      },
+                      "limit": {
+                        "type": "Integer",
+                        "value": 1000000
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "k"
+          ]
+        }
+      ],
+      "with_totals": true,
+      "order_by": [
+        {
+          "expression": {
+            "array": {
+              "parts": [
+                "k"
+              ]
+            },
+            "index": {
+              "type": "Integer",
+              "value": 2
+            }
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "max_threads",
+          "value": {
+            "type": "Integer",
+            "value": 100
+          }
+        },
+        {
+          "name": "max_execution_time",
+          "value": {
+            "type": "Integer",
+            "value": 120
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "JSON"
+        ]
+      }
+    }
+  ]
+}

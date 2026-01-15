@@ -1,0 +1,75 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "materialize",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "Привет, World"
+            }
+          ],
+          "alias": "s"
+        }
+      ],
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "parts": [
+                "s"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "hell%"
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "s"
+              ]
+            },
+            "case_insensitive": true,
+            "pattern": {
+              "type": "String",
+              "value": "%привет%"
+            }
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "s"
+            ]
+          },
+          "case_insensitive": true,
+          "pattern": {
+            "type": "String",
+            "value": "world%"
+          }
+        }
+      },
+      "settings": [
+        {
+          "name": "optimize_or_like_chain",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        },
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

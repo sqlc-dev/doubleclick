@@ -1,0 +1,62 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "depname"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "salary"
+              ]
+            }
+          ],
+          "over": {
+            "partition_by": [
+              {
+                "parts": [
+                  "depname"
+                ]
+              }
+            ],
+            "order_by": [
+              {
+                "expression": {
+                  "parts": [
+                    "empno"
+                  ]
+                }
+              }
+            ]
+          },
+          "alias": "depsalary"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "empsalary"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "depsalary"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

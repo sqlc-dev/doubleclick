@@ -1,0 +1,144 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "name": "greatest",
+              "arguments": [
+                {
+                  "name": "multiIf",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 2
+                    },
+                    {
+                      "name": "toNullable",
+                      "arguments": [
+                        {
+                          "type": "Null",
+                          "value": null
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 3
+                    },
+                    {
+                      "type": "Integer",
+                      "value": 4
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test1_00395"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "name": "toNullable",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 27
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "col1"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "name": "multiIf",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 27
+              },
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "name": "multiIf",
+                "arguments": [
+                  {
+                    "name": "materialize",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  {
+                    "name": "toLowCardinality",
+                    "arguments": [
+                      {
+                        "type": "Integer",
+                        "value": 2
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 3
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  {
+                    "type": "Integer",
+                    "value": 4
+                  }
+                ]
+              },
+              {
+                "type": "Null",
+                "value": null
+              },
+              {
+                "type": "Integer",
+                "value": 4
+              }
+            ]
+          },
+          "nulls_first": false
+        },
+        {
+          "expression": {
+            "parts": [
+              "col1"
+            ]
+          },
+          "descending": true
+        }
+      ]
+    }
+  ]
+}

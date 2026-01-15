@@ -1,0 +1,112 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "size_level_1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "total_compressed_size"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "file",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "03276_parquet_custom_encoder_compression_level_1",
+                                  "parquet"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "ParquetMetadata"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "size_level_22",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "total_compressed_size"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "file",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "03276_parquet_custom_encoder_compression_level_22",
+                                  "parquet"
+                                ]
+                              },
+                              {
+                                "parts": [
+                                  "ParquetMetadata"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "size_level_22"
+              ]
+            },
+            "op": "\u003c",
+            "right": {
+              "parts": [
+                "size_level_1"
+              ]
+            }
+          },
+          "alias": "compression_higher_level_produces_smaller_file"
+        }
+      ]
+    }
+  ]
+}

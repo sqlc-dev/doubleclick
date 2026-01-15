@@ -1,0 +1,90 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "$condition",
+          "query": {
+            "left": {
+              "expr": {
+                "parts": [
+                  "database"
+                ]
+              },
+              "not": true,
+              "pattern": {
+                "type": "String",
+                "value": "system"
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "name"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "fake"
+              }
+            },
+            "parenthesized": true
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "$main",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "distinct": true,
+                  "columns": [
+                    {
+                      "parts": [
+                        "table"
+                      ]
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "fake"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "parts": [
+                      "$condition"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "$main"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

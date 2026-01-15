@@ -1,0 +1,62 @@
+{
+  "table": "03173_multiple_partition_cols",
+  "columns": [
+    {
+      "name": "key1",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "key2",
+      "type": {
+        "name": "Int32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "name": "intDiv",
+        "arguments": [
+          {
+            "parts": [
+              "key1"
+            ]
+          },
+          {
+            "type": "Integer",
+            "value": 50
+          }
+        ]
+      },
+      {
+        "left": {
+          "name": "xxHash32",
+          "arguments": [
+            {
+              "parts": [
+                "key2"
+              ]
+            }
+          ]
+        },
+        "op": "%",
+        "right": {
+          "type": "Integer",
+          "value": 3
+        }
+      }
+    ],
+    "spaced_commas": true
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "REGEXP_REPLACE",
+          "arguments": [
+            {
+              "name": "trimLeft",
+              "arguments": [
+                {
+                  "parts": [
+                    "explain"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": "_runtime_filter_\\d+"
+            },
+            {
+              "type": "String",
+              "value": "_runtime_filter_UNIQ_ID"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "viewExplain",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "EXPLAIN"
+                                  },
+                                  {
+                                    "type": "String",
+                                    "value": "actions = 1"
+                                  },
+                                  {
+                                    "query": {
+                                      "selects": [
+                                        {
+                                          "columns": [
+                                            {
+                                              "name": "count"
+                                            },
+                                            {
+                                              "name": "max",
+                                              "arguments": [
+                                                {
+                                                  "parts": [
+                                                    "c_custkey"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "from": {
+                                            "tables": [
+                                              {
+                                                "table": {
+                                                  "table": {
+                                                    "table": "nation"
+                                                  }
+                                                }
+                                              },
+                                              {
+                                                "table": {
+                                                  "table": {
+                                                    "table": "customer"
+                                                  }
+                                                },
+                                                "join": {
+                                                  "type": ""
+                                                }
+                                              }
+                                            ]
+                                          },
+                                          "where": {
+                                            "left": {
+                                              "left": {
+                                                "parts": [
+                                                  "c_nationkey"
+                                                ]
+                                              },
+                                              "op": "=",
+                                              "right": {
+                                                "parts": [
+                                                  "n_nationkey"
+                                                ]
+                                              },
+                                              "parenthesized": true
+                                            },
+                                            "op": "AND",
+                                            "right": {
+                                              "left": {
+                                                "parts": [
+                                                  "n_name"
+                                                ]
+                                              },
+                                              "op": "=",
+                                              "right": {
+                                                "type": "String",
+                                                "value": "FRANCE"
+                                              },
+                                              "parenthesized": true
+                                            }
+                                          },
+                                          "settings": [
+                                            {
+                                              "name": "enable_join_runtime_filters",
+                                              "value": {
+                                                "type": "Integer",
+                                                "value": 1
+                                              }
+                                            },
+                                            {
+                                              "name": "optimize_move_to_prewhere",
+                                              "value": {
+                                                "type": "Integer",
+                                                "value": 1
+                                              }
+                                            },
+                                            {
+                                              "name": "query_plan_join_swap_table",
+                                              "value": {
+                                                "type": "Integer",
+                                                "value": 1
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%ReadFromMergeTree%"
+            }
+          },
+          "op": "OR",
+          "right": {
+            "expr": {
+              "parts": [
+                "explain"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%Prewhere filter column:%"
+            }
+          }
+        },
+        "op": "OR",
+        "right": {
+          "expr": {
+            "parts": [
+              "explain"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": "%Build%"
+          }
+        }
+      }
+    }
+  ]
+}

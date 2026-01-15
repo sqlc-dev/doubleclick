@@ -1,0 +1,112 @@
+{
+  "table": "merge1",
+  "columns": [
+    {
+      "name": "CounterID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "StartDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "Sign",
+      "type": {
+        "name": "Int8"
+      }
+    },
+    {
+      "name": "VisitID",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "UserID",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "StartTime",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "ClickLogID",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "CollapsingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "StartDate"
+        ]
+      },
+      {
+        "name": "intHash32",
+        "arguments": [
+          {
+            "parts": [
+              "UserID"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "tuple",
+        "arguments": [
+          {
+            "parts": [
+              "CounterID"
+            ]
+          },
+          {
+            "parts": [
+              "StartDate"
+            ]
+          },
+          {
+            "name": "intHash32",
+            "arguments": [
+              {
+                "parts": [
+                  "UserID"
+                ]
+              }
+            ]
+          },
+          {
+            "parts": [
+              "VisitID"
+            ]
+          },
+          {
+            "parts": [
+              "ClickLogID"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      },
+      {
+        "parts": [
+          "Sign"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  }
+}

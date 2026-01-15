@@ -1,0 +1,76 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "replaceRegexpOne",
+          "arguments": [
+            {
+              "parts": [
+                "create_table_query"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "CREATE TABLE [^ ]*"
+            },
+            {
+              "type": "String",
+              "value": "CREATE TABLE x"
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "tables"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "table"
+            ]
+          },
+          "pattern": {
+            "type": "String",
+            "value": ".inner%"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "LineAsString"
+        ]
+      }
+    }
+  ]
+}

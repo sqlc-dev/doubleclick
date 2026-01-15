@@ -1,0 +1,65 @@
+{
+  "table": "column_size_bug",
+  "columns": [
+    {
+      "name": "date_time",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "SimpleAggregateFunction",
+        "parameters": [
+          {
+            "parts": [
+              "sum"
+            ]
+          },
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "AggregatingMergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "date_time"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toStartOfInterval",
+    "arguments": [
+      {
+        "parts": [
+          "date_time"
+        ]
+      },
+      {
+        "value": {
+          "type": "Integer",
+          "value": 1
+        },
+        "unit": "DAY"
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "remove_empty_parts",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

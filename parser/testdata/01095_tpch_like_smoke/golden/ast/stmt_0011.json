@@ -1,0 +1,149 @@
+{
+  "table": "part",
+  "columns": [
+    {
+      "name": "p_partkey",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "p_name",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "p_mfgr",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 25
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "p_brand",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 10
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "p_type",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "p_size",
+      "type": {
+        "name": "Int32"
+      }
+    },
+    {
+      "name": "p_container",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 10
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "p_retailprice",
+      "type": {
+        "name": "Decimal",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 18
+          },
+          {
+            "type": "Integer",
+            "value": 2
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "p_comment",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "name": "pk",
+      "expression": {
+        "left": {
+          "parts": [
+            "p_partkey"
+          ]
+        },
+        "op": "\u003e=",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      }
+    },
+    {
+      "name": "positive",
+      "expression": {
+        "left": {
+          "left": {
+            "parts": [
+              "p_size"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "p_retailprice"
+            ]
+          },
+          "op": "\u003e=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "parenthesized": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "p_partkey"
+      ]
+    }
+  ]
+}

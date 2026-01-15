@@ -1,0 +1,61 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "String",
+          "value": "distributed_0"
+        },
+        {
+          "parts": [
+            "_shard_num"
+          ]
+        },
+        {
+          "name": "toUInt8",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ],
+          "alias": "dummy"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "d_one"
+              },
+              "alias": "o"
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "o",
+            "dummy"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "Integer",
+          "value": 0
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "_shard_num"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

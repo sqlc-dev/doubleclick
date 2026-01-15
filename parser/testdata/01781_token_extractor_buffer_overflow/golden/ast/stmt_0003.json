@@ -1,0 +1,91 @@
+{
+  "table": "bloom_filter",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "s",
+      "type": {
+        "name": "String"
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "tok_bf",
+      "expression": {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "s"
+            ]
+          },
+          {
+            "name": "lower",
+            "arguments": [
+              {
+                "parts": [
+                  "s"
+                ]
+              }
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      "type": {
+        "name": "tokenbf_v1",
+        "arguments": [
+          {
+            "type": "Integer",
+            "value": 512
+          },
+          {
+            "type": "Integer",
+            "value": 3
+          },
+          {
+            "type": "Integer",
+            "value": 0
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,74 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "sum",
+            "arguments": [
+              {
+                "left": {
+                  "name": "exp2",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "x"
+                      ]
+                    }
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "name": "pow",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 2
+                    },
+                    {
+                      "parts": [
+                        "x"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "op": "/",
+          "right": {
+            "name": "count"
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              }
+            }
+          },
+          {
+            "array_join": {
+              "columns": [
+                {
+                  "name": "range",
+                  "arguments": [
+                    {
+                      "type": "Integer",
+                      "value": 1000
+                    }
+                  ],
+                  "alias": "x"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "table": "mt1",
+  "columns": [
+    {
+      "name": "time",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "proj",
+      "select": {
+        "columns": [
+          {
+            "name": "min",
+            "arguments": [
+              {
+                "parts": [
+                  "time"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": null
+    }
+  ],
+  "ttl": {
+    "expression": {
+      "left": {
+        "parts": [
+          "time"
+        ]
+      },
+      "op": "+",
+      "right": {
+        "value": {
+          "type": "Integer",
+          "value": 1
+        },
+        "unit": "SECOND"
+      }
+    },
+    "elements": [
+      {
+        "expr": {
+          "left": {
+            "parts": [
+              "time"
+            ]
+          },
+          "op": "+",
+          "right": {
+            "value": {
+              "type": "Integer",
+              "value": 1
+            },
+            "unit": "SECOND"
+          }
+        }
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "remove_empty_parts",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "merge_with_ttl_timeout",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    {
+      "name": "deduplicate_merge_projection_mode",
+      "value": {
+        "type": "String",
+        "value": "ignore"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

@@ -1,0 +1,111 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "type": "Integer",
+          "value": 4
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "type": "Tuple",
+            "value": [
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "type": "Integer",
+                "value": 1
+              }
+            ],
+            "spaced_commas": true
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "expr": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "alias": "x"
+                  },
+                  {
+                    "parts": [
+                      "x"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "type": "Tuple",
+            "value": [
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "type": "Integer",
+                "value": 0
+              }
+            ],
+            "spaced_commas": true
+          },
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "expr": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "alias": "x"
+                  },
+                  {
+                    "name": "toUInt8",
+                    "arguments": [
+                      {
+                        "left": {
+                          "parts": [
+                            "x"
+                          ]
+                        },
+                        "op": "-",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,152 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "arrayStringConcat",
+          "arguments": [
+            {
+              "name": "arraySlice",
+              "arguments": [
+                {
+                  "name": "splitByString",
+                  "arguments": [
+                    {
+                      "type": "String",
+                      "value": ", "
+                    },
+                    {
+                      "name": "trimLeft",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "explain"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "Integer",
+                  "value": 2
+                }
+              ]
+            },
+            {
+              "type": "String",
+              "value": ", "
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "QUERY TREE",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "hex",
+                            "arguments": [
+                              {
+                                "name": "uniqState",
+                                "arguments": [
+                                  {
+                                    "name": "if",
+                                    "arguments": [
+                                      {
+                                        "name": "toNullable",
+                                        "arguments": [
+                                          {
+                                            "left": {
+                                              "left": {
+                                                "parts": [
+                                                  "number"
+                                                ]
+                                              },
+                                              "op": "%",
+                                              "right": {
+                                                "type": "Integer",
+                                                "value": 2
+                                              }
+                                            },
+                                            "op": "=",
+                                            "right": {
+                                              "type": "Integer",
+                                              "value": 0
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "parts": [
+                                          "number"
+                                        ]
+                                      },
+                                      {
+                                        "type": "Null",
+                                        "value": null
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "name": "numbers",
+                                  "arguments": [
+                                    {
+                                      "type": "Integer",
+                                      "value": 5
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "settings": [
+                          {
+                            "name": "optimize_rewrite_aggregate_function_with_if",
+                            "value": {
+                              "type": "Integer",
+                              "value": 1
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "explicit_type": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "explain"
+          ]
+        },
+        "pattern": {
+          "type": "String",
+          "value": "%AggregateFunction%"
+        }
+      }
+    }
+  ]
+}

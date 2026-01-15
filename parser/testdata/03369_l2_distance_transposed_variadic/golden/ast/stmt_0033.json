@@ -1,0 +1,130 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "reference_vec",
+          "query": {
+            "type": "Array",
+            "value": [
+              {
+                "name": "toFloat32",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "type": "Integer",
+                "value": 1
+              },
+              {
+                "type": "Integer",
+                "value": 2
+              }
+            ],
+            "spaced_commas": true
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "name": "round",
+          "arguments": [
+            {
+              "name": "L2DistanceTransposed",
+              "arguments": [
+                {
+                  "tuple": {
+                    "parts": [
+                      "vec"
+                    ]
+                  },
+                  "index": {
+                    "type": "Integer",
+                    "value": 1
+                  }
+                },
+                {
+                  "tuple": {
+                    "parts": [
+                      "vec"
+                    ]
+                  },
+                  "index": {
+                    "type": "Integer",
+                    "value": 2
+                  }
+                },
+                {
+                  "tuple": {
+                    "parts": [
+                      "vec"
+                    ]
+                  },
+                  "index": {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                },
+                {
+                  "tuple": {
+                    "parts": [
+                      "vec"
+                    ]
+                  },
+                  "index": {
+                    "type": "Integer",
+                    "value": 4
+                  }
+                },
+                {
+                  "type": "Integer",
+                  "value": 3
+                },
+                {
+                  "parts": [
+                    "reference_vec"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Integer",
+              "value": 5
+            }
+          ],
+          "alias": "dist"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "qbit"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

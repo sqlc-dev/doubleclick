@@ -1,0 +1,149 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "t5"
+              },
+              "alias": "ref_2"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "ref_3",
+                            "c_2_c48_2"
+                          ],
+                          "alias": "c_6_c185_6"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t4"
+                              },
+                              "alias": "ref_3"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "subq_1"
+            },
+            "join": {
+              "type": "LEFT",
+              "on": {
+                "left": {
+                  "parts": [
+                    "ref_2",
+                    "c52"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "subq_1",
+                    "c_6_c185_6"
+                  ]
+                },
+                "parenthesized": true
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "intExp2",
+          "arguments": [
+            {
+              "parts": [
+                "ref_2",
+                "pkey"
+              ]
+            }
+          ]
+        },
+        "op": "\u003c=",
+        "right": {
+          "whens": [
+            {
+              "condition": {
+                "left": {
+                  "left": {
+                    "parts": [
+                      "subq_1",
+                      "c_6_c185_6"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "parenthesized": true
+                },
+                "op": "AND",
+                "right": {
+                  "op": "NOT",
+                  "operand": {
+                    "left": {
+                      "parts": [
+                        "subq_1",
+                        "c_6_c185_6"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 1
+                    },
+                    "parenthesized": true
+                  }
+                },
+                "parenthesized": true
+              },
+              "result": {
+                "type": "Integer",
+                "value": 0
+              }
+            }
+          ],
+          "else": {
+            "name": "hiveHash",
+            "arguments": [
+              {
+                "parts": [
+                  "ref_2",
+                  "c56"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

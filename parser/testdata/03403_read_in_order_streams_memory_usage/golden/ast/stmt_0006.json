@@ -1,0 +1,97 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "array": {
+                    "parts": [
+                      "Settings"
+                    ]
+                  },
+                  "index": {
+                    "type": "String",
+                    "value": "max_streams_to_max_threads_ratio"
+                  }
+                },
+                "op": "=",
+                "right": {
+                  "type": "String",
+                  "value": "10000000"
+                }
+              },
+              "op": "AND",
+              "right": {
+                "expr": {
+                  "parts": [
+                    "query"
+                  ]
+                },
+                "pattern": {
+                  "type": "String",
+                  "value": "%FROM 03403_data%"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "type"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "QueryFinish"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "memory_usage"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 20000000
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "current_database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "currentDatabase"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "mapSort",
+          "arguments": [
+            {
+              "name": "mapFilter",
+              "arguments": [
+                {
+                  "parameters": [
+                    "k",
+                    "v"
+                  ],
+                  "body": {
+                    "expr": {
+                      "parts": [
+                        "k"
+                      ]
+                    },
+                    "list": [
+                      {
+                        "type": "String",
+                        "value": "ReadTasksWithAppliedPatches"
+                      },
+                      {
+                        "type": "String",
+                        "value": "PatchesAppliedInAllReadTasks"
+                      },
+                      {
+                        "type": "String",
+                        "value": "PatchesMergeAppliedInAllReadTasks"
+                      },
+                      {
+                        "type": "String",
+                        "value": "PatchesJoinAppliedInAllReadTasks"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "parts": [
+                    "ProfileEvents"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "query_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "current_database"
+              ]
+            },
+            "op": "=",
+            "right": {
+              "name": "currentDatabase"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "query"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%SELECT * FROM t_shared ORDER BY id%"
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "type"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "QueryFinish"
+          }
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "event_time_microseconds"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

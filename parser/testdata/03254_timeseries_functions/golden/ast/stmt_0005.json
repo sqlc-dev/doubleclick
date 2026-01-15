@@ -1,0 +1,124 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "start",
+          "query": {
+            "type": "Integer",
+            "value": 1734955380
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "end",
+          "query": {
+            "type": "Integer",
+            "value": 1734955680
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "step",
+          "query": {
+            "type": "Integer",
+            "value": 15
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "staleness",
+          "query": {
+            "type": "Integer",
+            "value": 0
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "grid",
+          "query": {
+            "name": "timeSeriesRange",
+            "arguments": [
+              {
+                "parts": [
+                  "start"
+                ]
+              },
+              {
+                "parts": [
+                  "end"
+                ]
+              },
+              {
+                "parts": [
+                  "step"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "arrayZip",
+          "arguments": [
+            {
+              "parts": [
+                "grid"
+              ]
+            },
+            {
+              "name": "timeSeriesResampleToGridWithStaleness",
+              "parameters": [
+                {
+                  "parts": [
+                    "start"
+                  ]
+                },
+                {
+                  "parts": [
+                    "end"
+                  ]
+                },
+                {
+                  "parts": [
+                    "step"
+                  ]
+                },
+                {
+                  "parts": [
+                    "staleness"
+                  ]
+                }
+              ],
+              "arguments": [
+                {
+                  "parts": [
+                    "timestamp"
+                  ]
+                },
+                {
+                  "parts": [
+                    "value"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "ts_raw_data"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

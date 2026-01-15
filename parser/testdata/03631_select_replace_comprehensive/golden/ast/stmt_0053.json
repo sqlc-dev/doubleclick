@@ -1,0 +1,110 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "category"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "value"
+              ]
+            }
+          ],
+          "alias": "total"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "replace": [
+                            {
+                              "expr": {
+                                "left": {
+                                  "parts": [
+                                    "value"
+                                  ]
+                                },
+                                "op": "*",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 10
+                                }
+                              },
+                              "name": "value"
+                            }
+                          ],
+                          "transformers": [
+                            {
+                              "type": "replace",
+                              "replaces": [
+                                {
+                                  "expr": {
+                                    "left": {
+                                      "parts": [
+                                        "value"
+                                      ]
+                                    },
+                                    "op": "*",
+                                    "right": {
+                                      "type": "Integer",
+                                      "value": 10
+                                    }
+                                  },
+                                  "name": "value"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test_group_by"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "category"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "category"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "hits_text"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "name": "hasToken",
+          "arguments": [
+            {
+              "parts": [
+                "URL"
+              ]
+            },
+            {
+              "type": "String",
+              "value": "auto"
+            }
+          ]
+        },
+        "op": "AND",
+        "right": {
+          "name": "hasAnyTokens",
+          "arguments": [
+            {
+              "parts": [
+                "SearchPhrase"
+              ]
+            },
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "String",
+                  "value": "bmw"
+                },
+                {
+                  "type": "String",
+                  "value": "audi"
+                },
+                {
+                  "type": "String",
+                  "value": "toyota"
+                }
+              ],
+              "spaced_commas": true
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

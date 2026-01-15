@@ -1,0 +1,223 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "parts": [
+            "eq"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "with": [
+                        {
+                          "name": "arr",
+                          "query": {
+                            "name": "range",
+                            "arguments": [
+                              {
+                                "left": {
+                                  "type": "Integer",
+                                  "value": 2
+                                },
+                                "op": "+",
+                                "right": {
+                                  "left": {
+                                    "parts": [
+                                      "number"
+                                    ]
+                                  },
+                                  "op": "%",
+                                  "right": {
+                                    "type": "Integer",
+                                    "value": 10
+                                  }
+                                }
+                              }
+                            ]
+                          },
+                          "scalar_with": true
+                        },
+                        {
+                          "name": "arr_with_nan",
+                          "query": {
+                            "name": "arrayMap",
+                            "arguments": [
+                              {
+                                "parameters": [
+                                  "x"
+                                ],
+                                "body": {
+                                  "condition": {
+                                    "left": {
+                                      "parts": [
+                                        "x"
+                                      ]
+                                    },
+                                    "op": "=",
+                                    "right": {
+                                      "name": "intDiv",
+                                      "arguments": [
+                                        {
+                                          "parts": [
+                                            "number"
+                                          ]
+                                        },
+                                        {
+                                          "type": "Integer",
+                                          "value": 10
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "then": {
+                                    "type": "Float",
+                                    "value": "NaN"
+                                  },
+                                  "else": {
+                                    "parts": [
+                                      "x"
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "parts": [
+                                  "arr"
+                                ]
+                              }
+                            ]
+                          },
+                          "scalar_with": true
+                        },
+                        {
+                          "name": "arr_filtered",
+                          "query": {
+                            "name": "arrayFilter",
+                            "arguments": [
+                              {
+                                "parameters": [
+                                  "x"
+                                ],
+                                "body": {
+                                  "left": {
+                                    "parts": [
+                                      "x"
+                                    ]
+                                  },
+                                  "op": "!=",
+                                  "right": {
+                                    "name": "intDiv",
+                                    "arguments": [
+                                      {
+                                        "parts": [
+                                          "number"
+                                        ]
+                                      },
+                                      {
+                                        "type": "Integer",
+                                        "value": 10
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "parts": [
+                                  "arr"
+                                ]
+                              }
+                            ]
+                          },
+                          "scalar_with": true
+                        }
+                      ],
+                      "columns": [
+                        {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        {
+                          "name": "arrayReduce",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "quantileBFloat16"
+                            },
+                            {
+                              "parts": [
+                                "arr_with_nan"
+                              ]
+                            }
+                          ],
+                          "alias": "q1"
+                        },
+                        {
+                          "name": "arrayReduce",
+                          "arguments": [
+                            {
+                              "type": "String",
+                              "value": "quantileBFloat16"
+                            },
+                            {
+                              "parts": [
+                                "arr_filtered"
+                              ]
+                            }
+                          ],
+                          "alias": "q2"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "parts": [
+                                "q1"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "parts": [
+                                "q2"
+                              ]
+                            }
+                          },
+                          "alias": "eq"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 100
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

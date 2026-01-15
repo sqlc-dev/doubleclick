@@ -1,0 +1,124 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "level"
+          ]
+        },
+        {
+          "name": "COUNT"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "uid"
+                          ]
+                        },
+                        {
+                          "name": "windowFunnel",
+                          "parameters": [
+                            {
+                              "type": "Integer",
+                              "value": 3600
+                            }
+                          ],
+                          "arguments": [
+                            {
+                              "name": "toUInt32",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "its"
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "left": {
+                                "parts": [
+                                  "action_code"
+                                ]
+                              },
+                              "op": "!=",
+                              "right": {
+                                "type": "String",
+                                "value": ""
+                              }
+                            },
+                            {
+                              "left": {
+                                "parts": [
+                                  "action_code"
+                                ]
+                              },
+                              "op": "=",
+                              "right": {
+                                "type": "String",
+                                "value": "2"
+                              }
+                            }
+                          ],
+                          "alias": "level"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "remote",
+                                "arguments": [
+                                  {
+                                    "type": "String",
+                                    "value": "127.0.0.{2,3}"
+                                  },
+                                  {
+                                    "name": "currentDatabase"
+                                  },
+                                  {
+                                    "parts": [
+                                      "remote_test"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "group_by": [
+                        {
+                          "parts": [
+                            "uid"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "level"
+          ]
+        }
+      ]
+    }
+  ]
+}

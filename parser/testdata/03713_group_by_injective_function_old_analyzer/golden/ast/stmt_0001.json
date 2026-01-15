@@ -1,0 +1,125 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "concat",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "a_"
+            },
+            {
+              "name": "toString",
+              "arguments": [
+                {
+                  "left": {
+                    "parts": [
+                      "number"
+                    ]
+                  },
+                  "op": "%",
+                  "right": {
+                    "type": "Integer",
+                    "value": 3
+                  }
+                }
+              ]
+            }
+          ],
+          "alias": "a"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "number"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 5
+            }
+          },
+          "alias": "b"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 50
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "type": "Tuple",
+          "value": [
+            {
+              "parts": [
+                "a"
+              ]
+            },
+            {
+              "parts": [
+                "b"
+              ]
+            }
+          ],
+          "spaced_commas": true
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "type": "Tuple",
+            "value": [
+              {
+                "parts": [
+                  "a"
+                ]
+              },
+              {
+                "parts": [
+                  "b"
+                ]
+              }
+            ],
+            "spaced_commas": true
+          }
+        }
+      ],
+      "limit": {
+        "type": "Integer",
+        "value": 1
+      },
+      "settings": [
+        {
+          "name": "optimize_injective_functions_in_group_by",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        {
+          "name": "enable_analyzer",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "table": "test_graphite",
+  "columns": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "Path",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "Time",
+      "type": {
+        "name": "DateTime",
+        "parameters": [
+          {
+            "type": "String",
+            "value": "UTC"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "Value",
+      "type": {
+        "name": "Float64"
+      }
+    },
+    {
+      "name": "Version",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "col",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "GraphiteMergeTree",
+    "parameters": [
+      {
+        "type": "String",
+        "value": "graphite_rollup"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "key"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

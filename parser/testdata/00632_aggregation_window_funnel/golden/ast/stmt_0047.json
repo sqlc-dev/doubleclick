@@ -1,0 +1,106 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "user"
+          ]
+        },
+        {
+          "name": "windowFunnel",
+          "parameters": [
+            {
+              "type": "Integer",
+              "value": 86400
+            },
+            {
+              "type": "String",
+              "value": "strict_deduplication"
+            },
+            {
+              "type": "String",
+              "value": "strict_order"
+            }
+          ],
+          "arguments": [
+            {
+              "parts": [
+                "dt"
+              ]
+            },
+            {
+              "left": {
+                "parts": [
+                  "event"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "a"
+              }
+            },
+            {
+              "left": {
+                "parts": [
+                  "event"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "b"
+              }
+            },
+            {
+              "left": {
+                "parts": [
+                  "event"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "type": "String",
+                "value": "c"
+              }
+            }
+          ],
+          "alias": "s"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "funnel_test_strict_order"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "user"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "user"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "JSONCompactEachRow"
+        ]
+      }
+    }
+  ]
+}

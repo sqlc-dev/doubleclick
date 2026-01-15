@@ -1,0 +1,73 @@
+{
+  "table": "derived_metrics_local",
+  "columns": [
+    {
+      "name": "timestamp",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "bytes",
+      "type": {
+        "name": "UInt64"
+      },
+      "ttl": {
+        "left": {
+          "name": "toStartOfHour",
+          "arguments": [
+            {
+              "parts": [
+                "timestamp"
+              ]
+            }
+          ]
+        },
+        "op": "+",
+        "right": {
+          "value": {
+            "type": "Integer",
+            "value": 1
+          },
+          "unit": "HOUR"
+        }
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "name": "toStartOfHour",
+          "arguments": [
+            {
+              "parts": [
+                "timestamp"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "timestamp"
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "min_bytes_for_wide_part",
+      "value": {
+        "type": "Integer",
+        "value": 0
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

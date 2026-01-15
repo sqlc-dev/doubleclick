@@ -1,0 +1,41 @@
+{
+  "table": "partition_and_primary_keys_using_same_expression",
+  "columns": [
+    {
+      "name": "dt",
+      "type": {
+        "name": "DateTime"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "name": "toDayOfWeek",
+      "arguments": [
+        {
+          "name": "toDate",
+          "arguments": [
+            {
+              "parts": [
+                "dt"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDate",
+    "arguments": [
+      {
+        "parts": [
+          "dt"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "id"
+          ]
+        },
+        {
+          "parts": [
+            "a"
+          ]
+        },
+        {
+          "parts": [
+            "b"
+          ]
+        },
+        {
+          "name": "IF",
+          "arguments": [
+            {
+              "left": {
+                "parts": [
+                  "a"
+                ]
+              },
+              "op": "\u003c=\u003e",
+              "right": {
+                "parts": [
+                  "b"
+                ]
+              }
+            },
+            {
+              "type": "String",
+              "value": "safe-equal"
+            },
+            {
+              "type": "String",
+              "value": "not_equal"
+            }
+          ],
+          "alias": "equal_flag"
+        },
+        {
+          "name": "IF",
+          "arguments": [
+            {
+              "op": "NOT",
+              "operand": {
+                "left": {
+                  "parts": [
+                    "a"
+                  ]
+                },
+                "op": "\u003c=\u003e",
+                "right": {
+                  "parts": [
+                    "b"
+                  ]
+                }
+              }
+            },
+            {
+              "type": "String",
+              "value": "distinct"
+            },
+            {
+              "type": "String",
+              "value": "same"
+            }
+          ],
+          "alias": "distinct_flag"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "03611_t_nullsafe"
+              }
+            }
+          }
+        ]
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "id"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

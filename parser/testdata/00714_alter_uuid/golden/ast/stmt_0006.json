@@ -1,0 +1,51 @@
+{
+  "if_not_exists": true,
+  "table": "uuid",
+  "columns": [
+    {
+      "name": "created_at",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "id0",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "id1",
+      "type": {
+        "name": "FixedString",
+        "parameters": [
+          {
+            "type": "Integer",
+            "value": 36
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "created_at"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDate",
+    "arguments": [
+      {
+        "parts": [
+          "created_at"
+        ]
+      }
+    ]
+  }
+}

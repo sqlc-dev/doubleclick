@@ -1,0 +1,101 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "expr": {
+                            "left": {
+                              "name": "toInt128",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              ]
+                            },
+                            "op": "*",
+                            "right": {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          },
+                          "alias": "x"
+                        },
+                        {
+                          "expr": {
+                            "left": {
+                              "name": "toInt256",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "number"
+                                  ]
+                                }
+                              ]
+                            },
+                            "op": "*",
+                            "right": {
+                              "parts": [
+                                "number"
+                              ]
+                            }
+                          },
+                          "alias": "y"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "name": "numbers_mt",
+                                "arguments": [
+                                  {
+                                    "type": "Integer",
+                                    "value": 100000000
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "parts": [
+                            "x"
+                          ]
+                        },
+                        "op": "!=",
+                        "right": {
+                          "parts": [
+                            "y"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

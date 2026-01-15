@@ -1,0 +1,135 @@
+{
+  "table": "out1",
+  "columns": [
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "j",
+      "type": {
+        "name": "JSON"
+      }
+    },
+    {
+      "name": "name",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt32"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "arrayMap",
+        "arguments": [
+          {
+            "parameters": [
+              "x"
+            ],
+            "body": {
+              "name": "toUInt32",
+              "arguments": [
+                {
+                  "parts": [
+                    "x"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "name": "JSONAllPaths",
+            "arguments": [
+              {
+                "parts": [
+                  "j"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Array",
+            "parameters": [
+              {
+                "name": "UInt32"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "arrayMap",
+        "arguments": [
+          {
+            "parameters": [
+              "x"
+            ],
+            "body": {
+              "name": "JSONExtract",
+              "arguments": [
+                {
+                  "expr": {
+                    "parts": [
+                      "j"
+                    ]
+                  },
+                  "type": {
+                    "name": "String"
+                  }
+                },
+                {
+                  "name": "indexOf",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "name"
+                      ]
+                    },
+                    {
+                      "parts": [
+                        "x"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "Array(UInt32)"
+                }
+              ]
+            }
+          },
+          {
+            "parts": [
+              "name"
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,275 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "w",
+          "query": {
+            "type": "Integer",
+            "value": 4096
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "h",
+          "query": {
+            "type": "Integer",
+            "value": 4096
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "pixels",
+          "query": {
+            "left": {
+              "parts": [
+                "w"
+              ]
+            },
+            "op": "*",
+            "right": {
+              "parts": [
+                "h"
+              ]
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "num",
+          "query": {
+            "name": "arrayJoin",
+            "arguments": [
+              {
+                "parts": [
+                  "coverage"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "idx",
+          "query": {
+            "left": {
+              "parts": [
+                "num"
+              ]
+            },
+            "op": "DIV",
+            "right": {
+              "left": {
+                "left": {
+                  "type": "Integer",
+                  "value": 32768
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 32768
+                }
+              },
+              "op": "DIV",
+              "right": {
+                "parts": [
+                  "pixels"
+                ]
+              },
+              "parenthesized": true
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "coord",
+          "query": {
+            "name": "mortonDecode",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 2
+              },
+              {
+                "parts": [
+                  "idx"
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "b",
+          "query": {
+            "type": "Integer",
+            "value": 255
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "r",
+          "query": {
+            "name": "least",
+            "arguments": [
+              {
+                "type": "Integer",
+                "value": 255
+              },
+              {
+                "name": "uniq",
+                "arguments": [
+                  {
+                    "parts": [
+                      "test_name"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "g",
+          "query": {
+            "left": {
+              "left": {
+                "type": "Integer",
+                "value": 255
+              },
+              "op": "*",
+              "right": {
+                "name": "uniq",
+                "arguments": [
+                  {
+                    "parts": [
+                      "test_name"
+                    ]
+                  }
+                ]
+              }
+            },
+            "op": "/",
+            "right": {
+              "name": "max",
+              "arguments": [
+                {
+                  "name": "uniq",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "test_name"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "over": {}
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "parts": [
+              "r"
+            ]
+          },
+          "type": {
+            "name": "UInt8"
+          },
+          "operator_syntax": true
+        },
+        {
+          "expr": {
+            "parts": [
+              "g"
+            ]
+          },
+          "type": {
+            "name": "UInt8"
+          },
+          "operator_syntax": true
+        },
+        {
+          "expr": {
+            "parts": [
+              "b"
+            ]
+          },
+          "type": {
+            "name": "UInt8"
+          },
+          "operator_syntax": true
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test"
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "coord"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "left": {
+              "left": {
+                "tuple": {
+                  "parts": [
+                    "coord"
+                  ]
+                },
+                "index": {
+                  "type": "Integer",
+                  "value": 2
+                }
+              },
+              "op": "*",
+              "right": {
+                "parts": [
+                  "w"
+                ]
+              }
+            },
+            "op": "+",
+            "right": {
+              "tuple": {
+                "parts": [
+                  "coord"
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 1
+              }
+            }
+          },
+          "with_fill": true,
+          "fill_from": {
+            "type": "Integer",
+            "value": 0
+          },
+          "fill_to": {
+            "type": "Integer",
+            "value": 10
+          }
+        }
+      ]
+    }
+  ]
+}

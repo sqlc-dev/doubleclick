@@ -1,0 +1,164 @@
+{
+  "table": "multidimensional",
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "number"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true,
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "number"
+            ]
+          },
+          {
+            "name": "arrayMap",
+            "arguments": [
+              {
+                "parameters": [
+                  "x"
+                ],
+                "body": {
+                  "type": "Tuple",
+                  "value": [
+                    {
+                      "parts": [
+                        "x"
+                      ]
+                    },
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "parts": [
+                            "x"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Array",
+                      "value": [
+                        {
+                          "type": "Array",
+                          "value": [
+                            {
+                              "parts": [
+                                "x"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Tuple",
+                      "value": [
+                        {
+                          "parts": [
+                            "x"
+                          ]
+                        },
+                        {
+                          "name": "toString",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "x"
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "spaced_commas": true
+                    }
+                  ],
+                  "spaced_commas": true
+                }
+              },
+              {
+                "name": "arrayMap",
+                "arguments": [
+                  {
+                    "parameters": [
+                      "x"
+                    ],
+                    "body": {
+                      "name": "range",
+                      "arguments": [
+                        {
+                          "parts": [
+                            "x"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "range",
+                    "arguments": [
+                      {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "%",
+                        "right": {
+                          "type": "Integer",
+                          "value": 10
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "alias": "value"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "database": "system",
+                  "table": "numbers"
+                }
+              }
+            }
+          ]
+        },
+        "limit": {
+          "type": "Integer",
+          "value": 100000
+        }
+      }
+    ]
+  }
+}

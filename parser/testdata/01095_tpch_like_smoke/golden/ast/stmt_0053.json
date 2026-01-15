@@ -1,0 +1,237 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "p_brand"
+          ]
+        },
+        {
+          "parts": [
+            "p_type"
+          ]
+        },
+        {
+          "parts": [
+            "p_size"
+          ]
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "parts": [
+                "ps_suppkey"
+              ]
+            }
+          ],
+          "distinct": true,
+          "alias": "supplier_cnt"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "partsupp"
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "part"
+              }
+            },
+            "join": {
+              "type": ""
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "left": {
+                "left": {
+                  "parts": [
+                    "p_partkey"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "ps_partkey"
+                  ]
+                }
+              },
+              "op": "AND",
+              "right": {
+                "left": {
+                  "parts": [
+                    "p_brand"
+                  ]
+                },
+                "op": "\u003c\u003e",
+                "right": {
+                  "type": "String",
+                  "value": "Brand#45"
+                }
+              }
+            },
+            "op": "AND",
+            "right": {
+              "expr": {
+                "parts": [
+                  "p_type"
+                ]
+              },
+              "not": true,
+              "pattern": {
+                "type": "String",
+                "value": "MEDIUM POLISHED%"
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "expr": {
+              "parts": [
+                "p_size"
+              ]
+            },
+            "list": [
+              {
+                "type": "Integer",
+                "value": 49
+              },
+              {
+                "type": "Integer",
+                "value": 14
+              },
+              {
+                "type": "Integer",
+                "value": 23
+              },
+              {
+                "type": "Integer",
+                "value": 45
+              },
+              {
+                "type": "Integer",
+                "value": 19
+              },
+              {
+                "type": "Integer",
+                "value": 3
+              },
+              {
+                "type": "Integer",
+                "value": 36
+              },
+              {
+                "type": "Integer",
+                "value": 9
+              }
+            ]
+          }
+        },
+        "op": "AND",
+        "right": {
+          "expr": {
+            "parts": [
+              "ps_suppkey"
+            ]
+          },
+          "not": true,
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {
+                    "parts": [
+                      "s_suppkey"
+                    ]
+                  }
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "supplier"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "expr": {
+                    "parts": [
+                      "s_comment"
+                    ]
+                  },
+                  "pattern": {
+                    "type": "String",
+                    "value": "%Customer%Complaints%"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "p_brand"
+          ]
+        },
+        {
+          "parts": [
+            "p_type"
+          ]
+        },
+        {
+          "parts": [
+            "p_size"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "supplier_cnt"
+            ]
+          },
+          "descending": true
+        },
+        {
+          "expression": {
+            "parts": [
+              "p_brand"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "p_type"
+            ]
+          }
+        },
+        {
+          "expression": {
+            "parts": [
+              "p_size"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

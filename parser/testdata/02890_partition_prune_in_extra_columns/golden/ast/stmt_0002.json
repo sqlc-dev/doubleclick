@@ -1,0 +1,47 @@
+{
+  "table": "e",
+  "columns": [
+    {
+      "name": "dt",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "t",
+      "type": {
+        "name": "Int32"
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "name": "tuple"
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "parts": [
+          "t"
+        ]
+      },
+      {
+        "name": "toYYYYMM",
+        "arguments": [
+          {
+            "parts": [
+              "dt"
+            ]
+          }
+        ]
+      }
+    ],
+    "spaced_commas": true
+  }
+}

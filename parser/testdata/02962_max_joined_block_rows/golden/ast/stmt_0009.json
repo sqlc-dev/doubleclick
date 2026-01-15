@@ -1,0 +1,114 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "max",
+            "arguments": [
+              {
+                "parts": [
+                  "bs"
+                ]
+              }
+            ]
+          },
+          "op": "\u003c=",
+          "right": {
+            "type": "Integer",
+            "value": 5
+          }
+        },
+        {
+          "parts": [
+            "b"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "blockSize",
+                          "alias": "bs"
+                        },
+                        {}
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t1"
+                              }
+                            }
+                          },
+                          {
+                            "table": {
+                              "table": {
+                                "table": "t2"
+                              }
+                            },
+                            "join": {
+                              "type": "INNER",
+                              "on": {
+                                "left": {
+                                  "parts": [
+                                    "t1",
+                                    "a"
+                                  ]
+                                },
+                                "op": "=",
+                                "right": {
+                                  "parts": [
+                                    "t2",
+                                    "a"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "b"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "b"
+            ]
+          }
+        }
+      ],
+      "settings": [
+        {
+          "name": "max_joined_block_size_rows",
+          "value": {
+            "type": "Integer",
+            "value": 5
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,326 @@
+{
+  "selects": [
+    {
+      "distinct": true,
+      "columns": [
+        {
+          "name": "firstNonDefault",
+          "arguments": [
+            {
+              "parts": [
+                "__table3",
+                "dummy"
+              ]
+            },
+            {
+              "parts": [
+                "__table4",
+                "dummy"
+              ]
+            }
+          ],
+          "alias": "dummy"
+        },
+        {
+          "parts": [
+            "__table4",
+            "isNotNull(map(assumeNotNull(isNull(3)), NULL))"
+          ],
+          "alias": "isNotNull(map(assumeNotNull(isNull(3)), NULL))"
+        },
+        {
+          "parts": [
+            "__table4",
+            "isNotDistinctFrom(3, isZeroOrNull(isNotNull(3)))"
+          ],
+          "alias": "isNotDistinctFrom(3, isZeroOrNull(isNotNull(3)))"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "one"
+              },
+              "alias": "__table3"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "distinct": true,
+                      "columns": [
+                        {
+                          "parts": [
+                            "__table5",
+                            "dummy"
+                          ],
+                          "alias": "dummy"
+                        },
+                        {
+                          "parts": [
+                            "__table5",
+                            "isNotNull(map(assumeNotNull(isNull(3)), NULL))"
+                          ],
+                          "alias": "isNotNull(map(assumeNotNull(isNull(3)), NULL))"
+                        },
+                        {
+                          "name": "_CAST",
+                          "arguments": [
+                            {
+                              "type": "Integer",
+                              "value": 0
+                            },
+                            {
+                              "type": "String",
+                              "value": "UInt8"
+                            }
+                          ],
+                          "alias": "isNotDistinctFrom(3, isZeroOrNull(isNotNull(3)))"
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "query": {
+                                  "selects": [
+                                    {
+                                      "columns": [
+                                        {
+                                          "parts": [
+                                            "__table6",
+                                            "dummy"
+                                          ],
+                                          "alias": "dummy"
+                                        },
+                                        {
+                                          "name": "_CAST",
+                                          "arguments": [
+                                            {
+                                              "type": "Integer",
+                                              "value": 1
+                                            },
+                                            {
+                                              "type": "String",
+                                              "value": "UInt8"
+                                            }
+                                          ],
+                                          "alias": "isNotNull(map(assumeNotNull(isNull(3)), NULL))"
+                                        }
+                                      ],
+                                      "from": {
+                                        "tables": [
+                                          {
+                                            "table": {
+                                              "table": {
+                                                "name": "remote",
+                                                "arguments": [
+                                                  {
+                                                    "type": "String",
+                                                    "value": "127.0.0.3"
+                                                  }
+                                                ]
+                                              },
+                                              "alias": "__table6"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              "alias": "__table5"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "alias": "__table4"
+            },
+            "join": {
+              "type": "FULL",
+              "strictness": "ALL",
+              "using": [
+                {
+                  "parts": [
+                    "dummy"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "array_join": {
+              "left": true,
+              "columns": [
+                {
+                  "expr": {
+                    "type": "Array",
+                    "value": [
+                      {
+                        "name": "equals",
+                        "arguments": [
+                          {
+                            "name": "materialize",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 3
+                              }
+                            ]
+                          },
+                          {
+                            "name": "_CAST",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              },
+                              {
+                                "type": "String",
+                                "value": "UInt8"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "alias": "__array_join_exp_2"
+                }
+              ]
+            }
+          },
+          {
+            "array_join": {
+              "left": true,
+              "columns": [
+                {
+                  "name": "map",
+                  "arguments": [
+                    {
+                      "name": "_CAST",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 0
+                        },
+                        {
+                          "type": "String",
+                          "value": "UInt8"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "materialize",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 2
+                        }
+                      ]
+                    },
+                    {
+                      "name": "_CAST",
+                      "arguments": [
+                        {
+                          "type": "Integer",
+                          "value": 0
+                        },
+                        {
+                          "type": "String",
+                          "value": "UInt8"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "_CAST",
+                      "arguments": [
+                        {
+                          "type": "String",
+                          "value": "1"
+                        },
+                        {
+                          "type": "String",
+                          "value": "UInt128"
+                        }
+                      ]
+                    }
+                  ],
+                  "alias": "__array_join_exp_1"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "name": "materialize",
+          "arguments": [
+            {
+              "type": "Integer",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "parts": [
+            "__table4",
+            "isNotNull(map(assumeNotNull(isNull(3)), NULL))"
+          ]
+        },
+        {
+          "name": "firstNonDefault",
+          "arguments": [
+            {
+              "parts": [
+                "__table3",
+                "dummy"
+              ]
+            },
+            {
+              "parts": [
+                "__table4",
+                "dummy"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "__table4",
+            "isNotDistinctFrom(3, isZeroOrNull(isNotNull(3)))"
+          ]
+        },
+        {
+          "parts": [
+            "__table4",
+            "isNotNull(map(assumeNotNull(isNull(3)), NULL))"
+          ]
+        }
+      ],
+      "with_cube": true,
+      "settings": [
+        {
+          "name": "enable_lazy_columns_replication",
+          "value": {
+            "type": "Integer",
+            "value": 1
+          }
+        }
+      ]
+    }
+  ]
+}

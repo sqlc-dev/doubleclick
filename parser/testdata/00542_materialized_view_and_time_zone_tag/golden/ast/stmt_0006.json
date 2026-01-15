@@ -1,0 +1,107 @@
+{
+  "view": "m1",
+  "materialized": true,
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "t",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "c",
+      "type": {
+        "name": "UInt64"
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "d"
+            ]
+          },
+          {
+            "parts": [
+              "t"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 1
+      }
+    ],
+    "has_parentheses": true
+  },
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "d"
+            ]
+          },
+          {
+            "name": "toStartOfMinute",
+            "arguments": [
+              {
+                "parts": [
+                  "x",
+                  "t"
+                ]
+              }
+            ],
+            "alias": "t"
+          },
+          {
+            "name": "count",
+            "alias": "c"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "x"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "d"
+            ]
+          },
+          {
+            "parts": [
+              "t"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

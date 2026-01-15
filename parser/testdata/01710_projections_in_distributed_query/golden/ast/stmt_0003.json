@@ -1,0 +1,74 @@
+{
+  "table": "projection_test",
+  "columns": [
+    {
+      "name": "dt",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "cost",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "p",
+      "select": {
+        "columns": [
+          {
+            "name": "toStartOfMinute",
+            "arguments": [
+              {
+                "parts": [
+                  "dt"
+                ]
+              }
+            ],
+            "alias": "dt_m"
+          },
+          {
+            "name": "sum",
+            "arguments": [
+              {
+                "parts": [
+                  "cost"
+                ]
+              }
+            ]
+          }
+        ],
+        "group_by": [
+          {
+            "parts": [
+              "dt_m"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "dt"
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toDate",
+    "arguments": [
+      {
+        "parts": [
+          "dt"
+        ]
+      }
+    ]
+  }
+}

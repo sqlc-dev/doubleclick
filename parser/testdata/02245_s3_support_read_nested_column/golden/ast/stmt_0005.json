@@ -1,0 +1,72 @@
+{
+  "table": "test_02245_s3_nested_parquet1",
+  "columns": [
+    {
+      "name": "a",
+      "type": {
+        "name": "Int64"
+      }
+    },
+    {
+      "name": "b",
+      "type": {
+        "name": "Tuple",
+        "parameters": [
+          {
+            "name": "a",
+            "type": {
+              "name": "Int64"
+            }
+          },
+          {
+            "name": "b",
+            "type": {
+              "name": "String"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "S3",
+    "parameters": [
+      {
+        "parts": [
+          "s3_conn"
+        ]
+      },
+      {
+        "left": {
+          "parts": [
+            "filename"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "test_02245_s3_nested_parquet1_{_partition_id}"
+        }
+      },
+      {
+        "left": {
+          "parts": [
+            "format"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "Parquet"
+        }
+      }
+    ],
+    "has_parentheses": true
+  },
+  "partition_by": {
+    "parts": [
+      "a"
+    ]
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "category"
+          ]
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "amount"
+              ]
+            }
+          ],
+          "alias": "total"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "replace": [
+                            {
+                              "expr": {
+                                "left": {
+                                  "parts": [
+                                    "amount"
+                                  ]
+                                },
+                                "op": "+",
+                                "right": {
+                                  "type": "Integer",
+                                  "value": 100
+                                }
+                              },
+                              "name": "amount"
+                            }
+                          ],
+                          "transformers": [
+                            {
+                              "type": "replace",
+                              "replaces": [
+                                {
+                                  "expr": {
+                                    "left": {
+                                      "parts": [
+                                        "amount"
+                                      ]
+                                    },
+                                    "op": "+",
+                                    "right": {
+                                      "type": "Integer",
+                                      "value": 100
+                                    }
+                                  },
+                                  "name": "amount"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "table": "test_having"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "category"
+          ]
+        }
+      ],
+      "having": {
+        "left": {
+          "parts": [
+            "total"
+          ]
+        },
+        "op": "\u003e",
+        "right": {
+          "type": "Integer",
+          "value": 200
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "category"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

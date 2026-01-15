@@ -1,0 +1,170 @@
+{
+  "table": "test_agg_variant",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "Name"
+            ]
+          },
+          {
+            "parts": [
+              "t"
+            ],
+            "alias": "Value"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "Name"
+                            ]
+                          },
+                          {
+                            "name": "arrayJoin",
+                            "arguments": [
+                              {
+                                "type": "Array",
+                                "value": [
+                                  {
+                                    "expr": {
+                                      "name": "uniqExactState",
+                                      "arguments": [
+                                        {
+                                          "parts": [
+                                            "Value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "type": {
+                                      "name": "Variant",
+                                      "parameters": [
+                                        {
+                                          "name": "AggregateFunction",
+                                          "parameters": [
+                                            {
+                                              "parts": [
+                                                "uniqExact"
+                                              ]
+                                            },
+                                            {
+                                              "name": "Int64"
+                                            }
+                                          ],
+                                          "has_parentheses": true
+                                        },
+                                        {
+                                          "name": "AggregateFunction",
+                                          "parameters": [
+                                            {
+                                              "parts": [
+                                                "avg"
+                                              ]
+                                            },
+                                            {
+                                              "name": "Int64"
+                                            }
+                                          ],
+                                          "has_parentheses": true
+                                        }
+                                      ],
+                                      "has_parentheses": true
+                                    },
+                                    "operator_syntax": true
+                                  },
+                                  {
+                                    "expr": {
+                                      "name": "avgState",
+                                      "arguments": [
+                                        {
+                                          "parts": [
+                                            "Value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "type": {
+                                      "name": "Variant",
+                                      "parameters": [
+                                        {
+                                          "name": "AggregateFunction",
+                                          "parameters": [
+                                            {
+                                              "parts": [
+                                                "uniqExact"
+                                              ]
+                                            },
+                                            {
+                                              "name": "Int64"
+                                            }
+                                          ],
+                                          "has_parentheses": true
+                                        },
+                                        {
+                                          "name": "AggregateFunction",
+                                          "parameters": [
+                                            {
+                                              "parts": [
+                                                "avg"
+                                              ]
+                                            },
+                                            {
+                                              "name": "Int64"
+                                            }
+                                          ],
+                                          "has_parentheses": true
+                                        }
+                                      ],
+                                      "has_parentheses": true
+                                    },
+                                    "operator_syntax": true
+                                  }
+                                ],
+                                "spaced_commas": true,
+                                "spaced_brackets": true
+                              }
+                            ],
+                            "alias": "t"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "source"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "group_by": [
+                          {
+                            "parts": [
+                              "Name"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

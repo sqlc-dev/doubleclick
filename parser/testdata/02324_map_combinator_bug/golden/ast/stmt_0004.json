@@ -1,0 +1,104 @@
+{
+  "view": "segfault_mv",
+  "materialized": true,
+  "engine": {
+    "name": "AggregatingMergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "id"
+            ]
+          },
+          {
+            "name": "uniqState",
+            "arguments": [
+              {
+                "parts": [
+                  "uuid"
+                ]
+              }
+            ],
+            "alias": "uniq_uuids"
+          },
+          {
+            "name": "uniqMapState",
+            "arguments": [
+              {
+                "expr": {
+                  "type": "Tuple",
+                  "value": [
+                    {
+                      "parts": [
+                        "tags_ids"
+                      ]
+                    },
+                    {
+                      "name": "arrayMap",
+                      "arguments": [
+                        {
+                          "parameters": [
+                            "_"
+                          ],
+                          "body": {
+                            "name": "toString",
+                            "arguments": [
+                              {
+                                "parts": [
+                                  "uuid"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "parts": [
+                            "tags_ids"
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "spaced_commas": true
+                },
+                "type": {
+                  "name": "Map(UInt32, String)"
+                }
+              }
+            ],
+            "alias": "uniq_tags_ids"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "segfault"
+                }
+              }
+            }
+          ]
+        },
+        "group_by": [
+          {
+            "parts": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

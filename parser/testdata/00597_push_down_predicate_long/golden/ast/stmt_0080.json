@@ -1,0 +1,128 @@
+{
+  "explain_type": "SYNTAX",
+  "statement": {
+    "selects": [
+      {
+        "columns": [
+          {}
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "name": "toInt8",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 1
+                              }
+                            ],
+                            "alias": "id"
+                          },
+                          {
+                            "name": "toDate",
+                            "arguments": [
+                              {
+                                "type": "String",
+                                "value": "2000-01-01"
+                              }
+                            ],
+                            "alias": "date"
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "database": "system",
+                                  "table": "numbers"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "limit": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {}
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "test_00597"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "b"
+              },
+              "join": {
+                "type": "LEFT",
+                "strictness": "ANY",
+                "using": [
+                  {
+                    "parts": [
+                      "date"
+                    ]
+                  },
+                  {
+                    "parts": [
+                      "id"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "b",
+              "date"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "name": "toDate",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "2000-01-01"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "explicit_type": true
+}

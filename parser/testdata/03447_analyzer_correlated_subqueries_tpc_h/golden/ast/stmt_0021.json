@@ -1,0 +1,153 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "o_orderpriority"
+          ]
+        },
+        {
+          "name": "count",
+          "arguments": [
+            {}
+          ],
+          "alias": "order_count"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "orders"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "left": {
+              "parts": [
+                "o_orderdate"
+              ]
+            },
+            "op": "\u003e=",
+            "right": {
+              "name": "toDate",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "1993-07-01"
+                }
+              ]
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "o_orderdate"
+              ]
+            },
+            "op": "\u003c",
+            "right": {
+              "left": {
+                "name": "toDate",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "1993-07-01"
+                  }
+                ]
+              },
+              "op": "+",
+              "right": {
+                "value": {
+                  "type": "String",
+                  "value": "3"
+                },
+                "unit": "MONTH"
+              }
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "query": {
+            "selects": [
+              {
+                "columns": [
+                  {}
+                ],
+                "from": {
+                  "tables": [
+                    {
+                      "table": {
+                        "table": {
+                          "table": "lineitem"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "where": {
+                  "left": {
+                    "left": {
+                      "parts": [
+                        "l_orderkey"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "parts": [
+                        "o_orderkey"
+                      ]
+                    }
+                  },
+                  "op": "AND",
+                  "right": {
+                    "left": {
+                      "parts": [
+                        "l_commitdate"
+                      ]
+                    },
+                    "op": "\u003c",
+                    "right": {
+                      "parts": [
+                        "l_receiptdate"
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "o_orderpriority"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "o_orderpriority"
+            ]
+          }
+        }
+      ],
+      "format": {
+        "parts": [
+          "Null"
+        ]
+      }
+    }
+  ]
+}

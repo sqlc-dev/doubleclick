@@ -1,0 +1,87 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "b",
+            "name"
+          ],
+          "alias": "name"
+        },
+        {
+          "parts": [
+            "a",
+            "a_col"
+          ],
+          "alias": "a_col"
+        },
+        {
+          "parts": [
+            "b",
+            "b_col"
+          ],
+          "alias": "b_col"
+        },
+        {
+          "expr": {
+            "type": "String",
+            "value": "N"
+          },
+          "alias": "some_val"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_a_table"
+              },
+              "alias": "a"
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "table": "test_b_table"
+              },
+              "alias": "b"
+            },
+            "join": {
+              "type": "INNER",
+              "on": {
+                "left": {
+                  "parts": [
+                    "a",
+                    "name"
+                  ]
+                },
+                "op": "=",
+                "right": {
+                  "parts": [
+                    "b",
+                    "name"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "b",
+            "some_val"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "Y"
+        }
+      }
+    }
+  ]
+}

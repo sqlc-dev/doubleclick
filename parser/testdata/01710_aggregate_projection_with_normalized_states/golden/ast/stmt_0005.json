@@ -1,0 +1,163 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "ifNotFinite",
+          "arguments": [
+            {
+              "array": {
+                "name": "quantilesTimingMerge",
+                "parameters": [
+                  {
+                    "type": "Float",
+                    "value": 0.95,
+                    "source": "0.95"
+                  }
+                ],
+                "arguments": [
+                  {
+                    "parts": [
+                      "q"
+                    ]
+                  }
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 0
+            }
+          ],
+          "alias": "d1"
+        },
+        {
+          "name": "ifNotFinite",
+          "arguments": [
+            {
+              "array": {
+                "name": "quantilesTimingMerge",
+                "parameters": [
+                  {
+                    "type": "Float",
+                    "value": 0.99,
+                    "source": "0.99"
+                  }
+                ],
+                "arguments": [
+                  {
+                    "parts": [
+                      "q"
+                    ]
+                  }
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 0
+            }
+          ],
+          "alias": "d2"
+        },
+        {
+          "name": "ifNotFinite",
+          "arguments": [
+            {
+              "array": {
+                "name": "quantilesTimingMerge",
+                "parameters": [
+                  {
+                    "type": "Float",
+                    "value": 0.5,
+                    "source": "0.50"
+                  }
+                ],
+                "arguments": [
+                  {
+                    "parts": [
+                      "q"
+                    ]
+                  }
+                ]
+              },
+              "index": {
+                "type": "Integer",
+                "value": 1
+              }
+            },
+            {
+              "type": "Integer",
+              "value": 0
+            }
+          ],
+          "alias": "d3"
+        },
+        {
+          "name": "sum",
+          "arguments": [
+            {
+              "parts": [
+                "s"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "cluster",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "test_cluster_two_shards"
+                  },
+                  {
+                    "name": "currentDatabase"
+                  },
+                  {
+                    "parts": [
+                      "r"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "a"
+          ]
+        },
+        "op": "=",
+        "right": {
+          "type": "String",
+          "value": "x"
+        }
+      },
+      "settings": [
+        {
+          "name": "prefer_localhost_replica",
+          "value": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ]
+    }
+  ]
+}

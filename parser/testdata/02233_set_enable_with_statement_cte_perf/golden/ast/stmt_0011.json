@@ -1,0 +1,114 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "count",
+          "arguments": [
+            {
+              "parts": [
+                "read_rows"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "parts": [
+                            "read_rows"
+                          ]
+                        }
+                      ],
+                      "from": {
+                        "tables": [
+                          {
+                            "table": {
+                              "table": {
+                                "database": "system",
+                                "table": "query_log"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "where": {
+                        "left": {
+                          "left": {
+                            "left": {
+                              "parts": [
+                                "current_database"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "name": "currentDatabase"
+                            }
+                          },
+                          "op": "AND",
+                          "right": {
+                            "left": {
+                              "parts": [
+                                "type"
+                              ]
+                            },
+                            "op": "=",
+                            "right": {
+                              "type": "String",
+                              "value": "QueryFinish"
+                            }
+                          }
+                        },
+                        "op": "AND",
+                        "right": {
+                          "expr": {
+                            "parts": [
+                              "query"
+                            ]
+                          },
+                          "pattern": {
+                            "type": "String",
+                            "value": "-- test_enable_global_with_statement_performance%"
+                          }
+                        }
+                      },
+                      "order_by": [
+                        {
+                          "expression": {
+                            "parts": [
+                              "initial_query_start_time_microseconds"
+                            ]
+                          },
+                          "descending": true
+                        }
+                      ],
+                      "limit": {
+                        "type": "Integer",
+                        "value": 3
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "group_by": [
+        {
+          "parts": [
+            "read_rows"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "table": "video_log",
+  "commands": [
+    {
+      "type": "ADD_PROJECTION",
+      "projection": {
+        "name": "p_agg",
+        "select": {
+          "columns": [
+            {
+              "name": "toStartOfHour",
+              "arguments": [
+                {
+                  "parts": [
+                    "datetime"
+                  ]
+                }
+              ],
+              "alias": "hour"
+            },
+            {
+              "parts": [
+                "domain"
+              ]
+            },
+            {
+              "name": "sum",
+              "arguments": [
+                {
+                  "parts": [
+                    "bytes"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "avg",
+              "arguments": [
+                {
+                  "parts": [
+                    "duration"
+                  ]
+                }
+              ]
+            }
+          ],
+          "group_by": [
+            {
+              "parts": [
+                "hour"
+              ]
+            },
+            {
+              "parts": [
+                "domain"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

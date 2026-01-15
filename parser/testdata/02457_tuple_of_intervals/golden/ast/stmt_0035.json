@@ -1,0 +1,190 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "e1",
+          "query": {
+            "left": {
+              "left": {
+                "expr": {
+                  "type": "String",
+                  "value": "2022-01-30"
+                },
+                "type": {
+                  "name": "Date"
+                },
+                "operator_syntax": true
+              },
+              "op": "+",
+              "right": {
+                "value": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "unit": "DAY"
+              }
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "type": "Integer",
+                "value": 1
+              },
+              "unit": "MONTH"
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "e2",
+          "query": {
+            "left": {
+              "expr": {
+                "type": "String",
+                "value": "2022-01-30"
+              },
+              "type": {
+                "name": "Date"
+              },
+              "operator_syntax": true
+            },
+            "op": "+",
+            "right": {
+              "left": {
+                "value": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "unit": "DAY"
+              },
+              "op": "+",
+              "right": {
+                "value": {
+                  "type": "Integer",
+                  "value": 1
+                },
+                "unit": "MONTH"
+              },
+              "parenthesized": true
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "e3",
+          "query": {
+            "left": {
+              "expr": {
+                "type": "String",
+                "value": "2022-01-30"
+              },
+              "type": {
+                "name": "Date"
+              },
+              "operator_syntax": true
+            },
+            "op": "+",
+            "right": {
+              "type": "Tuple",
+              "value": [
+                {
+                  "value": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "unit": "DAY"
+                },
+                {
+                  "value": {
+                    "type": "Integer",
+                    "value": 1
+                  },
+                  "unit": "MONTH"
+                }
+              ],
+              "spaced_commas": true
+            }
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "e4",
+          "query": {
+            "left": {
+              "expr": {
+                "type": "String",
+                "value": "2022-01-30"
+              },
+              "type": {
+                "name": "Date"
+              },
+              "operator_syntax": true
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "type": "String",
+                "value": "1 DAY 1 MONTH"
+              },
+              "unit": ""
+            }
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "left": {
+            "left": {
+              "left": {
+                "parts": [
+                  "e1"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "parts": [
+                  "e2"
+                ]
+              }
+            },
+            "op": "AND",
+            "right": {
+              "left": {
+                "parts": [
+                  "e2"
+                ]
+              },
+              "op": "==",
+              "right": {
+                "parts": [
+                  "e3"
+                ]
+              }
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "e3"
+              ]
+            },
+            "op": "==",
+            "right": {
+              "parts": [
+                "e4"
+              ]
+            }
+          }
+        },
+        {
+          "parts": [
+            "e1"
+          ]
+        }
+      ]
+    }
+  ]
+}

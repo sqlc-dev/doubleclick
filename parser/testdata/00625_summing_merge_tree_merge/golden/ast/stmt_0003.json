@@ -1,0 +1,69 @@
+{
+  "table": "tab_00625",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "testMap",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "k",
+            "type": {
+              "name": "UInt16"
+            }
+          },
+          {
+            "name": "v",
+            "type": {
+              "name": "UInt64"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "date"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "date"
+            ]
+          },
+          {
+            "parts": [
+              "key"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 1
+      }
+    ],
+    "has_parentheses": true
+  }
+}

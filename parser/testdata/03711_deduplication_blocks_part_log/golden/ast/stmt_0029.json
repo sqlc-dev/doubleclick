@@ -1,0 +1,132 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "parts": [
+            "name"
+          ]
+        },
+        {
+          "name": "argMax",
+          "arguments": [
+            {
+              "parts": [
+                "part_type"
+              ]
+            },
+            {
+              "parts": [
+                "event_time_microseconds"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "argMax",
+          "arguments": [
+            {
+              "parts": [
+                "deduplication_block_ids"
+              ]
+            },
+            {
+              "parts": [
+                "event_time_microseconds"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "part_log"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "expr": {
+            "parts": [
+              "table"
+            ]
+          },
+          "list": [
+            {
+              "type": "Array",
+              "value": [
+                {
+                  "type": "String",
+                  "value": "03711_join_with"
+                },
+                {
+                  "type": "String",
+                  "value": "03711_table"
+                },
+                {
+                  "type": "String",
+                  "value": "03711_mv_table_1"
+                },
+                {
+                  "type": "String",
+                  "value": "03711_mv_table_2"
+                }
+              ],
+              "spaced_commas": true
+            }
+          ]
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "database"
+            ]
+          },
+          "op": "=",
+          "right": {
+            "type": "String",
+            "value": "03710_database"
+          }
+        }
+      },
+      "group_by": [
+        {
+          "parts": [
+            "database"
+          ]
+        },
+        {
+          "parts": [
+            "table"
+          ]
+        },
+        {
+          "parts": [
+            "name"
+          ]
+        }
+      ],
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "ALL"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

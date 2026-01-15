@@ -1,0 +1,54 @@
+{
+  "table": "mt_00168",
+  "columns": [
+    {
+      "name": "EventDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "UTCEventTime",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "MoscowEventDate",
+      "type": {
+        "name": "Date"
+      },
+      "default": {
+        "name": "toDate",
+        "arguments": [
+          {
+            "parts": [
+              "UTCEventTime"
+            ]
+          }
+        ]
+      },
+      "default_kind": "DEFAULT"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "EventDate"
+        ]
+      },
+      {
+        "parts": [
+          "UTCEventTime"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

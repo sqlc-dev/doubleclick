@@ -1,0 +1,95 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "q1",
+          "query": {
+            "type": "Integer",
+            "value": 5
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "x",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "left": {
+                          "parts": [
+                            "number"
+                          ]
+                        },
+                        "op": "+",
+                        "right": {
+                          "type": "Integer",
+                          "value": 100
+                        }
+                      },
+                      "alias": "b"
+                    },
+                    {
+                      "parts": [
+                        "number"
+                      ],
+                      "alias": "a"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "name": "numbers",
+                            "arguments": [
+                              {
+                                "type": "Integer",
+                                "value": 10
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "number"
+                      ]
+                    },
+                    "op": "\u003e",
+                    "right": {
+                      "parts": [
+                        "q1"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {}
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "x"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

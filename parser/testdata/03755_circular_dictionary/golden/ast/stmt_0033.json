@@ -1,0 +1,67 @@
+{
+  "table": "distrcache_metrics",
+  "columns": [
+    {
+      "name": "metric",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "value",
+      "type": {
+        "name": "Int64"
+      }
+    }
+  ],
+  "projections": [
+    {
+      "name": "values",
+      "select": {
+        "columns": [
+          {
+            "parts": [
+              "metric"
+            ]
+          },
+          {
+            "name": "dictGet",
+            "arguments": [
+              {
+                "type": "String",
+                "value": "distrcache_dict"
+              },
+              {
+                "type": "String",
+                "value": "value"
+              },
+              {
+                "parts": [
+                  "metric"
+                ]
+              }
+            ],
+            "alias": "value"
+          }
+        ],
+        "order_by": [
+          {
+            "parts": [
+              "value"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree"
+  },
+  "order_by": [
+    {
+      "parts": [
+        "metric"
+      ]
+    }
+  ]
+}

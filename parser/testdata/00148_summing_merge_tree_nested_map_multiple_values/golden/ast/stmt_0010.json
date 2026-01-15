@@ -1,0 +1,104 @@
+{
+  "table": "nested_not_a_map",
+  "columns": [
+    {
+      "name": "d",
+      "type": null,
+      "default": {
+        "name": "today"
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "k",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "payload",
+      "type": null,
+      "default": {
+        "name": "rand"
+      },
+      "default_kind": "MATERIALIZED"
+    },
+    {
+      "name": "OnlyOneColumnMap",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": {
+              "name": "UInt32"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "NonArithmeticValueMap",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": {
+              "name": "UInt32"
+            }
+          },
+          {
+            "name": "Date",
+            "type": {
+              "name": "Date"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "Nested_",
+      "type": {
+        "name": "Nested",
+        "parameters": [
+          {
+            "name": "ID",
+            "type": {
+              "name": "UInt32"
+            }
+          },
+          {
+            "name": "Num",
+            "type": {
+              "name": "Int64"
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "parts": [
+          "k"
+        ]
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

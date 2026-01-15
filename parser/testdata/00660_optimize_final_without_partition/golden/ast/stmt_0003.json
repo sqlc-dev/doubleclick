@@ -1,0 +1,78 @@
+{
+  "table": "partitioned_by_tuple",
+  "columns": [
+    {
+      "name": "d",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "x",
+      "type": {
+        "name": "UInt8"
+      }
+    },
+    {
+      "name": "w",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "y",
+      "type": {
+        "name": "UInt8"
+      }
+    }
+  ],
+  "engine": {
+    "name": "SummingMergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "y"
+        ]
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "d"
+          ]
+        },
+        {
+          "parts": [
+            "x"
+          ]
+        },
+        {
+          "parts": [
+            "w"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "type": "Tuple",
+    "value": [
+      {
+        "parts": [
+          "d"
+        ]
+      },
+      {
+        "parts": [
+          "x"
+        ]
+      }
+    ],
+    "spaced_commas": true
+  }
+}

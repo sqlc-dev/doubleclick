@@ -1,0 +1,85 @@
+{
+  "table": "dict_sharded_multi",
+  "create_dictionary": true,
+  "dictionary_attrs": [
+    {
+      "name": "key",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "v0",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "v1",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "v2",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "v3",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "v4",
+      "type": {
+        "name": "UInt16"
+      }
+    }
+  ],
+  "dictionary_def": {
+    "primary_key": [
+      {
+        "parts": [
+          "key"
+        ]
+      }
+    ],
+    "source": {
+      "type": "CLICKHOUSE",
+      "args": [
+        {
+          "key": "TABLE",
+          "value": {
+            "type": "String",
+            "value": "dict_data"
+          }
+        }
+      ]
+    },
+    "lifetime": {
+      "min": {
+        "type": "Integer",
+        "value": 0
+      },
+      "max": {
+        "type": "Integer",
+        "value": 0
+      }
+    },
+    "layout": {
+      "type": "HASHED",
+      "args": [
+        {
+          "key": "SHARDS",
+          "value": {
+            "type": "Integer",
+            "value": 32
+          }
+        }
+      ]
+    }
+  }
+}

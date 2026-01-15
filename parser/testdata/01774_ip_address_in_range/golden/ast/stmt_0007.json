@@ -1,0 +1,74 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "addr",
+          "query": {
+            "name": "arrayJoin",
+            "arguments": [
+              {
+                "type": "Array",
+                "value": [
+                  {
+                    "type": "String",
+                    "value": "192.168.99.255"
+                  },
+                  {
+                    "type": "String",
+                    "value": "192.168.100.1"
+                  },
+                  {
+                    "type": "String",
+                    "value": "192.168.103.255"
+                  },
+                  {
+                    "type": "String",
+                    "value": "192.168.104.0"
+                  }
+                ],
+                "spaced_commas": true
+              }
+            ]
+          },
+          "scalar_with": true
+        },
+        {
+          "name": "prefix",
+          "query": {
+            "type": "String",
+            "value": "192.168.100.0/22"
+          },
+          "scalar_with": true
+        }
+      ],
+      "columns": [
+        {
+          "parts": [
+            "addr"
+          ]
+        },
+        {
+          "parts": [
+            "prefix"
+          ]
+        },
+        {
+          "name": "isIPAddressInRange",
+          "arguments": [
+            {
+              "parts": [
+                "addr"
+              ]
+            },
+            {
+              "parts": [
+                "prefix"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

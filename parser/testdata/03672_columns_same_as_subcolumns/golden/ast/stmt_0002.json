@@ -1,0 +1,290 @@
+{
+  "table": "opentelemetry_span_log_9997438610282160742",
+  "columns": [
+    {
+      "name": "pull_request_number",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "commit_sha",
+      "type": {
+        "name": "String"
+      }
+    },
+    {
+      "name": "check_start_time",
+      "type": {
+        "name": "DateTime"
+      }
+    },
+    {
+      "name": "check_name",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "instance_type",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "trace_id",
+      "type": {
+        "name": "UUID"
+      }
+    },
+    {
+      "name": "span_id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "parent_span_id",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "operation_name",
+      "type": {
+        "name": "LowCardinality",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "kind",
+      "type": {
+        "name": "Enum8",
+        "parameters": [
+          {
+            "left": {
+              "type": "String",
+              "value": "INTERNAL"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "SERVER"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "CLIENT"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 2
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "PRODUCER"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 3
+            }
+          },
+          {
+            "left": {
+              "type": "String",
+              "value": "CONSUMER"
+            },
+            "op": "=",
+            "right": {
+              "type": "Integer",
+              "value": 4
+            }
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "start_time_us",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "finish_time_us",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "finish_date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "attribute",
+      "type": {
+        "name": "Map",
+        "parameters": [
+          {
+            "name": "LowCardinality",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          },
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "attribute.names",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "LowCardinality",
+            "parameters": [
+              {
+                "name": "String"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "mapKeys",
+        "arguments": [
+          {
+            "parts": [
+              "attribute"
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    },
+    {
+      "name": "attribute.values",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "String"
+          }
+        ],
+        "has_parentheses": true
+      },
+      "default": {
+        "name": "mapValues",
+        "arguments": [
+          {
+            "parts": [
+              "attribute"
+            ]
+          }
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "check_name"
+          ]
+        },
+        {
+          "parts": [
+            "finish_date"
+          ]
+        },
+        {
+          "parts": [
+            "finish_time_us"
+          ]
+        },
+        {
+          "parts": [
+            "trace_id"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toYYYYMM",
+    "arguments": [
+      {
+        "parts": [
+          "finish_date"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    },
+    {
+      "name": "old_parts_lifetime",
+      "value": {
+        "type": "Integer",
+        "value": 60
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

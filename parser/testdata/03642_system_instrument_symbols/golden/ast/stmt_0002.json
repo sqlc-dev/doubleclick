@@ -1,0 +1,76 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "left": {
+            "name": "count"
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "database": "system",
+                "table": "symbols"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "expr": {
+              "parts": [
+                "symbol_demangled"
+              ]
+            },
+            "pattern": {
+              "type": "String",
+              "value": "%QueryMetricLog::startQuery%"
+            }
+          },
+          "op": "AND",
+          "right": {
+            "left": {
+              "parts": [
+                "function_id"
+              ]
+            },
+            "op": "\u003e",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "name": "length",
+            "arguments": [
+              {
+                "parts": [
+                  "symbol_demangled"
+                ]
+              }
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 10
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "table": "tab",
+  "columns": [
+    {
+      "name": "date",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "val",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "val2",
+      "type": {
+        "name": "UInt8"
+      },
+      "default": {
+        "type": "Integer",
+        "value": 42
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "val3",
+      "type": {
+        "name": "UInt8"
+      },
+      "default": {
+        "left": {
+          "parts": [
+            "val2"
+          ]
+        },
+        "op": "+",
+        "right": {
+          "type": "Integer",
+          "value": 1
+        }
+      },
+      "default_kind": "DEFAULT"
+    },
+    {
+      "name": "val4",
+      "type": {
+        "name": "UInt64"
+      },
+      "default": {
+        "parts": [
+          "val"
+        ]
+      },
+      "default_kind": "ALIAS"
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "parameters": [
+      {
+        "parts": [
+          "date"
+        ]
+      },
+      {
+        "type": "Tuple",
+        "value": [
+          {
+            "parts": [
+              "date"
+            ]
+          },
+          {
+            "parts": [
+              "val"
+            ]
+          }
+        ],
+        "spaced_commas": true
+      },
+      {
+        "type": "Integer",
+        "value": 8192
+      }
+    ],
+    "has_parentheses": true
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "if_not_exists": true,
+  "view": "view1",
+  "as_select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "parts": [
+              "t1",
+              "id"
+            ],
+            "alias": "id"
+          },
+          {
+            "parts": [
+              "t1",
+              "value1"
+            ],
+            "alias": "value1"
+          },
+          {
+            "parts": [
+              "t2",
+              "value2"
+            ],
+            "alias": "value2"
+          },
+          {
+            "parts": [
+              "t3",
+              "value3"
+            ],
+            "alias": "value3"
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "t1"
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "t2"
+                }
+              },
+              "join": {
+                "type": "LEFT",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "id"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "table": "t3"
+                }
+              },
+              "join": {
+                "type": "LEFT",
+                "on": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "id"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t3",
+                      "id"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "t1",
+              "id"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      }
+    ]
+  }
+}

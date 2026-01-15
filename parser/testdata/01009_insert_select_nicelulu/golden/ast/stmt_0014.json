@@ -1,0 +1,155 @@
+{
+  "table": "test_insert_t3",
+  "select": {
+    "selects": [
+      {
+        "columns": [
+          {
+            "type": "String",
+            "value": "2019-09-01"
+          },
+          {
+            "parts": [
+              "uid"
+            ]
+          },
+          {
+            "parts": [
+              "name"
+            ]
+          },
+          {
+            "parts": [
+              "city"
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "dt"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "uid"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "name"
+                            ]
+                          },
+                          {
+                            "parts": [
+                              "city"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "test_insert_t1"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "parts": [
+                              "dt"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "String",
+                            "value": "2019-09-01"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "t1"
+              }
+            },
+            {
+              "table": {
+                "table": {
+                  "query": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "uid"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "test_insert_t2"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "parts": [
+                              "dt"
+                            ]
+                          },
+                          "op": "=",
+                          "right": {
+                            "type": "String",
+                            "value": "2019-09-01"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "alias": "t2"
+              },
+              "join": {
+                "type": "LEFT",
+                "strictness": "SEMI",
+                "global": true,
+                "on": {
+                  "left": {
+                    "parts": [
+                      "t1",
+                      "uid"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "parts": [
+                      "t2",
+                      "uid"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

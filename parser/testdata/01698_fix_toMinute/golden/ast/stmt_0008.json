@@ -1,0 +1,126 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "toUnixTimestamp",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "alias": "tt"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "2020-09-20 00:00:00"
+                },
+                {
+                  "type": "String",
+                  "value": "Asia/Tehran"
+                }
+              ]
+            },
+            "op": "+",
+            "right": {
+              "value": {
+                "left": {
+                  "parts": [
+                    "number"
+                  ]
+                },
+                "op": "*",
+                "right": {
+                  "type": "Integer",
+                  "value": 600
+                }
+              },
+              "unit": "SECOND"
+            },
+            "parenthesized": true
+          },
+          "alias": "x"
+        },
+        {
+          "name": "timezoneOffset",
+          "arguments": [
+            {
+              "parts": [
+                "x"
+              ]
+            }
+          ],
+          "alias": "res"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "toDateTime",
+              "arguments": [
+                {
+                  "name": "toString",
+                  "arguments": [
+                    {
+                      "parts": [
+                        "x"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "String",
+                  "value": "UTC"
+                }
+              ]
+            },
+            "op": "-",
+            "right": {
+              "parts": [
+                "x"
+              ]
+            },
+            "parenthesized": true
+          },
+          "alias": "calc"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "name": "numbers",
+                "arguments": [
+                  {
+                    "type": "Integer",
+                    "value": 576
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "res"
+          ]
+        },
+        "op": "!=",
+        "right": {
+          "parts": [
+            "calc"
+          ]
+        }
+      }
+    }
+  ]
+}

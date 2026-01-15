@@ -1,0 +1,95 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "type": "String",
+            "value": "Test 9: Simple precision demonstration"
+          },
+          "alias": "test_name"
+        },
+        {
+          "name": "JSONExtract",
+          "arguments": [
+            {
+              "type": "String",
+              "value": "{\"amount\": 16.4}"
+            },
+            {
+              "type": "String",
+              "value": "amount"
+            },
+            {
+              "type": "String",
+              "value": "Decimal64(6)"
+            }
+          ],
+          "alias": "json_extract_result"
+        },
+        {
+          "expr": {
+            "expr": {
+              "name": "JSONExtractString",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "{\"amount\": 16.4}"
+                },
+                {
+                  "type": "String",
+                  "value": "amount"
+                }
+              ]
+            },
+            "type": {
+              "name": "Decimal64(6)"
+            }
+          },
+          "alias": "string_cast_result"
+        },
+        {
+          "expr": {
+            "left": {
+              "name": "JSONExtract",
+              "arguments": [
+                {
+                  "type": "String",
+                  "value": "{\"amount\": 16.4}"
+                },
+                {
+                  "type": "String",
+                  "value": "amount"
+                },
+                {
+                  "type": "String",
+                  "value": "Decimal64(6)"
+                }
+              ]
+            },
+            "op": "=",
+            "right": {
+              "expr": {
+                "name": "JSONExtractString",
+                "arguments": [
+                  {
+                    "type": "String",
+                    "value": "{\"amount\": 16.4}"
+                  },
+                  {
+                    "type": "String",
+                    "value": "amount"
+                  }
+                ]
+              },
+              "type": {
+                "name": "Decimal64(6)"
+              }
+            }
+          },
+          "alias": "precision_preserved"
+        }
+      ]
+    }
+  ]
+}

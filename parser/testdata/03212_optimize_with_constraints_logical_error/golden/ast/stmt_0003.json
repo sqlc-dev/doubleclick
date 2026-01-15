@@ -1,0 +1,85 @@
+{
+  "explain_type": "SYNTAX",
+  "statement": {
+    "selects": [
+      {
+        "with": [
+          {
+            "name": "compound_value",
+            "query": {
+              "type": "Integer",
+              "value": 1
+            },
+            "scalar_with": true
+          }
+        ],
+        "columns": [
+          {
+            "transformers": [
+              {
+                "type": "apply",
+                "apply_lambda": {
+                  "parameters": [
+                    "x"
+                  ],
+                  "body": {
+                    "table": "compound_value"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "from": {
+          "tables": [
+            {
+              "table": {
+                "table": {
+                  "table": "test_table"
+                }
+              }
+            }
+          ]
+        },
+        "where": {
+          "left": {
+            "parts": [
+              "x"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "settings": [
+          {
+            "name": "convert_query_to_cnf",
+            "value": {
+              "type": "Boolean",
+              "value": true
+            }
+          },
+          {
+            "name": "optimize_using_constraints",
+            "value": {
+              "type": "Boolean",
+              "value": true
+            }
+          },
+          {
+            "name": "optimize_substitute_columns",
+            "value": {
+              "type": "Boolean",
+              "value": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "has_settings": true,
+  "explicit_type": true,
+  "options_string": "run_query_tree_passes = 1"
+}

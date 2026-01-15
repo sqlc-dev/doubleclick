@@ -1,0 +1,209 @@
+{
+  "selects": [
+    {
+      "with": [
+        {
+          "name": "test1",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "parts": [
+                        "n"
+                      ]
+                    },
+                    {
+                      "expr": {
+                        "type": "Null",
+                        "value": null
+                      },
+                      "alias": "b"
+                    },
+                    {
+                      "expr": {
+                        "left": {
+                          "parts": [
+                            "n"
+                          ]
+                        },
+                        "op": "+",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      },
+                      "alias": "m"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "with_test"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "where": {
+                    "left": {
+                      "parts": [
+                        "n"
+                      ]
+                    },
+                    "op": "=",
+                    "right": {
+                      "type": "Integer",
+                      "value": 42
+                    }
+                  },
+                  "order_by": [
+                    {
+                      "expression": {
+                        "parts": [
+                          "n"
+                        ]
+                      }
+                    }
+                  ],
+                  "limit": {
+                    "type": "Integer",
+                    "value": 4
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "test2",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "left": {
+                          "parts": [
+                            "n"
+                          ]
+                        },
+                        "op": "+",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      },
+                      "alias": "x"
+                    },
+                    {
+                      "expr": {
+                        "left": {
+                          "parts": [
+                            "n"
+                          ]
+                        },
+                        "op": "-",
+                        "right": {
+                          "type": "Integer",
+                          "value": 1
+                        }
+                      },
+                      "alias": "y"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "test1"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        },
+        {
+          "name": "test3",
+          "query": {
+            "query": {
+              "selects": [
+                {
+                  "columns": [
+                    {
+                      "expr": {
+                        "left": {
+                          "parts": [
+                            "x"
+                          ]
+                        },
+                        "op": "*",
+                        "right": {
+                          "parts": [
+                            "y"
+                          ]
+                        }
+                      },
+                      "alias": "z"
+                    }
+                  ],
+                  "from": {
+                    "tables": [
+                      {
+                        "table": {
+                          "table": {
+                            "table": "test2"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "scalar_with": false
+        }
+      ],
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "z"
+              ]
+            },
+            "op": "+",
+            "right": {
+              "type": "Integer",
+              "value": 1
+            }
+          },
+          "alias": "q"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test3"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

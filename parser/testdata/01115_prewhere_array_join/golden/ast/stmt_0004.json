@@ -1,0 +1,81 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "left": {
+              "name": "arrayJoin",
+              "arguments": [
+                {
+                  "type": "Array",
+                  "value": [
+                    {
+                      "parts": [
+                        "light"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "op": "!=",
+            "right": {
+              "type": "Integer",
+              "value": 0
+            }
+          },
+          "alias": "cond"
+        },
+        {
+          "name": "length",
+          "arguments": [
+            {
+              "parts": [
+                "heavy"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "prewhere"
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "left": {
+            "parts": [
+              "light"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        },
+        "op": "AND",
+        "right": {
+          "left": {
+            "parts": [
+              "cond"
+            ]
+          },
+          "op": "!=",
+          "right": {
+            "type": "Integer",
+            "value": 0
+          }
+        }
+      }
+    }
+  ]
+}

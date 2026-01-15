@@ -1,0 +1,89 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "expr": {
+            "expr": {
+              "parts": [
+                "id1"
+              ]
+            },
+            "type": {
+              "name": "UInt16"
+            }
+          },
+          "alias": "cond1"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "id2"
+              ]
+            },
+            "op": "%",
+            "right": {
+              "type": "Integer",
+              "value": 40000
+            },
+            "parenthesized": true
+          },
+          "alias": "cond2"
+        },
+        {
+          "expr": {
+            "left": {
+              "parts": [
+                "cond1"
+              ]
+            },
+            "op": "AND",
+            "right": {
+              "parts": [
+                "cond2"
+              ]
+            },
+            "parenthesized": true
+          },
+          "alias": "cond"
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "table": "test_02559"
+              }
+            }
+          }
+        ]
+      },
+      "prewhere": {
+        "left": {
+          "left": {
+            "parts": [
+              "id2"
+            ]
+          },
+          "op": "\u003e",
+          "right": {
+            "type": "Integer",
+            "value": 5
+          }
+        },
+        "op": "AND",
+        "right": {
+          "parts": [
+            "cond"
+          ]
+        }
+      },
+      "limit": {
+        "type": "Integer",
+        "value": 10
+      }
+    }
+  ]
+}

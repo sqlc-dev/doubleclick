@@ -1,0 +1,167 @@
+{
+  "table": "arr_tests_visits",
+  "columns": [
+    {
+      "name": "CounterID",
+      "type": {
+        "name": "UInt32"
+      }
+    },
+    {
+      "name": "StartDate",
+      "type": {
+        "name": "Date"
+      }
+    },
+    {
+      "name": "Sign",
+      "type": {
+        "name": "Int8"
+      }
+    },
+    {
+      "name": "VisitID",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "UserID",
+      "type": {
+        "name": "UInt64"
+      }
+    },
+    {
+      "name": "VisitVersion",
+      "type": {
+        "name": "UInt16"
+      }
+    },
+    {
+      "name": "Test.BannerID",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt64"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "Test.Load",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "UInt8"
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "Test.PuidKey",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Array",
+            "parameters": [
+              {
+                "name": "UInt8"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    },
+    {
+      "name": "Test.PuidVal",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "Array",
+            "parameters": [
+              {
+                "name": "UInt32"
+              }
+            ],
+            "has_parentheses": true
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "type": "Tuple",
+      "value": [
+        {
+          "parts": [
+            "CounterID"
+          ]
+        },
+        {
+          "parts": [
+            "StartDate"
+          ]
+        },
+        {
+          "name": "intHash32",
+          "arguments": [
+            {
+              "parts": [
+                "UserID"
+              ]
+            }
+          ]
+        },
+        {
+          "parts": [
+            "VisitID"
+          ]
+        }
+      ]
+    }
+  ],
+  "partition_by": {
+    "name": "toMonday",
+    "arguments": [
+      {
+        "parts": [
+          "StartDate"
+        ]
+      }
+    ]
+  },
+  "sample_by": {
+    "name": "intHash32",
+    "arguments": [
+      {
+        "parts": [
+          "UserID"
+        ]
+      }
+    ]
+  },
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 8192
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

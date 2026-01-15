@@ -1,0 +1,70 @@
+{
+  "table": "alter_compression_codec2",
+  "columns": [
+    {
+      "name": "somedate",
+      "type": {
+        "name": "Date"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "LZ4"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id",
+      "type": {
+        "name": "UInt64"
+      },
+      "codec": {
+        "codecs": [
+          {
+            "name": "NONE"
+          }
+        ]
+      }
+    }
+  ],
+  "engine": {
+    "name": "ReplicatedMergeTree",
+    "parameters": [
+      {
+        "left": {
+          "left": {
+            "type": "String",
+            "value": "/clickhouse/tables/{database}/test_00910/"
+          },
+          "op": "||",
+          "right": {
+            "name": "currentDatabase"
+          }
+        },
+        "op": "||",
+        "right": {
+          "type": "String",
+          "value": "alter_compression_codecs/{shard}"
+        }
+      },
+      {
+        "type": "String",
+        "value": "2_{replica}"
+      }
+    ],
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "id"
+      ]
+    }
+  ],
+  "partition_by": {
+    "parts": [
+      "somedate"
+    ]
+  }
+}

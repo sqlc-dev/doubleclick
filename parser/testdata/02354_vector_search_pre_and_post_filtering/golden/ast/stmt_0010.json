@@ -1,0 +1,123 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "name": "trimLeft",
+          "arguments": [
+            {
+              "parts": [
+                "explain"
+              ]
+            }
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "explain_type": "PLAN",
+                  "statement": {
+                    "selects": [
+                      {
+                        "columns": [
+                          {
+                            "parts": [
+                              "id"
+                            ]
+                          }
+                        ],
+                        "from": {
+                          "tables": [
+                            {
+                              "table": {
+                                "table": {
+                                  "table": "tab"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "where": {
+                          "left": {
+                            "parts": [
+                              "attr2"
+                            ]
+                          },
+                          "op": "\u003e=",
+                          "right": {
+                            "type": "Integer",
+                            "value": 1006
+                          }
+                        },
+                        "order_by": [
+                          {
+                            "expression": {
+                              "name": "L2Distance",
+                              "arguments": [
+                                {
+                                  "parts": [
+                                    "vec"
+                                  ]
+                                },
+                                {
+                                  "type": "Array",
+                                  "value": [
+                                    {
+                                      "type": "Float",
+                                      "value": 1,
+                                      "source": "1.0"
+                                    },
+                                    {
+                                      "type": "Float",
+                                      "value": 1,
+                                      "source": "1.0"
+                                    }
+                                  ],
+                                  "spaced_commas": true
+                                }
+                              ]
+                            }
+                          }
+                        ],
+                        "limit": {
+                          "type": "Integer",
+                          "value": 2
+                        },
+                        "settings": [
+                          {
+                            "name": "vector_search_filter_strategy",
+                            "value": {
+                              "type": "String",
+                              "value": "prefilter"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "has_settings": true,
+                  "options_string": "indexes = 1"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "where": {
+        "expr": {
+          "parts": [
+            "explain"
+          ]
+        },
+        "pattern": {
+          "type": "String",
+          "value": "%vector_similarity%"
+        }
+      }
+    }
+  ]
+}

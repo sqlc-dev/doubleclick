@@ -1,0 +1,75 @@
+{
+  "table": "bloom_filter_array_offsets_i",
+  "columns": [
+    {
+      "name": "order_key",
+      "type": {
+        "name": "int"
+      }
+    },
+    {
+      "name": "i",
+      "type": {
+        "name": "Array",
+        "parameters": [
+          {
+            "name": "int"
+          }
+        ],
+        "has_parentheses": true
+      }
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx",
+      "expression": {
+        "parts": [
+          "i"
+        ]
+      },
+      "type": {
+        "name": "bloom_filter",
+        "arguments": [
+          {
+            "type": "Float",
+            "value": 1,
+            "source": "1."
+          }
+        ]
+      },
+      "granularity": {
+        "type": "Integer",
+        "value": 1024
+      }
+    }
+  ],
+  "engine": {
+    "name": "MergeTree",
+    "has_parentheses": true
+  },
+  "order_by": [
+    {
+      "parts": [
+        "order_key"
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "name": "index_granularity",
+      "value": {
+        "type": "Integer",
+        "value": 1024
+      }
+    },
+    {
+      "name": "index_granularity_bytes",
+      "value": {
+        "type": "String",
+        "value": "10Mi"
+      }
+    }
+  ],
+  "settings_before_comment": true
+}

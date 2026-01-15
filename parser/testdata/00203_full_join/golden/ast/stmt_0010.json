@@ -1,0 +1,148 @@
+{
+  "selects": [
+    {
+      "columns": [
+        {
+          "parts": [
+            "k"
+          ]
+        },
+        {
+          "parts": [
+            "y"
+          ]
+        }
+      ],
+      "from": {
+        "tables": [
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "Integer",
+                                  "value": 1
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 2
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 3
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ],
+                          "alias": "k"
+                        },
+                        {
+                          "expr": {
+                            "type": "String",
+                            "value": "Hello"
+                          },
+                          "alias": "x"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "table": {
+              "table": {
+                "query": {
+                  "selects": [
+                    {
+                      "columns": [
+                        {
+                          "name": "range",
+                          "arguments": [
+                            {
+                              "parts": [
+                                "k"
+                              ]
+                            }
+                          ],
+                          "alias": "y"
+                        },
+                        {
+                          "name": "arrayJoin",
+                          "arguments": [
+                            {
+                              "type": "Array",
+                              "value": [
+                                {
+                                  "type": "Integer",
+                                  "value": 3
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 4
+                                },
+                                {
+                                  "type": "Integer",
+                                  "value": 5
+                                }
+                              ],
+                              "spaced_commas": true
+                            }
+                          ],
+                          "alias": "k"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "join": {
+              "type": "RIGHT",
+              "strictness": "ANY",
+              "using": [
+                {
+                  "parts": [
+                    "k"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "where": {
+        "left": {
+          "parts": [
+            "k"
+          ]
+        },
+        "op": "\u003c",
+        "right": {
+          "type": "Integer",
+          "value": 10
+        }
+      },
+      "order_by": [
+        {
+          "expression": {
+            "parts": [
+              "k"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
