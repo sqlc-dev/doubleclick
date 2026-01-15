@@ -767,6 +767,7 @@ type AttachQuery struct {
 	Database           string               `json:"database,omitempty"`
 	Table              string               `json:"table,omitempty"`
 	Dictionary         string               `json:"dictionary,omitempty"`
+	FromPath           string               `json:"from_path,omitempty"`     // FROM 'path' clause
 	Columns            []*ColumnDeclaration `json:"columns,omitempty"`
 	ColumnsPrimaryKey       []Expression         `json:"columns_primary_key,omitempty"`        // PRIMARY KEY in column list
 	HasEmptyColumnsPrimaryKey bool               `json:"has_empty_columns_primary_key,omitempty"` // TRUE if PRIMARY KEY () was seen with empty parens

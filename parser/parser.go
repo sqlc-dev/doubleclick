@@ -7275,6 +7275,15 @@ func (p *Parser) parseAttach() *ast.AttachQuery {
 
 	_ = isMaterializedView
 
+	// Parse FROM clause: ATTACH TABLE name FROM 'path'
+	if p.currentIs(token.FROM) {
+		p.nextToken() // skip FROM
+		if p.currentIs(token.STRING) {
+			attach.FromPath = p.current.Value
+			p.nextToken()
+		}
+	}
+
 	// Parse column definitions for ATTACH TABLE name(col1 type, ...)
 	if !isDatabase && p.currentIs(token.LPAREN) {
 		p.nextToken()
