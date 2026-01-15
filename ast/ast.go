@@ -729,7 +729,8 @@ type DeleteQuery struct {
 	Position  token.Position `json:"-"`
 	Database  string         `json:"database,omitempty"`
 	Table     string         `json:"table"`
-	Partition Expression     `json:"partition,omitempty"` // IN PARTITION clause
+	OnCluster string         `json:"on_cluster,omitempty"` // ON CLUSTER clause
+	Partition Expression     `json:"partition,omitempty"`  // IN PARTITION clause
 	Where     Expression     `json:"where,omitempty"`
 	Settings  []*SettingExpr `json:"settings,omitempty"`
 }

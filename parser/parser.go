@@ -6277,6 +6277,15 @@ func (p *Parser) parseDelete() *ast.DeleteQuery {
 		}
 	}
 
+	// Parse ON CLUSTER clause
+	if p.currentIs(token.ON) {
+		p.nextToken() // skip ON
+		if p.currentIs(token.CLUSTER) {
+			p.nextToken() // skip CLUSTER
+			del.OnCluster = p.parseIdentifierName()
+		}
+	}
+
 	// Parse IN PARTITION clause
 	if p.currentIs(token.IN) {
 		p.nextToken() // skip IN
