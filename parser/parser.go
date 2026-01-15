@@ -6922,11 +6922,14 @@ func (p *Parser) parseRename() *ast.RenameQuery {
 
 	p.nextToken() // skip RENAME
 
-	// Handle RENAME TABLE or RENAME DICTIONARY
+	// Handle RENAME TABLE, RENAME DICTIONARY, or RENAME DATABASE
 	if p.currentIs(token.TABLE) {
 		p.nextToken()
 	} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DICTIONARY" {
 		p.nextToken()
+	} else if p.currentIs(token.DATABASE) {
+		p.nextToken()
+		rename.RenameDatabase = true
 	} else {
 		return nil
 	}

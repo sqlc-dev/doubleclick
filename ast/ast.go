@@ -981,13 +981,14 @@ type RenamePair struct {
 
 // RenameQuery represents a RENAME TABLE statement.
 type RenameQuery struct {
-	Position  token.Position `json:"-"`
-	Pairs     []*RenamePair  `json:"pairs"`             // Multiple rename pairs
-	From      string         `json:"from,omitempty"`    // Deprecated: for backward compat
-	To        string         `json:"to,omitempty"`      // Deprecated: for backward compat
-	OnCluster string         `json:"on_cluster,omitempty"`
-	Settings  []*SettingExpr `json:"settings,omitempty"`
-	IfExists  bool           `json:"if_exists,omitempty"` // IF EXISTS modifier
+	Position       token.Position `json:"-"`
+	Pairs          []*RenamePair  `json:"pairs"`                     // Multiple rename pairs
+	From           string         `json:"from,omitempty"`            // Deprecated: for backward compat
+	To             string         `json:"to,omitempty"`              // Deprecated: for backward compat
+	OnCluster      string         `json:"on_cluster,omitempty"`
+	Settings       []*SettingExpr `json:"settings,omitempty"`
+	IfExists       bool           `json:"if_exists,omitempty"`       // IF EXISTS modifier
+	RenameDatabase bool           `json:"rename_database,omitempty"` // True for RENAME DATABASE
 }
 
 func (r *RenameQuery) Pos() token.Position { return r.Position }

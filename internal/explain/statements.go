@@ -720,6 +720,26 @@ func explainRenameQuery(sb *strings.Builder, n *ast.RenameQuery, indent string, 
 		fmt.Fprintf(sb, "%s*ast.RenameQuery\n", indent)
 		return
 	}
+
+	// Handle RENAME DATABASE separately - it outputs just 2 identifiers
+	if n.RenameDatabase {
+		children := 2 // source and target database names
+		hasSettings := len(n.Settings) > 0
+		if hasSettings {
+			children++
+		}
+		fmt.Fprintf(sb, "%sRename (children %d)\n", indent, children)
+		if len(n.Pairs) > 0 {
+			// FromTable contains source database, ToTable contains target database
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Pairs[0].FromTable)
+			fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Pairs[0].ToTable)
+		}
+		if hasSettings {
+			fmt.Fprintf(sb, "%s Set\n", indent)
+		}
+		return
+	}
+
 	// Count identifiers: 2 per pair if no database, 4 per pair if databases specified
 	hasSettings := len(n.Settings) > 0
 	children := 0
