@@ -7,6 +7,13 @@ import (
 	"github.com/sqlc-dev/doubleclick/ast"
 )
 
+// escapeFunctionAlias escapes single quotes in function alias names.
+// Unlike escapeAlias (for column aliases), this does NOT escape backslashes
+// since ClickHouse EXPLAIN AST preserves backslashes in function aliases.
+func escapeFunctionAlias(alias string) string {
+	return strings.ReplaceAll(alias, "'", "\\'")
+}
+
 // normalizeIntervalUnit converts interval units to title-cased singular form
 // e.g., "years" -> "Year", "MONTH" -> "Month", "days" -> "Day"
 // Also handles SQL standard abbreviations: QQ -> Quarter, YY -> Year, MM -> Month, etc.
@@ -132,7 +139,7 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 		fnName = fnName + "If"
 	}
 	if alias != "" {
-		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, children)
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, escapeFunctionAlias(alias), children)
 	} else {
 		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, children)
 	}
