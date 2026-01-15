@@ -5697,20 +5697,26 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					cmd.PartitionIsID = true
 				}
 				cmd.Partition = p.parseExpression(LOWEST)
-				// Parse TO TABLE destination
+				// Parse TO TABLE/DISK/VOLUME destination
 				if p.currentIs(token.TO) {
 					p.nextToken()
 					if p.currentIs(token.TABLE) {
 						p.nextToken()
-					}
-					// Parse destination table (can be qualified: database.table)
-					destName := p.parseIdentifierName()
-					if p.currentIs(token.DOT) {
-						p.nextToken()
-						cmd.ToDatabase = destName
-						cmd.ToTable = p.parseIdentifierName()
-					} else {
-						cmd.ToTable = destName
+						// Parse destination table (can be qualified: database.table)
+						destName := p.parseIdentifierName()
+						if p.currentIs(token.DOT) {
+							p.nextToken()
+							cmd.ToDatabase = destName
+							cmd.ToTable = p.parseIdentifierName()
+						} else {
+							cmd.ToTable = destName
+						}
+					} else if p.currentIs(token.IDENT) && (strings.ToUpper(p.current.Value) == "DISK" || strings.ToUpper(p.current.Value) == "VOLUME") {
+						// MOVE PARTITION ... TO DISK 'disk_name' or TO VOLUME 'volume_name'
+						p.nextToken() // skip DISK/VOLUME
+						if p.currentIs(token.STRING) {
+							p.nextToken() // skip the disk/volume name
+						}
 					}
 				}
 			}
