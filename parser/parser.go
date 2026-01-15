@@ -5809,6 +5809,11 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				p.nextToken() // skip BY
 			}
 			cmd.SampleByExpr = p.parseExpression(LOWEST)
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "QUERY" {
+			// MODIFY QUERY SELECT ...
+			cmd.Type = ast.AlterModifyQuery
+			p.nextToken() // skip QUERY
+			cmd.Query = p.parseSelectWithUnion()
 		}
 	case token.RENAME:
 		p.nextToken()

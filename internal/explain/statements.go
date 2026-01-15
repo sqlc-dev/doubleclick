@@ -1931,6 +1931,11 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		if cmd.SampleByExpr != nil {
 			Node(sb, cmd.SampleByExpr, depth+1)
 		}
+	case ast.AlterModifyQuery:
+		// MODIFY QUERY: output the SELECT statement
+		if cmd.Query != nil {
+			Node(sb, cmd.Query, depth+1)
+		}
 	case ast.AlterResetSetting:
 		// RESET SETTING outputs ExpressionList with Identifier children
 		if len(cmd.ResetSettings) > 0 {
@@ -2190,6 +2195,11 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 	case ast.AlterModifySampleBy:
 		// MODIFY SAMPLE BY: single expression (1 child)
 		if cmd.SampleByExpr != nil {
+			children = 1
+		}
+	case ast.AlterModifyQuery:
+		// MODIFY QUERY: SELECT statement (1 child)
+		if cmd.Query != nil {
 			children = 1
 		}
 	case ast.AlterResetSetting:

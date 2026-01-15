@@ -624,6 +624,7 @@ type AlterCommand struct {
 	OrderByExpr       []Expression      `json:"order_by_expr,omitempty"`      // For MODIFY ORDER BY
 	SampleByExpr      Expression        `json:"sample_by_expr,omitempty"`     // For MODIFY SAMPLE BY
 	ResetSettings     []string          `json:"reset_settings,omitempty"`     // For MODIFY COLUMN ... RESET SETTING
+	Query             Statement         `json:"query,omitempty"`              // For MODIFY QUERY
 }
 
 // Projection represents a projection definition.
@@ -702,6 +703,7 @@ const (
 	AlterModifyComment         AlterCommandType = "MODIFY_COMMENT"
 	AlterModifyOrderBy         AlterCommandType = "MODIFY_ORDER_BY"
 	AlterModifySampleBy        AlterCommandType = "MODIFY_SAMPLE_BY"
+	AlterModifyQuery           AlterCommandType = "MODIFY_QUERY"
 	AlterRemoveSampleBy        AlterCommandType = "REMOVE_SAMPLE_BY"
 	AlterApplyDeletedMask      AlterCommandType = "APPLY_DELETED_MASK"
 )
