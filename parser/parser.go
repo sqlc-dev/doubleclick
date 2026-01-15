@@ -6821,7 +6821,10 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 				strings.HasSuffix(upperCmd, " MOVES") ||
 				strings.HasSuffix(upperCmd, " FETCHES") ||
 				strings.HasSuffix(upperCmd, " SENDS") ||
-				strings.HasSuffix(upperCmd, " MUTATIONS") {
+				strings.HasSuffix(upperCmd, " MUTATIONS") ||
+				upperCmd == "FLUSH DISTRIBUTED" ||
+				upperCmd == "STOP DISTRIBUTED SENDS" ||
+				upperCmd == "START DISTRIBUTED SENDS" {
 				// Next token should be the table name
 				break
 			}
@@ -6901,13 +6904,13 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 			}
 		} else {
 			// For certain commands, the table name appears as both database and table in EXPLAIN
+			// But for FLUSH DISTRIBUTED, use DuplicateTableOutput instead of setting both
 			upperCmd := strings.ToUpper(sys.Command)
 			if strings.Contains(upperCmd, "RELOAD DICTIONARY") ||
 				strings.Contains(upperCmd, "DROP REPLICA") ||
 				strings.Contains(upperCmd, "RESTORE REPLICA") ||
 				strings.Contains(upperCmd, "STOP DISTRIBUTED SENDS") ||
-				strings.Contains(upperCmd, "START DISTRIBUTED SENDS") ||
-				strings.Contains(upperCmd, "FLUSH DISTRIBUTED") {
+				strings.Contains(upperCmd, "START DISTRIBUTED SENDS") {
 				sys.Database = tableName
 				sys.Table = tableName
 			} else {
@@ -6917,11 +6920,14 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 	}
 
 	// Set DuplicateTableOutput for commands that need database/table output twice
-	// Only duplicate when we have a qualified name (database != table)
 	upperCmd := strings.ToUpper(sys.Command)
-	if strings.Contains(upperCmd, "STOP DISTRIBUTED SENDS") ||
+	if strings.Contains(upperCmd, "FLUSH DISTRIBUTED") {
+		// FLUSH DISTRIBUTED always outputs the table name twice (even if unqualified)
+		if sys.Table != "" {
+			sys.DuplicateTableOutput = true
+		}
+	} else if strings.Contains(upperCmd, "STOP DISTRIBUTED SENDS") ||
 		strings.Contains(upperCmd, "START DISTRIBUTED SENDS") ||
-		strings.Contains(upperCmd, "FLUSH DISTRIBUTED") ||
 		strings.Contains(upperCmd, "RELOAD DICTIONARY") {
 		// Only set duplicate if database and table are different (qualified name)
 		if sys.Database != sys.Table {
