@@ -5729,6 +5729,10 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					p.nextToken() // skip BY
 				}
 				cmd.Type = ast.AlterRemoveSampleBy
+			} else if p.currentIs(token.TTL) {
+				// REMOVE TTL (table-level TTL)
+				p.nextToken() // skip TTL
+				cmd.Type = ast.AlterRemoveTTL
 			}
 		} else if upper == "RESET" {
 			p.nextToken() // skip RESET

@@ -678,6 +678,7 @@ const (
 	AlterDropConstraint    AlterCommandType = "DROP_CONSTRAINT"
 	AlterModifyTTL          AlterCommandType = "MODIFY_TTL"
 	AlterMaterializeTTL     AlterCommandType = "MATERIALIZE_TTL"
+	AlterRemoveTTL          AlterCommandType = "REMOVE_TTL"
 	AlterModifySetting      AlterCommandType = "MODIFY_SETTING"
 	AlterResetSetting       AlterCommandType = "RESET_SETTING"
 	AlterDropPartition         AlterCommandType = "DROP_PARTITION"
