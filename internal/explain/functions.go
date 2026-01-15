@@ -1034,6 +1034,7 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 		allTuples := true
 		allTuplesArePrimitive := true
 		allPrimitiveLiterals := true // New: check if all are primitive literals (any type)
+		allNull := true              // Track if all items are NULL
 		hasNonNull := false          // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
@@ -1041,6 +1042,7 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 					// NULL is compatible with all literal type lists
 					continue
 				}
+				allNull = false
 				hasNonNull = true
 				if lit.Type != ast.LiteralInteger && lit.Type != ast.LiteralFloat {
 					allNumericOrNull = false
@@ -1066,12 +1068,14 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				}
 			} else if isNumericExpr(item) {
 				// Unary minus of numeric is still numeric
+				allNull = false
 				hasNonNull = true
 				allStringsOrNull = false
 				allBooleansOrNull = false
 				allTuples = false
 				// Numeric expression counts as primitive
 			} else {
+				allNull = false
 				allNumericOrNull = false
 				allStringsOrNull = false
 				allBooleansOrNull = false
@@ -1082,7 +1086,8 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 		}
 		// Allow combining mixed primitive literals into a tuple when comparing tuples
 		// This handles cases like: (1,'') IN (-1,'') where the right side should be a single tuple literal
-		canBeTupleLiteral = hasNonNull && (allNumericOrNull || allStringsOrNull || allBooleansOrNull || (allTuples && allTuplesArePrimitive) || allPrimitiveLiterals)
+		// Also allow all-NULL lists to be formatted as tuple literals
+		canBeTupleLiteral = allNull || (hasNonNull && (allNumericOrNull || allStringsOrNull || allBooleansOrNull || (allTuples && allTuplesArePrimitive) || allPrimitiveLiterals))
 	}
 
 	// Count arguments: expr + list items or subquery
@@ -1252,6 +1257,7 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 		allTuples := true
 		allTuplesArePrimitive := true
 		allPrimitiveLiterals := true // Any mix of primitive literals (numbers, strings, booleans, null, primitive tuples)
+		allNull := true              // Track if all items are NULL
 		hasNonNull := false          // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
@@ -1259,6 +1265,7 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 					// NULL is compatible with all literal type lists
 					continue
 				}
+				allNull = false
 				hasNonNull = true
 				if lit.Type != ast.LiteralInteger && lit.Type != ast.LiteralFloat {
 					allNumericOrNull = false
@@ -1278,11 +1285,13 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 					}
 				}
 			} else if isNumericExpr(item) {
+				allNull = false
 				hasNonNull = true
 				allStringsOrNull = false
 				allBooleansOrNull = false
 				allTuples = false
 			} else {
+				allNull = false
 				allNumericOrNull = false
 				allStringsOrNull = false
 				allBooleansOrNull = false
@@ -1291,7 +1300,7 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 				break
 			}
 		}
-		canBeTupleLiteral = hasNonNull && (allNumericOrNull || (allStringsOrNull && len(n.List) <= maxStringTupleSizeWithAlias) || allBooleansOrNull || (allTuples && allTuplesArePrimitive) || allPrimitiveLiterals)
+		canBeTupleLiteral = allNull || (hasNonNull && (allNumericOrNull || (allStringsOrNull && len(n.List) <= maxStringTupleSizeWithAlias) || allBooleansOrNull || (allTuples && allTuplesArePrimitive) || allPrimitiveLiterals))
 	}
 
 	// Count arguments
@@ -1342,9 +1351,8 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 		fmt.Fprintf(sb, "%s  Literal %s\n", indent, FormatLiteral(tupleLit))
 	} else if len(n.List) == 1 {
 		if lit, ok := n.List[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
-			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
-			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
-			Node(sb, n.List[0], depth+4)
+			// Use explainTupleInInList to properly handle primitive-only tuples as Literal Tuple_
+			explainTupleInInList(sb, lit, indent+" ", depth+2)
 		} else if n.TrailingComma {
 			// Single element with trailing comma (e.g., (2,)) - wrap in Function tuple
 			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
