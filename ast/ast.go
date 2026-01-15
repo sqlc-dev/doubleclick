@@ -711,13 +711,14 @@ const (
 
 // TruncateQuery represents a TRUNCATE statement.
 type TruncateQuery struct {
-	Position  token.Position `json:"-"`
-	Temporary bool           `json:"temporary,omitempty"`
-	IfExists  bool           `json:"if_exists,omitempty"`
-	Database  string         `json:"database,omitempty"`
-	Table     string         `json:"table"`
-	OnCluster string         `json:"on_cluster,omitempty"`
-	Settings  []*SettingExpr `json:"settings,omitempty"`
+	Position         token.Position `json:"-"`
+	Temporary        bool           `json:"temporary,omitempty"`
+	IfExists         bool           `json:"if_exists,omitempty"`
+	TruncateDatabase bool           `json:"truncate_database,omitempty"` // True for TRUNCATE DATABASE
+	Database         string         `json:"database,omitempty"`
+	Table            string         `json:"table"`
+	OnCluster        string         `json:"on_cluster,omitempty"`
+	Settings         []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (t *TruncateQuery) Pos() token.Position { return t.Position }

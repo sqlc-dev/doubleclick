@@ -2332,7 +2332,12 @@ func explainTruncateQuery(sb *strings.Builder, n *ast.TruncateQuery, indent stri
 		if hasSettings {
 			children++
 		}
-		fmt.Fprintf(sb, "%sTruncateQuery  %s (children %d)\n", indent, n.Table, children)
+		// TRUNCATE DATABASE has different spacing than TRUNCATE TABLE
+		if n.TruncateDatabase {
+			fmt.Fprintf(sb, "%sTruncateQuery %s  (children %d)\n", indent, n.Table, children)
+		} else {
+			fmt.Fprintf(sb, "%sTruncateQuery  %s (children %d)\n", indent, n.Table, children)
+		}
 		fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 	}
 	if hasSettings {

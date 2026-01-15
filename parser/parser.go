@@ -6147,7 +6147,11 @@ func (p *Parser) parseTruncate() *ast.TruncateQuery {
 		p.nextToken()
 	}
 
+	// Handle TABLE or DATABASE keyword
 	if p.currentIs(token.TABLE) {
+		p.nextToken()
+	} else if p.currentIs(token.DATABASE) {
+		trunc.TruncateDatabase = true
 		p.nextToken()
 	}
 
