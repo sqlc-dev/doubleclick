@@ -5414,8 +5414,8 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				cmd.ConstraintName = p.current.Value
 				p.nextToken()
 			}
-			// Parse CHECK
-			if p.currentIs(token.CHECK) {
+			// Parse CHECK or ASSUME
+			if p.currentIs(token.CHECK) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ASSUME") {
 				p.nextToken()
 				cmd.Constraint = &ast.Constraint{
 					Position:   p.current.Pos,
