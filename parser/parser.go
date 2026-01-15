@@ -6347,12 +6347,6 @@ func (p *Parser) parseDescribe() *ast.DescribeQuery {
 		}
 	}
 
-	// Parse SETTINGS clause
-	if p.currentIs(token.SETTINGS) {
-		p.nextToken()
-		desc.Settings = p.parseSettingsList()
-	}
-
 	// Parse FORMAT clause
 	if p.currentIs(token.FORMAT) {
 		p.nextToken()
@@ -6360,6 +6354,12 @@ func (p *Parser) parseDescribe() *ast.DescribeQuery {
 			desc.Format = p.current.Value
 			p.nextToken()
 		}
+	}
+
+	// Parse SETTINGS clause (can come after FORMAT)
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken()
+		desc.Settings = p.parseSettingsList()
 	}
 
 	return desc
