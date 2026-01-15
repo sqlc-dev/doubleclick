@@ -1428,6 +1428,7 @@ type ColumnTransformer struct {
 	Position    token.Position `json:"-"`
 	Type        string         `json:"type"`                   // "apply", "except", "replace"
 	Apply       string         `json:"apply,omitempty"`        // function name for APPLY
+	ApplyParams []Expression   `json:"apply_params,omitempty"` // parameters for parameterized APPLY functions like quantiles(0.5)
 	ApplyLambda Expression     `json:"apply_lambda,omitempty"` // lambda expression for APPLY x -> expr
 	Except      []string       `json:"except,omitempty"`       // column names for EXCEPT
 	Pattern     string         `json:"pattern,omitempty"`      // regex pattern for EXCEPT('pattern')

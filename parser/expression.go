@@ -2957,20 +2957,40 @@ func (p *Parser) parseAsteriskApply(asterisk *ast.Asterisk) ast.Expression {
 		// Parse lambda expression
 		lambda := p.parseExpression(LOWEST)
 		asterisk.Transformers = append(asterisk.Transformers, &ast.ColumnTransformer{
-			Position:     pos,
-			Type:         "apply",
-			ApplyLambda:  lambda,
+			Position:    pos,
+			Type:        "apply",
+			ApplyLambda: lambda,
 		})
 	} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		// Parse function name (can be IDENT or keyword like sum, avg, etc.)
 		funcName := p.current.Value
+		p.nextToken()
+
+		// Check for parameterized function: APPLY(quantiles(0.5))
+		var params []ast.Expression
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				expr := p.parseExpression(LOWEST)
+				if expr != nil {
+					params = append(params, expr)
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+			p.expect(token.RPAREN)
+		}
+
 		asterisk.Apply = append(asterisk.Apply, funcName)
 		asterisk.Transformers = append(asterisk.Transformers, &ast.ColumnTransformer{
-			Position: pos,
-			Type:     "apply",
-			Apply:    funcName,
+			Position:    pos,
+			Type:        "apply",
+			Apply:       funcName,
+			ApplyParams: params,
 		})
-		p.nextToken()
 	}
 
 	if hasParens {
@@ -3002,13 +3022,33 @@ func (p *Parser) parseColumnsApply(matcher *ast.ColumnsMatcher) ast.Expression {
 	} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		// Parse function name (can be IDENT or keyword like sum, avg, etc.)
 		funcName := p.current.Value
+		p.nextToken()
+
+		// Check for parameterized function: APPLY(quantiles(0.5))
+		var params []ast.Expression
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				expr := p.parseExpression(LOWEST)
+				if expr != nil {
+					params = append(params, expr)
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+			p.expect(token.RPAREN)
+		}
+
 		matcher.Apply = append(matcher.Apply, funcName)
 		matcher.Transformers = append(matcher.Transformers, &ast.ColumnTransformer{
-			Position: pos,
-			Type:     "apply",
-			Apply:    funcName,
+			Position:    pos,
+			Type:        "apply",
+			Apply:       funcName,
+			ApplyParams: params,
 		})
-		p.nextToken()
 	}
 
 	if hasParens {
