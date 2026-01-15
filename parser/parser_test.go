@@ -18,6 +18,10 @@ import (
 // Use with: go test ./parser -check-explain -v
 var checkExplain = flag.Bool("check-explain", false, "Run skipped explain_todo tests to see which ones now pass")
 
+// checkAST enables AST golden file verification.
+// Use with: go test ./parser -check-ast -v
+var checkAST = flag.Bool("check-ast", false, "Verify AST output matches golden files")
+
 // testMetadata holds optional metadata for a test case
 type testMetadata struct {
 	ExplainTodo map[string]bool `json:"explain_todo,omitempty"` // map of stmtN -> true to skip specific statements
@@ -328,6 +332,24 @@ func TestParser(t *testing.T) {
 								t.Errorf("Failed to write updated metadata.json: %v", err)
 							} else {
 								t.Logf("EXPLAIN PASSES NOW - removed explain_todo[%s] from: %s", stmtKey, entry.Name())
+							}
+						}
+					}
+
+					// Check AST golden file if -check-ast is enabled
+					if *checkAST {
+						astGoldenPath := filepath.Join(testDir, "golden", "ast", fmt.Sprintf("stmt_%04d.json", stmtIndex))
+						if expectedASTBytes, err := os.ReadFile(astGoldenPath); err == nil {
+							// Marshal actual AST to JSON
+							actualASTBytes, err := json.MarshalIndent(stmts[0], "", "  ")
+							if err != nil {
+								t.Errorf("Failed to marshal AST to JSON: %v", err)
+							} else {
+								expectedAST := strings.TrimSpace(string(expectedASTBytes))
+								actualAST := strings.TrimSpace(string(actualASTBytes))
+								if expectedAST != actualAST {
+									t.Errorf("AST mismatch for %s\nExpected:\n%s\n\nGot:\n%s", astGoldenPath, expectedAST, actualAST)
+								}
 							}
 						}
 					}
