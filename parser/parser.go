@@ -2826,6 +2826,72 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		}
 	}
 
+	// Handle REFRESH clause for materialized views (REFRESH AFTER/EVERY interval APPEND TO target)
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "REFRESH" {
+		p.nextToken() // skip REFRESH
+		create.HasRefresh = true
+
+		// Parse refresh timing: AFTER interval or EVERY interval
+		if p.currentIs(token.IDENT) {
+			upper := strings.ToUpper(p.current.Value)
+			if upper == "AFTER" || upper == "EVERY" {
+				create.RefreshType = upper
+				p.nextToken()
+				// Parse interval value and unit
+				create.RefreshInterval = p.parseExpression(AND_PREC)
+				// Parse interval unit if present as identifier
+				if p.currentIs(token.IDENT) {
+					unitUpper := strings.ToUpper(p.current.Value)
+					if unitUpper == "SECOND" || unitUpper == "MINUTE" || unitUpper == "HOUR" ||
+						unitUpper == "DAY" || unitUpper == "WEEK" || unitUpper == "MONTH" || unitUpper == "YEAR" {
+						create.RefreshUnit = unitUpper
+						p.nextToken()
+					}
+				}
+			}
+		}
+
+		// Handle APPEND TO target - different from regular TO, part of REFRESH strategy
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "APPEND" {
+			p.nextToken() // skip APPEND
+			create.RefreshAppend = true
+			if p.currentIs(token.TO) {
+				p.nextToken() // skip TO
+				toName := p.parseIdentifierName()
+				if p.currentIs(token.DOT) {
+					p.nextToken()
+					create.ToDatabase = toName
+					create.To = p.parseIdentifierName()
+				} else {
+					create.To = toName
+				}
+			}
+		}
+
+		// For REFRESH ... APPEND TO target (columns), column definitions come after
+		if p.currentIs(token.LPAREN) && len(create.Columns) == 0 {
+			p.nextToken()
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				col := p.parseColumnDeclaration()
+				if col != nil {
+					create.Columns = append(create.Columns, col)
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+			p.expect(token.RPAREN)
+		}
+
+		// Handle EMPTY keyword
+		if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "EMPTY" {
+			create.Empty = true
+			p.nextToken()
+		}
+	}
+
 	// Parse column definitions (e.g., CREATE VIEW v (x UInt64) AS SELECT ...)
 	// For MATERIALIZED VIEW, this can also include INDEX, PROJECTION, and PRIMARY KEY
 	if p.currentIs(token.LPAREN) {

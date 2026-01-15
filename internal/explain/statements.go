@@ -237,6 +237,10 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if len(n.QuerySettings) > 0 {
 		children++
 	}
+	// Count REFRESH strategy as a child
+	if n.HasRefresh {
+		children++ // Refresh strategy definition
+	}
 	// For materialized views with TO clause but no storage, count ViewTargets as a child
 	if n.Materialized && n.To != "" && !hasStorageChild {
 		children++ // ViewTargets
@@ -352,6 +356,11 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				}
 			}
 		}
+	}
+	// Output REFRESH strategy for materialized views with REFRESH clause
+	if n.HasRefresh {
+		fmt.Fprintf(sb, "%s Refresh strategy definition (children 1)\n", indent)
+		fmt.Fprintf(sb, "%s  TimeInterval\n", indent)
 	}
 	// For materialized views, output AsSelect before storage definition
 	if n.Materialized && n.AsSelect != nil {

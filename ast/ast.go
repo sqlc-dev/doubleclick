@@ -278,6 +278,12 @@ type CreateQuery struct {
 	ToDatabase       string               `json:"to_database,omitempty"` // Target database for materialized views
 	To               string               `json:"to,omitempty"`          // Target table for materialized views
 	Populate         bool                 `json:"populate,omitempty"`    // POPULATE for materialized views
+	HasRefresh       bool                 `json:"has_refresh,omitempty"` // Has REFRESH clause
+	RefreshType      string               `json:"refresh_type,omitempty"` // AFTER or EVERY
+	RefreshInterval  Expression           `json:"refresh_interval,omitempty"` // Interval value
+	RefreshUnit      string               `json:"refresh_unit,omitempty"` // SECOND, MINUTE, etc.
+	RefreshAppend    bool                 `json:"refresh_append,omitempty"` // APPEND TO was specified
+	Empty            bool                 `json:"empty,omitempty"`       // EMPTY keyword was specified
 	Columns          []*ColumnDeclaration `json:"columns,omitempty"`
 	Indexes          []*IndexDefinition   `json:"indexes,omitempty"`
 	Projections      []*Projection        `json:"projections,omitempty"`
