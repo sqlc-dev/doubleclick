@@ -1167,13 +1167,9 @@ func (p *Parser) parseUnaryPlus() ast.Expression {
 		}
 	}
 
-	// Standard unary plus handling
-	expr := &ast.UnaryExpr{
-		Position: pos,
-		Op:       "+",
-	}
-	expr.Operand = p.parseExpression(UNARY)
-	return expr
+	// In ClickHouse, unary plus is a no-op and doesn't appear in EXPLAIN AST.
+	// Simply return the operand without wrapping it in UnaryExpr.
+	return p.parseExpression(UNARY)
 }
 
 func (p *Parser) parseNot() ast.Expression {
