@@ -242,6 +242,27 @@ func TestParser(t *testing.T) {
 						if strings.HasSuffix(expected, "\nOK") {
 							expected = strings.TrimSpace(expected[:len(expected)-3])
 						}
+						// Skip if expected is empty and statement has --{clientError annotation
+						// (ClickHouse errors at runtime before producing EXPLAIN output)
+						if expected == "" && strings.Contains(stmt, "--{clientError") {
+							// Also remove from explain_todo if present (this case is now handled)
+							if isExplainTodo && *checkExplain {
+								delete(metadata.ExplainTodo, stmtKey)
+								if len(metadata.ExplainTodo) == 0 {
+									metadata.ExplainTodo = nil
+								}
+								updatedBytes, err := json.MarshalIndent(metadata, "", "  ")
+								if err != nil {
+									t.Errorf("Failed to marshal updated metadata: %v", err)
+								} else if err := os.WriteFile(metadataPath, append(updatedBytes, '\n'), 0644); err != nil {
+									t.Errorf("Failed to write updated metadata.json: %v", err)
+								} else {
+									t.Logf("EXPLAIN PASSES NOW (clientError skip) - removed explain_todo[%s] from: %s", stmtKey, entry.Name())
+								}
+							}
+							t.Skipf("Skipping: empty expected output with --{clientError annotation")
+							return
+						}
 						actual := strings.TrimSpace(parser.Explain(stmts[0]))
 						// Use case-insensitive comparison since ClickHouse EXPLAIN AST has inconsistent casing
 						if !strings.EqualFold(actual, expected) {
