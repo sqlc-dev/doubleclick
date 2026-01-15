@@ -2598,6 +2598,19 @@ func (p *Parser) parseParametricFunctionCall(fn *ast.FunctionCall) *ast.Function
 
 	p.nextToken() // skip (
 
+	// Handle DISTINCT modifier (but not if DISTINCT is being used as a column name)
+	// If DISTINCT is followed by ) or , then it's a column reference, not a modifier
+	if p.currentIs(token.DISTINCT) && !p.peekIs(token.RPAREN) && !p.peekIs(token.COMMA) {
+		result.Distinct = true
+		p.nextToken()
+	}
+
+	// Handle ALL modifier (but not if ALL is being used as a column name)
+	// If ALL is followed by ) or , then it's a column reference, not a modifier
+	if p.currentIs(token.ALL) && !p.peekIs(token.RPAREN) && !p.peekIs(token.COMMA) {
+		p.nextToken()
+	}
+
 	// Parse the actual arguments
 	if !p.currentIs(token.RPAREN) {
 		result.Arguments = p.parseExpressionList()
