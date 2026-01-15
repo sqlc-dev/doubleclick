@@ -2761,6 +2761,15 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		}
 	}
 
+	// Handle UUID clause (CREATE MATERIALIZED VIEW name UUID 'uuid-value' ...)
+	// The UUID is not shown in EXPLAIN AST output, but we need to skip it
+	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "UUID" {
+		p.nextToken() // skip UUID
+		if p.currentIs(token.STRING) {
+			p.nextToken() // skip the UUID value
+		}
+	}
+
 	// Parse column definitions (e.g., CREATE VIEW v (x UInt64) AS SELECT ...)
 	// For MATERIALIZED VIEW, this can also include INDEX, PROJECTION, and PRIMARY KEY
 	if p.currentIs(token.LPAREN) {
