@@ -1142,6 +1142,17 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 		}
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 		Node(sb, e.Operand, depth+2)
+	case *ast.TernaryExpr:
+		// Ternary expressions become if functions with alias
+		if n.Name != "" {
+			fmt.Fprintf(sb, "%sFunction if (alias %s) (children %d)\n", indent, n.Name, 1)
+		} else {
+			fmt.Fprintf(sb, "%sFunction if (children %d)\n", indent, 1)
+		}
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 3)
+		Node(sb, e.Condition, depth+2)
+		Node(sb, e.Then, depth+2)
+		Node(sb, e.Else, depth+2)
 	default:
 		// For other types, just output the expression (alias may be lost)
 		Node(sb, n.Query, depth)
