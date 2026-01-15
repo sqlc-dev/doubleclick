@@ -3019,11 +3019,12 @@ func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 		replaces = append(replaces, replace)
 
 		if p.currentIs(token.COMMA) {
-			p.nextToken()
-			// If no parens and we see comma, might be end of select column
+			// If no parens and we see comma, this is the end of the REPLACE clause
+			// Don't consume the comma - let the caller handle it for the next select item
 			if !hasParens {
 				break
 			}
+			p.nextToken() // Only consume comma if inside parentheses
 		} else if !hasParens {
 			break
 		}
