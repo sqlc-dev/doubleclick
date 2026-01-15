@@ -455,8 +455,6 @@ func NormalizeFunctionName(name string) string {
 		"trim":  "trimBoth",
 		"ltrim": "trimLeft",
 		"rtrim": "trimRight",
-		// CONCAT_WS is normalized to concat
-		"concat_ws": "concat",
 		// Position is normalized to lowercase
 		"position": "position",
 		// SUBSTRING is normalized to lowercase (but SUBSTR preserves case)
