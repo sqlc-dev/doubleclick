@@ -1596,7 +1596,8 @@ func (p *Parser) wrapWithAlias(expr ast.Expression, alias string) ast.Expression
 
 func (p *Parser) parseExtract() ast.Expression {
 	pos := p.current.Pos
-	p.nextToken() // skip EXTRACT
+	name := p.current.Value // preserve original case
+	p.nextToken()           // skip EXTRACT
 
 	if !p.expect(token.LPAREN) {
 		return nil
@@ -1646,7 +1647,7 @@ func (p *Parser) parseExtract() ast.Expression {
 			p.expect(token.RPAREN)
 			return &ast.FunctionCall{
 				Position:  pos,
-				Name:      "extract",
+				Name:      name,
 				Arguments: args,
 			}
 		}
@@ -1670,7 +1671,7 @@ func (p *Parser) parseExtract() ast.Expression {
 
 	return &ast.FunctionCall{
 		Position:  pos,
-		Name:      "extract",
+		Name:      name,
 		Arguments: args,
 	}
 }
@@ -1764,7 +1765,8 @@ func (p *Parser) parsePositionalParameter() ast.Expression {
 
 func (p *Parser) parseSubstring() ast.Expression {
 	pos := p.current.Pos
-	p.nextToken() // skip SUBSTRING
+	name := p.current.Value // preserve original case
+	p.nextToken()           // skip SUBSTRING
 
 	if !p.expect(token.LPAREN) {
 		return nil
@@ -1871,7 +1873,7 @@ func (p *Parser) parseSubstring() ast.Expression {
 
 	return &ast.FunctionCall{
 		Position:  pos,
-		Name:      "substring",
+		Name:      name,
 		Arguments: args,
 	}
 }
@@ -2705,7 +2707,8 @@ func (p *Parser) parseQualifiedColumnsMatcher(qualifier string, pos token.Positi
 
 func (p *Parser) parseArrayConstructor() ast.Expression {
 	pos := p.current.Pos
-	p.nextToken() // skip ARRAY
+	name := p.current.Value // preserve original case
+	p.nextToken()           // skip ARRAY
 
 	if !p.expect(token.LPAREN) {
 		return nil
@@ -2720,14 +2723,15 @@ func (p *Parser) parseArrayConstructor() ast.Expression {
 
 	return &ast.FunctionCall{
 		Position:  pos,
-		Name:      "array",
+		Name:      name,
 		Arguments: args,
 	}
 }
 
 func (p *Parser) parseIfFunction() ast.Expression {
 	pos := p.current.Pos
-	p.nextToken() // skip IF
+	name := p.current.Value // preserve original case
+	p.nextToken()           // skip IF
 
 	if !p.expect(token.LPAREN) {
 		return nil
@@ -2742,15 +2746,15 @@ func (p *Parser) parseIfFunction() ast.Expression {
 
 	return &ast.FunctionCall{
 		Position:  pos,
-		Name:      "if",
+		Name:      name,
 		Arguments: args,
 	}
 }
 
 func (p *Parser) parseKeywordAsFunction() ast.Expression {
 	pos := p.current.Pos
-	name := strings.ToLower(p.current.Value)
-	p.nextToken() // skip keyword
+	name := p.current.Value // preserve original case
+	p.nextToken()           // skip keyword
 
 	if !p.expect(token.LPAREN) {
 		return nil

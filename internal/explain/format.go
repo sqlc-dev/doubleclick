@@ -448,24 +448,22 @@ func formatExprForType(expr ast.Expression) string {
 // NormalizeFunctionName normalizes function names to match ClickHouse's EXPLAIN AST output
 func NormalizeFunctionName(name string) string {
 	// ClickHouse normalizes certain function names in EXPLAIN AST
-	// Note: lcase, ucase, mid are preserved as-is by ClickHouse EXPLAIN AST
+	// Most functions preserve their original case from the SQL source.
+	// Only a few are normalized to specific canonical forms.
 	normalized := map[string]string{
-		"trim":     "trimBoth",
-		"ltrim":    "trimLeft",
-		"rtrim":    "trimRight",
-		"ceiling":  "ceil",
-		"log10":    "log10",
-		"log2":     "log2",
-		"rand":     "rand",
-		"ifnull":   "ifNull",
-		"nullif":   "nullIf",
-		"coalesce": "coalesce",
-		"greatest": "greatest",
-		"least":    "least",
+		// TRIM functions are normalized to trimBoth/trimLeft/trimRight
+		"trim":  "trimBoth",
+		"ltrim": "trimLeft",
+		"rtrim": "trimRight",
+		// CONCAT_WS is normalized to concat
 		"concat_ws": "concat",
+		// Position is normalized to lowercase
 		"position": "position",
-		"date_diff":  "dateDiff",
-		"datediff":   "dateDiff",
+		// SUBSTRING is normalized to lowercase (but SUBSTR preserves case)
+		"substring": "substring",
+		// DateDiff variants are normalized to camelCase
+		"date_diff": "dateDiff",
+		"datediff":  "dateDiff",
 		// SQL standard ANY/ALL subquery operators - simple cases
 		"anyequals":    "in",
 		"allnotequals": "notIn",
