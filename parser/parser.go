@@ -3850,6 +3850,19 @@ func (p *Parser) parseCreateDictionary(create *ast.CreateQuery) {
 			}
 			continue
 		}
+		// Handle SETTINGS as a keyword token
+		if p.currentIs(token.SETTINGS) {
+			p.nextToken() // skip SETTINGS
+			// Parse dictionary settings: SETTINGS(key=value, ...) or SETTINGS key=value, ...
+			if p.currentIs(token.LPAREN) {
+				p.nextToken() // skip (
+				dictDef.Settings = p.parseSettingsList()
+				p.expect(token.RPAREN)
+			} else {
+				dictDef.Settings = p.parseSettingsList()
+			}
+			continue
+		}
 		if p.currentIs(token.IDENT) {
 			upper := strings.ToUpper(p.current.Value)
 			switch upper {
@@ -3873,9 +3886,13 @@ func (p *Parser) parseCreateDictionary(create *ast.CreateQuery) {
 				dictDef.Range = p.parseDictionaryRange()
 			case "SETTINGS":
 				p.nextToken() // skip SETTINGS
-				// Skip settings for now
-				for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.isDictionaryClauseKeyword() {
-					p.nextToken()
+				// Parse dictionary settings: SETTINGS(key=value, ...) or SETTINGS key=value, ...
+				if p.currentIs(token.LPAREN) {
+					p.nextToken() // skip (
+					dictDef.Settings = p.parseSettingsList()
+					p.expect(token.RPAREN)
+				} else {
+					dictDef.Settings = p.parseSettingsList()
 				}
 			case "COMMENT":
 				p.nextToken() // skip COMMENT
@@ -3892,7 +3909,7 @@ func (p *Parser) parseCreateDictionary(create *ast.CreateQuery) {
 	}
 
 	// Only set dictionary definition if it has any content
-	if len(dictDef.PrimaryKey) > 0 || dictDef.Source != nil || dictDef.Lifetime != nil || dictDef.Layout != nil || dictDef.Range != nil {
+	if len(dictDef.PrimaryKey) > 0 || dictDef.Source != nil || dictDef.Lifetime != nil || dictDef.Layout != nil || dictDef.Range != nil || len(dictDef.Settings) > 0 {
 		create.DictionaryDef = dictDef
 	}
 }

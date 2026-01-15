@@ -92,7 +92,7 @@ func explainDictionaryDefinition(sb *strings.Builder, n *ast.DictionaryDefinitio
 
 	// SETTINGS
 	if len(n.Settings) > 0 {
-		fmt.Fprintf(sb, "%s Set\n", indent)
+		fmt.Fprintf(sb, "%s Dictionary settings\n", indent)
 	}
 }
 
