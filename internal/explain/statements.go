@@ -1850,7 +1850,7 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 		}
 	case ast.AlterModifySetting:
 		fmt.Fprintf(sb, "%s Set\n", indent)
-	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
+	case ast.AlterDropPartition, ast.AlterDropDetachedPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
 		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition, ast.AlterApplyPatches, ast.AlterApplyDeletedMask:
 		if cmd.Partition != nil {
 			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
@@ -2149,7 +2149,7 @@ func countAlterCommandChildren(cmd *ast.AlterCommand) int {
 		}
 	case ast.AlterModifySetting:
 		children = 1
-	case ast.AlterDropPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
+	case ast.AlterDropPartition, ast.AlterDropDetachedPartition, ast.AlterDetachPartition, ast.AlterAttachPartition,
 		ast.AlterReplacePartition, ast.AlterFetchPartition, ast.AlterMovePartition, ast.AlterFreezePartition, ast.AlterApplyPatches, ast.AlterApplyDeletedMask:
 		if cmd.Partition != nil {
 			children++

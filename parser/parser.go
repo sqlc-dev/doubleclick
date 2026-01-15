@@ -5475,6 +5475,14 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				cmd.ConstraintName = p.current.Value
 				p.nextToken()
 			}
+		} else if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "DETACHED" {
+			// DROP DETACHED PARTITION
+			p.nextToken() // skip DETACHED
+			if p.currentIs(token.PARTITION) {
+				p.nextToken() // skip PARTITION
+				cmd.Type = ast.AlterDropDetachedPartition
+				cmd.Partition = p.parseExpression(LOWEST)
+			}
 		} else if p.currentIs(token.PARTITION) {
 			cmd.Type = ast.AlterDropPartition
 			p.nextToken()
