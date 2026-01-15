@@ -156,7 +156,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		return
 	}
 	if n.CreateDictionary {
-		// Dictionary: count children = database identifier (if any) + table identifier + attributes (if any) + definition (if any)
+		// Dictionary: count children = database identifier (if any) + table identifier + attributes (if any) + definition (if any) + comment (if any)
 		children := 1 // table identifier
 		hasDatabase := n.Database != ""
 		if hasDatabase {
@@ -166,6 +166,9 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			children++
 		}
 		if n.DictionaryDef != nil {
+			children++
+		}
+		if n.Comment != "" {
 			children++
 		}
 		// Format: "CreateQuery [database] [table] (children N)"
@@ -186,6 +189,10 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		// Dictionary definition
 		if n.DictionaryDef != nil {
 			explainDictionaryDefinition(sb, n.DictionaryDef, indent+" ", depth+1)
+		}
+		// Dictionary COMMENT
+		if n.Comment != "" {
+			fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, n.Comment)
 		}
 		return
 	}

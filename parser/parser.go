@@ -3890,6 +3890,15 @@ func (p *Parser) parseCreateDictionary(create *ast.CreateQuery) {
 			}
 			continue
 		}
+		// Handle COMMENT as a keyword token
+		if p.currentIs(token.COMMENT) {
+			p.nextToken() // skip COMMENT
+			if p.currentIs(token.STRING) {
+				create.Comment = p.current.Value
+				p.nextToken()
+			}
+			continue
+		}
 		if p.currentIs(token.IDENT) {
 			upper := strings.ToUpper(p.current.Value)
 			switch upper {
