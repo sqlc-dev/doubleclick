@@ -886,19 +886,19 @@ func (l *Lexer) readNumber() Item {
 			}
 			return Item{Token: token.NUMBER, Value: sb.String(), Pos: pos}
 		} else if l.ch == 'b' || l.ch == 'B' {
-			// Binary literal
+			// Binary literal (allows underscores as digit separators: 0b0010_0100_0111)
 			sb.WriteRune(l.ch)
 			l.readChar()
-			for l.ch == '0' || l.ch == '1' {
+			for l.ch == '0' || l.ch == '1' || l.ch == '_' {
 				sb.WriteRune(l.ch)
 				l.readChar()
 			}
 			return Item{Token: token.NUMBER, Value: sb.String(), Pos: pos}
 		} else if l.ch == 'o' || l.ch == 'O' {
-			// Octal literal
+			// Octal literal (allows underscores as digit separators: 0o755_644)
 			sb.WriteRune(l.ch)
 			l.readChar()
-			for l.ch >= '0' && l.ch <= '7' {
+			for (l.ch >= '0' && l.ch <= '7') || l.ch == '_' {
 				sb.WriteRune(l.ch)
 				l.readChar()
 			}
@@ -1088,9 +1088,10 @@ func (l *Lexer) readNumberOrIdent() Item {
 			}
 		}
 	} else if val == "0" && (l.ch == 'b' || l.ch == 'B') && (l.peekChar() == '0' || l.peekChar() == '1') {
+		// Binary literal (allows underscores as digit separators: 0b0010_0100_0111)
 		sb.WriteRune(l.ch)
 		l.readChar()
-		for l.ch == '0' || l.ch == '1' {
+		for l.ch == '0' || l.ch == '1' || l.ch == '_' {
 			sb.WriteRune(l.ch)
 			l.readChar()
 		}
@@ -1100,11 +1101,11 @@ func (l *Lexer) readNumberOrIdent() Item {
 	// and the number already consumed is just the leading zero (checking for 0x, 0b, 0o)
 	if startCh == '0' && len(sb.String()) == 1 {
 		// Already handled above for 0x, 0b
-		// Handle 0o for octal
+		// Handle 0o for octal (allows underscores as digit separators: 0o755_644)
 		if l.ch == 'o' || l.ch == 'O' {
 			sb.WriteRune(l.ch)
 			l.readChar()
-			for l.ch >= '0' && l.ch <= '7' {
+			for (l.ch >= '0' && l.ch <= '7') || l.ch == '_' {
 				sb.WriteRune(l.ch)
 				l.readChar()
 			}
