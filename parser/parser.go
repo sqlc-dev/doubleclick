@@ -18,14 +18,14 @@ var intervalUnits = map[string]bool{
 	"YEAR": true, "YEARS": true,
 	"QUARTER": true, "QUARTERS": true,
 	"MONTH": true, "MONTHS": true,
-	"WEEK": true, "WEEKS": true,
-	"DAY": true, "DAYS": true,
-	"HOUR": true, "HOURS": true,
-	"MINUTE": true, "MINUTES": true,
-	"SECOND": true, "SECONDS": true,
-	"MILLISECOND": true, "MILLISECONDS": true,
-	"MICROSECOND": true, "MICROSECONDS": true,
-	"NANOSECOND": true, "NANOSECONDS": true,
+	"WEEK": true, "WEEKS": true, "W": true,
+	"DAY": true, "DAYS": true, "D": true,
+	"HOUR": true, "HOURS": true, "H": true,
+	"MINUTE": true, "MINUTES": true, "M": true,
+	"SECOND": true, "SECONDS": true, "S": true,
+	"MILLISECOND": true, "MILLISECONDS": true, "MS": true,
+	"MICROSECOND": true, "MICROSECONDS": true, "US": true,
+	"NANOSECOND": true, "NANOSECONDS": true, "NS": true,
 }
 
 // isIntervalUnit checks if the given string is a valid interval unit name

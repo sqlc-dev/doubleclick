@@ -22,20 +22,26 @@ func normalizeIntervalUnit(unit string) string {
 		u = u[8:] // Remove "sql_tsi_" prefix
 	}
 
-	// Handle SQL standard abbreviations
+	// Handle SQL standard abbreviations and ClickHouse short notations
 	abbrevs := map[string]string{
-		"yy":  "year",
-		"qq":  "quarter",
-		"mm":  "month",
-		"wk":  "week",
-		"ww":  "week",
-		"dd":  "day",
-		"hh":  "hour",
-		"mi":  "minute",
-		"ss":  "second",
-		"ms":  "millisecond",
-		"us":  "microsecond",
-		"ns":  "nanosecond",
+		"yy": "year",
+		"qq": "quarter",
+		"mm": "month",
+		"wk": "week",
+		"ww": "week",
+		"dd": "day",
+		"hh": "hour",
+		"mi": "minute",
+		"ss": "second",
+		// ClickHouse short notations
+		"w":  "week",
+		"d":  "day",
+		"h":  "hour",
+		"m":  "minute",
+		"s":  "second",
+		"ms": "millisecond",
+		"us": "microsecond",
+		"ns": "nanosecond",
 	}
 	if expanded, ok := abbrevs[u]; ok {
 		u = expanded
@@ -62,20 +68,26 @@ func normalizeIntervalUnitToLiteral(unit string) string {
 		u = u[8:] // Remove "sql_tsi_" prefix
 	}
 
-	// Handle SQL standard abbreviations
+	// Handle SQL standard abbreviations and ClickHouse short notations
 	abbrevs := map[string]string{
-		"yy":  "year",
-		"qq":  "quarter",
-		"mm":  "month",
-		"wk":  "week",
-		"ww":  "week",
-		"dd":  "day",
-		"hh":  "hour",
-		"mi":  "minute",
-		"ss":  "second",
-		"ms":  "millisecond",
-		"us":  "microsecond",
-		"ns":  "nanosecond",
+		"yy": "year",
+		"qq": "quarter",
+		"mm": "month",
+		"wk": "week",
+		"ww": "week",
+		"dd": "day",
+		"hh": "hour",
+		"mi": "minute",
+		"ss": "second",
+		// ClickHouse short notations
+		"w":  "week",
+		"d":  "day",
+		"h":  "hour",
+		"m":  "minute",
+		"s":  "second",
+		"ms": "millisecond",
+		"us": "microsecond",
+		"ns": "nanosecond",
 	}
 	if expanded, ok := abbrevs[u]; ok {
 		return expanded
