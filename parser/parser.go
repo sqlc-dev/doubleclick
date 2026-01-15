@@ -8268,7 +8268,8 @@ func (p *Parser) parseKill() *ast.KillQuery {
 	}
 
 	// Parse SYNC/ASYNC/TEST
-	for p.currentIs(token.IDENT) {
+	// SYNC can be a keyword token or IDENT
+	for p.currentIs(token.IDENT) || p.currentIs(token.SYNC) {
 		upper := strings.ToUpper(p.current.Value)
 		switch upper {
 		case "SYNC":
