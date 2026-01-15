@@ -23,6 +23,85 @@ func Explain(stmt ast.Statement) string {
 	return sb.String()
 }
 
+// ExplainStatements returns the EXPLAIN AST output for multiple statements.
+// This handles the special ClickHouse behavior where INSERT VALUES followed by SELECT
+// on the same line outputs the INSERT AST and then executes the SELECT, printing its result.
+func ExplainStatements(stmts []ast.Statement) string {
+	if len(stmts) == 0 {
+		return ""
+	}
+
+	var sb strings.Builder
+	Node(&sb, stmts[0], 0)
+
+	// If the first statement is an INSERT and there are subsequent SELECT statements
+	// with simple literals, append those literal values (matching ClickHouse's behavior)
+	if _, isInsert := stmts[0].(*ast.InsertQuery); isInsert {
+		for i := 1; i < len(stmts); i++ {
+			if result := getSimpleSelectResult(stmts[i]); result != "" {
+				sb.WriteString(result)
+				sb.WriteString("\n")
+			}
+		}
+	}
+
+	return sb.String()
+}
+
+// getSimpleSelectResult extracts the literal value from a simple SELECT statement
+// like "SELECT 11111" and returns it as a string. Returns empty string if not a simple SELECT.
+func getSimpleSelectResult(stmt ast.Statement) string {
+	// Check if it's a SelectWithUnionQuery
+	selectUnion, ok := stmt.(*ast.SelectWithUnionQuery)
+	if !ok {
+		return ""
+	}
+
+	// Must have exactly one select query
+	if len(selectUnion.Selects) != 1 {
+		return ""
+	}
+
+	// Get the inner select query
+	selectQuery, ok := selectUnion.Selects[0].(*ast.SelectQuery)
+	if !ok {
+		return ""
+	}
+
+	// Must have exactly one expression in the select list
+	if len(selectQuery.Columns) != 1 {
+		return ""
+	}
+
+	// Must be a literal
+	literal, ok := selectQuery.Columns[0].(*ast.Literal)
+	if !ok {
+		return ""
+	}
+
+	// Format the literal value
+	return formatLiteralValue(literal)
+}
+
+// formatLiteralValue formats a literal value as it would appear in query results
+func formatLiteralValue(lit *ast.Literal) string {
+	switch v := lit.Value.(type) {
+	case int64:
+		return fmt.Sprintf("%d", v)
+	case float64:
+		return fmt.Sprintf("%v", v)
+	case string:
+		return v
+	case bool:
+		if v {
+			return "1"
+		}
+		return "0"
+	default:
+		return fmt.Sprintf("%v", v)
+	}
+}
+
 // Node writes the EXPLAIN AST output for an AST node.
 func Node(sb *strings.Builder, node interface{}, depth int) {
 	if node == nil {
@@ -350,15 +429,16 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 		children++
 	}
 	if children > 0 {
-		fmt.Fprintf(sb, "%sColumnDeclaration %s (children %d)\n", indent, col.Name, children)
+		fmt.Fprintf(sb, "%sColumnDeclaration %s (children %d)\n", indent, sanitizeUTF8(col.Name), children)
 	} else {
-		fmt.Fprintf(sb, "%sColumnDeclaration %s\n", indent, col.Name)
+		fmt.Fprintf(sb, "%sColumnDeclaration %s\n", indent, sanitizeUTF8(col.Name))
 	}
 	if col.Type != nil {
 		Node(sb, col.Type, depth+1)
 	}
-	if len(col.Statistics) > 0 {
-		explainStatisticsExpr(sb, col.Statistics, indent+" ", depth+1)
+	// Settings comes right after Type in ClickHouse EXPLAIN output
+	if len(col.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 	if col.Default != nil {
 		Node(sb, col.Default, depth+1)
@@ -372,8 +452,8 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	if col.Codec != nil {
 		explainCodecExpr(sb, col.Codec, indent+" ", depth+1)
 	}
-	if len(col.Settings) > 0 {
-		fmt.Fprintf(sb, "%s Set\n", indent)
+	if len(col.Statistics) > 0 {
+		explainStatisticsExpr(sb, col.Statistics, indent+" ", depth+1)
 	}
 	if col.Comment != "" {
 		fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, col.Comment)

@@ -275,9 +275,17 @@ type CreateQuery struct {
 	Table            string               `json:"table,omitempty"`
 	View             string               `json:"view,omitempty"`
 	Materialized     bool                 `json:"materialized,omitempty"`
+	WindowView       bool                 `json:"window_view,omitempty"` // WINDOW VIEW type
+	InnerEngine      *EngineClause        `json:"inner_engine,omitempty"` // INNER ENGINE for window views
 	ToDatabase       string               `json:"to_database,omitempty"` // Target database for materialized views
 	To               string               `json:"to,omitempty"`          // Target table for materialized views
 	Populate         bool                 `json:"populate,omitempty"`    // POPULATE for materialized views
+	HasRefresh       bool                 `json:"has_refresh,omitempty"` // Has REFRESH clause
+	RefreshType      string               `json:"refresh_type,omitempty"` // AFTER or EVERY
+	RefreshInterval  Expression           `json:"refresh_interval,omitempty"` // Interval value
+	RefreshUnit      string               `json:"refresh_unit,omitempty"` // SECOND, MINUTE, etc.
+	RefreshAppend    bool                 `json:"refresh_append,omitempty"` // APPEND TO was specified
+	Empty            bool                 `json:"empty,omitempty"`       // EMPTY keyword was specified
 	Columns          []*ColumnDeclaration `json:"columns,omitempty"`
 	Indexes          []*IndexDefinition   `json:"indexes,omitempty"`
 	Projections      []*Projection        `json:"projections,omitempty"`
@@ -291,7 +299,9 @@ type CreateQuery struct {
 	PrimaryKey          []Expression         `json:"primary_key,omitempty"`
 	SampleBy         Expression           `json:"sample_by,omitempty"`
 	TTL              *TTLClause           `json:"ttl,omitempty"`
-	Settings         []*SettingExpr       `json:"settings,omitempty"`
+	Settings             []*SettingExpr       `json:"settings,omitempty"`
+	QuerySettings        []*SettingExpr       `json:"query_settings,omitempty"`          // Query-level SETTINGS (second SETTINGS clause)
+	SettingsBeforeComment bool                `json:"settings_before_comment,omitempty"` // True if SETTINGS comes before COMMENT
 	AsSelect         Statement            `json:"as_select,omitempty"`
 	AsTableFunction  Expression           `json:"as_table_function,omitempty"` // AS table_function(...) in CREATE TABLE
 	CloneAs          string               `json:"clone_as,omitempty"`          // CLONE AS source_table in CREATE TABLE
@@ -622,6 +632,7 @@ type AlterCommand struct {
 	OrderByExpr       []Expression      `json:"order_by_expr,omitempty"`      // For MODIFY ORDER BY
 	SampleByExpr      Expression        `json:"sample_by_expr,omitempty"`     // For MODIFY SAMPLE BY
 	ResetSettings     []string          `json:"reset_settings,omitempty"`     // For MODIFY COLUMN ... RESET SETTING
+	Query             Statement         `json:"query,omitempty"`              // For MODIFY QUERY
 }
 
 // Projection represents a projection definition.
@@ -675,10 +686,12 @@ const (
 	AlterDropConstraint    AlterCommandType = "DROP_CONSTRAINT"
 	AlterModifyTTL          AlterCommandType = "MODIFY_TTL"
 	AlterMaterializeTTL     AlterCommandType = "MATERIALIZE_TTL"
+	AlterRemoveTTL          AlterCommandType = "REMOVE_TTL"
 	AlterModifySetting      AlterCommandType = "MODIFY_SETTING"
 	AlterResetSetting       AlterCommandType = "RESET_SETTING"
-	AlterDropPartition      AlterCommandType = "DROP_PARTITION"
-	AlterDetachPartition    AlterCommandType = "DETACH_PARTITION"
+	AlterDropPartition         AlterCommandType = "DROP_PARTITION"
+	AlterDropDetachedPartition AlterCommandType = "DROP_DETACHED_PARTITION"
+	AlterDetachPartition       AlterCommandType = "DETACH_PARTITION"
 	AlterAttachPartition    AlterCommandType = "ATTACH_PARTITION"
 	AlterReplacePartition   AlterCommandType = "REPLACE_PARTITION"
 	AlterFetchPartition     AlterCommandType = "FETCH_PARTITION"
@@ -700,19 +713,21 @@ const (
 	AlterModifyComment         AlterCommandType = "MODIFY_COMMENT"
 	AlterModifyOrderBy         AlterCommandType = "MODIFY_ORDER_BY"
 	AlterModifySampleBy        AlterCommandType = "MODIFY_SAMPLE_BY"
+	AlterModifyQuery           AlterCommandType = "MODIFY_QUERY"
 	AlterRemoveSampleBy        AlterCommandType = "REMOVE_SAMPLE_BY"
 	AlterApplyDeletedMask      AlterCommandType = "APPLY_DELETED_MASK"
 )
 
 // TruncateQuery represents a TRUNCATE statement.
 type TruncateQuery struct {
-	Position  token.Position `json:"-"`
-	Temporary bool           `json:"temporary,omitempty"`
-	IfExists  bool           `json:"if_exists,omitempty"`
-	Database  string         `json:"database,omitempty"`
-	Table     string         `json:"table"`
-	OnCluster string         `json:"on_cluster,omitempty"`
-	Settings  []*SettingExpr `json:"settings,omitempty"`
+	Position         token.Position `json:"-"`
+	Temporary        bool           `json:"temporary,omitempty"`
+	IfExists         bool           `json:"if_exists,omitempty"`
+	TruncateDatabase bool           `json:"truncate_database,omitempty"` // True for TRUNCATE DATABASE
+	Database         string         `json:"database,omitempty"`
+	Table            string         `json:"table"`
+	OnCluster        string         `json:"on_cluster,omitempty"`
+	Settings         []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (t *TruncateQuery) Pos() token.Position { return t.Position }
@@ -724,7 +739,8 @@ type DeleteQuery struct {
 	Position  token.Position `json:"-"`
 	Database  string         `json:"database,omitempty"`
 	Table     string         `json:"table"`
-	Partition Expression     `json:"partition,omitempty"` // IN PARTITION clause
+	OnCluster string         `json:"on_cluster,omitempty"` // ON CLUSTER clause
+	Partition Expression     `json:"partition,omitempty"`  // IN PARTITION clause
 	Where     Expression     `json:"where,omitempty"`
 	Settings  []*SettingExpr `json:"settings,omitempty"`
 }
@@ -762,6 +778,7 @@ type AttachQuery struct {
 	Database           string               `json:"database,omitempty"`
 	Table              string               `json:"table,omitempty"`
 	Dictionary         string               `json:"dictionary,omitempty"`
+	FromPath           string               `json:"from_path,omitempty"`     // FROM 'path' clause
 	Columns            []*ColumnDeclaration `json:"columns,omitempty"`
 	ColumnsPrimaryKey       []Expression         `json:"columns_primary_key,omitempty"`        // PRIMARY KEY in column list
 	HasEmptyColumnsPrimaryKey bool               `json:"has_empty_columns_primary_key,omitempty"` // TRUE if PRIMARY KEY () was seen with empty parens
@@ -952,6 +969,7 @@ type SystemQuery struct {
 	Table                string         `json:"table,omitempty"`
 	OnCluster            string         `json:"on_cluster,omitempty"`
 	DuplicateTableOutput bool           `json:"duplicate_table_output,omitempty"` // True for commands that need database/table output twice
+	Settings             []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (s *SystemQuery) Pos() token.Position { return s.Position }
@@ -979,13 +997,14 @@ type RenamePair struct {
 
 // RenameQuery represents a RENAME TABLE statement.
 type RenameQuery struct {
-	Position  token.Position `json:"-"`
-	Pairs     []*RenamePair  `json:"pairs"`             // Multiple rename pairs
-	From      string         `json:"from,omitempty"`    // Deprecated: for backward compat
-	To        string         `json:"to,omitempty"`      // Deprecated: for backward compat
-	OnCluster string         `json:"on_cluster,omitempty"`
-	Settings  []*SettingExpr `json:"settings,omitempty"`
-	IfExists  bool           `json:"if_exists,omitempty"` // IF EXISTS modifier
+	Position       token.Position `json:"-"`
+	Pairs          []*RenamePair  `json:"pairs"`                     // Multiple rename pairs
+	From           string         `json:"from,omitempty"`            // Deprecated: for backward compat
+	To             string         `json:"to,omitempty"`              // Deprecated: for backward compat
+	OnCluster      string         `json:"on_cluster,omitempty"`
+	Settings       []*SettingExpr `json:"settings,omitempty"`
+	IfExists       bool           `json:"if_exists,omitempty"`       // IF EXISTS modifier
+	RenameDatabase bool           `json:"rename_database,omitempty"` // True for RENAME DATABASE
 }
 
 func (r *RenameQuery) Pos() token.Position { return r.Position }
@@ -1058,6 +1077,7 @@ type KillQuery struct {
 	Sync     bool           `json:"sync,omitempty"`    // SYNC mode (default false = ASYNC)
 	Test     bool           `json:"test,omitempty"`    // TEST mode
 	Format   string         `json:"format,omitempty"`  // FORMAT clause
+	Settings []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (k *KillQuery) Pos() token.Position { return k.Position }
@@ -1278,12 +1298,13 @@ func (d *DropWorkloadQuery) statementNode()      {}
 
 // CreateIndexQuery represents a CREATE INDEX statement.
 type CreateIndexQuery struct {
-	Position    token.Position `json:"-"`
-	IndexName   string         `json:"index_name"`
-	Table       string         `json:"table"`
-	Columns     []Expression   `json:"columns,omitempty"`
-	Type        string         `json:"type,omitempty"`        // Index type (minmax, bloom_filter, etc.)
-	Granularity int            `json:"granularity,omitempty"` // GRANULARITY value
+	Position             token.Position `json:"-"`
+	IndexName            string         `json:"index_name"`
+	Table                string         `json:"table"`
+	Columns              []Expression   `json:"columns,omitempty"`
+	ColumnsParenthesized bool           `json:"columns_parenthesized,omitempty"` // True if columns in (...)
+	Type                 string         `json:"type,omitempty"`                  // Index type (minmax, bloom_filter, etc.)
+	Granularity          int            `json:"granularity,omitempty"`           // GRANULARITY value
 }
 
 func (c *CreateIndexQuery) Pos() token.Position { return c.Position }
@@ -1427,6 +1448,7 @@ type ColumnTransformer struct {
 	Position    token.Position `json:"-"`
 	Type        string         `json:"type"`                   // "apply", "except", "replace"
 	Apply       string         `json:"apply,omitempty"`        // function name for APPLY
+	ApplyParams []Expression   `json:"apply_params,omitempty"` // parameters for parameterized APPLY functions like quantiles(0.5)
 	ApplyLambda Expression     `json:"apply_lambda,omitempty"` // lambda expression for APPLY x -> expr
 	Except      []string       `json:"except,omitempty"`       // column names for EXCEPT
 	Pattern     string         `json:"pattern,omitempty"`      // regex pattern for EXCEPT('pattern')
@@ -1571,9 +1593,10 @@ func (s *Subquery) expressionNode()     {}
 
 // WithElement represents a WITH element (CTE).
 type WithElement struct {
-	Position token.Position `json:"-"`
-	Name     string         `json:"name"`
-	Query    Expression     `json:"query"` // Subquery or Expression
+	Position   token.Position `json:"-"`
+	Name       string         `json:"name"`
+	Query      Expression     `json:"query"`       // Subquery or Expression
+	ScalarWith bool           `json:"scalar_with"` // True for "(expr) AS name" syntax, false for "name AS (SELECT ...)"
 }
 
 func (w *WithElement) Pos() token.Position { return w.Position }
@@ -1713,12 +1736,13 @@ func (b *BetweenExpr) expressionNode()     {}
 
 // InExpr represents an IN expression.
 type InExpr struct {
-	Position token.Position `json:"-"`
-	Expr     Expression     `json:"expr"`
-	Not      bool           `json:"not,omitempty"`
-	Global   bool           `json:"global,omitempty"`
-	List     []Expression   `json:"list,omitempty"`
-	Query    Statement      `json:"query,omitempty"`
+	Position      token.Position `json:"-"`
+	Expr          Expression     `json:"expr"`
+	Not           bool           `json:"not,omitempty"`
+	Global        bool           `json:"global,omitempty"`
+	List          []Expression   `json:"list,omitempty"`
+	Query         Statement      `json:"query,omitempty"`
+	TrailingComma bool           `json:"trailing_comma,omitempty"` // true if list had trailing comma like (2,)
 }
 
 func (i *InExpr) Pos() token.Position { return i.Position }

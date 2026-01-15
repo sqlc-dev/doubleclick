@@ -4,9 +4,47 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/sqlc-dev/doubleclick/ast"
 )
+
+// sanitizeUTF8 replaces invalid UTF-8 bytes with the Unicode replacement character (U+FFFD)
+// and null bytes with the escape sequence \0.
+// This matches ClickHouse's behavior of displaying special bytes in EXPLAIN AST output.
+func sanitizeUTF8(s string) string {
+	// Check if we need to process at all
+	needsProcessing := !utf8.ValidString(s)
+	if !needsProcessing {
+		for i := 0; i < len(s); i++ {
+			if s[i] == 0 {
+				needsProcessing = true
+				break
+			}
+		}
+	}
+	if !needsProcessing {
+		return s
+	}
+
+	var result strings.Builder
+	for i := 0; i < len(s); {
+		r, size := utf8.DecodeRuneInString(s[i:])
+		if r == utf8.RuneError && size == 1 {
+			// Invalid byte - write replacement character
+			result.WriteRune('\uFFFD')
+			i++
+		} else if r == 0 {
+			// Null byte - write as escape sequence \0
+			result.WriteString("\\0")
+			i += size
+		} else {
+			result.WriteRune(r)
+			i += size
+		}
+	}
+	return result.String()
+}
 
 // escapeAlias escapes backslashes and single quotes in alias names for EXPLAIN output
 func escapeAlias(alias string) string {
@@ -25,21 +63,31 @@ func explainIdentifier(sb *strings.Builder, n *ast.Identifier, indent string) {
 	}
 }
 
-// formatIdentifierName formats an identifier name, handling JSON path notation
+// escapeIdentifierPart escapes backslashes and single quotes in an identifier part
+// and sanitizes invalid UTF-8 bytes
+func escapeIdentifierPart(s string) string {
+	s = sanitizeUTF8(s)
+	s = strings.ReplaceAll(s, "\\", "\\\\")
+	s = strings.ReplaceAll(s, "'", "\\'")
+	return s
+}
+
+// formatIdentifierName formats an identifier name, handling JSON path notation,
+// sanitizing invalid UTF-8 bytes, and escaping special characters
 func formatIdentifierName(n *ast.Identifier) string {
 	if len(n.Parts) == 0 {
 		return ""
 	}
 	if len(n.Parts) == 1 {
-		return n.Parts[0]
+		return escapeIdentifierPart(n.Parts[0])
 	}
-	result := n.Parts[0]
+	result := escapeIdentifierPart(n.Parts[0])
 	for _, p := range n.Parts[1:] {
 		// JSON path notation: ^fieldname should be formatted as ^`fieldname`
 		if strings.HasPrefix(p, "^") {
-			result += ".^`" + p[1:] + "`"
+			result += ".^`" + escapeIdentifierPart(p[1:]) + "`"
 		} else {
-			result += "." + p
+			result += "." + escapeIdentifierPart(p)
 		}
 	}
 	return result
@@ -174,6 +222,10 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			if hasNestedArrays && containsTuplesRecursive(exprs) {
 				shouldUseFunctionArray = true
 			}
+			// Also check for non-literal expressions at any depth within nested arrays
+			if hasNestedArrays && containsNonLiteralExpressionsRecursive(exprs) {
+				shouldUseFunctionArray = true
+			}
 
 			if shouldUseFunctionArray {
 				// Render as Function array instead of Literal
@@ -257,9 +309,14 @@ func containsOnlyArraysOrTuples(exprs []ast.Expression) bool {
 
 // containsNonLiteralExpressions checks if a slice of expressions contains
 // any non-literal expressions (identifiers, function calls, etc.)
+// or parenthesized literals (which need Function array format)
 func containsNonLiteralExpressions(exprs []ast.Expression) bool {
 	for _, e := range exprs {
-		if _, ok := e.(*ast.Literal); ok {
+		if lit, ok := e.(*ast.Literal); ok {
+			// Parenthesized literals need Function array format
+			if lit.Parenthesized {
+				return true
+			}
 			continue
 		}
 		// Unary minus of a literal (negative number) is also acceptable
@@ -353,6 +410,36 @@ func containsTuplesRecursive(exprs []ast.Expression) bool {
 				}
 			}
 		}
+	}
+	return false
+}
+
+// containsNonLiteralExpressionsRecursive checks if any nested array contains non-literal expressions at any depth
+func containsNonLiteralExpressionsRecursive(exprs []ast.Expression) bool {
+	for _, e := range exprs {
+		if lit, ok := e.(*ast.Literal); ok {
+			// Parenthesized literals need Function array format
+			if lit.Parenthesized {
+				return true
+			}
+			if lit.Type == ast.LiteralArray {
+				if innerExprs, ok := lit.Value.([]ast.Expression); ok {
+					// Recursively check nested arrays
+					if containsNonLiteralExpressionsRecursive(innerExprs) {
+						return true
+					}
+				}
+			}
+			continue
+		}
+		// Unary minus of a literal (negative number) is also acceptable
+		if unary, ok := e.(*ast.UnaryExpr); ok && unary.Op == "-" {
+			if _, ok := unary.Operand.(*ast.Literal); ok {
+				continue
+			}
+		}
+		// Any other expression type means we have non-literal expressions
+		return true
 	}
 	return false
 }
@@ -755,6 +842,20 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 	case *ast.ExistsExpr:
 		// EXISTS expressions with alias
 		explainExistsExprWithAlias(sb, e, n.Alias, indent, depth)
+	case *ast.IsNullExpr:
+		// IS NULL expressions with alias
+		explainIsNullExprWithAlias(sb, e, n.Alias, indent, depth)
+	case *ast.Parameter:
+		// QueryParameter with alias
+		if e.Name != "" {
+			if e.Type != nil {
+				fmt.Fprintf(sb, "%sQueryParameter %s:%s (alias %s)\n", indent, e.Name, FormatDataType(e.Type), escapeAlias(n.Alias))
+			} else {
+				fmt.Fprintf(sb, "%sQueryParameter %s (alias %s)\n", indent, e.Name, escapeAlias(n.Alias))
+			}
+		} else {
+			fmt.Fprintf(sb, "%sQueryParameter (alias %s)\n", indent, escapeAlias(n.Alias))
+		}
 	default:
 		// For other types, recursively explain and add alias info
 		Node(sb, n.Expr, depth)
@@ -1094,14 +1195,23 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 			Node(sb, e.Right, depth+2)
 		}
 	case *ast.Subquery:
-		// Check if this is "(subquery) AS alias" syntax vs "name AS (subquery)" syntax
-		if e.Alias != "" {
-			// "(subquery) AS alias" syntax: output Subquery with alias directly
-			fmt.Fprintf(sb, "%sSubquery (alias %s) (children 1)\n", indent, e.Alias)
+		// Output format depends on the WITH syntax:
+		// - "name AS (SELECT ...)": Standard CTE - output WithElement wrapping Subquery (no alias)
+		// - "(SELECT ...) AS name": Scalar WITH - output Subquery with alias
+		if n.ScalarWith {
+			// Scalar WITH: show alias on Subquery
+			alias := n.Name
+			if alias == "" {
+				alias = e.Alias
+			}
+			if alias != "" {
+				fmt.Fprintf(sb, "%sSubquery (alias %s) (children 1)\n", indent, alias)
+			} else {
+				fmt.Fprintf(sb, "%sSubquery (children 1)\n", indent)
+			}
 			Node(sb, e.Query, depth+1)
 		} else {
-			// "name AS (subquery)" syntax: output WithElement wrapping the Subquery
-			// The alias/name is not shown in the EXPLAIN AST output
+			// Standard CTE: wrap in WithElement without alias
 			fmt.Fprintf(sb, "%sWithElement (children 1)\n", indent)
 			fmt.Fprintf(sb, "%s Subquery (children 1)\n", indent)
 			Node(sb, e.Query, depth+2)
@@ -1112,6 +1222,8 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 		explainArrayAccessWithAlias(sb, e, n.Name, indent, depth)
 	case *ast.BetweenExpr:
 		explainBetweenExprWithAlias(sb, e, n.Name, indent, depth)
+	case *ast.LikeExpr:
+		explainLikeExprWithAlias(sb, e, n.Name, indent, depth)
 	case *ast.UnaryExpr:
 		// For unary minus with numeric literal, output as negative literal with alias
 		if e.Op == "-" {
@@ -1142,6 +1254,17 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 		}
 		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 		Node(sb, e.Operand, depth+2)
+	case *ast.TernaryExpr:
+		// Ternary expressions become if functions with alias
+		if n.Name != "" {
+			fmt.Fprintf(sb, "%sFunction if (alias %s) (children %d)\n", indent, n.Name, 1)
+		} else {
+			fmt.Fprintf(sb, "%sFunction if (children %d)\n", indent, 1)
+		}
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 3)
+		Node(sb, e.Condition, depth+2)
+		Node(sb, e.Then, depth+2)
+		Node(sb, e.Else, depth+2)
 	default:
 		// For other types, just output the expression (alias may be lost)
 		Node(sb, n.Query, depth)

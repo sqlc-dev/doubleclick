@@ -29,17 +29,18 @@ func parseHexToFloat(s string) (float64, bool) {
 
 // Operator precedence levels
 const (
-	LOWEST      = iota
-	ALIAS_PREC  // AS
-	OR_PREC     // OR
-	AND_PREC    // AND
-	NOT_PREC    // NOT
-	COMPARE     // =, !=, <, >, <=, >=, LIKE, IN, BETWEEN, IS
-	CONCAT_PREC // ||
-	ADD_PREC    // +, -
-	MUL_PREC    // *, /, %
-	UNARY       // -x, NOT x
-	CALL        // function(), array[]
+	LOWEST       = iota
+	ALIAS_PREC   // AS
+	TERNARY_PREC // ? : (ternary operator - very low precedence in ClickHouse)
+	OR_PREC      // OR
+	AND_PREC     // AND
+	NOT_PREC     // NOT
+	COMPARE      // =, !=, <, >, <=, >=, LIKE, IN, BETWEEN, IS
+	CONCAT_PREC  // ||
+	ADD_PREC     // +, -
+	MUL_PREC     // *, /, %
+	UNARY        // -x, NOT x
+	CALL         // function(), array[]
 	HIGHEST
 )
 
@@ -58,7 +59,7 @@ func (p *Parser) precedence(tok token.Token) int {
 		token.NULL_SAFE_EQ, token.GLOBAL:
 		return COMPARE
 	case token.QUESTION:
-		return COMPARE // Ternary operator
+		return TERNARY_PREC // Ternary operator has very low precedence
 	case token.CONCAT:
 		return CONCAT_PREC
 	case token.PLUS, token.MINUS:
@@ -132,6 +133,32 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 	return exprs
 }
 
+// isBinaryOperatorToken checks if a token is a binary operator that could continue an expression
+func isBinaryOperatorToken(t token.Token) bool {
+	switch t {
+	case token.PLUS, token.MINUS, token.ASTERISK, token.SLASH, token.PERCENT,
+		token.EQ, token.NEQ, token.LT, token.GT, token.LTE, token.GTE,
+		token.AND, token.OR, token.CONCAT, token.DIV, token.MOD:
+		return true
+	}
+	return false
+}
+
+// parseExpressionFrom continues parsing an expression from an existing left operand
+func (p *Parser) parseExpressionFrom(left ast.Expression, precedence int) ast.Expression {
+	for !p.currentIs(token.EOF) && precedence < p.precedenceForCurrent() {
+		startPos := p.current.Pos
+		left = p.parseInfixExpression(left)
+		if left == nil {
+			return nil
+		}
+		if p.current.Pos == startPos {
+			break
+		}
+	}
+	return left
+}
+
 // parseCreateOrderByExpressions parses expressions for CREATE TABLE ORDER BY clause.
 // Returns the expressions and a boolean indicating if any ASC/DESC modifier was found.
 // This is different from regular expression list parsing because ORDER BY in CREATE TABLE
@@ -184,8 +211,16 @@ func (p *Parser) isClauseKeyword() bool {
 	case token.RPAREN, token.SEMICOLON, token.EOF:
 		return true
 	// FROM is a clause keyword unless followed by ( or [ (function/index access)
+	// Exception: FROM (SELECT ...) or FROM (WITH ...) is a subquery, not a function call
 	case token.FROM:
-		return !p.peekIs(token.LPAREN) && !p.peekIs(token.LBRACKET)
+		if p.peekIs(token.LPAREN) {
+			// Check if it's FROM (SELECT...) or FROM (WITH...) - that's a subquery
+			if p.peekPeekIs(token.SELECT) || p.peekPeekIs(token.WITH) {
+				return true
+			}
+			return false
+		}
+		return !p.peekIs(token.LBRACKET)
 	// These keywords can be used as identifiers in ClickHouse
 	// Only treat as clause keywords if NOT followed by expression-like tokens
 	case token.WHERE, token.GROUP, token.HAVING, token.ORDER, token.LIMIT:
@@ -235,7 +270,9 @@ func (p *Parser) parseGroupingSets() []ast.Expression {
 func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 	var exprs []ast.Expression
 
-	if p.currentIs(token.RPAREN) || p.currentIs(token.EOF) || p.currentIs(token.SETTINGS) {
+	// Stop at RPAREN/EOF, but only stop at SETTINGS if it's a clause keyword (not followed by [ for array access)
+	// Settings['key'] is the Settings map column, not a SETTINGS clause
+	if p.currentIs(token.RPAREN) || p.currentIs(token.EOF) || (p.currentIs(token.SETTINGS) && !p.peekIs(token.LBRACKET)) {
 		return exprs
 	}
 
@@ -248,8 +285,8 @@ func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 
 	for p.currentIs(token.COMMA) {
 		p.nextToken()
-		// Stop if we hit SETTINGS
-		if p.currentIs(token.SETTINGS) {
+		// Stop if we hit SETTINGS clause (but not Settings['key'] map access)
+		if p.currentIs(token.SETTINGS) && !p.peekIs(token.LBRACKET) {
 			break
 		}
 		expr := p.parseExpression(LOWEST)
@@ -323,7 +360,7 @@ func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
 	if !canBeAlias {
 		// Some keywords can be used as implicit aliases in ClickHouse
 		switch p.current.Token {
-		case token.KEY, token.INDEX, token.VIEW, token.DATABASE, token.TABLE:
+		case token.KEY, token.INDEX, token.VIEW, token.DATABASE, token.TABLE, token.SYNC:
 			canBeAlias = true
 		}
 	}
@@ -756,13 +793,13 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 	if strings.ToLower(name) == "view" && (p.currentIs(token.SELECT) || p.currentIs(token.WITH)) {
 		subquery := p.parseSelectWithUnion()
 		fn.Arguments = []ast.Expression{&ast.Subquery{Position: pos, Query: subquery}}
-	} else if !p.currentIs(token.RPAREN) && !p.currentIs(token.SETTINGS) {
-		// Parse arguments
+	} else if !p.currentIs(token.RPAREN) && !(p.currentIs(token.SETTINGS) && !p.peekIs(token.LBRACKET)) {
+		// Parse arguments, but allow Settings['key'] map access (SETTINGS followed by [)
 		fn.Arguments = p.parseFunctionArgumentList()
 	}
 
-	// Handle SETTINGS inside function call (table functions)
-	if p.currentIs(token.SETTINGS) {
+	// Handle SETTINGS inside function call (table functions), but not Settings['key'] map access
+	if p.currentIs(token.SETTINGS) && !p.peekIs(token.LBRACKET) {
 		p.nextToken()
 		fn.Settings = p.parseSettingsList()
 	}
@@ -1127,8 +1164,10 @@ func (p *Parser) parseUnaryMinus() ast.Expression {
 		}
 		p.nextToken() // move past number
 		// Apply postfix operators like :: using the expression parsing loop
+		// Use MUL_PREC as the threshold to allow casts (::) and member access (.)
+		// but stop before operators like AND which has lower precedence
 		left := ast.Expression(lit)
-		for !p.currentIs(token.EOF) && LOWEST < p.precedenceForCurrent() {
+		for !p.currentIs(token.EOF) && MUL_PREC < p.precedenceForCurrent() {
 			startPos := p.current.Pos
 			left = p.parseInfixExpression(left)
 			if left == nil {
@@ -1164,13 +1203,9 @@ func (p *Parser) parseUnaryPlus() ast.Expression {
 		}
 	}
 
-	// Standard unary plus handling
-	expr := &ast.UnaryExpr{
-		Position: pos,
-		Op:       "+",
-	}
-	expr.Operand = p.parseExpression(UNARY)
-	return expr
+	// In ClickHouse, unary plus is a no-op and doesn't appear in EXPLAIN AST.
+	// Simply return the operand without wrapping it in UnaryExpr.
+	return p.parseExpression(UNARY)
 }
 
 func (p *Parser) parseNot() ast.Expression {
@@ -1231,8 +1266,15 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 	// Check if it's a tuple
 	if p.currentIs(token.COMMA) {
 		elements := []ast.Expression{first}
+		spacedCommas := false
 		for p.currentIs(token.COMMA) {
+			commaPos := p.current.Pos.Offset
 			p.nextToken()
+			// Check if there's whitespace between comma and next token
+			// A comma is 1 byte, so if offset difference > 1, there's whitespace
+			if p.current.Pos.Offset > commaPos+1 {
+				spacedCommas = true
+			}
 			// Handle trailing comma: (1,) should create tuple with single element
 			if p.currentIs(token.RPAREN) {
 				break
@@ -1241,9 +1283,10 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 		}
 		p.expect(token.RPAREN)
 		return &ast.Literal{
-			Position: pos,
-			Type:     ast.LiteralTuple,
-			Value:    elements,
+			Position:     pos,
+			Type:         ast.LiteralTuple,
+			Value:        elements,
+			SpacedCommas: spacedCommas,
 		}
 	}
 
@@ -1514,7 +1557,9 @@ func (p *Parser) parseCast() ast.Expression {
 		p.nextToken()
 		// Type can be given as a string literal or an expression (e.g., if(cond, 'Type1', 'Type2'))
 		// It can also have an alias like: cast('1234', 'UInt32' AS rhs)
-		if p.currentIs(token.STRING) {
+		// For expressions like 'Str'||'ing', we need to parse the full expression
+		if p.currentIs(token.STRING) && !p.peekIs(token.CONCAT) && !p.peekIs(token.PLUS) && !p.peekIs(token.MINUS) {
+			// Simple string literal type, not part of an expression
 			typeStr := p.current.Value
 			typePos := p.current.Pos
 			p.nextToken()
@@ -1554,7 +1599,7 @@ func (p *Parser) parseCast() ast.Expression {
 				expr.Type = &ast.DataType{Position: typePos, Name: typeStr}
 			}
 		} else {
-			// Parse as expression for dynamic type casting
+			// Parse as expression for dynamic type casting or expressions like 'Str'||'ing'
 			expr.TypeExpr = p.parseExpression(LOWEST)
 		}
 	}
@@ -1589,7 +1634,8 @@ func (p *Parser) wrapWithAlias(expr ast.Expression, alias string) ast.Expression
 
 func (p *Parser) parseExtract() ast.Expression {
 	pos := p.current.Pos
-	p.nextToken() // skip EXTRACT
+	name := p.current.Value // preserve original case
+	p.nextToken()           // skip EXTRACT
 
 	if !p.expect(token.LPAREN) {
 		return nil
@@ -1639,7 +1685,7 @@ func (p *Parser) parseExtract() ast.Expression {
 			p.expect(token.RPAREN)
 			return &ast.FunctionCall{
 				Position:  pos,
-				Name:      "extract",
+				Name:      name,
 				Arguments: args,
 			}
 		}
@@ -1663,7 +1709,7 @@ func (p *Parser) parseExtract() ast.Expression {
 
 	return &ast.FunctionCall{
 		Position:  pos,
-		Name:      "extract",
+		Name:      name,
 		Arguments: args,
 	}
 }
@@ -1674,8 +1720,16 @@ func (p *Parser) parseInterval() ast.Expression {
 	}
 	p.nextToken() // skip INTERVAL
 
-	// Use ALIAS_PREC to prevent consuming the unit as an alias
-	expr.Value = p.parseExpression(ALIAS_PREC)
+	// Choose precedence based on the first token of the interval value:
+	// - String literals like '1 day' have embedded units, so use ADD_PREC to stop before
+	//   arithmetic operators. This handles `interval '1 day' - interval '1 hour'` correctly.
+	// - Other expressions (identifiers, numbers) need arithmetic included before the unit.
+	//   Use LOWEST so `INTERVAL number - 15 MONTH` parses value as `number - 15`.
+	prec := ADD_PREC
+	if !p.currentIs(token.STRING) {
+		prec = LOWEST
+	}
+	expr.Value = p.parseExpression(prec)
 
 	// Handle INTERVAL '2' AS n minute - where AS n is alias on the value
 	// Only consume AS if it's followed by an identifier AND that identifier is followed by an interval unit
@@ -1757,7 +1811,8 @@ func (p *Parser) parsePositionalParameter() ast.Expression {
 
 func (p *Parser) parseSubstring() ast.Expression {
 	pos := p.current.Pos
-	p.nextToken() // skip SUBSTRING
+	name := p.current.Value // preserve original case
+	p.nextToken()           // skip SUBSTRING
 
 	if !p.expect(token.LPAREN) {
 		return nil
@@ -1864,7 +1919,7 @@ func (p *Parser) parseSubstring() ast.Expression {
 
 	return &ast.FunctionCall{
 		Position:  pos,
-		Name:      "substring",
+		Name:      name,
 		Arguments: args,
 	}
 }
@@ -2110,7 +2165,8 @@ func (p *Parser) parseInExpression(left ast.Expression, not bool) ast.Expression
 		if p.currentIs(token.SELECT) || p.currentIs(token.WITH) {
 			expr.Query = p.parseSelectWithUnion()
 		} else {
-			expr.List = p.parseExpressionList()
+			// Parse IN list manually to detect trailing comma
+			expr.List, expr.TrailingComma = p.parseInList()
 		}
 		p.expect(token.RPAREN)
 	} else if p.currentIs(token.LBRACKET) {
@@ -2128,6 +2184,37 @@ func (p *Parser) parseInExpression(left ast.Expression, not bool) ast.Expression
 	}
 
 	return expr
+}
+
+// parseInList parses an expression list for IN expressions and returns
+// whether the list had a trailing comma (which indicates a single-element tuple).
+func (p *Parser) parseInList() ([]ast.Expression, bool) {
+	var exprs []ast.Expression
+	trailingComma := false
+
+	if p.currentIs(token.RPAREN) || p.currentIs(token.EOF) {
+		return exprs, false
+	}
+
+	expr := p.parseExpression(LOWEST)
+	if expr != nil {
+		exprs = append(exprs, expr)
+	}
+
+	for p.currentIs(token.COMMA) {
+		p.nextToken() // consume comma
+		// Check if this is a trailing comma (followed by RPAREN)
+		if p.currentIs(token.RPAREN) {
+			trailingComma = true
+			break
+		}
+		expr := p.parseExpression(LOWEST)
+		if expr != nil {
+			exprs = append(exprs, expr)
+		}
+	}
+
+	return exprs, trailingComma
 }
 
 func (p *Parser) parseBetweenExpression(left ast.Expression, not bool) ast.Expression {
@@ -2557,6 +2644,19 @@ func (p *Parser) parseParametricFunctionCall(fn *ast.FunctionCall) *ast.Function
 
 	p.nextToken() // skip (
 
+	// Handle DISTINCT modifier (but not if DISTINCT is being used as a column name)
+	// If DISTINCT is followed by ) or , then it's a column reference, not a modifier
+	if p.currentIs(token.DISTINCT) && !p.peekIs(token.RPAREN) && !p.peekIs(token.COMMA) {
+		result.Distinct = true
+		p.nextToken()
+	}
+
+	// Handle ALL modifier (but not if ALL is being used as a column name)
+	// If ALL is followed by ) or , then it's a column reference, not a modifier
+	if p.currentIs(token.ALL) && !p.peekIs(token.RPAREN) && !p.peekIs(token.COMMA) {
+		p.nextToken()
+	}
+
 	// Parse the actual arguments
 	if !p.currentIs(token.RPAREN) {
 		result.Arguments = p.parseExpressionList()
@@ -2666,7 +2766,8 @@ func (p *Parser) parseQualifiedColumnsMatcher(qualifier string, pos token.Positi
 
 func (p *Parser) parseArrayConstructor() ast.Expression {
 	pos := p.current.Pos
-	p.nextToken() // skip ARRAY
+	name := p.current.Value // preserve original case
+	p.nextToken()           // skip ARRAY
 
 	if !p.expect(token.LPAREN) {
 		return nil
@@ -2681,14 +2782,15 @@ func (p *Parser) parseArrayConstructor() ast.Expression {
 
 	return &ast.FunctionCall{
 		Position:  pos,
-		Name:      "array",
+		Name:      name,
 		Arguments: args,
 	}
 }
 
 func (p *Parser) parseIfFunction() ast.Expression {
 	pos := p.current.Pos
-	p.nextToken() // skip IF
+	name := p.current.Value // preserve original case
+	p.nextToken()           // skip IF
 
 	if !p.expect(token.LPAREN) {
 		return nil
@@ -2703,15 +2805,15 @@ func (p *Parser) parseIfFunction() ast.Expression {
 
 	return &ast.FunctionCall{
 		Position:  pos,
-		Name:      "if",
+		Name:      name,
 		Arguments: args,
 	}
 }
 
 func (p *Parser) parseKeywordAsFunction() ast.Expression {
 	pos := p.current.Pos
-	name := strings.ToLower(p.current.Value)
-	p.nextToken() // skip keyword
+	name := p.current.Value // preserve original case
+	p.nextToken()           // skip keyword
 
 	if !p.expect(token.LPAREN) {
 		return nil
@@ -2917,11 +3019,12 @@ func (p *Parser) parseAsteriskReplace(asterisk *ast.Asterisk) ast.Expression {
 		replaces = append(replaces, replace)
 
 		if p.currentIs(token.COMMA) {
-			p.nextToken()
-			// If no parens and we see comma, might be end of select column
+			// If no parens and we see comma, this is the end of the REPLACE clause
+			// Don't consume the comma - let the caller handle it for the next select item
 			if !hasParens {
 				break
 			}
+			p.nextToken() // Only consume comma if inside parentheses
 		} else if !hasParens {
 			break
 		}
@@ -2957,20 +3060,40 @@ func (p *Parser) parseAsteriskApply(asterisk *ast.Asterisk) ast.Expression {
 		// Parse lambda expression
 		lambda := p.parseExpression(LOWEST)
 		asterisk.Transformers = append(asterisk.Transformers, &ast.ColumnTransformer{
-			Position:     pos,
-			Type:         "apply",
-			ApplyLambda:  lambda,
+			Position:    pos,
+			Type:        "apply",
+			ApplyLambda: lambda,
 		})
 	} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		// Parse function name (can be IDENT or keyword like sum, avg, etc.)
 		funcName := p.current.Value
+		p.nextToken()
+
+		// Check for parameterized function: APPLY(quantiles(0.5))
+		var params []ast.Expression
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				expr := p.parseExpression(LOWEST)
+				if expr != nil {
+					params = append(params, expr)
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+			p.expect(token.RPAREN)
+		}
+
 		asterisk.Apply = append(asterisk.Apply, funcName)
 		asterisk.Transformers = append(asterisk.Transformers, &ast.ColumnTransformer{
-			Position: pos,
-			Type:     "apply",
-			Apply:    funcName,
+			Position:    pos,
+			Type:        "apply",
+			Apply:       funcName,
+			ApplyParams: params,
 		})
-		p.nextToken()
 	}
 
 	if hasParens {
@@ -3002,13 +3125,33 @@ func (p *Parser) parseColumnsApply(matcher *ast.ColumnsMatcher) ast.Expression {
 	} else if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 		// Parse function name (can be IDENT or keyword like sum, avg, etc.)
 		funcName := p.current.Value
+		p.nextToken()
+
+		// Check for parameterized function: APPLY(quantiles(0.5))
+		var params []ast.Expression
+		if p.currentIs(token.LPAREN) {
+			p.nextToken() // skip (
+			for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
+				expr := p.parseExpression(LOWEST)
+				if expr != nil {
+					params = append(params, expr)
+				}
+				if p.currentIs(token.COMMA) {
+					p.nextToken()
+				} else {
+					break
+				}
+			}
+			p.expect(token.RPAREN)
+		}
+
 		matcher.Apply = append(matcher.Apply, funcName)
 		matcher.Transformers = append(matcher.Transformers, &ast.ColumnTransformer{
-			Position: pos,
-			Type:     "apply",
-			Apply:    funcName,
+			Position:    pos,
+			Type:        "apply",
+			Apply:       funcName,
+			ApplyParams: params,
 		})
-		p.nextToken()
 	}
 
 	if hasParens {

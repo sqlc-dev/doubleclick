@@ -7,6 +7,13 @@ import (
 	"github.com/sqlc-dev/doubleclick/ast"
 )
 
+// escapeFunctionAlias escapes backslashes and single quotes in function alias names.
+// This is needed because the lexer processes escape sequences in backtick identifiers.
+func escapeFunctionAlias(alias string) string {
+	result := strings.ReplaceAll(alias, "\\", "\\\\")
+	return strings.ReplaceAll(result, "'", "\\'")
+}
+
 // normalizeIntervalUnit converts interval units to title-cased singular form
 // e.g., "years" -> "Year", "MONTH" -> "Month", "days" -> "Day"
 // Also handles SQL standard abbreviations: QQ -> Quarter, YY -> Year, MM -> Month, etc.
@@ -22,20 +29,26 @@ func normalizeIntervalUnit(unit string) string {
 		u = u[8:] // Remove "sql_tsi_" prefix
 	}
 
-	// Handle SQL standard abbreviations
+	// Handle SQL standard abbreviations and ClickHouse short notations
 	abbrevs := map[string]string{
-		"yy":  "year",
-		"qq":  "quarter",
-		"mm":  "month",
-		"wk":  "week",
-		"ww":  "week",
-		"dd":  "day",
-		"hh":  "hour",
-		"mi":  "minute",
-		"ss":  "second",
-		"ms":  "millisecond",
-		"us":  "microsecond",
-		"ns":  "nanosecond",
+		"yy": "year",
+		"qq": "quarter",
+		"mm": "month",
+		"wk": "week",
+		"ww": "week",
+		"dd": "day",
+		"hh": "hour",
+		"mi": "minute",
+		"ss": "second",
+		// ClickHouse short notations
+		"w":  "week",
+		"d":  "day",
+		"h":  "hour",
+		"m":  "minute",
+		"s":  "second",
+		"ms": "millisecond",
+		"us": "microsecond",
+		"ns": "nanosecond",
 	}
 	if expanded, ok := abbrevs[u]; ok {
 		u = expanded
@@ -62,20 +75,26 @@ func normalizeIntervalUnitToLiteral(unit string) string {
 		u = u[8:] // Remove "sql_tsi_" prefix
 	}
 
-	// Handle SQL standard abbreviations
+	// Handle SQL standard abbreviations and ClickHouse short notations
 	abbrevs := map[string]string{
-		"yy":  "year",
-		"qq":  "quarter",
-		"mm":  "month",
-		"wk":  "week",
-		"ww":  "week",
-		"dd":  "day",
-		"hh":  "hour",
-		"mi":  "minute",
-		"ss":  "second",
-		"ms":  "millisecond",
-		"us":  "microsecond",
-		"ns":  "nanosecond",
+		"yy": "year",
+		"qq": "quarter",
+		"mm": "month",
+		"wk": "week",
+		"ww": "week",
+		"dd": "day",
+		"hh": "hour",
+		"mi": "minute",
+		"ss": "second",
+		// ClickHouse short notations
+		"w":  "week",
+		"d":  "day",
+		"h":  "hour",
+		"m":  "minute",
+		"s":  "second",
+		"ms": "millisecond",
+		"us": "microsecond",
+		"ns": "nanosecond",
 	}
 	if expanded, ok := abbrevs[u]; ok {
 		return expanded
@@ -120,7 +139,7 @@ func explainFunctionCallWithAlias(sb *strings.Builder, n *ast.FunctionCall, alia
 		fnName = fnName + "If"
 	}
 	if alias != "" {
-		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, children)
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, escapeFunctionAlias(alias), children)
 	} else {
 		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, children)
 	}
@@ -1015,6 +1034,7 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 		allTuples := true
 		allTuplesArePrimitive := true
 		allPrimitiveLiterals := true // New: check if all are primitive literals (any type)
+		allNull := true              // Track if all items are NULL
 		hasNonNull := false          // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
@@ -1022,6 +1042,7 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 					// NULL is compatible with all literal type lists
 					continue
 				}
+				allNull = false
 				hasNonNull = true
 				if lit.Type != ast.LiteralInteger && lit.Type != ast.LiteralFloat {
 					allNumericOrNull = false
@@ -1047,12 +1068,14 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 				}
 			} else if isNumericExpr(item) {
 				// Unary minus of numeric is still numeric
+				allNull = false
 				hasNonNull = true
 				allStringsOrNull = false
 				allBooleansOrNull = false
 				allTuples = false
 				// Numeric expression counts as primitive
 			} else {
+				allNull = false
 				allNumericOrNull = false
 				allStringsOrNull = false
 				allBooleansOrNull = false
@@ -1063,7 +1086,8 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 		}
 		// Allow combining mixed primitive literals into a tuple when comparing tuples
 		// This handles cases like: (1,'') IN (-1,'') where the right side should be a single tuple literal
-		canBeTupleLiteral = hasNonNull && (allNumericOrNull || allStringsOrNull || allBooleansOrNull || (allTuples && allTuplesArePrimitive) || allPrimitiveLiterals)
+		// Also allow all-NULL lists to be formatted as tuple literals
+		canBeTupleLiteral = allNull || (hasNonNull && (allNumericOrNull || allStringsOrNull || allBooleansOrNull || (allTuples && allTuplesArePrimitive) || allPrimitiveLiterals))
 	}
 
 	// Count arguments: expr + list items or subquery
@@ -1078,6 +1102,9 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 		if len(n.List) == 1 {
 			if lit, ok := n.List[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
 				// Single tuple literal gets wrapped in Function tuple, so count as 1
+				argCount++
+			} else if n.TrailingComma {
+				// Single element with trailing comma (e.g., (2,)) gets wrapped in Function tuple
 				argCount++
 			} else {
 				argCount += len(n.List)
@@ -1148,6 +1175,11 @@ func explainInExpr(sb *strings.Builder, n *ast.InExpr, indent string, depth int)
 					Node(sb, n.List[0], depth+4)
 				}
 			}
+		} else if n.TrailingComma {
+			// Single element with trailing comma (e.g., (2,)) - wrap in Function tuple
+			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
+			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
+			Node(sb, n.List[0], depth+4)
 		} else {
 			// Single non-tuple element - output directly
 			Node(sb, n.List[0], depth+2)
@@ -1225,6 +1257,7 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 		allTuples := true
 		allTuplesArePrimitive := true
 		allPrimitiveLiterals := true // Any mix of primitive literals (numbers, strings, booleans, null, primitive tuples)
+		allNull := true              // Track if all items are NULL
 		hasNonNull := false          // Need at least one non-null value
 		for _, item := range n.List {
 			if lit, ok := item.(*ast.Literal); ok {
@@ -1232,6 +1265,7 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 					// NULL is compatible with all literal type lists
 					continue
 				}
+				allNull = false
 				hasNonNull = true
 				if lit.Type != ast.LiteralInteger && lit.Type != ast.LiteralFloat {
 					allNumericOrNull = false
@@ -1251,11 +1285,13 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 					}
 				}
 			} else if isNumericExpr(item) {
+				allNull = false
 				hasNonNull = true
 				allStringsOrNull = false
 				allBooleansOrNull = false
 				allTuples = false
 			} else {
+				allNull = false
 				allNumericOrNull = false
 				allStringsOrNull = false
 				allBooleansOrNull = false
@@ -1264,7 +1300,7 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 				break
 			}
 		}
-		canBeTupleLiteral = hasNonNull && (allNumericOrNull || (allStringsOrNull && len(n.List) <= maxStringTupleSizeWithAlias) || allBooleansOrNull || (allTuples && allTuplesArePrimitive) || allPrimitiveLiterals)
+		canBeTupleLiteral = allNull || (hasNonNull && (allNumericOrNull || (allStringsOrNull && len(n.List) <= maxStringTupleSizeWithAlias) || allBooleansOrNull || (allTuples && allTuplesArePrimitive) || allPrimitiveLiterals))
 	}
 
 	// Count arguments
@@ -1276,6 +1312,9 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 	} else {
 		if len(n.List) == 1 {
 			if lit, ok := n.List[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+				argCount++
+			} else if n.TrailingComma {
+				// Single element with trailing comma (e.g., (2,)) gets wrapped in Function tuple
 				argCount++
 			} else {
 				argCount += len(n.List)
@@ -1312,6 +1351,10 @@ func explainInExprWithAlias(sb *strings.Builder, n *ast.InExpr, alias string, in
 		fmt.Fprintf(sb, "%s  Literal %s\n", indent, FormatLiteral(tupleLit))
 	} else if len(n.List) == 1 {
 		if lit, ok := n.List[0].(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
+			// Use explainTupleInInList to properly handle primitive-only tuples as Literal Tuple_
+			explainTupleInInList(sb, lit, indent+" ", depth+2)
+		} else if n.TrailingComma {
+			// Single element with trailing comma (e.g., (2,)) - wrap in Function tuple
 			fmt.Fprintf(sb, "%s  Function tuple (children %d)\n", indent, 1)
 			fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, 1)
 			Node(sb, n.List[0], depth+4)
@@ -1413,6 +1456,25 @@ func explainLikeExpr(sb *strings.Builder, n *ast.LikeExpr, indent string, depth 
 	Node(sb, n.Pattern, depth+2)
 }
 
+func explainLikeExprWithAlias(sb *strings.Builder, n *ast.LikeExpr, alias string, indent string, depth int) {
+	// LIKE is represented as Function like
+	fnName := "like"
+	if n.CaseInsensitive {
+		fnName = "ilike"
+	}
+	if n.Not {
+		fnName = "not" + strings.Title(fnName)
+	}
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+	Node(sb, n.Expr, depth+2)
+	Node(sb, n.Pattern, depth+2)
+}
+
 func explainBetweenExpr(sb *strings.Builder, n *ast.BetweenExpr, indent string, depth int) {
 	if n.Not {
 		// NOT BETWEEN is transformed to: expr < low OR expr > high
@@ -1490,23 +1552,26 @@ func explainBetweenExprWithAlias(sb *strings.Builder, n *ast.BetweenExpr, alias 
 }
 
 func explainIsNullExpr(sb *strings.Builder, n *ast.IsNullExpr, indent string, depth int) {
+	explainIsNullExprWithAlias(sb, n, "", indent, depth)
+}
+
+func explainIsNullExprWithAlias(sb *strings.Builder, n *ast.IsNullExpr, alias string, indent string, depth int) {
 	// IS NULL is represented as Function isNull
 	fnName := "isNull"
 	if n.Not {
 		fnName = "isNotNull"
 	}
-	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 	Node(sb, n.Expr, depth+2)
 }
 
 func explainCaseExpr(sb *strings.Builder, n *ast.CaseExpr, indent string, depth int) {
-	// Only output alias if it's unquoted (ClickHouse doesn't show quoted aliases)
-	alias := ""
-	if n.Alias != "" && !n.QuotedAlias {
-		alias = n.Alias
-	}
-	explainCaseExprWithAlias(sb, n, alias, indent, depth)
+	explainCaseExprWithAlias(sb, n, n.Alias, indent, depth)
 }
 
 func explainCaseExprWithAlias(sb *strings.Builder, n *ast.CaseExpr, alias string, indent string, depth int) {

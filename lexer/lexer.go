@@ -698,6 +698,63 @@ func (l *Lexer) readBacktickIdentifier() Item {
 			l.readChar() // skip closing backtick
 			break
 		}
+		if l.ch == '\\' {
+			l.readChar() // consume backslash
+			if l.eof {
+				break
+			}
+			// Interpret escape sequence (same as readString)
+			switch l.ch {
+			case '\'':
+				sb.WriteRune('\'')
+			case '"':
+				sb.WriteRune('"')
+			case '\\':
+				sb.WriteRune('\\')
+			case '`':
+				sb.WriteRune('`')
+			case 'n':
+				sb.WriteRune('\n')
+			case 't':
+				sb.WriteRune('\t')
+			case 'r':
+				sb.WriteRune('\r')
+			case '0':
+				sb.WriteRune('\x00')
+			case 'a':
+				sb.WriteRune('\a')
+			case 'b':
+				sb.WriteRune('\b')
+			case 'f':
+				sb.WriteRune('\f')
+			case 'v':
+				sb.WriteRune('\v')
+			case 'e':
+				sb.WriteRune('\x1b') // escape character (ASCII 27)
+			case 'x':
+				// Hex escape: \xNN
+				l.readChar()
+				if l.eof {
+					break
+				}
+				hex1 := l.ch
+				l.readChar()
+				if l.eof {
+					sb.WriteRune(rune(hexValue(hex1)))
+					continue
+				}
+				hex2 := l.ch
+				// Convert hex digits to byte
+				val := hexValue(hex1)*16 + hexValue(hex2)
+				sb.WriteByte(byte(val))
+			default:
+				// Unknown escape, preserve both the backslash and the character
+				sb.WriteRune('\\')
+				sb.WriteRune(l.ch)
+			}
+			l.readChar()
+			continue
+		}
 		sb.WriteRune(l.ch)
 		l.readChar()
 	}
@@ -886,19 +943,19 @@ func (l *Lexer) readNumber() Item {
 			}
 			return Item{Token: token.NUMBER, Value: sb.String(), Pos: pos}
 		} else if l.ch == 'b' || l.ch == 'B' {
-			// Binary literal
+			// Binary literal (allows underscores as digit separators: 0b0010_0100_0111)
 			sb.WriteRune(l.ch)
 			l.readChar()
-			for l.ch == '0' || l.ch == '1' {
+			for l.ch == '0' || l.ch == '1' || l.ch == '_' {
 				sb.WriteRune(l.ch)
 				l.readChar()
 			}
 			return Item{Token: token.NUMBER, Value: sb.String(), Pos: pos}
 		} else if l.ch == 'o' || l.ch == 'O' {
-			// Octal literal
+			// Octal literal (allows underscores as digit separators: 0o755_644)
 			sb.WriteRune(l.ch)
 			l.readChar()
-			for l.ch >= '0' && l.ch <= '7' {
+			for (l.ch >= '0' && l.ch <= '7') || l.ch == '_' {
 				sb.WriteRune(l.ch)
 				l.readChar()
 			}
@@ -1088,9 +1145,10 @@ func (l *Lexer) readNumberOrIdent() Item {
 			}
 		}
 	} else if val == "0" && (l.ch == 'b' || l.ch == 'B') && (l.peekChar() == '0' || l.peekChar() == '1') {
+		// Binary literal (allows underscores as digit separators: 0b0010_0100_0111)
 		sb.WriteRune(l.ch)
 		l.readChar()
-		for l.ch == '0' || l.ch == '1' {
+		for l.ch == '0' || l.ch == '1' || l.ch == '_' {
 			sb.WriteRune(l.ch)
 			l.readChar()
 		}
@@ -1100,11 +1158,11 @@ func (l *Lexer) readNumberOrIdent() Item {
 	// and the number already consumed is just the leading zero (checking for 0x, 0b, 0o)
 	if startCh == '0' && len(sb.String()) == 1 {
 		// Already handled above for 0x, 0b
-		// Handle 0o for octal
+		// Handle 0o for octal (allows underscores as digit separators: 0o755_644)
 		if l.ch == 'o' || l.ch == 'O' {
 			sb.WriteRune(l.ch)
 			l.readChar()
-			for l.ch >= '0' && l.ch <= '7' {
+			for (l.ch >= '0' && l.ch <= '7') || l.ch == '_' {
 				sb.WriteRune(l.ch)
 				l.readChar()
 			}
