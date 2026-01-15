@@ -133,6 +133,32 @@ func (p *Parser) parseExpressionList() []ast.Expression {
 	return exprs
 }
 
+// isBinaryOperatorToken checks if a token is a binary operator that could continue an expression
+func isBinaryOperatorToken(t token.Token) bool {
+	switch t {
+	case token.PLUS, token.MINUS, token.ASTERISK, token.SLASH, token.PERCENT,
+		token.EQ, token.NEQ, token.LT, token.GT, token.LTE, token.GTE,
+		token.AND, token.OR, token.CONCAT, token.DIV, token.MOD:
+		return true
+	}
+	return false
+}
+
+// parseExpressionFrom continues parsing an expression from an existing left operand
+func (p *Parser) parseExpressionFrom(left ast.Expression, precedence int) ast.Expression {
+	for !p.currentIs(token.EOF) && precedence < p.precedenceForCurrent() {
+		startPos := p.current.Pos
+		left = p.parseInfixExpression(left)
+		if left == nil {
+			return nil
+		}
+		if p.current.Pos == startPos {
+			break
+		}
+	}
+	return left
+}
+
 // parseCreateOrderByExpressions parses expressions for CREATE TABLE ORDER BY clause.
 // Returns the expressions and a boolean indicating if any ASC/DESC modifier was found.
 // This is different from regular expression list parsing because ORDER BY in CREATE TABLE

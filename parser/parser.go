@@ -2627,8 +2627,18 @@ func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 							Value:    exprs,
 						}}
 					} else {
-						// Single expression in parentheses without modifiers - just extract it
-						create.OrderBy = exprs
+						// Single expression in parentheses without modifiers
+						// Check if there's a binary operator continuing the expression (e.g., (a + b) * c)
+						expr := exprs[0]
+						if isBinaryOperatorToken(p.current.Token) {
+							// Mark the expression as parenthesized and continue parsing
+							if binExpr, ok := expr.(*ast.BinaryExpr); ok {
+								binExpr.Parenthesized = true
+							}
+							// Continue parsing from this expression as left operand
+							expr = p.parseExpressionFrom(expr, LOWEST)
+						}
+						create.OrderBy = []ast.Expression{expr}
 					}
 				} else {
 					// Use ALIAS_PREC to avoid consuming AS keyword (for AS SELECT)
