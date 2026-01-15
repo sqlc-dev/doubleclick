@@ -307,7 +307,7 @@ func TestParser(t *testing.T) {
 							t.Skipf("Skipping: empty expected output with clientError annotation")
 							return
 						}
-						actual := strings.TrimSpace(parser.Explain(stmts[0]))
+						actual := strings.TrimSpace(parser.ExplainStatements(stmts))
 						// Use case-insensitive comparison since ClickHouse EXPLAIN AST has inconsistent casing
 						if !strings.EqualFold(actual, expected) {
 							if isExplainTodo && *checkExplain {

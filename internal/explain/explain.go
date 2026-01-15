@@ -23,6 +23,85 @@ func Explain(stmt ast.Statement) string {
 	return sb.String()
 }
 
+// ExplainStatements returns the EXPLAIN AST output for multiple statements.
+// This handles the special ClickHouse behavior where INSERT VALUES followed by SELECT
+// on the same line outputs the INSERT AST and then executes the SELECT, printing its result.
+func ExplainStatements(stmts []ast.Statement) string {
+	if len(stmts) == 0 {
+		return ""
+	}
+
+	var sb strings.Builder
+	Node(&sb, stmts[0], 0)
+
+	// If the first statement is an INSERT and there are subsequent SELECT statements
+	// with simple literals, append those literal values (matching ClickHouse's behavior)
+	if _, isInsert := stmts[0].(*ast.InsertQuery); isInsert {
+		for i := 1; i < len(stmts); i++ {
+			if result := getSimpleSelectResult(stmts[i]); result != "" {
+				sb.WriteString(result)
+				sb.WriteString("\n")
+			}
+		}
+	}
+
+	return sb.String()
+}
+
+// getSimpleSelectResult extracts the literal value from a simple SELECT statement
+// like "SELECT 11111" and returns it as a string. Returns empty string if not a simple SELECT.
+func getSimpleSelectResult(stmt ast.Statement) string {
+	// Check if it's a SelectWithUnionQuery
+	selectUnion, ok := stmt.(*ast.SelectWithUnionQuery)
+	if !ok {
+		return ""
+	}
+
+	// Must have exactly one select query
+	if len(selectUnion.Selects) != 1 {
+		return ""
+	}
+
+	// Get the inner select query
+	selectQuery, ok := selectUnion.Selects[0].(*ast.SelectQuery)
+	if !ok {
+		return ""
+	}
+
+	// Must have exactly one expression in the select list
+	if len(selectQuery.Columns) != 1 {
+		return ""
+	}
+
+	// Must be a literal
+	literal, ok := selectQuery.Columns[0].(*ast.Literal)
+	if !ok {
+		return ""
+	}
+
+	// Format the literal value
+	return formatLiteralValue(literal)
+}
+
+// formatLiteralValue formats a literal value as it would appear in query results
+func formatLiteralValue(lit *ast.Literal) string {
+	switch v := lit.Value.(type) {
+	case int64:
+		return fmt.Sprintf("%d", v)
+	case float64:
+		return fmt.Sprintf("%v", v)
+	case string:
+		return v
+	case bool:
+		if v {
+			return "1"
+		}
+		return "0"
+	default:
+		return fmt.Sprintf("%v", v)
+	}
+}
+
 // Node writes the EXPLAIN AST output for an AST node.
 func Node(sb *strings.Builder, node interface{}, depth int) {
 	if node == nil {
