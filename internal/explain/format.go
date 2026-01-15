@@ -318,7 +318,7 @@ func FormatDataType(dt *ast.DataType) string {
 			// Binary expression (e.g., 'hello' = 1 for Enum types)
 			params = append(params, formatBinaryExprForType(binExpr))
 		} else if fn, ok := p.(*ast.FunctionCall); ok {
-			// Function call (e.g., SKIP for JSON types)
+			// Function call (e.g., SKIP for JSON types, or function args in AggregateFunction)
 			if fn.Name == "SKIP" && len(fn.Arguments) > 0 {
 				if ident, ok := fn.Arguments[0].(*ast.Identifier); ok {
 					params = append(params, "SKIP "+ident.Name())
@@ -328,7 +328,8 @@ func FormatDataType(dt *ast.DataType) string {
 					params = append(params, fmt.Sprintf("SKIP REGEXP \\\\\\'%s\\\\\\'", lit.Value))
 				}
 			} else {
-				params = append(params, fmt.Sprintf("%v", p))
+				// General function call (e.g., sumMapFiltered([1, 2]) in AggregateFunction)
+				params = append(params, formatFunctionCallForType(fn))
 			}
 		} else if ident, ok := p.(*ast.Identifier); ok {
 			// Identifier (e.g., function name in AggregateFunction types)
@@ -387,6 +388,42 @@ func formatUnaryExprForType(expr *ast.UnaryExpr) string {
 		return expr.Op + fmt.Sprintf("%v", lit.Value)
 	}
 	return expr.Op + fmt.Sprintf("%v", expr.Operand)
+}
+
+// formatFunctionCallForType formats a function call for use in type parameters
+// e.g., sumMapFiltered([1, 2]) -> "sumMapFiltered([1, 2])"
+func formatFunctionCallForType(fn *ast.FunctionCall) string {
+	args := make([]string, 0, len(fn.Arguments))
+	for _, arg := range fn.Arguments {
+		args = append(args, formatExprForType(arg))
+	}
+	return fn.Name + "(" + strings.Join(args, ", ") + ")"
+}
+
+// formatExprForType formats an expression for use in type parameters
+func formatExprForType(expr ast.Expression) string {
+	switch e := expr.(type) {
+	case *ast.Literal:
+		if e.Type == ast.LiteralArray {
+			// Format array literal: [1, 2] -> "[1, 2]"
+			if elements, ok := e.Value.([]ast.Expression); ok {
+				parts := make([]string, 0, len(elements))
+				for _, elem := range elements {
+					parts = append(parts, formatExprForType(elem))
+				}
+				return "[" + strings.Join(parts, ", ") + "]"
+			}
+		}
+		return fmt.Sprintf("%v", e.Value)
+	case *ast.Identifier:
+		return e.Name()
+	case *ast.FunctionCall:
+		return formatFunctionCallForType(e)
+	case *ast.DataType:
+		return FormatDataType(e)
+	default:
+		return fmt.Sprintf("%v", expr)
+	}
 }
 
 // NormalizeFunctionName normalizes function names to match ClickHouse's EXPLAIN AST output
