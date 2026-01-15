@@ -6752,8 +6752,8 @@ func (p *Parser) parseOptimize() *ast.OptimizeQuery {
 		opt.Partition = p.parseExpression(LOWEST)
 	}
 
-	// Handle FINAL
-	if p.currentIs(token.FINAL) {
+	// Handle FINAL or FORCE (both are equivalent for forcing merge)
+	if p.currentIs(token.FINAL) || (p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "FORCE") {
 		opt.Final = true
 		p.nextToken()
 	}
