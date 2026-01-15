@@ -8444,25 +8444,22 @@ func (p *Parser) parseTTLElement() *ast.TTLElement {
 			p.parseExpression(ALIAS_PREC)
 			// Check for comma
 			if p.currentIs(token.COMMA) {
-				// Look ahead to check pattern. We need to see: COMMA IDENT EQ
-				// Save state to peek ahead
-				savedCurrent := p.current
-				savedPeek := p.peek
-				p.nextToken() // skip comma to see what follows
+				// Check if this is a SET continuation (COMMA IDENT EQ pattern)
+				// We can check using peek (what follows comma) and peekPeek (what follows that)
+				// without consuming any tokens
 				isSetContinuation := false
-				if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-					if p.peekIs(token.EQ) {
+				if p.peekIs(token.IDENT) || p.peek.Token.IsKeyword() {
+					if p.peekPeekIs(token.EQ) {
 						// It's another SET assignment (id = expr)
 						isSetContinuation = true
 					}
 				}
 				if isSetContinuation {
-					// Continue parsing SET assignments (already consumed comma)
+					// Consume comma and continue parsing SET assignments
+					p.nextToken()
 					continue
 				}
-				// Not a SET assignment - restore state so caller sees the comma
-				p.current = savedCurrent
-				p.peek = savedPeek
+				// Not a SET assignment - break and let caller handle the comma
 				break
 			}
 			// No comma, end of SET clause
