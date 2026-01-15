@@ -2807,6 +2807,15 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		}
 	}
 
+	// Handle ON CLUSTER (can appear before or after column definitions)
+	if p.currentIs(token.ON) {
+		p.nextToken()
+		if p.currentIs(token.CLUSTER) {
+			p.nextToken()
+			create.OnCluster = p.parseIdentifierName()
+		}
+	}
+
 	// Parse column definitions (e.g., CREATE VIEW v (x UInt64) AS SELECT ...)
 	// For MATERIALIZED VIEW, this can also include INDEX, PROJECTION, and PRIMARY KEY
 	if p.currentIs(token.LPAREN) {
@@ -2850,8 +2859,8 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		p.expect(token.RPAREN)
 	}
 
-	// Handle ON CLUSTER
-	if p.currentIs(token.ON) {
+	// Handle ON CLUSTER (if it appears after column definitions instead of before)
+	if create.OnCluster == "" && p.currentIs(token.ON) {
 		p.nextToken()
 		if p.currentIs(token.CLUSTER) {
 			p.nextToken()
