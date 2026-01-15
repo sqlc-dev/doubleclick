@@ -27,10 +27,17 @@ type testMetadata struct {
 	ParseError  bool            `json:"parse_error,omitempty"` // true if query is intentionally invalid SQL
 }
 
+// statementInfo holds a parsed statement and its metadata
+type statementInfo struct {
+	stmt          string
+	hasClientErr  bool
+}
+
 // splitStatements splits SQL content into individual statements.
-func splitStatements(content string) []string {
-	var statements []string
+func splitStatements(content string) []statementInfo {
+	var statements []statementInfo
 	var current strings.Builder
+	var currentHasClientErr bool
 
 	lines := strings.Split(content, "\n")
 	for _, line := range lines {
@@ -39,6 +46,12 @@ func splitStatements(content string) []string {
 		// Skip empty lines and full-line comments
 		if trimmed == "" || strings.HasPrefix(trimmed, "--") {
 			continue
+		}
+
+		// Check for clientError annotation before stripping comment
+		// Handles both "-- { clientError" and "--{clientError" formats
+		if strings.Contains(trimmed, "clientError") {
+			currentHasClientErr = true
 		}
 
 		// Remove inline comments (-- comment at end of line)
@@ -60,9 +73,10 @@ func splitStatements(content string) []string {
 			stmt := strings.TrimSpace(current.String())
 			// Skip empty statements (just semicolons or empty)
 			if stmt != "" && stmt != ";" {
-				statements = append(statements, stmt)
+				statements = append(statements, statementInfo{stmt: stmt, hasClientErr: currentHasClientErr})
 			}
 			current.Reset()
+			currentHasClientErr = false
 		}
 	}
 
@@ -70,7 +84,7 @@ func splitStatements(content string) []string {
 	if current.Len() > 0 {
 		stmt := strings.TrimSpace(current.String())
 		if stmt != "" {
-			statements = append(statements, stmt)
+			statements = append(statements, statementInfo{stmt: stmt, hasClientErr: currentHasClientErr})
 		}
 	}
 
@@ -170,9 +184,11 @@ func TestParser(t *testing.T) {
 			}
 
 			// Test each statement as a subtest
-			for i, stmt := range statements {
+			for i, stmtInfo := range statements {
 				stmtIndex := i + 1
 				t.Run(fmt.Sprintf("stmt%d", stmtIndex), func(t *testing.T) {
+					stmt := stmtInfo.stmt
+
 					// Determine explain file path: explain.txt for first, explain_N.txt for N >= 2
 					var explainPath string
 					if stmtIndex == 1 {
@@ -181,20 +197,46 @@ func TestParser(t *testing.T) {
 						explainPath = filepath.Join(testDir, fmt.Sprintf("explain_%d.txt", stmtIndex))
 					}
 
-					// For statements beyond the first, skip if no explain file exists
-					// (these statements haven't been regenerated yet)
-					if stmtIndex > 1 {
-						if _, err := os.Stat(explainPath); os.IsNotExist(err) {
-							t.Skipf("No explain_%d.txt file (run regenerate-explain to generate)", stmtIndex)
-							return
-						}
-					}
-
 					// Skip statements marked in explain_todo (unless -check-explain is set)
 					stmtKey := fmt.Sprintf("stmt%d", stmtIndex)
 					isExplainTodo := metadata.ExplainTodo[stmtKey]
 					if isExplainTodo && !*checkExplain {
 						t.Skipf("TODO: explain_todo[%s] is true", stmtKey)
+						return
+					}
+
+					// For statements beyond the first, check if explain file exists
+					explainFileExists := true
+					if stmtIndex > 1 {
+						if _, err := os.Stat(explainPath); os.IsNotExist(err) {
+							explainFileExists = false
+						}
+					}
+
+					// If no explain file and statement has clientError annotation, skip (no expected output for runtime errors)
+					if !explainFileExists && stmtInfo.hasClientErr {
+						// Remove from explain_todo if present
+						if isExplainTodo && *checkExplain {
+							delete(metadata.ExplainTodo, stmtKey)
+							if len(metadata.ExplainTodo) == 0 {
+								metadata.ExplainTodo = nil
+							}
+							updatedBytes, err := json.MarshalIndent(metadata, "", "  ")
+							if err != nil {
+								t.Errorf("Failed to marshal updated metadata: %v", err)
+							} else if err := os.WriteFile(metadataPath, append(updatedBytes, '\n'), 0644); err != nil {
+								t.Errorf("Failed to write updated metadata.json: %v", err)
+							} else {
+								t.Logf("EXPLAIN PASSES NOW (clientError skip, no explain file) - removed explain_todo[%s] from: %s", stmtKey, entry.Name())
+							}
+						}
+						t.Skipf("No explain_%d.txt file (clientError annotation - runtime error)", stmtIndex)
+						return
+					}
+
+					// For statements beyond the first without clientError, skip if no explain file exists
+					if !explainFileExists {
+						t.Skipf("No explain_%d.txt file (run regenerate-explain to generate)", stmtIndex)
 						return
 					}
 
@@ -242,9 +284,9 @@ func TestParser(t *testing.T) {
 						if strings.HasSuffix(expected, "\nOK") {
 							expected = strings.TrimSpace(expected[:len(expected)-3])
 						}
-						// Skip if expected is empty and statement has --{clientError annotation
+						// Skip if expected is empty and statement has clientError annotation
 						// (ClickHouse errors at runtime before producing EXPLAIN output)
-						if expected == "" && strings.Contains(stmt, "--{clientError") {
+						if expected == "" && stmtInfo.hasClientErr {
 							// Also remove from explain_todo if present (this case is now handled)
 							if isExplainTodo && *checkExplain {
 								delete(metadata.ExplainTodo, stmtKey)
@@ -260,7 +302,7 @@ func TestParser(t *testing.T) {
 									t.Logf("EXPLAIN PASSES NOW (clientError skip) - removed explain_todo[%s] from: %s", stmtKey, entry.Name())
 								}
 							}
-							t.Skipf("Skipping: empty expected output with --{clientError annotation")
+							t.Skipf("Skipping: empty expected output with clientError annotation")
 							return
 						}
 						actual := strings.TrimSpace(parser.Explain(stmts[0]))

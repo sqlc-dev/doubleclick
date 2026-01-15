@@ -6270,6 +6270,13 @@ func (p *Parser) parseUse() *ast.UseQuery {
 
 	p.nextToken() // skip USE
 
+	// Skip optional DATABASE keyword (USE DATABASE dbname is equivalent to USE dbname)
+	// But only if DATABASE is followed by another identifier/keyword (not semicolon or EOF)
+	// e.g., "USE DATABASE d1" vs "USE database" where database is the db name
+	if p.currentIs(token.DATABASE) && !p.peekIs(token.SEMICOLON) && !p.peekIs(token.EOF) {
+		p.nextToken()
+	}
+
 	// Database name can be an identifier or a keyword like DEFAULT (can also start with number)
 	use.Database = p.parseIdentifierName()
 
