@@ -1718,9 +1718,16 @@ func (p *Parser) parseInterval() ast.Expression {
 	}
 	p.nextToken() // skip INTERVAL
 
-	// Use AND_PREC to stop before AND/OR operators, but still allow arithmetic operations
-	// This ensures INTERVAL '5 MINUTES' AND ... doesn't consume the AND
-	expr.Value = p.parseExpression(AND_PREC)
+	// Choose precedence based on the first token of the interval value:
+	// - String literals like '1 day' have embedded units, so use ADD_PREC to stop before
+	//   arithmetic operators. This handles `interval '1 day' - interval '1 hour'` correctly.
+	// - Other expressions (identifiers, numbers) need arithmetic included before the unit.
+	//   Use LOWEST so `INTERVAL number - 15 MONTH` parses value as `number - 15`.
+	prec := ADD_PREC
+	if !p.currentIs(token.STRING) {
+		prec = LOWEST
+	}
+	expr.Value = p.parseExpression(prec)
 
 	// Handle INTERVAL '2' AS n minute - where AS n is alias on the value
 	// Only consume AS if it's followed by an identifier AND that identifier is followed by an interval unit
