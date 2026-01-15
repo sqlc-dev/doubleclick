@@ -270,7 +270,9 @@ func (p *Parser) parseGroupingSets() []ast.Expression {
 func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 	var exprs []ast.Expression
 
-	if p.currentIs(token.RPAREN) || p.currentIs(token.EOF) || p.currentIs(token.SETTINGS) {
+	// Stop at RPAREN/EOF, but only stop at SETTINGS if it's a clause keyword (not followed by [ for array access)
+	// Settings['key'] is the Settings map column, not a SETTINGS clause
+	if p.currentIs(token.RPAREN) || p.currentIs(token.EOF) || (p.currentIs(token.SETTINGS) && !p.peekIs(token.LBRACKET)) {
 		return exprs
 	}
 
@@ -283,8 +285,8 @@ func (p *Parser) parseFunctionArgumentList() []ast.Expression {
 
 	for p.currentIs(token.COMMA) {
 		p.nextToken()
-		// Stop if we hit SETTINGS
-		if p.currentIs(token.SETTINGS) {
+		// Stop if we hit SETTINGS clause (but not Settings['key'] map access)
+		if p.currentIs(token.SETTINGS) && !p.peekIs(token.LBRACKET) {
 			break
 		}
 		expr := p.parseExpression(LOWEST)
@@ -791,13 +793,13 @@ func (p *Parser) parseFunctionCall(name string, pos token.Position) *ast.Functio
 	if strings.ToLower(name) == "view" && (p.currentIs(token.SELECT) || p.currentIs(token.WITH)) {
 		subquery := p.parseSelectWithUnion()
 		fn.Arguments = []ast.Expression{&ast.Subquery{Position: pos, Query: subquery}}
-	} else if !p.currentIs(token.RPAREN) && !p.currentIs(token.SETTINGS) {
-		// Parse arguments
+	} else if !p.currentIs(token.RPAREN) && !(p.currentIs(token.SETTINGS) && !p.peekIs(token.LBRACKET)) {
+		// Parse arguments, but allow Settings['key'] map access (SETTINGS followed by [)
 		fn.Arguments = p.parseFunctionArgumentList()
 	}
 
-	// Handle SETTINGS inside function call (table functions)
-	if p.currentIs(token.SETTINGS) {
+	// Handle SETTINGS inside function call (table functions), but not Settings['key'] map access
+	if p.currentIs(token.SETTINGS) && !p.peekIs(token.LBRACKET) {
 		p.nextToken()
 		fn.Settings = p.parseSettingsList()
 	}
