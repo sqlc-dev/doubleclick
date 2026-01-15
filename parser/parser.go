@@ -5459,13 +5459,13 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				p.expect(token.EXISTS)
 				cmd.IfExists = true
 			}
-			if p.currentIs(token.IDENT) {
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 				// Handle dotted column names like NestedColumn.A
 				colName := p.current.Value
 				p.nextToken()
 				for p.currentIs(token.DOT) {
 					p.nextToken() // skip DOT
-					if p.currentIs(token.IDENT) {
+					if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 						colName += "." + p.current.Value
 						p.nextToken()
 					}
