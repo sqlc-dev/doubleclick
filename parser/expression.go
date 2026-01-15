@@ -1557,7 +1557,9 @@ func (p *Parser) parseCast() ast.Expression {
 		p.nextToken()
 		// Type can be given as a string literal or an expression (e.g., if(cond, 'Type1', 'Type2'))
 		// It can also have an alias like: cast('1234', 'UInt32' AS rhs)
-		if p.currentIs(token.STRING) {
+		// For expressions like 'Str'||'ing', we need to parse the full expression
+		if p.currentIs(token.STRING) && !p.peekIs(token.CONCAT) && !p.peekIs(token.PLUS) && !p.peekIs(token.MINUS) {
+			// Simple string literal type, not part of an expression
 			typeStr := p.current.Value
 			typePos := p.current.Pos
 			p.nextToken()
@@ -1597,7 +1599,7 @@ func (p *Parser) parseCast() ast.Expression {
 				expr.Type = &ast.DataType{Position: typePos, Name: typeStr}
 			}
 		} else {
-			// Parse as expression for dynamic type casting
+			// Parse as expression for dynamic type casting or expressions like 'Str'||'ing'
 			expr.TypeExpr = p.parseExpression(LOWEST)
 		}
 	}
