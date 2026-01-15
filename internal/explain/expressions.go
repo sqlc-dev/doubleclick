@@ -1176,6 +1176,8 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 		explainArrayAccessWithAlias(sb, e, n.Name, indent, depth)
 	case *ast.BetweenExpr:
 		explainBetweenExprWithAlias(sb, e, n.Name, indent, depth)
+	case *ast.LikeExpr:
+		explainLikeExprWithAlias(sb, e, n.Name, indent, depth)
 	case *ast.UnaryExpr:
 		// For unary minus with numeric literal, output as negative literal with alias
 		if e.Op == "-" {

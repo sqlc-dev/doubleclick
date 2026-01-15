@@ -1448,6 +1448,25 @@ func explainLikeExpr(sb *strings.Builder, n *ast.LikeExpr, indent string, depth 
 	Node(sb, n.Pattern, depth+2)
 }
 
+func explainLikeExprWithAlias(sb *strings.Builder, n *ast.LikeExpr, alias string, indent string, depth int) {
+	// LIKE is represented as Function like
+	fnName := "like"
+	if n.CaseInsensitive {
+		fnName = "ilike"
+	}
+	if n.Not {
+		fnName = "not" + strings.Title(fnName)
+	}
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	}
+	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 2)
+	Node(sb, n.Expr, depth+2)
+	Node(sb, n.Pattern, depth+2)
+}
+
 func explainBetweenExpr(sb *strings.Builder, n *ast.BetweenExpr, indent string, depth int) {
 	if n.Not {
 		// NOT BETWEEN is transformed to: expr < low OR expr > high
