@@ -908,7 +908,10 @@ func explainExplainQuery(sb *strings.Builder, n *ast.ExplainQuery, indent string
 	if format != nil {
 		children++
 	}
-	if n.HasSettings || hasSettingsAfterFormat {
+	if n.HasSettings {
+		children++
+	}
+	if hasSettingsAfterFormat {
 		children++
 	}
 
