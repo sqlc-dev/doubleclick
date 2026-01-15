@@ -332,7 +332,7 @@ func (p *Parser) parseImplicitAlias(expr ast.Expression) ast.Expression {
 	if !canBeAlias {
 		// Some keywords can be used as implicit aliases in ClickHouse
 		switch p.current.Token {
-		case token.KEY, token.INDEX, token.VIEW, token.DATABASE, token.TABLE:
+		case token.KEY, token.INDEX, token.VIEW, token.DATABASE, token.TABLE, token.SYNC:
 			canBeAlias = true
 		}
 	}
