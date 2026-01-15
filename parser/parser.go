@@ -4366,6 +4366,21 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 		}
 	}
 
+	// Handle NOT NULL / NULL after DEFAULT (ClickHouse allows DEFAULT expr NOT NULL)
+	if p.currentIs(token.NOT) {
+		p.nextToken()
+		if p.currentIs(token.NULL) {
+			notNull := false
+			col.Nullable = &notNull
+			p.nextToken()
+		}
+	} else if p.currentIs(token.NULL) && col.Nullable == nil {
+		// NULL is explicit nullable (default)
+		nullable := true
+		col.Nullable = &nullable
+		p.nextToken()
+	}
+
 	// Parse CODEC
 	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "CODEC" {
 		p.nextToken()
