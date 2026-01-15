@@ -1885,6 +1885,15 @@ func explainAlterCommand(sb *strings.Builder, cmd *ast.AlterCommand, indent stri
 			// PARTITION ALL is shown as Partition_ID (empty) in EXPLAIN AST
 			if ident, ok := cmd.Partition.(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "ALL" {
 				fmt.Fprintf(sb, "%s Partition_ID \n", indent)
+			} else if cmd.PartitionIsID {
+				// PARTITION ID 'value' is shown as Partition_ID Literal_'value' (children 1)
+				if lit, ok := cmd.Partition.(*ast.Literal); ok {
+					fmt.Fprintf(sb, "%s Partition_ID Literal_\\'%s\\' (children 1)\n", indent, lit.Value)
+					Node(sb, cmd.Partition, depth+2)
+				} else {
+					fmt.Fprintf(sb, "%s Partition_ID (children 1)\n", indent)
+					Node(sb, cmd.Partition, depth+2)
+				}
 			} else {
 				fmt.Fprintf(sb, "%s Partition (children 1)\n", indent)
 				Node(sb, cmd.Partition, depth+2)

@@ -6053,7 +6053,12 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				if ident, ok := inExpr.List[0].(*ast.Identifier); ok && strings.ToUpper(ident.Name()) == "PARTITION" {
 					// Fix the mis-parse: the actual assignment value is the left side of IN
 					lastAssign.Value = inExpr.Expr
-					// Current token should be the partition expression (e.g., ALL)
+					// Check for PARTITION ID 'value' syntax
+					if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+						p.nextToken()
+						cmd.PartitionIsID = true
+					}
+					// Current token should be the partition expression (e.g., ALL or '1')
 					cmd.Partition = p.parseExpression(LOWEST)
 				}
 			}
@@ -6062,6 +6067,11 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 			p.nextToken() // skip IN
 			if p.currentIs(token.PARTITION) {
 				p.nextToken() // skip PARTITION
+				// Check for PARTITION ID 'value' syntax
+				if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+					p.nextToken()
+					cmd.PartitionIsID = true
+				}
 				cmd.Partition = p.parseExpression(LOWEST)
 			}
 		}
