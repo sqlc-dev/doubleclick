@@ -1544,12 +1544,20 @@ func explainBetweenExprWithAlias(sb *strings.Builder, n *ast.BetweenExpr, alias 
 }
 
 func explainIsNullExpr(sb *strings.Builder, n *ast.IsNullExpr, indent string, depth int) {
+	explainIsNullExprWithAlias(sb, n, "", indent, depth)
+}
+
+func explainIsNullExprWithAlias(sb *strings.Builder, n *ast.IsNullExpr, alias string, indent string, depth int) {
 	// IS NULL is represented as Function isNull
 	fnName := "isNull"
 	if n.Not {
 		fnName = "isNotNull"
 	}
-	fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	if alias != "" {
+		fmt.Fprintf(sb, "%sFunction %s (alias %s) (children %d)\n", indent, fnName, alias, 1)
+	} else {
+		fmt.Fprintf(sb, "%sFunction %s (children %d)\n", indent, fnName, 1)
+	}
 	fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, 1)
 	Node(sb, n.Expr, depth+2)
 }

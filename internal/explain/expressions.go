@@ -808,6 +808,9 @@ func explainAliasedExpr(sb *strings.Builder, n *ast.AliasedExpr, depth int) {
 	case *ast.ExistsExpr:
 		// EXISTS expressions with alias
 		explainExistsExprWithAlias(sb, e, n.Alias, indent, depth)
+	case *ast.IsNullExpr:
+		// IS NULL expressions with alias
+		explainIsNullExprWithAlias(sb, e, n.Alias, indent, depth)
 	case *ast.Parameter:
 		// QueryParameter with alias
 		if e.Name != "" {
