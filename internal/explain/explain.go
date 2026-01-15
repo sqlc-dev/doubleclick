@@ -357,8 +357,9 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	if col.Type != nil {
 		Node(sb, col.Type, depth+1)
 	}
-	if len(col.Statistics) > 0 {
-		explainStatisticsExpr(sb, col.Statistics, indent+" ", depth+1)
+	// Settings comes right after Type in ClickHouse EXPLAIN output
+	if len(col.Settings) > 0 {
+		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 	if col.Default != nil {
 		Node(sb, col.Default, depth+1)
@@ -372,8 +373,8 @@ func Column(sb *strings.Builder, col *ast.ColumnDeclaration, depth int) {
 	if col.Codec != nil {
 		explainCodecExpr(sb, col.Codec, indent+" ", depth+1)
 	}
-	if len(col.Settings) > 0 {
-		fmt.Fprintf(sb, "%s Set\n", indent)
+	if len(col.Statistics) > 0 {
+		explainStatisticsExpr(sb, col.Statistics, indent+" ", depth+1)
 	}
 	if col.Comment != "" {
 		fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, col.Comment)
