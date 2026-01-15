@@ -1127,8 +1127,10 @@ func (p *Parser) parseUnaryMinus() ast.Expression {
 		}
 		p.nextToken() // move past number
 		// Apply postfix operators like :: using the expression parsing loop
+		// Use MUL_PREC as the threshold to allow casts (::) and member access (.)
+		// but stop before operators like AND which has lower precedence
 		left := ast.Expression(lit)
-		for !p.currentIs(token.EOF) && LOWEST < p.precedenceForCurrent() {
+		for !p.currentIs(token.EOF) && MUL_PREC < p.precedenceForCurrent() {
 			startPos := p.current.Pos
 			left = p.parseInfixExpression(left)
 			if left == nil {
