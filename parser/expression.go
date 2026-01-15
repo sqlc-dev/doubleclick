@@ -185,8 +185,16 @@ func (p *Parser) isClauseKeyword() bool {
 	case token.RPAREN, token.SEMICOLON, token.EOF:
 		return true
 	// FROM is a clause keyword unless followed by ( or [ (function/index access)
+	// Exception: FROM (SELECT ...) or FROM (WITH ...) is a subquery, not a function call
 	case token.FROM:
-		return !p.peekIs(token.LPAREN) && !p.peekIs(token.LBRACKET)
+		if p.peekIs(token.LPAREN) {
+			// Check if it's FROM (SELECT...) or FROM (WITH...) - that's a subquery
+			if p.peekPeekIs(token.SELECT) || p.peekPeekIs(token.WITH) {
+				return true
+			}
+			return false
+		}
+		return !p.peekIs(token.LBRACKET)
 	// These keywords can be used as identifiers in ClickHouse
 	// Only treat as clause keywords if NOT followed by expression-like tokens
 	case token.WHERE, token.GROUP, token.HAVING, token.ORDER, token.LIMIT:
