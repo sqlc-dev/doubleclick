@@ -401,7 +401,22 @@ func explainSelectQuery(sb *strings.Builder, n *ast.SelectQuery, indent string, 
 				// Each grouping set is wrapped in an ExpressionList
 				// but we need to unwrap tuples and output elements directly
 				if lit, ok := g.(*ast.Literal); ok && lit.Type == ast.LiteralTuple {
-					if elements, ok := lit.Value.([]ast.Expression); ok {
+					// Check if this tuple was from double parens ((a,b,c)) - marked as Parenthesized
+					// In that case, output as Function tuple wrapped in ExpressionList(1)
+					if lit.Parenthesized {
+						if elements, ok := lit.Value.([]ast.Expression); ok {
+							fmt.Fprintf(sb, "%s  ExpressionList (children 1)\n", indent)
+							fmt.Fprintf(sb, "%s   Function tuple (children 1)\n", indent)
+							if len(elements) > 0 {
+								fmt.Fprintf(sb, "%s    ExpressionList (children %d)\n", indent, len(elements))
+								for _, elem := range elements {
+									Node(sb, elem, depth+5)
+								}
+							} else {
+								fmt.Fprintf(sb, "%s    ExpressionList\n", indent)
+							}
+						}
+					} else if elements, ok := lit.Value.([]ast.Expression); ok {
 						if len(elements) == 0 {
 							// Empty grouping set () outputs ExpressionList without children count
 							fmt.Fprintf(sb, "%s  ExpressionList\n", indent)
