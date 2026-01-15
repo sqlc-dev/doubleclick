@@ -5974,6 +5974,11 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 					p.nextToken() // skip IN
 					if p.currentIs(token.PARTITION) {
 						p.nextToken() // skip PARTITION
+						// Check for PARTITION ID 'value' syntax
+						if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "ID" {
+							p.nextToken()
+							cmd.PartitionIsID = true
+						}
 						cmd.Partition = p.parseExpression(LOWEST)
 					}
 				}
