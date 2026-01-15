@@ -576,7 +576,7 @@ func formatExprAsString(expr ast.Expression) string {
 		case ast.LiteralArray:
 			return formatArrayAsStringFromLiteral(e)
 		case ast.LiteralTuple:
-			return formatTupleAsString(e.Value)
+			return formatTupleAsStringFromLiteral(e)
 		default:
 			return fmt.Sprintf("%v", e.Value)
 		}
@@ -659,6 +659,24 @@ func formatArrayAsString(val interface{}) string {
 	return "[" + strings.Join(parts, ", ") + "]"
 }
 
+// formatTupleAsStringFromLiteral formats a tuple literal as a string for :: cast syntax
+// respecting the SpacedCommas flag to preserve original formatting
+func formatTupleAsStringFromLiteral(lit *ast.Literal) string {
+	exprs, ok := lit.Value.([]ast.Expression)
+	if !ok {
+		return "()"
+	}
+	var parts []string
+	for _, e := range exprs {
+		parts = append(parts, formatElementAsString(e))
+	}
+	separator := ","
+	if lit.SpacedCommas {
+		separator = ", "
+	}
+	return "(" + strings.Join(parts, separator) + ")"
+}
+
 // formatTupleAsString formats a tuple literal as a string for :: cast syntax
 func formatTupleAsString(val interface{}) string {
 	exprs, ok := val.([]ast.Expression)
@@ -707,7 +725,7 @@ func formatElementAsString(expr ast.Expression) string {
 		case ast.LiteralArray:
 			return formatArrayAsStringFromLiteral(e)
 		case ast.LiteralTuple:
-			return formatTupleAsString(e.Value)
+			return formatTupleAsStringFromLiteral(e)
 		default:
 			return fmt.Sprintf("%v", e.Value)
 		}

@@ -1238,8 +1238,15 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 	// Check if it's a tuple
 	if p.currentIs(token.COMMA) {
 		elements := []ast.Expression{first}
+		spacedCommas := false
 		for p.currentIs(token.COMMA) {
+			commaPos := p.current.Pos.Offset
 			p.nextToken()
+			// Check if there's whitespace between comma and next token
+			// A comma is 1 byte, so if offset difference > 1, there's whitespace
+			if p.current.Pos.Offset > commaPos+1 {
+				spacedCommas = true
+			}
 			// Handle trailing comma: (1,) should create tuple with single element
 			if p.currentIs(token.RPAREN) {
 				break
@@ -1248,9 +1255,10 @@ func (p *Parser) parseGroupedOrTuple() ast.Expression {
 		}
 		p.expect(token.RPAREN)
 		return &ast.Literal{
-			Position: pos,
-			Type:     ast.LiteralTuple,
-			Value:    elements,
+			Position:     pos,
+			Type:         ast.LiteralTuple,
+			Value:        elements,
+			SpacedCommas: spacedCommas,
 		}
 	}
 
