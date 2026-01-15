@@ -7001,7 +7001,9 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 				strings.Contains(upperCmd, "DROP REPLICA") ||
 				strings.Contains(upperCmd, "RESTORE REPLICA") ||
 				strings.Contains(upperCmd, "STOP DISTRIBUTED SENDS") ||
-				strings.Contains(upperCmd, "START DISTRIBUTED SENDS") {
+				strings.Contains(upperCmd, "START DISTRIBUTED SENDS") ||
+				strings.Contains(upperCmd, "LOAD PRIMARY KEY") ||
+				strings.Contains(upperCmd, "UNLOAD PRIMARY KEY") {
 				sys.Database = tableName
 				sys.Table = tableName
 			} else {
