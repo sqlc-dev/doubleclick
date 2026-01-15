@@ -222,6 +222,10 @@ func explainLiteral(sb *strings.Builder, n *ast.Literal, indent string, depth in
 			if hasNestedArrays && containsTuplesRecursive(exprs) {
 				shouldUseFunctionArray = true
 			}
+			// Also check for non-literal expressions at any depth within nested arrays
+			if hasNestedArrays && containsNonLiteralExpressionsRecursive(exprs) {
+				shouldUseFunctionArray = true
+			}
 
 			if shouldUseFunctionArray {
 				// Render as Function array instead of Literal
@@ -406,6 +410,36 @@ func containsTuplesRecursive(exprs []ast.Expression) bool {
 				}
 			}
 		}
+	}
+	return false
+}
+
+// containsNonLiteralExpressionsRecursive checks if any nested array contains non-literal expressions at any depth
+func containsNonLiteralExpressionsRecursive(exprs []ast.Expression) bool {
+	for _, e := range exprs {
+		if lit, ok := e.(*ast.Literal); ok {
+			// Parenthesized literals need Function array format
+			if lit.Parenthesized {
+				return true
+			}
+			if lit.Type == ast.LiteralArray {
+				if innerExprs, ok := lit.Value.([]ast.Expression); ok {
+					// Recursively check nested arrays
+					if containsNonLiteralExpressionsRecursive(innerExprs) {
+						return true
+					}
+				}
+			}
+			continue
+		}
+		// Unary minus of a literal (negative number) is also acceptable
+		if unary, ok := e.(*ast.UnaryExpr); ok && unary.Op == "-" {
+			if _, ok := unary.Operand.(*ast.Literal); ok {
+				continue
+			}
+		}
+		// Any other expression type means we have non-literal expressions
+		return true
 	}
 	return false
 }
