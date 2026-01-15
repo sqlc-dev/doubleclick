@@ -1195,14 +1195,23 @@ func explainWithElement(sb *strings.Builder, n *ast.WithElement, indent string, 
 			Node(sb, e.Right, depth+2)
 		}
 	case *ast.Subquery:
-		// Check if this is "(subquery) AS alias" syntax vs "name AS (subquery)" syntax
-		if e.Alias != "" {
-			// "(subquery) AS alias" syntax: output Subquery with alias directly
-			fmt.Fprintf(sb, "%sSubquery (alias %s) (children 1)\n", indent, e.Alias)
+		// Output format depends on the WITH syntax:
+		// - "name AS (SELECT ...)": Standard CTE - output WithElement wrapping Subquery (no alias)
+		// - "(SELECT ...) AS name": Scalar WITH - output Subquery with alias
+		if n.ScalarWith {
+			// Scalar WITH: show alias on Subquery
+			alias := n.Name
+			if alias == "" {
+				alias = e.Alias
+			}
+			if alias != "" {
+				fmt.Fprintf(sb, "%sSubquery (alias %s) (children 1)\n", indent, alias)
+			} else {
+				fmt.Fprintf(sb, "%sSubquery (children 1)\n", indent)
+			}
 			Node(sb, e.Query, depth+1)
 		} else {
-			// "name AS (subquery)" syntax: output WithElement wrapping the Subquery
-			// The alias/name is not shown in the EXPLAIN AST output
+			// Standard CTE: wrap in WithElement without alias
 			fmt.Fprintf(sb, "%sWithElement (children 1)\n", indent)
 			fmt.Fprintf(sb, "%s Subquery (children 1)\n", indent)
 			Node(sb, e.Query, depth+2)

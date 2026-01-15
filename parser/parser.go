@@ -1447,33 +1447,16 @@ func (p *Parser) parseWithClause() []ast.Expression {
 				elem.Name = name
 				elem.Query = &ast.Identifier{Position: pos, Parts: []string{name}}
 			}
-		} else if p.currentIs(token.LPAREN) && (p.peekIs(token.SELECT) || p.peekIs(token.WITH)) {
-			// Subquery: (SELECT ...) AS name or (WITH ... SELECT ...) AS name
-			// In this syntax, the alias goes on the Subquery, not on WithElement
-			p.nextToken()
-			subquery := p.parseSelectWithUnion()
-			if !p.expect(token.RPAREN) {
-				return nil
-			}
-			sq := &ast.Subquery{Query: subquery}
-
-			if !p.expect(token.AS) {
-				return nil
-			}
-
-			// Alias can be IDENT or certain keywords (VALUES, KEY, etc.)
-			// Set alias on the Subquery for "(subquery) AS name" syntax
-			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
-				sq.Alias = p.current.Value
-				p.nextToken()
-			}
-			elem.Query = sq
 		} else {
 			// Scalar WITH: expr AS name (ClickHouse style)
-			// Examples: WITH 1 AS x, WITH 'hello' AS s, WITH func() AS f
-			// Also handles lambda: WITH x -> toString(x) AS lambda_1
+			// This handles various forms:
+			// - WITH 1 AS x, WITH 'hello' AS s, WITH func() AS f
+			// - WITH (SELECT ...) AS name (subquery expression)
+			// - WITH (SELECT ...) + (SELECT ...) AS name (binary expression of subqueries)
+			// - WITH x -> toString(x) AS lambda_1 (lambda expression)
 			// Arrow has OR_PREC precedence, so it gets parsed with ALIAS_PREC
 			// Note: AS name is optional in ClickHouse, e.g., WITH 1 SELECT 1 is valid
+			elem.ScalarWith = true
 			elem.Query = p.parseExpression(ALIAS_PREC) // Use ALIAS_PREC to stop before AS
 
 			// AS name is optional

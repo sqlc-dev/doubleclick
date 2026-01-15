@@ -1593,9 +1593,10 @@ func (s *Subquery) expressionNode()     {}
 
 // WithElement represents a WITH element (CTE).
 type WithElement struct {
-	Position token.Position `json:"-"`
-	Name     string         `json:"name"`
-	Query    Expression     `json:"query"` // Subquery or Expression
+	Position   token.Position `json:"-"`
+	Name       string         `json:"name"`
+	Query      Expression     `json:"query"`       // Subquery or Expression
+	ScalarWith bool           `json:"scalar_with"` // True for "(expr) AS name" syntax, false for "name AS (SELECT ...)"
 }
 
 func (w *WithElement) Pos() token.Position { return w.Position }
