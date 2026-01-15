@@ -1990,6 +1990,13 @@ func explainProjectionSelectQuery(sb *strings.Builder, q *ast.ProjectionSelectQu
 			Node(sb, col, depth+2)
 		}
 	}
+	// GROUP BY comes before ORDER BY in projection output
+	if len(q.GroupBy) > 0 {
+		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(q.GroupBy))
+		for _, expr := range q.GroupBy {
+			Node(sb, expr, depth+2)
+		}
+	}
 	if len(q.OrderBy) > 0 {
 		if len(q.OrderBy) == 1 {
 			// Single column: just output as Identifier
@@ -2001,12 +2008,6 @@ func explainProjectionSelectQuery(sb *strings.Builder, q *ast.ProjectionSelectQu
 			for _, col := range q.OrderBy {
 				Node(sb, col, depth+3)
 			}
-		}
-	}
-	if len(q.GroupBy) > 0 {
-		fmt.Fprintf(sb, "%s ExpressionList (children %d)\n", indent, len(q.GroupBy))
-		for _, expr := range q.GroupBy {
-			Node(sb, expr, depth+2)
 		}
 	}
 }
