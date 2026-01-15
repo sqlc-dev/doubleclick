@@ -5475,7 +5475,15 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 		} else if p.currentIs(token.INDEX) {
 			cmd.Type = ast.AlterDropIndex
 			p.nextToken()
-			if p.currentIs(token.IDENT) {
+			// Handle IF EXISTS
+			if p.currentIs(token.IF) {
+				p.nextToken()
+				if p.currentIs(token.EXISTS) {
+					cmd.IfExists = true
+					p.nextToken()
+				}
+			}
+			if p.currentIs(token.IDENT) || p.current.Token.IsKeyword() {
 				cmd.Index = p.current.Value
 				p.nextToken()
 			}
@@ -5724,8 +5732,8 @@ func (p *Parser) parseAlterCommand() *ast.AlterCommand {
 				colName := p.current.Value
 				p.nextToken() // skip column name
 				cmd.Column = &ast.ColumnDeclaration{Name: colName}
-				// Skip REMOVE COMMENT etc.
-				for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.COMMA) {
+				// Skip REMOVE COMMENT etc. but stop at SETTINGS clause
+				for !p.currentIs(token.EOF) && !p.currentIs(token.SEMICOLON) && !p.currentIs(token.COMMA) && !p.currentIs(token.SETTINGS) {
 					p.nextToken()
 				}
 			} else if (p.currentIs(token.IDENT) || p.current.Token.IsKeyword()) && p.peek.Token == token.MODIFY {
