@@ -29,17 +29,18 @@ func parseHexToFloat(s string) (float64, bool) {
 
 // Operator precedence levels
 const (
-	LOWEST      = iota
-	ALIAS_PREC  // AS
-	OR_PREC     // OR
-	AND_PREC    // AND
-	NOT_PREC    // NOT
-	COMPARE     // =, !=, <, >, <=, >=, LIKE, IN, BETWEEN, IS
-	CONCAT_PREC // ||
-	ADD_PREC    // +, -
-	MUL_PREC    // *, /, %
-	UNARY       // -x, NOT x
-	CALL        // function(), array[]
+	LOWEST       = iota
+	ALIAS_PREC   // AS
+	TERNARY_PREC // ? : (ternary operator - very low precedence in ClickHouse)
+	OR_PREC      // OR
+	AND_PREC     // AND
+	NOT_PREC     // NOT
+	COMPARE      // =, !=, <, >, <=, >=, LIKE, IN, BETWEEN, IS
+	CONCAT_PREC  // ||
+	ADD_PREC     // +, -
+	MUL_PREC     // *, /, %
+	UNARY        // -x, NOT x
+	CALL         // function(), array[]
 	HIGHEST
 )
 
@@ -58,7 +59,7 @@ func (p *Parser) precedence(tok token.Token) int {
 		token.NULL_SAFE_EQ, token.GLOBAL:
 		return COMPARE
 	case token.QUESTION:
-		return COMPARE // Ternary operator
+		return TERNARY_PREC // Ternary operator has very low precedence
 	case token.CONCAT:
 		return CONCAT_PREC
 	case token.PLUS, token.MINUS:
