@@ -8006,6 +8006,8 @@ func (p *Parser) parseProjection() *ast.Projection {
 
 		col := p.parseExpression(LOWEST)
 		if col != nil {
+			// Handle implicit alias (identifier without AS)
+			col = p.parseImplicitAlias(col)
 			proj.Select.Columns = append(proj.Select.Columns, col)
 		}
 
