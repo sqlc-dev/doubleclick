@@ -959,6 +959,7 @@ type SystemQuery struct {
 	Table                string         `json:"table,omitempty"`
 	OnCluster            string         `json:"on_cluster,omitempty"`
 	DuplicateTableOutput bool           `json:"duplicate_table_output,omitempty"` // True for commands that need database/table output twice
+	Settings             []*SettingExpr `json:"settings,omitempty"`
 }
 
 func (s *SystemQuery) Pos() token.Position { return s.Position }

@@ -837,6 +837,10 @@ func explainSystemQuery(sb *strings.Builder, n *ast.SystemQuery, indent string) 
 			children *= 2
 		}
 	}
+	// Settings adds a child
+	if len(n.Settings) > 0 {
+		children++
+	}
 	if children > 0 {
 		fmt.Fprintf(sb, "%sSYSTEM query (children %d)\n", indent, children)
 		if n.Database != "" {
@@ -853,6 +857,10 @@ func explainSystemQuery(sb *strings.Builder, n *ast.SystemQuery, indent string) 
 			if n.Table != "" {
 				fmt.Fprintf(sb, "%s Identifier %s\n", indent, n.Table)
 			}
+		}
+		// Output Set for settings
+		if len(n.Settings) > 0 {
+			fmt.Fprintf(sb, "%s Set\n", indent)
 		}
 	} else {
 		fmt.Fprintf(sb, "%sSYSTEM query\n", indent)

@@ -7026,6 +7026,12 @@ func (p *Parser) parseSystem() *ast.SystemQuery {
 		}
 	}
 
+	// Parse optional SETTINGS clause
+	if p.currentIs(token.SETTINGS) {
+		p.nextToken() // skip SETTINGS
+		sys.Settings = p.parseSettingsList()
+	}
+
 	return sys
 }
 
