@@ -1716,8 +1716,9 @@ func (p *Parser) parseInterval() ast.Expression {
 	}
 	p.nextToken() // skip INTERVAL
 
-	// Use ALIAS_PREC to prevent consuming the unit as an alias
-	expr.Value = p.parseExpression(ALIAS_PREC)
+	// Use AND_PREC to stop before AND/OR operators, but still allow arithmetic operations
+	// This ensures INTERVAL '5 MINUTES' AND ... doesn't consume the AND
+	expr.Value = p.parseExpression(AND_PREC)
 
 	// Handle INTERVAL '2' AS n minute - where AS n is alias on the value
 	// Only consume AS if it's followed by an identifier AND that identifier is followed by an interval unit
