@@ -215,8 +215,15 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	if len(n.Columns) > 0 || len(n.Indexes) > 0 || len(n.Projections) > 0 || len(n.Constraints) > 0 {
 		children++
 	}
-	hasStorageChild := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0 || len(n.ColumnsPrimaryKey) > 0 || hasColumnPrimaryKey
+	// When SETTINGS comes after COMMENT (not before), Settings goes outside Storage definition
+	// SettingsBeforeComment=true means SETTINGS came first, so it stays in Storage
+	settingsInStorage := len(n.Settings) > 0 && (n.Comment == "" || n.SettingsBeforeComment)
+	hasStorageChild := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || settingsInStorage || len(n.ColumnsPrimaryKey) > 0 || hasColumnPrimaryKey
 	if hasStorageChild {
+		children++
+	}
+	// When SETTINGS comes after COMMENT, Settings is a separate child of CreateQuery
+	if n.Comment != "" && len(n.Settings) > 0 && !n.SettingsBeforeComment {
 		children++
 	}
 	// For materialized views with TO clause but no storage, count ViewTargets as a child
@@ -347,7 +354,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			inCreateQueryContext = false
 		}
 	}
-	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || len(n.Settings) > 0 || len(n.ColumnsPrimaryKey) > 0 || hasColumnPrimaryKey
+	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || settingsInStorage || len(n.ColumnsPrimaryKey) > 0 || hasColumnPrimaryKey
 	if hasStorage {
 		storageChildren := 0
 		if n.Engine != nil {
@@ -369,7 +376,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		if n.TTL != nil {
 			storageChildren++
 		}
-		if len(n.Settings) > 0 {
+		if settingsInStorage {
 			storageChildren++
 		}
 		// For materialized views, wrap storage definition in ViewTargets
@@ -514,7 +521,7 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 				}
 			}
 		}
-		if len(n.Settings) > 0 {
+		if settingsInStorage {
 			fmt.Fprintf(sb, "%s Set\n", storageIndent)
 		}
 	} else if n.Materialized && n.To != "" {
@@ -546,6 +553,10 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	// Output COMMENT clause if present
 	if n.Comment != "" {
 		fmt.Fprintf(sb, "%s Literal \\'%s\\'\n", indent, escapeStringLiteral(n.Comment))
+	}
+	// Output Settings at CreateQuery level when SETTINGS comes after COMMENT
+	if n.Comment != "" && len(n.Settings) > 0 && !n.SettingsBeforeComment {
+		fmt.Fprintf(sb, "%s Set\n", indent)
 	}
 }
 

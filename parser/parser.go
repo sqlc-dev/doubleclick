@@ -2687,6 +2687,10 @@ func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 				}
 			}
 		case p.currentIs(token.SETTINGS):
+			// Track if SETTINGS comes before COMMENT
+			if create.Comment == "" && len(create.Settings) == 0 {
+				create.SettingsBeforeComment = true
+			}
 			p.nextToken()
 			create.Settings = p.parseSettingsList()
 		case p.currentIs(token.COMMENT):
@@ -2694,6 +2698,10 @@ func (p *Parser) parseTableOptions(create *ast.CreateQuery) {
 			if p.currentIs(token.STRING) {
 				create.Comment = p.current.Value
 				p.nextToken()
+			}
+			// If we see COMMENT but Settings wasn't set yet, clear the flag
+			if len(create.Settings) == 0 {
+				create.SettingsBeforeComment = false
 			}
 		default:
 			return

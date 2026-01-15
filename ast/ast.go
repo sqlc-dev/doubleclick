@@ -291,7 +291,8 @@ type CreateQuery struct {
 	PrimaryKey          []Expression         `json:"primary_key,omitempty"`
 	SampleBy         Expression           `json:"sample_by,omitempty"`
 	TTL              *TTLClause           `json:"ttl,omitempty"`
-	Settings         []*SettingExpr       `json:"settings,omitempty"`
+	Settings             []*SettingExpr       `json:"settings,omitempty"`
+	SettingsBeforeComment bool                `json:"settings_before_comment,omitempty"` // True if SETTINGS comes before COMMENT
 	AsSelect         Statement            `json:"as_select,omitempty"`
 	AsTableFunction  Expression           `json:"as_table_function,omitempty"` // AS table_function(...) in CREATE TABLE
 	CloneAs          string               `json:"clone_as,omitempty"`          // CLONE AS source_table in CREATE TABLE
