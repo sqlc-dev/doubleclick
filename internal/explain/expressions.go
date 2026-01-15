@@ -305,9 +305,14 @@ func containsOnlyArraysOrTuples(exprs []ast.Expression) bool {
 
 // containsNonLiteralExpressions checks if a slice of expressions contains
 // any non-literal expressions (identifiers, function calls, etc.)
+// or parenthesized literals (which need Function array format)
 func containsNonLiteralExpressions(exprs []ast.Expression) bool {
 	for _, e := range exprs {
-		if _, ok := e.(*ast.Literal); ok {
+		if lit, ok := e.(*ast.Literal); ok {
+			// Parenthesized literals need Function array format
+			if lit.Parenthesized {
+				return true
+			}
 			continue
 		}
 		// Unary minus of a literal (negative number) is also acceptable
