@@ -4340,8 +4340,10 @@ func (p *Parser) parseColumnDeclaration() *ast.ColumnDeclaration {
 	if p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "EPHEMERAL" {
 		col.DefaultKind = "EPHEMERAL"
 		p.nextToken()
-		// Optional default value
-		if !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) && !p.currentIs(token.IDENT) {
+		// Optional default value - but don't parse column keywords (CODEC, COMMENT, TTL, etc.) as expressions
+		if !p.currentIs(token.COMMA) && !p.currentIs(token.RPAREN) && !p.currentIs(token.IDENT) &&
+			!p.currentIs(token.COMMENT) && !p.currentIs(token.TTL) && !p.currentIs(token.PRIMARY) &&
+			!p.currentIs(token.SETTINGS) {
 			col.Default = p.parseExpression(LOWEST)
 		}
 	}
