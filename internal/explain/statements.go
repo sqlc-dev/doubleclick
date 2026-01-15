@@ -225,7 +225,9 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	// When SETTINGS comes after COMMENT (not before), Settings goes outside Storage definition
 	// SettingsBeforeComment=true means SETTINGS came first, so it stays in Storage
 	settingsInStorage := len(n.Settings) > 0 && (n.Comment == "" || n.SettingsBeforeComment)
-	hasStorageChild := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || settingsInStorage || len(n.ColumnsPrimaryKey) > 0 || hasColumnPrimaryKey
+	// For WINDOW VIEW with INNER ENGINE, ORDER BY goes inside ViewTargets, not in regular Storage definition
+	orderByInRegularStorage := len(n.OrderBy) > 0 && !(n.WindowView && n.InnerEngine != nil)
+	hasStorageChild := n.Engine != nil || orderByInRegularStorage || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || settingsInStorage || len(n.ColumnsPrimaryKey) > 0 || hasColumnPrimaryKey
 	if hasStorageChild {
 		children++
 	}
@@ -244,6 +246,10 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 	// For materialized views with TO clause but no storage, count ViewTargets as a child
 	if n.Materialized && n.To != "" && !hasStorageChild {
 		children++ // ViewTargets
+	}
+	// For window views with INNER ENGINE, count ViewTargets as a child
+	if n.WindowView && n.InnerEngine != nil {
+		children++ // ViewTargets with Storage definition
 	}
 	if n.AsSelect != nil {
 		children++
@@ -374,7 +380,9 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 			inCreateQueryContext = false
 		}
 	}
-	hasStorage := n.Engine != nil || len(n.OrderBy) > 0 || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || settingsInStorage || len(n.ColumnsPrimaryKey) > 0 || hasColumnPrimaryKey
+	// For WINDOW VIEW with INNER ENGINE, ORDER BY goes inside ViewTargets
+	hasOrderByInStorage := len(n.OrderBy) > 0 && !(n.WindowView && n.InnerEngine != nil)
+	hasStorage := n.Engine != nil || hasOrderByInStorage || len(n.PrimaryKey) > 0 || n.PartitionBy != nil || n.SampleBy != nil || n.TTL != nil || settingsInStorage || len(n.ColumnsPrimaryKey) > 0 || hasColumnPrimaryKey
 	if hasStorage {
 		storageChildren := 0
 		if n.Engine != nil {
@@ -549,8 +557,58 @@ func explainCreateQuery(sb *strings.Builder, n *ast.CreateQuery, indent string, 
 		// output just ViewTargets without children
 		fmt.Fprintf(sb, "%s ViewTargets\n", indent)
 	}
+	// For window views, output AsSelect before ViewTargets
+	if n.WindowView && n.AsSelect != nil {
+		if hasFormat {
+			inCreateQueryContext = true
+		}
+		Node(sb, n.AsSelect, depth+1)
+		if hasFormat {
+			inCreateQueryContext = false
+		}
+	}
+	// For window views with INNER ENGINE, output ViewTargets with Storage definition
+	if n.WindowView && n.InnerEngine != nil {
+		// Count children in storage definition: engine + order by (if any)
+		storageChildren := 1 // Always have the engine
+		if len(n.OrderBy) > 0 {
+			storageChildren++
+		}
+		fmt.Fprintf(sb, "%s ViewTargets (children 1)\n", indent)
+		fmt.Fprintf(sb, "%s  Storage definition (children %d)\n", indent, storageChildren)
+		// Output the engine
+		if n.InnerEngine.HasParentheses {
+			fmt.Fprintf(sb, "%s   Function %s (children 1)\n", indent, n.InnerEngine.Name)
+			if len(n.InnerEngine.Parameters) > 0 {
+				fmt.Fprintf(sb, "%s    ExpressionList (children %d)\n", indent, len(n.InnerEngine.Parameters))
+				for _, param := range n.InnerEngine.Parameters {
+					Node(sb, param, depth+5)
+				}
+			} else {
+				fmt.Fprintf(sb, "%s    ExpressionList\n", indent)
+			}
+		} else {
+			fmt.Fprintf(sb, "%s   Function %s\n", indent, n.InnerEngine.Name)
+		}
+		// Output ORDER BY if present
+		if len(n.OrderBy) > 0 {
+			if len(n.OrderBy) == 1 {
+				if ident, ok := n.OrderBy[0].(*ast.Identifier); ok {
+					fmt.Fprintf(sb, "%s   Identifier %s\n", indent, ident.Name())
+				} else {
+					Node(sb, n.OrderBy[0], depth+3)
+				}
+			} else {
+				fmt.Fprintf(sb, "%s   Function tuple (children 1)\n", indent)
+				fmt.Fprintf(sb, "%s    ExpressionList (children %d)\n", indent, len(n.OrderBy))
+				for _, o := range n.OrderBy {
+					Node(sb, o, depth+5)
+				}
+			}
+		}
+	}
 	// For non-materialized views, output AsSelect after storage
-	if n.AsSelect != nil && !n.Materialized {
+	if n.AsSelect != nil && !n.Materialized && !n.WindowView {
 		// Set context flag to prevent Format from being output at SelectWithUnionQuery level
 		// (it will be output at CreateQuery level instead)
 		if hasFormat {

@@ -2202,6 +2202,12 @@ func (p *Parser) parseCreate() ast.Statement {
 		p.nextToken()
 	}
 
+	// Handle WINDOW (for WINDOW VIEW)
+	if p.currentIs(token.WINDOW) {
+		create.WindowView = true
+		p.nextToken()
+	}
+
 	// What are we creating?
 	switch p.current.Token {
 	case token.TABLE:
@@ -2944,11 +2950,11 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 		}
 	}
 
-	// Handle TO (target table for materialized views only)
-	// TO clause is not valid for regular views - only for MATERIALIZED VIEW
+	// Handle TO (target table for materialized views and window views)
+	// TO clause is not valid for regular views - only for MATERIALIZED VIEW or WINDOW VIEW
 	if p.currentIs(token.TO) {
-		if !create.Materialized {
-			p.errors = append(p.errors, fmt.Errorf("TO clause is only valid for MATERIALIZED VIEW, not VIEW"))
+		if !create.Materialized && !create.WindowView {
+			p.errors = append(p.errors, fmt.Errorf("TO clause is only valid for MATERIALIZED VIEW or WINDOW VIEW, not VIEW"))
 			return
 		}
 		p.nextToken()
@@ -2977,6 +2983,18 @@ func (p *Parser) parseCreateView(create *ast.CreateQuery) {
 				}
 			}
 			p.expect(token.RPAREN)
+		}
+	}
+
+	// Parse INNER ENGINE (for window views) - comes before regular ENGINE
+	if p.currentIs(token.INNER) {
+		p.nextToken() // skip INNER
+		if p.currentIs(token.ENGINE) {
+			p.nextToken() // skip ENGINE
+			if p.currentIs(token.EQ) {
+				p.nextToken()
+			}
+			create.InnerEngine = p.parseEngineClause()
 		}
 	}
 

@@ -275,6 +275,8 @@ type CreateQuery struct {
 	Table            string               `json:"table,omitempty"`
 	View             string               `json:"view,omitempty"`
 	Materialized     bool                 `json:"materialized,omitempty"`
+	WindowView       bool                 `json:"window_view,omitempty"` // WINDOW VIEW type
+	InnerEngine      *EngineClause        `json:"inner_engine,omitempty"` // INNER ENGINE for window views
 	ToDatabase       string               `json:"to_database,omitempty"` // Target database for materialized views
 	To               string               `json:"to,omitempty"`          // Target table for materialized views
 	Populate         bool                 `json:"populate,omitempty"`    // POPULATE for materialized views
