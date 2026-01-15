@@ -2352,8 +2352,9 @@ func (p *Parser) parseCreateIndex(pos token.Position) *ast.CreateIndexQuery {
 		query.Table = p.parseIdentifierName()
 	}
 
-	// Parse column list in parentheses
+	// Parse column expression - can be in parentheses or directly after table name
 	if p.currentIs(token.LPAREN) {
+		query.ColumnsParenthesized = true
 		p.nextToken() // skip (
 
 		for !p.currentIs(token.RPAREN) && !p.currentIs(token.EOF) {
@@ -2375,6 +2376,12 @@ func (p *Parser) parseCreateIndex(pos token.Position) *ast.CreateIndexQuery {
 		if p.currentIs(token.RPAREN) {
 			p.nextToken() // skip )
 		}
+	} else if !p.currentIs(token.SEMICOLON) && !p.currentIs(token.EOF) &&
+		!(p.currentIs(token.IDENT) && strings.ToUpper(p.current.Value) == "TYPE") {
+		// Expression directly after table name without parentheses
+		// e.g., CREATE INDEX idx ON tbl date(ts) TYPE MinMax
+		col := p.parseExpression(0)
+		query.Columns = append(query.Columns, col)
 	}
 
 	// Parse TYPE clause

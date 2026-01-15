@@ -1283,12 +1283,13 @@ func (d *DropWorkloadQuery) statementNode()      {}
 
 // CreateIndexQuery represents a CREATE INDEX statement.
 type CreateIndexQuery struct {
-	Position    token.Position `json:"-"`
-	IndexName   string         `json:"index_name"`
-	Table       string         `json:"table"`
-	Columns     []Expression   `json:"columns,omitempty"`
-	Type        string         `json:"type,omitempty"`        // Index type (minmax, bloom_filter, etc.)
-	Granularity int            `json:"granularity,omitempty"` // GRANULARITY value
+	Position             token.Position `json:"-"`
+	IndexName            string         `json:"index_name"`
+	Table                string         `json:"table"`
+	Columns              []Expression   `json:"columns,omitempty"`
+	ColumnsParenthesized bool           `json:"columns_parenthesized,omitempty"` // True if columns in (...)
+	Type                 string         `json:"type,omitempty"`                  // Index type (minmax, bloom_filter, etc.)
+	Granularity          int            `json:"granularity,omitempty"`           // GRANULARITY value
 }
 
 func (c *CreateIndexQuery) Pos() token.Position { return c.Position }

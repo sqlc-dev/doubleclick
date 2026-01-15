@@ -2461,18 +2461,33 @@ func explainCreateIndexQuery(sb *strings.Builder, n *ast.CreateIndexQuery, inden
 	}
 	fmt.Fprintf(sb, "%s Index (children %d)\n", indent, indexChildren)
 
-	// For single column, output as Identifier
-	// For multiple columns or if there are any special cases, output as Function tuple
-	if len(n.Columns) == 1 {
-		if ident, ok := n.Columns[0].(*ast.Identifier); ok {
-			fmt.Fprintf(sb, "%s  Identifier %s\n", indent, ident.Name())
+	// Output columns based on whether they were parenthesized
+	if n.ColumnsParenthesized {
+		if len(n.Columns) == 1 {
+			// Single column in parentheses: output as identifier (if it's an identifier)
+			if ident, ok := n.Columns[0].(*ast.Identifier); ok {
+				fmt.Fprintf(sb, "%s  Identifier %s\n", indent, ident.Name())
+			} else {
+				// Non-identifier single expression - output directly
+				Node(sb, n.Columns[0], depth+2)
+			}
 		} else {
-			// Non-identifier expression - wrap in tuple
+			// Multiple columns in parentheses: output as empty Function tuple
 			fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
 			fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
 		}
+	} else if len(n.Columns) == 1 {
+		// Single unparenthesized expression: output directly
+		Node(sb, n.Columns[0], depth+2)
+	} else if len(n.Columns) > 0 {
+		// Multiple columns - wrap in Function tuple with ExpressionList
+		fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
+		fmt.Fprintf(sb, "%s   ExpressionList (children %d)\n", indent, len(n.Columns))
+		for _, col := range n.Columns {
+			Node(sb, col, depth+3)
+		}
 	} else {
-		// Multiple columns or empty - always Function tuple with ExpressionList
+		// No columns - empty Function tuple
 		fmt.Fprintf(sb, "%s  Function tuple (children 1)\n", indent)
 		fmt.Fprintf(sb, "%s   ExpressionList\n", indent)
 	}
